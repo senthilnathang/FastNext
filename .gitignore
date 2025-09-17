@@ -3,4 +3,5 @@
 *.orig
 .next
 node_modules
-
+.env
+env
