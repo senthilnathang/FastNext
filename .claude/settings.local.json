@@ -5,7 +5,8 @@
       "Bash(npx create-next-app:*)",
       "Bash(npm install:*)",
       "Bash(npx storybook@latest init:*)",
-      "Bash(npx shadcn@latest init:*)"
+      "Bash(npx shadcn@latest init:*)",
+      "Bash(npm run build:*)"
     ],
     "deny": []
   }

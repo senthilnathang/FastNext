@@ -19,3 +19,4 @@ class Project(Base):
     owner = relationship("User", back_populates="projects")
     pages = relationship("Page", back_populates="project", cascade="all, delete-orphan")
     components = relationship("Component", back_populates="project", cascade="all, delete-orphan")
+    members = relationship("ProjectMember", back_populates="project", cascade="all, delete-orphan")

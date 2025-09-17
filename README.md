@@ -88,6 +88,17 @@ FastNext/
 - **Component Reordering**: Drag-and-drop reordering within containers
 - **Visual Feedback**: Selection highlighting, hover states, drag previews
 
+## Stage 2.5 Features ✅
+
+### User Roles & Permissions System
+- **Role-Based Access Control**: Complete RBAC implementation with roles and permissions
+- **System Roles**: Admin, Editor, Viewer, Member with predefined permissions
+- **Project Collaboration**: Multi-user project access with role-based permissions
+- **Permission Categories**: System, Project, Page, Component, User permissions
+- **Permission Actions**: Create, Read, Update, Delete, Manage, Publish, Deploy
+- **Project Membership**: Invite users to projects with specific roles
+- **Security Middleware**: Route protection with permission checks
+
 ## Getting Started
 
 ### Prerequisites
@@ -190,6 +201,30 @@ FastNext/
 - `POST /api/v1/components/instances/` - Create component instance
 - `PUT /api/v1/components/instances/{id}` - Update component instance
 - `DELETE /api/v1/components/instances/{id}` - Delete component instance
+
+### Roles & Permissions
+- `GET /api/v1/roles/` - List all roles (admin only)
+- `POST /api/v1/roles/` - Create new role (admin only)
+- `GET /api/v1/roles/{id}` - Get role with permissions (admin only)
+- `PUT /api/v1/roles/{id}` - Update role (admin only)
+- `DELETE /api/v1/roles/{id}` - Delete role (admin only)
+- `POST /api/v1/roles/{id}/permissions` - Assign permission to role (admin only)
+- `DELETE /api/v1/roles/{id}/permissions/{permission_id}` - Remove permission from role (admin only)
+
+### Permissions
+- `GET /api/v1/permissions/` - List all permissions (admin only)
+- `POST /api/v1/permissions/` - Create new permission (admin only)
+- `GET /api/v1/permissions/{id}` - Get permission details (admin only)
+- `PUT /api/v1/permissions/{id}` - Update permission (admin only)
+- `DELETE /api/v1/permissions/{id}` - Delete permission (admin only)
+
+### Project Members
+- `GET /api/v1/project-members/project/{project_id}/members` - List project members
+- `POST /api/v1/project-members/project/{project_id}/members` - Add project member
+- `POST /api/v1/project-members/project/{project_id}/invite` - Invite user by email
+- `PUT /api/v1/project-members/members/{member_id}` - Update project member
+- `DELETE /api/v1/project-members/members/{member_id}` - Remove project member
+- `GET /api/v1/project-members/user/projects` - Get user's accessible projects
 
 ## Next Steps
 

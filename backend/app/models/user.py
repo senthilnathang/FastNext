@@ -17,3 +17,5 @@ class User(Base):
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
     projects = relationship("Project", back_populates="owner")
+    user_roles = relationship("UserRole", foreign_keys="UserRole.user_id", back_populates="user")
+    project_memberships = relationship("ProjectMember", foreign_keys="ProjectMember.user_id", back_populates="user")
