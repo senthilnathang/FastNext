@@ -1,0 +1,40 @@
+from typing import Optional, List, Dict, Any
+from pydantic import BaseModel
+from datetime import datetime
+
+
+class ProjectBase(BaseModel):
+    name: str
+    description: Optional[str] = None
+    is_public: Optional[bool] = False
+    settings: Optional[Dict[str, Any]] = {}
+
+
+class ProjectCreate(ProjectBase):
+    pass
+
+
+class ProjectUpdate(ProjectBase):
+    name: Optional[str] = None
+
+
+class ProjectInDBBase(ProjectBase):
+    id: Optional[int] = None
+    user_id: int
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
+
+    class Config:
+        from_attributes = True
+
+
+class Project(ProjectInDBBase):
+    pass
+
+
+class ProjectWithPages(Project):
+    pages: List["Page"] = []
+
+
+class ProjectWithComponents(Project):
+    components: List["Component"] = []

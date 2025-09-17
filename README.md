@@ -71,6 +71,23 @@ FastNext/
 - Pylint for Python code quality
 - Biome for JavaScript/TypeScript linting
 
+## Stage 2 Features ✅
+
+### Custom App Builder Core
+- **Database Schema**: Complete data models for projects, pages, components, and instances
+- **Component Management API**: Full CRUD operations for all builder entities
+- **Drag-and-Drop Interface**: Visual builder with @dnd-kit integration
+- **Component Library System**: Pre-built components (Text, Button, Image, Layout, Form)
+- **Property Panel**: Dynamic form generation based on component schemas
+- **Real-time Canvas**: Live preview and editing of component layouts
+
+### Advanced Features
+- **Component Types**: Text, Button, Image, Layout containers, Form inputs
+- **Dynamic Properties**: Schema-driven property panels with validation
+- **Nested Components**: Support for container components with children
+- **Component Reordering**: Drag-and-drop reordering within containers
+- **Visual Feedback**: Selection highlighting, hover states, drag previews
+
 ## Getting Started
 
 ### Prerequisites
@@ -148,14 +165,68 @@ FastNext/
 - `GET /api/v1/users/me` - Get current user (protected)
 - `PUT /api/v1/users/me` - Update current user (protected)
 
+### Projects
+- `GET /api/v1/projects/` - List user projects
+- `POST /api/v1/projects/` - Create project
+- `GET /api/v1/projects/{id}` - Get project details
+- `PUT /api/v1/projects/{id}` - Update project
+- `DELETE /api/v1/projects/{id}` - Delete project
+
+### Pages
+- `GET /api/v1/pages/project/{project_id}/pages` - List project pages
+- `POST /api/v1/pages/` - Create page
+- `GET /api/v1/pages/{id}` - Get page details
+- `PUT /api/v1/pages/{id}` - Update page
+- `DELETE /api/v1/pages/{id}` - Delete page
+
+### Components
+- `GET /api/v1/components/` - List components (global & project-specific)
+- `POST /api/v1/components/` - Create component
+- `GET /api/v1/components/{id}` - Get component details
+- `PUT /api/v1/components/{id}` - Update component
+
+### Component Instances
+- `GET /api/v1/components/instances/page/{page_id}` - List page components
+- `POST /api/v1/components/instances/` - Create component instance
+- `PUT /api/v1/components/instances/{id}` - Update component instance
+- `DELETE /api/v1/components/instances/{id}` - Delete component instance
+
 ## Next Steps
 
-Stage 1 provides a solid foundation. Future stages will include:
-- Custom App Builder functionality
-- Advanced ORM features
-- Enhanced UI components
-- Automated testing pipeline
-- Deployment configurations
+### Stage 3 (Upcoming)
+- **App Preview & Deployment**: Live preview generation and one-click deployment
+- **User Roles & Permissions**: Project ownership and collaboration features
+- **File Upload & Media Management**: Asset storage and media handling
+- **App Templates**: Pre-built templates and starter kits
+- **Analytics & Tracking**: Usage metrics and performance monitoring
+
+### How to Use the Builder
+
+1. **Start the Backend**:
+   ```bash
+   cd backend
+   python main.py
+   ```
+
+2. **Start the Frontend**:
+   ```bash
+   cd frontend
+   npm run dev
+   ```
+
+3. **Access the Builder**:
+   - Visit `http://localhost:3000` for the main page
+   - Click "🚀 Try Builder" to access the visual builder
+   - Drag components from the left panel to the canvas
+   - Select components to edit their properties in the right panel
+
+### Key Features Demonstrated
+
+- **Visual Interface**: Complete drag-and-drop builder with component library
+- **Dynamic Components**: Pre-built Text, Button, Image, Layout, and Form components
+- **Property Editing**: Dynamic forms generated from component schemas
+- **Nested Layouts**: Container components that can hold other components
+- **Real-time Updates**: Immediate visual feedback for all changes
 
 ## License
 
