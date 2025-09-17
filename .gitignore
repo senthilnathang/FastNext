@@ -1,0 +1,6 @@
+*.pyc
+*.pyo
+*.orig
+.next
+node_modules
+
