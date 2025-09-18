@@ -7,7 +7,7 @@ from typing import List, Optional, Dict, Any
 
 from fastapi import APIRouter, HTTPException, Depends, status, Request
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from fastapi.responses import Response
+from fastapi.responses import Response, JSONResponse
 from jose import jwt, JWTError
 from sqlalchemy.orm import Session, joinedload
 from pydantic import BaseModel
@@ -15,11 +15,17 @@ from pydantic import BaseModel
 from app.db.session import get_db
 from app.core.config import settings
 from app.core.security import verify_password, get_password_hash, create_access_token
+from app.core.exceptions import (
+    AuthenticationError, AccountLocked, ValidationError, 
+    ConflictError, NotFoundError, SecurityError
+)
+from app.core.logging import log_security_event, get_client_ip, get_logger
 from app.models.user import User
 from app.schemas.user import UserCreate, UserResponse, UserUpdate
 from app.schemas.token import Token
+from app.services.user_service import UserService
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 # Enhanced schemas for authentication
 class UserLogin(BaseModel):
@@ -145,18 +151,9 @@ def authenticate_user(db: Session, username: str, password: str) -> Optional[Use
     
     return user
 
-def get_client_ip(request: Request) -> str:
-    """Extract client IP address from request"""
-    # Check for forwarded headers
-    forwarded_for = request.headers.get("X-Forwarded-For")
-    if forwarded_for:
-        return forwarded_for.split(",")[0].strip()
-    
-    real_ip = request.headers.get("X-Real-IP")
-    if real_ip:
-        return real_ip
-    
-    return request.client.host if request.client else "unknown"
+def get_user_service(db: Session = Depends(get_db)) -> UserService:
+    """Get user service dependency."""
+    return UserService(db)
 
 router = APIRouter(
     tags=["Authentication"],
@@ -365,43 +362,107 @@ async def register_user(
 async def login_for_access_token(
     form_data: UserLogin, 
     request: Request,
-    db: Session = Depends(get_db)
+    user_service: UserService = Depends(get_user_service)
 ) -> Token:
-    """Authenticate user and return JWT tokens"""
+    """
+    Authenticate user and return JWT tokens.
+    
+    This endpoint follows coding standards with:
+    - Comprehensive error handling
+    - Security event logging
+    - Service layer architecture
+    - Proper exception management
+    """
     
     # Extract request information for logging
     client_ip = get_client_ip(request)
     user_agent = request.headers.get("user-agent", "")
     
-    # Authenticate user
-    user = authenticate_user(db, form_data.username, form_data.password)
-    if not user:
-        logger.warning(f"Failed login attempt for username: {form_data.username} from IP: {client_ip}")
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect username or password",
-            headers={"WWW-Authenticate": "Bearer"},
+    try:
+        # Authenticate user through service layer
+        user = await user_service.authenticate_user(
+            form_data.username, 
+            form_data.password,
+            ip_address=client_ip
         )
-    
-    # Check if user is active
-    if not user.is_active:
-        logger.warning(f"Login attempt for inactive user: {user.username} from IP: {client_ip}")
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Inactive user"
+        
+        if not user:
+            # Log security event
+            log_security_event(
+                "LOGIN_FAILED",
+                None,
+                request,
+                severity="MEDIUM",
+                details={
+                    "username": form_data.username,
+                    "reason": "invalid_credentials"
+                }
+            )
+            
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Incorrect username or password",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+        
+        # Create token pair
+        token_data = create_token_pair(user)
+        
+        # Log successful login
+        log_security_event(
+            "LOGIN_SUCCESS",
+            user.id,
+            request,
+            severity="LOW",
+            details={
+                "username": user.username,
+                "login_time": datetime.utcnow().isoformat()
+            }
         )
-    
-    # Create token pair
-    token_data = create_token_pair(user)
-    
-    # Update last login
-    user.last_login_at = datetime.utcnow()
-    db.commit()
-    
-    # Log successful login
-    logger.info(f"Successful login: {user.username} from IP: {client_ip}")
-    
-    return Token(**token_data)
+        
+        logger.info(f"Successful login: {user.username} from IP: {client_ip}")
+        
+        return Token(**token_data)
+        
+    except AccountLocked as e:
+        # Log account lockout event
+        log_security_event(
+            "ACCOUNT_LOCKED",
+            None,
+            request,
+            severity="HIGH",
+            details={
+                "username": form_data.username,
+                "reason": "failed_attempts",
+                "error_details": e.details
+            }
+        )
+        
+        raise HTTPException(
+            status_code=status.HTTP_423_LOCKED,
+            detail=e.message,
+            headers={"WWW-Authenticate": "Bearer"}
+        )
+        
+    except Exception as e:
+        # Log unexpected errors
+        log_security_event(
+            "LOGIN_ERROR",
+            None,
+            request,
+            severity="HIGH",
+            details={
+                "username": form_data.username,
+                "error": str(e)
+            }
+        )
+        
+        logger.error(f"Unexpected error during login for {form_data.username}: {e}")
+        
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="An unexpected error occurred during authentication"
+        )
 
 @router.post("/refresh", response_model=Token)
 async def refresh_access_token(

@@ -7,17 +7,23 @@ from contextlib import asynccontextmanager
 from datetime import datetime
 import logging
 import time
+import traceback
 
 from app.core.config import settings
+from app.core.exceptions import (
+    FastNextException, SecurityError, ValidationError, 
+    AuthenticationError, ConflictError, NotFoundError
+)
+from app.core.logging import setup_logging, log_security_event, get_logger
 from app.api.main import api_router
 from app.db.init_db import init_db
 from app.middleware.security_middleware import (
     SecurityMiddleware, AutoLogoutMiddleware, SessionExpirationMiddleware
 )
 
-# Configure logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+# Setup comprehensive logging
+setup_logging()
+logger = get_logger(__name__)
 
 
 @asynccontextmanager
@@ -171,35 +177,188 @@ def _setup_middleware(app: FastAPI):
 
 
 def _setup_exception_handlers(app: FastAPI):
-    """Setup custom exception handlers"""
+    """Setup comprehensive exception handlers following coding standards"""
+    
+    @app.exception_handler(SecurityError)
+    async def security_error_handler(request: Request, exc: SecurityError):
+        """Handle security-related exceptions"""
+        # Log security event
+        log_security_event(
+            "SECURITY_VIOLATION",
+            None,
+            request,
+            severity="HIGH",
+            details={
+                "error_type": exc.__class__.__name__,
+                "error_message": exc.message,
+                "error_details": exc.details
+            }
+        )
+        
+        return JSONResponse(
+            status_code=status.HTTP_403_FORBIDDEN,
+            content={
+                "success": False,
+                "error": {
+                    "code": exc.error_code,
+                    "message": exc.message,
+                    "details": exc.details
+                },
+                "meta": {
+                    "timestamp": datetime.utcnow().isoformat(),
+                    "request_id": getattr(request.state, 'request_id', 'unknown')
+                }
+            }
+        )
+    
+    @app.exception_handler(ValidationError)
+    async def validation_error_handler(request: Request, exc: ValidationError):
+        """Handle validation errors"""
+        logger.warning(f"Validation error: {exc.message} - Details: {exc.details}")
+        
+        return JSONResponse(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            content={
+                "success": False,
+                "error": {
+                    "code": exc.error_code,
+                    "message": exc.message,
+                    "details": exc.details
+                },
+                "meta": {
+                    "timestamp": datetime.utcnow().isoformat(),
+                    "request_id": getattr(request.state, 'request_id', 'unknown')
+                }
+            }
+        )
+    
+    @app.exception_handler(AuthenticationError)
+    async def authentication_error_handler(request: Request, exc: AuthenticationError):
+        """Handle authentication errors with auto-logout support"""
+        # Log authentication failure
+        log_security_event(
+            "AUTHENTICATION_FAILED",
+            None,
+            request,
+            severity="MEDIUM",
+            details={
+                "error_message": exc.message,
+                "error_details": exc.details
+            }
+        )
+        
+        response_body = {
+            "success": False,
+            "error": {
+                "code": exc.error_code,
+                "message": exc.message,
+                "details": exc.details
+            },
+            "action": "auto_logout",
+            "redirect_to": "/login",
+            "meta": {
+                "timestamp": datetime.utcnow().isoformat(),
+                "request_id": getattr(request.state, 'request_id', 'unknown')
+            }
+        }
+        
+        return JSONResponse(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            content=response_body,
+            headers={
+                "X-Auto-Logout": "true",
+                "X-Redirect-To": "/login",
+                "Cache-Control": "no-cache, no-store, must-revalidate",
+                "Pragma": "no-cache",
+                "Expires": "0"
+            }
+        )
+    
+    @app.exception_handler(ConflictError)
+    async def conflict_error_handler(request: Request, exc: ConflictError):
+        """Handle conflict errors (e.g., duplicate resources)"""
+        logger.info(f"Conflict error: {exc.message}")
+        
+        return JSONResponse(
+            status_code=status.HTTP_409_CONFLICT,
+            content={
+                "success": False,
+                "error": {
+                    "code": exc.error_code,
+                    "message": exc.message,
+                    "details": exc.details
+                },
+                "meta": {
+                    "timestamp": datetime.utcnow().isoformat(),
+                    "request_id": getattr(request.state, 'request_id', 'unknown')
+                }
+            }
+        )
+    
+    @app.exception_handler(NotFoundError)
+    async def not_found_error_handler(request: Request, exc: NotFoundError):
+        """Handle not found errors"""
+        logger.info(f"Not found error: {exc.message}")
+        
+        return JSONResponse(
+            status_code=status.HTTP_404_NOT_FOUND,
+            content={
+                "success": False,
+                "error": {
+                    "code": exc.error_code,
+                    "message": exc.message,
+                    "details": exc.details
+                },
+                "meta": {
+                    "timestamp": datetime.utcnow().isoformat(),
+                    "request_id": getattr(request.state, 'request_id', 'unknown')
+                }
+            }
+        )
+    
+    @app.exception_handler(FastNextException)
+    async def fastnext_exception_handler(request: Request, exc: FastNextException):
+        """Handle all FastNext custom exceptions"""
+        logger.error(f"FastNext exception: {exc.message} - Details: {exc.details}")
+        
+        return JSONResponse(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            content={
+                "success": False,
+                "error": {
+                    "code": exc.error_code,
+                    "message": exc.message,
+                    "details": exc.details
+                },
+                "meta": {
+                    "timestamp": datetime.utcnow().isoformat(),
+                    "request_id": getattr(request.state, 'request_id', 'unknown')
+                }
+            }
+        )
     
     @app.exception_handler(HTTPException)
     async def custom_http_exception_handler(request: Request, exc: HTTPException):
-        """Custom handler for HTTP exceptions with auto-logout support"""
-        
-        # Handle 401 Unauthorized errors specially
+        """Handle FastAPI HTTP exceptions with consistent format"""
+        # Handle 401 Unauthorized errors specially for backward compatibility
         if exc.status_code == status.HTTP_401_UNAUTHORIZED:
             auth_status = exc.headers.get("X-Auth-Status", "expired") if exc.headers else "expired"
             redirect_to = exc.headers.get("X-Redirect-To", "/login") if exc.headers else "/login"
             
-            # Create auto-logout response
             response_body = {
                 "success": False,
-                "error": "authentication_required",
-                "message": exc.detail,
-                "auth_status": auth_status,
+                "error": {
+                    "code": "AUTHENTICATION_REQUIRED",
+                    "message": exc.detail,
+                    "details": {"auth_status": auth_status}
+                },
                 "action": "auto_logout",
                 "redirect_to": redirect_to,
-                "timestamp": datetime.utcnow().isoformat(),
-                "request_path": str(request.url.path),
-                "request_method": request.method
+                "meta": {
+                    "timestamp": datetime.utcnow().isoformat(),
+                    "request_id": getattr(request.state, 'request_id', 'unknown')
+                }
             }
-            
-            # Log the auto-logout
-            logger.warning(
-                f"Auto-logout triggered: {request.method} {request.url.path} - "
-                f"Status: {auth_status}, Reason: {exc.detail}"
-            )
             
             return JSONResponse(
                 status_code=status.HTTP_401_UNAUTHORIZED,
@@ -214,22 +373,61 @@ def _setup_exception_handlers(app: FastAPI):
                 }
             )
         
-        # For non-auth errors, use default handler
-        return await http_exception_handler(request, exc)
+        # For other HTTP exceptions, return consistent format
+        return JSONResponse(
+            status_code=exc.status_code,
+            content={
+                "success": False,
+                "error": {
+                    "code": f"HTTP_{exc.status_code}",
+                    "message": exc.detail,
+                    "details": {}
+                },
+                "meta": {
+                    "timestamp": datetime.utcnow().isoformat(),
+                    "request_id": getattr(request.state, 'request_id', 'unknown')
+                }
+            }
+        )
     
     @app.exception_handler(Exception)
     async def custom_general_exception_handler(request: Request, exc: Exception):
         """Handle unexpected exceptions gracefully"""
-        logger.error(f"Unexpected error on {request.method} {request.url.path}: {exc}")
+        # Log the full stack trace for debugging
+        logger.error(
+            f"Unexpected error on {request.method} {request.url.path}: {exc}",
+            extra={
+                "traceback": traceback.format_exc(),
+                "request_id": getattr(request.state, 'request_id', 'unknown')
+            }
+        )
+        
+        # Log as security event if it might be an attack
+        if any(keyword in str(exc).lower() for keyword in ['sql', 'injection', 'script', 'xss']):
+            log_security_event(
+                "POTENTIAL_ATTACK",
+                None,
+                request,
+                severity="CRITICAL",
+                details={
+                    "error": str(exc),
+                    "error_type": exc.__class__.__name__
+                }
+            )
         
         return JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             content={
                 "success": False,
-                "error": "internal_server_error",
-                "message": "An unexpected error occurred",
-                "timestamp": datetime.utcnow().isoformat(),
-                "request_path": str(request.url.path)
+                "error": {
+                    "code": "INTERNAL_SERVER_ERROR",
+                    "message": "An unexpected error occurred",
+                    "details": {}
+                },
+                "meta": {
+                    "timestamp": datetime.utcnow().isoformat(),
+                    "request_id": getattr(request.state, 'request_id', 'unknown')
+                }
             }
         )
 

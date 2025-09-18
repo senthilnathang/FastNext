@@ -22,7 +22,9 @@
       "Bash(psql:*)",
       "Bash(alembic current:*)",
       "Bash(alembic:*)",
-      "Bash(rm:*)"
+      "Bash(rm:*)",
+      "Bash(cp:*)",
+      "Bash(touch:*)"
     ],
     "deny": []
   }
