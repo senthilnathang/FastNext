@@ -14,7 +14,15 @@
       "Bash(source:*)",
       "Bash(alembic revision:*)",
       "Bash(find:*)",
-      "Bash(alembic init:*)"
+      "Bash(alembic init:*)",
+      "Bash(pip install:*)",
+      "Bash(PYTHONPATH=/home/sen/FastNext/backend alembic revision --autogenerate -m \"enhance_user_model_with_security_fields\")",
+      "Bash(curl:*)",
+      "Bash(sudo -u postgres psql:*)",
+      "Bash(psql:*)",
+      "Bash(alembic current:*)",
+      "Bash(alembic:*)",
+      "Bash(rm:*)"
     ],
     "deny": []
   }
