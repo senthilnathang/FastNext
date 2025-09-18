@@ -15,6 +15,29 @@ interface PropertyPanelProps {
 export default function PropertyPanel({ instance }: PropertyPanelProps) {
   const updateInstanceMutation = useUpdateComponentInstance()
 
+  // Always call hooks first - create safe defaults when instance is null
+  const component = instance?.component
+  const schema = component?.schema || {}
+  const properties = schema.properties || {}
+
+  // Create form schema and default values from component properties
+  const formSchema = z.object(
+    Object.keys(properties).reduce((acc, key) => {
+      acc[key] = z.unknown().optional()
+      return acc
+    }, {} as Record<string, z.ZodTypeAny>)
+  )
+
+  const defaultValues = Object.keys(properties).reduce((acc, key) => {
+    acc[key] = instance?.props[key] || ''
+    return acc
+  }, {} as Record<string, unknown>)
+
+  const form = useForm({
+    resolver: zodResolver(formSchema),
+    defaultValues,
+  })
+
   if (!instance || !instance.component) {
     return (
       <div className="w-80 bg-white border-l border-gray-200 p-4">
@@ -25,42 +48,7 @@ export default function PropertyPanel({ instance }: PropertyPanelProps) {
     )
   }
 
-  const { component } = instance
-  const schema = component.schema || {}
-  const properties = schema.properties || {}
-
-  // Create dynamic form schema based on component schema
-  const createFormSchema = () => {
-    const schemaFields: Record<string, any> = {}
-    
-    Object.entries(properties).forEach(([key, prop]: [string, any]) => {
-      switch (prop.type) {
-        case 'string':
-          schemaFields[key] = z.string().optional()
-          break
-        case 'number':
-          schemaFields[key] = z.number().optional()
-          break
-        case 'boolean':
-          schemaFields[key] = z.boolean().optional()
-          break
-        default:
-          schemaFields[key] = z.any().optional()
-      }
-    })
-    
-    return z.object(schemaFields)
-  }
-
-  const formSchema = createFormSchema()
-  type FormData = z.infer<typeof formSchema>
-
-  const form = useForm<FormData>({
-    resolver: zodResolver(formSchema),
-    defaultValues: instance.props || {},
-  })
-
-  const onSubmit = async (data: FormData) => {
+  const onSubmit = async (data: Record<string, unknown>) => {
     try {
       await updateInstanceMutation.mutateAsync({
         id: instance.id,
@@ -71,9 +59,7 @@ export default function PropertyPanel({ instance }: PropertyPanelProps) {
     }
   }
 
-  const renderFormField = (key: string, prop: any) => {
-    const currentValue = form.watch(key)
-
+  const renderFormField = (key: string, prop: Record<string, unknown>) => {
     switch (prop.type) {
       case 'string':
         if (prop.enum) {
@@ -82,7 +68,7 @@ export default function PropertyPanel({ instance }: PropertyPanelProps) {
               {...form.register(key)}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
-              {prop.enum.map((option: string) => (
+              {(prop.enum as string[])?.map((option: string) => (
                 <option key={option} value={option}>
                   {option}
                 </option>
@@ -105,7 +91,7 @@ export default function PropertyPanel({ instance }: PropertyPanelProps) {
           <input
             type="text"
             {...form.register(key)}
-            placeholder={prop.placeholder || ''}
+            placeholder={(prop.placeholder as string) || ''}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         )
@@ -144,22 +130,25 @@ export default function PropertyPanel({ instance }: PropertyPanelProps) {
       <div className="p-4 border-b border-gray-200">
         <h3 className="text-lg font-semibold">Properties</h3>
         <div className="text-sm text-gray-500 mt-1">
-          {component.name}
+          {instance.component.name}
         </div>
       </div>
 
       <form onSubmit={form.handleSubmit(onSubmit)} className="p-4 space-y-4">
-        {Object.entries(properties).map(([key, prop]: [string, any]) => (
+        {Object.entries(properties).map(([key, prop]: [string, Record<string, unknown>]) => (
           <div key={key}>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              {prop.title || key}
+              {(prop.title as string) || key}
             </label>
             {renderFormField(key, prop)}
-            {prop.description && (
-              <div className="text-xs text-gray-500 mt-1">
-                {prop.description}
-              </div>
-            )}
+            {(() => {
+              const description = prop.description
+              return typeof description === 'string' && description ? (
+                <div className="text-xs text-gray-500 mt-1">
+                  {description}
+                </div>
+              ) : null
+            })()}
           </div>
         ))}
 

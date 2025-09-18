@@ -20,7 +20,7 @@ import {
 interface MenuItem {
   title: string
   href?: string
-  icon: React.ComponentType<any>
+  icon: React.ComponentType<{ className?: string }>
   children?: MenuItem[]
 }
 

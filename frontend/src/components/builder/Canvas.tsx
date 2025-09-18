@@ -4,11 +4,9 @@ import React from 'react'
 import { useDroppable } from '@dnd-kit/core'
 import { 
   SortableContext, 
-  verticalListSortingStrategy,
-  rectSortingStrategy 
+  verticalListSortingStrategy
 } from '@dnd-kit/sortable'
 import { usePageComponents } from '@/hooks/useComponents'
-import { ComponentInstance } from '@/types'
 import DroppableArea from './DroppableArea'
 import ComponentRenderer from './ComponentRenderer'
 

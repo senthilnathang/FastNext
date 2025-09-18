@@ -24,7 +24,7 @@ class Component(Base):
     category = Column(String, default="general")
     description = Column(Text)
     project_id = Column(Integer, ForeignKey("projects.id"), nullable=True)  # null for global components
-    schema = Column(JSON, default={})  # Component property schema
+    component_schema = Column(JSON, default={})  # Component property schema
     default_props = Column(JSON, default={})
     template = Column(Text)  # React/HTML template
     styles = Column(JSON, default={})  # CSS styles
@@ -54,4 +54,4 @@ class ComponentInstance(Base):
     component = relationship("Component", back_populates="instances")
     page = relationship("Page", back_populates="components")
     parent = relationship("ComponentInstance", remote_side=[id])
-    children = relationship("ComponentInstance")
+    children = relationship("ComponentInstance", overlaps="parent")

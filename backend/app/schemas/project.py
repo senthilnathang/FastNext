@@ -33,8 +33,8 @@ class Project(ProjectInDBBase):
 
 
 class ProjectWithPages(Project):
-    pages: List["Page"] = []
+    pages: List[Dict[str, Any]] = []
 
 
 class ProjectWithComponents(Project):
-    components: List["Component"] = []
+    components: List[Dict[str, Any]] = []

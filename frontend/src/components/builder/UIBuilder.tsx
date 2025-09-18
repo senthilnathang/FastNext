@@ -4,8 +4,6 @@ import React, { useState } from 'react'
 import {
   DndContext,
   DragEndEvent,
-  DragOverEvent,
-  DragStartEvent,
   closestCenter,
   PointerSensor,
   useSensor,
@@ -25,7 +23,6 @@ interface UIBuilderProps {
 
 export default function UIBuilder({ projectId, pageId }: UIBuilderProps) {
   const [selectedInstanceId, setSelectedInstanceId] = useState<number | undefined>()
-  const [activeId, setActiveId] = useState<string | null>(null)
 
   const { data: instances = [] } = usePageComponents(pageId)
   const createInstanceMutation = useCreateComponentInstance()
@@ -40,20 +37,19 @@ export default function UIBuilder({ projectId, pageId }: UIBuilderProps) {
   )
 
   const selectedInstance = selectedInstanceId 
-    ? instances.find(instance => instance.id === selectedInstanceId)
+    ? instances.find(instance => instance.id === selectedInstanceId) || null
     : null
 
-  const handleDragStart = (event: DragStartEvent) => {
-    setActiveId(event.active.id as string)
+  const handleDragStart = () => {
+    // Handle drag start if needed
   }
 
-  const handleDragOver = (event: DragOverEvent) => {
+  const handleDragOver = () => {
     // Handle drag over logic if needed
   }
 
   const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event
-    setActiveId(null)
 
     if (!over) return
 

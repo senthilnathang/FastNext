@@ -19,7 +19,7 @@ class ComponentBase(BaseModel):
     type: ComponentType
     category: Optional[str] = "general"
     description: Optional[str] = None
-    schema: Optional[Dict[str, Any]] = {}
+    component_schema: Optional[Dict[str, Any]] = {}
     default_props: Optional[Dict[str, Any]] = {}
     template: Optional[str] = None
     styles: Optional[Dict[str, Any]] = {}

@@ -13,7 +13,7 @@ export interface Project {
   description?: string
   user_id: number
   is_public: boolean
-  settings: Record<string, any>
+  settings: Record<string, unknown>
   created_at: string
   updated_at?: string
 }
@@ -23,8 +23,8 @@ export interface Page {
   name: string
   slug: string
   project_id: number
-  layout: any[]
-  meta_data: Record<string, any>
+  layout: unknown[]
+  meta_data: Record<string, unknown>
   is_home: boolean
   order_index: number
   created_at: string
@@ -48,10 +48,10 @@ export interface Component {
   category: string
   description?: string
   project_id?: number
-  schema: Record<string, any>
-  default_props: Record<string, any>
+  schema: Record<string, unknown>
+  default_props: Record<string, unknown>
   template?: string
-  styles: Record<string, any>
+  styles: Record<string, unknown>
   is_global: boolean
   is_published: boolean
   version: string
@@ -63,8 +63,8 @@ export interface ComponentInstance {
   id: number
   component_id: number
   page_id: number
-  props: Record<string, any>
-  position: Record<string, any>
+  props: Record<string, unknown>
+  position: Record<string, unknown>
   parent_id?: number
   order_index: number
   created_at: string
@@ -92,22 +92,22 @@ export interface CreateProjectRequest {
   name: string
   description?: string
   is_public?: boolean
-  settings?: Record<string, any>
+  settings?: Record<string, unknown>
 }
 
 export interface UpdateProjectRequest {
   name?: string
   description?: string
   is_public?: boolean
-  settings?: Record<string, any>
+  settings?: Record<string, unknown>
 }
 
 export interface CreatePageRequest {
   name: string
   slug: string
   project_id: number
-  layout?: any[]
-  meta_data?: Record<string, any>
+  layout?: unknown[]
+  meta_data?: Record<string, unknown>
   is_home?: boolean
   order_index?: number
 }
@@ -115,8 +115,8 @@ export interface CreatePageRequest {
 export interface UpdatePageRequest {
   name?: string
   slug?: string
-  layout?: any[]
-  meta_data?: Record<string, any>
+  layout?: unknown[]
+  meta_data?: Record<string, unknown>
   is_home?: boolean
   order_index?: number
 }
@@ -127,10 +127,10 @@ export interface CreateComponentRequest {
   category?: string
   description?: string
   project_id?: number
-  schema?: Record<string, any>
-  default_props?: Record<string, any>
+  schema?: Record<string, unknown>
+  default_props?: Record<string, unknown>
   template?: string
-  styles?: Record<string, any>
+  styles?: Record<string, unknown>
   is_global?: boolean
   is_published?: boolean
   version?: string
@@ -139,15 +139,15 @@ export interface CreateComponentRequest {
 export interface CreateComponentInstanceRequest {
   component_id: number
   page_id: number
-  props?: Record<string, any>
-  position?: Record<string, any>
+  props?: Record<string, unknown>
+  position?: Record<string, unknown>
   parent_id?: number
   order_index?: number
 }
 
 export interface UpdateComponentInstanceRequest {
-  props?: Record<string, any>
-  position?: Record<string, any>
+  props?: Record<string, unknown>
+  position?: Record<string, unknown>
   parent_id?: number
   order_index?: number
 }

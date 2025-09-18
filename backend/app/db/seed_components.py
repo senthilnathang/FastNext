@@ -11,7 +11,7 @@ def create_default_components(db: Session) -> None:
             "type": ComponentType.TEXT,
             "category": "basic",
             "description": "A simple text block with customizable content",
-            "schema": {
+            "component_schema": {
                 "properties": {
                     "content": {"type": "string", "title": "Content"},
                     "fontSize": {"type": "string", "title": "Font Size", "enum": ["sm", "md", "lg", "xl"]},
@@ -39,7 +39,7 @@ def create_default_components(db: Session) -> None:
             "type": ComponentType.BUTTON,
             "category": "basic",
             "description": "Customizable button component",
-            "schema": {
+            "component_schema": {
                 "properties": {
                     "text": {"type": "string", "title": "Button Text"},
                     "variant": {"type": "string", "title": "Variant", "enum": ["primary", "secondary", "outline"]},
@@ -70,7 +70,7 @@ def create_default_components(db: Session) -> None:
             "type": ComponentType.IMAGE,
             "category": "media",
             "description": "Image component with customizable source and alt text",
-            "schema": {
+            "component_schema": {
                 "properties": {
                     "src": {"type": "string", "title": "Image URL"},
                     "alt": {"type": "string", "title": "Alt Text"},
@@ -100,7 +100,7 @@ def create_default_components(db: Session) -> None:
             "type": ComponentType.LAYOUT,
             "category": "layout",
             "description": "Container for grouping other components",
-            "schema": {
+            "component_schema": {
                 "properties": {
                     "padding": {"type": "string", "title": "Padding"},
                     "margin": {"type": "string", "title": "Margin"},
@@ -133,7 +133,7 @@ def create_default_components(db: Session) -> None:
             "type": ComponentType.FORM,
             "category": "form",
             "description": "Input field for forms",
-            "schema": {
+            "component_schema": {
                 "properties": {
                     "label": {"type": "string", "title": "Label"},
                     "placeholder": {"type": "string", "title": "Placeholder"},

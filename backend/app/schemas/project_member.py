@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Dict, Any
 from pydantic import BaseModel
 from datetime import datetime
 from enum import Enum
@@ -46,8 +46,8 @@ class ProjectMemberInDBBase(ProjectMemberBase):
 
 
 class ProjectMember(ProjectMemberInDBBase):
-    user: Optional["User"] = None
-    role: Optional["Role"] = None
+    user: Optional[Dict[str, Any]] = None
+    role: Optional[Dict[str, Any]] = None
 
 
 class ProjectMemberWithDetails(ProjectMember):

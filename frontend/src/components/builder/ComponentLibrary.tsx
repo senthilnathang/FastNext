@@ -4,7 +4,6 @@ import React from 'react'
 import { useDraggable } from '@dnd-kit/core'
 import { useComponents } from '@/hooks/useComponents'
 import { Component, ComponentType } from '@/types'
-import { Button } from '@/components/ui/button'
 import { 
   Type, 
   Square, 
@@ -78,18 +77,6 @@ export default function ComponentLibrary({ projectId }: ComponentLibraryProps) {
     project_id: projectId
   })
 
-  if (globalLoading || projectLoading) {
-    return (
-      <div className="p-4">
-        <div className="animate-pulse space-y-3">
-          {[...Array(5)].map((_, i) => (
-            <div key={i} className="h-16 bg-gray-200 rounded-lg" />
-          ))}
-        </div>
-      </div>
-    )
-  }
-
   const groupedComponents = React.useMemo(() => {
     const all = [...globalComponents, ...projectComponents]
     const grouped: Record<string, Component[]> = {}
@@ -103,6 +90,18 @@ export default function ComponentLibrary({ projectId }: ComponentLibraryProps) {
     
     return grouped
   }, [globalComponents, projectComponents])
+
+  if (globalLoading || projectLoading) {
+    return (
+      <div className="w-64 bg-white border-r border-gray-200 overflow-y-auto p-4">
+        <div className="animate-pulse space-y-3">
+          {[...Array(5)].map((_, i) => (
+            <div key={i} className="h-16 bg-gray-200 rounded-lg" />
+          ))}
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="w-64 bg-white border-r border-gray-200 overflow-y-auto">

@@ -1,6 +1,7 @@
 "use client"
 
 import React from 'react'
+import Image from 'next/image'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { ComponentInstance, ComponentType } from '@/types'
@@ -69,14 +70,14 @@ export default function ComponentRenderer({
         return (
           <div
             style={{
-              textAlign: mergedProps.alignment || 'left',
-              color: mergedProps.color || '#000000',
+              textAlign: (mergedProps.alignment as 'left' | 'center' | 'right' | 'justify') || 'left',
+              color: String(mergedProps.color) || '#000000',
               fontSize: mergedProps.fontSize === 'sm' ? '14px' :
                         mergedProps.fontSize === 'lg' ? '18px' :
                         mergedProps.fontSize === 'xl' ? '24px' : '16px'
             }}
           >
-            {mergedProps.content || 'Text content'}
+            {String(mergedProps.content) || 'Text content'}
           </div>
         )
 
@@ -96,18 +97,18 @@ export default function ComponentRenderer({
               }
             )}
           >
-            {mergedProps.text || 'Button'}
+            {String(mergedProps.text) || 'Button'}
           </button>
         )
 
       case ComponentType.IMAGE:
         return (
-          <img
-            src={mergedProps.src || 'https://via.placeholder.com/300x200'}
-            alt={mergedProps.alt || 'Image'}
+          <Image
+            src={String(mergedProps.src) || 'https://via.placeholder.com/300x200'}
+            alt={String(mergedProps.alt) || 'Image'}
+            width={parseInt(String(mergedProps.width)) || 300}
+            height={parseInt(String(mergedProps.height)) || 200}
             style={{
-              width: mergedProps.width || '300px',
-              height: mergedProps.height || '200px',
               objectFit: 'cover',
             }}
           />
@@ -117,11 +118,11 @@ export default function ComponentRenderer({
         return (
           <div
             style={{
-              padding: mergedProps.padding || '16px',
-              margin: mergedProps.margin || '0px',
-              backgroundColor: mergedProps.backgroundColor || 'transparent',
+              padding: String(mergedProps.padding) || '16px',
+              margin: String(mergedProps.margin) || '0px',
+              backgroundColor: String(mergedProps.backgroundColor) || 'transparent',
               display: 'flex',
-              flexDirection: mergedProps.flexDirection || 'column',
+              flexDirection: (mergedProps.flexDirection as 'row' | 'column') || 'column',
               minHeight: children.length === 0 ? '100px' : 'auto',
             }}
           >
@@ -151,11 +152,11 @@ export default function ComponentRenderer({
         return (
           <div className="space-y-2">
             <label className="block text-sm font-medium text-gray-700">
-              {mergedProps.label || 'Label'}
+              {String(mergedProps.label) || 'Label'}
             </label>
             <input
-              type={mergedProps.type || 'text'}
-              placeholder={mergedProps.placeholder || 'Enter value...'}
+              type={String(mergedProps.type) || 'text'}
+              placeholder={String(mergedProps.placeholder) || 'Enter value...'}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>

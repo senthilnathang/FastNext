@@ -1,4 +1,4 @@
-from typing import Optional, List
+from typing import Optional, List, Dict, Any
 from pydantic import BaseModel
 from datetime import datetime
 
@@ -32,7 +32,7 @@ class Role(RoleInDBBase):
 
 
 class RoleWithPermissions(Role):
-    permissions: List["Permission"] = []
+    permissions: List[Dict[str, Any]] = []
 
 
 # User Role Assignment
@@ -61,3 +61,6 @@ class UserRoleInDBBase(UserRoleBase):
 
 class UserRole(UserRoleInDBBase):
     role: Optional[Role] = None
+
+
+# Forward references will be resolved when permission schema is imported

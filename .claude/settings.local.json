@@ -6,7 +6,15 @@
       "Bash(npm install:*)",
       "Bash(npx storybook@latest init:*)",
       "Bash(npx shadcn@latest init:*)",
-      "Bash(npm run build:*)"
+      "Bash(npm run build:*)",
+      "Bash(python:*)",
+      "Bash(cat:*)",
+      "Bash(ls:*)",
+      "Bash(grep:*)",
+      "Bash(source:*)",
+      "Bash(alembic revision:*)",
+      "Bash(find:*)",
+      "Bash(alembic init:*)"
     ],
     "deny": []
   }
