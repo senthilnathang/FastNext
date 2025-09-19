@@ -1,7 +1,7 @@
 "use client"
 
 import React from 'react'
-import { Bell, Search, User, Settings, LogOut, HelpCircle, Moon, Sun } from 'lucide-react'
+import { Bell, Search, User, Settings, LogOut, HelpCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -11,6 +11,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import { ThemeToggle, SimpleThemeToggle } from '@/components/ui/theme-toggle'
 import Breadcrumb from './Breadcrumb'
 import QuickActionButton from '../quick-actions/QuickActionButton'
 import { useAuth } from '../../contexts/AuthContext'
@@ -27,22 +28,27 @@ export default function Header() {
   }
 
   return (
-    <div className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800">
-      <header className="h-16 flex items-center justify-between px-6">
-        <div className="flex items-center space-x-6">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+    <div className="bg-background border-b border-border">
+      <header className="h-16 flex items-center justify-between px-4 sm:px-6">
+        <div className="flex items-center space-x-4 sm:space-x-6">
+          <div className="relative hidden sm:block">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
             <input
               type="text"
               placeholder="Search projects, components..."
-              className="pl-10 pr-4 py-2 w-80 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-800 dark:text-white"
+              className="pl-10 pr-4 py-2 w-64 lg:w-80 border border-input bg-background text-foreground placeholder:text-muted-foreground rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent transition-colors"
             />
           </div>
+          <Button variant="ghost" size="icon" className="sm:hidden" title="Search">
+            <Search className="w-5 h-5" />
+          </Button>
         </div>
 
-        <div className="flex items-center space-x-3">
-          <QuickActionButton />
-          <Button variant="ghost" size="icon" title="Help">
+        <div className="flex items-center space-x-2 sm:space-x-3">
+          <div className="hidden sm:block">
+            <QuickActionButton />
+          </div>
+          <Button variant="ghost" size="icon" title="Help" className="hidden md:flex">
             <HelpCircle className="w-5 h-5" />
           </Button>
           
@@ -50,22 +56,24 @@ export default function Header() {
             <Bell className="w-5 h-5" />
           </Button>
 
-          <Button variant="ghost" size="icon" title="Toggle theme">
-            <Sun className="w-5 h-5 dark:hidden" />
-            <Moon className="w-5 h-5 hidden dark:block" />
-          </Button>
+          <div className="flex items-center gap-1">
+            <div className="border border-border rounded-md">
+              <ThemeToggle />
+            </div>
+            <SimpleThemeToggle />
+          </div>
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="flex items-center space-x-2 px-3">
-                <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+              <Button variant="ghost" className="flex items-center space-x-2 px-2 sm:px-3">
+                <div className="w-8 h-8 bg-gradient-to-br from-brand-primary to-brand-secondary rounded-full flex items-center justify-center">
                   <User className="w-4 h-4 text-white" />
                 </div>
-                <div className="text-left">
-                  <div className="text-sm font-medium text-gray-900 dark:text-white">
+                <div className="text-left hidden sm:block">
+                  <div className="text-sm font-medium text-foreground">
                     {user?.full_name || user?.username || 'User'}
                   </div>
-                  <div className="text-xs text-gray-500 dark:text-gray-400">
+                  <div className="text-xs text-muted-foreground">
                     {user?.roles?.join(', ') || 'User'}
                   </div>
                 </div>
@@ -74,12 +82,12 @@ export default function Header() {
             <DropdownMenuContent align="end" className="w-64">
               <DropdownMenuLabel>
                 <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                  <div className="w-10 h-10 bg-gradient-to-br from-brand-primary to-brand-secondary rounded-full flex items-center justify-center">
                     <User className="w-5 h-5 text-white" />
                   </div>
                   <div>
-                    <div className="font-medium">{user?.full_name || user?.username || 'User'}</div>
-                    <div className="text-sm text-gray-500">{user?.email || 'user@example.com'}</div>
+                    <div className="font-medium text-foreground">{user?.full_name || user?.username || 'User'}</div>
+                    <div className="text-sm text-muted-foreground">{user?.email || 'user@example.com'}</div>
                   </div>
                 </div>
               </DropdownMenuLabel>
@@ -98,7 +106,7 @@ export default function Header() {
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem 
-                className="text-red-600 dark:text-red-400"
+                className="text-destructive focus:text-destructive"
                 onClick={handleLogout}
               >
                 <LogOut className="mr-2 h-4 w-4" />
@@ -109,7 +117,7 @@ export default function Header() {
         </div>
       </header>
       
-      <div className="px-6 py-3 bg-gray-50 dark:bg-gray-800/50 border-t border-gray-100 dark:border-gray-700">
+      <div className="px-4 sm:px-6 py-3 bg-muted/50 border-t border-border">
         <Breadcrumb />
       </div>
     </div>

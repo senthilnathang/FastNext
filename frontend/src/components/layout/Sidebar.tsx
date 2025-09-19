@@ -191,10 +191,10 @@ function SidebarItem({ item, level = 0 }: SidebarItemProps) {
 
   const itemClasses = cn(
     'flex items-center w-full px-3 py-2 text-sm font-medium rounded-lg transition-colors',
-    'hover:bg-gray-100 dark:hover:bg-gray-800',
+    'hover:bg-accent hover:text-accent-foreground',
     {
-      'bg-blue-50 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300': isActive || hasActiveChild,
-      'text-gray-700 dark:text-gray-300': !isActive && !hasActiveChild,
+      'bg-accent text-accent-foreground': isActive || hasActiveChild,
+      'text-foreground': !isActive && !hasActiveChild,
       'pl-6': level > 0
     }
   )
@@ -254,15 +254,15 @@ export default function Sidebar({ className }: SidebarProps) {
   const filteredMenuItems = filterMenuItems([...menuItems])
 
   return (
-    <div className={cn('w-64 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800', className)}>
-      <div className="p-6">
+    <div className={cn('w-64 bg-background border-r border-border', className)}>
+      <div className="p-4 sm:p-6">
         <div className="flex items-center space-x-3">
-          <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
+          <div className="w-10 h-10 bg-gradient-to-br from-brand-primary to-brand-secondary rounded-xl flex items-center justify-center shadow-lg">
             <span className="text-white font-bold text-lg">FN</span>
           </div>
-          <div>
-            <h1 className="text-lg font-semibold text-gray-900 dark:text-white">FastNext</h1>
-            <p className="text-xs text-gray-500 dark:text-gray-400">Enterprise App Builder</p>
+          <div className="hidden sm:block">
+            <h1 className="text-lg font-semibold text-foreground">FastNext</h1>
+            <p className="text-xs text-muted-foreground">Enterprise App Builder</p>
           </div>
         </div>
       </div>
@@ -275,8 +275,8 @@ export default function Sidebar({ className }: SidebarProps) {
         </div>
       </nav>
       
-      <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200 dark:border-gray-700">
-        <div className="text-xs text-gray-400 dark:text-gray-500 text-center">
+      <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-border">
+        <div className="text-xs text-muted-foreground text-center">
           v2.1.0 - FastNext Platform
         </div>
       </div>

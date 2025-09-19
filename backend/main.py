@@ -134,11 +134,30 @@ def _setup_middleware(app: FastAPI):
     # CORS middleware (must be first to handle preflight requests)
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=["*"],  # Allow all origins for debugging
-        allow_credentials=False,  # Must be False when using allow_origins=["*"]
-        allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
-        allow_headers=["*"],
-        expose_headers=["*"],
+        allow_origins=[str(origin) for origin in settings.BACKEND_CORS_ORIGINS],
+        allow_credentials=True,  # Enable credentials for authentication
+        allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH", "HEAD"],
+        allow_headers=[
+            "accept",
+            "accept-encoding",
+            "authorization",
+            "content-type",
+            "dnt",
+            "origin",
+            "user-agent",
+            "x-csrftoken",
+            "x-requested-with",
+            "x-request-id",
+            "cache-control",
+            "pragma"
+        ],
+        expose_headers=[
+            "x-process-time",
+            "x-request-id",
+            "x-auth-status",
+            "x-redirect-to",
+            "x-auto-logout"
+        ],
         max_age=3600,
     )
     
