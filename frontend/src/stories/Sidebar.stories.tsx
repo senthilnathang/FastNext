@@ -1,7 +1,8 @@
-import type { Meta, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/nextjs'
 import Sidebar from '../components/layout/Sidebar'
 import { AuthContext } from '../contexts/AuthContext'
-import { fn } from '@storybook/test'
+// Mock function helper
+const fn = () => () => {}
 
 const mockAuthContextValue = {
   user: {
@@ -134,7 +135,7 @@ export const CollapsedMenus: Story = {
       }
     }
   },
-  play: async ({ canvasElement }) => {
+  play: async () => {
     // The sidebar starts with all menus collapsed by default
     // This story shows the initial state
   }

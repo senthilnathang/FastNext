@@ -94,7 +94,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
 
     return response;
-  }, [router]);
+  }, [API_BASE, router]);
 
   // Login function
   const login = async (username: string, password: string) => {
@@ -197,7 +197,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       logout();
       throw error;
     }
-  }, [logout]);
+  }, [API_BASE, logout]);
 
   // Update user information
   const updateUser = (userData: Partial<User>) => {

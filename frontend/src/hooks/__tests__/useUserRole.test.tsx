@@ -36,8 +36,8 @@ const mockAuthContextValue = {
 }
 
 describe('useUserRole Hook', () => {
-  const createWrapper = (user: any) => {
-    return ({ children }: { children: React.ReactNode }) => (
+  const createWrapper = (user: typeof mockAdminUser | null) => {
+    const TestWrapper = ({ children }: { children: React.ReactNode }) => (
       <AuthContext.Provider value={{
         ...mockAuthContextValue,
         user
@@ -45,6 +45,8 @@ describe('useUserRole Hook', () => {
         {children}
       </AuthContext.Provider>
     )
+    TestWrapper.displayName = 'TestWrapper'
+    return TestWrapper
   }
 
   describe('hasPermission', () => {

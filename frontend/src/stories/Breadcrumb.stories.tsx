@@ -1,7 +1,8 @@
-import type { Meta, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/nextjs'
 import Breadcrumb from '../components/layout/Breadcrumb'
 import { Home, Building2, Cog } from 'lucide-react'
-import { fn } from '@storybook/test'
+// Mock function helper
+const fn = () => () => {}
 
 // Mock next/navigation
 const mockRouter = {

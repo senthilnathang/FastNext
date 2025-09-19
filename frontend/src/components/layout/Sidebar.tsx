@@ -13,7 +13,6 @@ import {
   Key,
   ChevronDown,
   ChevronRight,
-  Palette,
   BarChart3,
   FileText,
   Brain,

@@ -1,8 +1,6 @@
-import type { Meta, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/nextjs'
 import DashboardLayout from '../components/layout/DashboardLayout'
 import { AuthContext } from '../contexts/AuthContext'
-import { fn } from '@storybook/test'
-
 const mockAuthContextValue = {
   user: {
     id: 1,
@@ -16,10 +14,10 @@ const mockAuthContextValue = {
   },
   isLoading: false,
   isAuthenticated: true,
-  login: fn(),
-  logout: fn(),
-  refreshToken: fn(),
-  updateUser: fn()
+  login: async () => {},
+  logout: () => {},
+  refreshToken: async () => {},
+  updateUser: () => {}
 }
 
 const meta: Meta<typeof DashboardLayout> = {

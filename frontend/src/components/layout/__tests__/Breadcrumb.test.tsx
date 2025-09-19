@@ -4,12 +4,6 @@ import '@testing-library/jest-dom'
 import Breadcrumb from '../Breadcrumb'
 
 // Mock Next.js navigation
-const mockPaths = {
-  '/dashboard': '/dashboard',
-  '/dashboard/projects': '/dashboard/projects',
-  '/dashboard/projects/123': '/dashboard/projects/123',
-  '/admin/users': '/admin/users'
-}
 
 let currentPath = '/dashboard'
 

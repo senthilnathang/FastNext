@@ -1,6 +1,7 @@
-import type { Meta, StoryObj } from '@storybook/react'
+import type { Meta, StoryObj } from '@storybook/nextjs'
 import Header from '../components/layout/Header'
-import { fn } from '@storybook/test'
+// Mock function helper
+const fn = () => () => {}
 
 // Mock next/navigation
 const mockRouter = {

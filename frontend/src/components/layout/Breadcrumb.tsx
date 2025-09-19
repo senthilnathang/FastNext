@@ -33,7 +33,7 @@ export default function Breadcrumb({ className, customItems }: BreadcrumbProps) 
     ]
 
     let currentPath = ''
-    pathSegments.forEach((segment, index) => {
+    pathSegments.forEach((segment) => {
       currentPath += `/${segment}`
       
       const label = segment
