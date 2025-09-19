@@ -106,3 +106,93 @@ WHERE users.id = %(id_1)s
 2025-09-19 09:48:36,451 - app.services.user_service - INFO - User authenticated successfully: demo@fastnext.com (ID: 2)
 2025-09-19 09:48:36,451 - app.api.routes.auth_routes - INFO - Successful login: demo from IP: 127.0.0.1
 2025-09-19 09:48:36,546 - watchfiles.main - INFO - 1 change detected
+2025-09-19 10:45:24,087 - main - INFO - 🛑 Shutting down FastNext Framework...
+2025-09-19 10:45:30,833 - __main__ - INFO - Starting FastNext Framework on 0.0.0.0:8000
+2025-09-19 10:45:32,607 - main - INFO - 🚀 Starting FastNext Framework...
+2025-09-19 10:45:32,739 - main - INFO - ✅ Database initialized
+2025-09-19 10:45:32,946 - watchfiles.main - INFO - 1 change detected
+2025-09-19 10:51:36,082 - app.services.user_service - WARNING - Authentication failed - user not found: test
+2025-09-19 10:51:36,083 - security - WARNING - Security Event: LOGIN_FAILED | User: None | IP: 127.0.0.1 | Endpoint: /api/v1/auth/login
+2025-09-19 10:51:36,083 - security - ERROR - Security Event: LOGIN_ERROR | User: None | IP: 127.0.0.1 | Endpoint: /api/v1/auth/login
+2025-09-19 10:51:36,083 - app.api.routes.auth_routes - ERROR - Unexpected error during login for test: 401: Incorrect username or password
+2025-09-19 10:51:36,329 - watchfiles.main - INFO - 2 changes detected
+2025-09-19 10:52:10,593 - main - INFO - 🛑 Shutting down FastNext Framework...
+2025-09-19 10:52:13,915 - __main__ - INFO - Starting FastNext Framework on 0.0.0.0:8000
+2025-09-19 10:52:15,315 - main - INFO - 🚀 Starting FastNext Framework...
+2025-09-19 10:52:15,402 - main - INFO - ✅ Database initialized
+2025-09-19 10:52:15,683 - watchfiles.main - INFO - 1 change detected
+2025-09-19 10:55:50,003 - app.services.user_service - WARNING - Authentication failed - user not found: nonexistent
+2025-09-19 10:55:50,003 - security - WARNING - Security Event: LOGIN_FAILED | User: None | IP: 127.0.0.1 | Endpoint: /api/v1/auth/login
+2025-09-19 10:55:50,004 - security - ERROR - Security Event: LOGIN_ERROR | User: None | IP: 127.0.0.1 | Endpoint: /api/v1/auth/login
+2025-09-19 10:55:50,004 - app.api.routes.auth_routes - ERROR - Unexpected error during login for nonexistent: 401: Incorrect username or password
+2025-09-19 10:55:50,120 - watchfiles.main - INFO - 2 changes detected
+2025-09-19 10:55:50,471 - watchfiles.main - INFO - 1 change detected
+2025-09-19 11:12:58,098 - main - INFO - 🛑 Shutting down FastNext Framework...
+2025-09-19 11:13:04,728 - __main__ - INFO - Starting FastNext Framework on 0.0.0.0:8000
+2025-09-19 11:13:05,955 - main - INFO - 🚀 Starting FastNext Framework...
+2025-09-19 11:13:06,043 - main - INFO - ✅ Database initialized
+2025-09-19 11:13:06,122 - watchfiles.main - INFO - 1 change detected
+2025-09-19 11:13:06,473 - watchfiles.main - INFO - 1 change detected
+2025-09-19 11:19:10,335 - app.services.user_service - WARNING - Authentication failed - user not found: test
+2025-09-19 11:19:10,335 - security - WARNING - Security Event: LOGIN_FAILED | User: None | IP: 127.0.0.1 | Endpoint: /api/v1/auth/login
+2025-09-19 11:19:10,335 - security - ERROR - Security Event: LOGIN_ERROR | User: None | IP: 127.0.0.1 | Endpoint: /api/v1/auth/login
+2025-09-19 11:19:10,335 - app.api.routes.auth_routes - ERROR - Unexpected error during login for test: 401: Incorrect username or password
+2025-09-19 11:19:10,596 - watchfiles.main - INFO - 2 changes detected
+2025-09-19 11:23:50,257 - main - INFO - 🛑 Shutting down FastNext Framework...
+2025-09-19 11:23:56,091 - __main__ - INFO - Starting FastNext Framework on 0.0.0.0:8000
+2025-09-19 11:23:57,298 - main - INFO - 🚀 Starting FastNext Framework...
+2025-09-19 11:23:57,379 - main - INFO - ✅ Database initialized
+2025-09-19 11:23:57,484 - watchfiles.main - INFO - 1 change detected
+2025-09-19 11:26:03,695 - watchfiles.main - INFO - 2 changes detected
+2025-09-19 11:26:04,046 - watchfiles.main - INFO - 1 change detected
+2025-09-19 11:26:04,397 - watchfiles.main - INFO - 1 change detected
+2025-09-19 11:26:11,451 - app.services.user_service - WARNING - Authentication failed - user not found: test
+2025-09-19 11:26:11,451 - security - WARNING - Security Event: LOGIN_FAILED | User: None | IP: 127.0.0.1 | Endpoint: /api/v1/auth/login
+2025-09-19 11:26:11,452 - security - ERROR - Security Event: LOGIN_ERROR | User: None | IP: 127.0.0.1 | Endpoint: /api/v1/auth/login
+2025-09-19 11:26:11,452 - app.api.routes.auth_routes - ERROR - Unexpected error during login for test: 401: Incorrect username or password
+2025-09-19 11:26:11,571 - watchfiles.main - INFO - 2 changes detected
+2025-09-19 11:30:02,316 - watchfiles.main - INFO - 1 change detected
+2025-09-19 11:30:02,667 - watchfiles.main - INFO - 1 change detected
+2025-09-19 11:30:10,144 - app.services.user_service - WARNING - Authentication failed - user not found: test
+2025-09-19 11:30:10,144 - security - WARNING - Security Event: LOGIN_FAILED | User: None | IP: 127.0.0.1 | Endpoint: /api/v1/auth/login
+2025-09-19 11:30:10,144 - security - ERROR - Security Event: LOGIN_ERROR | User: None | IP: 127.0.0.1 | Endpoint: /api/v1/auth/login
+2025-09-19 11:30:10,144 - app.api.routes.auth_routes - ERROR - Unexpected error during login for test: 401: Incorrect username or password
+2025-09-19 11:30:10,476 - watchfiles.main - INFO - 2 changes detected
+2025-09-19 11:35:00,009 - main - INFO - 🛑 Shutting down FastNext Framework...
+2025-09-19 11:35:07,005 - __main__ - INFO - Starting FastNext Framework on 0.0.0.0:8000
+2025-09-19 11:35:09,391 - main - INFO - 🚀 Starting FastNext Framework...
+2025-09-19 11:35:09,575 - main - INFO - ✅ Database initialized
+2025-09-19 11:35:09,654 - watchfiles.main - INFO - 1 change detected
+2025-09-19 11:35:51,204 - app.services.user_service - INFO - User authenticated successfully: demo@fastnext.com (ID: 2)
+2025-09-19 11:35:51,209 - app.api.routes.auth_routes - INFO - Successful login: demo from IP: 127.0.0.1
+2025-09-19 11:35:51,549 - watchfiles.main - INFO - 1 change detected
+2025-09-19 11:35:52,453 - main - ERROR - Unexpected error on GET /api/v1/projects/: (psycopg2.errors.UndefinedFunction) could not identify an equality operator for type json
+LINE 2: ...ser_id, projects.is_public AS projects_is_public, projects.s...
+                                                             ^
+
+[SQL: SELECT anon_1.projects_id AS anon_1_projects_id, anon_1.projects_name AS anon_1_projects_name, anon_1.projects_description AS anon_1_projects_description, anon_1.projects_user_id AS anon_1_projects_user_id, anon_1.projects_is_public AS anon_1_projects_is_public, anon_1.projects_settings AS anon_1_projects_settings, anon_1.projects_created_at AS anon_1_projects_created_at, anon_1.projects_updated_at AS anon_1_projects_updated_at 
+FROM (SELECT projects.id AS projects_id, projects.name AS projects_name, projects.description AS projects_description, projects.user_id AS projects_user_id, projects.is_public AS projects_is_public, projects.settings AS projects_settings, projects.created_at AS projects_created_at, projects.updated_at AS projects_updated_at 
+FROM projects 
+WHERE projects.user_id = %(user_id_1)s UNION SELECT projects.id AS projects_id, projects.name AS projects_name, projects.description AS projects_description, projects.user_id AS projects_user_id, projects.is_public AS projects_is_public, projects.settings AS projects_settings, projects.created_at AS projects_created_at, projects.updated_at AS projects_updated_at 
+FROM projects JOIN project_members ON projects.id = project_members.project_id 
+WHERE project_members.user_id = %(user_id_2)s AND project_members.is_active = true) AS anon_1 
+ LIMIT %(param_1)s OFFSET %(param_2)s]
+[parameters: {'user_id_1': 2, 'user_id_2': 2, 'param_1': 100, 'param_2': 0}]
+(Background on this error at: https://sqlalche.me/e/20/f405)
+2025-09-19 11:35:52,453 - security - CRITICAL - Security Event: POTENTIAL_ATTACK | User: None | IP: 127.0.0.1 | Endpoint: /api/v1/projects/
+2025-09-19 11:35:52,604 - watchfiles.main - INFO - 2 changes detected
+2025-09-19 11:36:00,297 - main - ERROR - Unexpected error on GET /api/v1/projects/: (psycopg2.errors.UndefinedFunction) could not identify an equality operator for type json
+LINE 2: ...ser_id, projects.is_public AS projects_is_public, projects.s...
+                                                             ^
+
+[SQL: SELECT anon_1.projects_id AS anon_1_projects_id, anon_1.projects_name AS anon_1_projects_name, anon_1.projects_description AS anon_1_projects_description, anon_1.projects_user_id AS anon_1_projects_user_id, anon_1.projects_is_public AS anon_1_projects_is_public, anon_1.projects_settings AS anon_1_projects_settings, anon_1.projects_created_at AS anon_1_projects_created_at, anon_1.projects_updated_at AS anon_1_projects_updated_at 
+FROM (SELECT projects.id AS projects_id, projects.name AS projects_name, projects.description AS projects_description, projects.user_id AS projects_user_id, projects.is_public AS projects_is_public, projects.settings AS projects_settings, projects.created_at AS projects_created_at, projects.updated_at AS projects_updated_at 
+FROM projects 
+WHERE projects.user_id = %(user_id_1)s UNION SELECT projects.id AS projects_id, projects.name AS projects_name, projects.description AS projects_description, projects.user_id AS projects_user_id, projects.is_public AS projects_is_public, projects.settings AS projects_settings, projects.created_at AS projects_created_at, projects.updated_at AS projects_updated_at 
+FROM projects JOIN project_members ON projects.id = project_members.project_id 
+WHERE project_members.user_id = %(user_id_2)s AND project_members.is_active = true) AS anon_1 
+ LIMIT %(param_1)s OFFSET %(param_2)s]
+[parameters: {'user_id_1': 2, 'user_id_2': 2, 'param_1': 100, 'param_2': 0}]
+(Background on this error at: https://sqlalche.me/e/20/f405)
+2025-09-19 11:36:00,297 - security - CRITICAL - Security Event: POTENTIAL_ATTACK | User: None | IP: 127.0.0.1 | Endpoint: /api/v1/projects/
+2025-09-19 11:36:00,633 - watchfiles.main - INFO - 2 changes detected

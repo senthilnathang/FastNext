@@ -36,7 +36,8 @@
       "Bash(chmod:*)",
       "Bash(npx tsc:*)",
       "Bash(npm run lint)",
-      "Bash(npm run:*)"
+      "Bash(npm run:*)",
+      "Bash(node:*)"
     ],
     "deny": []
   }

@@ -19,6 +19,7 @@ import {
   Download,
   RefreshCw
 } from 'lucide-react';
+import { API_CONFIG, getApiUrl } from '@/lib/api/config';
 
 interface ActivityLog {
   id: number;
@@ -116,8 +117,8 @@ export default function ActivityLogViewer({ showUserActivitiesOnly = false }: Ac
       });
 
       const endpoint = showUserActivitiesOnly 
-        ? `/api/v1/activity-logs/me?${queryParams}&days=${filters.days}`
-        : `/api/v1/activity-logs?${queryParams}`;
+        ? getApiUrl(`${API_CONFIG.ENDPOINTS.ACTIVITY_LOGS.ME}?${queryParams}&days=${filters.days}`)
+        : getApiUrl(`${API_CONFIG.ENDPOINTS.ACTIVITY_LOGS.LIST}?${queryParams}`);
 
       const response = await fetch(endpoint, {
         headers: {
@@ -143,7 +144,7 @@ export default function ActivityLogViewer({ showUserActivitiesOnly = false }: Ac
   const fetchStats = React.useCallback(async () => {
     try {
       const token = localStorage.getItem('access_token');
-      const response = await fetch(`/api/v1/activity-logs/stats/summary?days=${filters.days}`, {
+      const response = await fetch(getApiUrl(`${API_CONFIG.ENDPOINTS.ACTIVITY_LOGS.STATS}?days=${filters.days}`), {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -186,7 +187,7 @@ export default function ActivityLogViewer({ showUserActivitiesOnly = false }: Ac
         format: 'json'
       });
 
-      const response = await fetch(`/api/v1/activity-logs/export?${queryParams}`, {
+      const response = await fetch(getApiUrl(`${API_CONFIG.ENDPOINTS.ACTIVITY_LOGS.EXPORT}?${queryParams}`), {
         headers: {
           'Authorization': `Bearer ${token}`,
         },

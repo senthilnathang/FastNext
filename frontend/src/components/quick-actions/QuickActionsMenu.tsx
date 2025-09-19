@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { Button } from '../ui/button';
 import { Card } from '../ui/card';
+import { API_CONFIG, getApiUrl } from '@/lib/api/config';
 
 interface QuickAction {
   id: string;
@@ -79,7 +80,7 @@ export default function QuickActionsMenu({ isOpen, onClose, onActionSelect }: Qu
       setLoading(true);
       const token = localStorage.getItem('access_token');
       
-      const response = await fetch('/api/v1/profile/quick-actions', {
+      const response = await fetch(getApiUrl(API_CONFIG.ENDPOINTS.PROFILE.QUICK_ACTIONS), {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',

@@ -7,6 +7,7 @@ import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 import { Card } from '../ui/card';
 import { Lock, Eye, EyeOff, Shield, AlertCircle } from 'lucide-react';
+import { API_CONFIG, getApiUrl } from '@/lib/api/config';
 
 interface PasswordFormData {
   current_password: string;
@@ -47,7 +48,7 @@ export default function ChangePasswordForm({ onSuccess, onCancel }: ChangePasswo
 
     try {
       const token = localStorage.getItem('access_token');
-      const response = await fetch('/api/v1/profile/me/password', {
+      const response = await fetch(getApiUrl(API_CONFIG.ENDPOINTS.PROFILE.PASSWORD), {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

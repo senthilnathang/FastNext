@@ -29,6 +29,7 @@ import {
   Calendar,
   BarChart3
 } from 'lucide-react';
+import { API_CONFIG, getApiUrl } from '@/lib/api/config';
 
 interface Project {
   id: number;
@@ -97,7 +98,7 @@ export default function DashboardPage() {
       const token = localStorage.getItem('access_token');
       
       // Fetch projects
-      const projectsResponse = await fetch('/api/v1/projects/', {
+      const projectsResponse = await fetch(getApiUrl(API_CONFIG.ENDPOINTS.PROJECTS.LIST), {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',

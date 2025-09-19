@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Shield, Eye, EyeOff, AlertCircle, CheckCircle } from 'lucide-react';
+import { API_CONFIG, getApiUrl } from '@/lib/api/config';
 import { useAuth } from '@/contexts/AuthContext';
 
 // Password strength interface
@@ -152,9 +153,7 @@ export default function RegisterPage() {
     setIsLoading(true);
 
     try {
-      const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
-      
-      const response = await fetch(`${API_BASE}/auth/register`, {
+      const response = await fetch(getApiUrl(API_CONFIG.ENDPOINTS.AUTH.REGISTER), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

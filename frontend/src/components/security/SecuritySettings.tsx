@@ -18,6 +18,7 @@ import {
   Users,
   Mail
 } from 'lucide-react';
+import { API_CONFIG, getApiUrl } from '@/lib/api/config';
 
 interface SecuritySettingsData {
   two_factor_enabled: boolean;
@@ -74,7 +75,7 @@ export default function SecuritySettings() {
   const fetchSecuritySettings = async () => {
     try {
       const token = localStorage.getItem('access_token');
-      const response = await fetch('/api/v1/security/settings', {
+      const response = await fetch(getApiUrl(API_CONFIG.ENDPOINTS.SECURITY.SETTINGS), {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -93,7 +94,7 @@ export default function SecuritySettings() {
   const fetchSecurityOverview = async () => {
     try {
       const token = localStorage.getItem('access_token');
-      const response = await fetch('/api/v1/security/overview', {
+      const response = await fetch(getApiUrl(API_CONFIG.ENDPOINTS.SECURITY.OVERVIEW), {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -118,7 +119,7 @@ export default function SecuritySettings() {
 
     try {
       const token = localStorage.getItem('access_token');
-      const response = await fetch('/api/v1/security/settings', {
+      const response = await fetch(getApiUrl(API_CONFIG.ENDPOINTS.SECURITY.SETTINGS), {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -161,7 +162,7 @@ export default function SecuritySettings() {
     try {
       setSaving(true);
       const token = localStorage.getItem('access_token');
-      const response = await fetch('/api/v1/security/2fa/disable', {
+      const response = await fetch(getApiUrl(API_CONFIG.ENDPOINTS.SECURITY.TWO_FA_DISABLE), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

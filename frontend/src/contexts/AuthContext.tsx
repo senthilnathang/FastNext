@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
+import { API_CONFIG, getApiUrl } from '@/lib/api/config';
 
 // Types for authentication
 interface User {
@@ -43,8 +44,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const isAuthenticated = !!user;
 
-  // API base URL
-  const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
 
   // Helper function to make authenticated requests
   const makeAuthenticatedRequest = useCallback(async (url: string, options: RequestInit = {}) => {
@@ -58,7 +57,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       headers.set('Authorization', `Bearer ${token}`);
     }
 
-    const response = await fetch(`${API_BASE}${url}`, {
+    const response = await fetch(`${API_CONFIG.API_BASE_URL}${url}`, {
       ...options,
       headers,
     });
@@ -95,14 +94,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
 
     return response;
-  }, [API_BASE, router]);
+  }, [router]);
 
   // Login function
   const login = async (username: string, password: string) => {
     setIsLoading(true);
     try {
-      console.log('Login request to:', `${API_BASE}/auth/login`);
-      const response = await fetch(`${API_BASE}/auth/login`, {
+      console.log('Login request to:', getApiUrl(API_CONFIG.ENDPOINTS.AUTH.LOGIN));
+      const response = await fetch(getApiUrl(API_CONFIG.ENDPOINTS.AUTH.LOGIN), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -133,7 +132,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   // Get current user information
   const getCurrentUser = useCallback(async () => {
     try {
-      const response = await makeAuthenticatedRequest('/auth/me');
+      const response = await makeAuthenticatedRequest(API_CONFIG.ENDPOINTS.AUTH.ME);
       const userData = await response.json();
       
       setUser(userData);
@@ -150,7 +149,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const logout = useCallback(async () => {
     try {
       // Call logout endpoint
-      await makeAuthenticatedRequest('/auth/logout', {
+      await makeAuthenticatedRequest(API_CONFIG.ENDPOINTS.AUTH.LOGOUT, {
         method: 'POST',
       });
     } catch (error) {
@@ -175,7 +174,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         throw new Error('No refresh token available');
       }
 
-      const response = await fetch(`${API_BASE}/auth/refresh`, {
+      const response = await fetch(getApiUrl(API_CONFIG.ENDPOINTS.AUTH.REFRESH), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -198,7 +197,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       logout();
       throw error;
     }
-  }, [API_BASE, logout]);
+  }, [logout]);
 
   // Update user information
   const updateUser = (userData: Partial<User>) => {

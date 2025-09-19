@@ -8,6 +8,7 @@ import { Label } from '../ui/label';
 import { Card } from '../ui/card';
 import { useAuth } from '../../contexts/AuthContext';
 import { User, MapPin, Globe, FileText } from 'lucide-react';
+import { API_CONFIG, getApiUrl } from '@/lib/api/config';
 
 interface ProfileFormData {
   full_name: string;
@@ -53,7 +54,7 @@ export default function UpdateProfileForm({ onSuccess, onCancel }: UpdateProfile
 
     try {
       const token = localStorage.getItem('access_token');
-      const response = await fetch('/api/v1/profile/me', {
+      const response = await fetch(getApiUrl(API_CONFIG.ENDPOINTS.PROFILE.ME), {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
