@@ -12,8 +12,20 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import Breadcrumb from './Breadcrumb'
+import QuickActionButton from '../quick-actions/QuickActionButton'
+import { useAuth } from '../../contexts/AuthContext'
 
 export default function Header() {
+  const { user, logout } = useAuth()
+  
+  const handleLogout = async () => {
+    try {
+      await logout()
+    } catch (error) {
+      console.error('Logout failed:', error)
+    }
+  }
+
   return (
     <div className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800">
       <header className="h-16 flex items-center justify-between px-6">
@@ -29,6 +41,7 @@ export default function Header() {
         </div>
 
         <div className="flex items-center space-x-3">
+          <QuickActionButton />
           <Button variant="ghost" size="icon" title="Help">
             <HelpCircle className="w-5 h-5" />
           </Button>
@@ -49,8 +62,12 @@ export default function Header() {
                   <User className="w-4 h-4 text-white" />
                 </div>
                 <div className="text-left">
-                  <div className="text-sm font-medium text-gray-900 dark:text-white">John Doe</div>
-                  <div className="text-xs text-gray-500 dark:text-gray-400">Admin</div>
+                  <div className="text-sm font-medium text-gray-900 dark:text-white">
+                    {user?.full_name || user?.username || 'User'}
+                  </div>
+                  <div className="text-xs text-gray-500 dark:text-gray-400">
+                    {user?.roles?.join(', ') || 'User'}
+                  </div>
                 </div>
               </Button>
             </DropdownMenuTrigger>
@@ -61,8 +78,8 @@ export default function Header() {
                     <User className="w-5 h-5 text-white" />
                   </div>
                   <div>
-                    <div className="font-medium">John Doe</div>
-                    <div className="text-sm text-gray-500">john.doe@company.com</div>
+                    <div className="font-medium">{user?.full_name || user?.username || 'User'}</div>
+                    <div className="text-sm text-gray-500">{user?.email || 'user@example.com'}</div>
                   </div>
                 </div>
               </DropdownMenuLabel>
@@ -80,7 +97,10 @@ export default function Header() {
                 <span>Help & Support</span>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem className="text-red-600 dark:text-red-400">
+              <DropdownMenuItem 
+                className="text-red-600 dark:text-red-400"
+                onClick={handleLogout}
+              >
                 <LogOut className="mr-2 h-4 w-4" />
                 <span>Sign out</span>
               </DropdownMenuItem>

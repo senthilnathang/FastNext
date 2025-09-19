@@ -91,6 +91,12 @@ start_frontend() {
         npm install
     fi
     
+    # Check if build exists, if not, create it
+    if [ ! -d ".next" ]; then
+        print_status "Building frontend for production..."
+        npm run build
+    fi
+    
     nohup npm start > /dev/null 2>&1 &
     echo $! > "$FRONTEND_PID_FILE"
     cd ..
