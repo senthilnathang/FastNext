@@ -16,6 +16,7 @@ interface User {
   location?: string;
   website?: string;
   created_at: string;
+  last_login_at?: string;
   roles?: string[];
 }
 

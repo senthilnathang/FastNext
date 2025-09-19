@@ -2,9 +2,16 @@ export interface User {
   id: number
   email: string
   username: string
+  full_name?: string
+  bio?: string
+  location?: string
+  website?: string
+  avatar_url?: string
   is_active: boolean
+  is_verified: boolean
   created_at: string
   updated_at?: string
+  last_login_at?: string
 }
 
 export interface Project {

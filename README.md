@@ -53,6 +53,15 @@ FastNext/
 - **Frontend Foundation**: Next.js with TypeScript, Tailwind CSS, ShadcnUI components
 - **Testing & Quality**: Jest testing, Storybook documentation, code linting
 
+### User Management & Settings
+- **Unified Navigation**: Responsive left sidebar with expandable menu sections
+- **User Settings Interface**: Comprehensive settings dashboard with tabbed navigation
+- **Profile Management**: Update profile form with bio, location, website, and avatar
+- **Security Settings**: 2FA setup, session management, email notifications, API access control
+- **Password Management**: Password change with strength validation and visual feedback
+- **Activity Monitoring**: Personal activity log viewer with filtering and export capabilities
+- **Account Overview**: Real-time account status, verification, and member information
+
 ### Visual App Builder
 - **Database Schema**: Complete data models for projects, pages, components, and instances
 - **Component Management API**: Full CRUD operations for all builder entities
@@ -77,6 +86,14 @@ FastNext/
 - **Project Membership**: Invite users to projects with specific roles
 - **Security Middleware**: Route protection with permission checks
 - **Enterprise UI**: Professional navigation, breadcrumbs, role-based menus
+
+### Audit & Security
+- **Activity Logging**: Comprehensive activity tracking with IP addresses, user agents, and metadata
+- **Audit Trail**: Complete change tracking with old/new value comparisons
+- **Security Events**: Login attempts, password changes, and suspicious activity monitoring
+- **Data Export**: Activity logs and audit trails export in JSON/CSV formats
+- **Bulk Operations**: Bulk cleanup and management of historical data
+- **Statistics Dashboard**: Real-time insights into user activities and security metrics
 
 ## Getting Started
 
@@ -149,11 +166,41 @@ FastNext/
 - `POST /api/v1/auth/login/access-token` - Login user
 - `POST /api/v1/auth/test-token` - Validate token
 
-### Users
+### Users & Profile
 - `GET /api/v1/users/` - List users (protected)
 - `POST /api/v1/users/` - Create user
 - `GET /api/v1/users/me` - Get current user (protected)
 - `PUT /api/v1/users/me` - Update current user (protected)
+- `GET /api/v1/profile/me` - Get user profile
+- `PUT /api/v1/profile/me` - Update user profile
+- `PUT /api/v1/profile/me/password` - Change password
+
+### Security Settings
+- `GET /api/v1/security/settings` - Get security settings
+- `PUT /api/v1/security/settings` - Update security settings
+- `GET /api/v1/security/overview` - Get security overview
+- `POST /api/v1/security/2fa/disable` - Disable 2FA
+
+### Activity Logs
+- `GET /api/v1/activity-logs/` - List activity logs (with filtering)
+- `GET /api/v1/activity-logs/me` - Get current user's activity logs
+- `GET /api/v1/activity-logs/{id}` - Get specific activity log
+- `POST /api/v1/activity-logs/` - Create activity log (admin only)
+- `PUT /api/v1/activity-logs/{id}` - Update activity log (admin only)
+- `DELETE /api/v1/activity-logs/{id}` - Delete activity log (admin only)
+- `GET /api/v1/activity-logs/stats/summary` - Get activity statistics
+- `DELETE /api/v1/activity-logs/bulk` - Bulk delete activity logs (admin only)
+
+### Audit Trails
+- `GET /api/v1/audit-trails/` - List audit trails (admin only)
+- `GET /api/v1/audit-trails/entity/{type}/{id}` - Get entity audit history
+- `GET /api/v1/audit-trails/{id}` - Get specific audit trail
+- `GET /api/v1/audit-trails/{id}/comparison` - Get structured value comparison
+- `POST /api/v1/audit-trails/` - Create audit trail (admin only)
+- `PUT /api/v1/audit-trails/{id}` - Update audit trail (limited fields, admin only)
+- `GET /api/v1/audit-trails/stats/summary` - Get audit statistics
+- `DELETE /api/v1/audit-trails/bulk` - Bulk delete audit trails (admin only)
+- `GET /api/v1/audit-trails/export/{format}` - Export audit trails (CSV/JSON)
 
 ### Projects
 - `GET /api/v1/projects/` - List user projects
@@ -219,16 +266,36 @@ FastNext/
    npm run dev
    ```
 
-3. **Access the Builder**:
+3. **Access the Application**:
    - Visit `http://localhost:3000` for the main page
-   - Navigate to `/builder` to access the visual builder
-   - Drag components from the left panel to the canvas
-   - Select components to edit their properties in the right panel
-   - Use the enterprise navigation for role-based access to different modules
+   - Register or login to access the platform
+   - Use the left sidebar navigation to access different sections
+
+### Application Navigation
+
+#### **Settings Dashboard** (`/settings`)
+- **Profile Tab**: Update personal information, bio, location, website
+- **Security Tab**: Configure 2FA, session settings, email notifications
+- **Password Tab**: Change password with strength validation
+- **Activity Tab**: View personal activity history with filtering
+
+#### **Administration** (Admin users only)
+- **User Management** (`/admin/users`): Manage all system users
+- **Role Management** (`/admin/roles`): Configure user roles and permissions
+- **Permission Management** (`/admin/permissions`): Manage system permissions
+
+#### **Projects & Builder**
+- **Projects** (`/projects`): Manage and create new projects
+- **Visual Builder** (`/builder`): Drag-and-drop interface for building applications
 
 ### Key Capabilities
 
-- **Visual Interface**: Complete drag-and-drop builder with component library
+- **Unified Navigation**: Responsive left sidebar with role-based menu filtering
+- **Comprehensive Settings**: Complete user profile and security management
+- **Activity Monitoring**: Real-time activity logging with detailed tracking
+- **Audit Trail**: Complete change history with old/new value comparisons
+- **Security Features**: 2FA support, session management, and threat monitoring
+- **Visual Builder**: Complete drag-and-drop builder with component library
 - **Dynamic Components**: Pre-built Text, Button, Image, Layout, and Form components
 - **Property Editing**: Dynamic forms generated from component schemas
 - **Nested Layouts**: Container components that can hold other components
@@ -238,12 +305,23 @@ FastNext/
 
 ## Roadmap
 
+### Recently Added ✅
+- **Unified Navigation**: Responsive left sidebar with expandable sections
+- **Settings Dashboard**: Complete user settings interface with tabbed navigation
+- **Security Management**: 2FA setup, session controls, and notification preferences
+- **Activity Monitoring**: Personal activity logs with filtering and export
+- **Audit Trail System**: Comprehensive change tracking with value comparisons
+- **Dashboard Conversion**: Transformed dashboard into user settings interface
+
 ### Upcoming Features
+- **Advanced Security**: TOTP 2FA implementation and hardware key support
+- **Data Visualization**: Activity and security analytics dashboards
+- **Notification System**: Real-time in-app notifications and email alerts
 - **App Preview & Deployment**: Live preview generation and one-click deployment
 - **File Upload & Media Management**: Asset storage and media handling
 - **App Templates**: Pre-built templates and starter kits
-- **Analytics & Tracking**: Usage metrics and performance monitoring
 - **Advanced Components**: Charts, tables, and data visualization components
+- **Mobile Application**: Native mobile app for platform management
 
 ## License
 

@@ -206,7 +206,7 @@ export default function ActivityLogViewer({ showUserActivitiesOnly = false }: Ac
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
-    } catch (err) {
+    } catch {
       alert('Export failed. Please try again.');
     }
   };

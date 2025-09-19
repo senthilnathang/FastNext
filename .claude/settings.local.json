@@ -34,7 +34,9 @@
       "Bash(npm outdated)",
       "Bash(pytest:*)",
       "Bash(chmod:*)",
-      "Bash(npx tsc:*)"
+      "Bash(npx tsc:*)",
+      "Bash(npm run lint)",
+      "Bash(npm run:*)"
     ],
     "deny": []
   }
