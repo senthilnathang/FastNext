@@ -24,7 +24,13 @@
       "Bash(alembic:*)",
       "Bash(rm:*)",
       "Bash(cp:*)",
-      "Bash(touch:*)"
+      "Bash(touch:*)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Bash(npm test:*)",
+      "Bash(mv:*)",
+      "Bash(npm run storybook:*)",
+      "Bash(pkill:*)"
     ],
     "deny": []
   }

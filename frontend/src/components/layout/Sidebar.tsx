@@ -4,6 +4,7 @@ import React, { useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
+import { useUserRole } from '@/hooks/useUserRole'
 import {
   Home,
   Settings,
@@ -14,7 +15,16 @@ import {
   ChevronRight,
   Palette,
   BarChart3,
-  FileText
+  FileText,
+  Brain,
+  CheckCircle,
+  Database,
+  Layers,
+  Activity,
+  Building2,
+  Clock,
+  FileCheck,
+  Globe
 } from 'lucide-react'
 
 interface MenuItem {
@@ -22,54 +32,127 @@ interface MenuItem {
   href?: string
   icon: React.ComponentType<{ className?: string }>
   children?: MenuItem[]
+  requiredPermission?: string
+  module?: string
 }
 
 const menuItems: MenuItem[] = [
   {
     title: 'Dashboard',
-    href: '/',
+    href: '/dashboard',
     icon: Home
   },
   {
     title: 'Projects',
     href: '/projects',
-    icon: Palette
+    icon: Building2,
+    module: 'projects'
   },
   {
     title: 'Builder',
     href: '/builder',
-    icon: Settings
+    icon: Layers,
+    module: 'builder'
   },
   {
-    title: 'Administration',
-    icon: Shield,
+    title: 'Compliance',
+    icon: CheckCircle,
+    module: 'compliance',
     children: [
       {
-        title: 'Users',
-        href: '/admin/users',
-        icon: Users
+        title: 'AI Trust Center',
+        href: '/compliance/ai-trust',
+        icon: Brain,
+        requiredPermission: 'compliance.ai-trust'
       },
       {
-        title: 'Roles',
-        href: '/admin/roles',
-        icon: Shield
+        title: 'Policy Dashboard',
+        href: '/compliance/policies',
+        icon: FileCheck,
+        requiredPermission: 'compliance.policies'
       },
       {
-        title: 'Permissions',
-        href: '/admin/permissions',
-        icon: Key
+        title: 'Framework',
+        href: '/compliance/framework',
+        icon: Globe,
+        requiredPermission: 'compliance.framework'
       }
     ]
   },
   {
-    title: 'Analytics',
-    href: '/analytics',
-    icon: BarChart3
+    title: 'AI Management',
+    icon: Brain,
+    module: 'ai-management',
+    children: [
+      {
+        title: 'Model Inventory',
+        href: '/ai/models',
+        icon: Database,
+        requiredPermission: 'ai.models'
+      },
+      {
+        title: 'Fairness Dashboard',
+        href: '/ai/fairness',
+        icon: Activity,
+        requiredPermission: 'ai.fairness'
+      },
+      {
+        title: 'Performance Metrics',
+        href: '/ai/metrics',
+        icon: BarChart3,
+        requiredPermission: 'ai.metrics'
+      }
+    ]
   },
   {
-    title: 'Documentation',
-    href: '/docs',
-    icon: FileText
+    title: 'Operations',
+    icon: Settings,
+    module: 'operations',
+    children: [
+      {
+        title: 'Tasks',
+        href: '/operations/tasks',
+        icon: Clock,
+        requiredPermission: 'operations.tasks'
+      },
+      {
+        title: 'Reporting',
+        href: '/operations/reports',
+        icon: FileText,
+        requiredPermission: 'operations.reports'
+      },
+      {
+        title: 'File Manager',
+        href: '/operations/files',
+        icon: FileText,
+        requiredPermission: 'operations.files'
+      }
+    ]
+  },
+  {
+    title: 'Administration',
+    icon: Shield,
+    module: 'administration',
+    children: [
+      {
+        title: 'Users',
+        href: '/admin/users',
+        icon: Users,
+        requiredPermission: 'admin.users'
+      },
+      {
+        title: 'Roles',
+        href: '/admin/roles',
+        icon: Shield,
+        requiredPermission: 'admin.roles'
+      },
+      {
+        title: 'Permissions',
+        href: '/admin/permissions',
+        icon: Key,
+        requiredPermission: 'admin.permissions'
+      }
+    ]
   }
 ]
 
@@ -148,27 +231,56 @@ interface SidebarProps {
 }
 
 export default function Sidebar({ className }: SidebarProps) {
+  const { canAccessModule, hasPermission } = useUserRole()
+
+  const filterMenuItems = (items: MenuItem[]): MenuItem[] => {
+    return items.filter(item => {
+      if (item.module && !canAccessModule(item.module)) {
+        return false
+      }
+      
+      if (item.requiredPermission && !hasPermission(item.requiredPermission)) {
+        return false
+      }
+
+      if (item.children) {
+        item.children = filterMenuItems(item.children)
+        return item.children.length > 0
+      }
+
+      return true
+    })
+  }
+
+  const filteredMenuItems = filterMenuItems([...menuItems])
+
   return (
     <div className={cn('w-64 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800', className)}>
       <div className="p-6">
-        <div className="flex items-center space-x-2">
-          <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-            <span className="text-white font-bold text-sm">FN</span>
+        <div className="flex items-center space-x-3">
+          <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
+            <span className="text-white font-bold text-lg">FN</span>
           </div>
           <div>
             <h1 className="text-lg font-semibold text-gray-900 dark:text-white">FastNext</h1>
-            <p className="text-xs text-gray-500 dark:text-gray-400">App Builder</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">Enterprise App Builder</p>
           </div>
         </div>
       </div>
 
       <nav className="px-4 pb-4">
         <div className="space-y-1">
-          {menuItems.map((item, index) => (
+          {filteredMenuItems.map((item, index) => (
             <SidebarItem key={index} item={item} />
           ))}
         </div>
       </nav>
+      
+      <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200 dark:border-gray-700">
+        <div className="text-xs text-gray-400 dark:text-gray-500 text-center">
+          v2.1.0 - FastNext Platform
+        </div>
+      </div>
     </div>
   )
 }

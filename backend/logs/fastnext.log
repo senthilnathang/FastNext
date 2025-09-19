@@ -5,3 +5,11 @@
 2025-09-18 17:44:35,701 - main - INFO - ✅ Database initialized
 2025-09-18 17:44:39,644 - app.services.user_service - INFO - User authenticated successfully: demo@fastnext.com (ID: 2)
 2025-09-18 17:44:39,646 - app.api.routes.auth_routes - INFO - Successful login: demo from IP: 127.0.0.1
+2025-09-18 17:46:27,566 - app.api.routes.auth_routes - INFO - User logout: demo from IP: 127.0.0.1
+2025-09-18 17:46:48,982 - app.services.user_service - INFO - User authenticated successfully: demo@fastnext.com (ID: 2)
+2025-09-18 17:46:48,982 - app.api.routes.auth_routes - INFO - Successful login: demo from IP: 127.0.0.1
+2025-09-18 17:49:25,901 - main - INFO - 🛑 Shutting down FastNext Framework...
+2025-09-19 04:57:48,068 - __main__ - INFO - Starting FastNext Framework on 0.0.0.0:8000
+2025-09-19 04:57:49,181 - main - INFO - 🚀 Starting FastNext Framework...
+2025-09-19 04:57:49,329 - watchfiles.main - INFO - 1 change detected
+2025-09-19 04:57:49,383 - main - INFO - ✅ Database initialized

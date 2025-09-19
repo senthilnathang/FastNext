@@ -1,6 +1,6 @@
 # FastNext Framework
 
-A comprehensive full-stack web application framework built with modern technologies for rapid development.
+A comprehensive full-stack web application framework built with modern technologies for rapid development and enterprise-grade app building.
 
 ## Tech Stack
 
@@ -45,35 +45,15 @@ FastNext/
 └── README.md
 ```
 
-## Stage 1 Features ✅
+## Features
 
-### Authentication & Security
-- JWT-based authentication
-- Password hashing with bcrypt
-- CORS middleware configuration
-- Protected API routes
+### Core Framework
+- **Authentication & Security**: JWT-based authentication, password hashing, CORS middleware, protected routes
+- **Database & ORM**: PostgreSQL setup, SQLAlchemy ORM, Alembic migrations
+- **Frontend Foundation**: Next.js with TypeScript, Tailwind CSS, ShadcnUI components
+- **Testing & Quality**: Jest testing, Storybook documentation, code linting
 
-### Database & ORM
-- PostgreSQL database setup
-- SQLAlchemy ORM with models
-- Alembic database migrations
-- User model with CRUD operations
-
-### Frontend Setup
-- Next.js with TypeScript
-- Tailwind CSS integration
-- ShadcnUI component library
-- Responsive design foundation
-
-### Testing & Quality
-- Jest configuration for unit testing
-- Storybook for component documentation
-- Pylint for Python code quality
-- Biome for JavaScript/TypeScript linting
-
-## Stage 2 Features ✅
-
-### Custom App Builder Core
+### Visual App Builder
 - **Database Schema**: Complete data models for projects, pages, components, and instances
 - **Component Management API**: Full CRUD operations for all builder entities
 - **Drag-and-Drop Interface**: Visual builder with @dnd-kit integration
@@ -81,16 +61,14 @@ FastNext/
 - **Property Panel**: Dynamic form generation based on component schemas
 - **Real-time Canvas**: Live preview and editing of component layouts
 
-### Advanced Features
+### Advanced Capabilities
 - **Component Types**: Text, Button, Image, Layout containers, Form inputs
 - **Dynamic Properties**: Schema-driven property panels with validation
 - **Nested Components**: Support for container components with children
 - **Component Reordering**: Drag-and-drop reordering within containers
 - **Visual Feedback**: Selection highlighting, hover states, drag previews
 
-## Stage 2.5 Features ✅
-
-### User Roles & Permissions System
+### Enterprise Features
 - **Role-Based Access Control**: Complete RBAC implementation with roles and permissions
 - **System Roles**: Admin, Editor, Viewer, Member with predefined permissions
 - **Project Collaboration**: Multi-user project access with role-based permissions
@@ -98,6 +76,7 @@ FastNext/
 - **Permission Actions**: Create, Read, Update, Delete, Manage, Publish, Deploy
 - **Project Membership**: Invite users to projects with specific roles
 - **Security Middleware**: Route protection with permission checks
+- **Enterprise UI**: Professional navigation, breadcrumbs, role-based menus
 
 ## Getting Started
 
@@ -226,16 +205,7 @@ FastNext/
 - `DELETE /api/v1/project-members/members/{member_id}` - Remove project member
 - `GET /api/v1/project-members/user/projects` - Get user's accessible projects
 
-## Next Steps
-
-### Stage 3 (Upcoming)
-- **App Preview & Deployment**: Live preview generation and one-click deployment
-- **User Roles & Permissions**: Project ownership and collaboration features
-- **File Upload & Media Management**: Asset storage and media handling
-- **App Templates**: Pre-built templates and starter kits
-- **Analytics & Tracking**: Usage metrics and performance monitoring
-
-### How to Use the Builder
+## How to Use the Builder
 
 1. **Start the Backend**:
    ```bash
@@ -251,17 +221,29 @@ FastNext/
 
 3. **Access the Builder**:
    - Visit `http://localhost:3000` for the main page
-   - Click "🚀 Try Builder" to access the visual builder
+   - Navigate to `/builder` to access the visual builder
    - Drag components from the left panel to the canvas
    - Select components to edit their properties in the right panel
+   - Use the enterprise navigation for role-based access to different modules
 
-### Key Features Demonstrated
+### Key Capabilities
 
 - **Visual Interface**: Complete drag-and-drop builder with component library
 - **Dynamic Components**: Pre-built Text, Button, Image, Layout, and Form components
 - **Property Editing**: Dynamic forms generated from component schemas
 - **Nested Layouts**: Container components that can hold other components
 - **Real-time Updates**: Immediate visual feedback for all changes
+- **Enterprise Navigation**: Professional sidebar with breadcrumbs and role-based access
+- **User Management**: Complete RBAC system with project collaboration
+
+## Roadmap
+
+### Upcoming Features
+- **App Preview & Deployment**: Live preview generation and one-click deployment
+- **File Upload & Media Management**: Asset storage and media handling
+- **App Templates**: Pre-built templates and starter kits
+- **Analytics & Tracking**: Usage metrics and performance monitoring
+- **Advanced Components**: Charts, tables, and data visualization components
 
 ## License
 
