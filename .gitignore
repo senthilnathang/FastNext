@@ -5,7 +5,7 @@
 node_modules
 .env
 env
-.claude
-logs/
-*.log
+.claude/settings.local.json
+~logs/
+**/*.log
 
