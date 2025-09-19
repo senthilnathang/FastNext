@@ -299,9 +299,11 @@ export default function ActivityLogViewer({ showUserActivitiesOnly = false }: Ac
               <Badge variant="secondary">Action</Badge>
             </div>
             <div className="text-lg font-semibold text-gray-900 dark:text-white">
-              {Object.entries(stats.activities_by_action).reduce((a, b) => 
-                stats.activities_by_action[a[0]] > stats.activities_by_action[b[0]] ? a : b
-              )[0] || 'N/A'}
+              {Object.entries(stats.activities_by_action).length > 0 
+                ? Object.entries(stats.activities_by_action).reduce((a, b) => 
+                    a[1] > b[1] ? a : b
+                  )[0] 
+                : 'N/A'}
             </div>
           </Card>
           

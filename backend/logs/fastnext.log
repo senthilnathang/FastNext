@@ -413,3 +413,70 @@ WHERE project_members.user_id = %(user_id_2)s AND project_members.is_active = tr
 (Background on this error at: https://sqlalche.me/e/20/f405)
 2025-09-19 16:06:40,127 - security - CRITICAL - Security Event: POTENTIAL_ATTACK | User: None | IP: 127.0.0.1 | Endpoint: /api/v1/projects/
 2025-09-19 16:06:40,318 - watchfiles.main - INFO - 2 changes detected
+2025-09-19 16:07:41,814 - main - ERROR - Unexpected error on GET /api/v1/security/settings: 1 validation errors:
+  {'type': 'string_type', 'loc': ('response', 'created_at'), 'msg': 'Input should be a valid string', 'input': datetime.datetime(2025, 9, 19, 11, 37, 45, 20100, tzinfo=datetime.timezone.utc)}
+
+2025-09-19 16:07:42,234 - watchfiles.main - INFO - 1 change detected
+2025-09-19 16:07:42,585 - watchfiles.main - INFO - 1 change detected
+2025-09-19 16:07:51,645 - main - ERROR - Unexpected error on GET /api/v1/security/settings: 1 validation errors:
+  {'type': 'string_type', 'loc': ('response', 'created_at'), 'msg': 'Input should be a valid string', 'input': datetime.datetime(2025, 9, 19, 11, 37, 45, 20100, tzinfo=datetime.timezone.utc)}
+
+2025-09-19 16:07:51,976 - watchfiles.main - INFO - 1 change detected
+2025-09-19 16:11:48,695 - main - ERROR - Unexpected error on GET /api/v1/projects/: (psycopg2.errors.UndefinedFunction) could not identify an equality operator for type json
+LINE 2: ...ser_id, projects.is_public AS projects_is_public, projects.s...
+                                                             ^
+
+[SQL: SELECT anon_1.projects_id AS anon_1_projects_id, anon_1.projects_name AS anon_1_projects_name, anon_1.projects_description AS anon_1_projects_description, anon_1.projects_user_id AS anon_1_projects_user_id, anon_1.projects_is_public AS anon_1_projects_is_public, anon_1.projects_settings AS anon_1_projects_settings, anon_1.projects_created_at AS anon_1_projects_created_at, anon_1.projects_updated_at AS anon_1_projects_updated_at 
+FROM (SELECT projects.id AS projects_id, projects.name AS projects_name, projects.description AS projects_description, projects.user_id AS projects_user_id, projects.is_public AS projects_is_public, projects.settings AS projects_settings, projects.created_at AS projects_created_at, projects.updated_at AS projects_updated_at 
+FROM projects 
+WHERE projects.user_id = %(user_id_1)s UNION SELECT projects.id AS projects_id, projects.name AS projects_name, projects.description AS projects_description, projects.user_id AS projects_user_id, projects.is_public AS projects_is_public, projects.settings AS projects_settings, projects.created_at AS projects_created_at, projects.updated_at AS projects_updated_at 
+FROM projects JOIN project_members ON projects.id = project_members.project_id 
+WHERE project_members.user_id = %(user_id_2)s AND project_members.is_active = true) AS anon_1 
+ LIMIT %(param_1)s OFFSET %(param_2)s]
+[parameters: {'user_id_1': 2, 'user_id_2': 2, 'param_1': 100, 'param_2': 0}]
+(Background on this error at: https://sqlalche.me/e/20/f405)
+2025-09-19 16:11:48,695 - security - CRITICAL - Security Event: POTENTIAL_ATTACK | User: None | IP: 127.0.0.1 | Endpoint: /api/v1/projects/
+2025-09-19 16:11:48,713 - main - ERROR - Unexpected error on GET /api/v1/projects/: (psycopg2.errors.UndefinedFunction) could not identify an equality operator for type json
+LINE 2: ...ser_id, projects.is_public AS projects_is_public, projects.s...
+                                                             ^
+
+[SQL: SELECT anon_1.projects_id AS anon_1_projects_id, anon_1.projects_name AS anon_1_projects_name, anon_1.projects_description AS anon_1_projects_description, anon_1.projects_user_id AS anon_1_projects_user_id, anon_1.projects_is_public AS anon_1_projects_is_public, anon_1.projects_settings AS anon_1_projects_settings, anon_1.projects_created_at AS anon_1_projects_created_at, anon_1.projects_updated_at AS anon_1_projects_updated_at 
+FROM (SELECT projects.id AS projects_id, projects.name AS projects_name, projects.description AS projects_description, projects.user_id AS projects_user_id, projects.is_public AS projects_is_public, projects.settings AS projects_settings, projects.created_at AS projects_created_at, projects.updated_at AS projects_updated_at 
+FROM projects 
+WHERE projects.user_id = %(user_id_1)s UNION SELECT projects.id AS projects_id, projects.name AS projects_name, projects.description AS projects_description, projects.user_id AS projects_user_id, projects.is_public AS projects_is_public, projects.settings AS projects_settings, projects.created_at AS projects_created_at, projects.updated_at AS projects_updated_at 
+FROM projects JOIN project_members ON projects.id = project_members.project_id 
+WHERE project_members.user_id = %(user_id_2)s AND project_members.is_active = true) AS anon_1 
+ LIMIT %(param_1)s OFFSET %(param_2)s]
+[parameters: {'user_id_1': 2, 'user_id_2': 2, 'param_1': 100, 'param_2': 0}]
+(Background on this error at: https://sqlalche.me/e/20/f405)
+2025-09-19 16:11:48,714 - security - CRITICAL - Security Event: POTENTIAL_ATTACK | User: None | IP: 127.0.0.1 | Endpoint: /api/v1/projects/
+2025-09-19 16:11:48,811 - watchfiles.main - INFO - 2 changes detected
+2025-09-19 16:12:32,236 - main - ERROR - Unexpected error on GET /api/v1/projects/: (psycopg2.errors.UndefinedFunction) could not identify an equality operator for type json
+LINE 2: ...ser_id, projects.is_public AS projects_is_public, projects.s...
+                                                             ^
+
+[SQL: SELECT anon_1.projects_id AS anon_1_projects_id, anon_1.projects_name AS anon_1_projects_name, anon_1.projects_description AS anon_1_projects_description, anon_1.projects_user_id AS anon_1_projects_user_id, anon_1.projects_is_public AS anon_1_projects_is_public, anon_1.projects_settings AS anon_1_projects_settings, anon_1.projects_created_at AS anon_1_projects_created_at, anon_1.projects_updated_at AS anon_1_projects_updated_at 
+FROM (SELECT projects.id AS projects_id, projects.name AS projects_name, projects.description AS projects_description, projects.user_id AS projects_user_id, projects.is_public AS projects_is_public, projects.settings AS projects_settings, projects.created_at AS projects_created_at, projects.updated_at AS projects_updated_at 
+FROM projects 
+WHERE projects.user_id = %(user_id_1)s UNION SELECT projects.id AS projects_id, projects.name AS projects_name, projects.description AS projects_description, projects.user_id AS projects_user_id, projects.is_public AS projects_is_public, projects.settings AS projects_settings, projects.created_at AS projects_created_at, projects.updated_at AS projects_updated_at 
+FROM projects JOIN project_members ON projects.id = project_members.project_id 
+WHERE project_members.user_id = %(user_id_2)s AND project_members.is_active = true) AS anon_1 
+ LIMIT %(param_1)s OFFSET %(param_2)s]
+[parameters: {'user_id_1': 2, 'user_id_2': 2, 'param_1': 100, 'param_2': 0}]
+(Background on this error at: https://sqlalche.me/e/20/f405)
+2025-09-19 16:12:32,236 - security - CRITICAL - Security Event: POTENTIAL_ATTACK | User: None | IP: 127.0.0.1 | Endpoint: /api/v1/projects/
+2025-09-19 16:12:32,258 - main - ERROR - Unexpected error on GET /api/v1/projects/: (psycopg2.errors.UndefinedFunction) could not identify an equality operator for type json
+LINE 2: ...ser_id, projects.is_public AS projects_is_public, projects.s...
+                                                             ^
+
+[SQL: SELECT anon_1.projects_id AS anon_1_projects_id, anon_1.projects_name AS anon_1_projects_name, anon_1.projects_description AS anon_1_projects_description, anon_1.projects_user_id AS anon_1_projects_user_id, anon_1.projects_is_public AS anon_1_projects_is_public, anon_1.projects_settings AS anon_1_projects_settings, anon_1.projects_created_at AS anon_1_projects_created_at, anon_1.projects_updated_at AS anon_1_projects_updated_at 
+FROM (SELECT projects.id AS projects_id, projects.name AS projects_name, projects.description AS projects_description, projects.user_id AS projects_user_id, projects.is_public AS projects_is_public, projects.settings AS projects_settings, projects.created_at AS projects_created_at, projects.updated_at AS projects_updated_at 
+FROM projects 
+WHERE projects.user_id = %(user_id_1)s UNION SELECT projects.id AS projects_id, projects.name AS projects_name, projects.description AS projects_description, projects.user_id AS projects_user_id, projects.is_public AS projects_is_public, projects.settings AS projects_settings, projects.created_at AS projects_created_at, projects.updated_at AS projects_updated_at 
+FROM projects JOIN project_members ON projects.id = project_members.project_id 
+WHERE project_members.user_id = %(user_id_2)s AND project_members.is_active = true) AS anon_1 
+ LIMIT %(param_1)s OFFSET %(param_2)s]
+[parameters: {'user_id_1': 2, 'user_id_2': 2, 'param_1': 100, 'param_2': 0}]
+(Background on this error at: https://sqlalche.me/e/20/f405)
+2025-09-19 16:12:32,258 - security - CRITICAL - Security Event: POTENTIAL_ATTACK | User: None | IP: 127.0.0.1 | Endpoint: /api/v1/projects/
+2025-09-19 16:12:32,301 - watchfiles.main - INFO - 2 changes detected
