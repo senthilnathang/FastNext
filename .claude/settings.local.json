@@ -30,7 +30,9 @@
       "Bash(npm test:*)",
       "Bash(mv:*)",
       "Bash(npm run storybook:*)",
-      "Bash(pkill:*)"
+      "Bash(pkill:*)",
+      "Bash(npm outdated)",
+      "Bash(pytest:*)"
     ],
     "deny": []
   }
