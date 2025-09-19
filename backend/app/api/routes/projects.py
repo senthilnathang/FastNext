@@ -20,17 +20,13 @@ def read_projects(
     current_user: User = Depends(get_current_active_user),
 ) -> Any:
     # Get projects user owns or has access to
-    owned_projects = db.query(Project).filter(Project.user_id == current_user.id)
-    
-    # Get projects user is a member of
     from app.models.project_member import ProjectMember
-    member_projects = db.query(Project).join(ProjectMember).filter(
-        ProjectMember.user_id == current_user.id,
-        ProjectMember.is_active == True
-    )
     
-    # Combine and deduplicate
-    all_projects = owned_projects.union(member_projects).offset(skip).limit(limit).all()
+    # Use a single query with OR condition instead of UNION to avoid JSON equality issues
+    all_projects = db.query(Project).outerjoin(ProjectMember).filter(
+        (Project.user_id == current_user.id) |
+        ((ProjectMember.user_id == current_user.id) & (ProjectMember.is_active == True))
+    ).distinct().offset(skip).limit(limit).all()
     return all_projects
 
 

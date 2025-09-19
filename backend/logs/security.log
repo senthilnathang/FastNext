@@ -56,3 +56,9 @@
 2025-09-19 16:12:32,236 - SECURITY - CRITICAL - Security Event: POTENTIAL_ATTACK | User: None | IP: 127.0.0.1 | Endpoint: /api/v1/projects/
 2025-09-19 16:12:32,258 - SECURITY - CRITICAL - Security Event: POTENTIAL_ATTACK | User: None | IP: 127.0.0.1 | Endpoint: /api/v1/projects/
 2025-09-19 16:12:32,258 - SECURITY - CRITICAL - Security Event: POTENTIAL_ATTACK | User: None | IP: 127.0.0.1 | Endpoint: /api/v1/projects/
+2025-09-19 16:15:15,988 - SECURITY - CRITICAL - Security Event: POTENTIAL_ATTACK | User: None | IP: 127.0.0.1 | Endpoint: /api/v1/projects/
+2025-09-19 16:15:15,988 - SECURITY - CRITICAL - Security Event: POTENTIAL_ATTACK | User: None | IP: 127.0.0.1 | Endpoint: /api/v1/projects/
+2025-09-19 16:15:16,023 - SECURITY - CRITICAL - Security Event: POTENTIAL_ATTACK | User: None | IP: 127.0.0.1 | Endpoint: /api/v1/projects/
+2025-09-19 16:15:16,023 - SECURITY - CRITICAL - Security Event: POTENTIAL_ATTACK | User: None | IP: 127.0.0.1 | Endpoint: /api/v1/projects/
+2025-09-19 16:15:16,032 - SECURITY - CRITICAL - Security Event: POTENTIAL_ATTACK | User: None | IP: 127.0.0.1 | Endpoint: /api/v1/projects/
+2025-09-19 16:15:16,032 - SECURITY - CRITICAL - Security Event: POTENTIAL_ATTACK | User: None | IP: 127.0.0.1 | Endpoint: /api/v1/projects/
