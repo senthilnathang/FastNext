@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { ColumnDef } from "@tanstack/react-table"
-import { Plus } from "lucide-react"
+import { Plus, Loader2 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { DataTable, ActionColumn } from "@/components/ui/data-table"
@@ -26,165 +26,170 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 
-interface User {
-  id: string
-  email: string
-  username: string
-  firstName: string
-  lastName: string
-  isActive: boolean
-  roles: string[]
-  createdAt: string
-  lastLogin: string | null
-}
+// Import React Query hooks
+import { useUsers, useCreateUser, useUpdateUser, useDeleteUser, useToggleUserStatus } from "@/hooks/useUsers"
+import { useRoles } from "@/hooks/useRoles"
+import { apiUtils } from "@/lib/api/client"
+import type { User } from "@/lib/api/users"
 
-const columns: ColumnDef<User>[] = [
-  {
-    accessorKey: "username",
-    header: "Username",
-  },
-  {
-    accessorKey: "email",
-    header: "Email",
-  },
-  {
-    accessorKey: "firstName",
-    header: "First Name",
-  },
-  {
-    accessorKey: "lastName",
-    header: "Last Name",
-  },
-  {
-    accessorKey: "roles",
-    header: "Roles",
-    cell: ({ row }) => {
-      const roles = row.getValue("roles") as string[]
-      return (
-        <div className="flex gap-1 flex-wrap">
-          {roles.map((role) => (
-            <Badge key={role} variant="secondary" className="text-xs">
-              {role}
-            </Badge>
-          ))}
-        </div>
-      )
-    },
-  },
-  {
-    accessorKey: "isActive",
-    header: "Status",
-    cell: ({ row }) => {
-      const isActive = row.getValue("isActive") as boolean
-      return (
-        <Badge variant={isActive ? "success" : "destructive"}>
-          {isActive ? "Active" : "Inactive"}
-        </Badge>
-      )
-    },
-  },
-  {
-    accessorKey: "lastLogin",
-    header: "Last Login",
-    cell: ({ row }) => {
-      const lastLogin = row.getValue("lastLogin") as string | null
-      return (
-        <span className="text-sm text-gray-500">
-          {lastLogin ? new Date(lastLogin).toLocaleDateString() : "Never"}
-        </span>
-      )
-    },
-  },
-  {
-    id: "actions",
-    header: "Actions",
-    cell: ({ row }) => (
-      <ActionColumn 
-        row={row.original} 
-        onAction={handleRowAction}
-        actions={["edit", "delete", "toggle-status"]}
-      />
-    ),
-  },
-]
+// Define action handler type
+type UserAction = "edit" | "delete" | "toggle-status" | "reset-password"
 
-function handleRowAction(user: User, action: string) {
-  switch (action) {
-    case "edit":
-      console.log("Edit user:", user)
-      break
-    case "delete":
-      console.log("Delete user:", user)
-      break
-    case "toggle-status":
-      console.log("Toggle status for user:", user)
-      break
-  }
-}
+interface UsersPageProps {}
 
-export default function UsersPage() {
-  const [users, setUsers] = React.useState<User[]>([
-    {
-      id: "1",
-      email: "admin@example.com",
-      username: "admin",
-      firstName: "Admin",
-      lastName: "User",
-      isActive: true,
-      roles: ["admin"],
-      createdAt: "2024-01-01T00:00:00Z",
-      lastLogin: "2024-01-15T10:30:00Z",
-    },
-    {
-      id: "2",
-      email: "editor@example.com",
-      username: "editor",
-      firstName: "Editor",
-      lastName: "User",
-      isActive: true,
-      roles: ["editor"],
-      createdAt: "2024-01-02T00:00:00Z",
-      lastLogin: "2024-01-14T14:20:00Z",
-    },
-    {
-      id: "3",
-      email: "viewer@example.com",
-      username: "viewer",
-      firstName: "Viewer",
-      lastName: "User",
-      isActive: false,
-      roles: ["viewer"],
-      createdAt: "2024-01-03T00:00:00Z",
-      lastLogin: null,
-    },
-  ])
-
+const UsersPage: React.FC<UsersPageProps> = () => {
+  // State
   const [isCreateDialogOpen, setIsCreateDialogOpen] = React.useState(false)
   const [newUser, setNewUser] = React.useState({
     email: "",
     username: "",
-    firstName: "",
-    lastName: "",
-    role: "",
+    full_name: "",
+    password: "",
+    roles: [] as string[],
   })
 
-  const handleCreateUser = () => {
-    const user: User = {
-      id: Math.random().toString(36).substr(2, 9),
+  // Queries
+  const { data: usersData, isLoading: usersLoading, error: usersError } = useUsers()
+  const { data: rolesData, isLoading: rolesLoading } = useRoles({ active_only: true })
+
+  // Mutations
+  const createUserMutation = useCreateUser()
+  const updateUserMutation = useUpdateUser()
+  const deleteUserMutation = useDeleteUser()
+  const toggleStatusMutation = useToggleUserStatus()
+
+  // Action handler
+  const handleRowAction = React.useCallback((user: User, action: UserAction) => {
+    switch (action) {
+      case "edit":
+        // TODO: Open edit dialog
+        console.log("Edit user:", user)
+        break
+      case "delete":
+        if (window.confirm(`Are you sure you want to delete user "${user.username}"?`)) {
+          deleteUserMutation.mutate(user.id)
+        }
+        break
+      case "toggle-status":
+        toggleStatusMutation.mutate(user.id)
+        break
+      case "reset-password":
+        // TODO: Implement password reset
+        console.log("Reset password for user:", user)
+        break
+    }
+  }, [deleteUserMutation, toggleStatusMutation])
+
+  // Table columns
+  const columns: ColumnDef<User>[] = React.useMemo(() => [
+    {
+      accessorKey: "username",
+      header: "Username",
+    },
+    {
+      accessorKey: "email", 
+      header: "Email",
+    },
+    {
+      accessorKey: "full_name",
+      header: "Full Name",
+      cell: ({ row }) => row.getValue("full_name") || "-",
+    },
+    {
+      accessorKey: "roles",
+      header: "Roles",
+      cell: ({ row }) => {
+        const roles = row.getValue("roles") as string[] || []
+        return (
+          <div className="flex gap-1 flex-wrap">
+            {roles.map((role) => (
+              <Badge key={role} variant="secondary" className="text-xs">
+                {role}
+              </Badge>
+            ))}
+          </div>
+        )
+      },
+    },
+    {
+      accessorKey: "is_active",
+      header: "Status",
+      cell: ({ row }) => {
+        const isActive = row.getValue("is_active") as boolean
+        return (
+          <Badge variant={isActive ? "default" : "destructive"}>
+            {isActive ? "Active" : "Inactive"}
+          </Badge>
+        )
+      },
+    },
+    {
+      accessorKey: "last_login_at",
+      header: "Last Login",
+      cell: ({ row }) => {
+        const lastLogin = row.getValue("last_login_at") as string | null
+        return (
+          <span className="text-sm text-gray-500">
+            {lastLogin ? new Date(lastLogin).toLocaleDateString() : "Never"}
+          </span>
+        )
+      },
+    },
+    {
+      id: "actions",
+      header: "Actions",
+      cell: ({ row }) => (
+        <ActionColumn 
+          row={row.original} 
+          onAction={handleRowAction}
+          actions={["edit", "delete", "toggle-status", "reset-password"]}
+        />
+      ),
+    },
+  ], [handleRowAction])
+
+  // Handle create user
+  const handleCreateUser = React.useCallback(() => {
+    if (!newUser.email || !newUser.username || !newUser.password) {
+      alert("Please fill in all required fields")
+      return
+    }
+
+    createUserMutation.mutate({
       email: newUser.email,
       username: newUser.username,
-      firstName: newUser.firstName,
-      lastName: newUser.lastName,
-      isActive: true,
-      roles: [newUser.role],
-      createdAt: new Date().toISOString(),
-      lastLogin: null,
-    }
-    
-    setUsers([...users, user])
-    setNewUser({ email: "", username: "", firstName: "", lastName: "", role: "" })
-    setIsCreateDialogOpen(false)
+      full_name: newUser.full_name || undefined,
+      password: newUser.password,
+      roles: newUser.roles,
+    }, {
+      onSuccess: () => {
+        setNewUser({ email: "", username: "", full_name: "", password: "", roles: [] })
+        setIsCreateDialogOpen(false)
+      },
+      onError: (error) => {
+        alert(`Failed to create user: ${apiUtils.getErrorMessage(error)}`)
+      }
+    })
+  }, [newUser, createUserMutation])
+
+  // Loading states
+  const isLoading = usersLoading || rolesLoading
+  const isCreating = createUserMutation.isPending
+
+  // Handle errors
+  if (usersError) {
+    return (
+      <div className="space-y-6">
+        <div className="text-center py-12">
+          <h2 className="text-xl font-semibold text-red-600 mb-2">Failed to load users</h2>
+          <p className="text-gray-600">{apiUtils.getErrorMessage(usersError)}</p>
+        </div>
+      </div>
+    )
   }
+
+  const users = usersData?.items || []
+  const roles = rolesData?.items || []
 
   return (
     <div className="space-y-6">
@@ -198,7 +203,7 @@ export default function UsersPage() {
 
         <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
           <DialogTrigger asChild>
-            <Button>
+            <Button disabled={isLoading}>
               <Plus className="mr-2 h-4 w-4" />
               Add User
             </Button>
@@ -212,73 +217,96 @@ export default function UsersPage() {
             </DialogHeader>
             <div className="grid gap-4 py-4">
               <div className="grid gap-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email">Email *</Label>
                 <Input
                   id="email"
                   type="email"
                   placeholder="user@example.com"
                   value={newUser.email}
                   onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
+                  disabled={isCreating}
                 />
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="username">Username</Label>
+                <Label htmlFor="username">Username *</Label>
                 <Input
                   id="username"
                   placeholder="username"
                   value={newUser.username}
                   onChange={(e) => setNewUser({ ...newUser, username: e.target.value })}
+                  disabled={isCreating}
                 />
               </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="grid gap-2">
-                  <Label htmlFor="firstName">First Name</Label>
-                  <Input
-                    id="firstName"
-                    placeholder="John"
-                    value={newUser.firstName}
-                    onChange={(e) => setNewUser({ ...newUser, firstName: e.target.value })}
-                  />
-                </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="lastName">Last Name</Label>
-                  <Input
-                    id="lastName"
-                    placeholder="Doe"
-                    value={newUser.lastName}
-                    onChange={(e) => setNewUser({ ...newUser, lastName: e.target.value })}
-                  />
-                </div>
+              <div className="grid gap-2">
+                <Label htmlFor="full_name">Full Name</Label>
+                <Input
+                  id="full_name"
+                  placeholder="John Doe"
+                  value={newUser.full_name}
+                  onChange={(e) => setNewUser({ ...newUser, full_name: e.target.value })}
+                  disabled={isCreating}
+                />
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="role">Role</Label>
-                <Select value={newUser.role} onValueChange={(value) => setNewUser({ ...newUser, role: value })}>
+                <Label htmlFor="password">Password *</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  placeholder="••••••••"
+                  value={newUser.password}
+                  onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
+                  disabled={isCreating}
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="roles">Roles</Label>
+                <Select 
+                  disabled={isCreating || rolesLoading}
+                  onValueChange={(value) => {
+                    setNewUser({ ...newUser, roles: value ? [value] : [] })
+                  }}
+                >
                   <SelectTrigger>
                     <SelectValue placeholder="Select a role" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="admin">Admin</SelectItem>
-                    <SelectItem value="editor">Editor</SelectItem>
-                    <SelectItem value="viewer">Viewer</SelectItem>
-                    <SelectItem value="member">Member</SelectItem>
+                    {roles.map((role) => (
+                      <SelectItem key={role.id} value={role.name}>
+                        {role.name} - {role.description}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
             </div>
             <DialogFooter>
-              <Button type="submit" onClick={handleCreateUser}>
-                Create User
+              <Button 
+                type="submit" 
+                onClick={handleCreateUser}
+                disabled={isCreating}
+              >
+                {isCreating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {isCreating ? 'Creating...' : 'Create User'}
               </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
       </div>
 
-      <DataTable 
-        columns={columns} 
-        data={users} 
-        searchKey="username"
-      />
+      {isLoading ? (
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="h-8 w-8 animate-spin" />
+          <span className="ml-2">Loading users...</span>
+        </div>
+      ) : (
+        <DataTable 
+          columns={columns} 
+          data={users} 
+          searchKey="username"
+        />
+      )}
     </div>
   )
 }
+
+export default UsersPage

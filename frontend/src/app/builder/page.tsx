@@ -2,7 +2,6 @@
 
 import React from 'react'
 import UIBuilder from '@/components/builder/UIBuilder'
-import QueryProvider from '@/components/providers/QueryProvider'
 
 export default function BuilderPage() {
   // For demo purposes, using hardcoded IDs
@@ -11,10 +10,8 @@ export default function BuilderPage() {
   const pageId = 1
 
   return (
-    <QueryProvider>
-      <div className="h-screen">
-        <UIBuilder projectId={projectId} pageId={pageId} />
-      </div>
-    </QueryProvider>
+    <div className="h-screen">
+      <UIBuilder projectId={projectId} pageId={pageId} />
+    </div>
   )
 }

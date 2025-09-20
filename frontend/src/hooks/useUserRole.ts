@@ -8,17 +8,28 @@ export const useUserRole = () => {
   const user = context?.user || null
   
   const hasPermission = (permission: string): boolean => {
-    if (!user?.roles) return false
-    return user.roles.includes(permission) || user.roles.includes('admin') || user.roles.includes('*')
+    if (!user) return false
+    
+    // Check if user is superuser/admin (full access)
+    if (user.roles?.includes('admin') || user.is_superuser) return true
+    
+    // Check specific permissions
+    if (user.permissions?.includes(permission)) return true
+    
+    // Check role-based permissions
+    if (user.roles?.includes(permission)) return true
+    
+    return false
   }
 
   const hasAnyPermission = (permissions: string[]): boolean => {
-    if (!user?.roles) return false
+    if (!user) return false
     return permissions.some(permission => hasPermission(permission))
   }
 
   const isAdmin = (): boolean => {
-    return user?.roles?.includes('admin') || hasPermission('admin.*')
+    if (!user) return false
+    return user.roles?.includes('admin') || user.is_superuser || hasPermission('system_manage')
   }
 
   const canAccessModule = (module: string): boolean => {
@@ -27,17 +38,18 @@ export const useUserRole = () => {
     // If user is admin, allow access to all modules
     if (isAdmin()) return true
     
+    // Check module-specific permissions
     const modulePermissions = {
       'compliance': ['compliance.*', 'compliance.read'],
       'ai-management': ['ai.*', 'ai.read'],
       'operations': ['operations.*', 'operations.read'],
-      'administration': ['admin.*', 'admin.read'],
+      'administration': ['admin.*', 'admin.read', 'admin.users', 'admin.roles', 'admin.permissions', 'user_manage', 'system_manage'],
       'builder': ['builder.*', 'builder.read'],
-      'projects': ['projects.*', 'projects.read']
+      'projects': ['projects.*', 'projects.read', 'project_manage']
     }
 
     const permissions = modulePermissions[module as keyof typeof modulePermissions] || []
-    return hasAnyPermission(permissions) || true // Allow access for now since we don't have full RBAC data
+    return hasAnyPermission(permissions)
   }
 
   return {

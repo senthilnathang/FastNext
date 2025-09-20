@@ -21,6 +21,8 @@ from app.core.exceptions import (
 )
 from app.core.logging import log_security_event, get_client_ip, get_logger
 from app.models.user import User
+from app.models.role import Role
+from app.models.user_role import UserRole, RolePermission
 from app.schemas.user import UserCreate, UserResponse, UserUpdate
 from app.schemas.token import Token
 from app.services.user_service import UserService
@@ -112,18 +114,55 @@ def verify_refresh_token(refresh_token: str) -> Optional[int]:
     except JWTError:
         return None
 
-def create_token_pair(user: User) -> Dict[str, Any]:
+def create_token_pair(user: User, db: Session = None) -> Dict[str, Any]:
     """Create access and refresh token pair"""
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     
-    # Create access token with user roles
-    user_roles = [role.name for role in user.roles] if hasattr(user, 'roles') and user.roles else ["user"]
+    # Get user roles and permissions if database session is provided
+    user_roles = []
+    user_permissions = []
+    
+    if db:
+        # Get user with roles using joinedload
+        user_with_roles = db.query(User).options(
+            joinedload(User.user_roles).joinedload(UserRole.role).joinedload(Role.role_permissions).joinedload(RolePermission.permission)
+        ).filter(User.id == user.id).first()
+        
+        if user_with_roles and user_with_roles.user_roles:
+            for user_role in user_with_roles.user_roles:
+                if user_role.is_active and user_role.role:
+                    user_roles.append(user_role.role.name)
+                    
+                    # Collect permissions from this role
+                    if user_role.role.role_permissions:
+                        for role_permission in user_role.role.role_permissions:
+                            if role_permission.permission:
+                                user_permissions.append(role_permission.permission.name)
+        
+        # Remove duplicates
+        user_roles = list(set(user_roles))
+        user_permissions = list(set(user_permissions))
+    
+    # If user is superuser, add admin role and permissions
+    if user.is_superuser:
+        if 'admin' not in user_roles:
+            user_roles.append('admin')
+        admin_permissions = [
+            'system_manage', 'user_manage', 'project_manage',
+            'admin.users', 'admin.roles', 'admin.permissions'
+        ]
+        user_permissions.extend([p for p in admin_permissions if p not in user_permissions])
+    
+    # Fallback to default user role if no roles found
+    if not user_roles:
+        user_roles = ["user"]
     
     access_token = create_access_token(
         data={
             "sub": str(user.id),
             "username": user.username,
-            "roles": user_roles
+            "roles": user_roles,
+            "permissions": user_permissions
         },
         expires_delta=access_token_expires
     )
@@ -362,6 +401,7 @@ async def register_user(
 async def login_for_access_token(
     form_data: UserLogin, 
     request: Request,
+    db: Session = Depends(get_db),
     user_service: UserService = Depends(get_user_service)
 ) -> Token:
     """
@@ -406,7 +446,7 @@ async def login_for_access_token(
             )
         
         # Create token pair
-        token_data = create_token_pair(user)
+        token_data = create_token_pair(user, db)
         
         # Log successful login
         log_security_event(
@@ -497,7 +537,7 @@ async def refresh_access_token(
         )
     
     # Create new token pair (token rotation)
-    token_data = create_token_pair(user)
+    token_data = create_token_pair(user, db)
     
     # Log token refresh
     client_ip = get_client_ip(request)
@@ -529,9 +569,46 @@ async def logout(
 
 @router.get("/me", response_model=UserResponse)
 async def read_users_me(
-    current_user: User = Depends(get_current_active_user)
+    current_user: User = Depends(get_current_active_user),
+    db: Session = Depends(get_db)
 ) -> UserResponse:
-    """Get current user information"""
+    """Get current user information with roles and permissions"""
+    
+    # Get user with roles using joinedload
+    user_with_roles = db.query(User).options(
+        joinedload(User.user_roles).joinedload(UserRole.role).joinedload(Role.role_permissions).joinedload(RolePermission.permission)
+    ).filter(User.id == current_user.id).first()
+    
+    # Collect user roles
+    user_roles = []
+    user_permissions = []
+    
+    if user_with_roles and user_with_roles.user_roles:
+        for user_role in user_with_roles.user_roles:
+            if user_role.is_active and user_role.role:
+                user_roles.append(user_role.role.name)
+                
+                # Collect permissions from this role
+                if user_role.role.role_permissions:
+                    for role_permission in user_role.role.role_permissions:
+                        if role_permission.permission:
+                            user_permissions.append(role_permission.permission.name)
+    
+    # Remove duplicates
+    user_roles = list(set(user_roles))
+    user_permissions = list(set(user_permissions))
+    
+    # If user is superuser, add admin role and all permissions
+    if current_user.is_superuser:
+        if 'admin' not in user_roles:
+            user_roles.append('admin')
+        # Add key admin permissions
+        admin_permissions = [
+            'system_manage', 'user_manage', 'project_manage',
+            'admin.users', 'admin.roles', 'admin.permissions'
+        ]
+        user_permissions.extend([p for p in admin_permissions if p not in user_permissions])
+    
     return UserResponse(
         id=current_user.id,
         email=current_user.email,
@@ -539,12 +616,56 @@ async def read_users_me(
         full_name=current_user.full_name,
         is_active=current_user.is_active,
         is_verified=current_user.is_verified,
-        created_at=current_user.created_at
+        is_superuser=current_user.is_superuser,
+        created_at=current_user.created_at,
+        last_login_at=current_user.last_login_at,
+        bio=current_user.bio,
+        location=current_user.location,
+        website=current_user.website,
+        avatar_url=current_user.avatar_url,
+        roles=user_roles,
+        permissions=user_permissions
     )
 
 @router.post("/test-token", response_model=UserResponse)
-def test_token(current_user: User = Depends(get_current_user)) -> UserResponse:
+def test_token(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)) -> UserResponse:
     """Test endpoint to verify token validity"""
+    
+    # Get user with roles using joinedload
+    user_with_roles = db.query(User).options(
+        joinedload(User.user_roles).joinedload(UserRole.role).joinedload(Role.role_permissions).joinedload(RolePermission.permission)
+    ).filter(User.id == current_user.id).first()
+    
+    # Collect user roles
+    user_roles = []
+    user_permissions = []
+    
+    if user_with_roles and user_with_roles.user_roles:
+        for user_role in user_with_roles.user_roles:
+            if user_role.is_active and user_role.role:
+                user_roles.append(user_role.role.name)
+                
+                # Collect permissions from this role
+                if user_role.role.role_permissions:
+                    for role_permission in user_role.role.role_permissions:
+                        if role_permission.permission:
+                            user_permissions.append(role_permission.permission.name)
+    
+    # Remove duplicates
+    user_roles = list(set(user_roles))
+    user_permissions = list(set(user_permissions))
+    
+    # If user is superuser, add admin role and all permissions
+    if current_user.is_superuser:
+        if 'admin' not in user_roles:
+            user_roles.append('admin')
+        # Add key admin permissions
+        admin_permissions = [
+            'system_manage', 'user_manage', 'project_manage',
+            'admin.users', 'admin.roles', 'admin.permissions'
+        ]
+        user_permissions.extend([p for p in admin_permissions if p not in user_permissions])
+    
     return UserResponse(
         id=current_user.id,
         email=current_user.email,
@@ -552,7 +673,15 @@ def test_token(current_user: User = Depends(get_current_user)) -> UserResponse:
         full_name=current_user.full_name,
         is_active=current_user.is_active,
         is_verified=current_user.is_verified,
-        created_at=current_user.created_at
+        is_superuser=current_user.is_superuser,
+        created_at=current_user.created_at,
+        last_login_at=current_user.last_login_at,
+        bio=current_user.bio,
+        location=current_user.location,
+        website=current_user.website,
+        avatar_url=current_user.avatar_url,
+        roles=user_roles,
+        permissions=user_permissions
     )
 
 # Export authentication dependencies for use in other routes

@@ -39,12 +39,6 @@ export const menuItems: MenuItem[] = [
     module: 'projects',
   },
   {
-    title: 'Builder',
-    href: '/builder',
-    icon: Layers,
-    module: 'builder',
-  },
-  {
     title: 'Compliance',
     icon: CheckCircle,
     module: 'compliance',
@@ -121,30 +115,9 @@ export const menuItems: MenuItem[] = [
   },
   {
     title: 'Settings',
+    href: '/settings',
     icon: Settings,
-    children: [
-      {
-        title: 'Profile',
-        href: '/settings',
-       icon: Users,
-      },
-      {
-       title: 'Security',
-       href: '/settings?tab=security',
-        icon: Shield,
-      },
-      {
-       title: 'Password',
-        href: '/settings?tab=password',
-        icon: Key,
-      },
-      {
-        title: 'Activity',
-        href: '/settings?tab=activity',
-        icon: Activity,
-      },
-	],
-  },
+   },
   {
     title: 'Administration',
     icon: Shield,

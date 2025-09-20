@@ -63,6 +63,7 @@ class UserUpdate(BaseModel):
 class UserResponse(UserBase):
     id: int
     is_verified: bool
+    is_superuser: Optional[bool] = False
     failed_login_attempts: Optional[int] = 0
     last_login_at: Optional[datetime] = None
     created_at: datetime
@@ -71,6 +72,8 @@ class UserResponse(UserBase):
     location: Optional[str] = None
     website: Optional[str] = None
     avatar_url: Optional[str] = None
+    roles: Optional[List[str]] = []
+    permissions: Optional[List[str]] = []
     
     class Config:
         from_attributes = True

@@ -12,6 +12,7 @@ interface User {
   full_name?: string;
   is_active: boolean;
   is_verified: boolean;
+  is_superuser?: boolean;
   avatar_url?: string;
   bio?: string;
   location?: string;
@@ -19,6 +20,7 @@ interface User {
   created_at: string;
   last_login_at?: string;
   roles?: string[];
+  permissions?: string[];
 }
 
 interface AuthContextType {
