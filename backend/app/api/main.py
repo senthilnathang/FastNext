@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 from app.api.routes import (
     auth, auth_routes, users, projects, pages, components, roles, permissions, project_members,
-    profile, security, activity_logs, audit_trails
+    profile, security, activity_logs, audit_trails, assets, user_roles
 )
 
 api_router = APIRouter()
@@ -17,3 +17,5 @@ api_router.include_router(components.router, prefix="/components", tags=["compon
 api_router.include_router(roles.router, prefix="/roles", tags=["roles"])
 api_router.include_router(permissions.router, prefix="/permissions", tags=["permissions"])
 api_router.include_router(project_members.router, prefix="/project-members", tags=["project-members"])
+api_router.include_router(assets.router, prefix="/assets", tags=["assets"])
+api_router.include_router(user_roles.router, prefix="/user-roles", tags=["user-roles"])

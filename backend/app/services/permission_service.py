@@ -11,7 +11,7 @@ from app.models.project import Project
 
 
 class PermissionService:
-    """Service for managing user permissions and role-based access control"""
+    """Enhanced service for managing user permissions and role-based access control with generic CRUD operations"""
     
     @staticmethod
     def get_user_permissions(db: Session, user_id: int) -> List[Permission]:
@@ -210,3 +210,101 @@ class PermissionService:
         db.refresh(member)
         
         return member
+    
+    @staticmethod
+    def check_resource_permission(
+        db: Session,
+        user_id: int,
+        action: str,
+        resource_type: str,
+        resource_id: Optional[int] = None,
+        project_id: Optional[int] = None
+    ) -> bool:
+        """Generic permission check for any resource type with optional project context"""
+        # Superusers have all permissions
+        user = db.query(User).filter(User.id == user_id).first()
+        if user and user.is_superuser:
+            return True
+        
+        # For project-scoped resources, check project permissions first
+        if project_id:
+            if not PermissionService.check_project_permission(db, user_id, project_id, action):
+                return False
+        
+        # Get user permissions
+        permissions = PermissionService.get_user_permissions(db, user_id)
+        
+        # Check for specific resource permission
+        for permission in permissions:
+            # Check exact match
+            if (permission.action == action and 
+                permission.category == resource_type):
+                return True
+            
+            # Check for manage permission (implies all actions)
+            if (permission.action == "manage" and 
+                permission.category == resource_type):
+                return True
+            
+            # Check for system-wide permissions
+            if (permission.action == action and 
+                permission.category == "system"):
+                return True
+        
+        return False
+    
+    @staticmethod
+    def get_allowed_actions(
+        db: Session,
+        user_id: int,
+        resource_type: str,
+        project_id: Optional[int] = None
+    ) -> List[str]:
+        """Get list of allowed actions for a user on a specific resource type"""
+        # Superusers have all permissions
+        user = db.query(User).filter(User.id == user_id).first()
+        if user and user.is_superuser:
+            return ["create", "read", "update", "delete", "manage"]
+        
+        permissions = PermissionService.get_user_permissions(db, user_id)
+        allowed_actions = set()
+        
+        for permission in permissions:
+            if permission.category == resource_type:
+                if permission.action == "manage":
+                    allowed_actions.update(["create", "read", "update", "delete", "manage"])
+                else:
+                    allowed_actions.add(permission.action)
+        
+        return list(allowed_actions)
+    
+    @staticmethod
+    def create_generic_permissions(db: Session) -> None:
+        """Create standard CRUD permissions for all resource types"""
+        resource_types = [
+            "user", "role", "permission", "project", "page", "component", 
+            "asset", "activity_log", "audit_trail", "project_member", "system"
+        ]
+        
+        actions = ["create", "read", "update", "delete", "manage"]
+        
+        for resource_type in resource_types:
+            for action in actions:
+                permission_name = f"{resource_type}:{action}"
+                
+                # Check if permission already exists
+                existing = db.query(Permission).filter(
+                    Permission.name == permission_name
+                ).first()
+                
+                if not existing:
+                    permission = Permission(
+                        name=permission_name,
+                        description=f"{action.title()} {resource_type} resources",
+                        category=resource_type,
+                        action=action,
+                        is_system_permission=True
+                    )
+                    db.add(permission)
+        
+        db.commit()
