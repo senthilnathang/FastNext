@@ -6,6 +6,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
 import { Menu, Bell } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import WindowControls from '@/components/ui/window-controls';
 import Sidebar from './Sidebar';
 import { getPageTitle } from './menuUtils';
 
@@ -66,6 +67,11 @@ export default function AppLayout({ children }: AppLayoutProps) {
               <Button variant="ghost" size="sm">
                 <Bell className="h-4 w-4" />
               </Button>
+              
+              <WindowControls 
+                variant="compact"
+                className="ml-2"
+              />
             </div>
           </div>
         </header>

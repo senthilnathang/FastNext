@@ -11,7 +11,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { ThemeToggle, SimpleThemeToggle } from '@/components/ui/theme-toggle'
+import { ThemeToggle } from '@/components/ui/theme-toggle'
+import WindowControls from '@/components/ui/window-controls'
 import Breadcrumb from './Breadcrumb'
 import QuickActionButton from '../quick-actions/QuickActionButton'
 import { useAuth } from '../../contexts/AuthContext'
@@ -59,6 +60,11 @@ export default function Header() {
           <div className="flex items-center gap-2">
             <ThemeToggle />
           </div>
+
+          <WindowControls 
+            variant="compact"
+            className="ml-2"
+          />
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>

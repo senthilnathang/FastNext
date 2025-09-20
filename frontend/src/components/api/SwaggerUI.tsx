@@ -1,0 +1,220 @@
+"use client"
+
+import React, { useEffect, useState } from 'react'
+import dynamic from 'next/dynamic'
+import { useAuth } from '@/contexts/AuthContext'
+import { Card } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { RefreshCw, Server, Shield, AlertCircle } from 'lucide-react'
+import { cn } from '@/lib/utils'
+
+// Dynamically import SwaggerUI to avoid SSR issues
+const SwaggerUIBundle = dynamic(() => import('swagger-ui-react'), {
+  ssr: false,
+  loading: () => (
+    <div className="flex items-center justify-center h-96">
+      <div className="text-center">
+        <RefreshCw className="w-8 h-8 animate-spin mx-auto mb-2 text-muted-foreground" />
+        <p className="text-sm text-muted-foreground">Loading API Documentation...</p>
+      </div>
+    </div>
+  ),
+})
+
+interface SwaggerUIProps {
+  className?: string
+  apiUrl?: string
+  showToolbar?: boolean
+}
+
+export function SwaggerUI({ 
+  className,
+  apiUrl = 'http://localhost:8000/api/v1/openapi.json',
+  showToolbar = true
+}: SwaggerUIProps) {
+  const { user } = useAuth()
+  const [isConnected, setIsConnected] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  
+  // Get token from localStorage
+  const getToken = () => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('access_token')
+    }
+    return null
+  }
+
+  const checkAPIConnection = async () => {
+    try {
+      setIsLoading(true)
+      setError(null)
+      
+      const response = await fetch('http://localhost:8000/health')
+      if (response.ok) {
+        setIsConnected(true)
+      } else {
+        setIsConnected(false)
+        setError('API server is not responding correctly')
+      }
+    } catch {
+      setIsConnected(false)
+      setError('Cannot connect to API server. Please ensure the backend is running on http://localhost:8000')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    checkAPIConnection()
+  }, [])
+
+  // SwaggerUI configuration
+  const swaggerConfig = {
+    url: apiUrl,
+    deepLinking: true,
+    showExtensions: true,
+    showCommonExtensions: true,
+    displayOperationId: false,
+    tryItOutEnabled: true,
+    requestInterceptor: (request: any) => {
+      // Add authorization header if user is logged in
+      const token = getToken()
+      if (token) {
+        request.headers = request.headers || {}
+        request.headers.Authorization = `Bearer ${token}`
+      }
+      return request
+    },
+    responseInterceptor: (response: any) => {
+      // Handle authentication errors
+      if (response.status === 401) {
+        console.warn('Authentication required for this endpoint')
+      }
+      return response
+    },
+    onComplete: () => {
+      console.log('SwaggerUI loaded successfully')
+    },
+    onFailure: (error: any) => {
+      console.error('SwaggerUI failed to load:', error)
+      setError('Failed to load API documentation')
+    }
+  }
+
+  return (
+    <div className={cn('w-full', className)}>
+      {showToolbar && (
+        <Card className="mb-4 p-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-2">
+                <Server className={cn(
+                  'w-4 h-4',
+                  isConnected ? 'text-green-500' : 'text-red-500'
+                )} />
+                <span className="text-sm font-medium">
+                  API Status: 
+                  <span className={cn(
+                    'ml-1',
+                    isConnected ? 'text-green-600' : 'text-red-600'
+                  )}>
+                    {isLoading ? 'Checking...' : isConnected ? 'Connected' : 'Disconnected'}
+                  </span>
+                </span>
+              </div>
+              
+              {user && (
+                <div className="flex items-center space-x-2">
+                  <Shield className="w-4 h-4 text-blue-500" />
+                  <span className="text-sm text-muted-foreground">
+                    Authenticated as: {user.username}
+                  </span>
+                </div>
+              )}
+            </div>
+            
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={checkAPIConnection}
+              disabled={isLoading}
+            >
+              <RefreshCw className={cn('w-4 h-4 mr-2', isLoading && 'animate-spin')} />
+              Refresh
+            </Button>
+          </div>
+          
+          {error && (
+            <div className="mt-3 p-3 bg-destructive/10 border border-destructive/20 rounded-lg">
+              <div className="flex items-center space-x-2">
+                <AlertCircle className="w-4 h-4 text-destructive" />
+                <span className="text-sm text-destructive">{error}</span>
+              </div>
+            </div>
+          )}
+        </Card>
+      )}
+
+      <Card className="overflow-hidden">
+        <div className="bg-background">
+          {!error && isConnected ? (
+            <SwaggerUIBundle {...swaggerConfig} />
+          ) : (
+            <div className="p-8 text-center">
+              <AlertCircle className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+              <h3 className="text-lg font-semibold mb-2">API Documentation Unavailable</h3>
+              <p className="text-sm text-muted-foreground mb-4">
+                {error || 'Cannot load API documentation. Please check your connection.'}
+              </p>
+              <Button onClick={checkAPIConnection} disabled={isLoading}>
+                <RefreshCw className={cn('w-4 h-4 mr-2', isLoading && 'animate-spin')} />
+                Retry Connection
+              </Button>
+            </div>
+          )}
+        </div>
+      </Card>
+      
+      <style jsx global>{`
+        .swagger-ui .info {
+          margin: 0 !important;
+        }
+        .swagger-ui .scheme-container {
+          background: transparent !important;
+          border: none !important;
+          box-shadow: none !important;
+        }
+        .swagger-ui .topbar {
+          display: none !important;
+        }
+        .swagger-ui .wrapper {
+          padding: 1rem !important;
+        }
+        .swagger-ui .info .title {
+          color: hsl(var(--foreground)) !important;
+        }
+        .swagger-ui .info .description {
+          color: hsl(var(--muted-foreground)) !important;
+        }
+        .swagger-ui .opblock-summary {
+          border-color: hsl(var(--border)) !important;
+        }
+        .swagger-ui .opblock.opblock-get .opblock-summary-method {
+          background: hsl(var(--primary)) !important;
+        }
+        .swagger-ui .opblock.opblock-post .opblock-summary-method {
+          background: hsl(var(--success)) !important;
+        }
+        .swagger-ui .opblock.opblock-put .opblock-summary-method {
+          background: hsl(var(--warning)) !important;
+        }
+        .swagger-ui .opblock.opblock-delete .opblock-summary-method {
+          background: hsl(var(--destructive)) !important;
+        }
+      `}</style>
+    </div>
+  )
+}
+
+export default SwaggerUI

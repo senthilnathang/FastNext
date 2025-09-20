@@ -14,6 +14,8 @@ import {
   Clock,
   FileCheck,
   Globe,
+  Code,
+  Book,
 } from 'lucide-react';
 
 export interface MenuItem {
@@ -36,6 +38,18 @@ export const menuItems: MenuItem[] = [
     href: '/projects',
     icon: Building2,
     module: 'projects',
+  },
+  {
+    title: 'Builder',
+    href: '/builder',
+    icon: Code,
+    module: 'builder',
+  },
+  {
+    title: 'API Documentation',
+    href: '/api-docs',
+    icon: Book,
+    module: 'api-docs',
   },
   {
     title: 'Compliance',
