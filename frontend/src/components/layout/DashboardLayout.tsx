@@ -12,6 +12,7 @@ interface DashboardLayoutProps {
 
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
 
   return (
     <div className="flex h-screen bg-muted/50">
@@ -25,11 +26,16 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       
       {/* Sidebar */}
       <div className={`
-        fixed inset-y-0 left-0 z-50 w-64 transform transition-transform duration-200 ease-in-out
+        fixed inset-y-0 left-0 z-50 transform transition-all duration-200 ease-in-out
         lg:relative lg:translate-x-0
         ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+        ${sidebarCollapsed ? 'w-16' : 'w-64'}
       `}>
-        <Sidebar className="h-full" />
+        <Sidebar 
+          className="h-full" 
+          isCollapsed={sidebarCollapsed}
+          onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
+        />
         
         {/* Mobile close button */}
         <Button
