@@ -1,78 +1,108 @@
-"use client"
+'use client';
 
-import React, { createContext, useContext, useEffect, useState } from 'react'
+import React, { createContext, useContext, useEffect, useState } from 'react';
 
-type Theme = 'light' | 'dark' | 'system'
+type Theme = 'light' | 'dark' | 'system';
 
 interface ThemeContextType {
-  theme: Theme
-  actualTheme: 'light' | 'dark'
-  setTheme: (theme: Theme) => void
-  toggleTheme: () => void
+  theme: Theme;
+  setTheme: (theme: Theme) => void;
+  actualTheme: 'light' | 'dark';
+  toggleTheme: () => void;
 }
 
-const ThemeContext = createContext<ThemeContextType | undefined>(undefined)
+const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setTheme] = useState<Theme>('system')
-  const [actualTheme, setActualTheme] = useState<'light' | 'dark'>('light')
+  const [theme, setTheme] = useState<Theme>('system');
+  const [actualTheme, setActualTheme] = useState<'light' | 'dark'>('light');
 
   useEffect(() => {
-    const stored = localStorage.getItem('theme') as Theme
-    if (stored && ['light', 'dark', 'system'].includes(stored)) {
-      setTheme(stored)
-    }
-  }, [])
+    // Load theme from localStorage or user preferences
+    const loadTheme = () => {
+      try {
+        // First check for direct theme setting
+        const savedTheme = localStorage.getItem('theme') as Theme;
+        if (savedTheme && ['light', 'dark', 'system'].includes(savedTheme)) {
+          setTheme(savedTheme);
+          return;
+        }
+        
+        // Then check user preferences
+        const userPrefs = localStorage.getItem('userPreferences');
+        if (userPrefs) {
+          const parsed = JSON.parse(userPrefs);
+          if (parsed.theme && ['light', 'dark', 'system'].includes(parsed.theme)) {
+            setTheme(parsed.theme);
+            return;
+          }
+        }
+        
+        // Default to system
+        setTheme('system');
+      } catch (error) {
+        console.error('Error loading theme:', error);
+        setTheme('system');
+      }
+    };
+
+    loadTheme();
+  }, []);
 
   useEffect(() => {
     const updateActualTheme = () => {
       if (theme === 'system') {
-        const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
-        setActualTheme(systemTheme)
+        const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        setActualTheme(systemTheme);
       } else {
-        setActualTheme(theme)
+        setActualTheme(theme);
       }
-    }
+    };
 
-    updateActualTheme()
+    updateActualTheme();
 
     if (theme === 'system') {
-      const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
-      const handleChange = () => updateActualTheme()
-      mediaQuery.addEventListener('change', handleChange)
-      return () => mediaQuery.removeEventListener('change', handleChange)
+      const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+      mediaQuery.addEventListener('change', updateActualTheme);
+      return () => mediaQuery.removeEventListener('change', updateActualTheme);
     }
-  }, [theme])
+  }, [theme]);
 
   useEffect(() => {
-    const root = document.documentElement
-    root.classList.remove('light', 'dark')
-    root.classList.add(actualTheme)
+    // Apply theme to document
+    const root = document.documentElement;
+    root.classList.remove('light', 'dark');
+    root.classList.add(actualTheme);
     
-    localStorage.setItem('theme', theme)
-  }, [theme, actualTheme])
+    // Save to localStorage
+    localStorage.setItem('theme', theme);
+  }, [theme, actualTheme]);
+
+  const handleSetTheme = (newTheme: Theme) => {
+    setTheme(newTheme);
+  };
 
   const toggleTheme = () => {
     if (theme === 'light') {
-      setTheme('dark')
+      setTheme('dark');
     } else if (theme === 'dark') {
-      setTheme('system')
+      setTheme('system');
     } else {
-      setTheme('light')
+      setTheme('light');
     }
-  }
+  };
 
   return (
-    <ThemeContext.Provider value={{ theme, actualTheme, setTheme, toggleTheme }}>
+    <ThemeContext.Provider value={{ theme, setTheme: handleSetTheme, actualTheme, toggleTheme }}>
       {children}
     </ThemeContext.Provider>
-  )
+  );
 }
 
 export function useTheme() {
-  const context = useContext(ThemeContext)
+  const context = useContext(ThemeContext);
   if (context === undefined) {
-    throw new Error('useTheme must be used within a ThemeProvider')
+    throw new Error('useTheme must be used within a ThemeProvider');
   }
-  return context
+  return context;
 }
