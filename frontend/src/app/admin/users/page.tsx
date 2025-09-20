@@ -27,15 +27,13 @@ import {
 } from "@/components/ui/select"
 
 // Import React Query hooks
-import { useUsers, useCreateUser, useUpdateUser, useDeleteUser, useToggleUserStatus } from "@/hooks/useUsers"
+import { useUsers, useCreateUser, useDeleteUser, useToggleUserStatus } from "@/hooks/useUsers"
 import { useRoles } from "@/hooks/useRoles"
 import { apiUtils } from "@/lib/api/client"
 import type { User } from "@/lib/api/users"
 
-// Define action handler type
-type UserAction = "edit" | "delete" | "toggle-status" | "reset-password"
 
-interface UsersPageProps {}
+type UsersPageProps = Record<string, never>
 
 const UsersPage: React.FC<UsersPageProps> = () => {
   // State
@@ -54,12 +52,11 @@ const UsersPage: React.FC<UsersPageProps> = () => {
 
   // Mutations
   const createUserMutation = useCreateUser()
-  const updateUserMutation = useUpdateUser()
   const deleteUserMutation = useDeleteUser()
   const toggleStatusMutation = useToggleUserStatus()
 
   // Action handler
-  const handleRowAction = React.useCallback((user: User, action: UserAction) => {
+  const handleRowAction = React.useCallback((user: User, action: string) => {
     switch (action) {
       case "edit":
         // TODO: Open edit dialog

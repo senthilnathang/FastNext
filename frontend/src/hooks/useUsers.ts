@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { usersApi, type CreateUserRequest, type UpdateUserRequest, type UserListParams } from '@/lib/api/users'
+import { usersApi, type CreateUserRequest, type UpdateUserRequest, type UserListParams, type User } from '@/lib/api/users'
 
 // Query keys for users
 export const userKeys = {
@@ -76,8 +76,8 @@ export const useUpdateUser = () => {
       queryClient.invalidateQueries({ queryKey: userKeys.lists() })
       
       // Update current user if it's the same user
-      const currentUserData = queryClient.getQueryData(userKeys.current())
-      if (currentUserData && (currentUserData as any).id === id) {
+      const currentUserData = queryClient.getQueryData(userKeys.current()) as User | undefined
+      if (currentUserData && currentUserData.id === id) {
         queryClient.setQueryData(userKeys.current(), updatedUser)
       }
     },
@@ -159,8 +159,8 @@ export const useOptimisticUserUpdate = () => {
   const queryClient = useQueryClient()
   
   return {
-    updateUserOptimistically: (id: number, updates: Partial<any>) => {
-      queryClient.setQueryData(userKeys.detail(id), (old: any) => 
+    updateUserOptimistically: (id: number, updates: Partial<User>) => {
+      queryClient.setQueryData(userKeys.detail(id), (old: User | undefined) => 
         old ? { ...old, ...updates } : old
       )
     },

@@ -1,5 +1,5 @@
-import { useQuery, useMutation, useQueryClient, type UseQueryOptions, type UseMutationOptions } from '@tanstack/react-query'
-import { apiUtils, type ApiError } from '@/lib/api/client'
+import { useQuery, useMutation, useQueryClient, useInfiniteQuery, type UseQueryOptions, type UseMutationOptions } from '@tanstack/react-query'
+import { type ApiError } from '@/lib/api/client'
 
 // Generic hook for API queries with common patterns
 export function useApiQuery<TData = unknown, TError = ApiError>(
@@ -7,11 +7,6 @@ export function useApiQuery<TData = unknown, TError = ApiError>(
 ) {
   return useQuery({
     ...options,
-    // Add default error handling
-    onError: (error) => {
-      console.error('Query error:', apiUtils.getErrorMessage(error))
-      options.onError?.(error)
-    },
   })
 }
 
@@ -21,17 +16,12 @@ export function useApiMutation<TData = unknown, TError = ApiError, TVariables = 
 ) {
   return useMutation({
     ...options,
-    // Add default error handling
-    onError: (error, variables, context) => {
-      console.error('Mutation error:', apiUtils.getErrorMessage(error))
-      options.onError?.(error, variables, context)
-    },
   })
 }
 
 // Hook for paginated queries with common patterns
 export function usePaginatedQuery<TData = unknown>(
-  queryKey: any[],
+  queryKey: unknown[],
   queryFn: () => Promise<TData>,
   options?: Partial<UseQueryOptions<TData, ApiError>>
 ) {
@@ -48,10 +38,10 @@ export function usePaginatedQuery<TData = unknown>(
 export function useOptimisticMutation<TData, TVariables>(
   mutationFn: (variables: TVariables) => Promise<TData>,
   options: {
-    queryKey: any[]
-    updater: (oldData: any, variables: TVariables) => any
+    queryKey: unknown[]
+    updater: (oldData: unknown, variables: TVariables) => unknown
     onSuccess?: (data: TData, variables: TVariables) => void
-    onError?: (error: ApiError, variables: TVariables, context: any) => void
+    onError?: (error: Error, variables: TVariables, context: unknown) => void
   }
 ) {
   const queryClient = useQueryClient()
@@ -66,7 +56,7 @@ export function useOptimisticMutation<TData, TVariables>(
       const previousData = queryClient.getQueryData(options.queryKey)
       
       // Optimistically update
-      queryClient.setQueryData(options.queryKey, (old: any) => 
+      queryClient.setQueryData(options.queryKey, (old: unknown) => 
         options.updater(old, variables)
       )
       
@@ -89,22 +79,23 @@ export function useOptimisticMutation<TData, TVariables>(
 
 // Hook for infinite queries (for load more functionality)
 export function useInfiniteApiQuery<TData = unknown>(
-  queryKey: any[],
+  queryKey: unknown[],
   queryFn: ({ pageParam }: { pageParam: number }) => Promise<TData>,
   options?: {
-    getNextPageParam?: (lastPage: any, allPages: any[]) => number | undefined
+    getNextPageParam?: (lastPage: unknown, allPages: unknown[]) => number | undefined
     staleTime?: number
   }
 ) {
-  const { useInfiniteQuery } = require('@tanstack/react-query')
   
   return useInfiniteQuery({
     queryKey,
     queryFn,
-    getNextPageParam: options?.getNextPageParam || ((lastPage: any) => {
+    initialPageParam: 1,
+    getNextPageParam: options?.getNextPageParam || ((lastPage: unknown) => {
       // Default pagination logic
-      if (lastPage?.page < lastPage?.pages) {
-        return lastPage.page + 1
+      const page = lastPage as { page?: number; pages?: number }
+      if (page?.page && page?.pages && page.page < page.pages) {
+        return page.page + 1
       }
       return undefined
     }),
@@ -118,22 +109,22 @@ export function useCacheUtils() {
   
   return {
     // Prefetch data
-    prefetch: <TData>(queryKey: any[], queryFn: () => Promise<TData>) => {
+    prefetch: <TData>(queryKey: unknown[], queryFn: () => Promise<TData>) => {
       return queryClient.prefetchQuery({ queryKey, queryFn })
     },
     
     // Set cache data
-    setCache: (queryKey: any[], data: any) => {
+    setCache: (queryKey: unknown[], data: unknown) => {
       queryClient.setQueryData(queryKey, data)
     },
     
     // Invalidate queries
-    invalidate: (queryKey: any[]) => {
+    invalidate: (queryKey: unknown[]) => {
       queryClient.invalidateQueries({ queryKey })
     },
     
     // Remove from cache
-    remove: (queryKey: any[]) => {
+    remove: (queryKey: unknown[]) => {
       queryClient.removeQueries({ queryKey })
     },
     
@@ -145,7 +136,7 @@ export function useCacheUtils() {
 }
 
 // Hook for handling loading states across multiple queries
-export function useLoadingStates(queries: Array<{ isLoading: boolean; error: any }>) {
+export function useLoadingStates(queries: Array<{ isLoading: boolean; error: unknown }>) {
   const isLoading = queries.some(q => q.isLoading)
   const hasError = queries.some(q => q.error)
   const errors = queries.filter(q => q.error).map(q => q.error)

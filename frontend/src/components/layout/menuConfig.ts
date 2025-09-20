@@ -6,7 +6,6 @@ import {
   Key,
   Activity,
   Building2,
-  Layers,
   BarChart3,
   FileText,
   Brain,

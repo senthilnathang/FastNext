@@ -57,7 +57,6 @@ const queryClient = new QueryClient({
       
       // Error handling
       throwOnError: false, // Let components handle errors gracefully
-      onError: handleGlobalError,
     },
     mutations: {
       // Error handling for mutations
@@ -69,21 +68,6 @@ const queryClient = new QueryClient({
     },
   },
   
-  // Global query cache configuration
-  queryCache: {
-    onError: handleGlobalError,
-    onSuccess: (data, query) => {
-      console.log(`[Query Success] ${query.queryKey}`, data)
-    },
-  },
-  
-  // Global mutation cache configuration
-  mutationCache: {
-    onError: handleGlobalError,
-    onSuccess: (data, variables, context, mutation) => {
-      console.log(`[Mutation Success]`, { data, variables })
-    },
-  },
 })
 
 interface QueryProviderProps {
@@ -98,8 +82,6 @@ export default function QueryProvider({ children }: QueryProviderProps) {
       {process.env.NODE_ENV === 'development' && (
         <ReactQueryDevtools 
           initialIsOpen={false}
-          position="bottom-right"
-          buttonPosition="bottom-right"
         />
       )}
     </QueryClientProvider>

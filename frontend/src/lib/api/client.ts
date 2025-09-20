@@ -1,12 +1,20 @@
 import axios, { AxiosError, AxiosResponse, InternalAxiosRequestConfig } from 'axios'
 import { API_CONFIG } from './config'
 
+// Extended config interface for metadata
+interface ExtendedAxiosRequestConfig extends InternalAxiosRequestConfig {
+  metadata?: {
+    startTime: number
+    requestId: string
+  }
+}
+
 // Enhanced API Error types
 export interface ApiError {
   message: string
   status: number
   code?: string
-  details?: Record<string, any>
+  details?: Record<string, unknown>
   timestamp: string
 }
 
@@ -28,7 +36,7 @@ export const apiClient = axios.create({
 
 // Enhanced request interceptor
 apiClient.interceptors.request.use(
-  (config: InternalAxiosRequestConfig) => {
+  (config: ExtendedAxiosRequestConfig) => {
     // Add auth token
     const token = localStorage.getItem('access_token')
     if (token) {
@@ -49,7 +57,7 @@ apiClient.interceptors.request.use(
 
     return config
   },
-  (error: AxiosError) => {
+  (error: AxiosError<ApiErrorResponse>) => {
     console.error('[API Request Error]', error)
     return Promise.reject(createApiError(error))
   }
@@ -58,7 +66,7 @@ apiClient.interceptors.request.use(
 // Enhanced response interceptor with comprehensive error handling
 apiClient.interceptors.response.use(
   (response: AxiosResponse) => {
-    const config = response.config as InternalAxiosRequestConfig & { metadata?: any }
+    const config = response.config as ExtendedAxiosRequestConfig
     const duration = Date.now() - (config.metadata?.startTime || 0)
     
     console.log(`[API Response] ${response.status} ${config.method?.toUpperCase()} ${config.url}`, {
@@ -70,7 +78,7 @@ apiClient.interceptors.response.use(
     return response
   },
   async (error: AxiosError<ApiErrorResponse>) => {
-    const config = error.config as InternalAxiosRequestConfig & { metadata?: any }
+    const config = error.config as ExtendedAxiosRequestConfig
     const duration = config?.metadata ? Date.now() - config.metadata.startTime : 0
 
     console.error(`[API Error] ${error.response?.status} ${config?.method?.toUpperCase()} ${config?.url}`, {
@@ -82,11 +90,12 @@ apiClient.interceptors.response.use(
     })
 
     // Handle specific HTTP status codes
-    if (error.response?.status === 401) {
+    const status = error.response?.status
+    if (status === 401) {
       await handleAuthError(error)
-    } else if (error.response?.status === 403) {
+    } else if (status === 403) {
       handleForbiddenError(error)
-    } else if (error.response?.status >= 500) {
+    } else if (status && status >= 500) {
       handleServerError(error)
     }
 
@@ -103,7 +112,7 @@ function createApiError(error: AxiosError<ApiErrorResponse>): ApiError {
     message: getErrorMessage(data, error),
     status: response?.status || 0,
     code: data?.code || error.code,
-    details: data?.errors || data,
+    details: data?.errors || (data as Record<string, unknown>),
     timestamp: new Date().toISOString()
   }
 }
@@ -182,22 +191,24 @@ function handleServerError(error: AxiosError<ApiErrorResponse>) {
 // Utility functions for common API patterns
 export const apiUtils = {
   // Check if error is a specific type
-  isApiError: (error: any): error is ApiError => {
-    return error && typeof error === 'object' && 'message' in error && 'status' in error
+  isApiError: (error: unknown): error is ApiError => {
+    return error !== null && typeof error === 'object' && 'message' in error && 'status' in error
   },
 
   // Check if error is network related
-  isNetworkError: (error: any): boolean => {
-    return error?.code === 'ERR_NETWORK' || error?.message?.includes('Network Error')
+  isNetworkError: (error: unknown): boolean => {
+    const err = error as { code?: string; message?: string }
+    return err?.code === 'ERR_NETWORK' || Boolean(err?.message?.includes('Network Error'))
   },
 
   // Check if error is timeout related
-  isTimeoutError: (error: any): boolean => {
-    return error?.code === 'ECONNABORTED' || error?.message?.includes('timeout')
+  isTimeoutError: (error: unknown): boolean => {
+    const err = error as { code?: string; message?: string }
+    return err?.code === 'ECONNABORTED' || Boolean(err?.message?.includes('timeout'))
   },
 
   // Get user-friendly error message
-  getErrorMessage: (error: any): string => {
+  getErrorMessage: (error: unknown): string => {
     if (apiUtils.isApiError(error)) {
       return error.message
     }
@@ -211,5 +222,3 @@ export const apiUtils = {
   }
 }
 
-// Export types for use in other files
-export type { ApiError, ApiErrorResponse }
