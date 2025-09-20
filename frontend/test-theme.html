@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Theme Test</title>
+    <script src="https://unpkg.com/react@19/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@19/umd/react-dom.development.js"></script>
+    <style>
+        .light { background: white; color: black; }
+        .dark { background: #1a1a1a; color: white; }
+        body { margin: 0; padding: 20px; font-family: system-ui; }
+        button { padding: 10px 20px; margin: 10px; border: 1px solid; background: transparent; cursor: pointer; }
+        .light button { border-color: #ccc; }
+        .dark button { border-color: #666; color: white; }
+    </style>
+</head>
+<body>
+    <div id="root">
+        <h1>Theme Switcher Test</h1>
+        <p>The theme functionality has been successfully updated based on the CodeSecAI frontend implementation.</p>
+        
+        <h2>Key Improvements Made:</h2>
+        <ul>
+            <li><strong>Enhanced ThemeContext:</strong> Added better error handling and user preferences loading</li>
+            <li><strong>Improved Theme Persistence:</strong> Now checks both direct theme setting and user preferences from localStorage</li>
+            <li><strong>Better System Theme Detection:</strong> Enhanced support for system theme changes</li>
+            <li><strong>Consistent Code Style:</strong> Updated to match CodeSecAI frontend conventions</li>
+            <li><strong>SimpleThemeToggle Component:</strong> Added an additional toggle component for simpler use cases</li>
+        </ul>
+        
+        <h2>Features:</h2>
+        <ul>
+            <li>✅ Light/Dark/System theme modes</li>
+            <li>✅ Automatic system theme detection</li>
+            <li>✅ Theme persistence in localStorage</li>
+            <li>✅ Dropdown theme selector with visual indicators</li>
+            <li>✅ Simple toggle button option</li>
+            <li>✅ Smooth theme transitions</li>
+        </ul>
+        
+        <div style="margin-top: 20px; padding: 20px; border: 1px solid;">
+            <p><strong>Test Instructions:</strong></p>
+            <ol>
+                <li>Start the development server: <code>npm run dev</code></li>
+                <li>Navigate to any page with the theme toggle</li>
+                <li>Click the theme toggle button (sun/moon icon)</li>
+                <li>Select different theme options (Light, Dark, System)</li>
+                <li>Verify theme persists after page refresh</li>
+                <li>Test system theme by changing your OS theme preference</li>
+            </ol>
+        </div>
+    </div>
+    
+    <script>
+        // Simple theme demo for this test page
+        let currentTheme = 'light';
+        document.documentElement.className = currentTheme;
+        
+        function toggleTheme() {
+            currentTheme = currentTheme === 'light' ? 'dark' : 'light';
+            document.documentElement.className = currentTheme;
+        }
+    </script>
+    
+    <button onclick="toggleTheme()">Toggle Theme (Demo)</button>
+</body>
+</html>
