@@ -56,11 +56,8 @@ export default function Header() {
             <Bell className="w-5 h-5" />
           </Button>
 
-          <div className="flex items-center gap-1">
-            <div className="border border-border rounded-md">
-              <ThemeToggle />
-            </div>
-            <SimpleThemeToggle />
+          <div className="flex items-center gap-2">
+            <ThemeToggle />
           </div>
 
           <DropdownMenu>

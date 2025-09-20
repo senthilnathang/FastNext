@@ -25,7 +25,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
         const savedTheme = localStorage.getItem('theme') as Theme;
         if (savedTheme && ['light', 'dark', 'system'].includes(savedTheme)) {
           setTheme(savedTheme);
-          return;
+          return savedTheme;
         }
         
         // Then check user preferences
@@ -34,19 +34,25 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
           const parsed = JSON.parse(userPrefs);
           if (parsed.theme && ['light', 'dark', 'system'].includes(parsed.theme)) {
             setTheme(parsed.theme);
-            return;
+            return parsed.theme;
           }
         }
         
         // Default to system
         setTheme('system');
+        return 'system';
       } catch (error) {
         console.error('Error loading theme:', error);
         setTheme('system');
+        return 'system';
       }
     };
 
-    loadTheme();
+    const initialTheme = loadTheme();
+    // Set initial theme immediately
+    if (initialTheme !== 'system') {
+      setActualTheme(initialTheme);
+    }
   }, []);
 
   useEffect(() => {

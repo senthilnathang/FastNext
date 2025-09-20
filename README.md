@@ -102,63 +102,38 @@ FastNext/
 - Node.js 18+
 - PostgreSQL 12+
 
-### Backend Setup
-1. Navigate to backend directory:
+### Quick Start
+1. **Clone the repository**
+   ```bash
+   git clone <repository-url>
+   cd FastNext
+   ```
+
+2. **Backend Setup**
    ```bash
    cd backend
-   ```
-
-2. Create virtual environment:
-   ```bash
    python -m venv venv
    source venv/bin/activate  # On Windows: venv\Scripts\activate
-   ```
-
-3. Install dependencies:
-   ```bash
    pip install -r requirements.txt
-   ```
-
-4. Set up environment variables:
-   ```bash
-   cp .env.example .env
-   # Edit .env with your database credentials
-   ```
-
-5. Start the server:
-   ```bash
+   cp .env.example .env  # Edit with your database credentials
    python main.py
    ```
 
-### Frontend Setup
-1. Navigate to frontend directory:
+3. **Frontend Setup** (in a new terminal)
    ```bash
    cd frontend
-   ```
-
-2. Install dependencies:
-   ```bash
    npm install
-   ```
-
-3. Start development server:
-   ```bash
    npm run dev
    ```
 
-### Available Scripts
+4. **Access the Application**
+   - Frontend: http://localhost:3000
+   - Backend API: http://localhost:8000
+   - API Documentation: http://localhost:8000/docs
 
-#### Backend
-- `python main.py` - Start FastAPI server
-- `pylint app/` - Run Python linting
-
-#### Frontend
-- `npm run dev` - Start development server
-- `npm run build` - Build for production
-- `npm run test` - Run Jest tests
-- `npm run storybook` - Start Storybook
-- `npm run biome` - Run Biome linting
-- `npm run biome:fix` - Fix Biome issues
+### Documentation
+- **[Backend Development Guide](docs/BACKEND_DEV.md)** - Backend development, testing, and deployment
+- **[Frontend Development Guide](docs/FRONTEND_DEV.md)** - Frontend development, Storybook, and testing
 
 ## API Endpoints
 
