@@ -38,7 +38,8 @@
       "Bash(npm run lint)",
       "Bash(npm run:*)",
       "Bash(node:*)",
-      "Bash(pip3 install:*)"
+      "Bash(pip3 install:*)",
+      "Bash(npm update:*)"
     ],
     "deny": []
   }

@@ -2,10 +2,17 @@ import React from 'react'
 import { render, screen, fireEvent } from '@testing-library/react'
 import '@testing-library/jest-dom'
 import Header from '../Header'
+import { AuthProvider } from '@/contexts/AuthContext'
+import { ThemeProvider } from '@/contexts/ThemeContext'
 
 // Mock Next.js navigation
 jest.mock('next/navigation', () => ({
   usePathname: () => '/dashboard/projects',
+  useRouter: () => ({
+    push: jest.fn(),
+    replace: jest.fn(),
+    prefetch: jest.fn(),
+  }),
 }))
 
 // Mock Breadcrumb component
@@ -15,9 +22,57 @@ jest.mock('../Breadcrumb', () => {
   }
 })
 
+// Mock fetch API
+global.fetch = jest.fn()
+
+// Mock localStorage
+const mockLocalStorage = {
+  getItem: jest.fn(),
+  setItem: jest.fn(),
+  removeItem: jest.fn(),
+  clear: jest.fn(),
+}
+Object.defineProperty(window, 'localStorage', {
+  value: mockLocalStorage,
+})
+
+// Mock API config
+jest.mock('@/lib/api/config', () => ({
+  API_CONFIG: {
+    API_BASE_URL: 'http://localhost:8000',
+    ENDPOINTS: {
+      AUTH: {
+        LOGIN: '/auth/login',
+        LOGOUT: '/auth/logout',
+        REFRESH: '/auth/refresh',
+        ME: '/auth/me',
+      },
+    },
+  },
+  getApiUrl: (endpoint: string) => `http://localhost:8000${endpoint}`,
+}))
+
+// Test wrapper with AuthProvider and ThemeProvider
+const TestWrapper = ({ children }: { children: React.ReactNode }) => {
+  return (
+    <ThemeProvider>
+      <AuthProvider>{children}</AuthProvider>
+    </ThemeProvider>
+  )
+}
+
 describe('Header Component', () => {
+  beforeEach(() => {
+    jest.clearAllMocks()
+    mockLocalStorage.getItem.mockReturnValue(null)
+  })
+
   it('renders search input with correct placeholder', () => {
-    render(<Header />)
+    render(
+      <TestWrapper>
+        <Header />
+      </TestWrapper>
+    )
     
     const searchInput = screen.getByPlaceholderText('Search projects, components...')
     expect(searchInput).toBeInTheDocument()
@@ -25,7 +80,11 @@ describe('Header Component', () => {
   })
 
   it('renders all action buttons', () => {
-    render(<Header />)
+    render(
+      <TestWrapper>
+        <Header />
+      </TestWrapper>
+    )
     
     // Check for buttons by their title attributes
     expect(screen.getByTitle('Help')).toBeInTheDocument()
@@ -34,14 +93,22 @@ describe('Header Component', () => {
   })
 
   it('renders user profile dropdown trigger', () => {
-    render(<Header />)
+    render(
+      <TestWrapper>
+        <Header />
+      </TestWrapper>
+    )
     
     expect(screen.getByText('John Doe')).toBeInTheDocument()
     expect(screen.getByText('Admin')).toBeInTheDocument()
   })
 
   it('opens user profile dropdown when clicked', () => {
-    render(<Header />)
+    render(
+      <TestWrapper>
+        <Header />
+      </TestWrapper>
+    )
     
     const userButton = screen.getByText('John Doe').closest('button')
     expect(userButton).toBeInTheDocument()
@@ -54,14 +121,22 @@ describe('Header Component', () => {
   })
 
   it('renders breadcrumb component', () => {
-    render(<Header />)
+    render(
+      <TestWrapper>
+        <Header />
+      </TestWrapper>
+    )
     
     expect(screen.getByTestId('breadcrumb')).toBeInTheDocument()
     expect(screen.getByText('Home / Dashboard / Projects')).toBeInTheDocument()
   })
 
   it('has proper search input styling', () => {
-    render(<Header />)
+    render(
+      <TestWrapper>
+        <Header />
+      </TestWrapper>
+    )
     
     const searchInput = screen.getByPlaceholderText('Search projects, components...')
     expect(searchInput).toHaveClass(
@@ -75,7 +150,11 @@ describe('Header Component', () => {
   })
 
   it('renders theme toggle icons', () => {
-    render(<Header />)
+    render(
+      <TestWrapper>
+        <Header />
+      </TestWrapper>
+    )
     
     const themeButton = screen.getByTitle('Toggle theme')
     expect(themeButton).toBeInTheDocument()
@@ -88,7 +167,11 @@ describe('Header Component', () => {
   })
 
   it('has correct header structure', () => {
-    const { container } = render(<Header />)
+    const { container } = render(
+      <TestWrapper>
+        <Header />
+      </TestWrapper>
+    )
     
     // Check main header structure
     const headerElement = container.querySelector('header')
@@ -100,7 +183,11 @@ describe('Header Component', () => {
   })
 
   it('renders with proper dark mode classes', () => {
-    const { container } = render(<Header />)
+    const { container } = render(
+      <TestWrapper>
+        <Header />
+      </TestWrapper>
+    )
     
     const headerContainer = container.firstChild
     expect(headerContainer).toHaveClass(
