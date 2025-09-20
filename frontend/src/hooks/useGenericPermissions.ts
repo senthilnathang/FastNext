@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react'
-import { useAuth } from './useAuth'
+import { useState, useEffect, useCallback } from 'react'
+import { useIsAuthenticated } from './useAuth'
 import { apiClient } from '@/lib/api/client'
 
 export interface Permission {
@@ -37,13 +37,13 @@ export const useGenericPermissions = (
   resource?: string,
   projectId?: number
 ): UseGenericPermissionsResult => {
-  const { user, isAuthenticated } = useAuth()
+  const { user, isAuthenticated } = useIsAuthenticated()
   const [permissions, setPermissions] = useState<Permission[]>([])
   const [allowedActions, setAllowedActions] = useState<string[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  const fetchPermissions = async () => {
+  const fetchPermissions = useCallback(async () => {
     if (!isAuthenticated || !user) {
       setPermissions([])
       setAllowedActions([])
@@ -66,14 +66,15 @@ export const useGenericPermissions = (
         })
         setAllowedActions(actionsResponse.data)
       }
-    } catch (err: any) {
-      setError(err.response?.data?.detail || 'Failed to fetch permissions')
+    } catch (err: unknown) {
+      const errorMessage = err && typeof err === 'object' && 'response' in err && err.response && typeof err.response === 'object' && 'data' in err.response && err.response.data && typeof err.response.data === 'object' && 'detail' in err.response.data ? String(err.response.data.detail) : 'Failed to fetch permissions'
+      setError(errorMessage)
       setPermissions([])
       setAllowedActions([])
     } finally {
       setLoading(false)
     }
-  }
+  }, [isAuthenticated, user, resource, projectId])
 
   const hasPermission = (check: PermissionCheck): boolean => {
     if (!isAuthenticated || !user) return false
@@ -128,7 +129,7 @@ export const useGenericPermissions = (
 
   useEffect(() => {
     fetchPermissions()
-  }, [isAuthenticated, user, resource, projectId])
+  }, [fetchPermissions])
 
   return {
     permissions,

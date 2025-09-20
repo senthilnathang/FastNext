@@ -40,7 +40,8 @@
       "Bash(node:*)",
       "Bash(pip3 install:*)",
       "Bash(npm update:*)",
-      "Bash(kill:*)"
+      "Bash(kill:*)",
+      "Bash(npx eslint:*)"
     ],
     "deny": []
   }

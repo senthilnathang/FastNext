@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -54,7 +54,7 @@ export interface GenericKanbanViewProps<T = any> {
   cardFields?: Array<{
     key: keyof T | string
     label: string
-    render?: (value: any, item: KanbanItem<T>) => React.ReactNode
+    render?: (value: unknown, item: KanbanItem<T>) => React.ReactNode
   }>
   
   // Custom actions
@@ -83,7 +83,7 @@ export function GenericKanbanView<T>({
   title,
   subtitle,
   createButtonText = 'Create New',
-  emptyStateTitle = 'No items found',
+  // emptyStateTitle = 'No items found',
   emptyStateDescription = 'Get started by creating your first item',
   renderCard,
   cardFields = [],

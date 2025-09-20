@@ -35,13 +35,13 @@ export interface FormField<T = any> {
   required?: boolean
   placeholder?: string
   description?: string
-  defaultValue?: any
+  defaultValue?: unknown
   
   // Validation
-  validation?: z.ZodType<any>
+  validation?: z.ZodType<unknown>
   
   // For select fields
-  options?: Array<{ value: any; label: string }>
+  options?: Array<{ value: string | number; label: string }>
   multiple?: boolean
   
   // For number fields
@@ -58,7 +58,7 @@ export interface FormField<T = any> {
   maxSize?: number
   
   // Custom rendering
-  render?: (field: any, form: any) => React.ReactNode
+  render?: (field: FormField<T>, form: any) => React.ReactNode
   
   // Conditional display
   condition?: (formData: T) => boolean
@@ -92,7 +92,7 @@ export interface GenericFormViewProps<T = any> {
   // Form handling
   onSubmit: (data: T) => Promise<void> | void
   onCancel?: () => void
-  onFieldChange?: (name: string, value: any, formData: T) => void
+  onFieldChange?: (name: string, value: unknown, formData: T) => void
   
   // Validation
   validationSchema?: z.ZodSchema<T>
@@ -126,7 +126,7 @@ export interface GenericFormViewProps<T = any> {
   }>
 }
 
-export function GenericFormView<T extends Record<string, any>>({
+export function GenericFormView<T = any>({
   fields = [],
   sections = [],
   initialData = {},
@@ -169,12 +169,12 @@ export function GenericFormView<T extends Record<string, any>>({
   const finalSubmitText = submitButtonText || defaultSubmitText
 
   // Create default validation schema if none provided
-  const defaultSchema = z.object({})
+  const defaultSchema = z.object({}) as any
   const schema = validationSchema || defaultSchema
 
-  const form = useForm<T>({
-    resolver: zodResolver(schema),
-    defaultValues: initialData as T,
+  const form = useForm<any>({
+    resolver: zodResolver(schema) as any,
+    defaultValues: initialData as any,
     mode: 'onChange'
   })
 
@@ -197,7 +197,7 @@ export function GenericFormView<T extends Record<string, any>>({
       }
       
       const timeout = setTimeout(() => {
-        handleSubmit(onSubmit)()
+        handleSubmit(onSubmit as any)()
       }, autosaveDelay)
       
       setAutosaveTimeout(timeout)
@@ -208,7 +208,7 @@ export function GenericFormView<T extends Record<string, any>>({
         clearTimeout(autosaveTimeout)
       }
     }
-  }, [watchedData, autosave, isDirty, mode, canEdit])
+  }, [watchedData, autosave, isDirty, mode, canEdit, autosaveDelay, autosaveTimeout, handleSubmit, onSubmit])
 
   // Handle field changes
   useEffect(() => {
@@ -322,7 +322,7 @@ export function GenericFormView<T extends Record<string, any>>({
                   </SelectTrigger>
                   <SelectContent>
                     {field.options?.map((option) => (
-                      <SelectItem key={option.value} value={option.value}>
+                      <SelectItem key={option.value} value={String(option.value)}>
                         {option.label}
                       </SelectItem>
                     ))}
@@ -411,7 +411,7 @@ export function GenericFormView<T extends Record<string, any>>({
       }
     }
 
-    const fieldError = errors[field.name as keyof typeof errors]
+    const fieldError = errors[field.name as string]
 
     return (
       <div key={String(field.name)} className={`space-y-2 ${field.className || ''}`}>
@@ -462,7 +462,7 @@ export function GenericFormView<T extends Record<string, any>>({
   const footerActions = customActions.filter(action => action.position === 'footer')
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+    <form onSubmit={handleSubmit(onSubmit as any)} className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>

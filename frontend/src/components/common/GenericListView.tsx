@@ -3,9 +3,8 @@
 import React, { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { useGenericPermissions } from '@/hooks/useGenericPermissions'
 import { Plus, Search, MoreHorizontal, Edit, Trash2, Eye } from 'lucide-react'
@@ -13,7 +12,7 @@ import { Plus, Search, MoreHorizontal, Edit, Trash2, Eye } from 'lucide-react'
 export interface Column<T = any> {
   key: keyof T | string
   label: string
-  render?: (value: any, row: T) => React.ReactNode
+  render?: (value: unknown, row: T) => React.ReactNode
   sortable?: boolean
   searchable?: boolean
   width?: string
@@ -323,7 +322,7 @@ export function GenericListView<T extends { id: number }>({
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredData.map((item, index) => (
+                  {filteredData.map((item) => (
                     <tr key={item.id} className="border-b hover:bg-muted/50">
                       {selectable && (
                         <td className="p-4">

@@ -75,7 +75,7 @@ describe('useUserRole Hook', () => {
     })
 
     it('returns false when user has no roles', () => {
-      const userWithoutRoles = { ...mockRegularUser, roles: undefined }
+      const userWithoutRoles = { ...mockRegularUser, roles: [] }
       const wrapper = createWrapper(userWithoutRoles)
       const { result } = renderHook(() => useUserRole(), { wrapper })
       

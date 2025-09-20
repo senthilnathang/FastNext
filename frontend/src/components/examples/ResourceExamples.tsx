@@ -1,64 +1,65 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { UserFactory, ProjectFactory, TaskFactory } from '@/lib/resource-factory'
-import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
 // Example 1: Users Management
 export function UsersExample() {
-  const [users, setUsers] = useState([])
+  const [users, setUsers] = useState<unknown[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [showForm, setShowForm] = useState(false)
-  const [editingUser, setEditingUser] = useState(null)
+  const [editingUser, setEditingUser] = useState<unknown>(null)
 
   const userApi = UserFactory.getApi()
 
-  const loadUsers = async () => {
+  const loadUsers = useCallback(async () => {
     try {
       setLoading(true)
       const data = await userApi.getList()
       setUsers(data)
-    } catch (err: any) {
-      setError(err.message)
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'An error occurred')
     } finally {
       setLoading(false)
     }
-  }
+  }, [userApi])
 
   useEffect(() => {
     loadUsers()
-  }, [])
+  }, [loadUsers])
 
-  const handleCreateUser = async (userData: any) => {
+  const handleCreateUser = async (userData: unknown) => {
     try {
-      await userApi.create(userData)
+      await userApi.create(userData as any)
       setShowForm(false)
       loadUsers()
-    } catch (err: any) {
-      throw new Error(err.response?.data?.detail || 'Failed to create user')
+    } catch (err: unknown) {
+      const errorMessage = err && typeof err === 'object' && 'response' in err && err.response && typeof err.response === 'object' && 'data' in err.response && err.response.data && typeof err.response.data === 'object' && 'detail' in err.response.data ? String(err.response.data.detail) : 'Failed to create user'
+      throw new Error(errorMessage)
     }
   }
 
-  const handleEditUser = async (userData: any) => {
+  const handleEditUser = async (userData: unknown) => {
     try {
-      await userApi.update(editingUser.id, userData)
+      await userApi.update((editingUser as { id: number }).id, userData as any)
       setEditingUser(null)
       loadUsers()
-    } catch (err: any) {
-      throw new Error(err.response?.data?.detail || 'Failed to update user')
+    } catch (err: unknown) {
+      const errorMessage = err && typeof err === 'object' && 'response' in err && err.response && typeof err.response === 'object' && 'data' in err.response && err.response.data && typeof err.response.data === 'object' && 'detail' in err.response.data ? String(err.response.data.detail) : 'Failed to update user'
+      throw new Error(errorMessage)
     }
   }
 
-  const handleDeleteUser = async (user: any) => {
+  const handleDeleteUser = async (user: { id: number }) => {
     if (confirm('Are you sure you want to delete this user?')) {
       try {
         await userApi.delete(user.id)
         loadUsers()
-      } catch (err: any) {
-        alert('Failed to delete user: ' + err.message)
+      } catch (err: unknown) {
+        alert('Failed to delete user: ' + (err instanceof Error ? err.message : 'Unknown error'))
       }
     }
   }
@@ -75,7 +76,7 @@ export function UsersExample() {
     return UserFactory.createFormView({
       mode: 'edit',
       initialData: editingUser,
-      resourceId: editingUser.id,
+      resourceId: (editingUser as { id: number }).id,
       onSubmit: handleEditUser,
       onCancel: () => setEditingUser(null)
     })
@@ -94,57 +95,59 @@ export function UsersExample() {
 
 // Example 2: Projects Management
 export function ProjectsExample() {
-  const [projects, setProjects] = useState([])
+  const [projects, setProjects] = useState<unknown[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [showForm, setShowForm] = useState(false)
-  const [editingProject, setEditingProject] = useState(null)
+  const [editingProject, setEditingProject] = useState<unknown>(null)
 
   const projectApi = ProjectFactory.getApi()
 
-  const loadProjects = async () => {
+  const loadProjects = useCallback(async () => {
     try {
       setLoading(true)
       const data = await projectApi.getList()
       setProjects(data)
-    } catch (err: any) {
-      setError(err.message)
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'An error occurred')
     } finally {
       setLoading(false)
     }
-  }
+  }, [projectApi])
 
   useEffect(() => {
     loadProjects()
-  }, [])
+  }, [loadProjects])
 
-  const handleCreateProject = async (projectData: any) => {
+  const handleCreateProject = async (projectData: unknown) => {
     try {
-      await projectApi.create(projectData)
+      await projectApi.create(projectData as any)
       setShowForm(false)
       loadProjects()
-    } catch (err: any) {
-      throw new Error(err.response?.data?.detail || 'Failed to create project')
+    } catch (err: unknown) {
+      const errorMessage = err && typeof err === 'object' && 'response' in err && err.response && typeof err.response === 'object' && 'data' in err.response && err.response.data && typeof err.response.data === 'object' && 'detail' in err.response.data ? String(err.response.data.detail) : 'Failed to create project'
+      throw new Error(errorMessage)
     }
   }
 
-  const handleEditProject = async (projectData: any) => {
+  const handleEditProject = async (projectData: unknown) => {
     try {
-      await projectApi.update(editingProject.id, projectData)
+      await projectApi.update((editingProject as { id: number }).id, projectData as any)
       setEditingProject(null)
       loadProjects()
-    } catch (err: any) {
-      throw new Error(err.response?.data?.detail || 'Failed to update project')
+    } catch (err: unknown) {
+      const errorMessage = err && typeof err === 'object' && 'response' in err && err.response && typeof err.response === 'object' && 'data' in err.response && err.response.data && typeof err.response.data === 'object' && 'detail' in err.response.data ? String(err.response.data.detail) : 'Failed to update project'
+      throw new Error(errorMessage)
     }
   }
 
-  const handleDeleteProject = async (project: any) => {
+  const handleDeleteProject = async (project: { id: number }) => {
     if (confirm('Are you sure you want to delete this project?')) {
       try {
         await projectApi.delete(project.id)
         loadProjects()
-      } catch (err: any) {
-        alert('Failed to delete project: ' + err.message)
+      } catch (err: unknown) {
+        alert('Failed to delete project: ' + (err instanceof Error ? err.message : 'Unknown error'))
       }
     }
   }
@@ -161,7 +164,7 @@ export function ProjectsExample() {
     return ProjectFactory.createFormView({
       mode: 'edit',
       initialData: editingProject,
-      resourceId: editingProject.id,
+      resourceId: (editingProject as { id: number }).id,
       onSubmit: handleEditProject,
       onCancel: () => setEditingProject(null)
     })
@@ -180,33 +183,33 @@ export function ProjectsExample() {
 
 // Example 3: Tasks with Kanban View
 export function TasksExample({ projectId = 1 }: { projectId?: number }) {
-  const [tasks, setTasks] = useState([])
+  const [tasks, setTasks] = useState<unknown[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [viewMode, setViewMode] = useState<'list' | 'kanban'>('list')
   const [showForm, setShowForm] = useState(false)
-  const [editingTask, setEditingTask] = useState(null)
+  const [editingTask, setEditingTask] = useState<unknown>(null)
   const [createForColumn, setCreateForColumn] = useState<string | null>(null)
 
   const taskApi = TaskFactory.getApi()
 
-  const loadTasks = async () => {
+  const loadTasks = useCallback(async () => {
     try {
       setLoading(true)
       const data = await taskApi.getList({ project_id: projectId })
       setTasks(data)
-    } catch (err: any) {
-      setError(err.message)
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'An error occurred')
     } finally {
       setLoading(false)
     }
-  }
+  }, [taskApi, projectId])
 
   useEffect(() => {
     loadTasks()
-  }, [projectId])
+  }, [projectId, loadTasks])
 
-  const handleCreateTask = async (taskData: any) => {
+  const handleCreateTask = async (taskData: { status?: string }) => {
     try {
       const data = {
         ...taskData,
@@ -217,28 +220,30 @@ export function TasksExample({ projectId = 1 }: { projectId?: number }) {
       setShowForm(false)
       setCreateForColumn(null)
       loadTasks()
-    } catch (err: any) {
-      throw new Error(err.response?.data?.detail || 'Failed to create task')
+    } catch (err: unknown) {
+      const errorMessage = err && typeof err === 'object' && 'response' in err && err.response && typeof err.response === 'object' && 'data' in err.response && err.response.data && typeof err.response.data === 'object' && 'detail' in err.response.data ? String(err.response.data.detail) : 'Failed to create task'
+      throw new Error(errorMessage)
     }
   }
 
-  const handleEditTask = async (taskData: any) => {
+  const handleEditTask = async (taskData: unknown) => {
     try {
-      await taskApi.update(editingTask.id, taskData)
+      await taskApi.update((editingTask as { id: number }).id, taskData as any)
       setEditingTask(null)
       loadTasks()
-    } catch (err: any) {
-      throw new Error(err.response?.data?.detail || 'Failed to update task')
+    } catch (err: unknown) {
+      const errorMessage = err && typeof err === 'object' && 'response' in err && err.response && typeof err.response === 'object' && 'data' in err.response && err.response.data && typeof err.response.data === 'object' && 'detail' in err.response.data ? String(err.response.data.detail) : 'Failed to update task'
+      throw new Error(errorMessage)
     }
   }
 
-  const handleDeleteTask = async (task: any) => {
+  const handleDeleteTask = async (task: { id: number }) => {
     if (confirm('Are you sure you want to delete this task?')) {
       try {
         await taskApi.delete(task.id)
         loadTasks()
-      } catch (err: any) {
-        alert('Failed to delete task: ' + err.message)
+      } catch (err: unknown) {
+        alert('Failed to delete task: ' + (err instanceof Error ? err.message : 'Unknown error'))
       }
     }
   }
@@ -247,13 +252,13 @@ export function TasksExample({ projectId = 1 }: { projectId?: number }) {
     try {
       await taskApi.update(taskId, { status: newStatus })
       loadTasks()
-    } catch (err: any) {
-      alert('Failed to move task: ' + err.message)
+    } catch (err: unknown) {
+      alert('Failed to move task: ' + (err instanceof Error ? err.message : 'Unknown error'))
     }
   }
 
   // Convert tasks to kanban items
-  const kanbanItems = tasks.map(task => ({
+  const kanbanItems = (tasks as any[]).map((task: { id: number; status: string; title: string; description?: string }) => ({
     id: task.id,
     status: task.status,
     title: task.title,
@@ -278,7 +283,7 @@ export function TasksExample({ projectId = 1 }: { projectId?: number }) {
     return TaskFactory.createFormView({
       mode: 'edit',
       initialData: editingTask,
-      resourceId: editingTask.id,
+      resourceId: (editingTask as { id: number }).id,
       projectId,
       onSubmit: handleEditTask,
       onCancel: () => setEditingTask(null)

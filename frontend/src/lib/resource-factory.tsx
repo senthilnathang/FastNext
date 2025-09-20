@@ -31,7 +31,7 @@ export interface ResourceConfig<T extends BaseResource = BaseResource> {
     cardFields?: Array<{
       key: keyof T | string
       label: string
-      render?: (value: any, item: KanbanItem<T>) => React.ReactNode
+      render?: (value: unknown, item: KanbanItem<T>) => React.ReactNode
     }>
   }
   
@@ -46,7 +46,7 @@ export interface ResourceConfig<T extends BaseResource = BaseResource> {
   
   // API methods (optional overrides)
   customApi?: {
-    getList?: (filters?: any) => Promise<T[]>
+    getList?: (filters?: Record<string, unknown>) => Promise<T[]>
     getById?: (id: number) => Promise<T>
     create?: (data: Partial<T>) => Promise<T>
     update?: (id: number, data: Partial<T>) => Promise<T>
@@ -62,7 +62,7 @@ export class ResourceApiFactory<T extends BaseResource> {
     this.config = config
   }
   
-  getList = async (filters?: any): Promise<T[]> => {
+  getList = async (filters?: Record<string, unknown>): Promise<T[]> => {
     if (this.config.customApi?.getList) {
       return this.config.customApi.getList(filters)
     }
@@ -236,7 +236,7 @@ export const createUserResourceConfig = (): ResourceConfig<any> => ({
     { key: 'email', label: 'Email', sortable: true },
     { key: 'full_name', label: 'Full Name' },
     { key: 'is_active', label: 'Active', render: (value) => value ? 'Yes' : 'No' },
-    { key: 'created_at', label: 'Created', render: (value) => new Date(value).toLocaleDateString() }
+    { key: 'created_at', label: 'Created', render: (value) => new Date(value as string).toLocaleDateString() }
   ],
   formFields: [
     { name: 'username', label: 'Username', type: 'text', required: true },
@@ -262,7 +262,7 @@ export const createProjectResourceConfig = (): ResourceConfig<any> => ({
     { key: 'name', label: 'Name', sortable: true },
     { key: 'description', label: 'Description' },
     { key: 'is_public', label: 'Public', render: (value) => value ? 'Yes' : 'No' },
-    { key: 'created_at', label: 'Created', render: (value) => new Date(value).toLocaleDateString() }
+    { key: 'created_at', label: 'Created', render: (value) => new Date(value as string).toLocaleDateString() }
   ],
   formFields: [
     { name: 'name', label: 'Project Name', type: 'text', required: true },
@@ -286,7 +286,7 @@ export const createTaskResourceConfig = (): ResourceConfig<any> => ({
     { key: 'title', label: 'Title', sortable: true },
     { key: 'status', label: 'Status' },
     { key: 'priority', label: 'Priority' },
-    { key: 'due_date', label: 'Due Date', render: (value) => value ? new Date(value).toLocaleDateString() : '-' }
+    { key: 'due_date', label: 'Due Date', render: (value) => value ? new Date(value as string).toLocaleDateString() : '-' }
   ],
   kanbanConfig: {
     statusField: 'status',
@@ -297,7 +297,7 @@ export const createTaskResourceConfig = (): ResourceConfig<any> => ({
     ],
     cardFields: [
       { key: 'priority', label: 'Priority' },
-      { key: 'due_date', label: 'Due', render: (value) => value ? new Date(value).toLocaleDateString() : 'No due date' }
+      { key: 'due_date', label: 'Due', render: (value) => value ? new Date(value as string).toLocaleDateString() : 'No due date' }
     ]
   },
   formFields: [
