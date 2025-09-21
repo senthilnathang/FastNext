@@ -8,7 +8,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/shared/components/dropdown-menu';
-import { useTheme } from '@/shared/services/ThemeContext';
+import { useTheme } from 'next-themes';
 
 export function ThemeToggle() {
   const { theme, setTheme } = useTheme();
@@ -44,18 +44,28 @@ export function ThemeToggle() {
 }
 
 export function SimpleThemeToggle() {
-  const { toggleTheme, theme, actualTheme } = useTheme();
+  const { theme, setTheme, resolvedTheme } = useTheme();
+
+  const toggleTheme = () => {
+    if (theme === 'light') {
+      setTheme('dark');
+    } else if (theme === 'dark') {
+      setTheme('system');
+    } else {
+      setTheme('light');
+    }
+  };
 
   const getIcon = () => {
     if (theme === 'system') {
       return <Monitor className="h-5 w-5" />;
     }
-    return actualTheme === 'dark' ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />;
+    return resolvedTheme === 'dark' ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />;
   };
 
   const getTooltip = () => {
     if (theme === 'system') {
-      return `System (${actualTheme})`;
+      return `System (${resolvedTheme})`;
     }
     return theme === 'dark' ? 'Dark mode' : 'Light mode';
   };

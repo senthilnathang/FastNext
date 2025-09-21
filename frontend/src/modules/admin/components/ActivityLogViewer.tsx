@@ -176,7 +176,7 @@ export default function ActivityLogViewer({ showUserActivitiesOnly = false }: Ac
     } else {
       fetchActivityLogs();
     }
-  }, [search, action, entityType, level, startDate, endDate, days, currentPage, fetchActivityLogs]);
+  }, [search, action, entityType, level, startDate, endDate, days, currentPage, fetchActivityLogs, setCurrentPage]);
 
   const handleRefresh = () => {
     fetchActivityLogs();

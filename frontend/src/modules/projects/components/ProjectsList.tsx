@@ -43,6 +43,50 @@ const statusColors = {
   archived: 'bg-gray-100 text-gray-800'
 }
 
+// Mock data for demonstration
+const mockProjects: Project[] = [
+  {
+    id: 1,
+    name: 'E-commerce Platform',
+    description: 'Modern e-commerce solution with advanced features',
+    status: 'active',
+    created_at: '2024-01-15T10:00:00Z',
+    updated_at: '2024-01-20T15:30:00Z',
+    pages_count: 12,
+    components_count: 45
+  },
+  {
+    id: 2,
+    name: 'Marketing Website',
+    description: 'Company marketing website with blog functionality',
+    status: 'active',
+    created_at: '2024-01-10T08:00:00Z',
+    updated_at: '2024-01-18T12:00:00Z',
+    pages_count: 8,
+    components_count: 23
+  },
+  {
+    id: 3,
+    name: 'Portfolio Site',
+    description: 'Personal portfolio showcase',
+    status: 'inactive',
+    created_at: '2024-01-05T14:00:00Z',
+    updated_at: '2024-01-15T09:00:00Z',
+    pages_count: 5,
+    components_count: 15
+  },
+  {
+    id: 4,
+    name: 'Legacy Project',
+    description: 'Old project that needs migration',
+    status: 'archived',
+    created_at: '2023-12-01T10:00:00Z',
+    updated_at: '2023-12-20T16:00:00Z',
+    pages_count: 20,
+    components_count: 78
+  }
+]
+
 export default function ProjectsList() {
   const [projects, setProjects] = useState<Project[]>([])
   const [loading, setLoading] = useState(true)
@@ -59,49 +103,6 @@ export default function ProjectsList() {
     ''
   )
 
-  // Mock data for demonstration
-  const mockProjects: Project[] = [
-    {
-      id: 1,
-      name: 'E-commerce Platform',
-      description: 'Modern e-commerce solution with advanced features',
-      status: 'active',
-      created_at: '2024-01-15T10:00:00Z',
-      updated_at: '2024-01-20T15:30:00Z',
-      pages_count: 12,
-      components_count: 45
-    },
-    {
-      id: 2,
-      name: 'Marketing Website',
-      description: 'Company marketing website with blog functionality',
-      status: 'active',
-      created_at: '2024-01-10T08:00:00Z',
-      updated_at: '2024-01-18T12:00:00Z',
-      pages_count: 8,
-      components_count: 23
-    },
-    {
-      id: 3,
-      name: 'Portfolio Site',
-      description: 'Personal portfolio showcase',
-      status: 'inactive',
-      created_at: '2024-01-05T14:00:00Z',
-      updated_at: '2024-01-15T09:00:00Z',
-      pages_count: 5,
-      components_count: 15
-    },
-    {
-      id: 4,
-      name: 'Legacy Project',
-      description: 'Old project that needs migration',
-      status: 'archived',
-      created_at: '2023-12-01T10:00:00Z',
-      updated_at: '2023-12-20T16:00:00Z',
-      pages_count: 20,
-      components_count: 78
-    }
-  ]
 
   useEffect(() => {
     // Simulate API call with filtering, sorting, and pagination
@@ -146,7 +147,7 @@ export default function ProjectsList() {
         const paginatedProjects = filteredProjects.slice(startIndex, endIndex)
         
         setProjects(paginatedProjects)
-      } catch (err) {
+      } catch {
         setError('Failed to load projects')
       } finally {
         setLoading(false)
