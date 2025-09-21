@@ -14,12 +14,14 @@ A comprehensive full-stack web application framework built with modern technolog
 - **TypeScript** - Typed JavaScript at scale
 - **Tailwind CSS** - Utility-first CSS framework
 - **ShadcnUI** - Re-usable components built with Radix UI and Tailwind CSS
+- **nuqs** - Type-safe URL state management for React
 
 ### Development Tools
 - **Jest** - JavaScript testing framework
 - **Storybook** - Tool for building UI components in isolation
 - **Pylint** - Python code analysis tool
 - **Biome** - Fast formatter and linter for JavaScript/TypeScript
+- **ESLint** - JavaScript/TypeScript linting and code quality
 - **Swagger UI** - Interactive API documentation and testing interface
 
 ## Project Structure
@@ -224,6 +226,8 @@ import { User, Project } from '@/shared/types'
 ### Documentation
 - **[Backend Development Guide](docs/BACKEND_DEV.md)** - Backend development, testing, and deployment
 - **[Frontend Development Guide](docs/FRONTEND_DEV.md)** - Frontend development, Storybook, and testing
+- **[Coding Standards](CODING_STANDARDS.md)** - Code quality guidelines and best practices
+- **[CRUD System Documentation](CRUD_SYSTEM_DOCUMENTATION.md)** - Generic CRUD operations guide
 
 ## API Documentation & Testing
 
@@ -386,8 +390,9 @@ The application includes a comprehensive Swagger UI integration for interactive 
 ### Key Capabilities
 
 - **Unified Navigation**: Responsive left sidebar with role-based menu filtering
+- **URL State Management**: Type-safe URL-based state with shareable links and browser history support
 - **Comprehensive Settings**: Complete user profile and security management
-- **Activity Monitoring**: Real-time activity logging with detailed tracking
+- **Activity Monitoring**: Real-time activity logging with detailed tracking and URL-based filtering
 - **Audit Trail**: Complete change history with old/new value comparisons
 - **Security Features**: 2FA support, session management, and threat monitoring
 - **Visual Builder**: Complete drag-and-drop builder with component library
@@ -398,10 +403,80 @@ The application includes a comprehensive Swagger UI integration for interactive 
 - **Enterprise Navigation**: Professional sidebar with breadcrumbs and role-based access
 - **User Management**: Complete RBAC system with project collaboration
 
-## Roadmap
+## URL State Management
 
-### Recently Added ✅
-- **Modular Frontend Architecture**: Feature-based modules with clear separation of concerns
+The FastNext Framework includes comprehensive URL state management using nuqs, providing type-safe state synchronization with the browser URL. This enables shareable links, browser history support, and persistent filter states.
+
+### Features
+- **Type-safe URL parameters**: Automatic parsing and validation of URL query parameters
+- **Shareable links**: Share filtered views and application states via URL
+- **Browser history support**: Navigate back/forward through different states
+- **Persistent state**: Filters, pagination, and view modes persist across page refreshes
+
+### Built-in URL State Hooks
+
+```typescript
+import { 
+  useSearchState,
+  usePaginationState,
+  useSortState,
+  useViewModeState,
+  useTabState,
+  useFilterArrayState,
+  useBooleanFilterState
+} from '@/shared/hooks'
+
+// Search functionality
+const [search, setSearch] = useSearchState()
+
+// Pagination with page and limit
+const { page, setPage, limit, offset } = usePaginationState(1, 20)
+
+// Sorting with field and direction
+const { sortBy, setSortBy, sortOrder, setSortOrder } = useSortState('name', 'asc')
+
+// View mode switching (grid/list)
+const [viewMode, setViewMode] = useViewModeState(['grid', 'list'], 'grid')
+
+// Tab navigation
+const [activeTab, setActiveTab] = useTabState(['profile', 'security'], 'profile')
+```
+
+### Implementation Examples
+
+#### Activity Log Filtering
+The activity log viewer demonstrates comprehensive URL state management:
+- Search queries in URL
+- Pagination state preservation
+- Filter combinations (action, level, time range)
+- Sort preferences maintained
+
+#### Settings Tab Navigation
+Settings pages use URL-based tab state:
+- Direct navigation to specific tabs via URL
+- Shareable links to specific settings sections
+- Browser back/forward navigation between tabs
+
+#### Project Management
+Project lists showcase advanced filtering:
+- Search, status filtering, and sorting in URL
+- View mode (grid/list) preference stored
+- Pagination state across page refreshes
+
+## Recent Updates & Improvements
+
+### Latest Changes ✅
+- **URL State Management**: Integrated nuqs for type-safe URL-based state management across the application
+- **Backend Architecture Enhancements**: Improved API structure, enhanced CRUD operations, and better error handling
+- **User, Role & Permission System**: Complete RBAC implementation with enhanced permission management
+- **Project Model Improvements**: Enhanced project structure and data models for better scalability
+- **Modular Frontend Architecture**: Feature-based modules with clear separation of concerns and barrel exports
+- **Code Quality & Standards**: Comprehensive coding standards, linting improvements, and documentation
+- **Import Path Optimization**: Systematic import path updates for better module organization
+- **Enhanced Testing**: Improved test coverage and testing infrastructure
+- **Documentation Updates**: Added comprehensive developer guides and API documentation
+
+### Core Framework Features ✅
 - **Unified Navigation**: Responsive left sidebar with expandable sections
 - **Settings Dashboard**: Complete user settings interface with tabbed navigation
 - **Security Management**: 2FA setup, session controls, and notification preferences
@@ -410,7 +485,15 @@ The application includes a comprehensive Swagger UI integration for interactive 
 - **Swagger UI Integration**: Interactive API documentation with authentication support
 - **Enhanced Backend Structure**: Organized API routes, services, and middleware layers
 
-### Upcoming Features
+### Development & Code Quality ✅
+- **Modular Code Organization**: Feature-based modules with clear boundaries
+- **CRUD System Template**: Generic CRUD operations for rapid development
+- **Code Standards**: Established coding standards and best practices
+- **Import Path Structure**: Organized import paths with TypeScript path mapping
+- **Testing Infrastructure**: Unit, integration, and E2E testing setup
+- **Development Tools**: Enhanced development workflow with better tooling
+
+## Upcoming Features
 - **Advanced Security**: TOTP 2FA implementation and hardware key support
 - **Data Visualization**: Activity and security analytics dashboards
 - **Notification System**: Real-time in-app notifications and email alerts

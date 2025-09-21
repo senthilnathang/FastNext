@@ -7,9 +7,7 @@ import {
   parseAsBoolean,
   parseAsArrayOf,
   parseAsStringLiteral,
-  parseAsJson,
-  type ParseAsStringLiterals,
-  type Parser
+  parseAsJson
 } from 'nuqs'
 
 /**
@@ -86,9 +84,15 @@ export function useViewModeState<T extends readonly string[]>(
 
 /**
  * Custom hook for managing complex object state in URL as JSON
+ * Note: Consider using schema validation libraries like Zod for production use
  */
-export function useJSONState<T>(key: string, defaultValue: T) {
-  return useQueryState(key, parseAsJson<T>().withDefault(defaultValue))
+export function useJSONState<T extends Record<string, any>>(key: string, defaultValue: T) {
+  return useQueryState(key, parseAsJson((value: unknown) => {
+    if (typeof value === 'object' && value !== null) {
+      return value as T
+    }
+    return null
+  }).withDefault(defaultValue as NonNullable<T>))
 }
 
 /**
