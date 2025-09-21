@@ -5,31 +5,26 @@ import { useAuth } from '@/modules/auth';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/components/card';
 import { Button } from '@/shared/components/button';
 import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  PieChart,
-  Pie,
-  Cell,
-  AreaChart,
-  Area
-} from 'recharts';
-import {
   Building2,
   Users,
   Activity,
-  TrendingUp,
   Plus,
   Eye,
   Edit3,
-  Calendar,
   BarChart3
 } from 'lucide-react';
 import { API_CONFIG, getApiUrl } from '@/shared/services/api/config';
+import { AnalyticsDashboard, type KpiData } from '@/shared/components/analytics-dashboard';
+import { EnhancedDataTable, EnhancedDataTableColumnHeader } from '@/shared/components/enhanced-data-table';
+import { EnhancedEmptyState } from '@/shared/components/enhanced-empty-state';
+import {
+  createColumnHelper,
+  getCoreRowModel,
+  useReactTable,
+  getSortedRowModel,
+  getFilteredRowModel,
+  getPaginationRowModel,
+} from '@tanstack/react-table';
 
 interface Project {
   id: number;
@@ -69,28 +64,131 @@ export default function DashboardPage() {
 
   // Sample data for charts
   const projectActivityData = [
-    { month: 'Jan', projects: 12, pages: 45, components: 120 },
-    { month: 'Feb', projects: 15, pages: 52, components: 135 },
-    { month: 'Mar', projects: 18, pages: 63, components: 158 },
-    { month: 'Apr', projects: 22, pages: 71, components: 182 },
-    { month: 'May', projects: 25, pages: 84, components: 205 },
-    { month: 'Jun', projects: 28, pages: 92, components: 228 }
+    { date: 'Jan', projects: 12, pages: 45, components: 120 },
+    { date: 'Feb', projects: 15, pages: 52, components: 135 },
+    { date: 'Mar', projects: 18, pages: 63, components: 158 },
+    { date: 'Apr', projects: 22, pages: 71, components: 182 },
+    { date: 'May', projects: 25, pages: 84, components: 205 },
+    { date: 'Jun', projects: 28, pages: 92, components: 228 }
   ];
 
-  const projectStatusData = [
-    { name: 'Active', value: 65, color: '#10B981' },
-    { name: 'Paused', value: 25, color: '#F59E0B' },
-    { name: 'Completed', value: 10, color: '#6B7280' }
+  // KPI data for analytics dashboard
+  const kpiData: KpiData[] = [
+    {
+      title: 'Total Projects',
+      value: stats.totalProjects,
+      change: stats.monthlyGrowth / 100,
+      changeType: 'increase',
+      format: 'number',
+      icon: <Building2 className="h-4 w-4" />,
+      description: 'All projects created'
+    },
+    {
+      title: 'Active Projects',
+      value: stats.activeProjects,
+      change: 0.08,
+      changeType: 'increase',
+      format: 'number',
+      icon: <Activity className="h-4 w-4" />,
+      description: 'Currently active projects'
+    },
+    {
+      title: 'Total Pages',
+      value: stats.totalPages,
+      change: 0.15,
+      changeType: 'increase',
+      format: 'number',
+      icon: <BarChart3 className="h-4 w-4" />,
+      description: 'Pages across all projects'
+    },
+    {
+      title: 'Total Components',
+      value: stats.totalComponents,
+      change: 0.22,
+      changeType: 'increase',
+      format: 'number',
+      icon: <Users className="h-4 w-4" />,
+      description: 'Reusable components created'
+    }
   ];
 
-  const recentActivityData = [
-    { time: '00:00', activity: 15 },
-    { time: '04:00', activity: 8 },
-    { time: '08:00', activity: 45 },
-    { time: '12:00', activity: 78 },
-    { time: '16:00', activity: 65 },
-    { time: '20:00', activity: 32 }
+  // Table setup for projects
+  const columnHelper = createColumnHelper<Project>();
+  
+  const columns = [
+    columnHelper.accessor('name', {
+      header: ({ column }) => (
+        <EnhancedDataTableColumnHeader column={column} title="Project Name" />
+      ),
+      cell: ({ row }) => (
+        <div className="flex items-center space-x-3">
+          <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+            <Building2 className="h-5 w-5 text-blue-600" />
+          </div>
+          <div>
+            <div className="font-medium">{row.getValue('name')}</div>
+            <div className="text-sm text-muted-foreground">
+              {row.original.description || 'No description'}
+            </div>
+          </div>
+        </div>
+      ),
+    }),
+    columnHelper.accessor('status', {
+      header: ({ column }) => (
+        <EnhancedDataTableColumnHeader column={column} title="Status" />
+      ),
+      cell: ({ row }) => {
+        const status = String(row.getValue('status') || (row.original.is_public ? 'active' : 'draft'));
+        return (
+          <span className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(status)}`}>
+            {status}
+          </span>
+        );
+      },
+    }),
+    columnHelper.accessor('pages_count', {
+      header: ({ column }) => (
+        <EnhancedDataTableColumnHeader column={column} title="Pages" />
+      ),
+      cell: ({ row }) => row.getValue('pages_count') || 3,
+    }),
+    columnHelper.accessor('components_count', {
+      header: ({ column }) => (
+        <EnhancedDataTableColumnHeader column={column} title="Components" />
+      ),
+      cell: ({ row }) => row.getValue('components_count') || 8,
+    }),
+    columnHelper.accessor('created_at', {
+      header: ({ column }) => (
+        <EnhancedDataTableColumnHeader column={column} title="Created" />
+      ),
+      cell: ({ row }) => formatDate(row.getValue('created_at')),
+    }),
+    columnHelper.display({
+      id: 'actions',
+      header: 'Actions',
+      cell: () => (
+        <Button variant="ghost" size="sm">
+          <Edit3 className="h-4 w-4" />
+        </Button>
+      ),
+    }),
   ];
+
+  const table = useReactTable({
+    data: projects,
+    columns,
+    getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    initialState: {
+      pagination: {
+        pageSize: 5,
+      },
+    },
+  });
 
   const fetchDashboardData = useCallback(async () => {
     try {
@@ -197,22 +295,13 @@ export default function DashboardPage() {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center py-12">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-        <span className="ml-2 text-gray-600 dark:text-gray-300">Loading dashboard...</span>
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Dashboard</h1>
-          <p className="text-gray-600 dark:text-gray-400">
+          <h1 className="text-3xl font-bold text-foreground">Dashboard</h1>
+          <p className="text-muted-foreground">
             Welcome back, {user?.full_name || user?.username}! Here&apos;s what&apos;s happening with your projects.
           </p>
         </div>
@@ -222,149 +311,19 @@ export default function DashboardPage() {
         </Button>
       </div>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Total Projects</p>
-                <p className="text-3xl font-bold text-gray-900 dark:text-white">{stats.totalProjects}</p>
-              </div>
-              <Building2 className="h-8 w-8 text-blue-600" />
-            </div>
-            <div className="mt-4 flex items-center text-sm">
-              <TrendingUp className="h-4 w-4 text-green-500 mr-1" />
-              <span className="text-green-600">+{stats.monthlyGrowth}%</span>
-              <span className="text-gray-500 ml-1">from last month</span>
-            </div>
-          </CardContent>
-        </Card>
+      {/* Enhanced Analytics Dashboard */}
+      <AnalyticsDashboard
+        kpis={kpiData}
+        chartData={projectActivityData}
+        chartType="bar"
+        xAxisKey="date"
+        yAxisKeys={['projects', 'pages', 'components']}
+        chartHeight={350}
+        loading={loading}
+        showTrends={true}
+      />
 
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Active Projects</p>
-                <p className="text-3xl font-bold text-gray-900 dark:text-white">{stats.activeProjects}</p>
-              </div>
-              <Activity className="h-8 w-8 text-green-600" />
-            </div>
-            <div className="mt-4 flex items-center text-sm">
-              <span className="text-gray-500">
-                {Math.round((stats.activeProjects / stats.totalProjects) * 100)}% active rate
-              </span>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Total Pages</p>
-                <p className="text-3xl font-bold text-gray-900 dark:text-white">{stats.totalPages}</p>
-              </div>
-              <BarChart3 className="h-8 w-8 text-purple-600" />
-            </div>
-            <div className="mt-4 flex items-center text-sm">
-              <span className="text-gray-500">
-                Avg {Math.round(stats.totalPages / stats.totalProjects)} pages per project
-              </span>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Components</p>
-                <p className="text-3xl font-bold text-gray-900 dark:text-white">{stats.totalComponents}</p>
-              </div>
-              <Users className="h-8 w-8 text-orange-600" />
-            </div>
-            <div className="mt-4 flex items-center text-sm">
-              <span className="text-gray-500">
-                Avg {Math.round(stats.totalComponents / stats.totalProjects)} per project
-              </span>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Charts Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Project Activity Chart */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Project Activity</CardTitle>
-            <CardDescription>Monthly projects, pages, and components created</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={projectActivityData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="month" />
-                <YAxis />
-                <Tooltip />
-                <Bar dataKey="projects" fill="#3B82F6" name="Projects" />
-                <Bar dataKey="pages" fill="#10B981" name="Pages" />
-                <Bar dataKey="components" fill="#F59E0B" name="Components" />
-              </BarChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
-
-        {/* Project Status Distribution */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Project Status</CardTitle>
-            <CardDescription>Distribution of project statuses</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <PieChart>
-                <Pie
-                  data={projectStatusData}
-                  cx="50%"
-                  cy="50%"
-                  labelLine={false}
-                  outerRadius={80}
-                  fill="#8884d8"
-                  dataKey="value"
-                >
-                  {projectStatusData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
-                  ))}
-                </Pie>
-                <Tooltip />
-              </PieChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Activity Chart */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Recent Activity</CardTitle>
-          <CardDescription>User activity over the last 24 hours</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <ResponsiveContainer width="100%" height={200}>
-            <AreaChart data={recentActivityData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="time" />
-              <YAxis />
-              <Tooltip />
-              <Area type="monotone" dataKey="activity" stroke="#3B82F6" fill="#3B82F6" fillOpacity={0.3} />
-            </AreaChart>
-          </ResponsiveContainer>
-        </CardContent>
-      </Card>
-
-      {/* Recent Projects */}
+      {/* Recent Projects Table */}
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <div>
@@ -376,40 +335,30 @@ export default function DashboardPage() {
             View All
           </Button>
         </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {projects.map((project) => (
-              <div key={project.id} className="flex items-center justify-between p-4 border rounded-lg hover:shadow-md transition-shadow">
-                <div className="flex items-center space-x-4">
-                  <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                    <Building2 className="h-6 w-6 text-blue-600" />
-                  </div>
-                  <div>
-                    <h4 className="font-semibold text-gray-900 dark:text-white">{project.name}</h4>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
-                      {project.description || 'No description available'}
-                    </p>
-                    <div className="flex items-center space-x-4 mt-1 text-xs text-gray-500">
-                      <span className="flex items-center">
-                        <Calendar className="h-3 w-3 mr-1" />
-                        {formatDate(project.created_at)}
-                      </span>
-                      <span>{project.pages_count || 3} pages</span>
-                      <span>{project.components_count || 8} components</span>
-                    </div>
-                  </div>
-                </div>
-                <div className="flex items-center space-x-3">
-                  <span className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(project.status)}`}>
-                    {project.status || (project.is_public ? 'Active' : 'Draft')}
-                  </span>
-                  <Button variant="ghost" size="sm">
-                    <Edit3 className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-            ))}
-          </div>
+        <CardContent className="px-0">
+          {projects.length > 0 ? (
+            <EnhancedDataTable
+              table={table}
+              showRowSelectionCount={true}
+            />
+          ) : (
+            <div className="px-6">
+              <EnhancedEmptyState
+                variant="no-data"
+                title="No projects yet"
+                description="Get started by creating your first project"
+                actions={[
+                  {
+                    label: 'Create Project',
+                    onClick: () => console.log('Create project'),
+                    icon: <Plus className="h-4 w-4" />,
+                  }
+                ]}
+                size="sm"
+                showBackground
+              />
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>
