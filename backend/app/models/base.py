@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, DateTime, Boolean, String, Text, JSON
 from sqlalchemy.sql import func
-from sqlalchemy.ext.declarative import declared_attr
+from sqlalchemy.orm import declared_attr
 from app.db.base import Base
 
 

@@ -13,6 +13,12 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/..")
 from app.db.base import Base
 from app.core.config import settings
 
+# Import all models so they are registered with SQLAlchemy metadata
+from app.models import user, role, permission, user_role, project, project_member
+from app.models import component, page, asset, activity_log, audit_trail, security_setting
+# Import the modern example (optional, for demonstration)
+from app.models import modern_example
+
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config

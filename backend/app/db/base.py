@@ -1,9 +1,17 @@
 from sqlalchemy import create_engine
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, DeclarativeBase
 from app.core.config import settings
 
-engine = create_engine(settings.SQLALCHEMY_DATABASE_URI)
+# SQLAlchemy 2.x modern patterns
+engine = create_engine(
+    settings.SQLALCHEMY_DATABASE_URI,
+    pool_pre_ping=True,  # Enable connection health checks
+    echo=False  # Set to True for SQL query logging
+)
+
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-Base = declarative_base()
+
+class Base(DeclarativeBase):
+    """Modern SQLAlchemy 2.x declarative base"""
+    pass
