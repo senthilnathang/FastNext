@@ -46,7 +46,8 @@
       "Bash(timeout 30 npm run build)",
       "Bash(timeout 40 npm run build)",
       "Bash(timeout 60 npm run build)",
-      "Bash(sed:*)"
+      "Bash(sed:*)",
+      "Bash(./venv/bin/python -c \"\nimport sys\nsys.path.append(''.'')\nfrom main import app\n\nprint(''=== FastNext Projects API Verification ==='')\nprint(''Available routes with /projects:'')\nfor route in app.routes:\n    if hasattr(route, ''path'') and ''/projects'' in route.path:\n        print(f''{list(route.methods)} {route.path}'')\nprint('''')\nprint(''Checking if projects module is properly included...'')\nprint(f''API router includes projects: {\"\"projects\"\" in str(app.router.routes)}'')\n\")"
     ],
     "deny": []
   }

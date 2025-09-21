@@ -24,26 +24,114 @@ A comprehensive full-stack web application framework built with modern technolog
 
 ## Project Structure
 
+The FastNext Framework follows a modular architecture pattern that promotes scalability, maintainability, and developer productivity. The codebase is organized into feature-based modules with clear separation of concerns.
+
+### Backend Structure
 ```
-FastNext/
-├── backend/               # FastAPI backend
-│   ├── app/
-│   │   ├── api/          # API routes
-│   │   ├── auth/         # Authentication logic
-│   │   ├── core/         # Core configurations
-│   │   ├── db/           # Database configurations
-│   │   ├── models/       # SQLAlchemy models
-│   │   └── schemas/      # Pydantic schemas
-│   ├── main.py           # FastAPI application entry point
-│   └── requirements.txt  # Python dependencies
-├── frontend/             # Next.js frontend
-│   ├── src/
-│   │   ├── app/          # Next.js app directory
-│   │   ├── components/   # React components
-│   │   └── lib/          # Utility functions
-│   ├── .storybook/       # Storybook configuration
-│   └── package.json      # Node.js dependencies
-└── README.md
+backend/
+├── app/
+│   ├── api/              # API routes and endpoints
+│   │   ├── routes/       # Feature-specific route modules
+│   │   └── base_crud.py  # Base CRUD operations
+│   ├── auth/             # Authentication and authorization
+│   │   ├── deps.py       # Dependency injection
+│   │   └── permissions.py # Permission system
+│   ├── core/             # Core configurations
+│   │   ├── config.py     # Application settings
+│   │   ├── security.py   # Security utilities
+│   │   └── swagger_config.py # API documentation config
+│   ├── db/               # Database layer
+│   │   ├── session.py    # Database sessions
+│   │   └── init_db.py    # Database initialization
+│   ├── models/           # SQLAlchemy data models
+│   ├── schemas/          # Pydantic schemas for validation
+│   ├── services/         # Business logic layer
+│   ├── middleware/       # Custom middleware
+│   └── utils/           # Utility functions
+├── migrations/          # Alembic database migrations
+├── tests/              # Backend test suite
+├── main.py             # FastAPI application entry point
+└── requirements.txt    # Python dependencies
+```
+
+### Frontend Modular Architecture
+```
+frontend/src/
+├── modules/                    # Feature-based modules
+│   ├── auth/                  # Authentication module
+│   │   ├── components/        # Auth-specific components
+│   │   ├── hooks/            # Authentication hooks
+│   │   ├── services/         # Auth context and services
+│   │   ├── types/           # Authentication types
+│   │   └── index.ts         # Module barrel exports
+│   ├── admin/               # Administration module
+│   │   ├── components/      # Admin UI components
+│   │   ├── hooks/          # Admin management hooks
+│   │   ├── types/          # Admin type definitions
+│   │   └── index.ts
+│   ├── api-docs/           # API documentation module
+│   │   ├── components/     # Swagger UI components
+│   │   ├── types/         # API documentation types
+│   │   └── index.ts
+│   ├── builder/           # Visual page builder
+│   │   ├── components/    # Builder UI components
+│   │   ├── hooks/        # Builder state management
+│   │   ├── types/       # Builder type definitions
+│   │   └── index.ts
+│   ├── projects/         # Project management
+│   │   ├── hooks/       # Project management hooks
+│   │   ├── types/      # Project types
+│   │   └── index.ts
+│   └── settings/        # User settings module
+├── shared/             # Shared resources across modules
+│   ├── components/    # Reusable UI components
+│   │   ├── ui/       # Base UI components (Button, Card, etc.)
+│   │   └── layout/   # Layout components
+│   ├── hooks/        # Shared custom hooks
+│   ├── services/     # API client and shared services
+│   │   └── api/     # API service layer
+│   ├── types/       # Global type definitions
+│   ├── constants/   # Application constants
+│   ├── utils/      # Utility functions
+│   └── index.ts    # Shared barrel exports
+├── features/       # Cross-cutting features
+├── __tests__/     # Test organization
+│   ├── unit/     # Unit tests
+│   ├── integration/ # Integration tests
+│   └── e2e/     # End-to-end tests
+├── __dev__/      # Development tools
+│   └── stories/  # Storybook stories
+└── app/         # Next.js app directory (pages and layouts)
+```
+
+### Key Architectural Benefits
+
+#### 1. **Modular Organization**
+- **Feature-based modules**: Each major feature (auth, admin, builder) is self-contained
+- **Clear boundaries**: Modules have explicit interfaces and dependencies
+- **Scalable structure**: New features can be added as independent modules
+
+#### 2. **Shared Resources**
+- **Centralized UI components**: Reusable components in `/shared/components/`
+- **Common services**: API clients and utilities available across modules
+- **Type safety**: Shared type definitions ensure consistency
+
+#### 3. **Developer Experience**
+- **Barrel exports**: Clean imports using module index files
+- **Predictable structure**: Consistent organization across all modules
+- **Easy navigation**: Intuitive file locations and naming conventions
+
+#### 4. **Import Patterns**
+```typescript
+// Module imports
+import { useAuth, LoginForm } from '@/modules/auth'
+import { UserManager, RoleEditor } from '@/modules/admin'
+import { ComponentLibrary, Canvas } from '@/modules/builder'
+
+// Shared imports
+import { Button, Card, Input } from '@/shared/components'
+import { apiClient, formatDate } from '@/shared/services'
+import { User, Project } from '@/shared/types'
 ```
 
 ## Features
@@ -313,12 +401,14 @@ The application includes a comprehensive Swagger UI integration for interactive 
 ## Roadmap
 
 ### Recently Added ✅
+- **Modular Frontend Architecture**: Feature-based modules with clear separation of concerns
 - **Unified Navigation**: Responsive left sidebar with expandable sections
 - **Settings Dashboard**: Complete user settings interface with tabbed navigation
 - **Security Management**: 2FA setup, session controls, and notification preferences
 - **Activity Monitoring**: Personal activity logs with filtering and export
 - **Audit Trail System**: Comprehensive change tracking with value comparisons
-- **Dashboard Conversion**: Transformed dashboard into user settings interface
+- **Swagger UI Integration**: Interactive API documentation with authentication support
+- **Enhanced Backend Structure**: Organized API routes, services, and middleware layers
 
 ### Upcoming Features
 - **Advanced Security**: TOTP 2FA implementation and hardware key support

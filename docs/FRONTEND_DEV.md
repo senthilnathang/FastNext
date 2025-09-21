@@ -75,32 +75,108 @@ npm run build-storybook    # Build Storybook for production
 
 ## Project Structure
 
+The FastNext frontend follows a **modular architecture** that organizes code by features and functionality, promoting scalability and maintainability.
+
+### Modular Architecture Overview
+
 ```
 frontend/src/
-├── app/                   # Next.js App Router
-│   ├── layout.tsx        # Root layout
-│   ├── page.tsx          # Home page
-│   ├── globals.css       # Global styles
-│   ├── login/            # Login page
-│   ├── register/         # Registration page
-│   ├── dashboard/        # Dashboard pages
-│   ├── settings/         # Settings pages
-│   ├── admin/            # Admin pages
-│   ├── projects/         # Projects pages
-│   └── builder/          # Visual builder
-├── components/           # React components
-│   ├── ui/              # Base UI components (shadcn/ui)
-│   ├── layout/          # Layout components
-│   ├── auth/            # Authentication components
-│   ├── builder/         # Visual builder components
-│   ├── profile/         # Profile components
-│   └── security/        # Security components
-├── contexts/            # React contexts
-├── hooks/               # Custom hooks
-├── lib/                 # Utilities and configurations
-├── types/               # TypeScript type definitions
-└── stories/             # Storybook stories
+├── modules/                    # Feature-based modules
+│   ├── auth/                  # Authentication module
+│   │   ├── components/        # Auth-specific components (LoginForm, etc.)
+│   │   ├── hooks/            # Authentication hooks (useAuth)
+│   │   ├── services/         # Auth context and API services
+│   │   ├── types/           # Authentication type definitions
+│   │   └── index.ts         # Module barrel exports
+│   ├── admin/               # Administration module
+│   │   ├── components/      # Admin UI components (UserManager, RoleEditor)
+│   │   ├── hooks/          # Admin hooks (useUsers, useRoles, usePermissions)
+│   │   ├── types/          # Admin type definitions
+│   │   └── index.ts
+│   ├── api-docs/           # API documentation module
+│   │   ├── components/     # Swagger UI components
+│   │   ├── types/         # API documentation types
+│   │   └── index.ts
+│   ├── builder/           # Visual page builder
+│   │   ├── components/    # Builder UI (Canvas, ComponentLibrary, PropertyPanel)
+│   │   ├── hooks/        # Builder state management (useComponents)
+│   │   ├── types/       # Builder type definitions
+│   │   └── index.ts
+│   ├── projects/         # Project management
+│   │   ├── hooks/       # Project management hooks (useProjects)
+│   │   ├── types/      # Project types
+│   │   └── index.ts
+│   └── settings/        # User settings module
+├── shared/             # Shared resources across modules
+│   ├── components/    # Reusable UI components
+│   │   ├── ui/       # Base shadcn/ui components (Button, Card, Input)
+│   │   └── layout/   # Layout components (Sidebar, Header, AppLayout)
+│   ├── hooks/        # Shared custom hooks (useApiQuery, useTheme)
+│   ├── services/     # API client and shared services
+│   │   └── api/     # API service layer (client.ts, users.ts, etc.)
+│   ├── types/       # Global type definitions
+│   ├── constants/   # Application constants
+│   ├── utils/      # Utility functions
+│   └── index.ts    # Shared barrel exports
+├── features/       # Cross-cutting features
+├── __tests__/     # Test organization
+│   ├── unit/     # Unit tests
+│   ├── integration/ # Integration tests
+│   └── e2e/     # End-to-end tests
+├── __dev__/      # Development tools
+│   └── stories/  # Storybook stories
+└── app/         # Next.js App Router
+    ├── layout.tsx        # Root layout
+    ├── page.tsx          # Home page
+    ├── globals.css       # Global styles
+    ├── login/            # Login page
+    ├── register/         # Registration page
+    ├── dashboard/        # Dashboard pages
+    ├── settings/         # Settings pages
+    ├── admin/            # Admin pages
+    ├── projects/         # Projects pages
+    └── builder/          # Visual builder
 ```
+
+### Module Import Patterns
+
+The modular architecture uses **barrel exports** for clean, predictable imports:
+
+```typescript
+// Module imports - feature-specific functionality
+import { useAuth, LoginForm, ChangePasswordForm } from '@/modules/auth'
+import { UserManager, RoleEditor, useUsers } from '@/modules/admin'
+import { Canvas, ComponentLibrary, useComponents } from '@/modules/builder'
+import { SwaggerUI, ApiTester } from '@/modules/api-docs'
+
+// Shared imports - reusable across modules
+import { Button, Card, Input, DataTable } from '@/shared/components'
+import { apiClient, useApiQuery } from '@/shared/services'
+import { User, Project, ApiResponse } from '@/shared/types'
+import { formatDate, parseError } from '@/shared/utils'
+```
+
+### Benefits of Modular Architecture
+
+#### 1. **Feature Isolation**
+- Each module encapsulates related functionality
+- Clear boundaries prevent tight coupling
+- Easier to test and maintain individual features
+
+#### 2. **Scalable Organization**
+- New features are added as self-contained modules
+- Predictable file locations and naming conventions
+- Consistent patterns across all modules
+
+#### 3. **Developer Experience**
+- Clean imports with barrel exports
+- IDE autocomplete and navigation support
+- Easy to onboard new developers
+
+#### 4. **Code Reusability**
+- Shared components and utilities are centralized
+- Common patterns are abstracted into hooks
+- Type safety across module boundaries
 
 ## Component Development
 

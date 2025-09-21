@@ -2,39 +2,60 @@
 
 ## Overview
 
-FastNext uses **React Query (TanStack Query v5)** as the primary data fetching and state management solution. This provides a consistent, powerful, and efficient way to handle server state throughout the application.
+FastNext uses **React Query (TanStack Query v5)** as the primary data fetching and state management solution. This provides a consistent, powerful, and efficient way to handle server state throughout the application's modular architecture.
 
 ## Architecture
 
+The data fetching layer is organized to support the modular frontend architecture, with shared services and module-specific hooks.
+
 ### Core Components
 
-1. **Enhanced API Client** (`/lib/api/client.ts`)
+1. **Enhanced API Client** (`/shared/services/api/client.ts`)
    - Axios-based HTTP client with comprehensive error handling
    - Automatic token management and refresh
    - Request/response logging and monitoring
    - Graceful error recovery and user-friendly messages
 
-2. **Query Provider** (`/components/providers/QueryProvider.tsx`)
+2. **Query Provider** (`/shared/components/QueryProvider.tsx`)
    - Global React Query configuration
    - Development tools integration
    - Intelligent retry logic and caching strategies
 
-3. **Resource-Specific APIs** (`/lib/api/`)
+3. **Resource-Specific APIs** (`/shared/services/api/`)
    - Modular API functions for each resource (users, roles, permissions)
    - Type-safe request/response interfaces
    - Consistent error handling
 
-4. **Custom Hooks** (`/hooks/`)
-   - React Query hooks for each resource
+4. **Module-Specific Hooks** (within each module)
+   - React Query hooks organized by feature module
    - Optimistic updates and cache management
    - Loading states and error handling
+
+### Module Organization
+
+```
+frontend/src/
+├── shared/services/api/    # Shared API layer
+│   ├── client.ts          # Base API client
+│   ├── users.ts           # User API functions
+│   ├── roles.ts           # Role API functions
+│   └── projects.ts        # Project API functions
+├── modules/
+│   ├── auth/hooks/        # Auth-specific hooks (useAuth, useLogin)
+│   ├── admin/hooks/       # Admin hooks (useUsers, useRoles)
+│   ├── builder/hooks/     # Builder hooks (useComponents)
+│   └── projects/hooks/    # Project hooks (useProjects)
+└── shared/hooks/          # Cross-module hooks (useApiQuery)
+```
 
 ## Usage Patterns
 
 ### Basic Data Fetching
 
 ```typescript
-import { useUsers } from '@/hooks/useUsers'
+// In admin module - admin/components/UsersPage.tsx
+import { useUsers } from '@/modules/admin'
+import { LoadingSpinner, ErrorMessage } from '@/shared/components'
 
 function UsersPage() {
   const { data, isLoading, error } = useUsers()
@@ -49,7 +70,10 @@ function UsersPage() {
 ### Mutations with Optimistic Updates
 
 ```typescript
-import { useCreateUser, useUsers } from '@/hooks/useUsers'
+// In admin module - admin/components/CreateUserForm.tsx
+import { useCreateUser } from '@/modules/admin'
+import { Button } from '@/shared/components'
+import { apiUtils } from '@/shared/services'
 
 function CreateUserForm() {
   const createUser = useCreateUser()
@@ -69,9 +93,9 @@ function CreateUserForm() {
   return (
     <form onSubmit={handleSubmit}>
       {/* form fields */}
-      <button disabled={createUser.isPending}>
+      <Button disabled={createUser.isPending}>
         {createUser.isPending ? 'Creating...' : 'Create User'}
-      </button>
+      </Button>
     </form>
   )
 }

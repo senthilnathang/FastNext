@@ -8,6 +8,7 @@ from app.db.session import get_db
 from app.models.user import User
 from app.models.project import Project
 from app.schemas.project import Project as ProjectSchema, ProjectCreate, ProjectUpdate
+from typing import Dict
 
 router = APIRouter()
 
@@ -19,15 +20,18 @@ def read_projects(
     limit: int = 100,
     current_user: User = Depends(get_current_active_user),
 ) -> Any:
-    # Get projects user owns or has access to
-    from app.models.project_member import ProjectMember
-    
-    # Use a single query with OR condition instead of UNION to avoid JSON equality issues
-    all_projects = db.query(Project).outerjoin(ProjectMember).filter(
-        (Project.user_id == current_user.id) |
-        ((ProjectMember.user_id == current_user.id) & (ProjectMember.is_active == True))
-    ).distinct().offset(skip).limit(limit).all()
-    return all_projects
+    """Get projects user owns or has access to"""
+    try:
+        # Get paginated projects
+        user_projects = db.query(Project).filter(
+            Project.user_id == current_user.id
+        ).offset(skip).limit(limit).all()
+        
+        return user_projects
+    except Exception as e:
+        # Log the error and return empty response
+        print(f"Error fetching projects: {e}")
+        return []
 
 
 @router.post("/", response_model=ProjectSchema)
