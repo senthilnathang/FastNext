@@ -53,19 +53,19 @@ export default function Breadcrumb({ className, customItems }: BreadcrumbProps) 
   const breadcrumbs = generateBreadcrumbs()
 
   return (
-    <nav className={cn('flex items-center space-x-1 text-sm text-gray-500 dark:text-gray-400', className)}>
+    <nav className={cn('flex items-center space-x-1 text-xs text-gray-500 dark:text-gray-400', className)}>
       {breadcrumbs.map((item, index) => {
         const isLast = index === breadcrumbs.length - 1
         
         return (
           <React.Fragment key={`${item.href}-${index}`}>
             {index > 0 && (
-              <ChevronRight className="w-4 h-4 mx-1" />
+              <ChevronRight className="w-3 h-3 mx-0.5" />
             )}
             
             {isLast ? (
               <span className="flex items-center text-gray-900 dark:text-white font-medium">
-                {item.icon && <item.icon className="w-4 h-4 mr-1" />}
+                {item.icon && <item.icon className="w-3 h-3 mr-1" />}
                 {item.label}
               </span>
             ) : (
@@ -73,7 +73,7 @@ export default function Breadcrumb({ className, customItems }: BreadcrumbProps) 
                 href={item.href}
                 className="flex items-center hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
               >
-                {item.icon && <item.icon className="w-4 h-4 mr-1" />}
+                {item.icon && <item.icon className="w-3 h-3 mr-1" />}
                 {item.label}
               </Link>
             )}

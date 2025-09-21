@@ -3,6 +3,12 @@ import Header from '@/shared/components/Header'
 // Mock function helper
 const fn = () => () => {}
 
+// Define the component props interface explicitly
+interface HeaderProps {
+  sidebarCollapsed?: boolean;
+  onToggleSidebar?: () => void;
+}
+
 // Mock next/navigation
 const mockRouter = {
   push: fn(),
@@ -13,7 +19,7 @@ const mockRouter = {
   refresh: fn()
 }
 
-const meta: Meta<typeof Header> = {
+const meta: Meta<HeaderProps> = {
   title: 'Layout/Header',
   component: Header,
   parameters: {
@@ -27,6 +33,16 @@ const meta: Meta<typeof Header> = {
     }
   },
   tags: ['autodocs'],
+  argTypes: {
+    sidebarCollapsed: {
+      control: 'boolean',
+      description: 'Whether the sidebar is collapsed'
+    },
+    onToggleSidebar: {
+      action: 'toggle-sidebar',
+      description: 'Callback to toggle sidebar'
+    }
+  },
   decorators: [
     (Story) => (
       <div style={{ minHeight: '200px' }}>
@@ -40,6 +56,10 @@ export default meta
 type Story = StoryObj<typeof meta>
 
 export const Default: Story = {
+  args: {
+    sidebarCollapsed: undefined,
+    onToggleSidebar: undefined
+  },
   parameters: {
     docs: {
       description: {
@@ -50,6 +70,10 @@ export const Default: Story = {
 }
 
 export const DarkMode: Story = {
+  args: {
+    sidebarCollapsed: undefined,
+    onToggleSidebar: undefined
+  },
   parameters: {
     backgrounds: {
       default: 'dark',
@@ -73,6 +97,10 @@ export const DarkMode: Story = {
 }
 
 export const MobileView: Story = {
+  args: {
+    sidebarCollapsed: undefined,
+    onToggleSidebar: undefined
+  },
   parameters: {
     viewport: {
       defaultViewport: 'mobile1'
@@ -86,6 +114,10 @@ export const MobileView: Story = {
 }
 
 export const TabletView: Story = {
+  args: {
+    sidebarCollapsed: undefined,
+    onToggleSidebar: undefined
+  },
   parameters: {
     viewport: {
       defaultViewport: 'tablet'
@@ -93,6 +125,20 @@ export const TabletView: Story = {
     docs: {
       description: {
         story: 'Header on tablet viewport.'
+      }
+    }
+  }
+}
+
+export const WithSidebarToggle: Story = {
+  args: {
+    sidebarCollapsed: false,
+    onToggleSidebar: fn()
+  },
+  parameters: {
+    docs: {
+      description: {
+        story: 'Header with sidebar toggle functionality enabled.'
       }
     }
   }
