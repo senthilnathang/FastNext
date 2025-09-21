@@ -1,6 +1,7 @@
 from typing import Any, List
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
+from sqlalchemy import func
 
 from app.auth.deps import get_current_active_user
 from app.auth.permissions import require_admin
@@ -12,27 +13,48 @@ from app.schemas.permission import (
     PermissionCreate, 
     PermissionUpdate
 )
+from app.schemas.common import ListResponse
 
 router = APIRouter()
 
 
-@router.get("", response_model=List[PermissionSchema])
-@router.get("/", response_model=List[PermissionSchema])
+@router.get("", response_model=ListResponse[PermissionSchema])
+@router.get("/", response_model=ListResponse[PermissionSchema])
 def read_permissions(
     db: Session = Depends(get_db),
     skip: int = 0,
     limit: int = 100,
     category: str = None,
+    search: str = None,
     current_user: User = Depends(require_admin),
 ) -> Any:
-    """Get all permissions (admin only)"""
+    """Get all permissions with pagination (admin only)"""
     query = db.query(Permission)
     
+    # Apply filters
     if category:
         query = query.filter(Permission.category == category)
     
+    if search:
+        search_term = f"%{search}%"
+        query = query.filter(
+            (Permission.name.ilike(search_term)) |
+            (Permission.description.ilike(search_term)) |
+            (Permission.action.ilike(search_term))
+        )
+    
+    # Get total count
+    total = query.count()
+    
+    # Get paginated results
     permissions = query.offset(skip).limit(limit).all()
-    return permissions
+    
+    return ListResponse.paginate(
+        items=permissions,
+        total=total,
+        skip=skip,
+        limit=limit
+    )
 
 
 @router.post("", response_model=PermissionSchema)

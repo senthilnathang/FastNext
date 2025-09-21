@@ -1,6 +1,7 @@
 from typing import Any, List
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
+from sqlalchemy import func
 
 from app.auth.deps import get_current_active_user
 from app.auth.permissions import require_admin
@@ -8,21 +9,48 @@ from app.core import security
 from app.db.session import get_db
 from app.models.user import User
 from app.schemas.user import User as UserSchema, UserCreate, UserUpdate, UserResponse
+from app.schemas.common import ListResponse
 
 router = APIRouter()
 
 
-@router.get("", response_model=List[UserResponse])
-@router.get("/", response_model=List[UserResponse])
+@router.get("", response_model=ListResponse[UserResponse])
+@router.get("/", response_model=ListResponse[UserResponse])
 def read_users(
     db: Session = Depends(get_db),
     skip: int = 0,
     limit: int = 100,
+    search: str = None,
+    is_active: bool = None,
     current_user: User = Depends(require_admin),
 ) -> Any:
-    """Get all users (admin only)"""
-    users = db.query(User).offset(skip).limit(limit).all()
-    return users
+    """Get all users with pagination (admin only)"""
+    query = db.query(User)
+    
+    # Apply filters
+    if search:
+        search_term = f"%{search}%"
+        query = query.filter(
+            (User.username.ilike(search_term)) |
+            (User.email.ilike(search_term)) |
+            (User.full_name.ilike(search_term))
+        )
+    
+    if is_active is not None:
+        query = query.filter(User.is_active == is_active)
+    
+    # Get total count
+    total = query.count()
+    
+    # Get paginated results
+    users = query.offset(skip).limit(limit).all()
+    
+    return ListResponse.paginate(
+        items=users,
+        total=total,
+        skip=skip,
+        limit=limit
+    )
 
 
 @router.post("", response_model=UserResponse)
@@ -153,3 +181,28 @@ def delete_user(
     db.add(user)
     db.commit()
     return {"message": "User deleted successfully"}
+
+
+@router.patch("/{user_id}/toggle-status", response_model=UserResponse)
+def toggle_user_status(
+    *,
+    db: Session = Depends(get_db),
+    user_id: int,
+    current_user: User = Depends(require_admin),
+) -> Any:
+    """Toggle user active status (admin only)"""
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    if user.is_superuser:
+        raise HTTPException(
+            status_code=400,
+            detail="Cannot modify superuser status"
+        )
+    
+    user.is_active = not user.is_active
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+    return user

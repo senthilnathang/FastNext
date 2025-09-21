@@ -1,6 +1,7 @@
 from typing import Any, List
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
+from sqlalchemy import func
 
 from app.auth.deps import get_current_active_user
 from app.services.permission_service import PermissionService
@@ -8,31 +9,50 @@ from app.db.session import get_db
 from app.models.user import User
 from app.models.project import Project
 from app.schemas.project import Project as ProjectSchema, ProjectCreate, ProjectUpdate
+from app.schemas.common import ListResponse
 from typing import Dict
 
 router = APIRouter()
 
 
-@router.get("", response_model=List[ProjectSchema])
-@router.get("/", response_model=List[ProjectSchema])
+@router.get("", response_model=ListResponse[ProjectSchema])
+@router.get("/", response_model=ListResponse[ProjectSchema])
 def read_projects(
     db: Session = Depends(get_db),
     skip: int = 0,
     limit: int = 100,
+    search: str = None,
     current_user: User = Depends(get_current_active_user),
 ) -> Any:
     """Get projects user owns or has access to"""
     try:
-        # Get paginated projects
-        user_projects = db.query(Project).filter(
-            Project.user_id == current_user.id
-        ).offset(skip).limit(limit).all()
+        # Build query
+        query = db.query(Project).filter(Project.user_id == current_user.id)
         
-        return user_projects
+        # Apply search filter
+        if search:
+            search_term = f"%{search}%"
+            query = query.filter(
+                (Project.name.ilike(search_term)) |
+                (Project.description.ilike(search_term))
+            )
+        
+        # Get total count
+        total = query.count()
+        
+        # Get paginated projects
+        user_projects = query.offset(skip).limit(limit).all()
+        
+        return ListResponse.paginate(
+            items=user_projects,
+            total=total,
+            skip=skip,
+            limit=limit
+        )
     except Exception as e:
         # Log the error and return empty response
         print(f"Error fetching projects: {e}")
-        return []
+        return ListResponse.paginate(items=[], total=0, skip=skip, limit=limit)
 
 
 @router.post("", response_model=ProjectSchema)

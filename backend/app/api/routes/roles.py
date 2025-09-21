@@ -1,6 +1,7 @@
 from typing import Any, List
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
+from sqlalchemy import func
 
 from app.auth.deps import get_current_active_user
 from app.auth.permissions import require_admin
@@ -11,22 +12,48 @@ from app.models.permission import Permission
 from app.models.user_role import RolePermission
 from app.schemas.role import Role as RoleSchema, RoleCreate, RoleUpdate, RoleWithPermissions
 from app.schemas.permission import Permission as PermissionSchema, RolePermissionCreate
+from app.schemas.common import ListResponse
 from app.services.permission_service import PermissionService
 
 router = APIRouter()
 
 
-@router.get("", response_model=List[RoleSchema])
-@router.get("/", response_model=List[RoleSchema])
+@router.get("", response_model=ListResponse[RoleSchema])
+@router.get("/", response_model=ListResponse[RoleSchema])
 def read_roles(
     db: Session = Depends(get_db),
     skip: int = 0,
     limit: int = 100,
+    search: str = None,
+    active_only: bool = True,
     current_user: User = Depends(require_admin),
 ) -> Any:
-    """Get all roles (admin only)"""
-    roles = db.query(Role).filter(Role.is_active == True).offset(skip).limit(limit).all()
-    return roles
+    """Get all roles with pagination (admin only)"""
+    query = db.query(Role)
+    
+    # Apply filters
+    if active_only:
+        query = query.filter(Role.is_active == True)
+    
+    if search:
+        search_term = f"%{search}%"
+        query = query.filter(
+            (Role.name.ilike(search_term)) |
+            (Role.description.ilike(search_term))
+        )
+    
+    # Get total count
+    total = query.count()
+    
+    # Get paginated results
+    roles = query.offset(skip).limit(limit).all()
+    
+    return ListResponse.paginate(
+        items=roles,
+        total=total,
+        skip=skip,
+        limit=limit
+    )
 
 
 @router.post("", response_model=RoleSchema)

@@ -11,7 +11,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/shared/components/dropdown-menu'
-import { ThemeToggle } from '@/shared/components/theme-toggle'
+import { EnhancedThemeToggle } from '@/shared/components/EnhancedThemeToggle'
 import WindowControls from '@/shared/components/window-controls'
 import Breadcrumb from './Breadcrumb'
 import QuickActionButton from '@/shared/components/QuickActionButton'
@@ -58,7 +58,7 @@ export default function Header() {
           </Button>
 
           <div className="flex items-center gap-2">
-            <ThemeToggle />
+            <EnhancedThemeToggle />
           </div>
 
           <WindowControls 
