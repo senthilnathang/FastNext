@@ -3,12 +3,12 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/shared/components/button';
+import { Input } from '@/shared/components/input';
+import { Label } from '@/shared/components/label';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/components/card';
 import { Shield, Eye, EyeOff, AlertCircle } from 'lucide-react';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/modules/auth';
 
 export default function LoginPage() {
   const [username, setUsername] = useState('');

@@ -1,15 +1,13 @@
 'use client';
 
 import React, { useState, useEffect, Suspense } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/modules/auth';
 import { useSearchParams } from 'next/navigation';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import UpdateProfileForm from '@/components/profile/UpdateProfileForm';
-import ChangePasswordForm from '@/components/profile/ChangePasswordForm';
-import SecuritySettings from '@/components/security/SecuritySettings';
-import ActivityLogViewer from '@/components/activity/ActivityLogViewer';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/components/card';
+import { Button } from '@/shared/components/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/components/tabs';
+import { UpdateProfileForm, ChangePasswordForm, SecuritySettings } from '@/modules/auth';
+import ActivityLogViewer from '@/modules/admin/components/ActivityLogViewer';
 import {
   User,
   Lock,

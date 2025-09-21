@@ -1,9 +1,9 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { useAuth } from '@/modules/auth';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/components/card';
+import { Button } from '@/shared/components/button';
 import {
   BarChart,
   Bar,
@@ -29,7 +29,7 @@ import {
   Calendar,
   BarChart3
 } from 'lucide-react';
-import { API_CONFIG, getApiUrl } from '@/lib/api/config';
+import { API_CONFIG, getApiUrl } from '@/shared/services/api/config';
 
 interface Project {
   id: number;
@@ -98,7 +98,7 @@ export default function DashboardPage() {
       const token = localStorage.getItem('access_token');
       
       // Fetch projects
-      const projectsResponse = await fetch(getApiUrl(API_CONFIG.ENDPOINTS.PROJECTS.LIST), {
+      const projectsResponse = await fetch(getApiUrl(API_CONFIG.ENDPOINTS.PROJECTS), {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',

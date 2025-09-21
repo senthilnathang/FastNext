@@ -1,7 +1,7 @@
 "use client"
 
 import React from 'react'
-import UIBuilder from '@/components/builder/UIBuilder'
+import UIBuilder from '@/modules/builder/components/UIBuilder'
 
 export default function BuilderPage() {
   // For demo purposes, using hardcoded IDs

@@ -46,7 +46,8 @@ npm run dev
 npm run dev -- --no-turbopack
 
 # Application will be available at:
-# http://localhost:3000
+# - Frontend: http://localhost:3000
+# - API Documentation: http://localhost:3000/api-docs
 ```
 
 ### Available Scripts
@@ -365,6 +366,35 @@ Configured addons:
 - **@storybook/addon-docs** - Auto-generated documentation
 - **@storybook/addon-a11y** - Accessibility testing
 - **@chromatic-com/storybook** - Visual regression testing
+
+## API Documentation
+
+### Swagger UI Integration
+
+The frontend includes comprehensive Swagger UI integration for interactive API documentation:
+
+```bash
+# Access API documentation
+http://localhost:3000/api-docs
+```
+
+#### Features
+- **Interactive Testing**: Test all API endpoints directly from the browser
+- **Authentication Support**: Automatic JWT token injection for protected routes
+- **Real-time Status**: Live API connectivity monitoring
+- **CRUD Testing**: Built-in utilities for testing Create, Read, Update, Delete operations
+- **Response Inspection**: Detailed request/response information
+
+#### Usage
+1. Start both frontend and backend servers
+2. Navigate to `/api-docs`
+3. Login to access protected endpoints
+4. Use "Try it out" to test endpoints with real data
+
+#### Components
+- `SwaggerUI` - Main Swagger UI component
+- API testing utilities in `@/lib/api/swagger.ts`
+- Connection testing and CRUD utilities
 
 ## Production Deployment
 

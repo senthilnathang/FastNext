@@ -1,0 +1,337 @@
+import React from 'react'
+import { z } from 'zod'
+import { GenericListView, Column } from '@/shared/components/list-view'
+import { GenericKanbanView, KanbanColumn, KanbanItem } from '@/shared/components/kanban-board'
+import { GenericFormView, FormField, FormSection } from '@/shared/components/form-view'
+import { apiClient } from '@/shared/services/api/client'
+
+// Base resource interface
+export interface BaseResource {
+  id: number
+  created_at: string
+  updated_at?: string
+  is_active?: boolean
+}
+
+// Resource configuration interface
+export interface ResourceConfig<T extends BaseResource = BaseResource> {
+  name: string
+  displayName: string
+  apiEndpoint: string
+  
+  // List view configuration
+  listColumns: Column<T>[]
+  listTitle?: string
+  listSubtitle?: string
+  
+  // Kanban view configuration (optional)
+  kanbanConfig?: {
+    statusField: keyof T
+    columns: KanbanColumn[]
+    cardFields?: Array<{
+      key: keyof T | string
+      label: string
+      render?: (value: unknown, item: KanbanItem<T>) => React.ReactNode
+    }>
+  }
+  
+  // Form configuration
+  formFields: FormField<T>[]
+  formSections?: FormSection<T>[]
+  validationSchema?: z.ZodSchema<T>
+  
+  // Permissions
+  projectScoped?: boolean
+  ownerField?: keyof T
+  
+  // API methods (optional overrides)
+  customApi?: {
+    getList?: (filters?: Record<string, unknown>) => Promise<T[]>
+    getById?: (id: number) => Promise<T>
+    create?: (data: Partial<T>) => Promise<T>
+    update?: (id: number, data: Partial<T>) => Promise<T>
+    delete?: (id: number) => Promise<void>
+  }
+}
+
+// Standard API factory
+export class ResourceApiFactory<T extends BaseResource> {
+  private config: ResourceConfig<T>
+  
+  constructor(config: ResourceConfig<T>) {
+    this.config = config
+  }
+  
+  getList = async (filters?: Record<string, unknown>): Promise<T[]> => {
+    if (this.config.customApi?.getList) {
+      return this.config.customApi.getList(filters)
+    }
+    
+    const response = await apiClient.get(this.config.apiEndpoint, { params: filters })
+    return response.data
+  }
+  
+  getById = async (id: number): Promise<T> => {
+    if (this.config.customApi?.getById) {
+      return this.config.customApi.getById(id)
+    }
+    
+    const response = await apiClient.get(`${this.config.apiEndpoint}/${id}`)
+    return response.data
+  }
+  
+  create = async (data: Partial<T>): Promise<T> => {
+    if (this.config.customApi?.create) {
+      return this.config.customApi.create(data)
+    }
+    
+    const response = await apiClient.post(this.config.apiEndpoint, data)
+    return response.data
+  }
+  
+  update = async (id: number, data: Partial<T>): Promise<T> => {
+    if (this.config.customApi?.update) {
+      return this.config.customApi.update(id, data)
+    }
+    
+    const response = await apiClient.put(`${this.config.apiEndpoint}/${id}`, data)
+    return response.data
+  }
+  
+  delete = async (id: number): Promise<void> => {
+    if (this.config.customApi?.delete) {
+      return this.config.customApi.delete(id)
+    }
+    
+    await apiClient.delete(`${this.config.apiEndpoint}/${id}`)
+  }
+}
+
+// Component factory
+export class ResourceComponentFactory<T extends BaseResource> {
+  private config: ResourceConfig<T>
+  private api: ResourceApiFactory<T>
+  
+  constructor(config: ResourceConfig<T>) {
+    this.config = config
+    this.api = new ResourceApiFactory(config)
+  }
+  
+  createListView = (props?: {
+    data?: T[]
+    loading?: boolean
+    error?: string | null
+    onCreateClick?: () => void
+    onEditClick?: (item: T) => void
+    onDeleteClick?: (item: T) => void
+    onViewClick?: (item: T) => void
+    onRefresh?: () => void
+    projectId?: number
+  }) => {
+    return (
+      <GenericListView<T>
+        data={props?.data || []}
+        columns={this.config.listColumns}
+        loading={props?.loading}
+        error={props?.error}
+        resourceName={this.config.name}
+        projectId={props?.projectId}
+        title={this.config.listTitle || `${this.config.displayName}s`}
+        subtitle={this.config.listSubtitle}
+        onCreateClick={props?.onCreateClick}
+        onEditClick={props?.onEditClick}
+        onDeleteClick={props?.onDeleteClick}
+        onViewClick={props?.onViewClick}
+        onRefresh={props?.onRefresh}
+        createButtonText={`Create ${this.config.displayName}`}
+        emptyStateTitle={`No ${this.config.displayName.toLowerCase()}s found`}
+        emptyStateDescription={`Get started by creating your first ${this.config.displayName.toLowerCase()}`}
+      />
+    )
+  }
+  
+  createKanbanView = (props?: {
+    items?: KanbanItem<T>[]
+    loading?: boolean
+    error?: string | null
+    onCreateClick?: (columnId: string) => void
+    onEditClick?: (item: KanbanItem<T>) => void
+    onDeleteClick?: (item: KanbanItem<T>) => void
+    onViewClick?: (item: KanbanItem<T>) => void
+    onRefresh?: () => void
+    onMoveItem?: (itemId: number, newStatus: string) => void
+    projectId?: number
+  }) => {
+    if (!this.config.kanbanConfig) {
+      throw new Error(`Kanban view not configured for ${this.config.name}`)
+    }
+    
+    return (
+      <GenericKanbanView<T>
+        items={props?.items || []}
+        columns={this.config.kanbanConfig.columns}
+        loading={props?.loading}
+        error={props?.error}
+        resourceName={this.config.name}
+        projectId={props?.projectId}
+        title={this.config.listTitle || `${this.config.displayName}s`}
+        subtitle={this.config.listSubtitle}
+        onCreateClick={props?.onCreateClick}
+        onEditClick={props?.onEditClick}
+        onDeleteClick={props?.onDeleteClick}
+        onViewClick={props?.onViewClick}
+        onRefresh={props?.onRefresh}
+        onMoveItem={props?.onMoveItem}
+        createButtonText={`Create ${this.config.displayName}`}
+        cardFields={this.config.kanbanConfig.cardFields}
+      />
+    )
+  }
+  
+  createFormView = (props: {
+    mode: 'create' | 'edit' | 'view'
+    initialData?: Partial<T>
+    onSubmit: (data: T) => Promise<void> | void
+    onCancel?: () => void
+    resourceId?: number
+    projectId?: number
+    loading?: boolean
+    error?: string | null
+  }) => {
+    const title = props.mode === 'create' 
+      ? `Create ${this.config.displayName}`
+      : props.mode === 'edit'
+      ? `Edit ${this.config.displayName}`
+      : `View ${this.config.displayName}`
+    
+    return (
+      <GenericFormView<T>
+        fields={this.config.formFields}
+        sections={this.config.formSections}
+        initialData={props.initialData}
+        resourceName={this.config.name}
+        resourceId={props.resourceId}
+        projectId={props.projectId}
+        mode={props.mode}
+        onSubmit={props.onSubmit}
+        onCancel={props.onCancel}
+        title={title}
+        validationSchema={this.config.validationSchema}
+        loading={props.loading}
+        error={props.error}
+      />
+    )
+  }
+  
+  getApi = () => this.api
+}
+
+// Predefined resource configurations
+export const createUserResourceConfig = (): ResourceConfig<any> => ({
+  name: 'user',
+  displayName: 'User',
+  apiEndpoint: '/users',
+  listColumns: [
+    { key: 'username', label: 'Username', sortable: true },
+    { key: 'email', label: 'Email', sortable: true },
+    { key: 'full_name', label: 'Full Name' },
+    { key: 'is_active', label: 'Active', render: (value) => value ? 'Yes' : 'No' },
+    { key: 'created_at', label: 'Created', render: (value) => new Date(value as string).toLocaleDateString() }
+  ],
+  formFields: [
+    { name: 'username', label: 'Username', type: 'text', required: true },
+    { name: 'email', label: 'Email', type: 'email', required: true },
+    { name: 'full_name', label: 'Full Name', type: 'text' },
+    { name: 'password', label: 'Password', type: 'password', required: true },
+    { name: 'is_active', label: 'Active', type: 'checkbox' }
+  ],
+  validationSchema: z.object({
+    username: z.string().min(3).max(50),
+    email: z.string().email(),
+    full_name: z.string().optional(),
+    password: z.string().min(8),
+    is_active: z.boolean().optional()
+  })
+})
+
+export const createProjectResourceConfig = (): ResourceConfig<any> => ({
+  name: 'project',
+  displayName: 'Project',
+  apiEndpoint: '/projects',
+  listColumns: [
+    { key: 'name', label: 'Name', sortable: true },
+    { key: 'description', label: 'Description' },
+    { key: 'is_public', label: 'Public', render: (value) => value ? 'Yes' : 'No' },
+    { key: 'created_at', label: 'Created', render: (value) => new Date(value as string).toLocaleDateString() }
+  ],
+  formFields: [
+    { name: 'name', label: 'Project Name', type: 'text', required: true },
+    { name: 'description', label: 'Description', type: 'textarea' },
+    { name: 'is_public', label: 'Public Project', type: 'checkbox' }
+  ],
+  validationSchema: z.object({
+    name: z.string().min(1).max(255),
+    description: z.string().optional(),
+    is_public: z.boolean().optional()
+  }),
+  projectScoped: false,
+  ownerField: 'user_id'
+})
+
+export const createTaskResourceConfig = (): ResourceConfig<any> => ({
+  name: 'task',
+  displayName: 'Task',
+  apiEndpoint: '/tasks',
+  listColumns: [
+    { key: 'title', label: 'Title', sortable: true },
+    { key: 'status', label: 'Status' },
+    { key: 'priority', label: 'Priority' },
+    { key: 'due_date', label: 'Due Date', render: (value) => value ? new Date(value as string).toLocaleDateString() : '-' }
+  ],
+  kanbanConfig: {
+    statusField: 'status',
+    columns: [
+      { id: 'todo', title: 'To Do', color: '#ef4444' },
+      { id: 'in_progress', title: 'In Progress', color: '#f59e0b' },
+      { id: 'done', title: 'Done', color: '#10b981' }
+    ],
+    cardFields: [
+      { key: 'priority', label: 'Priority' },
+      { key: 'due_date', label: 'Due', render: (value) => value ? new Date(value as string).toLocaleDateString() : 'No due date' }
+    ]
+  },
+  formFields: [
+    { name: 'title', label: 'Task Title', type: 'text', required: true },
+    { name: 'description', label: 'Description', type: 'textarea' },
+    { name: 'status', label: 'Status', type: 'select', required: true, options: [
+      { value: 'todo', label: 'To Do' },
+      { value: 'in_progress', label: 'In Progress' },
+      { value: 'done', label: 'Done' }
+    ]},
+    { name: 'priority', label: 'Priority', type: 'select', options: [
+      { value: 'low', label: 'Low' },
+      { value: 'medium', label: 'Medium' },
+      { value: 'high', label: 'High' }
+    ]},
+    { name: 'due_date', label: 'Due Date', type: 'date' }
+  ],
+  validationSchema: z.object({
+    title: z.string().min(1).max(500),
+    description: z.string().optional(),
+    status: z.enum(['todo', 'in_progress', 'done']),
+    priority: z.enum(['low', 'medium', 'high']).optional(),
+    due_date: z.date().optional()
+  }),
+  projectScoped: true,
+  ownerField: 'created_by'
+})
+
+// Factory function to create resource components
+export const createResourceFactory = <T extends BaseResource>(config: ResourceConfig<T>) => {
+  return new ResourceComponentFactory<T>(config)
+}
+
+// Pre-built factories
+export const UserFactory = createResourceFactory(createUserResourceConfig())
+export const ProjectFactory = createResourceFactory(createProjectResourceConfig())
+export const TaskFactory = createResourceFactory(createTaskResourceConfig())

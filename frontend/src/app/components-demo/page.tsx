@@ -1,8 +1,8 @@
 "use client"
 
 import * as React from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
+import { Card, CardContent, CardHeader, CardTitle } from "@/shared/components/card"
+import { Badge } from "@/shared/components/badge"
 import { 
   DateField, 
   DateTimeField, 
@@ -10,9 +10,9 @@ import {
   SelectionList, 
   WidgetSelector,
   type WidgetType 
-} from "@/components/ui/form-fields"
-import { KanbanBoard, type KanbanColumn } from "@/components/ui/kanban-board"
-import { ListView, type ListColumn, type ListItem } from "@/components/ui/list-view"
+} from "@/shared/components/form-fields"
+import { KanbanBoard, type KanbanColumn } from "@/shared/components/kanban-board"
+import { ListView, type ListColumn, type ListItem } from "@/shared/components/list-view"
 
 // Demo data for components
 const selectionOptions = [

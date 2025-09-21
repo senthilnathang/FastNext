@@ -68,6 +68,7 @@ python main.py
 # - API: http://localhost:8000
 # - Interactive API docs: http://localhost:8000/docs
 # - Alternative docs: http://localhost:8000/redoc
+# - OpenAPI specification: http://localhost:8000/api/v1/openapi.json
 ```
 
 ### Code Quality

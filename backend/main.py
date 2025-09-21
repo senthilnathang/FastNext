@@ -15,6 +15,7 @@ from app.core.exceptions import (
     AuthenticationError, ConflictError, NotFoundError
 )
 from app.core.logging import setup_logging, log_security_event, get_logger
+from app.core.swagger_config import customize_swagger_ui, setup_swagger_auth_config
 from app.api.main import api_router
 from app.db.init_db import init_db
 from app.middleware.security_middleware import (
@@ -68,6 +69,13 @@ def create_app() -> FastAPI:
 - Comprehensive password security and validation
 - Session management with automatic timeout handling
 
+## Authentication
+Use the **Authorize** button below to authenticate with your JWT token:
+1. Login through `/auth/login` to get your access token
+2. Click the **Authorize** button 
+3. Enter your token in the format: `Bearer your_jwt_token_here`
+4. Test protected endpoints directly from this interface
+
 ## Authentication Endpoints
 - **POST /auth/login** - User authentication
 - **POST /auth/register** - User registration  
@@ -75,13 +83,31 @@ def create_app() -> FastAPI:
 - **POST /auth/logout** - User logout
 - **GET /auth/me** - Current user information
 """,
-        # Enhanced API documentation
+        # Enhanced API documentation with security schemes
         openapi_tags=[
-            {"name": "Authentication", "description": "User authentication and session management"},
-            {"name": "Users", "description": "User management operations"},
-            {"name": "Projects", "description": "Project management"},
-            {"name": "Security", "description": "Security and monitoring features"},
-        ]
+            {"name": "Authentication", "description": "🔐 User authentication and session management"},
+            {"name": "Users", "description": "👥 User management operations"},
+            {"name": "Profile", "description": "👤 User profile management"},
+            {"name": "Security", "description": "🛡️ Security settings and monitoring"},
+            {"name": "Projects", "description": "📂 Project management"},
+            {"name": "Pages", "description": "📄 Page management"},
+            {"name": "Components", "description": "🧩 Component management"},
+            {"name": "Roles", "description": "🔑 Role-based access control"},
+            {"name": "Permissions", "description": "🔒 Permission management"},
+            {"name": "Activity Logs", "description": "📊 Activity tracking and monitoring"},
+            {"name": "Audit Trails", "description": "📋 Change history and audit logs"},
+            {"name": "Assets", "description": "🖼️ File and asset management"},
+        ],
+        swagger_ui_parameters={
+            "deepLinking": True,
+            "displayRequestDuration": True,
+            "docExpansion": "none",
+            "operationsSorter": "alpha",
+            "filter": True,
+            "showExtensions": True,
+            "showCommonExtensions": True,
+            "tryItOutEnabled": True,
+        }
     )
     
     # Setup middleware
@@ -92,6 +118,31 @@ def create_app() -> FastAPI:
     
     # Register routes
     app.include_router(api_router, prefix=settings.API_V1_STR)
+    
+    # Setup custom Swagger UI
+    customize_swagger_ui(app)
+    
+    # Configure OpenAPI schema with authentication
+    def custom_openapi():
+        if app.openapi_schema:
+            return app.openapi_schema
+        
+        from fastapi.openapi.utils import get_openapi
+        openapi_schema = get_openapi(
+            title=app.title,
+            version=app.version,
+            description=app.description,
+            routes=app.routes,
+        )
+        
+        # Add security schemes
+        auth_config = setup_swagger_auth_config()
+        openapi_schema.update(auth_config)
+        
+        app.openapi_schema = openapi_schema
+        return app.openapi_schema
+    
+    app.openapi = custom_openapi
     
     # Add health check endpoint
     @app.get("/health")

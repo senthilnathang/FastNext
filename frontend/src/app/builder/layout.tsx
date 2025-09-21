@@ -1,4 +1,4 @@
-import AppLayout from '@/components/layout/AppLayout';
+import AppLayout from '@/shared/components/AppLayout';
 
 export default function BuilderLayout({
   children,

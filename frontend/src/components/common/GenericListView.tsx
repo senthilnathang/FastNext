@@ -1,12 +1,12 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Card, CardContent } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
-import { useGenericPermissions } from '@/hooks/useGenericPermissions'
+import { Button } from '@/shared/components/button'
+import { Input } from '@/shared/components/input'
+import { Card, CardContent } from '@/shared/components/card'
+import { Badge } from '@/shared/components/badge'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/shared/components/dropdown-menu'
+import { useGenericPermissions } from '@/modules/admin/hooks/useGenericPermissions'
 import { Plus, Search, MoreHorizontal, Edit, Trash2, Eye } from 'lucide-react'
 
 export interface Column<T = any> {

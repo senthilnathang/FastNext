@@ -1,11 +1,11 @@
 "use client"
 
 import React, { useState } from 'react'
-import { SwaggerUI } from '@/components/api'
-import { Card } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Badge } from '@/components/ui/badge'
+import { SwaggerUI } from '@/modules/api-docs'
+import { Card } from '@/shared/components/card'
+import { Button } from '@/shared/components/button'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/components/tabs'
+import { Badge } from '@/shared/components/badge'
 import { 
   Book, 
   Code, 
@@ -17,8 +17,8 @@ import {
   Copy,
   CheckCircle
 } from 'lucide-react'
-import { useAuth } from '@/contexts/AuthContext'
-import { cn } from '@/lib/utils'
+import { useAuth } from '@/modules/auth'
+import { cn } from '@/shared/utils'
 
 export default function APIDocumentationPage() {
   const { user } = useAuth()

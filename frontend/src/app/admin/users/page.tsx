@@ -4,9 +4,9 @@ import * as React from "react"
 import { ColumnDef } from "@tanstack/react-table"
 import { Plus, Loader2 } from "lucide-react"
 
-import { Button } from "@/components/ui/button"
-import { DataTable, ActionColumn } from "@/components/ui/data-table"
-import { Badge } from "@/components/ui/badge"
+import { Button } from "@/shared/components/button"
+import { DataTable, ActionColumn } from "@/shared/components/data-table"
+import { Badge } from "@/shared/components/badge"
 import {
   Dialog,
   DialogContent,
@@ -15,22 +15,22 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+} from "@/shared/components/dialog"
+import { Input } from "@/shared/components/input"
+import { Label } from "@/shared/components/label"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
+} from "@/shared/components/select"
 
 // Import React Query hooks
-import { useUsers, useCreateUser, useDeleteUser, useToggleUserStatus } from "@/hooks/useUsers"
-import { useRoles } from "@/hooks/useRoles"
-import { apiUtils } from "@/lib/api/client"
-import type { User } from "@/lib/api/users"
+import { useUsers, useCreateUser, useDeleteUser, useToggleUserStatus } from "@/modules/admin/hooks/useUsers"
+import { useRoles } from "@/modules/admin/hooks/useRoles"
+import { apiUtils } from "@/shared/services/api/client"
+import type { User } from "@/shared/services/api/users"
 
 
 type UsersPageProps = Record<string, never>

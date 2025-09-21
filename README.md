@@ -20,6 +20,7 @@ A comprehensive full-stack web application framework built with modern technolog
 - **Storybook** - Tool for building UI components in isolation
 - **Pylint** - Python code analysis tool
 - **Biome** - Fast formatter and linter for JavaScript/TypeScript
+- **Swagger UI** - Interactive API documentation and testing interface
 
 ## Project Structure
 
@@ -130,10 +131,41 @@ FastNext/
    - Frontend: http://localhost:3000
    - Backend API: http://localhost:8000
    - API Documentation: http://localhost:8000/docs
+   - Swagger UI: http://localhost:3000/api-docs (Interactive API documentation)
 
 ### Documentation
 - **[Backend Development Guide](docs/BACKEND_DEV.md)** - Backend development, testing, and deployment
 - **[Frontend Development Guide](docs/FRONTEND_DEV.md)** - Frontend development, Storybook, and testing
+
+## API Documentation & Testing
+
+### Swagger UI Integration
+The application includes a comprehensive Swagger UI integration for interactive API documentation and testing:
+
+#### Features
+- **Interactive Documentation**: Browse and test all API endpoints directly from the browser
+- **Authentication Support**: Automatic token injection for protected endpoints
+- **Real-time API Testing**: Test API endpoints with live data and see responses
+- **Connection Status**: Real-time API server connectivity monitoring
+- **Request/Response Inspection**: Detailed request and response information
+
+#### Access Points
+- **Built-in Swagger UI**: Access at `http://localhost:3000/api-docs` (Frontend integration)
+- **FastAPI Docs**: Native documentation at `http://localhost:8000/docs`
+- **OpenAPI Spec**: Raw specification at `http://localhost:8000/api/v1/openapi.json`
+
+#### Usage
+1. Start both backend and frontend servers
+2. Navigate to `http://localhost:3000/api-docs`
+3. The interface will automatically check API connectivity
+4. Login to your account to test protected endpoints
+5. Use the "Try it out" feature to test endpoints with real data
+
+#### Authentication
+- Protected endpoints require authentication
+- Token is automatically injected when logged in
+- Authentication status is displayed in the UI toolbar
+- Failed authentication attempts are clearly indicated
 
 ## API Endpoints
 

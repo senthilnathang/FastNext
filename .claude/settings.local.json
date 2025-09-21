@@ -41,7 +41,12 @@
       "Bash(pip3 install:*)",
       "Bash(npm update:*)",
       "Bash(kill:*)",
-      "Bash(npx eslint:*)"
+      "Bash(npx eslint:*)",
+      "Bash(npm info:*)",
+      "Bash(timeout 30 npm run build)",
+      "Bash(timeout 40 npm run build)",
+      "Bash(timeout 60 npm run build)",
+      "Bash(sed:*)"
     ],
     "deny": []
   }

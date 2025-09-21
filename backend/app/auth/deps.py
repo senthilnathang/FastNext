@@ -1,6 +1,6 @@
 from typing import Generator
 from fastapi import Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from jose import jwt
 from pydantic import ValidationError
 from sqlalchemy.orm import Session
@@ -11,14 +11,31 @@ from app.db.session import get_db
 from app.models.user import User
 from app.schemas.token import TokenPayload
 
-oauth2_scheme = OAuth2PasswordBearer(
-    tokenUrl=f"{settings.API_V1_STR}/login/access-token"
+# Use HTTPBearer for better Swagger UI integration
+security_scheme = HTTPBearer(
+    scheme_name="Bearer Token",
+    description="Enter your JWT access token"
 )
 
 
 def get_current_user(
-    db: Session = Depends(get_db), token: str = Depends(oauth2_scheme)
+    db: Session = Depends(get_db), 
+    credentials: HTTPAuthorizationCredentials = Depends(security_scheme)
 ) -> User:
+    """
+    Get current authenticated user from JWT token
+    
+    Args:
+        db: Database session
+        credentials: HTTPAuthorizationCredentials with Bearer token
+        
+    Returns:
+        User: Current authenticated user
+        
+    Raises:
+        HTTPException: If token is invalid or user not found
+    """
+    token = credentials.credentials
     try:
         payload = jwt.decode(
             token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM]
@@ -26,12 +43,16 @@ def get_current_user(
         token_data = TokenPayload(**payload)
     except (jwt.JWTError, ValidationError):
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
+            status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Could not validate credentials",
+            headers={"WWW-Authenticate": "Bearer"},
         )
     user = db.query(User).filter(User.id == token_data.sub).first()
     if not user:
-        raise HTTPException(status_code=404, detail="User not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, 
+            detail="User not found"
+        )
     return user
 
 

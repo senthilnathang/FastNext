@@ -1,9 +1,9 @@
 'use client';
 
 import React from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/components/card';
 import { Building2, Plus } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/shared/components/button';
 
 export default function ProjectsPage() {
   return (

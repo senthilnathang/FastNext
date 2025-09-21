@@ -1,5 +1,5 @@
 import { renderHook } from '@testing-library/react'
-import { AuthContext } from '@/contexts/AuthContext'
+import { AuthContext } from '@/modules/auth'
 import { useUserRole } from '../useUserRole'
 import React from 'react'
 

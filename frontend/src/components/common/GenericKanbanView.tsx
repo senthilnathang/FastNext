@@ -1,11 +1,11 @@
 'use client'
 
 import React, { useState } from 'react'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
-import { useGenericPermissions } from '@/hooks/useGenericPermissions'
+import { Button } from '@/shared/components/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/card'
+import { Badge } from '@/shared/components/badge'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/shared/components/dropdown-menu'
+import { useGenericPermissions } from '@/modules/admin/hooks/useGenericPermissions'
 import { Plus, MoreHorizontal, Edit, Trash2, Eye } from 'lucide-react'
 
 export interface KanbanColumn {
