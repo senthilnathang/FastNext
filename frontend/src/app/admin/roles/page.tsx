@@ -209,14 +209,15 @@ export default function RolesPage() {
   }, {} as Record<string, Permission[]>)
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Roles</h1>
-          <p className="text-muted-foreground">
-            Manage user roles and their permissions
-          </p>
-        </div>
+    <div className="container mx-auto px-4 py-6 max-w-7xl">
+      <div className="space-y-6">
+        <div className="flex justify-between items-center">
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight">Roles</h1>
+            <p className="text-sm text-muted-foreground">
+              Manage user roles and their permissions
+            </p>
+          </div>
 
         <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
           <DialogTrigger asChild>
@@ -303,18 +304,19 @@ export default function RolesPage() {
         </Dialog>
       </div>
 
-      {isLoading ? (
-        <div className="flex items-center justify-center py-12">
-          <Loader2 className="h-8 w-8 animate-spin" />
-          <span className="ml-2">Loading roles...</span>
-        </div>
-      ) : (
-        <DataTable 
-          columns={columns} 
-          data={roles} 
-          searchKey="name"
-        />
-      )}
+        {isLoading ? (
+          <div className="flex items-center justify-center py-12">
+            <Loader2 className="h-8 w-8 animate-spin" />
+            <span className="ml-2">Loading roles...</span>
+          </div>
+        ) : (
+          <DataTable 
+            columns={columns} 
+            data={roles} 
+            searchKey="name"
+          />
+        )}
+      </div>
     </div>
   )
 }

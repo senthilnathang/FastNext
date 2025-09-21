@@ -189,14 +189,15 @@ const UsersPage: React.FC<UsersPageProps> = () => {
   const roles = rolesData?.items || []
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Users</h1>
-          <p className="text-muted-foreground">
-            Manage user accounts and their permissions
-          </p>
-        </div>
+    <div className="container mx-auto px-4 py-6 max-w-7xl">
+      <div className="space-y-6">
+        <div className="flex justify-between items-center">
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight">Users</h1>
+            <p className="text-sm text-muted-foreground">
+              Manage user accounts and their permissions
+            </p>
+          </div>
 
         <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
           <DialogTrigger asChild>
@@ -290,18 +291,19 @@ const UsersPage: React.FC<UsersPageProps> = () => {
         </Dialog>
       </div>
 
-      {isLoading ? (
-        <div className="flex items-center justify-center py-12">
-          <Loader2 className="h-8 w-8 animate-spin" />
-          <span className="ml-2">Loading users...</span>
-        </div>
-      ) : (
-        <DataTable 
-          columns={columns} 
-          data={users} 
-          searchKey="username"
-        />
-      )}
+        {isLoading ? (
+          <div className="flex items-center justify-center py-12">
+            <Loader2 className="h-8 w-8 animate-spin" />
+            <span className="ml-2">Loading users...</span>
+          </div>
+        ) : (
+          <DataTable 
+            columns={columns} 
+            data={users} 
+            searchKey="username"
+          />
+        )}
+      </div>
     </div>
   )
 }

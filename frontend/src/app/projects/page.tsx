@@ -100,18 +100,19 @@ export default function ProjectsPage() {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-3">
-          <Building2 className="h-8 w-8 text-blue-600" />
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Projects</h1>
-            <p className="text-gray-600 dark:text-gray-400">
-              Manage your projects and applications
-            </p>
+    <div className="container mx-auto px-4 py-6 max-w-7xl">
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-3">
+            <Building2 className="h-7 w-7 text-blue-600" />
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Projects</h1>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                Manage your projects and applications
+              </p>
+            </div>
           </div>
-        </div>
         <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
           <DialogTrigger asChild>
             <Button>
@@ -167,79 +168,84 @@ export default function ProjectsPage() {
         </Dialog>
       </div>
 
-      {/* Projects Grid */}
-      {isLoading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {[...Array(6)].map((_, i) => (
-            <Card key={i} className="animate-pulse">
-              <CardHeader>
-                <div className="h-4 bg-gray-300 rounded w-3/4"></div>
-                <div className="h-3 bg-gray-200 rounded w-full"></div>
-              </CardHeader>
-              <CardContent>
-                <div className="h-3 bg-gray-200 rounded w-1/2"></div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {projects.map((project) => (
-            <Card key={project.id} className="hover:shadow-lg transition-shadow">
-              <CardHeader className="pb-3">
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <CardTitle className="text-lg">{project.name}</CardTitle>
-                    <CardDescription className="mt-1">
-                      {project.description || 'No description provided'}
-                    </CardDescription>
+        {/* Projects Grid */}
+        {isLoading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            {[...Array(8)].map((_, i) => (
+              <Card key={i} className="animate-pulse" variant="flat">
+                <CardHeader compact>
+                  <div className="h-4 bg-gray-300 rounded w-3/4"></div>
+                  <div className="h-3 bg-gray-200 rounded w-full"></div>
+                </CardHeader>
+                <CardContent compact>
+                  <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            {projects.map((project) => (
+              <Card key={project.id} className="hover:shadow-md transition-shadow" variant="default">
+                <CardHeader compact className="pb-2">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1 min-w-0">
+                      <CardTitle size="sm" className="truncate">{project.name}</CardTitle>
+                      <CardDescription className="mt-1 line-clamp-2 text-xs">
+                        {project.description || 'No description provided'}
+                      </CardDescription>
+                    </div>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon-sm" className="shrink-0">
+                          <MoreVertical className="h-3 w-3" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => openEditDialog(project)}>
+                          <Edit className="h-3 w-3 mr-2" />
+                          Edit
+                        </DropdownMenuItem>
+                        <DropdownMenuItem 
+                          onClick={() => handleDeleteProject(project.id)}
+                          className="text-red-600"
+                        >
+                          <Trash2 className="h-3 w-3 mr-2" />
+                          Delete
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </div>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                        <MoreVertical className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem onClick={() => openEditDialog(project)}>
-                        <Edit className="h-4 w-4 mr-2" />
-                        Edit
-                      </DropdownMenuItem>
-                      <DropdownMenuItem 
-                        onClick={() => handleDeleteProject(project.id)}
-                        className="text-red-600"
-                      >
-                        <Trash2 className="h-4 w-4 mr-2" />
-                        Delete
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-4 text-sm text-gray-500">
-                    <div className="flex items-center">
-                      <Calendar className="h-4 w-4 mr-1" />
-                      {formatDistanceToNow(new Date(project.created_at), { addSuffix: true })}
+                </CardHeader>
+                <CardContent compact>
+                  <div className="space-y-2">
+                    <div className="flex items-center text-xs text-gray-500">
+                      <Calendar className="h-3 w-3 mr-1" />
+                      <span className="truncate">
+                        {formatDistanceToNow(new Date(project.created_at), { addSuffix: true })}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-1">
+                        {project.is_public ? (
+                          <div title="Public project">
+                            <Globe className="h-3 w-3 text-blue-500" />
+                          </div>
+                        ) : (
+                          <div title="Private project">
+                            <Lock className="h-3 w-3 text-gray-500" />
+                          </div>
+                        )}
+                        <span className="text-xs text-gray-500">
+                          {project.is_public ? 'Public' : 'Private'}
+                        </span>
+                      </div>
+                      <span className="bg-green-100 text-green-800 text-xs px-1.5 py-0.5 rounded-full">
+                        Active
+                      </span>
                     </div>
                   </div>
-                  <div className="flex items-center space-x-2">
-                    {project.is_public ? (
-                      <div className="flex items-center" title="Public project">
-                        <Globe className="h-4 w-4 text-blue-500" />
-                      </div>
-                    ) : (
-                      <div className="flex items-center" title="Private project">
-                        <Lock className="h-4 w-4 text-gray-500" />
-                      </div>
-                    )}
-                    <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">
-                      Active
-                    </span>
-                  </div>
-                </div>
-              </CardContent>
+                </CardContent>
             </Card>
           ))}
           
@@ -247,22 +253,23 @@ export default function ProjectsPage() {
           <Card 
             className="border-dashed border-2 hover:border-blue-500 transition-colors cursor-pointer"
             onClick={() => setCreateDialogOpen(true)}
+            variant="outlined"
           >
-            <CardContent className="flex flex-col items-center justify-center py-12">
-              <Plus className="h-12 w-12 text-gray-400 mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+            <CardContent compact className="flex flex-col items-center justify-center py-8">
+              <Plus className="h-8 w-8 text-gray-400 mb-3" />
+              <h3 className="text-sm font-medium text-gray-900 dark:text-white mb-1">
                 Create New Project
               </h3>
-              <p className="text-sm text-gray-500 text-center">
-                Start a new project and build something amazing
+              <p className="text-xs text-gray-500 text-center">
+                Start building something amazing
               </p>
             </CardContent>
           </Card>
-        </div>
-      )}
+          </div>
+        )}
 
-      {/* Edit Project Dialog */}
-      <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+        {/* Edit Project Dialog */}
+        <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle>Edit Project</DialogTitle>
@@ -308,7 +315,8 @@ export default function ProjectsPage() {
             </div>
           </form>
         </DialogContent>
-      </Dialog>
+        </Dialog>
+      </div>
     </div>
   );
 }

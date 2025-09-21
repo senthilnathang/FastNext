@@ -220,8 +220,8 @@ export default function Sidebar({
       >
         {/* Compact Header */}
         <div className={cn(
-          'flex items-center justify-between border-b border-gray-200/60 dark:border-gray-700/60',
-          isCollapsed && !isHovered ? 'p-3' : 'px-4 py-3'
+          'flex items-center justify-between border-b border-gray-200/60 dark:border-gray-700/60 h-12',
+          isCollapsed && !isHovered ? 'px-3' : 'px-4'
         )}>
           <div className="flex items-center space-x-3 min-w-0 flex-1">
             <div className="relative flex-shrink-0">
