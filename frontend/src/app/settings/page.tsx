@@ -1,13 +1,13 @@
 'use client';
 
-import React, { useState, useEffect, Suspense } from 'react';
+import React, { Suspense } from 'react';
 import { useAuth } from '@/modules/auth';
-import { useSearchParams } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/components/card';
 import { Button } from '@/shared/components/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/components/tabs';
 import { UpdateProfileForm, ChangePasswordForm, SecuritySettings } from '@/modules/auth';
 import ActivityLogViewer from '@/modules/admin/components/ActivityLogViewer';
+import { useTabState } from '@/shared/hooks';
 import {
   User,
   Lock,
@@ -19,15 +19,12 @@ import {
 
 function SettingsContent() {
   const { user } = useAuth();
-  const searchParams = useSearchParams();
-  const [activeTab, setActiveTab] = useState('profile');
-
-  useEffect(() => {
-    const tab = searchParams.get('tab');
-    if (tab && ['profile', 'security', 'password', 'activity'].includes(tab)) {
-      setActiveTab(tab);
-    }
-  }, [searchParams]);
+  
+  // Use nuqs for tab state management
+  const [activeTab, setActiveTab] = useTabState(
+    ['profile', 'security', 'password', 'activity'] as const,
+    'profile'
+  );
 
   if (!user) {
     return (

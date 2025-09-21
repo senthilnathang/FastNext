@@ -20,6 +20,12 @@ import {
   RefreshCw
 } from 'lucide-react';
 import { API_CONFIG, getApiUrl } from '@/shared/services/api/config';
+import { 
+  useSearchState, 
+  usePaginationState, 
+  useStringLiteralState,
+  useBooleanFilterState
+} from '@/shared/hooks';
 
 interface ActivityLog {
   id: number;
@@ -83,22 +89,20 @@ export default function ActivityLogViewer({ showUserActivitiesOnly = false }: Ac
   const [stats, setStats] = useState<ActivityLogStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [showFilters, setShowFilters] = useState(false);
   
-  // Filters
-  const [filters, setFilters] = useState({
-    search: '',
-    action: '',
-    entity_type: '',
-    level: '',
-    start_date: '',
-    end_date: '',
-    days: '30'
-  });
-
-  const pageSize = 20;
+  // URL State Management with nuqs
+  const [search, setSearch] = useSearchState();
+  const { page: currentPage, setPage: setCurrentPage, limit: pageSize } = usePaginationState(1, 20);
+  const [action, setAction] = useStringLiteralState('action', ['', 'create', 'read', 'update', 'delete', 'login', 'logout'] as const, '');
+  const [level, setLevel] = useStringLiteralState('level', ['', 'info', 'warning', 'error', 'critical'] as const, '');
+  const [days, setDays] = useStringLiteralState('days', ['7', '30', '90', '365'] as const, '30');
+  const [showFilters, setShowFilters] = useBooleanFilterState('filters', false);
+  
+  // Additional local filters not stored in URL
+  const [entityType, setEntityType] = useState('');
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
 
   const fetchActivityLogs = React.useCallback(async () => {
     try {
@@ -108,16 +112,16 @@ export default function ActivityLogViewer({ showUserActivitiesOnly = false }: Ac
       const queryParams = new URLSearchParams({
         skip: ((currentPage - 1) * pageSize).toString(),
         limit: pageSize.toString(),
-        ...(filters.search && { search: filters.search }),
-        ...(filters.action && { action: filters.action }),
-        ...(filters.entity_type && { entity_type: filters.entity_type }),
-        ...(filters.level && { level: filters.level }),
-        ...(filters.start_date && { start_date: filters.start_date }),
-        ...(filters.end_date && { end_date: filters.end_date })
+        ...(search && { search }),
+        ...(action && { action }),
+        ...(entityType && { entity_type: entityType }),
+        ...(level && { level }),
+        ...(startDate && { start_date: startDate }),
+        ...(endDate && { end_date: endDate })
       });
 
       const endpoint = showUserActivitiesOnly 
-        ? getApiUrl(`${API_CONFIG.ENDPOINTS.ACTIVITY_LOGS.ME}?${queryParams}&days=${filters.days}`)
+        ? getApiUrl(`${API_CONFIG.ENDPOINTS.ACTIVITY_LOGS.ME}?${queryParams}&days=${days}`)
         : getApiUrl(`${API_CONFIG.ENDPOINTS.ACTIVITY_LOGS.LIST}?${queryParams}`);
 
       const response = await fetch(endpoint, {
@@ -139,12 +143,12 @@ export default function ActivityLogViewer({ showUserActivitiesOnly = false }: Ac
     } finally {
       setLoading(false);
     }
-  }, [currentPage, filters, showUserActivitiesOnly]);
+  }, [currentPage, pageSize, search, action, entityType, level, startDate, endDate, days, showUserActivitiesOnly]);
 
   const fetchStats = React.useCallback(async () => {
     try {
       const token = localStorage.getItem('access_token');
-      const response = await fetch(getApiUrl(`${API_CONFIG.ENDPOINTS.ACTIVITY_LOGS.STATS}?days=${filters.days}`), {
+      const response = await fetch(getApiUrl(`${API_CONFIG.ENDPOINTS.ACTIVITY_LOGS.STATS}?days=${days}`), {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -158,7 +162,7 @@ export default function ActivityLogViewer({ showUserActivitiesOnly = false }: Ac
     } catch (err) {
       console.error('Failed to fetch activity stats:', err);
     }
-  }, [filters.days]);
+  }, [days]);
 
   useEffect(() => {
     fetchActivityLogs();
@@ -172,7 +176,7 @@ export default function ActivityLogViewer({ showUserActivitiesOnly = false }: Ac
     } else {
       fetchActivityLogs();
     }
-  }, [filters, currentPage, fetchActivityLogs]);
+  }, [search, action, entityType, level, startDate, endDate, days, currentPage, fetchActivityLogs]);
 
   const handleRefresh = () => {
     fetchActivityLogs();
@@ -183,7 +187,13 @@ export default function ActivityLogViewer({ showUserActivitiesOnly = false }: Ac
     try {
       const token = localStorage.getItem('access_token');
       const queryParams = new URLSearchParams({
-        ...filters,
+        ...(search && { search }),
+        ...(action && { action }),
+        ...(entityType && { entity_type: entityType }),
+        ...(level && { level }),
+        ...(startDate && { start_date: startDate }),
+        ...(endDate && { end_date: endDate }),
+        days,
         format: 'json'
       });
 
@@ -328,8 +338,8 @@ export default function ActivityLogViewer({ showUserActivitiesOnly = false }: Ac
               <Input
                 id="search"
                 placeholder="Search description..."
-                value={filters.search}
-                onChange={(e) => setFilters({ ...filters, search: e.target.value })}
+                value={search}
+                onChange={(e) => setSearch(e.target.value || null)}
               />
             </div>
             
@@ -337,8 +347,8 @@ export default function ActivityLogViewer({ showUserActivitiesOnly = false }: Ac
               <Label htmlFor="action">Action</Label>
               <select
                 id="action"
-                value={filters.action}
-                onChange={(e) => setFilters({ ...filters, action: e.target.value })}
+                value={action}
+                onChange={(e) => setAction(e.target.value as any)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md"
               >
                 <option value="">All Actions</option>
@@ -355,8 +365,8 @@ export default function ActivityLogViewer({ showUserActivitiesOnly = false }: Ac
               <Label htmlFor="level">Level</Label>
               <select
                 id="level"
-                value={filters.level}
-                onChange={(e) => setFilters({ ...filters, level: e.target.value })}
+                value={level}
+                onChange={(e) => setLevel(e.target.value as any)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md"
               >
                 <option value="">All Levels</option>
@@ -371,8 +381,8 @@ export default function ActivityLogViewer({ showUserActivitiesOnly = false }: Ac
               <Label htmlFor="days">Time Range</Label>
               <select
                 id="days"
-                value={filters.days}
-                onChange={(e) => setFilters({ ...filters, days: e.target.value })}
+                value={days}
+                onChange={(e) => setDays(e.target.value as any)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md"
               >
                 <option value="7">Last 7 days</option>
@@ -387,15 +397,16 @@ export default function ActivityLogViewer({ showUserActivitiesOnly = false }: Ac
             <Button
               variant="outline"
               size="sm"
-              onClick={() => setFilters({
-                search: '',
-                action: '',
-                entity_type: '',
-                level: '',
-                start_date: '',
-                end_date: '',
-                days: '30'
-              })}
+              onClick={() => {
+                setSearch(null);
+                setAction('');
+                setEntityType('');
+                setLevel('');
+                setStartDate('');
+                setEndDate('');
+                setDays('30');
+                setCurrentPage(1);
+              }}
             >
               Clear Filters
             </Button>

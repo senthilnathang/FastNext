@@ -1,5 +1,6 @@
 // Centralized hooks exports
 export * from './useApiQuery'
+export * from './useURLState'
 
 // Note: Other hooks have been moved to their respective modules:
 // - useAuth -> @/modules/auth
