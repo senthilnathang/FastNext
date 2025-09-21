@@ -16,6 +16,7 @@ from app.schemas.permission import (
 router = APIRouter()
 
 
+@router.get("", response_model=List[PermissionSchema])
 @router.get("/", response_model=List[PermissionSchema])
 def read_permissions(
     db: Session = Depends(get_db),
@@ -34,6 +35,7 @@ def read_permissions(
     return permissions
 
 
+@router.post("", response_model=PermissionSchema)
 @router.post("/", response_model=PermissionSchema)
 def create_permission(
     *,

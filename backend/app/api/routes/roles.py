@@ -16,6 +16,7 @@ from app.services.permission_service import PermissionService
 router = APIRouter()
 
 
+@router.get("", response_model=List[RoleSchema])
 @router.get("/", response_model=List[RoleSchema])
 def read_roles(
     db: Session = Depends(get_db),
@@ -28,6 +29,7 @@ def read_roles(
     return roles
 
 
+@router.post("", response_model=RoleSchema)
 @router.post("/", response_model=RoleSchema)
 def create_role(
     *,

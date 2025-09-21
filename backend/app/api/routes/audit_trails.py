@@ -19,6 +19,7 @@ import json
 router = APIRouter()
 
 
+@router.get("", response_model=List[AuditTrailResponse])
 @router.get("/", response_model=List[AuditTrailResponse])
 def get_audit_trails(
     db: Session = Depends(get_db),
@@ -202,6 +203,7 @@ def get_audit_trail_comparison(
         )
 
 
+@router.post("", response_model=AuditTrailResponse)
 @router.post("/", response_model=AuditTrailResponse)
 def create_audit_trail(
     *,

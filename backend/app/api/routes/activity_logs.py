@@ -17,6 +17,7 @@ from datetime import datetime, timedelta
 router = APIRouter()
 
 
+@router.get("", response_model=List[ActivityLogResponse])
 @router.get("/", response_model=List[ActivityLogResponse])
 def get_activity_logs(
     db: Session = Depends(get_db),
@@ -140,6 +141,7 @@ def get_activity_log(
     return activity
 
 
+@router.post("", response_model=ActivityLogResponse)
 @router.post("/", response_model=ActivityLogResponse)
 def create_activity_log(
     *,

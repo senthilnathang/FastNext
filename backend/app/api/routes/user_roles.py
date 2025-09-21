@@ -41,6 +41,7 @@ def read_user_roles(
     return user_roles
 
 
+@router.post("", response_model=UserRoleSchema)
 @router.post("/", response_model=UserRoleSchema)
 def assign_role_to_user(
     *,
@@ -148,6 +149,7 @@ def remove_role_from_user(
     return {"message": "Role removed from user successfully"}
 
 
+@router.get("", response_model=List[UserRoleSchema])
 @router.get("/", response_model=List[UserRoleSchema])
 def read_all_user_roles(
     db: Session = Depends(get_db),

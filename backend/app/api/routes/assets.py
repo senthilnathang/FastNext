@@ -12,6 +12,7 @@ from app.schemas.asset import Asset as AssetSchema, AssetCreate, AssetUpdate
 router = APIRouter()
 
 
+@router.get("", response_model=List[AssetSchema])
 @router.get("/", response_model=List[AssetSchema])
 def read_assets(
     db: Session = Depends(get_db),
@@ -46,6 +47,7 @@ def read_assets(
     return assets
 
 
+@router.post("", response_model=AssetSchema)
 @router.post("/", response_model=AssetSchema)
 def create_asset(
     *,

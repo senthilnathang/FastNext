@@ -30,6 +30,7 @@ def read_project_pages(
     return pages
 
 
+@router.post("", response_model=PageSchema)
 @router.post("/", response_model=PageSchema)
 def create_page(
     *,

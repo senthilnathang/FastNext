@@ -13,6 +13,7 @@ from typing import Dict
 router = APIRouter()
 
 
+@router.get("", response_model=List[ProjectSchema])
 @router.get("/", response_model=List[ProjectSchema])
 def read_projects(
     db: Session = Depends(get_db),
@@ -34,6 +35,7 @@ def read_projects(
         return []
 
 
+@router.post("", response_model=ProjectSchema)
 @router.post("/", response_model=ProjectSchema)
 def create_project(
     *,

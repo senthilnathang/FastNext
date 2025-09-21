@@ -21,6 +21,7 @@ router = APIRouter()
 
 
 # Component CRUD
+@router.get("", response_model=List[ComponentSchema])
 @router.get("/", response_model=List[ComponentSchema])
 def read_components(
     *,
@@ -56,6 +57,7 @@ def read_components(
     return components
 
 
+@router.post("", response_model=ComponentSchema)
 @router.post("/", response_model=ComponentSchema)
 def create_component(
     *,
