@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { ColumnDef } from "@tanstack/react-table"
-import { Plus, Shield, Users } from "lucide-react"
+import { Plus, Shield, Users, Loader2 } from "lucide-react"
 
 import { Button } from "@/shared/components/button"
 import { DataTable, ActionColumn } from "@/shared/components/data-table"
@@ -20,39 +20,14 @@ import { Input } from "@/shared/components/input"
 import { Label } from "@/shared/components/label"
 import { Checkbox } from "@/shared/components/checkbox"
 
-interface Role {
-  id: string
-  name: string
-  description: string
-  permissions: string[]
-  userCount: number
-  isSystem: boolean
-  createdAt: string
-}
+// Import React Query hooks
+import { useRoles, useCreateRole, useDeleteRole } from "@/modules/admin/hooks/useRoles"
+import { usePermissions } from "@/modules/admin/hooks/usePermissions"
+import { apiUtils } from "@/shared/services/api/client"
+import type { Role, Permission } from "@/shared/services/api/roles"
 
-interface Permission {
-  id: string
-  name: string
-  description: string
-  category: string
-}
-
-const permissions: Permission[] = [
-  { id: "users.read", name: "View Users", description: "Can view user list and profiles", category: "Users" },
-  { id: "users.create", name: "Create Users", description: "Can create new users", category: "Users" },
-  { id: "users.update", name: "Update Users", description: "Can edit user information", category: "Users" },
-  { id: "users.delete", name: "Delete Users", description: "Can delete users", category: "Users" },
-  { id: "roles.read", name: "View Roles", description: "Can view roles and permissions", category: "Roles" },
-  { id: "roles.create", name: "Create Roles", description: "Can create new roles", category: "Roles" },
-  { id: "roles.update", name: "Update Roles", description: "Can edit role permissions", category: "Roles" },
-  { id: "roles.delete", name: "Delete Roles", description: "Can delete roles", category: "Roles" },
-  { id: "projects.read", name: "View Projects", description: "Can view project list", category: "Projects" },
-  { id: "projects.create", name: "Create Projects", description: "Can create new projects", category: "Projects" },
-  { id: "projects.update", name: "Update Projects", description: "Can edit projects", category: "Projects" },
-  { id: "projects.delete", name: "Delete Projects", description: "Can delete projects", category: "Projects" },
-]
-
-const columns: ColumnDef<Role>[] = [
+// Define columns
+const createColumns = (handleRowAction: (role: Role, action: string) => void): ColumnDef<Role>[] => [
   {
     accessorKey: "name",
     header: "Role Name",
@@ -62,7 +37,7 @@ const columns: ColumnDef<Role>[] = [
         <div className="flex items-center gap-2">
           <Shield className="w-4 h-4 text-gray-500" />
           <span className="font-medium">{role.name}</span>
-          {role.isSystem && (
+          {role.is_system_role && (
             <Badge variant="outline" className="text-xs">
               System
             </Badge>
@@ -79,12 +54,12 @@ const columns: ColumnDef<Role>[] = [
     accessorKey: "permissions",
     header: "Permissions",
     cell: ({ row }) => {
-      const permissions = row.getValue("permissions") as string[]
+      const permissions = row.getValue("permissions") as Permission[] || []
       return (
         <div className="flex gap-1 flex-wrap max-w-xs">
           {permissions.slice(0, 3).map((permission) => (
-            <Badge key={permission} variant="secondary" className="text-xs">
-              {permission.split('.')[1]}
+            <Badge key={permission.id} variant="secondary" className="text-xs">
+              {permission.name}
             </Badge>
           ))}
           {permissions.length > 3 && (
@@ -97,10 +72,10 @@ const columns: ColumnDef<Role>[] = [
     },
   },
   {
-    accessorKey: "userCount",
+    accessorKey: "user_count",
     header: "Users",
     cell: ({ row }) => {
-      const userCount = row.getValue("userCount") as number
+      const userCount = row.getValue("user_count") as number || 0
       return (
         <div className="flex items-center gap-1">
           <Users className="w-4 h-4 text-gray-500" />
@@ -110,10 +85,10 @@ const columns: ColumnDef<Role>[] = [
     },
   },
   {
-    accessorKey: "createdAt",
+    accessorKey: "created_at",
     header: "Created",
     cell: ({ row }) => {
-      const createdAt = row.getValue("createdAt") as string
+      const createdAt = row.getValue("created_at") as string
       return (
         <span className="text-sm text-gray-500">
           {new Date(createdAt).toLocaleDateString()}
@@ -128,81 +103,71 @@ const columns: ColumnDef<Role>[] = [
       <ActionColumn 
         row={row.original} 
         onAction={handleRowAction}
-        actions={row.original.isSystem ? ["view"] : ["edit", "delete"]}
+        actions={row.original.is_system_role ? ["view"] : ["edit", "delete"]}
       />
     ),
   },
 ]
 
-function handleRowAction(role: Role, action: string) {
-  switch (action) {
-    case "edit":
-      console.log("Edit role:", role)
-      break
-    case "delete":
-      console.log("Delete role:", role)
-      break
-    case "view":
-      console.log("View role:", role)
-      break
-  }
-}
-
 export default function RolesPage() {
-  const [roles, setRoles] = React.useState<Role[]>([
-    {
-      id: "1",
-      name: "admin",
-      description: "Full system access with all permissions",
-      permissions: permissions.map(p => p.id),
-      userCount: 1,
-      isSystem: true,
-      createdAt: "2024-01-01T00:00:00Z",
-    },
-    {
-      id: "2",
-      name: "editor",
-      description: "Can create and edit content",
-      permissions: ["users.read", "projects.read", "projects.create", "projects.update"],
-      userCount: 3,
-      isSystem: true,
-      createdAt: "2024-01-01T00:00:00Z",
-    },
-    {
-      id: "3",
-      name: "viewer",
-      description: "Read-only access to content",
-      permissions: ["users.read", "projects.read"],
-      userCount: 5,
-      isSystem: true,
-      createdAt: "2024-01-01T00:00:00Z",
-    },
-  ])
-
+  // State
   const [isCreateDialogOpen, setIsCreateDialogOpen] = React.useState(false)
   const [newRole, setNewRole] = React.useState({
     name: "",
     description: "",
-    permissions: [] as string[],
+    permissions: [] as number[],
   })
 
-  const handleCreateRole = () => {
-    const role: Role = {
-      id: Math.random().toString(36).substr(2, 9),
+  // Queries
+  const { data: rolesData, isLoading: rolesLoading, error: rolesError } = useRoles()
+  const { data: permissionsData, isLoading: permissionsLoading } = usePermissions()
+
+  // Mutations
+  const createRoleMutation = useCreateRole()
+  const deleteRoleMutation = useDeleteRole()
+
+  // Action handler
+  const handleRowAction = React.useCallback((role: Role, action: string) => {
+    switch (action) {
+      case "edit":
+        console.log("Edit role:", role)
+        break
+      case "delete":
+        if (window.confirm(`Are you sure you want to delete role "${role.name}"?`)) {
+          deleteRoleMutation.mutate(role.id)
+        }
+        break
+      case "view":
+        console.log("View role:", role)
+        break
+    }
+  }, [deleteRoleMutation])
+
+  const columns = React.useMemo(() => createColumns(handleRowAction), [handleRowAction])
+
+  // Handle create role
+  const handleCreateRole = React.useCallback(() => {
+    if (!newRole.name || !newRole.description) {
+      alert("Please fill in all required fields")
+      return
+    }
+
+    createRoleMutation.mutate({
       name: newRole.name,
       description: newRole.description,
       permissions: newRole.permissions,
-      userCount: 0,
-      isSystem: false,
-      createdAt: new Date().toISOString(),
-    }
-    
-    setRoles([...roles, role])
-    setNewRole({ name: "", description: "", permissions: [] })
-    setIsCreateDialogOpen(false)
-  }
+    }, {
+      onSuccess: () => {
+        setNewRole({ name: "", description: "", permissions: [] })
+        setIsCreateDialogOpen(false)
+      },
+      onError: (error) => {
+        alert(`Failed to create role: ${apiUtils.getErrorMessage(error)}`)
+      }
+    })
+  }, [newRole, createRoleMutation])
 
-  const handlePermissionChange = (permissionId: string, checked: boolean) => {
+  const handlePermissionChange = (permissionId: number, checked: boolean) => {
     if (checked) {
       setNewRole({
         ...newRole,
@@ -215,6 +180,25 @@ export default function RolesPage() {
       })
     }
   }
+
+  // Loading states
+  const isLoading = rolesLoading || permissionsLoading
+  const isCreating = createRoleMutation.isPending
+
+  // Handle errors
+  if (rolesError) {
+    return (
+      <div className="space-y-6">
+        <div className="text-center py-12">
+          <h2 className="text-xl font-semibold text-red-600 mb-2">Failed to load roles</h2>
+          <p className="text-gray-600">{apiUtils.getErrorMessage(rolesError)}</p>
+        </div>
+      </div>
+    )
+  }
+
+  const roles = rolesData?.items || []
+  const permissions = permissionsData?.items || []
 
   const groupedPermissions = permissions.reduce((acc, permission) => {
     if (!acc[permission.category]) {
@@ -236,7 +220,7 @@ export default function RolesPage() {
 
         <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
           <DialogTrigger asChild>
-            <Button>
+            <Button disabled={isLoading}>
               <Plus className="mr-2 h-4 w-4" />
               Add Role
             </Button>
@@ -256,6 +240,7 @@ export default function RolesPage() {
                   placeholder="e.g., moderator"
                   value={newRole.name}
                   onChange={(e) => setNewRole({ ...newRole, name: e.target.value })}
+                  disabled={isCreating}
                 />
               </div>
               <div className="grid gap-2">
@@ -265,6 +250,7 @@ export default function RolesPage() {
                   placeholder="Brief description of the role"
                   value={newRole.description}
                   onChange={(e) => setNewRole({ ...newRole, description: e.target.value })}
+                  disabled={isCreating}
                 />
               </div>
               <div className="grid gap-4">
@@ -277,15 +263,16 @@ export default function RolesPage() {
                         {categoryPermissions.map((permission) => (
                           <div key={permission.id} className="flex items-center space-x-2">
                             <Checkbox
-                              id={permission.id}
+                              id={permission.id.toString()}
                               checked={newRole.permissions.includes(permission.id)}
                               onCheckedChange={(checked) => 
                                 handlePermissionChange(permission.id, checked as boolean)
                               }
+                              disabled={isCreating}
                             />
                             <div className="grid gap-1.5 leading-none">
                               <label
-                                htmlFor={permission.id}
+                                htmlFor={permission.id.toString()}
                                 className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                               >
                                 {permission.name}
@@ -303,19 +290,31 @@ export default function RolesPage() {
               </div>
             </div>
             <DialogFooter>
-              <Button type="submit" onClick={handleCreateRole}>
-                Create Role
+              <Button 
+                type="submit" 
+                onClick={handleCreateRole}
+                disabled={isCreating}
+              >
+                {isCreating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {isCreating ? 'Creating...' : 'Create Role'}
               </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
       </div>
 
-      <DataTable 
-        columns={columns} 
-        data={roles} 
-        searchKey="name"
-      />
+      {isLoading ? (
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="h-8 w-8 animate-spin" />
+          <span className="ml-2">Loading roles...</span>
+        </div>
+      ) : (
+        <DataTable 
+          columns={columns} 
+          data={roles} 
+          searchKey="name"
+        />
+      )}
     </div>
   )
 }

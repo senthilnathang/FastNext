@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { ColumnDef } from "@tanstack/react-table"
-import { Plus, Key, Shield } from "lucide-react"
+import { Plus, Key, Loader2 } from "lucide-react"
 
 import { Button } from "@/shared/components/button"
 import { DataTable, ActionColumn } from "@/shared/components/data-table"
@@ -26,24 +26,17 @@ import {
   SelectValue,
 } from "@/shared/components/select"
 
-interface Permission {
-  id: string
-  name: string
-  description: string
-  category: string
-  resource: string
-  action: string
-  rolesCount: number
-  createdAt: string
-}
+// Import React Query hooks
+import { usePermissions, useCreatePermission, useDeletePermission } from "@/modules/admin/hooks/usePermissions"
+import { apiUtils } from "@/shared/services/api/client"
+import type { Permission } from "@/shared/services/api/permissions"
 
 const categories = [
-  "Users",
-  "Roles", 
-  "Projects",
-  "Components",
-  "Settings",
-  "Analytics"
+  "project",
+  "page", 
+  "component",
+  "user",
+  "system"
 ]
 
 const actions = [
@@ -51,20 +44,13 @@ const actions = [
   "read", 
   "update",
   "delete",
-  "manage"
+  "manage",
+  "publish",
+  "deploy"
 ]
 
-const resources = [
-  "users",
-  "roles",
-  "permissions", 
-  "projects",
-  "components",
-  "settings",
-  "analytics"
-]
-
-const columns: ColumnDef<Permission>[] = [
+// Define columns
+const createColumns = (handleRowAction: (permission: Permission, action: string) => void): ColumnDef<Permission>[] => [
   {
     accessorKey: "name",
     header: "Permission Name",
@@ -95,36 +81,34 @@ const columns: ColumnDef<Permission>[] = [
     },
   },
   {
-    accessorKey: "resource",
-    header: "Resource",
+    accessorKey: "action",
+    header: "Action",
     cell: ({ row }) => {
-      const resource = row.getValue("resource") as string
-      const action = row.original.action
+      const action = row.getValue("action") as string
       return (
         <div className="font-mono text-sm">
-          {resource}.{action}
+          {action}
         </div>
       )
     },
   },
   {
-    accessorKey: "rolesCount",
-    header: "Assigned Roles",
+    id: "resource",
+    header: "Resource",
     cell: ({ row }) => {
-      const rolesCount = row.getValue("rolesCount") as number
+      const resource = row.original.resource
       return (
-        <div className="flex items-center gap-1">
-          <Shield className="w-4 h-4 text-gray-500" />
-          <span>{rolesCount}</span>
+        <div className="font-mono text-sm">
+          {resource || '-'}
         </div>
       )
     },
   },
   {
-    accessorKey: "createdAt",
+    accessorKey: "created_at",
     header: "Created",
     cell: ({ row }) => {
-      const createdAt = row.getValue("createdAt") as string
+      const createdAt = row.getValue("created_at") as string
       return (
         <span className="text-sm text-gray-500">
           {new Date(createdAt).toLocaleDateString()}
@@ -139,112 +123,72 @@ const columns: ColumnDef<Permission>[] = [
       <ActionColumn 
         row={row.original} 
         onAction={handleRowAction}
-        actions={["edit", "delete"]}
+        actions={row.original.is_system_permission ? ["view"] : ["edit", "delete"]}
       />
     ),
   },
 ]
 
-function handleRowAction(permission: Permission, action: string) {
-  switch (action) {
-    case "edit":
-      console.log("Edit permission:", permission)
-      break
-    case "delete":
-      console.log("Delete permission:", permission)
-      break
-  }
-}
-
 export default function PermissionsPage() {
-  const [permissions, setPermissions] = React.useState<Permission[]>([
-    {
-      id: "1",
-      name: "View Users",
-      description: "Can view user list and profiles",
-      category: "Users",
-      resource: "users",
-      action: "read",
-      rolesCount: 3,
-      createdAt: "2024-01-01T00:00:00Z",
-    },
-    {
-      id: "2", 
-      name: "Create Users",
-      description: "Can create new users",
-      category: "Users",
-      resource: "users",
-      action: "create",
-      rolesCount: 1,
-      createdAt: "2024-01-01T00:00:00Z",
-    },
-    {
-      id: "3",
-      name: "Update Users",
-      description: "Can edit user information",
-      category: "Users", 
-      resource: "users",
-      action: "update",
-      rolesCount: 2,
-      createdAt: "2024-01-01T00:00:00Z",
-    },
-    {
-      id: "4",
-      name: "Delete Users",
-      description: "Can delete users",
-      category: "Users",
-      resource: "users", 
-      action: "delete",
-      rolesCount: 1,
-      createdAt: "2024-01-01T00:00:00Z",
-    },
-    {
-      id: "5",
-      name: "View Roles",
-      description: "Can view roles and permissions",
-      category: "Roles",
-      resource: "roles",
-      action: "read", 
-      rolesCount: 3,
-      createdAt: "2024-01-01T00:00:00Z",
-    },
-    {
-      id: "6",
-      name: "Manage Projects",
-      description: "Full access to project management",
-      category: "Projects",
-      resource: "projects",
-      action: "manage",
-      rolesCount: 2,
-      createdAt: "2024-01-01T00:00:00Z",
-    },
-  ])
-
+  // State
   const [isCreateDialogOpen, setIsCreateDialogOpen] = React.useState(false)
   const [newPermission, setNewPermission] = React.useState({
     name: "",
     description: "",
     category: "",
-    resource: "",
     action: "",
+    resource: "",
   })
 
-  const handleCreatePermission = () => {
-    const permission: Permission = {
-      id: Math.random().toString(36).substr(2, 9),
+  // Queries
+  const { data: permissionsData, isLoading: permissionsLoading, error: permissionsError } = usePermissions()
+
+  // Mutations
+  const createPermissionMutation = useCreatePermission()
+  const deletePermissionMutation = useDeletePermission()
+
+  // Action handler
+  const handleRowAction = React.useCallback((permission: Permission, action: string) => {
+    switch (action) {
+      case "edit":
+        console.log("Edit permission:", permission)
+        break
+      case "delete":
+        if (window.confirm(`Are you sure you want to delete permission "${permission.name}"?`)) {
+          deletePermissionMutation.mutate(permission.id)
+        }
+        break
+      case "view":
+        console.log("View permission:", permission)
+        break
+    }
+  }, [deletePermissionMutation])
+
+  const columns = React.useMemo(() => createColumns(handleRowAction), [handleRowAction])
+
+  // Handle create permission
+  const handleCreatePermission = React.useCallback(() => {
+    if (!newPermission.name || !newPermission.category || !newPermission.action) {
+      alert("Please fill in all required fields")
+      return
+    }
+
+    createPermissionMutation.mutate({
       name: newPermission.name,
       description: newPermission.description,
       category: newPermission.category,
-      resource: newPermission.resource,
       action: newPermission.action,
-      rolesCount: 0,
-      createdAt: new Date().toISOString(),
-    }
-    
-    setPermissions([...permissions, permission])
-    setNewPermission({ name: "", description: "", category: "", resource: "", action: "" })
-    setIsCreateDialogOpen(false)
-  }
+      resource: newPermission.resource,
+    }, {
+      onSuccess: () => {
+        setNewPermission({ name: "", description: "", category: "", action: "", resource: "" })
+        setIsCreateDialogOpen(false)
+      },
+      onError: (error) => {
+        alert(`Failed to create permission: ${apiUtils.getErrorMessage(error)}`)
+      }
+    })
+  }, [newPermission, createPermissionMutation])
 
   const generatePermissionId = () => {
     if (newPermission.resource && newPermission.action) {
@@ -253,14 +197,33 @@ export default function PermissionsPage() {
     return ""
   }
 
+  // Auto-generate permission name
   React.useEffect(() => {
-    if (newPermission.resource && newPermission.action) {
-      const generatedName = `${newPermission.action.charAt(0).toUpperCase() + newPermission.action.slice(1)} ${newPermission.resource.charAt(0).toUpperCase() + newPermission.resource.slice(1)}`
+    if (newPermission.action && newPermission.category) {
+      const generatedName = `${newPermission.action.charAt(0).toUpperCase() + newPermission.action.slice(1)} ${newPermission.category.charAt(0).toUpperCase() + newPermission.category.slice(1)}`
       if (newPermission.name !== generatedName) {
         setNewPermission(prev => ({ ...prev, name: generatedName }))
       }
     }
-  }, [newPermission.resource, newPermission.action, newPermission.name])
+  }, [newPermission.action, newPermission.category, newPermission.name])
+
+  // Loading states
+  const isLoading = permissionsLoading
+  const isCreating = createPermissionMutation.isPending
+
+  // Handle errors
+  if (permissionsError) {
+    return (
+      <div className="space-y-6">
+        <div className="text-center py-12">
+          <h2 className="text-xl font-semibold text-red-600 mb-2">Failed to load permissions</h2>
+          <p className="text-gray-600">{apiUtils.getErrorMessage(permissionsError)}</p>
+        </div>
+      </div>
+    )
+  }
+
+  const permissions = permissionsData?.items || []
 
   return (
     <div className="space-y-6">
@@ -274,7 +237,7 @@ export default function PermissionsPage() {
 
         <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
           <DialogTrigger asChild>
-            <Button>
+            <Button disabled={isLoading}>
               <Plus className="mr-2 h-4 w-4" />
               Add Permission
             </Button>
@@ -289,7 +252,11 @@ export default function PermissionsPage() {
             <div className="grid gap-4 py-4">
               <div className="grid gap-2">
                 <Label htmlFor="category">Category</Label>
-                <Select value={newPermission.category} onValueChange={(value) => setNewPermission({ ...newPermission, category: value })}>
+                <Select 
+                  value={newPermission.category} 
+                  onValueChange={(value) => setNewPermission({ ...newPermission, category: value })}
+                  disabled={isCreating}
+                >
                   <SelectTrigger>
                     <SelectValue placeholder="Select a category" />
                   </SelectTrigger>
@@ -305,24 +272,12 @@ export default function PermissionsPage() {
               
               <div className="grid grid-cols-2 gap-4">
                 <div className="grid gap-2">
-                  <Label htmlFor="resource">Resource</Label>
-                  <Select value={newPermission.resource} onValueChange={(value) => setNewPermission({ ...newPermission, resource: value })}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Resource" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {resources.map((resource) => (
-                        <SelectItem key={resource} value={resource}>
-                          {resource}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                
-                <div className="grid gap-2">
                   <Label htmlFor="action">Action</Label>
-                  <Select value={newPermission.action} onValueChange={(value) => setNewPermission({ ...newPermission, action: value })}>
+                  <Select 
+                    value={newPermission.action} 
+                    onValueChange={(value) => setNewPermission({ ...newPermission, action: value })}
+                    disabled={isCreating}
+                  >
                     <SelectTrigger>
                       <SelectValue placeholder="Action" />
                     </SelectTrigger>
@@ -334,6 +289,17 @@ export default function PermissionsPage() {
                       ))}
                     </SelectContent>
                   </Select>
+                </div>
+                
+                <div className="grid gap-2">
+                  <Label htmlFor="resource">Resource (Optional)</Label>
+                  <Input
+                    id="resource"
+                    placeholder="e.g., projects"
+                    value={newPermission.resource}
+                    onChange={(e) => setNewPermission({ ...newPermission, resource: e.target.value })}
+                    disabled={isCreating}
+                  />
                 </div>
               </div>
 
@@ -353,6 +319,7 @@ export default function PermissionsPage() {
                   placeholder="e.g., Create Users"
                   value={newPermission.name}
                   onChange={(e) => setNewPermission({ ...newPermission, name: e.target.value })}
+                  disabled={isCreating}
                 />
               </div>
 
@@ -363,23 +330,36 @@ export default function PermissionsPage() {
                   placeholder="Brief description of what this permission allows"
                   value={newPermission.description}
                   onChange={(e) => setNewPermission({ ...newPermission, description: e.target.value })}
+                  disabled={isCreating}
                 />
               </div>
             </div>
             <DialogFooter>
-              <Button type="submit" onClick={handleCreatePermission}>
-                Create Permission
+              <Button 
+                type="submit" 
+                onClick={handleCreatePermission}
+                disabled={isCreating}
+              >
+                {isCreating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {isCreating ? 'Creating...' : 'Create Permission'}
               </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
       </div>
 
-      <DataTable 
-        columns={columns} 
-        data={permissions} 
-        searchKey="name"
-      />
+      {isLoading ? (
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="h-8 w-8 animate-spin" />
+          <span className="ml-2">Loading permissions...</span>
+        </div>
+      ) : (
+        <DataTable 
+          columns={columns} 
+          data={permissions} 
+          searchKey="name"
+        />
+      )}
     </div>
   )
 }
