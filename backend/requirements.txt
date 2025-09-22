@@ -12,6 +12,11 @@ pydantic[email]==2.11.9
 pydantic-settings==2.1.0
 pytest==7.4.3
 pytest-asyncio==0.21.1
+pytest-cov==4.1.0
+pytest-mock==3.12.0
+httpx==0.25.2
+factory-boy==3.3.0
+freezegun==1.2.2
 pylint==3.0.3
 black==23.11.0
 pyotp==2.9.0
