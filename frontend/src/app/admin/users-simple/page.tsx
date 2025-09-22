@@ -28,7 +28,6 @@ export default function UsersSimplePage() {
     username: '',
     full_name: '',
     password: '',
-    roles: [] as string[],
   });
 
   // Queries
@@ -158,10 +157,9 @@ export default function UsersSimplePage() {
       username: newUser.username,
       full_name: newUser.full_name || undefined,
       password: newUser.password,
-      roles: newUser.roles,
     }, {
       onSuccess: () => {
-        setNewUser({ email: '', username: '', full_name: '', password: '', roles: [] });
+        setNewUser({ email: '', username: '', full_name: '', password: '' });
         setIsCreateDialogOpen(false);
       },
       onError: (error) => {

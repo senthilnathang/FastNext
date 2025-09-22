@@ -31,6 +31,18 @@ class UserCreate(UserBase):
         return v
 
 
+class AdminUserCreate(UserCreate):
+    """Admin-only user creation with additional privileges"""
+    is_verified: Optional[bool] = False
+    is_superuser: Optional[bool] = False
+    bio: Optional[str] = Field(None, max_length=1000)
+    location: Optional[str] = Field(None, max_length=255)
+    website: Optional[str] = Field(None, max_length=500)
+    avatar_url: Optional[str] = Field(None, max_length=500)
+    role_id: Optional[int] = None
+    send_invitation: Optional[bool] = True
+
+
 class UserUpdate(BaseModel):
     email: Optional[EmailStr] = None
     username: Optional[str] = Field(None, min_length=3, max_length=50)

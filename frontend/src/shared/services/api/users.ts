@@ -60,7 +60,14 @@ export interface CreateUserRequest {
   password: string
   full_name?: string
   is_active?: boolean
-  roles?: string[]
+  is_verified?: boolean
+  is_superuser?: boolean
+  bio?: string
+  location?: string
+  website?: string
+  avatar_url?: string
+  role_id?: number
+  send_invitation?: boolean
 }
 
 export interface UpdateUserRequest {
@@ -68,11 +75,12 @@ export interface UpdateUserRequest {
   username?: string
   full_name?: string
   is_active?: boolean
+  is_verified?: boolean
+  is_superuser?: boolean
   bio?: string
   location?: string
   website?: string
   avatar_url?: string
-  roles?: string[]
 }
 
 import { apiClient } from './client'

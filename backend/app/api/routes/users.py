@@ -8,7 +8,7 @@ from app.auth.permissions import require_admin
 from app.core import security
 from app.db.session import get_db
 from app.models.user import User
-from app.schemas.user import User as UserSchema, UserCreate, UserUpdate, UserResponse
+from app.schemas.user import User as UserSchema, UserCreate, AdminUserCreate, UserUpdate, UserResponse
 from app.schemas.common import ListResponse
 
 router = APIRouter()
@@ -58,7 +58,7 @@ def read_users(
 def create_user(
     *,
     db: Session = Depends(get_db),
-    user_in: UserCreate,
+    user_in: AdminUserCreate,
     current_user: User = Depends(require_admin),
 ) -> Any:
     """Create new user (admin only)"""
@@ -75,8 +75,7 @@ def create_user(
             detail="The user with this username already exists in the system.",
         )
     
-    user_data = user_in.dict()
-    user_data.pop('password')
+    user_data = user_in.dict(exclude={'password', 'send_invitation'})
     user = User(
         **user_data,
         hashed_password=security.get_password_hash(user_in.password),
@@ -84,6 +83,12 @@ def create_user(
     db.add(user)
     db.commit()
     db.refresh(user)
+    
+    # TODO: Implement invitation email sending if send_invitation is True
+    if user_in.send_invitation:
+        # Send invitation email logic here
+        pass
+    
     return user
 
 

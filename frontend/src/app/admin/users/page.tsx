@@ -2,35 +2,21 @@
 
 import * as React from "react"
 import { ColumnDef } from "@tanstack/react-table"
-import { Plus, Loader2 } from "lucide-react"
+import { Plus, Loader2, Shield, UserCheck } from "lucide-react"
 
 import { Button } from "@/shared/components/button"
 import { DataTable, ActionColumn } from "@/shared/components/data-table"
 import { Badge } from "@/shared/components/badge"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/shared/components/dialog"
-import { Input } from "@/shared/components/input"
-import { Label } from "@/shared/components/label"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/shared/components/select"
+import { useConfirmationDialog } from "@/shared/components/ConfirmationDialog"
 
 // Import React Query hooks
-import { useUsers, useCreateUser, useDeleteUser, useToggleUserStatus } from "@/modules/admin/hooks/useUsers"
-import { useRoles } from "@/modules/admin/hooks/useRoles"
+import { useUsers, useDeleteUser, useToggleUserStatus } from "@/modules/admin/hooks/useUsers"
 import { apiUtils } from "@/shared/services/api/client"
 import type { User } from "@/shared/services/api/users"
+
+// Import new dialog components
+import { UserCreateDialog } from "@/modules/admin/components/UserCreateDialog"
+import { UserEditDialog } from "@/modules/admin/components/UserEditDialog"
 
 
 type UsersPageProps = Record<string, never>
@@ -38,54 +24,66 @@ type UsersPageProps = Record<string, never>
 const UsersPage: React.FC<UsersPageProps> = () => {
   // State
   const [isCreateDialogOpen, setIsCreateDialogOpen] = React.useState(false)
-  const [newUser, setNewUser] = React.useState({
-    email: "",
-    username: "",
-    full_name: "",
-    password: "",
-    roles: [] as string[],
-  })
+  const [editingUser, setEditingUser] = React.useState<User | null>(null)
 
   // Queries
   const { data: usersData, isLoading: usersLoading, error: usersError } = useUsers()
-  const { data: rolesData, isLoading: rolesLoading } = useRoles({ active_only: true })
 
   // Mutations
-  const createUserMutation = useCreateUser()
   const deleteUserMutation = useDeleteUser()
   const toggleStatusMutation = useToggleUserStatus()
+
+  // Confirmation dialog
+  const { confirmUserDelete, confirmStatusToggle, ConfirmationDialog } = useConfirmationDialog()
 
   // Action handler
   const handleRowAction = React.useCallback((user: User, action: string) => {
     switch (action) {
       case "edit":
-        // TODO: Open edit dialog
-        console.log("Edit user:", user)
+        setEditingUser(user)
         break
       case "delete":
-        if (window.confirm(`Are you sure you want to delete user "${user.username}"?`)) {
+        confirmUserDelete(user.username, () => {
           deleteUserMutation.mutate(user.id)
-        }
+        })
         break
       case "toggle-status":
-        toggleStatusMutation.mutate(user.id)
+        confirmStatusToggle(user.username, user.is_active, () => {
+          toggleStatusMutation.mutate(user.id)
+        })
         break
       case "reset-password":
         // TODO: Implement password reset
         console.log("Reset password for user:", user)
         break
+      case "send-invitation":
+        // TODO: Implement send invitation
+        console.log("Send invitation to user:", user)
+        break
     }
-  }, [deleteUserMutation, toggleStatusMutation])
+  }, [deleteUserMutation, toggleStatusMutation, confirmUserDelete, confirmStatusToggle])
 
   // Table columns
   const columns: ColumnDef<User>[] = React.useMemo(() => [
     {
       accessorKey: "username",
-      header: "Username",
-    },
-    {
-      accessorKey: "email", 
-      header: "Email",
+      header: "User",
+      cell: ({ row }) => {
+        const user = row.original
+        return (
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
+              <span className="text-sm font-medium text-primary">
+                {user.username.charAt(0).toUpperCase()}
+              </span>
+            </div>
+            <div>
+              <div className="font-medium">{user.username}</div>
+              <div className="text-sm text-muted-foreground">{user.email}</div>
+            </div>
+          </div>
+        )
+      },
     },
     {
       accessorKey: "full_name",
@@ -94,29 +92,52 @@ const UsersPage: React.FC<UsersPageProps> = () => {
     },
     {
       accessorKey: "roles",
-      header: "Roles",
+      header: "Role",
       cell: ({ row }) => {
         const roles = row.getValue("roles") as string[] || []
         return (
           <div className="flex gap-1 flex-wrap">
-            {roles.map((role) => (
-              <Badge key={role} variant="secondary" className="text-xs">
-                {role}
+            {roles.length > 0 ? (
+              roles.slice(0, 2).map((role) => (
+                <Badge key={role} variant="secondary" className="text-xs">
+                  {role}
+                </Badge>
+              ))
+            ) : (
+              <span className="text-sm text-muted-foreground">No role</span>
+            )}
+            {roles.length > 2 && (
+              <Badge variant="outline" className="text-xs">
+                +{roles.length - 2}
               </Badge>
-            ))}
+            )}
           </div>
         )
       },
     },
     {
-      accessorKey: "is_active",
+      accessorKey: "status",
       header: "Status",
       cell: ({ row }) => {
-        const isActive = row.getValue("is_active") as boolean
+        const user = row.original
         return (
-          <Badge variant={isActive ? "default" : "destructive"}>
-            {isActive ? "Active" : "Inactive"}
-          </Badge>
+          <div className="flex gap-2">
+            <Badge variant={user.is_active ? "default" : "destructive"}>
+              {user.is_active ? "Active" : "Inactive"}
+            </Badge>
+            {user.is_superuser && (
+              <Badge variant="outline" className="text-xs">
+                <Shield className="w-3 h-3 mr-1" />
+                Admin
+              </Badge>
+            )}
+            {user.is_verified && (
+              <Badge variant="outline" className="text-xs">
+                <UserCheck className="w-3 h-3 mr-1" />
+                Verified
+              </Badge>
+            )}
+          </div>
         )
       },
     },
@@ -126,8 +147,20 @@ const UsersPage: React.FC<UsersPageProps> = () => {
       cell: ({ row }) => {
         const lastLogin = row.getValue("last_login_at") as string | null
         return (
-          <span className="text-sm text-gray-500">
+          <span className="text-sm text-muted-foreground">
             {lastLogin ? new Date(lastLogin).toLocaleDateString() : "Never"}
+          </span>
+        )
+      },
+    },
+    {
+      accessorKey: "created_at",
+      header: "Created",
+      cell: ({ row }) => {
+        const createdAt = row.getValue("created_at") as string
+        return (
+          <span className="text-sm text-muted-foreground">
+            {new Date(createdAt).toLocaleDateString()}
           </span>
         )
       },
@@ -135,43 +168,32 @@ const UsersPage: React.FC<UsersPageProps> = () => {
     {
       id: "actions",
       header: "Actions",
-      cell: ({ row }) => (
-        <ActionColumn 
-          row={row.original} 
-          onAction={handleRowAction}
-          actions={["edit", "delete", "toggle-status", "reset-password"]}
-        />
-      ),
+      cell: ({ row }) => {
+        const user = row.original
+        const actions = ["edit", "toggle-status"]
+        
+        // Add conditional actions
+        if (!user.is_superuser) {
+          actions.push("delete")
+        }
+        if (!user.is_verified) {
+          actions.push("send-invitation")
+        }
+        actions.push("reset-password")
+        
+        return (
+          <ActionColumn 
+            row={user} 
+            onAction={handleRowAction}
+            actions={actions}
+          />
+        )
+      },
     },
   ], [handleRowAction])
 
-  // Handle create user
-  const handleCreateUser = React.useCallback(() => {
-    if (!newUser.email || !newUser.username || !newUser.password) {
-      alert("Please fill in all required fields")
-      return
-    }
-
-    createUserMutation.mutate({
-      email: newUser.email,
-      username: newUser.username,
-      full_name: newUser.full_name || undefined,
-      password: newUser.password,
-      roles: newUser.roles,
-    }, {
-      onSuccess: () => {
-        setNewUser({ email: "", username: "", full_name: "", password: "", roles: [] })
-        setIsCreateDialogOpen(false)
-      },
-      onError: (error) => {
-        alert(`Failed to create user: ${apiUtils.getErrorMessage(error)}`)
-      }
-    })
-  }, [newUser, createUserMutation])
-
   // Loading states
-  const isLoading = usersLoading || rolesLoading
-  const isCreating = createUserMutation.isPending
+  const isLoading = usersLoading
 
   // Handle errors
   if (usersError) {
@@ -186,7 +208,6 @@ const UsersPage: React.FC<UsersPageProps> = () => {
   }
 
   const users = usersData?.items || []
-  const roles = rolesData?.items || []
 
   return (
     <div className="container mx-auto px-4 py-6 max-w-7xl">
@@ -195,101 +216,15 @@ const UsersPage: React.FC<UsersPageProps> = () => {
           <div>
             <h1 className="text-2xl font-bold tracking-tight">Users</h1>
             <p className="text-sm text-muted-foreground">
-              Manage user accounts and their permissions
+              Manage user accounts and their permissions. {users.length} total users.
             </p>
           </div>
 
-        <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-          <DialogTrigger asChild>
-            <Button disabled={isLoading}>
-              <Plus className="mr-2 h-4 w-4" />
-              Add User
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-[425px]">
-            <DialogHeader>
-              <DialogTitle>Create New User</DialogTitle>
-              <DialogDescription>
-                Add a new user to the system. They will receive an email with login instructions.
-              </DialogDescription>
-            </DialogHeader>
-            <div className="grid gap-4 py-4">
-              <div className="grid gap-2">
-                <Label htmlFor="email">Email *</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="user@example.com"
-                  value={newUser.email}
-                  onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
-                  disabled={isCreating}
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="username">Username *</Label>
-                <Input
-                  id="username"
-                  placeholder="username"
-                  value={newUser.username}
-                  onChange={(e) => setNewUser({ ...newUser, username: e.target.value })}
-                  disabled={isCreating}
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="full_name">Full Name</Label>
-                <Input
-                  id="full_name"
-                  placeholder="John Doe"
-                  value={newUser.full_name}
-                  onChange={(e) => setNewUser({ ...newUser, full_name: e.target.value })}
-                  disabled={isCreating}
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="password">Password *</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder="••••••••"
-                  value={newUser.password}
-                  onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
-                  disabled={isCreating}
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="roles">Roles</Label>
-                <Select 
-                  disabled={isCreating || rolesLoading}
-                  onValueChange={(value) => {
-                    setNewUser({ ...newUser, roles: value ? [value] : [] })
-                  }}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select a role" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {roles.map((role) => (
-                      <SelectItem key={role.id} value={role.name}>
-                        {role.name} - {role.description}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            <DialogFooter>
-              <Button 
-                type="submit" 
-                onClick={handleCreateUser}
-                disabled={isCreating}
-              >
-                {isCreating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                {isCreating ? 'Creating...' : 'Create User'}
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-      </div>
+          <Button onClick={() => setIsCreateDialogOpen(true)} disabled={isLoading}>
+            <Plus className="mr-2 h-4 w-4" />
+            Add User
+          </Button>
+        </div>
 
         {isLoading ? (
           <div className="flex items-center justify-center py-12">
@@ -304,6 +239,20 @@ const UsersPage: React.FC<UsersPageProps> = () => {
           />
         )}
       </div>
+
+      {/* Dialog Components */}
+      <UserCreateDialog
+        open={isCreateDialogOpen}
+        onOpenChange={setIsCreateDialogOpen}
+      />
+      
+      <UserEditDialog
+        user={editingUser}
+        open={!!editingUser}
+        onOpenChange={(open) => !open && setEditingUser(null)}
+      />
+
+      <ConfirmationDialog />
     </div>
   )
 }

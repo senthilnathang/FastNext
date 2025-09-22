@@ -7,24 +7,16 @@ import { Plus, Shield, Users, Loader2 } from "lucide-react"
 import { Button } from "@/shared/components/button"
 import { DataTable, ActionColumn } from "@/shared/components/data-table"
 import { Badge } from "@/shared/components/badge"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/shared/components/dialog"
-import { Input } from "@/shared/components/input"
-import { Label } from "@/shared/components/label"
-import { Checkbox } from "@/shared/components/checkbox"
+import { useConfirmationDialog } from "@/shared/components/ConfirmationDialog"
 
 // Import React Query hooks
-import { useRoles, useCreateRole, useDeleteRole } from "@/modules/admin/hooks/useRoles"
-import { usePermissions } from "@/modules/admin/hooks/usePermissions"
+import { useRoles, useDeleteRole } from "@/modules/admin/hooks/useRoles"
 import { apiUtils } from "@/shared/services/api/client"
 import type { Role, Permission } from "@/shared/services/api/roles"
+
+// Import new dialog components
+import { RoleCreateDialog } from "@/modules/admin/components/RoleCreateDialog"
+import { RoleEditDialog } from "@/modules/admin/components/RoleEditDialog"
 
 // Define columns
 const createColumns = (handleRowAction: (role: Role, action: string) => void): ColumnDef<Role>[] => [
@@ -112,78 +104,38 @@ const createColumns = (handleRowAction: (role: Role, action: string) => void): C
 export default function RolesPage() {
   // State
   const [isCreateDialogOpen, setIsCreateDialogOpen] = React.useState(false)
-  const [newRole, setNewRole] = React.useState({
-    name: "",
-    description: "",
-    permissions: [] as number[],
-  })
+  const [editingRole, setEditingRole] = React.useState<Role | null>(null)
 
   // Queries
   const { data: rolesData, isLoading: rolesLoading, error: rolesError } = useRoles()
-  const { data: permissionsData, isLoading: permissionsLoading } = usePermissions()
 
   // Mutations
-  const createRoleMutation = useCreateRole()
   const deleteRoleMutation = useDeleteRole()
+
+  // Confirmation dialog
+  const { confirmRoleDelete, ConfirmationDialog } = useConfirmationDialog()
 
   // Action handler
   const handleRowAction = React.useCallback((role: Role, action: string) => {
     switch (action) {
       case "edit":
-        console.log("Edit role:", role)
+        setEditingRole(role)
         break
       case "delete":
-        if (window.confirm(`Are you sure you want to delete role "${role.name}"?`)) {
+        confirmRoleDelete(role.name, role.user_count || 0, () => {
           deleteRoleMutation.mutate(role.id)
-        }
+        })
         break
       case "view":
-        console.log("View role:", role)
+        setEditingRole(role)
         break
     }
-  }, [deleteRoleMutation])
+  }, [deleteRoleMutation, confirmRoleDelete])
 
   const columns = React.useMemo(() => createColumns(handleRowAction), [handleRowAction])
 
-  // Handle create role
-  const handleCreateRole = React.useCallback(() => {
-    if (!newRole.name || !newRole.description) {
-      alert("Please fill in all required fields")
-      return
-    }
-
-    createRoleMutation.mutate({
-      name: newRole.name,
-      description: newRole.description,
-      permissions: newRole.permissions,
-    }, {
-      onSuccess: () => {
-        setNewRole({ name: "", description: "", permissions: [] })
-        setIsCreateDialogOpen(false)
-      },
-      onError: (error) => {
-        alert(`Failed to create role: ${apiUtils.getErrorMessage(error)}`)
-      }
-    })
-  }, [newRole, createRoleMutation])
-
-  const handlePermissionChange = (permissionId: number, checked: boolean) => {
-    if (checked) {
-      setNewRole({
-        ...newRole,
-        permissions: [...newRole.permissions, permissionId],
-      })
-    } else {
-      setNewRole({
-        ...newRole,
-        permissions: newRole.permissions.filter((p) => p !== permissionId),
-      })
-    }
-  }
-
   // Loading states
-  const isLoading = rolesLoading || permissionsLoading
-  const isCreating = createRoleMutation.isPending
+  const isLoading = rolesLoading
 
   // Handle errors
   if (rolesError) {
@@ -198,15 +150,6 @@ export default function RolesPage() {
   }
 
   const roles = rolesData?.items || []
-  const permissions = permissionsData?.items || []
-
-  const groupedPermissions = permissions.reduce((acc, permission) => {
-    if (!acc[permission.category]) {
-      acc[permission.category] = []
-    }
-    acc[permission.category].push(permission)
-    return acc
-  }, {} as Record<string, Permission[]>)
 
   return (
     <div className="container mx-auto px-4 py-6 max-w-7xl">
@@ -215,94 +158,15 @@ export default function RolesPage() {
           <div>
             <h1 className="text-2xl font-bold tracking-tight">Roles</h1>
             <p className="text-sm text-muted-foreground">
-              Manage user roles and their permissions
+              Manage user roles and their permissions. {roles.length} total roles.
             </p>
           </div>
 
-        <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-          <DialogTrigger asChild>
-            <Button disabled={isLoading}>
-              <Plus className="mr-2 h-4 w-4" />
-              Add Role
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>Create New Role</DialogTitle>
-              <DialogDescription>
-                Create a new role and assign permissions to define what users with this role can do.
-              </DialogDescription>
-            </DialogHeader>
-            <div className="grid gap-4 py-4">
-              <div className="grid gap-2">
-                <Label htmlFor="name">Role Name</Label>
-                <Input
-                  id="name"
-                  placeholder="e.g., moderator"
-                  value={newRole.name}
-                  onChange={(e) => setNewRole({ ...newRole, name: e.target.value })}
-                  disabled={isCreating}
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="description">Description</Label>
-                <Input
-                  id="description"
-                  placeholder="Brief description of the role"
-                  value={newRole.description}
-                  onChange={(e) => setNewRole({ ...newRole, description: e.target.value })}
-                  disabled={isCreating}
-                />
-              </div>
-              <div className="grid gap-4">
-                <Label>Permissions</Label>
-                <div className="space-y-4 max-h-60 overflow-y-auto">
-                  {Object.entries(groupedPermissions).map(([category, categoryPermissions]) => (
-                    <div key={category} className="space-y-2">
-                      <h4 className="font-medium text-sm text-gray-700 dark:text-gray-300">{category}</h4>
-                      <div className="space-y-2 pl-4">
-                        {categoryPermissions.map((permission) => (
-                          <div key={permission.id} className="flex items-center space-x-2">
-                            <Checkbox
-                              id={permission.id.toString()}
-                              checked={newRole.permissions.includes(permission.id)}
-                              onCheckedChange={(checked) => 
-                                handlePermissionChange(permission.id, checked as boolean)
-                              }
-                              disabled={isCreating}
-                            />
-                            <div className="grid gap-1.5 leading-none">
-                              <label
-                                htmlFor={permission.id.toString()}
-                                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                              >
-                                {permission.name}
-                              </label>
-                              <p className="text-xs text-muted-foreground">
-                                {permission.description}
-                              </p>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-            <DialogFooter>
-              <Button 
-                type="submit" 
-                onClick={handleCreateRole}
-                disabled={isCreating}
-              >
-                {isCreating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                {isCreating ? 'Creating...' : 'Create Role'}
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-      </div>
+          <Button onClick={() => setIsCreateDialogOpen(true)} disabled={isLoading}>
+            <Plus className="mr-2 h-4 w-4" />
+            Add Role
+          </Button>
+        </div>
 
         {isLoading ? (
           <div className="flex items-center justify-center py-12">
@@ -317,6 +181,20 @@ export default function RolesPage() {
           />
         )}
       </div>
+
+      {/* Dialog Components */}
+      <RoleCreateDialog
+        open={isCreateDialogOpen}
+        onOpenChange={setIsCreateDialogOpen}
+      />
+      
+      <RoleEditDialog
+        role={editingRole}
+        open={!!editingRole}
+        onOpenChange={(open) => !open && setEditingRole(null)}
+      />
+
+      <ConfirmationDialog />
     </div>
   )
 }

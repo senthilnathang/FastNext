@@ -25,6 +25,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/shared/components/select"
+import { useConfirmationDialog } from "@/shared/components/ConfirmationDialog"
 
 // Import React Query hooks
 import { usePermissions, useCreatePermission, useDeletePermission } from "@/modules/admin/hooks/usePermissions"
@@ -147,6 +148,9 @@ export default function PermissionsPage() {
   const createPermissionMutation = useCreatePermission()
   const deletePermissionMutation = useDeletePermission()
 
+  // Confirmation dialog
+  const { confirmDelete, ConfirmationDialog } = useConfirmationDialog()
+
   // Action handler
   const handleRowAction = React.useCallback((permission: Permission, action: string) => {
     switch (action) {
@@ -154,15 +158,15 @@ export default function PermissionsPage() {
         console.log("Edit permission:", permission)
         break
       case "delete":
-        if (window.confirm(`Are you sure you want to delete permission "${permission.name}"?`)) {
+        confirmDelete(permission.name, () => {
           deletePermissionMutation.mutate(permission.id)
-        }
+        })
         break
       case "view":
         console.log("View permission:", permission)
         break
     }
-  }, [deletePermissionMutation])
+  }, [deletePermissionMutation, confirmDelete])
 
   const columns = React.useMemo(() => createColumns(handleRowAction), [handleRowAction])
 
@@ -232,7 +236,7 @@ export default function PermissionsPage() {
           <div>
             <h1 className="text-2xl font-bold tracking-tight">Permissions</h1>
             <p className="text-sm text-muted-foreground">
-              Manage system permissions and access controls
+              Manage system permissions and access controls. {permissions.length} total permissions.
             </p>
           </div>
 
@@ -362,6 +366,8 @@ export default function PermissionsPage() {
           />
         )}
       </div>
+
+      <ConfirmationDialog />
     </div>
   )
 }
