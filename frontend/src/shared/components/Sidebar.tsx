@@ -7,9 +7,10 @@ import { cn } from '@/shared/utils';
 import { useUserRole } from '@/modules/admin/hooks/useUserRole';
 import { useAuth } from '@/modules/auth';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/shared/components/tooltip';
-import { ChevronDown, ChevronRight, X, LogOut, User } from 'lucide-react';
+import { ChevronDown, ChevronRight, X } from 'lucide-react';
 import { MenuItem, menuItems } from './menuConfig';
 import { filterMenuItems } from './menuUtils';
+import { UserMenu } from './UserMenu';
 
 interface SidebarItemProps {
   item: MenuItem;
@@ -150,7 +151,7 @@ export default function Sidebar({
   isCollapsed = false
 }: SidebarProps) {
   const { canAccessModule, hasPermission } = useUserRole();
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   const [expandedItems, setExpandedItems] = useState<string[]>(['Settings', 'Administration']);
   const [isHovered, setIsHovered] = useState(false);
   const [hoverTimer, setHoverTimer] = useState<NodeJS.Timeout | null>(null);
@@ -268,58 +269,16 @@ export default function Sidebar({
           </div>
         </nav>
 
-        {/* Compact User Section */}
+        {/* Enhanced User Menu */}
         {user && (
           <div className={cn(
             'border-t border-gray-200/60 dark:border-gray-700/60',
             isCollapsed && !isHovered ? 'p-2' : 'p-3'
           )}>
-            <div className={cn(
-              'flex items-center',
-              isCollapsed && !isHovered ? 'justify-center' : 'space-x-3 mb-2'
-            )}>
-              <div className="relative flex-shrink-0">
-                <div className="w-7 h-7 bg-gradient-to-br from-blue-100 to-indigo-200 dark:from-blue-900 dark:to-indigo-800 rounded-lg flex items-center justify-center">
-                  <User className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-                </div>
-                <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-green-500 rounded-full border border-white dark:border-gray-900"></div>
-              </div>
-              {(!isCollapsed || isHovered) && (
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs font-medium text-gray-900 dark:text-white truncate">
-                    {user.full_name || user.username}
-                  </p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
-                    {user.email}
-                  </p>
-                </div>
-              )}
-            </div>
-            
-            {/* Compact logout button */}
-            {(!isCollapsed || isHovered) ? (
-              <button
-                onClick={logout}
-                className="w-full flex items-center justify-start px-2 py-1.5 text-xs text-gray-600 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
-              >
-                <LogOut className="h-3.5 w-3.5 mr-2" />
-                Sign Out
-              </button>
-            ) : (
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <button
-                    onClick={logout}
-                    className="w-full flex items-center justify-center p-1.5 text-gray-600 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
-                  >
-                    <LogOut className="h-3.5 w-3.5" />
-                  </button>
-                </TooltipTrigger>
-                <TooltipContent side="right" sideOffset={8}>
-                  <p>Sign Out</p>
-                </TooltipContent>
-              </Tooltip>
-            )}
+            <UserMenu 
+              isCollapsed={isCollapsed && !isHovered} 
+              className="w-full"
+            />
           </div>
         )}
       </div>
