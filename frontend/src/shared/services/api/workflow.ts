@@ -119,7 +119,7 @@ class WorkflowAPI {
     if (params.search) searchParams.set('search', params.search);
 
     const response = await fetch(
-      `${getApiUrl('/workflow-types')}?${searchParams}`,
+      `${getApiUrl('/api/v1/workflow-types')}?${searchParams}`,
       {
         headers: this.getAuthHeaders(),
       }
@@ -133,7 +133,7 @@ class WorkflowAPI {
   }
 
   async createWorkflowType(data: WorkflowTypeCreate): Promise<WorkflowType> {
-    const response = await fetch(getApiUrl('/workflow-types'), {
+    const response = await fetch(getApiUrl('/api/v1/workflow-types'), {
       method: 'POST',
       headers: this.getAuthHeaders(),
       body: JSON.stringify(data),
@@ -147,7 +147,7 @@ class WorkflowAPI {
   }
 
   async updateWorkflowType(id: number, data: WorkflowTypeUpdate): Promise<WorkflowType> {
-    const response = await fetch(getApiUrl(`/workflow-types/${id}`), {
+    const response = await fetch(getApiUrl(`/api/v1/workflow-types/${id}`), {
       method: 'PUT',
       headers: this.getAuthHeaders(),
       body: JSON.stringify(data),
@@ -161,7 +161,7 @@ class WorkflowAPI {
   }
 
   async deleteWorkflowType(id: number): Promise<{ message: string }> {
-    const response = await fetch(getApiUrl(`/workflow-types/${id}`), {
+    const response = await fetch(getApiUrl(`/api/v1/workflow-types/${id}`), {
       method: 'DELETE',
       headers: this.getAuthHeaders(),
     });
@@ -185,7 +185,7 @@ class WorkflowAPI {
     if (params.search) searchParams.set('search', params.search);
 
     const response = await fetch(
-      `${getApiUrl('/workflow-states')}?${searchParams}`,
+      `${getApiUrl('/api/v1/workflow-states')}?${searchParams}`,
       {
         headers: this.getAuthHeaders(),
       }
@@ -199,7 +199,7 @@ class WorkflowAPI {
   }
 
   async createWorkflowState(data: WorkflowStateCreate): Promise<WorkflowState> {
-    const response = await fetch(getApiUrl('/workflow-states'), {
+    const response = await fetch(getApiUrl('/api/v1/workflow-states'), {
       method: 'POST',
       headers: this.getAuthHeaders(),
       body: JSON.stringify(data),
@@ -226,7 +226,7 @@ class WorkflowAPI {
     if (params.workflow_type_id) searchParams.set('workflow_type_id', params.workflow_type_id.toString());
 
     const response = await fetch(
-      `${getApiUrl('/workflow-templates')}?${searchParams}`,
+      `${getApiUrl('/api/v1/workflow-templates')}?${searchParams}`,
       {
         headers: this.getAuthHeaders(),
       }
@@ -240,7 +240,7 @@ class WorkflowAPI {
   }
 
   async getWorkflowTemplate(id: number): Promise<WorkflowTemplate> {
-    const response = await fetch(getApiUrl(`/workflow-templates/${id}`), {
+    const response = await fetch(getApiUrl(`/api/v1/workflow-templates/${id}`), {
       headers: this.getAuthHeaders(),
     });
 
@@ -252,7 +252,7 @@ class WorkflowAPI {
   }
 
   async createWorkflowTemplate(data: WorkflowTemplateCreate): Promise<WorkflowTemplate> {
-    const response = await fetch(getApiUrl('/workflow-templates'), {
+    const response = await fetch(getApiUrl('/api/v1/workflow-templates'), {
       method: 'POST',
       headers: this.getAuthHeaders(),
       body: JSON.stringify(data),
@@ -266,7 +266,7 @@ class WorkflowAPI {
   }
 
   async updateWorkflowTemplate(id: number, data: WorkflowTemplateUpdate): Promise<WorkflowTemplate> {
-    const response = await fetch(getApiUrl(`/workflow-templates/${id}`), {
+    const response = await fetch(getApiUrl(`/api/v1/workflow-templates/${id}`), {
       method: 'PUT',
       headers: this.getAuthHeaders(),
       body: JSON.stringify(data),
@@ -280,7 +280,7 @@ class WorkflowAPI {
   }
 
   async deleteWorkflowTemplate(id: number): Promise<{ message: string }> {
-    const response = await fetch(getApiUrl(`/workflow-templates/${id}`), {
+    const response = await fetch(getApiUrl(`/api/v1/workflow-templates/${id}`), {
       method: 'DELETE',
       headers: this.getAuthHeaders(),
     });

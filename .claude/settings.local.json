@@ -51,7 +51,8 @@
       "Bash(cd:*)",
       "Bash(npm audit:*)",
       "Bash(npm ls:*)",
-      "WebFetch(domain:keenthemes.com)"
+      "WebFetch(domain:keenthemes.com)",
+      "Bash(npx biome check:*)"
     ],
     "deny": []
   }

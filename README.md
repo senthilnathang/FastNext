@@ -75,10 +75,11 @@ frontend/src/
 │   │   ├── components/     # Swagger UI components
 │   │   ├── types/         # API documentation types
 │   │   └── index.ts
-│   ├── builder/           # Visual page builder
-│   │   ├── components/    # Builder UI components
-│   │   ├── hooks/        # Builder state management
-│   │   ├── types/       # Builder type definitions
+│   ├── workflow/         # ReactFlow-based workflow system
+│   │   ├── components/    # Workflow UI components (ReactFlow nodes/edges)
+│   │   ├── hooks/        # Workflow state management
+│   │   ├── types/       # Workflow type definitions
+│   │   ├── templates/   # Workflow template system
 │   │   └── index.ts
 │   ├── projects/         # Project management
 │   │   ├── hooks/       # Project management hooks
@@ -128,7 +129,7 @@ frontend/src/
 // Module imports
 import { useAuth, LoginForm } from '@/modules/auth'
 import { UserManager, RoleEditor } from '@/modules/admin'
-import { ComponentLibrary, Canvas } from '@/modules/builder'
+import { WorkflowBuilder, WorkflowStateNode } from '@/modules/workflow'
 
 // Shared imports
 import { Button, Card, Input } from '@/shared/components'
@@ -153,20 +154,23 @@ import { User, Project } from '@/shared/types'
 - **Activity Monitoring**: Personal activity log viewer with filtering and export capabilities
 - **Account Overview**: Real-time account status, verification, and member information
 
-### Visual App Builder
-- **Database Schema**: Complete data models for projects, pages, components, and instances
-- **Component Management API**: Full CRUD operations for all builder entities
-- **Drag-and-Drop Interface**: Visual builder with @dnd-kit integration
-- **Component Library System**: Pre-built components (Text, Button, Image, Layout, Form)
-- **Property Panel**: Dynamic form generation based on component schemas
-- **Real-time Canvas**: Live preview and editing of component layouts
+### ReactFlow Workflow System
+- **Database-Driven Workflows**: Complete data models for workflow types, states, templates, and instances
+- **Visual Workflow Builder**: ReactFlow-based canvas with drag-and-drop node creation
+- **Custom Node Types**: State, Conditional, Parallel Gateway, Timer, and User Task nodes
+- **Workflow Engine**: Complete execution engine with state transitions and SLA monitoring
+- **Dynamic Templates**: Database-defined workflow types instead of hardcoded processes
+- **Real-time Workflow Canvas**: Live workflow building and editing interface
 
-### Advanced Capabilities
-- **Component Types**: Text, Button, Image, Layout containers, Form inputs
-- **Dynamic Properties**: Schema-driven property panels with validation
-- **Nested Components**: Support for container components with children
-- **Component Reordering**: Drag-and-drop reordering within containers
-- **Visual Feedback**: Selection highlighting, hover states, drag previews
+### Workflow Capabilities
+- **Business Process Automation**: Sales, Purchase, Invoice, and Payment workflows
+- **State Management**: New, Confirmed, Cancelled, Done, Paid, Pending states
+- **Conditional Logic**: Decision nodes with true/false branching
+- **Parallel Processing**: Split and merge nodes for concurrent workflow paths
+- **Timer Integration**: Time-based delays and scheduling in workflows
+- **User Task Management**: Manual approval and assignment workflows
+- **Role-based Permissions**: Workflow actions restricted by user roles
+- **SLA Monitoring**: Automatic escalation and deadline tracking
 
 ### Enterprise Features
 - **Role-Based Access Control**: Complete RBAC implementation with roles and permissions
@@ -351,7 +355,36 @@ The application includes a comprehensive Swagger UI integration for interactive 
 - `DELETE /api/v1/project-members/members/{member_id}` - Remove project member
 - `GET /api/v1/project-members/user/projects` - Get user's accessible projects
 
-## How to Use the Builder
+### Workflow Management
+- `GET /api/v1/workflow-types/` - List workflow types
+- `POST /api/v1/workflow-types/` - Create workflow type
+- `GET /api/v1/workflow-types/{id}` - Get workflow type details
+- `PUT /api/v1/workflow-types/{id}` - Update workflow type
+- `DELETE /api/v1/workflow-types/{id}` - Delete workflow type (soft delete)
+
+### Workflow States
+- `GET /api/v1/workflow-states/` - List workflow states
+- `POST /api/v1/workflow-states/` - Create workflow state
+- `GET /api/v1/workflow-states/{id}` - Get workflow state details
+- `PUT /api/v1/workflow-states/{id}` - Update workflow state
+- `DELETE /api/v1/workflow-states/{id}` - Delete workflow state
+
+### Workflow Templates
+- `GET /api/v1/workflow-templates/` - List workflow templates
+- `POST /api/v1/workflow-templates/` - Create workflow template
+- `GET /api/v1/workflow-templates/{id}` - Get workflow template details
+- `PUT /api/v1/workflow-templates/{id}` - Update workflow template
+- `DELETE /api/v1/workflow-templates/{id}` - Delete workflow template
+
+### Workflow Instances
+- `GET /api/v1/workflow-instances/` - List workflow instances
+- `POST /api/v1/workflow-instances/` - Create workflow instance
+- `GET /api/v1/workflow-instances/{id}` - Get workflow instance details
+- `PUT /api/v1/workflow-instances/{id}` - Update workflow instance
+- `POST /api/v1/workflow-instances/{id}/execute` - Execute workflow action
+- `GET /api/v1/workflow-instances/{id}/history` - Get workflow history
+
+## How to Use the Workflow System
 
 1. **Start the Backend**:
    ```bash
@@ -383,9 +416,9 @@ The application includes a comprehensive Swagger UI integration for interactive 
 - **Role Management** (`/admin/roles`): Configure user roles and permissions
 - **Permission Management** (`/admin/permissions`): Manage system permissions
 
-#### **Projects & Builder**
+#### **Projects & Workflows**
 - **Projects** (`/projects`): Manage and create new projects
-- **Visual Builder** (`/builder`): Drag-and-drop interface for building applications
+- **Workflows** (`/workflows`): ReactFlow-based workflow management system
 
 ### Key Capabilities
 
@@ -395,11 +428,12 @@ The application includes a comprehensive Swagger UI integration for interactive 
 - **Activity Monitoring**: Real-time activity logging with detailed tracking and URL-based filtering
 - **Audit Trail**: Complete change history with old/new value comparisons
 - **Security Features**: 2FA support, session management, and threat monitoring
-- **Visual Builder**: Complete drag-and-drop builder with component library
-- **Dynamic Components**: Pre-built Text, Button, Image, Layout, and Form components
-- **Property Editing**: Dynamic forms generated from component schemas
-- **Nested Layouts**: Container components that can hold other components
-- **Real-time Updates**: Immediate visual feedback for all changes
+- **ReactFlow Workflow System**: Visual workflow builder with custom node types
+- **Workflow Types & Templates**: Database-driven workflow configuration system
+- **State Management**: Configurable workflow states with transitions and permissions
+- **Business Process Automation**: Sales, Purchase, Invoice, and Payment workflows
+- **Execution Engine**: Complete workflow lifecycle management with SLA monitoring
+- **Real-time Canvas**: Interactive ReactFlow-based workflow building interface
 - **Enterprise Navigation**: Professional sidebar with breadcrumbs and role-based access
 - **User Management**: Complete RBAC system with project collaboration
 
@@ -466,15 +500,17 @@ Project lists showcase advanced filtering:
 ## Recent Updates & Improvements
 
 ### Latest Changes ✅
+- **ReactFlow Workflow System**: Complete workflow management system with visual builder, custom nodes, and execution engine
+- **Database-Driven Workflows**: Dynamic workflow types, states, and templates stored in database instead of hardcoded
+- **Workflow Builder Removal**: Removed incompatible /builder system and replaced with ReactFlow-based workflow system
+- **Custom Node Types**: State, Conditional, Parallel Gateway, Timer, and User Task nodes for comprehensive workflow building
+- **Workflow Engine**: Complete execution engine with state transitions, SLA monitoring, and role-based permissions
+- **Comprehensive Testing**: Full test coverage for workflow models, APIs, engine, and frontend components
 - **URL State Management**: Integrated nuqs for type-safe URL-based state management across the application
 - **Backend Architecture Enhancements**: Improved API structure, enhanced CRUD operations, and better error handling
 - **User, Role & Permission System**: Complete RBAC implementation with enhanced permission management
-- **Project Model Improvements**: Enhanced project structure and data models for better scalability
 - **Modular Frontend Architecture**: Feature-based modules with clear separation of concerns and barrel exports
 - **Code Quality & Standards**: Comprehensive coding standards, linting improvements, and documentation
-- **Import Path Optimization**: Systematic import path updates for better module organization
-- **Enhanced Testing**: Improved test coverage and testing infrastructure
-- **Documentation Updates**: Added comprehensive developer guides and API documentation
 
 ### Core Framework Features ✅
 - **Unified Navigation**: Responsive left sidebar with expandable sections
@@ -485,6 +521,17 @@ Project lists showcase advanced filtering:
 - **Swagger UI Integration**: Interactive API documentation with authentication support
 - **Enhanced Backend Structure**: Organized API routes, services, and middleware layers
 
+### ReactFlow Workflow System ✅
+- **Visual Workflow Builder**: ReactFlow-based canvas with drag-and-drop interface
+- **5 Custom Node Types**: State, Conditional, Parallel Gateway, Timer, User Task nodes
+- **Database-Driven**: Workflow types, states, and templates stored in database
+- **Execution Engine**: Complete workflow lifecycle with state transitions
+- **Business Process Support**: Sales, Purchase, Invoice, Payment workflows
+- **Role-Based Permissions**: Action restrictions based on user roles
+- **SLA Monitoring**: Automatic escalation and deadline tracking
+- **Comprehensive Testing**: Backend models, APIs, engine, and frontend components
+- **Sidebar Integration**: Unified navigation with other application sections
+
 ### Development & Code Quality ✅
 - **Modular Code Organization**: Feature-based modules with clear boundaries
 - **CRUD System Template**: Generic CRUD operations for rapid development
@@ -494,14 +541,15 @@ Project lists showcase advanced filtering:
 - **Development Tools**: Enhanced development workflow with better tooling
 
 ## Upcoming Features
+- **Advanced Workflow Features**: Enhanced conditional logic, loops, and dynamic routing
+- **Workflow Analytics**: Performance metrics, bottleneck analysis, and optimization insights
+- **Integration Framework**: External system connectors and API integrations
 - **Advanced Security**: TOTP 2FA implementation and hardware key support
 - **Data Visualization**: Activity and security analytics dashboards
 - **Notification System**: Real-time in-app notifications and email alerts
-- **App Preview & Deployment**: Live preview generation and one-click deployment
-- **File Upload & Media Management**: Asset storage and media handling
-- **App Templates**: Pre-built templates and starter kits
-- **Advanced Components**: Charts, tables, and data visualization components
-- **Mobile Application**: Native mobile app for platform management
+- **Workflow Templates Library**: Pre-built workflow templates for common business processes
+- **Mobile Workflow Management**: Native mobile app for workflow monitoring and approvals
+- **Advanced SLA Management**: Complex escalation rules and automated notifications
 
 ## License
 
