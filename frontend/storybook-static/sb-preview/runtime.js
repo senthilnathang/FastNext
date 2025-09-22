@@ -17423,7 +17423,7 @@ var o5 = y((Oa) => {
   };
   Object.defineProperty(Oa, "__esModule", { value: !0 });
   var n5 = Bxe(r5()), Hxe = (
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+     
     String.fromCodePoint || function(e) {
       var t = "";
       return e > 65535 && (e -= 65536, t += String.fromCharCode(e >>> 10 & 1023 | 55296), e = 56320 | e & 1023), t += String.fromCharCode(e),
@@ -17517,9 +17517,9 @@ var tS = y((yt) => {
   o(f5, "getInverseReplacer");
   var m5 = /(?:[\x80-\uD7FF\uE000-\uFFFF]|[\uD800-\uDBFF][\uDC00-\uDFFF]|[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?:[^\uD800-\uDBFF]|^)[\uDC00-\uDFFF])/g,
   Xxe = (
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+     
     String.prototype.codePointAt != null ? (
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+       
       function(e) {
         return e.codePointAt(0);
       }
@@ -19218,7 +19218,7 @@ Symbol]")
       "%encodeURIComponent%": encodeURIComponent,
       "%Error%": i,
       "%eval%": eval,
-      // eslint-disable-line no-eval
+       
       "%EvalError%": s,
       "%Float16Array%": typeof Float16Array > "u" ? r : Float16Array,
       "%Float32Array%": typeof Float32Array > "u" ? r : Float32Array,
@@ -22106,7 +22106,7 @@ function z_({
   maxArrayLength: s = 1 / 0,
   breakLength: a = 1 / 0,
   seen: l = [],
-  // eslint-disable-next-line no-shadow
+   
   truncate: u = 1 / 0,
   stylize: c = String
 } = {}, d) {
@@ -24439,7 +24439,7 @@ function JC({
   maxArrayLength: s = 1 / 0,
   breakLength: a = 1 / 0,
   seen: l = [],
-  // eslint-disable-next-line no-shadow
+   
   truncate: u = 1 / 0,
   stylize: c = String
 } = {}, d) {
@@ -25002,7 +25002,7 @@ function Qi(e, t, r) {
 o(Qi, "deepEqual");
 I(Qi, "deepEqual");
 function Sv(e, t) {
-  return e === t ? e !== 0 || 1 / e === 1 / t : e !== e && // eslint-disable-line no-self-compare
+  return e === t ? e !== 0 || 1 / e === 1 / t : e !== e &&  
   t !== t ? !0 : Sn(e) || Sn(t) ? !1 : null;
 }
 o(Sv, "simpleEqual");
@@ -25372,7 +25372,7 @@ function Po(e, t) {
         throw wP(n).forEach(function(l) {
           if (
             // we actually mean to check `Object.prototype` here
-            // eslint-disable-next-line no-prototype-builtins
+             
             !Object.prototype.hasOwnProperty(l) && FC.indexOf(l) === -1
           ) {
             var u = TP(i, l, a);
@@ -27963,9 +27963,9 @@ var f8 = /* @__PURE__ */ function() {
 function ke(e) {
   var t;
   return (
-    // eslint-disable-next-line no-restricted-properties -- actual guard for environments without localName
+     
     (t = e.localName) !== null && t !== void 0 ? t : (
-      // eslint-disable-next-line no-restricted-properties -- required for the fallback
+       
       e.tagName.toLowerCase()
     )
   );
@@ -28617,7 +28617,7 @@ var Nx = class Nx extends Error {
         ""
       ),
       "",
-      // eslint-disable-next-line new-cap
+       
       `${i.utils.RECEIVED_COLOR(
         "received"
       )} value must ${t}.`,
@@ -28664,9 +28664,9 @@ var Lx = class Lx extends Error {
     super(), Error.captureStackTrace && Error.captureStackTrace(this, r), this.message = [
       t.message,
       "",
-      // eslint-disable-next-line new-cap
+       
       n.utils.RECEIVED_COLOR("Failing css:"),
-      // eslint-disable-next-line new-cap
+       
       n.utils.RECEIVED_COLOR(`${t.css}`)
     ].join(`
 `);
@@ -28700,12 +28700,12 @@ function Xe(e, t, r, n, i, s) {
   return [
     `${t}
 `,
-    // eslint-disable-next-line new-cap
+     
     `${r}:
 ${e.utils.EXPECTED_COLOR(
       (0, lx.default)(uN(e, n), 2)
     )}`,
-    // eslint-disable-next-line new-cap
+     
     `${i}:
 ${e.utils.RECEIVED_COLOR(
       (0, lx.default)(uN(e, s), 2)
@@ -28818,7 +28818,7 @@ in element, found ${this.utils.stringify(
         ""
       ),
       "",
-      // eslint-disable-next-line new-cap
+       
       this.utils.RECEIVED_COLOR(this.isNot ? r() : n())
     ].join(`
 `), "message")
@@ -28876,7 +28876,7 @@ function Qd(e, t) {
         "element"
       ),
       "",
-      // eslint-disable-next-line new-cap
+       
       this.utils.RECEIVED_COLOR(`${this.utils.stringify(
         e.cloneNode(!1)
       )} ${this.isNot ? "contains:" : "does not contain:"} ${this.utils.stringify(t && t.cloneNode(!1))}
@@ -28903,7 +28903,7 @@ function mx(e, t) {
         ""
       ),
       "Expected:",
-      // eslint-disable-next-line new-cap
+       
       `  ${this.utils.EXPECTED_COLOR(t)}`,
       "Received:",
       `  ${this.utils.printReceived(e.cloneNode(!0))}`
@@ -32002,9 +32002,9 @@ var Jse = /* @__PURE__ */ function() {
 function De(e) {
   var t;
   return (
-    // eslint-disable-next-line no-restricted-properties -- actual guard for environments without localName
+     
     (t = e.localName) !== null && t !== void 0 ? t : (
-      // eslint-disable-next-line no-restricted-properties -- required for the fallback
+       
       e.tagName.toLowerCase()
     )
   );
@@ -32742,7 +32742,7 @@ function Gw() {
   return typeof jest < "u" && jest !== null ? (
     // legacy timers
     setTimeout._isMockFunction === !0 || // modern timers
-    // eslint-disable-next-line prefer-object-has-own -- not supported by our support matrix
+     
     Object.prototype.hasOwnProperty.call(setTimeout, "clock")
   ) : !1;
 }
@@ -32922,7 +32922,7 @@ o(o$, "getLabels");
 function i$(e) {
   if (e == null)
     throw new Error(
-      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions -- implicitly converting `T` to `string`
+       
       "It looks like " + e + " was passed instead of a matcher. Did you do something like getByText(" + e + ")?"
     );
 }
@@ -33485,7 +33485,7 @@ var nn = /* @__PURE__ */ o((e, t, r) => function(n) {
     if (
       // only want to suggest if all the els have the same suggestion.
       c.length === 1 && !t.endsWith(
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- TODO: Can this be null at runtime?
+         
         qh(l[0], r).queryName
       )
     )
@@ -40765,7 +40765,7 @@ function bi(e, t, r) {
     }
     return _;
   }, "applyLoaders"), u = /* @__PURE__ */ o(async (P) => {
-    let _ = new Array();
+    let _ = [];
     for (let C of [
       ...de(r.beforeEach),
       ...de(t.beforeEach),

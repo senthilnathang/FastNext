@@ -1,7 +1,8 @@
 from fastapi import APIRouter
 from app.api.routes import (
     auth, auth_routes, users, projects, pages, components, roles, permissions, project_members,
-    profile, security, activity_logs, audit_trails, assets, user_roles
+    profile, security, activity_logs, audit_trails, assets, user_roles,
+    workflow_types, workflow_states, workflow_templates, workflow_instances
 )
 
 api_router = APIRouter()
@@ -19,3 +20,7 @@ api_router.include_router(permissions.router, prefix="/permissions", tags=["perm
 api_router.include_router(project_members.router, prefix="/project-members", tags=["project-members"])
 api_router.include_router(assets.router, prefix="/assets", tags=["assets"])
 api_router.include_router(user_roles.router, prefix="/user-roles", tags=["user-roles"])
+api_router.include_router(workflow_types.router, prefix="/workflow-types", tags=["workflow-types"])
+api_router.include_router(workflow_states.router, prefix="/workflow-states", tags=["workflow-states"])
+api_router.include_router(workflow_templates.router, prefix="/workflow-templates", tags=["workflow-templates"])
+api_router.include_router(workflow_instances.router, prefix="/workflow-instances", tags=["workflow-instances"])

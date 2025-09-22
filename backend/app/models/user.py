@@ -40,6 +40,13 @@ class User(Base):
     user_roles = relationship("UserRole", foreign_keys="UserRole.user_id", back_populates="user")
     project_memberships = relationship("ProjectMember", foreign_keys="ProjectMember.user_id", back_populates="user")
     
+    # Workflow relationships
+    created_workflow_types = relationship("WorkflowType", foreign_keys="WorkflowType.created_by", back_populates="creator")
+    created_workflow_templates = relationship("WorkflowTemplate", foreign_keys="WorkflowTemplate.created_by", back_populates="creator")
+    created_workflow_instances = relationship("WorkflowInstance", foreign_keys="WorkflowInstance.created_by", back_populates="creator")
+    assigned_workflow_instances = relationship("WorkflowInstance", foreign_keys="WorkflowInstance.assigned_to", back_populates="assigned_user")
+    workflow_history = relationship("WorkflowHistory", foreign_keys="WorkflowHistory.user_id", back_populates="user")
+    
     def is_locked(self) -> bool:
         """Check if account is locked due to failed login attempts"""
         if not self.locked_until:

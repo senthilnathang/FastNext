@@ -15,16 +15,6 @@ import {
 } from 'lucide-react';
 import { API_CONFIG, getApiUrl } from '@/shared/services/api/config';
 import { AnalyticsDashboard, type KpiData } from '@/shared/components/analytics-dashboard';
-import { EnhancedDataTable, EnhancedDataTableColumnHeader } from '@/shared/components/enhanced-data-table';
-import { EnhancedEmptyState } from '@/shared/components/enhanced-empty-state';
-import {
-  createColumnHelper,
-  getCoreRowModel,
-  useReactTable,
-  getSortedRowModel,
-  getFilteredRowModel,
-  getPaginationRowModel,
-} from '@tanstack/react-table';
 
 interface Project {
   id: number;
@@ -112,83 +102,6 @@ export default function DashboardPage() {
     }
   ];
 
-  // Table setup for projects
-  const columnHelper = createColumnHelper<Project>();
-  
-  const columns = [
-    columnHelper.accessor('name', {
-      header: ({ column }) => (
-        <EnhancedDataTableColumnHeader column={column} title="Project Name" />
-      ),
-      cell: ({ row }) => (
-        <div className="flex items-center space-x-3">
-          <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-            <Building2 className="h-5 w-5 text-blue-600" />
-          </div>
-          <div>
-            <div className="font-medium">{row.getValue('name')}</div>
-            <div className="text-sm text-muted-foreground">
-              {row.original.description || 'No description'}
-            </div>
-          </div>
-        </div>
-      ),
-    }),
-    columnHelper.accessor('status', {
-      header: ({ column }) => (
-        <EnhancedDataTableColumnHeader column={column} title="Status" />
-      ),
-      cell: ({ row }) => {
-        const status = String(row.getValue('status') || (row.original.is_public ? 'active' : 'draft'));
-        return (
-          <span className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(status)}`}>
-            {status}
-          </span>
-        );
-      },
-    }),
-    columnHelper.accessor('pages_count', {
-      header: ({ column }) => (
-        <EnhancedDataTableColumnHeader column={column} title="Pages" />
-      ),
-      cell: ({ row }) => row.getValue('pages_count') || 3,
-    }),
-    columnHelper.accessor('components_count', {
-      header: ({ column }) => (
-        <EnhancedDataTableColumnHeader column={column} title="Components" />
-      ),
-      cell: ({ row }) => row.getValue('components_count') || 8,
-    }),
-    columnHelper.accessor('created_at', {
-      header: ({ column }) => (
-        <EnhancedDataTableColumnHeader column={column} title="Created" />
-      ),
-      cell: ({ row }) => formatDate(row.getValue('created_at')),
-    }),
-    columnHelper.display({
-      id: 'actions',
-      header: 'Actions',
-      cell: () => (
-        <Button variant="ghost" size="sm">
-          <Edit3 className="h-4 w-4" />
-        </Button>
-      ),
-    }),
-  ];
-
-  const table = useReactTable({
-    data: projects,
-    columns,
-    getCoreRowModel: getCoreRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    initialState: {
-      pagination: {
-        pageSize: 5,
-      },
-    },
-  });
 
   const fetchDashboardData = useCallback(async () => {
     try {
@@ -296,71 +209,139 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-foreground">Dashboard</h1>
-          <p className="text-muted-foreground">
-            Welcome back, {user?.full_name || user?.username}! Here&apos;s what&apos;s happening with your projects.
-          </p>
-        </div>
-        <Button>
-          <Plus className="h-4 w-4 mr-2" />
-          New Project
-        </Button>
-      </div>
-
-      {/* Enhanced Analytics Dashboard */}
-      <AnalyticsDashboard
-        kpis={kpiData}
-        chartData={projectActivityData}
-        chartType="bar"
-        xAxisKey="date"
-        yAxisKeys={['projects', 'pages', 'components']}
-        chartHeight={350}
-        loading={loading}
-        showTrends={true}
-      />
-
-      {/* Recent Projects Table */}
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
-          <div>
-            <CardTitle>Recent Projects</CardTitle>
-            <CardDescription>Your latest projects and their status</CardDescription>
+    <div className="container mx-auto px-4 py-6 max-w-7xl">
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-3">
+            <BarChart3 className="h-7 w-7 text-blue-600" />
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Dashboard</h1>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                Welcome back, {user?.full_name || user?.username}! Track your project metrics and progress.
+              </p>
+            </div>
           </div>
-          <Button variant="outline" size="sm">
-            <Eye className="h-4 w-4 mr-2" />
-            View All
+          <Button>
+            <Plus className="h-4 w-4 mr-2" />
+            New Project
           </Button>
-        </CardHeader>
-        <CardContent className="px-0">
-          {projects.length > 0 ? (
-            <EnhancedDataTable
-              table={table}
-              showRowSelectionCount={true}
-            />
+        </div>
+
+        {/* Enhanced Analytics Dashboard */}
+        <AnalyticsDashboard
+          kpis={kpiData}
+          chartData={projectActivityData}
+          chartType="bar"
+          xAxisKey="date"
+          yAxisKeys={['projects', 'pages', 'components']}
+          chartHeight={350}
+          loading={loading}
+          showTrends={true}
+        />
+
+        {/* Recent Projects Grid */}
+        <div>
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Recent Projects</h2>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                Your latest projects and their status
+              </p>
+            </div>
+            <Button variant="outline" size="sm">
+              <Eye className="h-4 w-4 mr-2" />
+              View All
+            </Button>
+          </div>
+
+          {loading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+              {[...Array(4)].map((_, i) => (
+                <Card key={i} className="animate-pulse" variant="flat">
+                  <CardHeader compact>
+                    <div className="h-4 bg-gray-300 dark:bg-gray-700 rounded w-3/4"></div>
+                    <div className="h-3 bg-gray-200 dark:bg-gray-600 rounded w-full"></div>
+                  </CardHeader>
+                  <CardContent compact>
+                    <div className="h-3 bg-gray-200 dark:bg-gray-600 rounded w-1/2"></div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          ) : projects.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+              {projects.map((project) => (
+                <Card key={project.id} className="hover:shadow-md transition-shadow" variant="default">
+                  <CardHeader compact className="pb-2">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1 min-w-0">
+                        <CardTitle size="sm" className="truncate">{project.name}</CardTitle>
+                        <CardDescription className="mt-1 line-clamp-2 text-xs">
+                          {project.description || 'No description provided'}
+                        </CardDescription>
+                      </div>
+                      <Button variant="ghost" size="icon-sm" className="shrink-0">
+                        <Edit3 className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  </CardHeader>
+                  <CardContent compact>
+                    <div className="space-y-2">
+                      <div className="flex items-center text-xs text-gray-500 dark:text-gray-400">
+                        <Building2 className="h-3 w-3 mr-1" />
+                        <span className="truncate">
+                          {project.pages_count || 3} pages • {project.components_count || 8} components
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-1">
+                          <span className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(project.status || (project.is_public ? 'active' : 'draft'))}`}>
+                            {project.status || (project.is_public ? 'active' : 'draft')}
+                          </span>
+                        </div>
+                        <span className="text-xs text-gray-500 dark:text-gray-400">
+                          {formatDate(project.created_at)}
+                        </span>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+              
+              {/* Create new project card */}
+              <Card 
+                className="border-dashed border-2 hover:border-blue-500 transition-colors cursor-pointer"
+                variant="outlined"
+              >
+                <CardContent compact className="flex flex-col items-center justify-center py-8">
+                  <Plus className="h-8 w-8 text-gray-400 mb-3" />
+                  <h3 className="text-sm font-medium text-gray-900 dark:text-white mb-1">
+                    Create New Project
+                  </h3>
+                  <p className="text-xs text-gray-500 text-center">
+                    Start building something amazing
+                  </p>
+                </CardContent>
+              </Card>
+            </div>
           ) : (
-            <div className="px-6">
-              <EnhancedEmptyState
-                variant="no-data"
-                title="No projects yet"
-                description="Get started by creating your first project"
-                actions={[
-                  {
-                    label: 'Create Project',
-                    onClick: () => console.log('Create project'),
-                    icon: <Plus className="h-4 w-4" />,
-                  }
-                ]}
-                size="sm"
-                showBackground
-              />
+            <div className="text-center py-12">
+              <Building2 className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+                No projects yet
+              </h3>
+              <p className="text-gray-500 dark:text-gray-400 mb-4">
+                Get started by creating your first project
+              </p>
+              <Button>
+                <Plus className="h-4 w-4 mr-2" />
+                Create Project
+              </Button>
             </div>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 }

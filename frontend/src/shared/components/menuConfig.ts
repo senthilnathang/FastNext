@@ -14,8 +14,8 @@ import {
   Clock,
   FileCheck,
   Globe,
-  Code,
   Book,
+  Workflow,
 } from 'lucide-react';
 
 export interface MenuItem {
@@ -40,10 +40,10 @@ export const menuItems: MenuItem[] = [
     module: 'projects',
   },
   {
-    title: 'Builder',
-    href: '/builder',
-    icon: Code,
-    module: 'builder',
+    title: 'Workflows',
+    href: '/workflows',
+    icon: Workflow,
+    module: 'workflows',
   },
   {
     title: 'API Documentation',
