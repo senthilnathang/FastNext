@@ -8,7 +8,7 @@ import { Input } from '@/shared/components/input';
 import { Label } from '@/shared/components/label';
 import { Textarea } from '@/shared/components/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/components/select';
-import { GitBranch, Plus, Edit, Eye, Settings, Workflow } from 'lucide-react';
+import { GitBranch, Plus, Edit, Eye, Settings } from 'lucide-react';
 import { useWorkflowTypes, useWorkflowTemplates, useCreateWorkflowType, useCreateWorkflowTemplate } from '@/modules/workflow/hooks/useWorkflow';
 import { WorkflowBuilder } from '@/modules/workflow';
 import { formatDistanceToNow } from 'date-fns';
@@ -74,9 +74,9 @@ export default function WorkflowsPage() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <Workflow className="h-7 w-7 text-blue-600" />
+            <GitBranch className="h-7 w-7 text-blue-600" />
             <div>
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Workflow Management</h1>
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Workflows</h1>
               <p className="text-sm text-gray-600 dark:text-gray-400">
                 Create and manage workflow types and templates
               </p>
@@ -84,38 +84,38 @@ export default function WorkflowsPage() {
           </div>
         </div>
 
-        {/* Tabs */}
-        <div className="border-b border-gray-200 dark:border-gray-700">
-          <nav className="-mb-px flex space-x-8">
-            <button
-              onClick={() => setActiveTab('types')}
-              className={`py-2 px-1 border-b-2 font-medium text-sm ${
-                activeTab === 'types'
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              }`}
-            >
-              Workflow Types
-            </button>
-            <button
-              onClick={() => setActiveTab('templates')}
-              className={`py-2 px-1 border-b-2 font-medium text-sm ${
-                activeTab === 'templates'
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              }`}
-            >
-              Workflow Templates
-            </button>
-          </nav>
-        </div>
+      {/* Tabs */}
+      <div className="border-b border-gray-200 dark:border-gray-700">
+        <nav className="-mb-px flex space-x-8">
+          <button
+            onClick={() => setActiveTab('types')}
+            className={`py-2 px-1 border-b-2 font-medium text-sm ${
+              activeTab === 'types'
+                ? 'border-blue-500 text-blue-600'
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+            }`}
+          >
+            Workflow Types
+          </button>
+          <button
+            onClick={() => setActiveTab('templates')}
+            className={`py-2 px-1 border-b-2 font-medium text-sm ${
+              activeTab === 'templates'
+                ? 'border-blue-500 text-blue-600'
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+            }`}
+          >
+            Workflow Templates
+          </button>
+        </nav>
+      </div>
 
-        {/* Workflow Types Tab */}
-        {activeTab === 'types' && (
-          <div className="space-y-4">
-            <div className="flex justify-between items-center">
-              <h2 className="text-lg font-semibold">Workflow Types</h2>
-              <Dialog open={createTypeDialogOpen} onOpenChange={setCreateTypeDialogOpen}>
+      {/* Workflow Types Tab */}
+      {activeTab === 'types' && (
+        <div className="space-y-4">
+          <div className="flex justify-between items-center">
+            <h2 className="text-lg font-semibold">Workflow Types</h2>
+            <Dialog open={createTypeDialogOpen} onOpenChange={setCreateTypeDialogOpen}>
                 <DialogTrigger asChild>
                   <Button>
                     <Plus className="h-4 w-4 mr-2" />
@@ -172,10 +172,10 @@ export default function WorkflowsPage() {
             </div>
 
             {typesLoading ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                 {[...Array(6)].map((_, i) => (
-                  <Card key={i} className="animate-pulse">
-                    <CardHeader>
+                  <Card key={i} className="animate-pulse" variant="flat">
+                    <CardHeader compact>
                       <div className="h-4 bg-gray-300 rounded w-3/4"></div>
                       <div className="h-3 bg-gray-200 rounded w-full"></div>
                     </CardHeader>
@@ -183,23 +183,23 @@ export default function WorkflowsPage() {
                 ))}
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                 {workflowTypes.map((type) => (
-                  <Card key={type.id} className="hover:shadow-md transition-shadow">
-                    <CardHeader>
+                  <Card key={type.id} className="hover:shadow-md transition-shadow" variant="default">
+                    <CardHeader compact className="pb-2">
                       <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-2">
+                        <div className="flex items-center space-x-2 flex-1 min-w-0">
                           <div
-                            className="w-3 h-3 rounded-full"
+                            className="w-3 h-3 rounded-full shrink-0"
                             style={{ backgroundColor: type.color }}
                           />
-                          <CardTitle className="text-lg">{type.name}</CardTitle>
+                          <CardTitle size="sm" className="truncate">{type.name}</CardTitle>
                         </div>
-                        <Button variant="ghost" size="sm">
-                          <Settings className="h-4 w-4" />
+                        <Button variant="ghost" size="icon-sm" className="shrink-0">
+                          <Settings className="h-3 w-3" />
                         </Button>
                       </div>
-                      <CardDescription>
+                      <CardDescription className="mt-1 line-clamp-2 text-xs">
                         {type.description || 'No description provided'}
                       </CardDescription>
                     </CardHeader>
@@ -210,12 +210,12 @@ export default function WorkflowsPage() {
           </div>
         )}
 
-        {/* Workflow Templates Tab */}
-        {activeTab === 'templates' && (
-          <div className="space-y-4">
-            <div className="flex justify-between items-center">
-              <h2 className="text-lg font-semibold">Workflow Templates</h2>
-              <div className="flex space-x-2">
+      {/* Workflow Templates Tab */}
+      {activeTab === 'templates' && (
+        <div className="space-y-4">
+          <div className="flex justify-between items-center">
+            <h2 className="text-lg font-semibold">Workflow Templates</h2>
+            <div className="flex space-x-2">
                 <Button variant="outline" onClick={() => openBuilder()}>
                   <GitBranch className="h-4 w-4 mr-2" />
                   New Template
@@ -287,44 +287,46 @@ export default function WorkflowsPage() {
             </div>
 
             {templatesLoading ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                 {[...Array(6)].map((_, i) => (
-                  <Card key={i} className="animate-pulse">
-                    <CardHeader>
+                  <Card key={i} className="animate-pulse" variant="flat">
+                    <CardHeader compact>
                       <div className="h-4 bg-gray-300 rounded w-3/4"></div>
                       <div className="h-3 bg-gray-200 rounded w-full"></div>
                     </CardHeader>
-                    <CardContent>
+                    <CardContent compact>
                       <div className="h-3 bg-gray-200 rounded w-1/2"></div>
                     </CardContent>
                   </Card>
                 ))}
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                 {workflowTemplates.map((template) => (
-                  <Card key={template.id} className="hover:shadow-md transition-shadow">
-                    <CardHeader className="pb-3">
-                      <div className="flex items-center justify-between">
-                        <CardTitle className="text-lg">{template.name}</CardTitle>
-                        <div className="flex space-x-1">
-                          <Button variant="ghost" size="sm" onClick={() => openBuilder(template.id)}>
-                            <Eye className="h-4 w-4" />
+                  <Card key={template.id} className="hover:shadow-md transition-shadow" variant="default">
+                    <CardHeader compact className="pb-2">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1 min-w-0">
+                          <CardTitle size="sm" className="truncate">{template.name}</CardTitle>
+                          <CardDescription className="mt-1 line-clamp-2 text-xs">
+                            {template.description || 'No description provided'}
+                          </CardDescription>
+                        </div>
+                        <div className="flex space-x-1 shrink-0">
+                          <Button variant="ghost" size="icon-sm" onClick={() => openBuilder(template.id)}>
+                            <Eye className="h-3 w-3" />
                           </Button>
-                          <Button variant="ghost" size="sm">
-                            <Edit className="h-4 w-4" />
+                          <Button variant="ghost" size="icon-sm">
+                            <Edit className="h-3 w-3" />
                           </Button>
                         </div>
                       </div>
-                      <CardDescription>
-                        {template.description || 'No description provided'}
-                      </CardDescription>
                     </CardHeader>
-                    <CardContent className="pt-0">
-                      <div className="space-y-2 text-sm">
+                    <CardContent compact>
+                      <div className="space-y-2 text-xs">
                         <div className="flex justify-between">
                           <span className="text-gray-500">Type:</span>
-                          <span>{template.workflow_type?.name}</span>
+                          <span className="truncate ml-2">{template.workflow_type?.name}</span>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-gray-500">States:</span>
@@ -332,7 +334,7 @@ export default function WorkflowsPage() {
                         </div>
                         <div className="flex justify-between">
                           <span className="text-gray-500">Created:</span>
-                          <span>
+                          <span className="truncate ml-2">
                             {formatDistanceToNow(new Date(template.created_at), { addSuffix: true })}
                           </span>
                         </div>
@@ -345,26 +347,26 @@ export default function WorkflowsPage() {
           </div>
         )}
 
-        {/* Workflow Builder Dialog */}
-        <Dialog open={builderDialogOpen} onOpenChange={setBuilderDialogOpen}>
-          <DialogContent className="max-w-[95vw] max-h-[95vh] w-full h-full">
-            <DialogHeader>
-              <DialogTitle>
-                {selectedTemplate ? `Edit Template #${selectedTemplate}` : 'Create New Workflow Template'}
-              </DialogTitle>
-            </DialogHeader>
-            <div className="flex-1 h-[80vh]">
-              <WorkflowBuilder
-                templateId={selectedTemplate || undefined}
-                readOnly={false}
-                onSave={(nodes, edges) => {
-                  console.log('Saving workflow:', { nodes, edges });
-                  // Handle save logic here
-                }}
-              />
-            </div>
-          </DialogContent>
-        </Dialog>
+      {/* Workflow Builder Dialog */}
+      <Dialog open={builderDialogOpen} onOpenChange={setBuilderDialogOpen}>
+        <DialogContent className="max-w-[95vw] max-h-[95vh] w-full h-full">
+          <DialogHeader>
+            <DialogTitle>
+              {selectedTemplate ? `Edit Template #${selectedTemplate}` : 'Create New Workflow Template'}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="flex-1 h-[80vh]">
+            <WorkflowBuilder
+              templateId={selectedTemplate || undefined}
+              readOnly={false}
+              onSave={(nodes, edges) => {
+                console.log('Saving workflow:', { nodes, edges });
+                // Handle save logic here
+              }}
+            />
+          </div>
+        </DialogContent>
+      </Dialog>
       </div>
     </div>
   );
