@@ -17,6 +17,8 @@ A comprehensive full-stack web application framework built with modern technolog
 - **nuqs** - Type-safe URL state management for React
 
 ### Development Tools
+- **pytest** - Python testing framework with coverage reporting
+- **Playwright** - End-to-end testing framework for web applications
 - **Jest** - JavaScript testing framework
 - **Storybook** - Tool for building UI components in isolation
 - **Pylint** - Python code analysis tool
@@ -52,6 +54,15 @@ backend/
 │   └── utils/           # Utility functions
 ├── migrations/          # Alembic database migrations
 ├── tests/              # Backend test suite
+│   ├── conftest.py     # Test configuration and fixtures
+│   ├── unit/           # Unit tests
+│   ├── integration/    # Integration tests
+│   ├── api/            # API endpoint tests
+│   ├── auth/           # Authentication tests
+│   ├── workflow/       # Workflow-specific tests
+│   └── crud/           # CRUD operation tests
+├── pytest.ini         # pytest configuration
+├── test_runner.py      # Comprehensive test runner script
 ├── main.py             # FastAPI application entry point
 └── requirements.txt    # Python dependencies
 ```
@@ -98,10 +109,13 @@ frontend/src/
 │   ├── utils/      # Utility functions
 │   └── index.ts    # Shared barrel exports
 ├── features/       # Cross-cutting features
-├── __tests__/     # Test organization
-│   ├── unit/     # Unit tests
-│   ├── integration/ # Integration tests
-│   └── e2e/     # End-to-end tests
+├── tests/        # Test organization
+│   └── e2e/     # End-to-end tests with Playwright
+│       ├── auth/           # Authentication e2e tests
+│       ├── admin/          # Admin panel e2e tests
+│       ├── workflow/       # Workflow e2e tests
+│       ├── api/            # Direct API e2e tests
+│       └── utils/          # Test utilities and helpers
 ├── __dev__/      # Development tools
 │   └── stories/  # Storybook stories
 └── app/         # Next.js app directory (pages and layouts)
@@ -143,7 +157,7 @@ import { User, Project } from '@/shared/types'
 - **Authentication & Security**: JWT-based authentication, password hashing, CORS middleware, protected routes
 - **Database & ORM**: PostgreSQL setup, SQLAlchemy ORM, Alembic migrations
 - **Frontend Foundation**: Next.js with TypeScript, Tailwind CSS, ShadcnUI components
-- **Testing & Quality**: Jest testing, Storybook documentation, code linting
+- **Testing & Quality**: Comprehensive testing with pytest (backend) and Playwright (e2e), Jest testing, Storybook documentation, code linting
 
 ### User Management & Settings
 - **Unified Navigation**: Responsive left sidebar with expandable menu sections
@@ -230,6 +244,7 @@ import { User, Project } from '@/shared/types'
 ### Documentation
 - **[Backend Development Guide](docs/BACKEND_DEV.md)** - Backend development, testing, and deployment
 - **[Frontend Development Guide](docs/FRONTEND_DEV.md)** - Frontend development, Storybook, and testing
+- **[Testing Guide](TESTING.md)** - Comprehensive testing documentation for pytest and Playwright
 - **[Coding Standards](CODING_STANDARDS.md)** - Code quality guidelines and best practices
 - **[CRUD System Documentation](CRUD_SYSTEM_DOCUMENTATION.md)** - Generic CRUD operations guide
 
@@ -497,15 +512,88 @@ Project lists showcase advanced filtering:
 - View mode (grid/list) preference stored
 - Pagination state across page refreshes
 
+## Testing Infrastructure
+
+The FastNext Framework includes comprehensive testing capabilities covering both backend unit/integration testing and frontend end-to-end testing.
+
+### Backend Testing (pytest)
+- **Test Framework**: pytest with async support and comprehensive fixtures
+- **Coverage Reporting**: 80% minimum coverage requirement with HTML/XML reports
+- **Test Structure**: Organized unit, integration, API, auth, workflow, and CRUD tests
+- **Test Runner**: Advanced test runner script with multiple execution modes
+- **Database Testing**: SQLite test database with automatic cleanup
+- **Authentication Testing**: JWT token testing with admin and user fixtures
+- **API Testing**: Complete endpoint testing with httpx client
+- **Mock Support**: Factory-boy for test data generation and pytest-mock for mocking
+
+#### Running Backend Tests
+```bash
+# Using the test runner (recommended)
+cd backend
+python test_runner.py
+
+# Run specific test types
+python test_runner.py --type unit
+python test_runner.py --type api
+python test_runner.py --type auth
+
+# Run with parallel execution
+python test_runner.py --parallel
+
+# Generate comprehensive report
+python test_runner.py --report
+```
+
+### Frontend E2E Testing (Playwright)
+- **Multi-Browser Support**: Chrome, Firefox, Safari testing
+- **Authentication State**: Stored login sessions for different user roles
+- **Test Organization**: Structured tests for auth, admin, workflow, and API
+- **Test Utilities**: Comprehensive helper functions for common operations
+- **Responsive Testing**: Multi-device viewport testing
+- **API Testing**: Direct API endpoint testing through Playwright
+- **Screenshot/Video**: Automatic capture on test failures
+- **Parallel Execution**: Concurrent test execution for faster feedback
+
+#### Running E2E Tests
+```bash
+# Install dependencies
+cd frontend
+npm install
+npx playwright install
+
+# Run all e2e tests
+npm run test:e2e
+
+# Run with UI mode for debugging
+npm run test:e2e:ui
+
+# Run specific test file
+npx playwright test tests/e2e/auth/login.test.ts
+
+# Generate test report
+npx playwright show-report
+```
+
+### Test Coverage & Quality
+- **Backend Coverage**: Minimum 80% code coverage with detailed HTML reports
+- **Critical Path Coverage**: 100% coverage for authentication and security
+- **API Endpoint Coverage**: Complete testing of all public endpoints
+- **E2E Workflow Testing**: Full user journey testing across the application
+- **Performance Testing**: Response time monitoring and load testing capabilities
+- **Security Testing**: Authentication, authorization, and input validation testing
+
 ## Recent Updates & Improvements
 
 ### Latest Changes ✅
+- **Comprehensive Testing Infrastructure**: Added pytest for backend testing and Playwright for e2e testing with complete documentation
+- **Test Coverage Requirements**: Implemented 80% minimum coverage with HTML/XML reporting and CI/CD integration
+- **Advanced Test Runner**: Built comprehensive test runner with multiple execution modes and cleanup utilities
+- **E2E Testing Suite**: Complete Playwright setup with multi-browser testing and authentication state management
 - **ReactFlow Workflow System**: Complete workflow management system with visual builder, custom nodes, and execution engine
 - **Database-Driven Workflows**: Dynamic workflow types, states, and templates stored in database instead of hardcoded
 - **Workflow Builder Removal**: Removed incompatible /builder system and replaced with ReactFlow-based workflow system
 - **Custom Node Types**: State, Conditional, Parallel Gateway, Timer, and User Task nodes for comprehensive workflow building
 - **Workflow Engine**: Complete execution engine with state transitions, SLA monitoring, and role-based permissions
-- **Comprehensive Testing**: Full test coverage for workflow models, APIs, engine, and frontend components
 - **URL State Management**: Integrated nuqs for type-safe URL-based state management across the application
 - **Backend Architecture Enhancements**: Improved API structure, enhanced CRUD operations, and better error handling
 - **User, Role & Permission System**: Complete RBAC implementation with enhanced permission management
@@ -537,7 +625,8 @@ Project lists showcase advanced filtering:
 - **CRUD System Template**: Generic CRUD operations for rapid development
 - **Code Standards**: Established coding standards and best practices
 - **Import Path Structure**: Organized import paths with TypeScript path mapping
-- **Testing Infrastructure**: Unit, integration, and E2E testing setup
+- **Testing Infrastructure**: Complete pytest and Playwright testing setup with 80% coverage requirements
+- **Test Documentation**: Comprehensive testing guide with examples and CI/CD integration
 - **Development Tools**: Enhanced development workflow with better tooling
 
 ## Upcoming Features

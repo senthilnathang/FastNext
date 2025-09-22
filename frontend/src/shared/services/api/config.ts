@@ -1,15 +1,16 @@
 // API Configuration
 export const API_CONFIG = {
-  API_BASE_URL: process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000',
+  API_BASE_URL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000',
   TIMEOUT: 30000,
   
   ENDPOINTS: {
     AUTH: {
-      LOGIN: '/api/v1/auth/login',
+      LOGIN: '/api/v1/auth/login/access-token',
       REGISTER: '/api/v1/auth/register',
-      REFRESH: '/api/v1/auth/refresh',
+      REFRESH: '/api/v1/auth/refresh-token',
       LOGOUT: '/api/v1/auth/logout',
-      ME: '/api/v1/auth/me',
+      ME: '/api/v1/users/me',
+      TEST_TOKEN: '/api/v1/auth/test-token',
     },
     PROFILE: {
       ME: '/api/v1/profile/me',

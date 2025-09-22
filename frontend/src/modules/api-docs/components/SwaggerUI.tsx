@@ -70,10 +70,14 @@ interface SwaggerUIProps {
 
 export function SwaggerUI({ 
   className,
-  apiUrl = 'http://localhost:8000/api/v1/openapi.json',
+  apiUrl,
   showToolbar = true,
   useStrictMode = false
 }: SwaggerUIProps) {
+  // Get API URL from environment variables with fallback
+  const baseApiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+  const defaultApiUrl = `${baseApiUrl}/api/v1/openapi.json`
+  const finalApiUrl = apiUrl || defaultApiUrl
   const { user } = useAuth()
   const [isConnected, setIsConnected] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
@@ -93,20 +97,29 @@ export function SwaggerUI({
       setIsLoading(true)
       setError(null)
       
-      const response = await fetch('http://localhost:8000/health')
+      const healthUrl = `${baseApiUrl}/health`
+      const response = await fetch(healthUrl)
+      
       if (response.ok) {
-        setIsConnected(true)
+        const data = await response.json()
+        if (data.status === 'healthy') {
+          setIsConnected(true)
+        } else {
+          setIsConnected(false)
+          setError('API server is not healthy')
+        }
       } else {
         setIsConnected(false)
-        setError('API server is not responding correctly')
+        setError(`API server responded with status ${response.status}`)
       }
-    } catch {
+    } catch (error) {
       setIsConnected(false)
-      setError('Cannot connect to API server. Please ensure the backend is running on http://localhost:8000')
+      setError(`Cannot connect to API server at ${baseApiUrl}. Please ensure the backend is running.`)
+      console.error('API connection error:', error)
     } finally {
       setIsLoading(false)
     }
-  }, [])
+  }, [baseApiUrl])
 
   useEffect(() => {
     checkAPIConnection()
@@ -114,14 +127,19 @@ export function SwaggerUI({
 
   // Memoized SwaggerUI configuration to prevent re-renders
   const swaggerConfig = useMemo(() => ({
-    url: apiUrl,
+    url: finalApiUrl,
     deepLinking: true,
     showExtensions: true,
     showCommonExtensions: true,
     displayOperationId: false,
     tryItOutEnabled: true,
+    filter: true,
+    docExpansion: 'none' as const,
+    operationsSorter: 'alpha' as const,
+    tagsSorter: 'alpha' as const,
+    validatorUrl: null, // Disable schema validation to avoid external calls
     // Suppress React warnings in Swagger UI
-    supportedSubmitMethods: ['get', 'post', 'put', 'delete', 'patch'],
+    supportedSubmitMethods: ['get', 'post', 'put', 'delete', 'patch', 'head', 'options'],
     requestInterceptor: (request: any) => {
       // Add authorization header if user is logged in
       const token = getToken()
@@ -129,13 +147,23 @@ export function SwaggerUI({
         request.headers = request.headers || {}
         request.headers.Authorization = `Bearer ${token}`
       }
+      
+      // Ensure content-type for POST/PUT requests
+      if (['POST', 'PUT', 'PATCH'].includes(request.method) && request.body) {
+        request.headers['Content-Type'] = request.headers['Content-Type'] || 'application/json'
+      }
+      
+      console.log(`API Request: ${request.method} ${request.url}`)
       return request
     },
     responseInterceptor: (response: any) => {
+      console.log(`API Response: ${response.status} ${response.url}`)
+      
       // Handle authentication errors
       if (response.status === 401) {
         console.warn('Authentication required for this endpoint')
       }
+      
       return response
     },
     onComplete: () => {
@@ -143,9 +171,9 @@ export function SwaggerUI({
     },
     onFailure: (error: any) => {
       console.error('SwaggerUI failed to load:', error)
-      setError('Failed to load API documentation')
+      setError('Failed to load API documentation. Please check the API server.')
     }
-  }), [apiUrl, getToken])
+  }), [finalApiUrl, getToken])
 
   return (
     <div className={cn('w-full', className)}>

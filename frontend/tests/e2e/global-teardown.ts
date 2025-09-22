@@ -48,7 +48,7 @@ async function cleanupAuthFiles() {
       }
     }
   } catch (error) {
-    console.log('⚠️  Auth file cleanup skipped:', error.message);
+    console.log('⚠️  Auth file cleanup skipped:', error instanceof Error ? error.message : String(error));
   }
 }
 
@@ -90,7 +90,7 @@ async function cleanupTestArtifacts() {
       console.log('🗑️  Old test artifacts cleaned up');
     }
   } catch (error) {
-    console.log('⚠️  Test artifact cleanup skipped:', error.message);
+    console.log('⚠️  Test artifact cleanup skipped:', error instanceof Error ? error.message : String(error));
   }
 }
 
@@ -127,7 +127,7 @@ async function generateTestSummary() {
       }
     }
   } catch (error) {
-    console.log('⚠️  Test summary generation skipped:', error.message);
+    console.log('⚠️  Test summary generation skipped:', error instanceof Error ? error.message : String(error));
   }
 }
 

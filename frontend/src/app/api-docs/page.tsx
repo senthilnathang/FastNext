@@ -23,50 +23,66 @@ import { cn } from '@/shared/utils'
 export default function APIDocumentationPage() {
   const { user } = useAuth()
   const [copiedEndpoint, setCopiedEndpoint] = useState<string | null>(null)
+  
+  // Get API base URL from environment
+  const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
 
   const apiEndpoints = [
     {
       category: 'Authentication',
       icon: Shield,
       endpoints: [
-        { method: 'POST', path: '/auth/login', description: 'User login' },
-        { method: 'POST', path: '/auth/register', description: 'User registration' },
-        { method: 'POST', path: '/auth/refresh', description: 'Refresh access token' },
+        { method: 'POST', path: '/auth/login/access-token', description: 'User login and get access token' },
+        { method: 'POST', path: '/auth/test-token', description: 'Test and validate JWT token' },
+        { method: 'POST', path: '/auth/refresh-token', description: 'Refresh access token' },
         { method: 'POST', path: '/auth/logout', description: 'User logout' },
-        { method: 'GET', path: '/auth/me', description: 'Get current user info' },
       ]
     },
     {
-      category: 'Users',
+      category: 'Users & Profile',
       icon: Database,
       endpoints: [
-        { method: 'GET', path: '/users', description: 'List all users' },
-        { method: 'POST', path: '/users', description: 'Create new user' },
-        { method: 'GET', path: '/users/{id}', description: 'Get user by ID' },
-        { method: 'PUT', path: '/users/{id}', description: 'Update user' },
-        { method: 'DELETE', path: '/users/{id}', description: 'Delete user' },
+        { method: 'GET', path: '/users/', description: 'List all users (admin only)' },
+        { method: 'POST', path: '/users/', description: 'Create new user' },
+        { method: 'GET', path: '/users/me', description: 'Get current user info' },
+        { method: 'PUT', path: '/users/me', description: 'Update current user' },
+        { method: 'GET', path: '/profile/me', description: 'Get user profile' },
+        { method: 'PUT', path: '/profile/me', description: 'Update user profile' },
+        { method: 'PUT', path: '/profile/me/password', description: 'Change password' },
       ]
     },
     {
       category: 'Projects',
       icon: Server,
       endpoints: [
-        { method: 'GET', path: '/projects', description: 'List all projects' },
-        { method: 'POST', path: '/projects', description: 'Create new project' },
-        { method: 'GET', path: '/projects/{id}', description: 'Get project by ID' },
+        { method: 'GET', path: '/projects/', description: 'List user projects' },
+        { method: 'POST', path: '/projects/', description: 'Create new project' },
+        { method: 'GET', path: '/projects/{id}', description: 'Get project details' },
         { method: 'PUT', path: '/projects/{id}', description: 'Update project' },
         { method: 'DELETE', path: '/projects/{id}', description: 'Delete project' },
       ]
     },
     {
-      category: 'Components',
+      category: 'Security & Activity',
+      icon: Shield,
+      endpoints: [
+        { method: 'GET', path: '/security/settings', description: 'Get security settings' },
+        { method: 'PUT', path: '/security/settings', description: 'Update security settings' },
+        { method: 'GET', path: '/activity-logs/', description: 'Get activity logs' },
+        { method: 'GET', path: '/activity-logs/me', description: 'Get user activity logs' },
+        { method: 'GET', path: '/audit-trails/', description: 'Get audit trails (admin only)' },
+      ]
+    },
+    {
+      category: 'Workflows',
       icon: Code,
       endpoints: [
-        { method: 'GET', path: '/components', description: 'List all components' },
-        { method: 'POST', path: '/components', description: 'Create new component' },
-        { method: 'GET', path: '/components/{id}', description: 'Get component by ID' },
-        { method: 'PUT', path: '/components/{id}', description: 'Update component' },
-        { method: 'DELETE', path: '/components/{id}', description: 'Delete component' },
+        { method: 'GET', path: '/workflow-types/', description: 'List workflow types' },
+        { method: 'POST', path: '/workflow-types/', description: 'Create workflow type' },
+        { method: 'GET', path: '/workflow-templates/', description: 'List workflow templates' },
+        { method: 'POST', path: '/workflow-templates/', description: 'Create workflow template' },
+        { method: 'GET', path: '/workflow-instances/', description: 'List workflow instances' },
+        { method: 'POST', path: '/workflow-instances/', description: 'Create workflow instance' },
       ]
     }
   ]
@@ -130,13 +146,13 @@ export default function APIDocumentationPage() {
               <div className="flex items-center space-x-2">
                 <Button variant="outline" size="sm" asChild>
                   <a 
-                    href="http://localhost:8000/docs" 
+                    href={`${apiBaseUrl}/docs`}
                     target="_blank" 
                     rel="noopener noreferrer"
                     className="flex items-center gap-2"
                   >
                     <ExternalLink className="w-4 h-4" />
-                    Open in New Tab
+                    Open FastAPI Docs
                   </a>
                 </Button>
               </div>
@@ -171,7 +187,7 @@ export default function APIDocumentationPage() {
                     
                     <div className="space-y-2">
                       {category.endpoints.map((endpoint, index) => {
-                        const fullPath = `http://localhost:8000/api/v1${endpoint.path}`
+                        const fullPath = `${apiBaseUrl}/api/v1${endpoint.path}`
                         const isCopied = copiedEndpoint === fullPath
                         
                         return (

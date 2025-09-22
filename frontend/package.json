@@ -80,7 +80,7 @@
     "@types/node": "^24.5.2",
     "@types/react": "^19.1.13",
     "@types/react-dom": "^19",
-    "@playwright/test": "^1.40.0",
+    "@playwright/test": "^1.55.0",
     "eslint": "^9.36.0",
     "eslint-config-next": "15.5.3",
     "eslint-plugin-storybook": "^9.1.7",
