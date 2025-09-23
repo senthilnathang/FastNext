@@ -103,8 +103,7 @@ const UsersPerformancePage: React.FC = () => {
 
   const {
     searchState,
-    updateSearchState,
-    hasActiveSearch
+    updateSearchState
   } = useAdvancedSearch({
     initialPageSize: 50,
     onSearch: (state: SearchState) => {

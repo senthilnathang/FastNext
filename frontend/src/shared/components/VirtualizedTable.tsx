@@ -1,7 +1,6 @@
 "use client"
 
 import * as React from "react"
-import { FixedSizeList as List } from "react-window"
 import { ColumnDef, flexRender, getCoreRowModel, useReactTable } from "@tanstack/react-table"
 import { ChevronDown, ChevronUp, Search } from "lucide-react"
 
@@ -19,22 +18,14 @@ interface VirtualizedTableProps<TData, TValue> {
   className?: string
 }
 
-interface TableRowProps<TData> {
+interface VirtualizedRowProps<TData> {
+  row: any
+  columns: ColumnDef<TData, any>[]
   index: number
   style: React.CSSProperties
-  data: {
-    items: TData[]
-    columns: ColumnDef<TData, any>[]
-    table: any
-  }
 }
 
-function TableRow<TData>({ index, style, data }: TableRowProps<TData>) {
-  const { items, columns, table } = data
-  const row = table.getRowModel().rows[index]
-  
-  if (!row) return null
-
+function VirtualizedRow<TData>({ row, index, style }: VirtualizedRowProps<TData>) {
   return (
     <div 
       style={style} 
@@ -43,7 +34,7 @@ function TableRow<TData>({ index, style, data }: TableRowProps<TData>) {
         index % 2 === 0 ? "bg-white dark:bg-gray-900" : "bg-gray-50/50 dark:bg-gray-800/20"
       )}
     >
-      {row.getVisibleCells().map((cell, cellIndex) => (
+      {row.getVisibleCells().map((cell: any, cellIndex: number) => (
         <div
           key={cell.id}
           className={cn(
@@ -61,7 +52,7 @@ function TableRow<TData>({ index, style, data }: TableRowProps<TData>) {
   )
 }
 
-function TableHeader<TData>({ columns, table }: { columns: ColumnDef<TData, any>[], table: any }) {
+function TableHeader<TData>({ table }: { columns: ColumnDef<TData, any>[], table: any }) {
   const headerGroups = table.getHeaderGroups()
 
   return (
@@ -111,6 +102,8 @@ export function VirtualizedTable<TData, TValue>({
   className
 }: VirtualizedTableProps<TData, TValue>) {
   const [searchValue, setSearchValue] = React.useState("")
+  const containerRef = React.useRef<HTMLDivElement>(null)
+  const [scrollTop, setScrollTop] = React.useState(0)
   
   // Filter data based on search
   const filteredData = React.useMemo(() => {
@@ -131,11 +124,20 @@ export function VirtualizedTable<TData, TValue>({
     getCoreRowModel: getCoreRowModel(),
   })
 
-  const tableRowData = React.useMemo(() => ({
-    items: filteredData,
-    columns,
-    table
-  }), [filteredData, columns, table])
+  // Virtual scrolling calculations
+  const startIndex = Math.floor(scrollTop / itemHeight)
+  const endIndex = Math.min(
+    startIndex + Math.ceil(height / itemHeight) + 1,
+    filteredData.length
+  )
+  
+  const visibleRows = table.getRowModel().rows.slice(startIndex, endIndex)
+  const totalHeight = filteredData.length * itemHeight
+  const offsetY = startIndex * itemHeight
+
+  const handleScroll = React.useCallback((e: React.UIEvent<HTMLDivElement>) => {
+    setScrollTop(e.currentTarget.scrollTop)
+  }, [])
 
   return (
     <div className={cn("space-y-4", className)}>
@@ -171,7 +173,7 @@ export function VirtualizedTable<TData, TValue>({
         </span>
         {searchValue && (
           <span>
-            Filtered by: "{searchValue}"
+            Filtered by: &ldquo;{searchValue}&rdquo;
           </span>
         )}
       </div>
@@ -181,17 +183,34 @@ export function VirtualizedTable<TData, TValue>({
         {/* Header */}
         <TableHeader columns={columns} table={table} />
         
-        {/* Virtual List */}
+        {/* Virtual Container */}
         {filteredData.length > 0 ? (
-          <List
-            height={height}
-            itemCount={filteredData.length}
-            itemSize={itemHeight}
-            itemData={tableRowData}
-            overscanCount={10} // Render extra items for smooth scrolling
+          <div
+            ref={containerRef}
+            className="overflow-auto"
+            style={{ height }}
+            onScroll={handleScroll}
           >
-            {TableRow}
-          </List>
+            <div style={{ height: totalHeight, position: 'relative' }}>
+              <div style={{ transform: `translateY(${offsetY}px)` }}>
+                {visibleRows.map((row, index) => (
+                  <VirtualizedRow
+                    key={row.id}
+                    row={row}
+                    columns={columns}
+                    index={startIndex + index}
+                    style={{
+                      height: itemHeight,
+                      position: 'absolute',
+                      top: index * itemHeight,
+                      left: 0,
+                      right: 0,
+                    }}
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
         ) : (
           <div className="flex items-center justify-center py-12 text-gray-500 dark:text-gray-400">
             {searchValue ? (
@@ -212,7 +231,7 @@ export function VirtualizedTable<TData, TValue>({
       {/* Performance Stats */}
       <div className="text-xs text-gray-500 dark:text-gray-400 flex items-center justify-between">
         <span>
-          Virtual scrolling enabled - Only rendering visible items for optimal performance
+          Virtual scrolling enabled - Rendering {visibleRows.length} of {filteredData.length} rows
         </span>
         <span>
           Item height: {itemHeight}px • Viewport: {height}px
