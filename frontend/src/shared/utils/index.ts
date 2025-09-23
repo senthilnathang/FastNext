@@ -1,5 +1,42 @@
+'use client'
+
 // Shared Utilities
 export { cn } from './utils'
+
+// Performance and optimization utilities
+export * from './performance'
+export * from './performance-server'
+
+// Re-export commonly used utilities for optimization
+export type {
+  PerformanceMeasurement,
+  VirtualScrollResult,
+  PerformanceConfig
+} from './performance'
+
+export type {
+  ServerPerformanceMeasurement,
+  ServerMemoryUsage
+} from './performance-server'
+
+// Performance monitoring shortcuts (client-side)
+export {
+  performance as perfUtils,
+  memoryMonitor,
+  performanceBudget,
+  bundleAnalyzer,
+  resourcePreloader
+} from './performance'
+
+// Server-safe performance utilities
+export {
+  serverPerformance,
+  serverMemoryMonitor,
+  serverPerformanceBudget,
+  serverBundleAnalyzer,
+  serverResourcePreloader,
+  serverOptimizationUtils
+} from './performance-server'
 
 export const formatDate = (date: string | Date): string => {
   const d = typeof date === 'string' ? new Date(date) : date

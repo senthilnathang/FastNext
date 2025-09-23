@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, memo, useCallback, useMemo } from 'react';
 import { Card } from '@/shared/components/ui/card';
 import { Button } from '@/shared/components/ui/button';
 import { Input } from '@/shared/components/ui/input';
@@ -61,19 +61,20 @@ interface ActivityLogViewerProps {
   showUserActivitiesOnly?: boolean;
 }
 
+// Memoized constants for better performance
 const levelColors = {
   info: 'bg-blue-100 text-blue-800 border-blue-200',
   warning: 'bg-yellow-100 text-yellow-800 border-yellow-200',
   error: 'bg-red-100 text-red-800 border-red-200',
   critical: 'bg-purple-100 text-purple-800 border-purple-200'
-};
+} as const;
 
 const levelIcons = {
   info: Info,
   warning: AlertTriangle,
   error: AlertCircle,
   critical: XCircle
-};
+} as const;
 
 const actionColors = {
   create: 'bg-green-100 text-green-800',
@@ -82,7 +83,68 @@ const actionColors = {
   delete: 'bg-red-100 text-red-800',
   login: 'bg-purple-100 text-purple-800',
   logout: 'bg-gray-100 text-gray-800'
-};
+} as const;
+
+// Memoized activity item component for better performance
+const ActivityItem = memo(({ 
+  activity, 
+  getLevelIcon, 
+  formatDate 
+}: { 
+  activity: ActivityLog
+  getLevelIcon: (level: string) => React.ReactElement
+  formatDate: (dateString: string) => string
+}) => (
+  <div className="p-4 hover:bg-gray-50 dark:hover:bg-gray-800">
+    <div className="flex items-start space-x-3">
+      <div className="flex-shrink-0 mt-1">
+        <div className={`p-2 rounded-full ${levelColors[activity.level]}`}>
+          {getLevelIcon(activity.level)}
+        </div>
+      </div>
+      
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-2">
+            <Badge
+              variant="secondary"
+              className={actionColors[activity.action as keyof typeof actionColors] || 'bg-gray-100 text-gray-800'}
+            >
+              {activity.action}
+            </Badge>
+            <span className="text-sm text-gray-500">{activity.entity_type}</span>
+            {activity.entity_name && (
+              <span className="text-sm font-medium text-gray-900 dark:text-white">
+                {activity.entity_name}
+              </span>
+            )}
+          </div>
+          <span className="text-sm text-gray-500">
+            {formatDate(activity.created_at)}
+          </span>
+        </div>
+        
+        <p className="mt-1 text-sm text-gray-700 dark:text-gray-300">
+          {activity.description}
+        </p>
+        
+        <div className="mt-2 flex items-center space-x-4 text-xs text-gray-500">
+          {activity.ip_address && (
+            <span>IP: {activity.ip_address}</span>
+          )}
+          {activity.status_code && (
+            <span>Status: {activity.status_code}</span>
+          )}
+          {activity.request_method && activity.request_path && (
+            <span>{activity.request_method} {activity.request_path}</span>
+          )}
+        </div>
+      </div>
+    </div>
+  </div>
+));
+
+ActivityItem.displayName = 'ActivityItem';
 
 export default function ActivityLogViewer({ showUserActivitiesOnly = false }: ActivityLogViewerProps) {
   const [activities, setActivities] = useState<ActivityLog[]>([]);
@@ -222,14 +284,29 @@ export default function ActivityLogViewer({ showUserActivitiesOnly = false }: Ac
     }
   };
 
-  const formatDate = (dateString: string) => {
+  // Memoized utility functions
+  const formatDate = useCallback((dateString: string) => {
     return new Date(dateString).toLocaleString();
-  };
+  }, []);
 
-  const getLevelIcon = (level: string) => {
+  const getLevelIcon = useCallback((level: string) => {
     const Icon = levelIcons[level as keyof typeof levelIcons] || Info;
     return <Icon className="h-4 w-4" />;
-  };
+  }, []);
+
+  // Memoized computed values
+  const mostCommonAction = useMemo(() => {
+    if (!stats?.activities_by_action || Object.keys(stats.activities_by_action).length === 0) {
+      return 'N/A';
+    }
+    return Object.entries(stats.activities_by_action).reduce((a, b) => 
+      a[1] > b[1] ? a : b
+    )[0];
+  }, [stats?.activities_by_action]);
+
+  const criticalEventsCount = useMemo(() => {
+    return stats?.activities_by_level?.critical || 0;
+  }, [stats?.activities_by_level?.critical]);
 
   if (loading && activities.length === 0) {
     return (
@@ -309,11 +386,7 @@ export default function ActivityLogViewer({ showUserActivitiesOnly = false }: Ac
               <Badge variant="secondary">Action</Badge>
             </div>
             <div className="text-lg font-semibold text-gray-900 dark:text-white">
-              {Object.entries(stats.activities_by_action).length > 0 
-                ? Object.entries(stats.activities_by_action).reduce((a, b) => 
-                    a[1] > b[1] ? a : b
-                  )[0] 
-                : 'N/A'}
+              {mostCommonAction}
             </div>
           </Card>
           
@@ -323,7 +396,7 @@ export default function ActivityLogViewer({ showUserActivitiesOnly = false }: Ac
               <XCircle className="h-4 w-4 text-red-600" />
             </div>
             <div className="text-2xl font-bold text-red-600">
-              {stats.activities_by_level.critical || 0}
+              {criticalEventsCount}
             </div>
           </Card>
         </div>
@@ -433,53 +506,12 @@ export default function ActivityLogViewer({ showUserActivitiesOnly = false }: Ac
             </div>
           ) : (
             activities.map((activity) => (
-              <div key={activity.id} className="p-4 hover:bg-gray-50 dark:hover:bg-gray-800">
-                <div className="flex items-start space-x-3">
-                  <div className="flex-shrink-0 mt-1">
-                    <div className={`p-2 rounded-full ${levelColors[activity.level]}`}>
-                      {getLevelIcon(activity.level)}
-                    </div>
-                  </div>
-                  
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-2">
-                        <Badge
-                          variant="secondary"
-                          className={actionColors[activity.action as keyof typeof actionColors] || 'bg-gray-100 text-gray-800'}
-                        >
-                          {activity.action}
-                        </Badge>
-                        <span className="text-sm text-gray-500">{activity.entity_type}</span>
-                        {activity.entity_name && (
-                          <span className="text-sm font-medium text-gray-900 dark:text-white">
-                            {activity.entity_name}
-                          </span>
-                        )}
-                      </div>
-                      <span className="text-sm text-gray-500">
-                        {formatDate(activity.created_at)}
-                      </span>
-                    </div>
-                    
-                    <p className="mt-1 text-sm text-gray-700 dark:text-gray-300">
-                      {activity.description}
-                    </p>
-                    
-                    <div className="mt-2 flex items-center space-x-4 text-xs text-gray-500">
-                      {activity.ip_address && (
-                        <span>IP: {activity.ip_address}</span>
-                      )}
-                      {activity.status_code && (
-                        <span>Status: {activity.status_code}</span>
-                      )}
-                      {activity.request_method && activity.request_path && (
-                        <span>{activity.request_method} {activity.request_path}</span>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </div>
+              <ActivityItem
+                key={activity.id}
+                activity={activity}
+                getLevelIcon={getLevelIcon}
+                formatDate={formatDate}
+              />
             ))
           )}
         </div>

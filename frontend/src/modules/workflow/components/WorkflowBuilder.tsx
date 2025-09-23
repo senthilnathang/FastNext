@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useRef, useState, memo, useMemo } from 'react';
 import ReactFlow, {
   addEdge,
   useNodesState,
@@ -59,14 +59,14 @@ const nodeTypes = {
 let nodeId = 0;
 const getId = () => `node_${nodeId++}`;
 
-function WorkflowBuilderInner({
+const WorkflowBuilderInner = memo(({
   templateId,
   workflowTypeId,
   initialNodes = [],
   initialEdges = [],
   onSave,
   readOnly = false
-}: WorkflowBuilderProps) {
+}: WorkflowBuilderProps) => {
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
@@ -95,103 +95,78 @@ function WorkflowBuilderInner({
     [setEdges, readOnly]
   );
 
-  // Add new node (with type selection)
+  // Memoized node templates for better performance
+  const nodeTemplates = useMemo(() => ({
+    state: {
+      type: 'workflowState',
+      data: {
+        label: `New State`,
+        description: 'Click to edit this state',
+        color: '#6B7280',
+        bgColor: '#F9FAFB',
+        icon: 'Circle',
+        isInitial: false,
+        isFinal: false,
+      },
+    },
+    condition: {
+      type: 'conditional',
+      data: {
+        label: `Decision`,
+        description: 'Conditional logic',
+        color: '#F97316',
+        condition: 'value == "yes"',
+      },
+    },
+    parallel: {
+      type: 'parallelGateway',
+      data: {
+        label: `Parallel Split`,
+        description: 'Parallel processing',
+        color: '#8B5CF6',
+      },
+    },
+    timer: {
+      type: 'timer',
+      data: {
+        label: `Timer`,
+        description: 'Wait for duration',
+        color: '#EAB308',
+        duration: '1h',
+      },
+    },
+    userTask: {
+      type: 'userTask',
+      data: {
+        label: `User Task`,
+        description: 'Manual task requiring user action',
+        color: '#6366F1',
+        requiredRoles: ['user'],
+        approval: false,
+        priority: 'medium' as const,
+      },
+    },
+  }), []);
+
+  // Add new node (with type selection) - optimized version
   const addNode = useCallback((nodeType: string) => {
     if (readOnly) return;
 
-    let newNode: WorkflowNode;
-    
-    switch (nodeType) {
-      case 'state':
-        newNode = {
-          id: getId(),
-          type: 'workflowState',
-          position: {
-            x: Math.random() * 400 + 100,
-            y: Math.random() * 400 + 100,
-          },
-          data: {
-            label: `New State`,
-            description: 'Click to edit this state',
-            color: '#6B7280',
-            bgColor: '#F9FAFB',
-            icon: 'Circle',
-            isInitial: false,
-            isFinal: false,
-          },
-        };
-        break;
-      case 'condition':
-        newNode = {
-          id: getId(),
-          type: 'conditional',
-          position: {
-            x: Math.random() * 400 + 100,
-            y: Math.random() * 400 + 100,
-          },
-          data: {
-            label: `Decision`,
-            description: 'Conditional logic',
-            color: '#F97316',
-            condition: 'value == "yes"',
-          },
-        };
-        break;
-      case 'parallel':
-        newNode = {
-          id: getId(),
-          type: 'parallelGateway',
-          position: {
-            x: Math.random() * 400 + 100,
-            y: Math.random() * 400 + 100,
-          },
-          data: {
-            label: `Parallel Split`,
-            description: 'Parallel processing',
-            color: '#8B5CF6',
-          },
-        };
-        break;
-      case 'timer':
-        newNode = {
-          id: getId(),
-          type: 'timer',
-          position: {
-            x: Math.random() * 400 + 100,
-            y: Math.random() * 400 + 100,
-          },
-          data: {
-            label: `Timer`,
-            description: 'Wait for duration',
-            color: '#EAB308',
-            duration: '1h',
-          },
-        };
-        break;
-      case 'userTask':
-        newNode = {
-          id: getId(),
-          type: 'userTask',
-          position: {
-            x: Math.random() * 400 + 100,
-            y: Math.random() * 400 + 100,
-          },
-          data: {
-            label: `User Task`,
-            description: 'Manual task requiring user action',
-            color: '#6366F1',
-            requiredRoles: ['user'],
-            approval: false,
-            priority: 'medium',
-          },
-        };
-        break;
-      default:
-        return;
-    }
+    const template = nodeTemplates[nodeType as keyof typeof nodeTemplates];
+    if (!template) return;
+
+    const newNode: WorkflowNode = {
+      id: getId(),
+      type: template.type,
+      position: {
+        x: Math.random() * 400 + 100,
+        y: Math.random() * 400 + 100,
+      },
+      data: { ...template.data },
+    };
 
     setNodes((nds) => nds.concat(newNode));
-  }, [setNodes, readOnly]);
+  }, [setNodes, readOnly, nodeTemplates]);
 
   // Save workflow template
   const handleSave = useCallback(() => {
@@ -383,7 +358,9 @@ function WorkflowBuilderInner({
       </div>
     </div>
   );
-}
+});
+
+WorkflowBuilderInner.displayName = 'WorkflowBuilderInner';
 
 export default function WorkflowBuilder(props: WorkflowBuilderProps) {
   return (
