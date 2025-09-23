@@ -51,7 +51,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
   const sidebarWidth = sidebarCollapsed ? 'md:pl-14' : 'md:pl-56';
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-background">
       {/* Mobile sidebar backdrop */}
       {sidebarOpen && (
         <div 
@@ -75,13 +75,13 @@ export default function AppLayout({ children }: AppLayoutProps) {
       {/* Main content */}
       <div className={cn('transition-all duration-300 ease-in-out', sidebarWidth)}>
         {/* Compact header */}
-        <header className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 px-4 py-2">
+        <header className="bg-card border-b border-border px-4 py-2">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
               {/* Mobile menu button */}
               <button
                 onClick={() => setSidebarOpen(true)}
-                className="md:hidden p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                className="md:hidden p-1.5 rounded-lg hover:bg-accent transition-colors"
               >
                 <Menu className="h-4 w-4" />
               </button>
@@ -97,7 +97,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
               </div>
               
               <div>
-                <h1 className="text-lg font-semibold text-gray-900 dark:text-white">
+                <h1 className="text-lg font-semibold text-card-foreground">
                   {getPageTitle(pathname)}
                 </h1>
               </div>

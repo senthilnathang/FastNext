@@ -33,9 +33,9 @@ export default function SidebarToggle({
   };
 
   const variantClasses = {
-    default: 'bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md',
-    minimal: 'bg-transparent hover:bg-gray-100 dark:hover:bg-gray-800',
-    floating: 'bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 shadow-lg hover:shadow-xl'
+    default: 'bg-card border border-border shadow-sm hover:shadow-md',
+    minimal: 'bg-transparent hover:bg-accent',
+    floating: 'bg-card border border-border shadow-lg hover:shadow-xl'
   };
 
   return (
@@ -46,8 +46,8 @@ export default function SidebarToggle({
             onClick={onToggle}
             className={cn(
               'rounded-lg transition-all duration-200 group flex items-center justify-center',
-              'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100',
-              'focus:outline-none focus:ring-2 focus:ring-blue-500/20',
+              'text-muted-foreground hover:text-foreground',
+              'focus:outline-none focus:ring-2 focus:ring-primary/20',
               variantClasses[variant],
               sizeClasses[size],
               className
@@ -63,7 +63,7 @@ export default function SidebarToggle({
         </TooltipTrigger>
         <TooltipContent side="bottom" className="text-xs">
           <p>{isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}</p>
-          <p className="text-xs text-gray-400 mt-0.5">Ctrl+B</p>
+          <p className="text-xs text-muted-foreground mt-0.5">Ctrl+B</p>
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>

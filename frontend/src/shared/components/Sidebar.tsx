@@ -72,11 +72,11 @@ function SidebarItem({
 
   const itemClasses = cn(
     'group flex items-center w-full text-sm rounded-lg transition-all duration-200',
-    'hover:bg-blue-50 dark:hover:bg-gray-800/50',
-    'focus:outline-none focus:ring-1 focus:ring-blue-500/30',
+    'hover:bg-sidebar-accent',
+    'focus:outline-none focus:ring-1 focus:ring-primary/30',
     {
-      'bg-blue-500 text-white shadow-sm': isActive || hasActiveChild,
-      'text-gray-700 dark:text-gray-300 hover:text-blue-700 dark:hover:text-blue-300': !isActive && !hasActiveChild,
+      'bg-primary text-primary-foreground shadow-sm': isActive || hasActiveChild,
+      'text-sidebar-foreground hover:text-primary': !isActive && !hasActiveChild,
       'px-2 py-2': showText,
       'px-2 py-2 justify-center': !showText,
       'ml-3 pl-4': level > 0 && showText,
@@ -210,7 +210,7 @@ export default function Sidebar({
     <TooltipProvider>
       <div 
         className={cn(
-          'bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800',
+          'bg-sidebar border-r border-border',
           'flex flex-col h-full transition-all duration-300 ease-in-out',
           'shadow-sm',
           sidebarWidth,
@@ -221,19 +221,19 @@ export default function Sidebar({
       >
         {/* Compact Header */}
         <div className={cn(
-          'flex items-center justify-between border-b border-gray-200/60 dark:border-gray-700/60 h-12',
+          'flex items-center justify-between border-b border-border h-12',
           isCollapsed && !isHovered ? 'px-3' : 'px-4'
         )}>
           <div className="flex items-center space-x-3 min-w-0 flex-1">
             <div className="relative flex-shrink-0">
-              <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center shadow-sm">
-                <span className="text-white font-bold text-sm">FN</span>
+              <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center shadow-sm">
+                <span className="text-primary-foreground font-bold text-sm">FN</span>
               </div>
-              <div className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-green-400 rounded-full border border-white dark:border-gray-900"></div>
+              <div className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-success rounded-full border border-sidebar"></div>
             </div>
             {(!isCollapsed || isHovered) && (
               <div className="min-w-0 flex-1">
-                <h1 className="text-sm font-bold text-gray-900 dark:text-white truncate">FastNext</h1>
+                <h1 className="text-sm font-bold text-sidebar-foreground truncate">FastNext</h1>
               </div>
             )}
           </div>
@@ -243,7 +243,7 @@ export default function Sidebar({
           {showCloseButton && onClose && (
             <button
               onClick={onClose}
-              className="md:hidden p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+              className="md:hidden p-1.5 rounded-lg hover:bg-sidebar-accent transition-colors"
             >
               <X className="h-3.5 w-3.5" />
             </button>
@@ -272,7 +272,7 @@ export default function Sidebar({
         {/* Enhanced User Menu */}
         {user && (
           <div className={cn(
-            'border-t border-gray-200/60 dark:border-gray-700/60',
+            'border-t border-border',
             isCollapsed && !isHovered ? 'p-2' : 'p-3'
           )}>
             <UserMenu 
