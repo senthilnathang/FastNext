@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import Image from "next/image"
 import { User, Mail, Calendar, MapPin } from "lucide-react"
 
 import { InfiniteScrollList } from "@/shared/components/InfiniteScrollList"
@@ -59,9 +60,11 @@ function UserCard({ user }: { user: UserItem }) {
         <div className="flex items-start space-x-4">
           {/* Avatar */}
           <div className="relative">
-            <img
+            <Image
               src={user.avatar}
               alt={user.name}
+              width={48}
+              height={48}
               className="w-12 h-12 rounded-full bg-gray-200"
             />
             {user.isOnline && (
@@ -183,7 +186,7 @@ export default function InfiniteScrollDemo() {
         {/* Infinite Scroll List */}
         <InfiniteScrollList<UserItem>
           fetchFn={fetchUsers}
-          renderItem={(user, index) => <UserCard key={user.id} user={user} />}
+          renderItem={(user) => <UserCard key={user.id} user={user} />}
           renderEmpty={EmptyState}
           renderError={ErrorState}
           pageSize={20}
