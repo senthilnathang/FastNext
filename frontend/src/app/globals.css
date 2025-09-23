@@ -55,17 +55,17 @@
   /* Enhanced OKLCH Dark theme colors - Fixed and immutable */
   --background: oklch(0.145 0 0) !important;
   --foreground: oklch(0.961 0 0) !important;
-  --primary: oklch(0.646 0.222 259.815) !important;
+  --primary: oklch(0.961 0 0) !important;
   --primary-foreground: oklch(0.145 0 0) !important;
-  --secondary: oklch(0.212 0 0) !important;
-  --secondary-foreground: oklch(0.961 0 0) !important;
+  --secondary: oklch(0.867 0 0) !important;
+  --secondary-foreground: oklch(0.145 0 0) !important;
   --accent: oklch(0.212 0 0) !important;
   --accent-foreground: oklch(0.961 0 0) !important;
   --muted: oklch(0.212 0 0) !important;
   --muted-foreground: oklch(0.635 0 0) !important;
   --border: oklch(0.212 0 0) !important;
   --input: oklch(0.212 0 0) !important;
-  --ring: oklch(0.646 0.222 259.815) !important;
+  --ring: oklch(0.961 0 0) !important;
   --card: oklch(0.145 0 0) !important;
   --card-foreground: oklch(0.961 0 0) !important;
   --popover: oklch(0.145 0 0) !important;
@@ -76,7 +76,7 @@
   /* Component-specific tokens - Fixed for dark mode */
   --sidebar: oklch(0.145 0 0) !important;
   --sidebar-foreground: oklch(0.961 0 0) !important;
-  --sidebar-primary: oklch(0.646 0.222 259.815) !important;
+  --sidebar-primary: oklch(0.961 0 0) !important;
   --sidebar-accent: oklch(0.192 0 0) !important;
   
   /* Chart colors for dark theme */
@@ -87,11 +87,11 @@
   --chart-5: oklch(0.648 0.021 221.463) !important;
   
   /* Status colors for dark theme */
-  --success: oklch(0.646 0.166 160.613) !important;
+  --success: oklch(0.746 0.166 160.613) !important;
   --success-foreground: oklch(0.145 0 0) !important;
-  --warning: oklch(0.746 0.222 41.116) !important;
+  --warning: oklch(0.846 0.222 41.116) !important;
   --warning-foreground: oklch(0.145 0 0) !important;
-  --info: oklch(0.646 0.222 259.815) !important;
+  --info: oklch(0.746 0.222 259.815) !important;
   --info-foreground: oklch(0.145 0 0) !important;
   
   /* Backward compatibility RGB fallbacks */
