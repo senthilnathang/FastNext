@@ -23,6 +23,7 @@ import {
 } from "@/shared/components/dropdown-menu"
 import { Badge } from "@/shared/components/badge"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/shared/components/tooltip"
+import { ThemeCustomizer } from "@/shared/components/ThemeCustomizer"
 
 import { useAuth } from "@/modules/auth"
 import type { User as UserType } from "@/shared/services/api/users"
@@ -309,39 +310,46 @@ function ExpandedUserMenu({ user, onLogout }: { user: UserType; onLogout: () => 
 
         {/* Theme Selection */}
         <DropdownMenuLabel className="text-xs font-medium text-gray-500 dark:text-gray-400 px-2">
-          Appearance
+          Appearance & Theme
         </DropdownMenuLabel>
         
-        <div className="grid grid-cols-3 gap-1 p-1">
-          {themes.map((themeOption) => {
-            const Icon = themeOption.icon
-            const isActive = theme === themeOption.name
-            
-            return (
-              <button
-                key={themeOption.name}
-                onClick={() => setTheme(themeOption.name)}
-                className={cn(
-                  "flex flex-col items-center p-2 rounded-lg border transition-all duration-200",
-                  "hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500/20",
-                  isActive
-                    ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20"
-                    : "border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600"
-                )}
-              >
-                <Icon className={cn(
-                  "h-4 w-4 mb-1",
-                  isActive ? "text-blue-600 dark:text-blue-400" : "text-gray-600 dark:text-gray-400"
-                )} />
-                <span className={cn(
-                  "text-xs font-medium",
-                  isActive ? "text-blue-700 dark:text-blue-300" : "text-gray-700 dark:text-gray-300"
-                )}>
-                  {themeOption.label}
-                </span>
-              </button>
-            )
-          })}
+        <div className="space-y-2">
+          <div className="grid grid-cols-3 gap-1 p-1">
+            {themes.map((themeOption) => {
+              const Icon = themeOption.icon
+              const isActive = theme === themeOption.name
+              
+              return (
+                <button
+                  key={themeOption.name}
+                  onClick={() => setTheme(themeOption.name)}
+                  className={cn(
+                    "flex flex-col items-center p-2 rounded-lg border transition-all duration-200",
+                    "hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500/20",
+                    isActive
+                      ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20"
+                      : "border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600"
+                  )}
+                >
+                  <Icon className={cn(
+                    "h-4 w-4 mb-1",
+                    isActive ? "text-blue-600 dark:text-blue-400" : "text-gray-600 dark:text-gray-400"
+                  )} />
+                  <span className={cn(
+                    "text-xs font-medium",
+                    isActive ? "text-blue-700 dark:text-blue-300" : "text-gray-700 dark:text-gray-300"
+                  )}>
+                    {themeOption.label}
+                  </span>
+                </button>
+              )
+            })}
+          </div>
+          
+          {/* Theme Customizer Button */}
+          <div className="px-1">
+            <ThemeCustomizer compact />
+          </div>
         </div>
 
         <DropdownMenuSeparator />

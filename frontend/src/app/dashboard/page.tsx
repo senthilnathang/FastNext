@@ -15,6 +15,8 @@ import {
 } from 'lucide-react';
 import { API_CONFIG, getApiUrl } from '@/shared/services/api/config';
 import { AnalyticsDashboard, type KpiData } from '@/shared/components/analytics-dashboard';
+import { ActivityFeed } from '@/shared/components/ActivityFeed';
+import { QuickActionsWidget, SystemStatusWidget, RecentStatsWidget } from '@/shared/components/DashboardWidgets';
 
 interface Project {
   id: number;
@@ -238,6 +240,20 @@ export default function DashboardPage() {
           chartHeight={350}
           loading={loading}
           showTrends={true}
+        />
+
+        {/* Dashboard Widgets Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <QuickActionsWidget className="lg:col-span-1" />
+          <SystemStatusWidget className="lg:col-span-1" loading={loading} />
+          <RecentStatsWidget className="lg:col-span-1" loading={loading} />
+        </div>
+
+        {/* Activity Feed */}
+        <ActivityFeed 
+          loading={loading}
+          maxItems={8}
+          className="lg:col-span-2"
         />
 
         {/* Recent Projects Grid */}

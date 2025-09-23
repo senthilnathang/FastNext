@@ -29,12 +29,14 @@ interface DataTableProps<TData, TValue> {
   data: TData[]
   searchKey?: string
   onRowAction?: (row: TData, action: string) => void
+  enableSearch?: boolean
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
   searchKey,
+  enableSearch = true,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
@@ -56,7 +58,7 @@ export function DataTable<TData, TValue>({
 
   return (
     <div className="space-y-4">
-      {searchKey && (
+      {enableSearch && searchKey && (
         <div className="flex items-center py-4">
           <div className="relative max-w-sm">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />

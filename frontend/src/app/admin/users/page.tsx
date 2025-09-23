@@ -8,6 +8,8 @@ import { Button } from "@/shared/components/button"
 import { DataTable, ActionColumn } from "@/shared/components/data-table"
 import { Badge } from "@/shared/components/badge"
 import { useConfirmationDialog } from "@/shared/components/ConfirmationDialog"
+import { AdvancedSearch, type SearchState, type SearchFilter } from "@/shared/components/AdvancedSearch"
+import { useAdvancedSearch } from "@/shared/hooks/useAdvancedSearch"
 
 // Import React Query hooks
 import { useUsers, useDeleteUser, useToggleUserStatus } from "@/modules/admin/hooks/useUsers"
@@ -28,6 +30,64 @@ const UsersPage: React.FC<UsersPageProps> = () => {
 
   // Queries
   const { data: usersData, isLoading: usersLoading, error: usersError } = useUsers()
+
+  // Advanced search setup
+  const availableFilters: Omit<SearchFilter, 'value'>[] = [
+    {
+      id: 'status',
+      field: 'is_active',
+      label: 'Status',
+      type: 'select',
+      options: [
+        { value: 'true', label: 'Active' },
+        { value: 'false', label: 'Inactive' }
+      ]
+    },
+    {
+      id: 'verified',
+      field: 'is_verified',
+      label: 'Verified',
+      type: 'boolean'
+    },
+    {
+      id: 'superuser',
+      field: 'is_superuser',
+      label: 'Admin User',
+      type: 'boolean'
+    },
+    {
+      id: 'created_date',
+      field: 'created_at',
+      label: 'Created Date',
+      type: 'daterange'
+    },
+    {
+      id: 'last_login',
+      field: 'last_login_at',
+      label: 'Last Login',
+      type: 'daterange'
+    }
+  ]
+
+  const availableSorts = [
+    { field: 'username', label: 'Username' },
+    { field: 'email', label: 'Email' },
+    { field: 'full_name', label: 'Full Name' },
+    { field: 'created_at', label: 'Created Date' },
+    { field: 'last_login_at', label: 'Last Login' }
+  ]
+
+  const {
+    searchState,
+    updateSearchState,
+    hasActiveSearch
+  } = useAdvancedSearch({
+    initialPageSize: 20,
+    onSearch: (state: SearchState) => {
+      console.log('Search state changed:', state)
+      // TODO: Implement API call with search parameters
+    }
+  })
 
   // Mutations
   const deleteUserMutation = useDeleteUser()
@@ -195,6 +255,105 @@ const UsersPage: React.FC<UsersPageProps> = () => {
   // Loading states
   const isLoading = usersLoading
 
+  // Prepare data with hooks (must be called before any early returns)
+  const users = React.useMemo(() => usersData?.items || [], [usersData])
+  
+  // Filter users based on search state
+  const filteredUsers = React.useMemo(() => {
+    if (!hasActiveSearch()) return users
+    
+    return users.filter(user => {
+      // Apply search query
+      if (searchState.query) {
+        const query = searchState.query.toLowerCase()
+        if (!(
+          user.username.toLowerCase().includes(query) ||
+          user.email.toLowerCase().includes(query) ||
+          (user.full_name && user.full_name.toLowerCase().includes(query))
+        )) {
+          return false
+        }
+      }
+      
+      // Apply filters
+      for (const filter of searchState.filters) {
+        if (filter.value === undefined || filter.value === '') continue
+        
+        switch (filter.field) {
+          case 'is_active':
+            if (user.is_active !== (filter.value === 'true')) return false
+            break
+          case 'is_verified':
+            if (user.is_verified !== filter.value) return false
+            break
+          case 'is_superuser':
+            if (user.is_superuser !== filter.value) return false
+            break
+          case 'created_at':
+            if (filter.value?.from) {
+              const createdAt = new Date(user.created_at)
+              const fromDate = new Date(filter.value.from)
+              const toDate = filter.value.to ? new Date(filter.value.to) : new Date()
+              if (createdAt < fromDate || createdAt > toDate) return false
+            }
+            break
+          case 'last_login_at':
+            if (filter.value?.from && user.last_login_at) {
+              const lastLogin = new Date(user.last_login_at)
+              const fromDate = new Date(filter.value.from)
+              const toDate = filter.value.to ? new Date(filter.value.to) : new Date()
+              if (lastLogin < fromDate || lastLogin > toDate) return false
+            }
+            break
+        }
+      }
+      
+      return true
+    })
+  }, [users, searchState, hasActiveSearch])
+  
+  // Sort filtered users
+  const sortedUsers = React.useMemo(() => {
+    if (!searchState.sort) return filteredUsers
+    
+    return [...filteredUsers].sort((a, b) => {
+      const field = searchState.sort!.field
+      const direction = searchState.sort!.direction
+      
+      let aValue: any
+      let bValue: any
+      
+      switch (field) {
+        case 'username':
+          aValue = a.username
+          bValue = b.username
+          break
+        case 'email':
+          aValue = a.email
+          bValue = b.email
+          break
+        case 'full_name':
+          aValue = a.full_name || ''
+          bValue = b.full_name || ''
+          break
+        case 'created_at':
+          aValue = new Date(a.created_at)
+          bValue = new Date(b.created_at)
+          break
+        case 'last_login_at':
+          aValue = a.last_login_at ? new Date(a.last_login_at) : new Date(0)
+          bValue = b.last_login_at ? new Date(b.last_login_at) : new Date(0)
+          break
+        default:
+          return 0
+      }
+      
+      if (aValue < bValue) return direction === 'asc' ? -1 : 1
+      if (aValue > bValue) return direction === 'asc' ? 1 : -1
+      return 0
+    })
+  }, [filteredUsers, searchState.sort])
+
   // Handle errors
   if (usersError) {
     return (
@@ -206,8 +365,6 @@ const UsersPage: React.FC<UsersPageProps> = () => {
       </div>
     )
   }
-
-  const users = usersData?.items || []
 
   return (
     <div className="container mx-auto px-4 py-6 max-w-7xl">
@@ -226,6 +383,17 @@ const UsersPage: React.FC<UsersPageProps> = () => {
           </Button>
         </div>
 
+        {/* Advanced Search */}
+        <AdvancedSearch
+          searchState={searchState}
+          onSearchChange={updateSearchState}
+          availableFilters={availableFilters}
+          availableSorts={availableSorts}
+          placeholder="Search users by username, email, or name..."
+          resultCount={sortedUsers.length}
+          loading={isLoading}
+        />
+
         {isLoading ? (
           <div className="flex items-center justify-center py-12">
             <Loader2 className="h-8 w-8 animate-spin" />
@@ -234,8 +402,9 @@ const UsersPage: React.FC<UsersPageProps> = () => {
         ) : (
           <DataTable 
             columns={columns} 
-            data={users} 
+            data={sortedUsers} 
             searchKey="username"
+            enableSearch={false}
           />
         )}
       </div>
