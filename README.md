@@ -73,52 +73,189 @@ frontend/src/
 ├── modules/                    # Feature-based modules
 │   ├── auth/                  # Authentication module
 │   │   ├── components/        # Auth-specific components
+│   │   │   ├── ChangePasswordForm.tsx
+│   │   │   ├── SecuritySettings.tsx
+│   │   │   ├── UpdateProfileForm.tsx
+│   │   │   └── index.ts
 │   │   ├── hooks/            # Authentication hooks
+│   │   │   └── useAuth.ts
 │   │   ├── services/         # Auth context and services
+│   │   │   └── AuthContext.tsx
 │   │   ├── types/           # Authentication types
+│   │   │   └── index.ts
+│   │   ├── client.ts        # Client-side auth utilities
+│   │   ├── server.ts        # Server-side auth utilities
 │   │   └── index.ts         # Module barrel exports
 │   ├── admin/               # Administration module
 │   │   ├── components/      # Admin UI components
+│   │   │   ├── ActivityLogViewer.tsx
+│   │   │   ├── RoleCreateDialog.tsx
+│   │   │   ├── RoleEditDialog.tsx
+│   │   │   ├── UserCreateDialog.tsx
+│   │   │   ├── UserEditDialog.tsx
+│   │   │   └── index.ts
 │   │   ├── hooks/          # Admin management hooks
+│   │   │   ├── useGenericPermissions.ts
+│   │   │   ├── usePermissions.ts
+│   │   │   ├── useRoles.ts
+│   │   │   ├── useUserRole.ts
+│   │   │   └── useUsers.ts
 │   │   ├── types/          # Admin type definitions
+│   │   │   └── index.ts
+│   │   ├── pages/          # Admin page components
+│   │   ├── services/       # Admin services
 │   │   └── index.ts
 │   ├── api-docs/           # API documentation module
 │   │   ├── components/     # Swagger UI components
+│   │   │   ├── SwaggerErrorBoundary.tsx
+│   │   │   ├── SwaggerUI.tsx
+│   │   │   ├── SwaggerUINoStrict.tsx
+│   │   │   ├── __tests__/
+│   │   │   └── index.ts
 │   │   ├── types/         # API documentation types
+│   │   │   ├── swagger.d.ts
+│   │   │   └── index.ts
+│   │   ├── utils/         # API testing utilities
+│   │   │   └── api-test.ts
+│   │   ├── hooks/
+│   │   ├── pages/
+│   │   ├── services/
 │   │   └── index.ts
 │   ├── workflow/         # ReactFlow-based workflow system
 │   │   ├── components/    # Workflow UI components (ReactFlow nodes/edges)
+│   │   │   ├── ConditionalNode.tsx
+│   │   │   ├── ParallelGatewayNode.tsx
+│   │   │   ├── TimerNode.tsx
+│   │   │   ├── UserTaskNode.tsx
+│   │   │   ├── WorkflowAnalytics.tsx
+│   │   │   ├── WorkflowBuilder.tsx
+│   │   │   ├── WorkflowStateNode.tsx
+│   │   │   └── __tests__/
 │   │   ├── hooks/        # Workflow state management
+│   │   │   └── useWorkflow.ts
 │   │   ├── types/       # Workflow type definitions
+│   │   │   ├── reactflow.ts
+│   │   │   └── index.ts
 │   │   ├── templates/   # Workflow template system
+│   │   │   └── index.ts
 │   │   └── index.ts
 │   ├── projects/         # Project management
+│   │   ├── components/   # Project components
+│   │   │   └── ProjectsList.tsx
 │   │   ├── hooks/       # Project management hooks
+│   │   │   └── useProjects.ts
 │   │   ├── types/      # Project types
+│   │   │   └── index.ts
+│   │   ├── pages/
+│   │   ├── services/
+│   │   └── index.ts
+│   ├── dashboard/        # Dashboard module
+│   │   ├── components/
+│   │   ├── hooks/
+│   │   ├── pages/
+│   │   ├── services/
+│   │   ├── types/
 │   │   └── index.ts
 │   └── settings/        # User settings module
+│       ├── components/
+│       ├── hooks/
+│       ├── pages/
+│       ├── services/
+│       ├── types/
+│       └── index.ts
 ├── shared/             # Shared resources across modules
 │   ├── components/    # Reusable UI components
 │   │   ├── ui/       # Base UI components (Button, Card, etc.)
-│   │   └── layout/   # Layout components
+│   │   │   ├── button.tsx, card.tsx, input.tsx
+│   │   │   ├── dialog.tsx, form.tsx, table.tsx
+│   │   │   ├── theme-toggle.tsx, spinner.tsx
+│   │   │   └── index.ts
+│   │   ├── layout/   # Layout components
+│   │   │   ├── AppLayout.tsx
+│   │   │   ├── DashboardLayout.tsx
+│   │   │   ├── Header.tsx
+│   │   │   └── index.ts
+│   │   ├── navigation/  # Navigation components
+│   │   │   ├── Sidebar.tsx, MobileSidebar.tsx
+│   │   │   ├── Breadcrumb.tsx, UserMenu.tsx
+│   │   │   ├── menuConfig.ts, menuUtils.ts
+│   │   │   └── index.ts
+│   │   ├── data-visualization/  # Data components
+│   │   │   ├── data-table.tsx, kanban-board.tsx
+│   │   │   ├── analytics-dashboard.tsx
+│   │   │   └── index.ts
+│   │   ├── feedback/    # Feedback components
+│   │   │   ├── ErrorBoundary.tsx
+│   │   │   ├── ConfirmationDialog.tsx
+│   │   │   └── index.ts
+│   │   ├── form-fields/ # Form field components
+│   │   ├── media/       # Media components
+│   │   ├── providers/   # Provider components
+│   │   ├── views/       # Generic view components
+│   │   └── index.ts
 │   ├── hooks/        # Shared custom hooks
+│   │   ├── useURLState.ts      # URL state management
+│   │   ├── useApiQuery.ts      # API querying
+│   │   ├── useInfiniteScroll.ts
+│   │   ├── useAdvancedSearch.ts
+│   │   ├── useSwipeGesture.ts
+│   │   ├── useOfflineSync.ts
+│   │   └── index.ts
 │   ├── services/     # API client and shared services
-│   │   └── api/     # API service layer
+│   │   ├── api/     # API service layer
+│   │   │   ├── client.ts, config.ts
+│   │   │   ├── users.ts, roles.ts, permissions.ts
+│   │   │   ├── projects.ts, components.ts
+│   │   │   ├── workflow.ts
+│   │   │   └── index.ts
+│   │   ├── ThemeContext.tsx
+│   │   ├── swagger.ts
+│   │   └── index.ts
 │   ├── types/       # Global type definitions
+│   │   ├── swagger-ui-react.d.ts
+│   │   ├── swagger-ui.d.ts
+│   │   └── index.ts
 │   ├── constants/   # Application constants
+│   │   └── index.ts
 │   ├── utils/      # Utility functions
+│   │   ├── theme-utils.ts
+│   │   ├── utils.ts
+│   │   └── index.ts
+│   ├── providers/  # Global providers
+│   │   └── EnhancedThemeProvider.tsx
 │   └── index.ts    # Shared barrel exports
 ├── features/       # Cross-cutting features
-├── tests/        # Test organization
-│   └── e2e/     # End-to-end tests with Playwright
-│       ├── auth/           # Authentication e2e tests
-│       ├── admin/          # Admin panel e2e tests
-│       ├── workflow/       # Workflow e2e tests
-│       ├── api/            # Direct API e2e tests
-│       └── utils/          # Test utilities and helpers
+│   ├── components/
+│   ├── constants/
+│   ├── hooks/
+│   ├── services/
+│   ├── types/
+│   └── utils/
+├── lib/           # External library configurations
+│   ├── api/
+│   └── trpc/     # tRPC configuration
+│       ├── client.ts, server.ts
+│       ├── routers/
+│       └── provider.tsx
+├── contexts/      # React contexts
+├── hooks/         # Legacy hooks (being migrated)
+├── examples/      # Usage examples
+├── types/         # Global type definitions
+├── __tests__/     # Test organization
+│   ├── unit/     # Unit tests
+│   ├── integration/ # Integration tests
+│   └── e2e/     # End-to-end tests
 ├── __dev__/      # Development tools
 │   └── stories/  # Storybook stories
 └── app/         # Next.js app directory (pages and layouts)
+    ├── admin/           # Admin pages
+    ├── api-docs/        # API documentation pages
+    ├── dashboard/       # Dashboard pages
+    ├── projects/        # Project pages
+    ├── settings/        # Settings pages
+    ├── workflows/       # Workflow pages
+    ├── login/, register/
+    └── layout.tsx, page.tsx
 ```
 
 ### Key Architectural Benefits
@@ -141,14 +278,25 @@ frontend/src/
 #### 4. **Import Patterns**
 ```typescript
 // Module imports
-import { useAuth, LoginForm } from '@/modules/auth'
-import { UserManager, RoleEditor } from '@/modules/admin'
-import { WorkflowBuilder, WorkflowStateNode } from '@/modules/workflow'
+import { useAuth, ChangePasswordForm, SecuritySettings } from '@/modules/auth'
+import { useUsers, useRoles, ActivityLogViewer } from '@/modules/admin'
+import { WorkflowBuilder, WorkflowStateNode, ConditionalNode } from '@/modules/workflow'
+import { useProjects, ProjectsList } from '@/modules/projects'
+import { SwaggerUI, SwaggerErrorBoundary } from '@/modules/api-docs'
 
-// Shared imports
-import { Button, Card, Input } from '@/shared/components'
-import { apiClient, formatDate } from '@/shared/services'
-import { User, Project } from '@/shared/types'
+// Shared component imports
+import { Button, Card, Input, Dialog, Table } from '@/shared/components/ui'
+import { Sidebar, Header, DashboardLayout } from '@/shared/components/layout'
+import { Breadcrumb, UserMenu } from '@/shared/components/navigation'
+import { DataTable, KanbanBoard } from '@/shared/components/data-visualization'
+
+// Shared service imports
+import { apiClient, usersApi, rolesApi, workflowApi } from '@/shared/services/api'
+import { useURLState, useApiQuery, useInfiniteScroll } from '@/shared/hooks'
+import { User, Project, Role, Permission } from '@/shared/types'
+
+// Utility imports
+import { cn, formatDate, themeUtils } from '@/shared/utils'
 ```
 
 ## Features
@@ -582,6 +730,43 @@ npx playwright show-report
 - **Performance Testing**: Response time monitoring and load testing capabilities
 - **Security Testing**: Authentication, authorization, and input validation testing
 
+## Frontend Code Restructuring
+
+### Modular Architecture Implementation ✅
+
+The FastNext Framework frontend has been completely restructured into a modular architecture that promotes scalability, maintainability, and developer productivity. The new structure organizes code into feature-based modules with clear separation of concerns.
+
+#### Key Restructuring Benefits
+
+- **Feature-based Organization**: Each major feature (auth, admin, workflow, etc.) is self-contained
+- **Clear Module Boundaries**: Explicit interfaces and dependencies between modules
+- **Shared Resource Management**: Centralized UI components, services, and utilities
+- **Improved Developer Experience**: Predictable file locations and clean import patterns
+- **Enhanced Scalability**: New features can be added as independent modules
+- **Better Testing Structure**: Organized test files with clear separation by feature
+
+#### Migration Status
+
+The restructuring is complete with the following organization:
+- ✅ **Modules Directory**: Feature-based modules (auth, admin, workflow, projects, api-docs, dashboard, settings)
+- ✅ **Shared Directory**: Reusable components, hooks, services, types, and utilities
+- ✅ **Component Organization**: UI components organized by category (ui, layout, navigation, data-visualization)
+- ✅ **Service Layer**: Structured API services with clear separation
+- ✅ **Type Definitions**: Centralized type management with module-specific types
+- ✅ **Hook Organization**: Shared hooks for common functionality (URL state, API queries, etc.)
+- ✅ **Testing Structure**: E2E tests organized by feature with comprehensive utilities
+
+#### Development Workflow
+
+With the new structure, developers can:
+- Work on features in isolation within their respective modules
+- Import components and services using clean, predictable paths
+- Leverage shared resources across modules without duplication
+- Add new features by creating new modules following established patterns
+- Test features independently with organized test suites
+
+For detailed information about the restructuring process, see `RESTRUCTURING_SUMMARY.md`.
+
 ## Recent Updates & Improvements
 
 ### Latest Changes ✅
@@ -597,7 +782,7 @@ npx playwright show-report
 - **URL State Management**: Integrated nuqs for type-safe URL-based state management across the application
 - **Backend Architecture Enhancements**: Improved API structure, enhanced CRUD operations, and better error handling
 - **User, Role & Permission System**: Complete RBAC implementation with enhanced permission management
-- **Modular Frontend Architecture**: Feature-based modules with clear separation of concerns and barrel exports
+- **Modular Frontend Architecture**: Complete restructuring into feature-based modules with clear separation of concerns and barrel exports
 - **Code Quality & Standards**: Comprehensive coding standards, linting improvements, and documentation
 
 ### Core Framework Features ✅

@@ -83,42 +83,175 @@ The FastNext frontend follows a **modular architecture** that organizes code by 
 frontend/src/
 ├── modules/                    # Feature-based modules
 │   ├── auth/                  # Authentication module
-│   │   ├── components/        # Auth-specific components (LoginForm, etc.)
-│   │   ├── hooks/            # Authentication hooks (useAuth)
-│   │   ├── services/         # Auth context and API services
-│   │   ├── types/           # Authentication type definitions
+│   │   ├── components/        # Auth-specific components
+│   │   │   ├── ChangePasswordForm.tsx
+│   │   │   ├── SecuritySettings.tsx
+│   │   │   ├── UpdateProfileForm.tsx
+│   │   │   └── index.ts
+│   │   ├── hooks/            # Authentication hooks
+│   │   │   └── useAuth.ts
+│   │   ├── services/         # Auth context and services
+│   │   │   └── AuthContext.tsx
+│   │   ├── types/           # Authentication types
+│   │   │   └── index.ts
+│   │   ├── client.ts        # Client-side auth utilities
+│   │   ├── server.ts        # Server-side auth utilities
 │   │   └── index.ts         # Module barrel exports
 │   ├── admin/               # Administration module
-│   │   ├── components/      # Admin UI components (UserManager, RoleEditor)
-│   │   ├── hooks/          # Admin hooks (useUsers, useRoles, usePermissions)
+│   │   ├── components/      # Admin UI components
+│   │   │   ├── ActivityLogViewer.tsx
+│   │   │   ├── RoleCreateDialog.tsx
+│   │   │   ├── RoleEditDialog.tsx
+│   │   │   ├── UserCreateDialog.tsx
+│   │   │   ├── UserEditDialog.tsx
+│   │   │   └── index.ts
+│   │   ├── hooks/          # Admin management hooks
+│   │   │   ├── useGenericPermissions.ts
+│   │   │   ├── usePermissions.ts
+│   │   │   ├── useRoles.ts
+│   │   │   ├── useUserRole.ts
+│   │   │   └── useUsers.ts
 │   │   ├── types/          # Admin type definitions
+│   │   │   └── index.ts
+│   │   ├── pages/          # Admin page components
+│   │   ├── services/       # Admin services
 │   │   └── index.ts
 │   ├── api-docs/           # API documentation module
 │   │   ├── components/     # Swagger UI components
+│   │   │   ├── SwaggerErrorBoundary.tsx
+│   │   │   ├── SwaggerUI.tsx
+│   │   │   ├── SwaggerUINoStrict.tsx
+│   │   │   ├── __tests__/
+│   │   │   └── index.ts
 │   │   ├── types/         # API documentation types
+│   │   │   ├── swagger.d.ts
+│   │   │   └── index.ts
+│   │   ├── utils/         # API testing utilities
+│   │   │   └── api-test.ts
+│   │   ├── hooks/
+│   │   ├── pages/
+│   │   ├── services/
 │   │   └── index.ts
-│   ├── builder/           # Visual page builder
-│   │   ├── components/    # Builder UI (Canvas, ComponentLibrary, PropertyPanel)
-│   │   ├── hooks/        # Builder state management (useComponents)
-│   │   ├── types/       # Builder type definitions
+│   ├── workflow/         # ReactFlow-based workflow system
+│   │   ├── components/    # Workflow UI components (ReactFlow nodes/edges)
+│   │   │   ├── ConditionalNode.tsx
+│   │   │   ├── ParallelGatewayNode.tsx
+│   │   │   ├── TimerNode.tsx
+│   │   │   ├── UserTaskNode.tsx
+│   │   │   ├── WorkflowAnalytics.tsx
+│   │   │   ├── WorkflowBuilder.tsx
+│   │   │   ├── WorkflowStateNode.tsx
+│   │   │   └── __tests__/
+│   │   ├── hooks/        # Workflow state management
+│   │   │   └── useWorkflow.ts
+│   │   ├── types/       # Workflow type definitions
+│   │   │   ├── reactflow.ts
+│   │   │   └── index.ts
+│   │   ├── templates/   # Workflow template system
+│   │   │   └── index.ts
 │   │   └── index.ts
 │   ├── projects/         # Project management
-│   │   ├── hooks/       # Project management hooks (useProjects)
+│   │   ├── components/   # Project components
+│   │   │   └── ProjectsList.tsx
+│   │   ├── hooks/       # Project management hooks
+│   │   │   └── useProjects.ts
 │   │   ├── types/      # Project types
+│   │   │   └── index.ts
+│   │   ├── pages/
+│   │   ├── services/
+│   │   └── index.ts
+│   ├── dashboard/        # Dashboard module
+│   │   ├── components/
+│   │   ├── hooks/
+│   │   ├── pages/
+│   │   ├── services/
+│   │   ├── types/
 │   │   └── index.ts
 │   └── settings/        # User settings module
+│       ├── components/
+│       ├── hooks/
+│       ├── pages/
+│       ├── services/
+│       ├── types/
+│       └── index.ts
 ├── shared/             # Shared resources across modules
 │   ├── components/    # Reusable UI components
-│   │   ├── ui/       # Base shadcn/ui components (Button, Card, Input)
-│   │   └── layout/   # Layout components (Sidebar, Header, AppLayout)
-│   ├── hooks/        # Shared custom hooks (useApiQuery, useTheme)
+│   │   ├── ui/       # Base UI components (Button, Card, etc.)
+│   │   │   ├── button.tsx, card.tsx, input.tsx
+│   │   │   ├── dialog.tsx, form.tsx, table.tsx
+│   │   │   ├── theme-toggle.tsx, spinner.tsx
+│   │   │   └── index.ts
+│   │   ├── layout/   # Layout components
+│   │   │   ├── AppLayout.tsx
+│   │   │   ├── DashboardLayout.tsx
+│   │   │   ├── Header.tsx
+│   │   │   └── index.ts
+│   │   ├── navigation/  # Navigation components
+│   │   │   ├── Sidebar.tsx, MobileSidebar.tsx
+│   │   │   ├── Breadcrumb.tsx, UserMenu.tsx
+│   │   │   ├── menuConfig.ts, menuUtils.ts
+│   │   │   └── index.ts
+│   │   ├── data-visualization/  # Data components
+│   │   │   ├── data-table.tsx, kanban-board.tsx
+│   │   │   ├── analytics-dashboard.tsx
+│   │   │   └── index.ts
+│   │   ├── feedback/    # Feedback components
+│   │   │   ├── ErrorBoundary.tsx
+│   │   │   ├── ConfirmationDialog.tsx
+│   │   │   └── index.ts
+│   │   ├── form-fields/ # Form field components
+│   │   ├── media/       # Media components
+│   │   ├── providers/   # Provider components
+│   │   ├── views/       # Generic view components
+│   │   └── index.ts
+│   ├── hooks/        # Shared custom hooks
+│   │   ├── useURLState.ts      # URL state management
+│   │   ├── useApiQuery.ts      # API querying
+│   │   ├── useInfiniteScroll.ts
+│   │   ├── useAdvancedSearch.ts
+│   │   ├── useSwipeGesture.ts
+│   │   ├── useOfflineSync.ts
+│   │   └── index.ts
 │   ├── services/     # API client and shared services
-│   │   └── api/     # API service layer (client.ts, users.ts, etc.)
+│   │   ├── api/     # API service layer
+│   │   │   ├── client.ts, config.ts
+│   │   │   ├── users.ts, roles.ts, permissions.ts
+│   │   │   ├── projects.ts, components.ts
+│   │   │   ├── workflow.ts
+│   │   │   └── index.ts
+│   │   ├── ThemeContext.tsx
+│   │   ├── swagger.ts
+│   │   └── index.ts
 │   ├── types/       # Global type definitions
+│   │   ├── swagger-ui-react.d.ts
+│   │   ├── swagger-ui.d.ts
+│   │   └── index.ts
 │   ├── constants/   # Application constants
+│   │   └── index.ts
 │   ├── utils/      # Utility functions
+│   │   ├── theme-utils.ts
+│   │   ├── utils.ts
+│   │   └── index.ts
+│   ├── providers/  # Global providers
+│   │   └── EnhancedThemeProvider.tsx
 │   └── index.ts    # Shared barrel exports
 ├── features/       # Cross-cutting features
+│   ├── components/
+│   ├── constants/
+│   ├── hooks/
+│   ├── services/
+│   ├── types/
+│   └── utils/
+├── lib/           # External library configurations
+│   ├── api/
+│   └── trpc/     # tRPC configuration
+│       ├── client.ts, server.ts
+│       ├── routers/
+│       └── provider.tsx
+├── contexts/      # React contexts
+├── hooks/         # Legacy hooks (being migrated)
+├── examples/      # Usage examples
+├── types/         # Global type definitions
 ├── __tests__/     # Test organization
 │   ├── unit/     # Unit tests
 │   ├── integration/ # Integration tests
@@ -126,16 +259,14 @@ frontend/src/
 ├── __dev__/      # Development tools
 │   └── stories/  # Storybook stories
 └── app/         # Next.js App Router
-    ├── layout.tsx        # Root layout
-    ├── page.tsx          # Home page
-    ├── globals.css       # Global styles
-    ├── login/            # Login page
-    ├── register/         # Registration page
-    ├── dashboard/        # Dashboard pages
-    ├── settings/         # Settings pages
-    ├── admin/            # Admin pages
-    ├── projects/         # Projects pages
-    └── builder/          # Visual builder
+    ├── admin/           # Admin pages
+    ├── api-docs/        # API documentation pages
+    ├── dashboard/       # Dashboard pages
+    ├── projects/        # Project pages
+    ├── settings/        # Settings pages
+    ├── workflows/       # Workflow pages
+    ├── login/, register/
+    └── layout.tsx, page.tsx
 ```
 
 ### Module Import Patterns
@@ -144,16 +275,25 @@ The modular architecture uses **barrel exports** for clean, predictable imports:
 
 ```typescript
 // Module imports - feature-specific functionality
-import { useAuth, LoginForm, ChangePasswordForm } from '@/modules/auth'
-import { UserManager, RoleEditor, useUsers } from '@/modules/admin'
-import { Canvas, ComponentLibrary, useComponents } from '@/modules/builder'
-import { SwaggerUI, ApiTester } from '@/modules/api-docs'
+import { useAuth, ChangePasswordForm, SecuritySettings } from '@/modules/auth'
+import { useUsers, useRoles, ActivityLogViewer, UserCreateDialog } from '@/modules/admin'
+import { WorkflowBuilder, WorkflowStateNode, ConditionalNode } from '@/modules/workflow'
+import { useProjects, ProjectsList } from '@/modules/projects'
+import { SwaggerUI, SwaggerErrorBoundary } from '@/modules/api-docs'
 
-// Shared imports - reusable across modules
-import { Button, Card, Input, DataTable } from '@/shared/components'
-import { apiClient, useApiQuery } from '@/shared/services'
-import { User, Project, ApiResponse } from '@/shared/types'
-import { formatDate, parseError } from '@/shared/utils'
+// Shared component imports
+import { Button, Card, Input, Dialog, Table } from '@/shared/components/ui'
+import { Sidebar, Header, DashboardLayout } from '@/shared/components/layout'
+import { Breadcrumb, UserMenu } from '@/shared/components/navigation'
+import { DataTable, KanbanBoard } from '@/shared/components/data-visualization'
+
+// Shared service imports
+import { apiClient, usersApi, rolesApi, workflowApi } from '@/shared/services/api'
+import { useURLState, useApiQuery, useInfiniteScroll } from '@/shared/hooks'
+import { User, Project, Role, Permission } from '@/shared/types'
+
+// Utility imports
+import { cn, formatDate, themeUtils } from '@/shared/utils'
 ```
 
 ### Benefits of Modular Architecture

@@ -52,7 +52,9 @@
       "Bash(npm audit:*)",
       "Bash(npm ls:*)",
       "WebFetch(domain:keenthemes.com)",
-      "Bash(npx biome check:*)"
+      "Bash(npx biome check:*)",
+      "Bash(timeout 30 npx tsc --noEmit)",
+      "Bash(timeout 30 npx tsc --noEmit --skipLibCheck)"
     ],
     "deny": []
   }
