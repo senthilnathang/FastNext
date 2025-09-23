@@ -1,107 +1,154 @@
 @import "tailwindcss";
 
 :root {
-  /* Light theme colors */
-  --background: 255 255 255;
-  --foreground: 23 23 23;
-  --muted: 245 245 245;
-  --muted-foreground: 115 115 115;
-  --popover: 255 255 255;
-  --popover-foreground: 23 23 23;
-  --card: 255 255 255;
-  --card-foreground: 23 23 23;
-  --border: 229 229 229;
-  --input: 229 229 229;
-  --primary: 24 24 27;
-  --primary-foreground: 250 250 250;
-  --secondary: 245 245 245;
-  --secondary-foreground: 39 39 42;
-  --accent: 245 245 245;
-  --accent-foreground: 39 39 42;
-  --destructive: 239 68 68;
-  --destructive-foreground: 255 255 255;
-  --ring: 24 24 27;
+  /* Enhanced OKLCH Light theme colors */
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.145 0 0);
+  --primary: oklch(0.523 0.214 259.815);
+  --primary-foreground: oklch(1 0 0);
+  --secondary: oklch(0.961 0 0);
+  --secondary-foreground: oklch(0.145 0 0);
+  --accent: oklch(0.961 0 0);
+  --accent-foreground: oklch(0.145 0 0);
+  --muted: oklch(0.961 0 0);
+  --muted-foreground: oklch(0.533 0 0);
+  --border: oklch(0.898 0 0);
+  --input: oklch(0.898 0 0);
+  --ring: oklch(0.523 0.214 259.815);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.145 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.145 0 0);
+  --destructive: oklch(0.576 0.204 17.38);
+  --destructive-foreground: oklch(1 0 0);
   --radius: 0.5rem;
   
-  /* Success, warning, info colors */
-  --success: 34 197 94;
-  --success-foreground: 255 255 255;
-  --warning: 245 158 11;
-  --warning-foreground: 255 255 255;
-  --info: 59 130 246;
-  --info-foreground: 255 255 255;
+  /* Component-specific tokens */
+  --sidebar: oklch(1 0 0);
+  --sidebar-foreground: oklch(0.145 0 0);
+  --sidebar-primary: oklch(0.523 0.214 259.815);
+  --sidebar-accent: oklch(0.961 0 0);
   
-  /* Brand colors */
-  --brand-primary: 59 130 246;
-  --brand-secondary: 147 51 234;
-  --brand-accent: 236 72 153;
+  /* Chart colors */
+  --chart-1: oklch(0.646 0.222 41.116);
+  --chart-2: oklch(0.548 0.166 160.613);
+  --chart-3: oklch(0.631 0.204 16.756);
+  --chart-4: oklch(0.569 0.214 286.078);
+  --chart-5: oklch(0.398 0.021 221.463);
+  
+  /* Status colors */
+  --success: oklch(0.548 0.166 160.613);
+  --success-foreground: oklch(1 0 0);
+  --warning: oklch(0.646 0.222 41.116);
+  --warning-foreground: oklch(1 0 0);
+  --info: oklch(0.523 0.214 259.815);
+  --info-foreground: oklch(1 0 0);
+  
+  /* Backward compatibility RGB fallbacks */
+  --background-rgb: 255 255 255;
+  --foreground-rgb: 23 23 23;
+  --primary-rgb: 59 130 246;
+  --destructive-rgb: 239 68 68;
 }
 
 .dark {
-  /* Dark theme colors */
-  --background: 10 10 10;
-  --foreground: 237 237 237;
-  --muted: 38 38 38;
-  --muted-foreground: 163 163 163;
-  --popover: 10 10 10;
-  --popover-foreground: 237 237 237;
-  --card: 10 10 10;
-  --card-foreground: 237 237 237;
-  --border: 38 38 38;
-  --input: 38 38 38;
-  --primary: 229 229 229;
-  --primary-foreground: 23 23 23;
-  --secondary: 38 38 38;
-  --secondary-foreground: 229 229 229;
-  --accent: 38 38 38;
-  --accent-foreground: 229 229 229;
-  --destructive: 220 38 38;
-  --destructive-foreground: 255 255 255;
-  --ring: 229 229 229;
+  /* Enhanced OKLCH Dark theme colors */
+  --background: oklch(0.145 0 0);
+  --foreground: oklch(0.961 0 0);
+  --primary: oklch(0.646 0.222 259.815);
+  --primary-foreground: oklch(0.145 0 0);
+  --secondary: oklch(0.212 0 0);
+  --secondary-foreground: oklch(0.961 0 0);
+  --accent: oklch(0.212 0 0);
+  --accent-foreground: oklch(0.961 0 0);
+  --muted: oklch(0.212 0 0);
+  --muted-foreground: oklch(0.635 0 0);
+  --border: oklch(0.212 0 0);
+  --input: oklch(0.212 0 0);
+  --ring: oklch(0.646 0.222 259.815);
+  --card: oklch(0.145 0 0);
+  --card-foreground: oklch(0.961 0 0);
+  --popover: oklch(0.145 0 0);
+  --popover-foreground: oklch(0.961 0 0);
+  --destructive: oklch(0.576 0.204 17.38);
+  --destructive-foreground: oklch(0.961 0 0);
   
-  /* Success, warning, info colors for dark theme */
-  --success: 34 197 94;
-  --success-foreground: 255 255 255;
-  --warning: 245 158 11;
-  --warning-foreground: 255 255 255;
-  --info: 59 130 246;
-  --info-foreground: 255 255 255;
+  /* Component-specific tokens */
+  --sidebar: oklch(0.145 0 0);
+  --sidebar-foreground: oklch(0.961 0 0);
+  --sidebar-primary: oklch(0.646 0.222 259.815);
+  --sidebar-accent: oklch(0.212 0 0);
   
-  /* Brand colors (same as light) */
-  --brand-primary: 59 130 246;
-  --brand-secondary: 147 51 234;
-  --brand-accent: 236 72 153;
+  /* Chart colors for dark theme */
+  --chart-1: oklch(0.746 0.222 41.116);
+  --chart-2: oklch(0.646 0.166 160.613);
+  --chart-3: oklch(0.731 0.204 16.756);
+  --chart-4: oklch(0.669 0.214 286.078);
+  --chart-5: oklch(0.648 0.021 221.463);
+  
+  /* Status colors for dark theme */
+  --success: oklch(0.646 0.166 160.613);
+  --success-foreground: oklch(0.145 0 0);
+  --warning: oklch(0.746 0.222 41.116);
+  --warning-foreground: oklch(0.145 0 0);
+  --info: oklch(0.646 0.222 259.815);
+  --info-foreground: oklch(0.145 0 0);
+  
+  /* Backward compatibility RGB fallbacks */
+  --background-rgb: 10 10 10;
+  --foreground-rgb: 237 237 237;
+  --primary-rgb: 96 165 250;
+  --destructive-rgb: 220 38 38;
 }
 
 @theme inline {
-  --color-background: rgb(var(--background));
-  --color-foreground: rgb(var(--foreground));
-  --color-muted: rgb(var(--muted));
-  --color-muted-foreground: rgb(var(--muted-foreground));
-  --color-popover: rgb(var(--popover));
-  --color-popover-foreground: rgb(var(--popover-foreground));
-  --color-card: rgb(var(--card));
-  --color-card-foreground: rgb(var(--card-foreground));
-  --color-border: rgb(var(--border));
-  --color-input: rgb(var(--input));
-  --color-primary: rgb(var(--primary));
-  --color-primary-foreground: rgb(var(--primary-foreground));
-  --color-secondary: rgb(var(--secondary));
-  --color-secondary-foreground: rgb(var(--secondary-foreground));
-  --color-accent: rgb(var(--accent));
-  --color-accent-foreground: rgb(var(--accent-foreground));
-  --color-destructive: rgb(var(--destructive));
-  --color-destructive-foreground: rgb(var(--destructive-foreground));
-  --color-ring: rgb(var(--ring));
-  --color-success: rgb(var(--success));
-  --color-success-foreground: rgb(var(--success-foreground));
-  --color-warning: rgb(var(--warning));
-  --color-warning-foreground: rgb(var(--warning-foreground));
-  --color-info: rgb(var(--info));
-  --color-info-foreground: rgb(var(--info-foreground));
-  --color-brand-primary: rgb(var(--brand-primary));
-  --color-brand-secondary: rgb(var(--brand-secondary));
-  --color-brand-accent: rgb(var(--brand-accent));
+  /* Direct OKLCH color variables */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  
+  /* Status colors */
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-info: var(--info);
+  --color-info-foreground: var(--info-foreground);
+  
+  /* Component-specific colors */
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-accent: var(--sidebar-accent);
+  
+  /* Chart colors */
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  
+  /* Backward compatibility for RGB values */
+  --color-background-rgb: rgb(var(--background-rgb));
+  --color-foreground-rgb: rgb(var(--foreground-rgb));
+  --color-primary-rgb: rgb(var(--primary-rgb));
+  --color-destructive-rgb: rgb(var(--destructive-rgb));
   
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
@@ -109,12 +156,12 @@
 }
 
 * {
-  border-color: rgb(var(--border));
+  border-color: var(--border);
 }
 
 body {
-  background: rgb(var(--background));
-  color: rgb(var(--foreground));
+  background: var(--background);
+  color: var(--foreground);
   font-family: var(--font-geist-sans), system-ui, -apple-system, sans-serif;
   line-height: 1.5;
   font-feature-settings: "rlig" 1, "calt" 1;
@@ -128,10 +175,11 @@ body {
               box-shadow 0.2s ease-in-out;
 }
 
-/* Focus styles */
+/* Enhanced focus styles with achromatic-pro patterns */
 *:focus-visible {
-  outline: 2px solid rgb(var(--ring));
-  outline-offset: 2px;
+  outline: none;
+  box-shadow: 0 0 0 2px var(--background), 0 0 0 4px var(--ring);
+  border-radius: calc(var(--radius) / 2);
 }
 
 /* Scrollbar styling */
@@ -140,22 +188,22 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  background: rgb(var(--muted));
+  background: var(--muted);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgb(var(--muted-foreground) / 0.3);
+  background: oklch(from var(--muted-foreground) l c h / 0.3);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgb(var(--muted-foreground) / 0.5);
+  background: oklch(from var(--muted-foreground) l c h / 0.5);
 }
 
 /* Selection styling */
 ::selection {
-  background: rgb(var(--primary) / 0.1);
-  color: rgb(var(--primary));
+  background: oklch(from var(--primary) l c h / 0.15);
+  color: var(--primary);
 }
 
 /* Responsive utilities */

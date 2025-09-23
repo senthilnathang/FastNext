@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/modules/auth";
-import { ThemeProvider } from "next-themes";
+import { EnhancedThemeProvider } from "@/shared/providers/EnhancedThemeProvider";
 import { NuqsProvider } from "@/shared/components";
 import { TRPCProvider } from "@/lib/trpc/provider";
 
@@ -33,11 +33,17 @@ export default function RootLayout({
       >
         <TRPCProvider>
           <NuqsProvider>
-            <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+            <EnhancedThemeProvider 
+              attribute="class" 
+              defaultTheme="system" 
+              enableSystem
+              defaultColorScheme="default"
+              colorSchemeStorageKey="color-scheme"
+            >
               <AuthProvider>
                 {children}
               </AuthProvider>
-            </ThemeProvider>
+            </EnhancedThemeProvider>
           </NuqsProvider>
         </TRPCProvider>
       </body>
