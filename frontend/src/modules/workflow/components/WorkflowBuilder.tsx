@@ -23,8 +23,8 @@ import ConditionalNode from './ConditionalNode';
 import ParallelGatewayNode from './ParallelGatewayNode';
 import TimerNode from './TimerNode';
 import UserTaskNode from './UserTaskNode';
-import { Button } from '@/shared/components/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/card';
+import { Button } from '@/shared/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card';
 import { 
   Plus, 
   Save, 
@@ -37,7 +37,7 @@ import {
   User,
   ChevronDown
 } from 'lucide-react';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/shared/components/dropdown-menu';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/shared/components/ui/dropdown-menu';
 
 interface WorkflowBuilderProps {
   templateId?: number;

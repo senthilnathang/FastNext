@@ -19,14 +19,14 @@ import {
 } from "lucide-react"
 
 import { cn } from '@/shared/utils'
-import { Button } from "@/shared/components/button"
-import { Input } from "@/shared/components/input"
-import { Label } from "@/shared/components/label"
+import { Button } from "@/shared/components/ui/button"
+import { Input } from "@/shared/components/ui/input"
+import { Label } from "@/shared/components/ui/label"
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/shared/components/popover"
+} from "@/shared/components/ui/popover"
 
 export interface WidgetType {
   id: string

@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/components/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/components/ui/card';
 import { 
   BarChart3, 
   Clock, 
@@ -9,7 +9,7 @@ import {
   CheckCircle, 
   Activity
 } from 'lucide-react';
-import { AnalyticsDashboard, type KpiData } from '@/shared/components/analytics-dashboard';
+import { AnalyticsDashboard, type KpiData } from '@/shared/components';
 
 interface WorkflowAnalyticsProps {
   workflowTypeId?: number;

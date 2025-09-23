@@ -2,8 +2,8 @@
 
 import React, { Component, ReactNode } from 'react'
 import { AlertCircle, RefreshCw } from 'lucide-react'
-import { Button } from '@/shared/components/button'
-import { Card } from '@/shared/components/card'
+import { Button } from '@/shared/components/ui/button'
+import { Card } from '@/shared/components/ui/card'
 
 interface Props {
   children: ReactNode

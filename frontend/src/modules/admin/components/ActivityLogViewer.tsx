@@ -1,11 +1,11 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Card } from '@/shared/components/card';
-import { Button } from '@/shared/components/button';
-import { Input } from '@/shared/components/input';
-import { Label } from '@/shared/components/label';
-import { Badge } from '@/shared/components/badge';
+import { Card } from '@/shared/components/ui/card';
+import { Button } from '@/shared/components/ui/button';
+import { Input } from '@/shared/components/ui/input';
+import { Label } from '@/shared/components/ui/label';
+import { Badge } from '@/shared/components/ui/badge';
 import {
   Activity,
   Filter,

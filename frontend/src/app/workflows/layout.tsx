@@ -1,4 +1,4 @@
-import AppLayout from '@/shared/components/AppLayout';
+import { AppLayout } from '@/shared/components';
 
 export default function WorkflowsLayout({
   children,

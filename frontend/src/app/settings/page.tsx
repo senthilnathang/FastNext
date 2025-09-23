@@ -2,9 +2,18 @@
 
 import React, { Suspense } from 'react';
 import { useAuth } from '@/modules/auth';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/components/card';
-import { Button } from '@/shared/components/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/components/tabs';
+import { 
+  Card, 
+  CardContent, 
+  CardDescription, 
+  CardHeader, 
+  CardTitle,
+  Button,
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger
+} from '@/shared/components';
 import { UpdateProfileForm, ChangePasswordForm, SecuritySettings } from '@/modules/auth';
 import ActivityLogViewer from '@/modules/admin/components/ActivityLogViewer';
 import { useTabState } from '@/shared/hooks';

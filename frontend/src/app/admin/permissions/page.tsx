@@ -4,10 +4,11 @@ import * as React from "react"
 import { ColumnDef } from "@tanstack/react-table"
 import { Plus, Key, Loader2 } from "lucide-react"
 
-import { Button } from "@/shared/components/button"
-import { DataTable, ActionColumn } from "@/shared/components/data-table"
-import { Badge } from "@/shared/components/badge"
 import {
+  Button,
+  DataTable,
+  ActionColumn,
+  Badge,
   Dialog,
   DialogContent,
   DialogDescription,
@@ -15,17 +16,15 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/shared/components/dialog"
-import { Input } from "@/shared/components/input"
-import { Label } from "@/shared/components/label"
-import {
+  Input,
+  Label,
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/shared/components/select"
-import { useConfirmationDialog } from "@/shared/components/ConfirmationDialog"
+  useConfirmationDialog
+} from "@/shared/components"
 
 // Import React Query hooks
 import { usePermissions, useCreatePermission, useDeletePermission } from "@/modules/admin/hooks/usePermissions"

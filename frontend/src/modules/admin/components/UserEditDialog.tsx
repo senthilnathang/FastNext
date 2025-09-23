@@ -6,7 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { Loader2 } from "lucide-react"
 
-import { Button } from "@/shared/components/button"
+import { Button } from "@/shared/components/ui/button"
 import {
   Dialog,
   DialogContent,
@@ -14,7 +14,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/shared/components/dialog"
+} from "@/shared/components/ui/dialog"
 import {
   Form,
   FormControl,
@@ -23,16 +23,16 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/shared/components/form"
-import { Input } from "@/shared/components/input"
-import { Switch } from "@/shared/components/switch"
+} from "@/shared/components/ui/form"
+import { Input } from "@/shared/components/ui/input"
+import { Switch } from "@/shared/components/ui/switch"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/shared/components/select"
+} from "@/shared/components/ui/select"
 
 import { useUpdateUser } from "@/modules/admin/hooks/useUsers"
 import { useRoles } from "@/modules/admin/hooks/useRoles"

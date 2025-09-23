@@ -4,11 +4,16 @@ import * as React from "react"
 import { ColumnDef } from "@tanstack/react-table"
 import { Plus, Loader2, Shield, UserCheck } from "lucide-react"
 
-import { Button } from "@/shared/components/button"
-import { DataTable, ActionColumn } from "@/shared/components/data-table"
-import { Badge } from "@/shared/components/badge"
-import { useConfirmationDialog } from "@/shared/components/ConfirmationDialog"
-import { AdvancedSearch, type SearchState, type SearchFilter } from "@/shared/components/AdvancedSearch"
+import { 
+  Button,
+  DataTable,
+  ActionColumn,
+  Badge,
+  useConfirmationDialog,
+  AdvancedSearch,
+  type SearchState,
+  type SearchFilter
+} from "@/shared/components"
 import { useAdvancedSearch } from "@/shared/hooks/useAdvancedSearch"
 
 // Import React Query hooks

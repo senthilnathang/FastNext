@@ -6,16 +6,14 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { Loader2 } from "lucide-react"
 
-import { Button } from "@/shared/components/button"
 import {
+  Button,
   Dialog,
   DialogContent,
   DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/shared/components/dialog"
-import {
   Form,
   FormControl,
   FormDescription,
@@ -23,11 +21,11 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/shared/components/form"
-import { Input } from "@/shared/components/input"
-import { Textarea } from "@/shared/components/textarea"
-import { Checkbox } from "@/shared/components/checkbox"
-import { Switch } from "@/shared/components/switch"
+  Input,
+  Textarea,
+  Checkbox,
+  Switch
+} from "@/shared/components"
 
 import { useUpdateRole } from "@/modules/admin/hooks/useRoles"
 import { usePermissions } from "@/modules/admin/hooks/usePermissions"

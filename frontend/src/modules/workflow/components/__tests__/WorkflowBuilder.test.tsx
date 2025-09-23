@@ -62,7 +62,7 @@ jest.mock('lucide-react', () => ({
 }));
 
 // Mock dropdown menu components
-jest.mock('@/shared/components/dropdown-menu', () => ({
+jest.mock('@/shared/components/ui/dropdown-menu', () => ({
   DropdownMenu: ({ children }: any) => <div data-testid="dropdown-menu">{children}</div>,
   DropdownMenuTrigger: ({ children }: any) => <div data-testid="dropdown-trigger">{children}</div>,
   DropdownMenuContent: ({ children }: any) => <div data-testid="dropdown-content">{children}</div>,

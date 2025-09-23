@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import type { SearchState, SearchFilter, SortOption } from "@/shared/components/AdvancedSearch"
+import type { SearchState, SearchFilter, SortOption } from "@/shared/components/navigation/AdvancedSearch"
 
 interface UseAdvancedSearchOptions {
   initialQuery?: string

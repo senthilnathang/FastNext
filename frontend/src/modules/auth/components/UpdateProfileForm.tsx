@@ -2,10 +2,10 @@
 
 import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
-import { Button } from '@/shared/components/button';
-import { Input } from '@/shared/components/input';
-import { Label } from '@/shared/components/label';
-import { Card } from '@/shared/components/card';
+import { Button } from '@/shared/components/ui/button';
+import { Input } from '@/shared/components/ui/input';
+import { Label } from '@/shared/components/ui/label';
+import { Card } from '@/shared/components/ui/card';
 import { useAuth } from '@/modules/auth';
 import { User, MapPin, Globe, FileText } from 'lucide-react';
 import { API_CONFIG, getApiUrl } from '@/shared/services/api/config';

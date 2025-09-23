@@ -1,9 +1,9 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Card } from '@/shared/components/card';
-import { Button } from '@/shared/components/button';
-import { Badge } from '@/shared/components/badge';
+import { Card } from '@/shared/components/ui/card';
+import { Button } from '@/shared/components/ui/button';
+import { Badge } from '@/shared/components/ui/badge';
 import { 
   Palette, 
   Sidebar, 
@@ -18,7 +18,7 @@ import {
   PanelLeft,
   RotateCcw
 } from 'lucide-react';
-import { EnhancedThemeToggle, CompactThemeToggle, ThemeIndicator } from '@/shared/components/EnhancedThemeToggle';
+import { EnhancedThemeToggle, CompactThemeToggle, ThemeIndicator } from '@/shared/components/ui/EnhancedThemeToggle';
 import { cn } from '@/shared/utils';
 
 export default function EnhancedDemoPage() {

@@ -4,9 +4,9 @@ import * as React from "react"
 import Image from "next/image"
 import { User, Mail, Calendar, MapPin } from "lucide-react"
 
-import { InfiniteScrollList } from "@/shared/components/InfiniteScrollList"
-import { Card, CardContent } from "@/shared/components/card"
-import { Badge } from "@/shared/components/badge"
+import { InfiniteScrollList } from "@/shared/components"
+import { Card, CardContent } from "@/shared/components/ui/card"
+import { Badge } from "@/shared/components/ui/badge"
 
 interface UserItem {
   id: number

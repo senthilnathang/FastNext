@@ -2,10 +2,10 @@
 
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { Button } from '@/shared/components/button';
-import { Input } from '@/shared/components/input';
-import { Label } from '@/shared/components/label';
-import { Card } from '@/shared/components/card';
+import { Button } from '@/shared/components/ui/button';
+import { Input } from '@/shared/components/ui/input';
+import { Label } from '@/shared/components/ui/label';
+import { Card } from '@/shared/components/ui/card';
 import { Lock, Eye, EyeOff, Shield, AlertCircle } from 'lucide-react';
 import { API_CONFIG, getApiUrl } from '@/shared/services/api/config';
 

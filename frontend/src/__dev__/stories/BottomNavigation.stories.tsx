@@ -14,7 +14,7 @@ import {
   FileText,
   Camera
 } from 'lucide-react'
-import { BottomNavigation, useBottomNavigation } from '@/shared/components/BottomNavigation'
+import { BottomNavigation, useBottomNavigation } from '@/shared/components'
 
 const meta: Meta<typeof BottomNavigation> = {
   title: 'Mobile/BottomNavigation',

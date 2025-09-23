@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/nextjs'
-import Header from '@/shared/components/Header'
+import Header from '@/shared/components/layout/Header'
 // Mock function helper
 const fn = () => () => {}
 

@@ -1,15 +1,29 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/components/card';
+import { 
+  Card, 
+  CardContent, 
+  CardDescription, 
+  CardHeader, 
+  CardTitle,
+  Button,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  Input,
+  Label,
+  Textarea,
+  Checkbox,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger
+} from '@/shared/components';
 import { Building2, Plus, Edit, Trash2, Calendar, Globe, Lock, MoreVertical } from 'lucide-react';
-import { Button } from '@/shared/components/button';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/shared/components/dialog';
-import { Input } from '@/shared/components/input';
-import { Label } from '@/shared/components/label';
-import { Textarea } from '@/shared/components/textarea';
-import { Checkbox } from '@/shared/components/checkbox';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/shared/components/dropdown-menu';
 import { useProjects, useCreateProject, useUpdateProject, useDeleteProject } from '@/modules/projects/hooks/useProjects';
 import { formatDistanceToNow } from 'date-fns';
 import type { Project, CreateProjectRequest, UpdateProjectRequest } from '@/shared/types';

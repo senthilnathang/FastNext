@@ -1,13 +1,28 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/components/card';
-import { Button } from '@/shared/components/button';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/shared/components/dialog';
-import { Input } from '@/shared/components/input';
-import { Label } from '@/shared/components/label';
-import { Textarea } from '@/shared/components/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/components/select';
+import { 
+  Card, 
+  CardContent, 
+  CardDescription, 
+  CardHeader, 
+  CardTitle,
+  Button,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  Input,
+  Label,
+  Textarea,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from '@/shared/components';
 import { GitBranch, Plus, Edit, Eye, Settings } from 'lucide-react';
 import { useWorkflowTypes, useWorkflowTemplates, useCreateWorkflowType, useCreateWorkflowTemplate } from '@/modules/workflow/hooks/useWorkflow';
 import { WorkflowBuilder } from '@/modules/workflow';

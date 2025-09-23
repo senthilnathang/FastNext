@@ -4,17 +4,18 @@ import * as React from "react"
 import { ColumnDef } from "@tanstack/react-table"
 import { Plus, Shield, UserCheck, Edit3, MoreHorizontal } from "lucide-react"
 
-import { Button } from "@/shared/components/button"
-import { VirtualizedTable } from "@/shared/components/VirtualizedTable"
-import { Badge } from "@/shared/components/badge"
-import { AdvancedSearch, type SearchState } from "@/shared/components/AdvancedSearch"
-import { useAdvancedSearch } from "@/shared/hooks/useAdvancedSearch"
-import {
+import { 
+  Button,
+  VirtualizedTable,
+  Badge,
+  AdvancedSearch,
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/shared/components/dropdown-menu"
+} from "@/shared/components"
+import type { SearchState } from "@/shared/components"
+import { useAdvancedSearch } from "@/shared/hooks/useAdvancedSearch"
 
 // Mock user type for demonstration
 interface User {

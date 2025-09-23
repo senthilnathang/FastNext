@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/nextjs'
 import { useState } from 'react'
-import { MobileSearch } from '@/shared/components/MobileSearch'
+import { MobileSearch } from '@/shared/components/navigation/MobileSearch'
 
 const meta: Meta<typeof MobileSearch> = {
   title: 'Mobile/MobileSearch',

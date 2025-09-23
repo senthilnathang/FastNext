@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/nextjs'
-import Sidebar from '@/shared/components/Sidebar'
+import Sidebar from '@/shared/components/navigation/Sidebar'
 import { AuthContext } from '@/modules/auth/services/AuthContext'
 // Mock function helper
 const fn = () => () => {}

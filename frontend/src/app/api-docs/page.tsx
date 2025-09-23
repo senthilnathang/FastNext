@@ -2,10 +2,15 @@
 
 import React, { useState } from 'react'
 import { SwaggerUI } from '@/modules/api-docs'
-import { Card } from '@/shared/components/card'
-import { Button } from '@/shared/components/button'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/components/tabs'
-import { Badge } from '@/shared/components/badge'
+import { 
+  Card,
+  Button,
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+  Badge
+} from '@/shared/components'
 import { 
   Book, 
   Code, 

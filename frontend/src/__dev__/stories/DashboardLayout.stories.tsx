@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/nextjs'
-import DashboardLayout from '@/shared/components/DashboardLayout'
+import DashboardLayout from '@/shared/components/layout/DashboardLayout'
 import { AuthContext } from '@/modules/auth/services/AuthContext'
 const mockAuthContextValue = {
   user: {

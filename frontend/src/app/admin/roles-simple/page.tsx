@@ -2,9 +2,10 @@
 
 import React, { useState } from 'react';
 import { Plus, Shield, Users, Calendar, Edit } from 'lucide-react';
-import { Button } from '@/shared/components/button';
-import { Badge } from '@/shared/components/badge';
-import { EnhancedListView, ListViewColumn, ListViewAction } from '@/shared/components/EnhancedListView';
+import { Button } from '@/shared/components/ui/button';
+import { Badge } from '@/shared/components/ui/badge';
+import { EnhancedListView } from '@/shared/components';
+import type { ListViewColumn, ListViewAction } from '@/shared/components/data-visualization/EnhancedListView';
 import { useRoles, useCreateRole, useDeleteRole } from '@/modules/admin/hooks/useRoles';
 import { usePermissions } from '@/modules/admin/hooks/usePermissions';
 import { apiUtils } from '@/shared/services/api/client';
@@ -17,10 +18,10 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '@/shared/components/dialog';
-import { Input } from '@/shared/components/input';
-import { Label } from '@/shared/components/label';
-import { Checkbox } from '@/shared/components/checkbox';
+} from '@/shared/components/ui/dialog';
+import { Input } from '@/shared/components/ui/input';
+import { Label } from '@/shared/components/ui/label';
+import { Checkbox } from '@/shared/components/ui/checkbox';
 
 export default function RolesSimplePage() {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);

@@ -2,13 +2,10 @@
 
 import React, { useState } from 'react';
 import { Plus, Key, Calendar, Code, Settings } from 'lucide-react';
-import { Button } from '@/shared/components/button';
-import { Badge } from '@/shared/components/badge';
-import { EnhancedListView, ListViewColumn, ListViewAction } from '@/shared/components/EnhancedListView';
-import { usePermissions, useCreatePermission, useDeletePermission } from '@/modules/admin/hooks/usePermissions';
-import { apiUtils } from '@/shared/services/api/client';
-import type { Permission } from '@/shared/services/api/permissions';
-import {
+import { 
+  Button,
+  Badge,
+  EnhancedListView,
   Dialog,
   DialogContent,
   DialogDescription,
@@ -16,16 +13,18 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '@/shared/components/dialog';
-import { Input } from '@/shared/components/input';
-import { Label } from '@/shared/components/label';
-import {
+  Input,
+  Label,
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
-} from '@/shared/components/select';
+  SelectValue
+} from '@/shared/components';
+import type { ListViewColumn, ListViewAction } from '@/shared/components/data-visualization/EnhancedListView';
+import { usePermissions, useCreatePermission, useDeletePermission } from '@/modules/admin/hooks/usePermissions';
+import { apiUtils } from '@/shared/services/api/client';
+import type { Permission } from '@/shared/services/api/permissions';
 
 const categories = [
   'project',
@@ -76,7 +75,7 @@ export default function PermissionsSimplePage() {
             <Key className="h-4 w-4 text-orange-600 dark:text-orange-400" />
           </div>
           <div>
-            <div className="font-medium">{value}</div>
+            <div className="font-medium">{String(value)}</div>
             {permission.is_system_permission && (
               <Badge variant="outline" className="text-xs mt-1">
                 System Permission
@@ -91,7 +90,7 @@ export default function PermissionsSimplePage() {
       title: 'Description',
       render: (value) => (
         <span className="text-gray-600 dark:text-gray-400">
-          {value || 'No description provided'}
+          {String(value) || 'No description provided'}
         </span>
       ),
     },
@@ -101,7 +100,7 @@ export default function PermissionsSimplePage() {
       sortable: true,
       render: (value) => (
         <Badge variant="outline" className="text-xs capitalize">
-          {value}
+          {String(value)}
         </Badge>
       ),
     },
@@ -112,7 +111,7 @@ export default function PermissionsSimplePage() {
       render: (value) => (
         <div className="flex items-center space-x-2">
           <Code className="h-4 w-4 text-gray-400" />
-          <span className="font-mono text-sm">{value}</span>
+          <span className="font-mono text-sm">{String(value)}</span>
         </div>
       ),
     },
@@ -121,7 +120,7 @@ export default function PermissionsSimplePage() {
       title: 'Resource',
       render: (value) => (
         <span className="font-mono text-sm text-gray-600 dark:text-gray-400">
-          {value || '-'}
+          {String(value) || '-'}
         </span>
       ),
     },
@@ -132,7 +131,7 @@ export default function PermissionsSimplePage() {
       render: (value) => (
         <div className="flex items-center space-x-2 text-sm text-gray-500">
           <Calendar className="h-4 w-4" />
-          <span>{new Date(value).toLocaleDateString()}</span>
+          <span>{new Date(String(value)).toLocaleDateString()}</span>
         </div>
       ),
     },

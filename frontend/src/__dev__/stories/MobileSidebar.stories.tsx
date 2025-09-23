@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/nextjs'
 import { useState } from 'react'
 import { Home, Users, Settings, Bell, Search, Menu } from 'lucide-react'
-import { MobileSidebar, useMobileSidebar } from '@/shared/components/MobileSidebar'
-import { Button } from '@/shared/components/button'
+import { MobileSidebar, useMobileSidebar } from '@/shared/components/navigation/MobileSidebar'
+import { Button } from '@/shared/components/ui/button'
 
 const meta: Meta<typeof MobileSidebar> = {
   title: 'Mobile/MobileSidebar',

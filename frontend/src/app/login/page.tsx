@@ -3,10 +3,16 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Button } from '@/shared/components/button';
-import { Input } from '@/shared/components/input';
-import { Label } from '@/shared/components/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/components/card';
+import { 
+  Button,
+  Input,
+  Label,
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle
+} from '@/shared/components';
 import { Shield, Eye, EyeOff, AlertCircle } from 'lucide-react';
 import { useAuth } from '@/modules/auth';
 

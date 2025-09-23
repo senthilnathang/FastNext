@@ -1,18 +1,21 @@
 "use client"
 
 import * as React from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/shared/components/card"
-import { Badge } from "@/shared/components/badge"
 import { 
-  DateField, 
-  DateTimeField, 
-  NumberField, 
-  SelectionList, 
+  Card, 
+  CardContent, 
+  CardHeader, 
+  CardTitle,
+  Badge,
+  DateField,
+  DateTimeField,
+  NumberField,
+  SelectionList,
   WidgetSelector,
-  type WidgetType 
-} from "@/shared/components/form-fields"
-import { KanbanBoard, type KanbanColumn } from "@/shared/components/kanban-board"
-import { ListView, type ListColumn, type ListItem } from "@/shared/components/list-view"
+  KanbanBoard,
+  ListView
+} from "@/shared/components"
+import type { WidgetType, KanbanColumn, ListColumn, ListItem } from "@/shared/components"
 
 // Demo data for components
 const selectionOptions = [

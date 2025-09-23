@@ -2,9 +2,10 @@
 
 import React, { useState } from 'react';
 import { Plus, User, Mail, Shield, Calendar, ToggleLeft } from 'lucide-react';
-import { Button } from '@/shared/components/button';
-import { Badge } from '@/shared/components/badge';
-import { EnhancedListView, ListViewColumn, ListViewAction } from '@/shared/components/EnhancedListView';
+import { Button } from '@/shared/components/ui/button';
+import { Badge } from '@/shared/components/ui/badge';
+import { EnhancedListView } from '@/shared/components';
+import type { ListViewColumn, ListViewAction } from '@/shared/components/data-visualization/EnhancedListView';
 import { useUsers, useCreateUser, useDeleteUser, useToggleUserStatus } from '@/modules/admin/hooks/useUsers';
 // import { useRoles } from '@/modules/admin/hooks/useRoles'; // Currently unused
 import { apiUtils } from '@/shared/services/api/client';
@@ -17,9 +18,9 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '@/shared/components/dialog';
-import { Input } from '@/shared/components/input';
-import { Label } from '@/shared/components/label';
+} from '@/shared/components/ui/dialog';
+import { Input } from '@/shared/components/ui/input';
+import { Label } from '@/shared/components/ui/label';
 
 export default function UsersSimplePage() {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);

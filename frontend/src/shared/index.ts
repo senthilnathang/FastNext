@@ -1,11 +1,11 @@
 // Shared Module Exports
 
 // Components
-export { ErrorBoundary } from './components/ErrorBoundary'
-export { default as QueryProvider } from './components/QueryProvider'
-export { ResourceManagementExamples } from './components/ResourceExamples'
-export { default as QuickActionButton } from './components/QuickActionButton'
-export { default as QuickActionsMenu } from './components/QuickActionsMenu'
+export { ErrorBoundary } from './components/feedback/ErrorBoundary'
+export { default as QueryProvider } from './components/providers/QueryProvider'
+export { ResourceManagementExamples } from './components/ui/ResourceExamples'
+export { default as QuickActionButton } from './components/ui/QuickActionButton'
+export { default as QuickActionsMenu } from './components/ui/QuickActionsMenu'
 
 // Hooks
 export * from './hooks/useApiQuery'

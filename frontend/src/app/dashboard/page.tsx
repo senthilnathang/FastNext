@@ -2,8 +2,20 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/modules/auth';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/components/card';
-import { Button } from '@/shared/components/button';
+import { 
+  Card, 
+  CardContent, 
+  CardDescription, 
+  CardHeader, 
+  CardTitle,
+  Button,
+  AnalyticsDashboard,
+  ActivityFeed,
+  QuickActionsWidget,
+  SystemStatusWidget,
+  RecentStatsWidget
+} from '@/shared/components';
+import type { KpiData } from '@/shared/components';
 import {
   Building2,
   Users,
@@ -14,9 +26,6 @@ import {
   BarChart3
 } from 'lucide-react';
 import { API_CONFIG, getApiUrl } from '@/shared/services/api/config';
-import { AnalyticsDashboard, type KpiData } from '@/shared/components/analytics-dashboard';
-import { ActivityFeed } from '@/shared/components/ActivityFeed';
-import { QuickActionsWidget, SystemStatusWidget, RecentStatsWidget } from '@/shared/components/DashboardWidgets';
 
 interface Project {
   id: number;
@@ -120,14 +129,16 @@ export default function DashboardPage() {
 
       if (projectsResponse.ok) {
         const projectsData = await projectsResponse.json();
-        setProjects(projectsData.slice(0, 6)); // Show only recent 6 projects
+        // Handle both array response and object with items property
+        const projects = Array.isArray(projectsData) ? projectsData : (projectsData.items || []);
+        setProjects(projects.slice(0, 6)); // Show only recent 6 projects
         
         // Calculate stats
         setStats({
-          totalProjects: projectsData.length,
-          activeProjects: projectsData.filter((p: Project) => p.is_public).length,
-          totalPages: projectsData.reduce((acc: number, p: Project) => acc + (p.pages_count || 3), 0),
-          totalComponents: projectsData.reduce((acc: number, p: Project) => acc + (p.components_count || 8), 0),
+          totalProjects: projects.length,
+          activeProjects: projects.filter((p: Project) => p.is_public).length,
+          totalPages: projects.reduce((acc: number, p: Project) => acc + (p.pages_count || 3), 0),
+          totalComponents: projects.reduce((acc: number, p: Project) => acc + (p.components_count || 8), 0),
           totalUsers: 1250, // Mock data
           monthlyGrowth: 12.5 // Mock data
         });

@@ -4,10 +4,13 @@ import * as React from "react"
 import { ColumnDef } from "@tanstack/react-table"
 import { Plus, Shield, Users, Loader2 } from "lucide-react"
 
-import { Button } from "@/shared/components/button"
-import { DataTable, ActionColumn } from "@/shared/components/data-table"
-import { Badge } from "@/shared/components/badge"
-import { useConfirmationDialog } from "@/shared/components/ConfirmationDialog"
+import { 
+  Button,
+  DataTable,
+  ActionColumn,
+  Badge,
+  useConfirmationDialog
+} from "@/shared/components"
 
 // Import React Query hooks
 import { useRoles, useDeleteRole } from "@/modules/admin/hooks/useRoles"

@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/nextjs'
-import Breadcrumb from '@/shared/components/Breadcrumb'
+import { Breadcrumb } from '@/shared/components'
 import { Home, Building2, Cog } from 'lucide-react'
 // Mock function helper
 const fn = () => () => {}
