@@ -52,47 +52,47 @@
 }
 
 .dark {
-  /* Enhanced OKLCH Dark theme colors */
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.961 0 0);
-  --primary: oklch(0.646 0.222 259.815);
-  --primary-foreground: oklch(0.145 0 0);
-  --secondary: oklch(0.212 0 0);
-  --secondary-foreground: oklch(0.961 0 0);
-  --accent: oklch(0.212 0 0);
-  --accent-foreground: oklch(0.961 0 0);
-  --muted: oklch(0.212 0 0);
-  --muted-foreground: oklch(0.635 0 0);
-  --border: oklch(0.212 0 0);
-  --input: oklch(0.212 0 0);
-  --ring: oklch(0.646 0.222 259.815);
-  --card: oklch(0.145 0 0);
-  --card-foreground: oklch(0.961 0 0);
-  --popover: oklch(0.145 0 0);
-  --popover-foreground: oklch(0.961 0 0);
-  --destructive: oklch(0.576 0.204 17.38);
-  --destructive-foreground: oklch(0.961 0 0);
+  /* Enhanced OKLCH Dark theme colors - Fixed and immutable */
+  --background: oklch(0.145 0 0) !important;
+  --foreground: oklch(0.961 0 0) !important;
+  --primary: oklch(0.646 0.222 259.815) !important;
+  --primary-foreground: oklch(0.145 0 0) !important;
+  --secondary: oklch(0.212 0 0) !important;
+  --secondary-foreground: oklch(0.961 0 0) !important;
+  --accent: oklch(0.212 0 0) !important;
+  --accent-foreground: oklch(0.961 0 0) !important;
+  --muted: oklch(0.212 0 0) !important;
+  --muted-foreground: oklch(0.635 0 0) !important;
+  --border: oklch(0.212 0 0) !important;
+  --input: oklch(0.212 0 0) !important;
+  --ring: oklch(0.646 0.222 259.815) !important;
+  --card: oklch(0.145 0 0) !important;
+  --card-foreground: oklch(0.961 0 0) !important;
+  --popover: oklch(0.145 0 0) !important;
+  --popover-foreground: oklch(0.961 0 0) !important;
+  --destructive: oklch(0.576 0.204 17.38) !important;
+  --destructive-foreground: oklch(0.961 0 0) !important;
   
-  /* Component-specific tokens */
-  --sidebar: oklch(0.145 0 0);
-  --sidebar-foreground: oklch(0.961 0 0);
-  --sidebar-primary: oklch(0.646 0.222 259.815);
-  --sidebar-accent: oklch(0.192 0 0);
+  /* Component-specific tokens - Fixed for dark mode */
+  --sidebar: oklch(0.145 0 0) !important;
+  --sidebar-foreground: oklch(0.961 0 0) !important;
+  --sidebar-primary: oklch(0.646 0.222 259.815) !important;
+  --sidebar-accent: oklch(0.192 0 0) !important;
   
   /* Chart colors for dark theme */
-  --chart-1: oklch(0.746 0.222 41.116);
-  --chart-2: oklch(0.646 0.166 160.613);
-  --chart-3: oklch(0.731 0.204 16.756);
-  --chart-4: oklch(0.669 0.214 286.078);
-  --chart-5: oklch(0.648 0.021 221.463);
+  --chart-1: oklch(0.746 0.222 41.116) !important;
+  --chart-2: oklch(0.646 0.166 160.613) !important;
+  --chart-3: oklch(0.731 0.204 16.756) !important;
+  --chart-4: oklch(0.669 0.214 286.078) !important;
+  --chart-5: oklch(0.648 0.021 221.463) !important;
   
   /* Status colors for dark theme */
-  --success: oklch(0.646 0.166 160.613);
-  --success-foreground: oklch(0.145 0 0);
-  --warning: oklch(0.746 0.222 41.116);
-  --warning-foreground: oklch(0.145 0 0);
-  --info: oklch(0.646 0.222 259.815);
-  --info-foreground: oklch(0.145 0 0);
+  --success: oklch(0.646 0.166 160.613) !important;
+  --success-foreground: oklch(0.145 0 0) !important;
+  --warning: oklch(0.746 0.222 41.116) !important;
+  --warning-foreground: oklch(0.145 0 0) !important;
+  --info: oklch(0.646 0.222 259.815) !important;
+  --info-foreground: oklch(0.145 0 0) !important;
   
   /* Backward compatibility RGB fallbacks */
   --background-rgb: 10 10 10;

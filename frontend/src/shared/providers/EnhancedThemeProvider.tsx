@@ -371,11 +371,16 @@ function ColorSchemeProvider({
 
     const root = document.documentElement
     const isDark = root.classList.contains('dark')
-    const colors = isDark ? schemeConfig.colors.dark : schemeConfig.colors.light
-
-    Object.entries(colors).forEach(([key, value]) => {
-      root.style.setProperty(`--${key}`, value)
-    })
+    
+    // Only apply color scheme to light theme
+    // Dark theme colors are protected by CSS !important declarations
+    if (!isDark) {
+      const colors = schemeConfig.colors.light
+      Object.entries(colors).forEach(([key, value]) => {
+        root.style.setProperty(`--${key}`, value)
+      })
+    }
+    // Dark mode: do nothing - CSS will handle with !important declarations
   }, [])
 
   const setColorScheme = React.useCallback((scheme: ColorScheme) => {
@@ -397,6 +402,8 @@ function ColorSchemeProvider({
     const observer = new MutationObserver((mutations) => {
       mutations.forEach((mutation) => {
         if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+          // When switching to dark mode, always reset to default dark colors
+          // When switching to light mode, apply the selected color scheme
           applyColorScheme(colorScheme)
         }
       })

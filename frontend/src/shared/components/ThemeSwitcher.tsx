@@ -114,6 +114,8 @@ function InlineThemeSwitcher({ showColorSchemes = true, className }: { showColor
     )
   }
 
+  const isDarkMode = theme === 'dark'
+
   return (
     <div className={cn("space-y-6", className)}>
       {/* Theme Mode Selection */}
@@ -159,21 +161,38 @@ function InlineThemeSwitcher({ showColorSchemes = true, className }: { showColor
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <h4 className="text-sm font-medium">Color Scheme</h4>
-              <Badge variant="secondary" className="text-xs">
-                {availableSchemes.find(s => s.id === colorScheme)?.name}
-              </Badge>
+              {!isDarkMode ? (
+                <Badge variant="secondary" className="text-xs">
+                  {availableSchemes.find(s => s.id === colorScheme)?.name}
+                </Badge>
+              ) : (
+                <Badge variant="outline" className="text-xs">
+                  Disabled
+                </Badge>
+              )}
             </div>
-            <div className="grid grid-cols-3 gap-2">
-              {availableSchemes.map((scheme) => (
-                <ColorSchemePreview
-                  key={scheme.id}
-                  scheme={scheme.id}
-                  isSelected={colorScheme === scheme.id}
-                  onClick={() => setColorScheme(scheme.id)}
-                  currentTheme={theme}
-                />
-              ))}
-            </div>
+            
+            {!isDarkMode ? (
+              <div className="grid grid-cols-3 gap-2">
+                {availableSchemes.map((scheme) => (
+                  <ColorSchemePreview
+                    key={scheme.id}
+                    scheme={scheme.id}
+                    isSelected={colorScheme === scheme.id}
+                    onClick={() => setColorScheme(scheme.id)}
+                    currentTheme={theme}
+                  />
+                ))}
+              </div>
+            ) : (
+              <div className="p-3 bg-muted/50 rounded-lg border border-dashed border-border">
+                <p className="text-xs text-muted-foreground text-center">
+                  🌙 Color schemes are only available in light mode.
+                  <br />
+                  Dark mode uses a consistent default palette.
+                </p>
+              </div>
+            )}
           </div>
         </>
       )}
@@ -200,6 +219,7 @@ function DropdownThemeSwitcher({ showColorSchemes = true, className }: { showCol
 
   const currentTheme = themes.find(t => t.name === theme)
   const Icon = currentTheme?.icon || Monitor
+  const isDarkMode = theme === 'dark'
 
   return (
     <DropdownMenu>
@@ -242,21 +262,31 @@ function DropdownThemeSwitcher({ showColorSchemes = true, className }: { showCol
             <DropdownMenuSeparator />
             <DropdownMenuLabel className="text-xs">Color Scheme</DropdownMenuLabel>
             <div className="p-2">
-              <div className="grid grid-cols-3 gap-2">
-                {availableSchemes.slice(0, 6).map((scheme) => (
-                  <ColorSchemePreview
-                    key={scheme.id}
-                    scheme={scheme.id}
-                    isSelected={colorScheme === scheme.id}
-                    onClick={() => setColorScheme(scheme.id)}
-                    currentTheme={theme}
-                  />
-                ))}
-              </div>
-              {availableSchemes.length > 6 && (
-                <div className="mt-2 pt-2 border-t">
-                  <p className="text-xs text-muted-foreground text-center">
-                    +{availableSchemes.length - 6} more schemes
+              {!isDarkMode ? (
+                <>
+                  <div className="grid grid-cols-3 gap-2">
+                    {availableSchemes.slice(0, 6).map((scheme) => (
+                      <ColorSchemePreview
+                        key={scheme.id}
+                        scheme={scheme.id}
+                        isSelected={colorScheme === scheme.id}
+                        onClick={() => setColorScheme(scheme.id)}
+                        currentTheme={theme}
+                      />
+                    ))}
+                  </div>
+                  {availableSchemes.length > 6 && (
+                    <div className="mt-2 pt-2 border-t">
+                      <p className="text-xs text-muted-foreground text-center">
+                        +{availableSchemes.length - 6} more schemes
+                      </p>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <div className="p-2 text-center">
+                  <p className="text-xs text-muted-foreground">
+                    🌙 Color schemes only work in light mode
                   </p>
                 </div>
               )}
