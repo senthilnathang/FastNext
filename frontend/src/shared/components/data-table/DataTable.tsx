@@ -196,7 +196,8 @@ export function DataTable<TData, TValue>({
         />
       )}
       
-      <div className="rounded-md border">
+      {/* Desktop Table View */}
+      <div className="rounded-md border hidden md:block">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
@@ -261,6 +262,59 @@ export function DataTable<TData, TValue>({
             )}
           </TableBody>
         </Table>
+      </div>
+
+      {/* Mobile Card View */}
+      <div className="md:hidden space-y-3">
+        {isLoading ? (
+          // Loading skeleton for cards
+          Array.from({ length: Math.min(pageSize, 5) }).map((_, index) => (
+            <div key={index} className="border rounded-lg p-4 space-y-3 animate-pulse">
+              <div className="h-4 bg-muted rounded w-3/4" />
+              <div className="h-3 bg-muted rounded w-1/2" />
+              <div className="h-3 bg-muted rounded w-full" />
+            </div>
+          ))
+        ) : table.getRowModel().rows?.length ? (
+          table.getRowModel().rows.map((row) => (
+            <div key={row.id} className="border rounded-lg p-4 space-y-2 bg-card">
+              {/* Show key information from first few columns */}
+              {row.getVisibleCells().slice(1, 4).map((cell) => {
+                const columnId = cell.column.id
+                const header = cell.column.columnDef.header
+                const headerText = typeof header === 'string' ? header : 
+                  typeof header === 'function' ? columnId : columnId
+                
+                return (
+                  <div key={cell.id} className="flex justify-between items-start">
+                    <span className="text-sm font-medium text-muted-foreground capitalize">
+                      {headerText}:
+                    </span>
+                    <div className="text-sm text-right max-w-[60%]">
+                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                    </div>
+                  </div>
+                )
+              })}
+              {/* Actions */}
+              {(() => {
+                const actionsCell = row.getVisibleCells().find(cell => cell.column.id === 'actions')
+                if (actionsCell) {
+                  return (
+                    <div className="pt-2 border-t">
+                      {flexRender(actionsCell.column.columnDef.cell, actionsCell.getContext())}
+                    </div>
+                  )
+                }
+                return null
+              })()}
+            </div>
+          ))
+        ) : (
+          <div className="text-center py-12 text-muted-foreground">
+            {emptyMessage}
+          </div>
+        )}
       </div>
       
       <DataTablePagination

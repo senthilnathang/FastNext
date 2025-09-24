@@ -23,7 +23,12 @@ import {
   Plus,
   Eye,
   Edit3,
-  BarChart3
+  BarChart3,
+  Sparkles,
+  Table,
+  Shield,
+  Key,
+  ArrowRight
 } from 'lucide-react';
 import { API_CONFIG, getApiUrl } from '@/shared/services/api/config';
 
@@ -252,6 +257,67 @@ export default function DashboardPage() {
           loading={loading}
           showTrends={true}
         />
+
+        {/* Enhanced Features Highlight */}
+        <Card className="border-l-4 border-l-blue-500 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20">
+          <CardHeader>
+            <div className="flex items-center space-x-2">
+              <Sparkles className="h-5 w-5 text-blue-600" />
+              <CardTitle className="text-lg">✨ New Enhanced Features</CardTitle>
+            </div>
+            <CardDescription>
+              Advanced data management tools now available with powerful table features
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="flex items-center space-x-3 p-3 rounded-lg bg-white/50 dark:bg-gray-900/50">
+                <div className="p-2 bg-blue-100 dark:bg-blue-900 rounded-lg">
+                  <Table className="h-4 w-4 text-blue-600" />
+                </div>
+                <div className="flex-1">
+                  <h4 className="text-sm font-medium">Advanced Data Tables</h4>
+                  <p className="text-xs text-gray-600 dark:text-gray-400">Sorting, filtering, export</p>
+                </div>
+                <Button variant="ghost" size="sm" asChild>
+                  <a href="/data-tables">
+                    <ArrowRight className="h-4 w-4" />
+                  </a>
+                </Button>
+              </div>
+              
+              <div className="flex items-center space-x-3 p-3 rounded-lg bg-white/50 dark:bg-gray-900/50">
+                <div className="p-2 bg-purple-100 dark:bg-purple-900 rounded-lg">
+                  <Shield className="h-4 w-4 text-purple-600" />
+                </div>
+                <div className="flex-1">
+                  <h4 className="text-sm font-medium">Enhanced Roles</h4>
+                  <p className="text-xs text-gray-600 dark:text-gray-400">Analytics & bulk operations</p>
+                </div>
+                <Button variant="ghost" size="sm" asChild>
+                  <a href="/admin/roles-enhanced">
+                    <ArrowRight className="h-4 w-4" />
+                  </a>
+                </Button>
+              </div>
+              
+              <div className="flex items-center space-x-3 p-3 rounded-lg bg-white/50 dark:bg-gray-900/50">
+                <div className="p-2 bg-green-100 dark:bg-green-900 rounded-lg">
+                  <Key className="h-4 w-4 text-green-600" />
+                </div>
+                <div className="flex-1">
+                  <h4 className="text-sm font-medium">Enhanced Permissions</h4>
+                  <p className="text-xs text-gray-600 dark:text-gray-400">Category management & insights</p>
+                </div>
+                <Button variant="ghost" size="sm" asChild>
+                  <a href="/admin/permissions-enhanced">
+                    <ArrowRight className="h-4 w-4" />
+                  </a>
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Dashboard Widgets Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

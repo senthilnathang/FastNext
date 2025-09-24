@@ -15,6 +15,7 @@ import {
 } from '@/shared/components/ui/dropdown-menu'
 import { Badge } from '@/shared/components/ui/badge'
 import { useDataTableExport } from '../hooks/useDataTableExport'
+import { useConfirmationDialog } from '@/shared/components/feedback/ConfirmationDialog'
 import type { ExportOptions } from '../types'
 
 // Define the Permission type
@@ -209,6 +210,7 @@ export function PermissionsDataTable({
   isLoading = false,
 }: PermissionsDataTableProps) {
   const [selectedPermissions, setSelectedPermissions] = React.useState<Permission[]>([])
+  const { confirmBulkDelete, confirmBulkAction, ConfirmationDialog } = useConfirmationDialog()
 
   // Define columns
   const columns: ColumnDef<Permission>[] = [
@@ -448,14 +450,38 @@ export function PermissionsDataTable({
   })
 
   const handleDeleteSelected = async (selectedPermissions: Permission[]) => {
-    if (onDeletePermission) {
-      const nonSystemPermissions = selectedPermissions.filter(permission => 
-        !permission.is_system_permission
+    if (!onDeletePermission) return
+    
+    const nonSystemPermissions = selectedPermissions.filter(permission => 
+      !permission.is_system_permission
+    )
+    
+    if (nonSystemPermissions.length === 0) {
+      // Show message that no permissions can be deleted
+      confirmBulkAction(
+        'Cannot Delete',
+        'permission',
+        selectedPermissions.length,
+        `Selected permissions cannot be deleted. System permissions are protected and cannot be removed.`,
+        () => {},
+        'warning'
       )
+      return
+    }
+
+    const systemPermissionCount = selectedPermissions.filter(permission => permission.is_system_permission).length
+    
+    let description = `Are you sure you want to delete ${nonSystemPermissions.length} permission${nonSystemPermissions.length > 1 ? 's' : ''}?`
+    if (systemPermissionCount > 0) {
+      description += ` Note: ${systemPermissionCount} system permission${systemPermissionCount !== 1 ? 's' : ''} will be skipped as they are protected.`
+    }
+    description += ' This action cannot be undone.'
+
+    confirmBulkDelete('permission', nonSystemPermissions.length, async () => {
       for (const permission of nonSystemPermissions) {
         await onDeletePermission(permission)
       }
-    }
+    })
   }
 
   const handleExport = () => {
@@ -486,6 +512,7 @@ export function PermissionsDataTable({
         emptyMessage="No permissions found."
         columnDefinitions={columnDefinitions}
       />
+      <ConfirmationDialog />
     </div>
   )
 }

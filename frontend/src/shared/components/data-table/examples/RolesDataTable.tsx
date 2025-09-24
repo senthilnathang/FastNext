@@ -16,6 +16,7 @@ import {
 import { Badge } from '@/shared/components/ui/badge'
 import { Avatar, AvatarFallback, AvatarImage } from '@/shared/components/ui/avatar'
 import { useDataTableExport } from '../hooks/useDataTableExport'
+import { useConfirmationDialog } from '@/shared/components/feedback/ConfirmationDialog'
 import type { ExportOptions } from '../types'
 
 // Define the Role type
@@ -131,6 +132,7 @@ export function RolesDataTable({
   isLoading = false,
 }: RolesDataTableProps) {
   const [selectedRoles, setSelectedRoles] = React.useState<Role[]>([])
+  const { confirmBulkDelete, confirmBulkAction, ConfirmationDialog } = useConfirmationDialog()
 
   // Define columns
   const columns: ColumnDef<Role>[] = [
@@ -366,14 +368,39 @@ export function RolesDataTable({
   })
 
   const handleDeleteSelected = async (selectedRoles: Role[]) => {
-    if (onDeleteRole) {
-      const nonSystemRoles = selectedRoles.filter(role => 
-        !role.is_system_role && (role.user_count || 0) === 0
+    if (!onDeleteRole) return
+    
+    const nonSystemRoles = selectedRoles.filter(role => 
+      !role.is_system_role && (role.user_count || 0) === 0
+    )
+    
+    if (nonSystemRoles.length === 0) {
+      // Show message that no roles can be deleted
+      confirmBulkAction(
+        'Cannot Delete',
+        'role',
+        selectedRoles.length,
+        `Selected roles cannot be deleted. System roles and roles with assigned users cannot be removed.`,
+        () => {},
+        'warning'
       )
+      return
+    }
+
+    const systemRoleCount = selectedRoles.filter(role => role.is_system_role).length
+    const rolesWithUsersCount = selectedRoles.filter(role => (role.user_count || 0) > 0).length
+    
+    let description = `Are you sure you want to delete ${nonSystemRoles.length} role${nonSystemRoles.length > 1 ? 's' : ''}?`
+    if (systemRoleCount > 0 || rolesWithUsersCount > 0) {
+      description += ` Note: ${systemRoleCount} system role${systemRoleCount !== 1 ? 's' : ''} and ${rolesWithUsersCount} role${rolesWithUsersCount !== 1 ? 's' : ''} with assigned users will be skipped.`
+    }
+    description += ' This action cannot be undone.'
+
+    confirmBulkDelete('role', nonSystemRoles.length, async () => {
       for (const role of nonSystemRoles) {
         await onDeleteRole(role)
       }
-    }
+    })
   }
 
   const handleExport = () => {
@@ -404,6 +431,7 @@ export function RolesDataTable({
         emptyMessage="No roles found."
         columnDefinitions={columnDefinitions}
       />
+      <ConfirmationDialog />
     </div>
   )
 }

@@ -3,7 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/modules/auth";
 import { EnhancedThemeProvider } from "@/shared/providers/EnhancedThemeProvider";
-import { NuqsProvider } from "@/shared/components";
+import { NuqsProvider, ConditionalAppLayout } from "@/shared/components";
 import { TRPCProvider } from "@/lib/trpc/provider";
 
 const geistSans = Geist({
@@ -41,7 +41,9 @@ export default function RootLayout({
               colorSchemeStorageKey="color-scheme"
             >
               <AuthProvider>
-                {children}
+                <ConditionalAppLayout>
+                  {children}
+                </ConditionalAppLayout>
               </AuthProvider>
             </EnhancedThemeProvider>
           </NuqsProvider>

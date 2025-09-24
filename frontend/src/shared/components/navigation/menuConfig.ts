@@ -7,6 +7,8 @@ import {
   Building2,
   Book,
   Workflow,
+  Table,
+  Sparkles,
 } from 'lucide-react';
 
 export interface MenuItem {
@@ -43,6 +45,12 @@ export const menuItems: MenuItem[] = [
     module: 'api-docs',
   },
   {
+    title: 'Data Tables',
+    href: '/data-tables',
+    icon: Table,
+    module: 'data-tables',
+  },
+  {
     title: 'Settings',
     href: '/settings',
     icon: Settings,
@@ -68,6 +76,18 @@ export const menuItems: MenuItem[] = [
         title: 'Permissions',
         href: '/admin/permissions',
         icon: Key,
+        requiredPermission: 'admin.permissions',
+      },
+      {
+        title: 'Enhanced Roles',
+        href: '/admin/roles-enhanced',
+        icon: Sparkles,
+        requiredPermission: 'admin.roles',
+      },
+      {
+        title: 'Enhanced Permissions',
+        href: '/admin/permissions-enhanced',
+        icon: Sparkles,
         requiredPermission: 'admin.permissions',
       },
     ],

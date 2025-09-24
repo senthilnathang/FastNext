@@ -61,6 +61,7 @@ export { default as WindowControls } from './ui/window-controls';
 
 // Layout Components
 export { default as AppLayout } from './layout/AppLayout';
+export { default as ConditionalAppLayout } from './layout/ConditionalAppLayout';
 export { default as DashboardLayout } from './layout/DashboardLayout';
 export { default as EnhancedDashboardLayout } from './layout/EnhancedDashboardLayout';
 export { default as CompactPageLayout } from './layout/CompactPageLayout';

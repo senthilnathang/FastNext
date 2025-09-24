@@ -160,6 +160,35 @@ export const useConfirmationDialog = () => {
     })
   }
 
+  const confirmBulkDelete = (itemType: string, count: number, onConfirm: () => void) => {
+    showDialog({
+      title: `Delete ${count} ${itemType}${count > 1 ? 's' : ''}`,
+      description: `Are you sure you want to delete ${count} selected ${itemType}${count > 1 ? 's' : ''}? This action cannot be undone.`,
+      confirmText: `Delete ${count} ${itemType}${count > 1 ? 's' : ''}`,
+      variant: "destructive",
+      icon: "delete",
+      onConfirm,
+    })
+  }
+
+  const confirmBulkAction = (
+    actionName: string,
+    itemType: string,
+    count: number,
+    description: string,
+    onConfirm: () => void,
+    variant: 'default' | 'destructive' | 'warning' = 'default'
+  ) => {
+    showDialog({
+      title: `${actionName} ${count} ${itemType}${count > 1 ? 's' : ''}`,
+      description,
+      confirmText: `${actionName} ${count} ${itemType}${count > 1 ? 's' : ''}`,
+      variant,
+      icon: variant === 'destructive' ? 'delete' : variant === 'warning' ? 'warning' : 'shield',
+      onConfirm,
+    })
+  }
+
   const ConfirmationDialogComponent = () => (
     <ConfirmationDialog
       open={dialog.open}
@@ -175,6 +204,8 @@ export const useConfirmationDialog = () => {
     confirmUserDelete,
     confirmStatusToggle,
     confirmRoleDelete,
+    confirmBulkDelete,
+    confirmBulkAction,
     ConfirmationDialog: ConfirmationDialogComponent,
   }
 }
