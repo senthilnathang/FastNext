@@ -47,7 +47,7 @@ class WorkflowType(Base):
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
     # Relationships
-    creator = relationship("User", back_populates="created_workflow_types")
+    creator = relationship("User", foreign_keys=[created_by])
     templates = relationship("WorkflowTemplate", back_populates="workflow_type", cascade="all, delete-orphan")
     instances = relationship("WorkflowInstance", back_populates="workflow_type", cascade="all, delete-orphan")
 
@@ -91,7 +91,7 @@ class WorkflowTemplate(Base):
     # Relationships
     workflow_type = relationship("WorkflowType", back_populates="templates")
     default_state = relationship("WorkflowState", foreign_keys=[default_state_id])
-    creator = relationship("User", back_populates="created_workflow_templates")
+    creator = relationship("User", foreign_keys=[created_by])
     instances = relationship("WorkflowInstance", back_populates="template", cascade="all, delete-orphan")
 
 
@@ -123,8 +123,8 @@ class WorkflowInstance(Base):
     template = relationship("WorkflowTemplate", back_populates="instances")
     workflow_type = relationship("WorkflowType", back_populates="instances")
     current_state = relationship("WorkflowState", foreign_keys=[current_state_id])
-    creator = relationship("User", foreign_keys=[created_by], back_populates="created_workflow_instances")
-    assigned_user = relationship("User", foreign_keys=[assigned_to], back_populates="assigned_workflow_instances")
+    creator = relationship("User", foreign_keys=[created_by])
+    assigned_user = relationship("User", foreign_keys=[assigned_to])
     history = relationship("WorkflowHistory", back_populates="instance", cascade="all, delete-orphan")
 
 
@@ -145,7 +145,7 @@ class WorkflowHistory(Base):
     instance = relationship("WorkflowInstance", back_populates="history")
     from_state = relationship("WorkflowState", foreign_keys=[from_state_id])
     to_state = relationship("WorkflowState", foreign_keys=[to_state_id])
-    user = relationship("User", back_populates="workflow_history")
+    user = relationship("User", foreign_keys=[user_id])
 
 
 class WorkflowTransition(Base):

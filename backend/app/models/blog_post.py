@@ -1,7 +1,8 @@
-from sqlalchemy import Column, Integer, String, Boolean, DateTime, Text, Float, ForeignKey, JSON
+from sqlalchemy import Column, Integer, String, Boolean, DateTime, Text, Float, ForeignKey, JSON, Enum
 from sqlalchemy.orm import relationship, Mapped, mapped_column
 from sqlalchemy.sql import func
-from typing import Optional, List
+from typing import Optional, List, Dict, Any
+from datetime import datetime
 
 from app.models.base import TimestampMixin, AuditMixin
 from app.models.base import Base
@@ -36,7 +37,7 @@ class BlogPost(Base, TimestampMixin, AuditMixin):
     author_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"))
 
     # Relationships
-    author_id: Mapped[Optional[User]] = relationship("User", back_populates="blog_posts")
+    # author = relationship("User", back_populates="blog_posts")
 
     def __repr__(self) -> str:
         return f"<BlogPost(id={self.id})>"

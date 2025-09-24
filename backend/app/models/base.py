@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, DateTime, Boolean, String, Text, JSON
+from sqlalchemy import Column, Integer, DateTime, Boolean, String, Text, JSON, ForeignKey
 from sqlalchemy.sql import func
 from sqlalchemy.orm import declared_attr
 from app.db.base import Base
@@ -18,19 +18,18 @@ class SoftDeleteMixin:
 
 class AuditMixin:
     """Mixin for adding audit fields"""
-    created_by = Column(Integer, nullable=True)
-    updated_by = Column(Integer, nullable=True)
+    created_by = Column(Integer, ForeignKey("users.id"), nullable=True)
+    updated_by = Column(Integer, ForeignKey("users.id"), nullable=True)
     
     @declared_attr
     def created_by_user(cls):
         from sqlalchemy.orm import relationship
-        from sqlalchemy import ForeignKey
-        return relationship("User", foreign_keys=[cls.created_by])
+        return relationship("User", primaryjoin=f"{cls.__name__}.created_by==User.id", viewonly=True)
     
     @declared_attr
     def updated_by_user(cls):
         from sqlalchemy.orm import relationship
-        return relationship("User", foreign_keys=[cls.updated_by])
+        return relationship("User", primaryjoin=f"{cls.__name__}.updated_by==User.id", viewonly=True)
 
 
 class MetadataMixin:

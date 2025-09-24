@@ -20,13 +20,14 @@ class LoginRequest(BaseModel):
     username: str
     password: str
     
-    class Config:
-        schema_extra = {
+    model_config = {
+        "json_schema_extra": {
             "example": {
                 "username": "admin",
                 "password": "password123"
             }
         }
+    }
 
 
 @router.post("/login/access-token", response_model=Token, 

@@ -30,13 +30,26 @@ from scaffolding.backend_generator import (
     RelationshipConfig
 )
 
-# Import frontend scaffolding
-sys.path.append(str(Path(__file__).parent / "frontend" / "src"))
-from shared.utils.scaffold_generator import (
-    ScaffoldGenerator as FrontendScaffoldGenerator,
-    ModelDefinition as FrontendModelDefinition,
-    FieldDefinition as FrontendFieldDefinition
-)
+# Frontend scaffolding placeholder (TypeScript-based, not Python)
+# TODO: Implement Python wrapper for TypeScript frontend scaffolding
+class FrontendScaffoldGenerator:
+    def __init__(self, model, output_path):
+        self.model = model
+        self.output_path = output_path
+        
+    def generateAll(self):
+        print("⚠️  Frontend scaffolding requires TypeScript. Please use:")
+        print(f"   cd frontend && npm run scaffold -- --model {self.model.name}")
+
+class FrontendModelDefinition:
+    def __init__(self, **kwargs):
+        for k, v in kwargs.items():
+            setattr(self, k, v)
+
+class FrontendFieldDefinition:
+    def __init__(self, **kwargs):
+        for k, v in kwargs.items():
+            setattr(self, k, v)
 
 
 class UnifiedScaffoldCLI:

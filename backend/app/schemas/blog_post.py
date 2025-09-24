@@ -8,7 +8,7 @@ from app.models.enums import PostStatus
 class BlogPostBase(BaseModel):
     """Base schema for BlogPost"""
     title: str = Field(..., description="Blog post title", example='How to Build Amazing Products', min_length=5, max_length=300)
-    slug: str = Field(..., description="URL slug for the blog post", example='how-to-build-amazing-products', regex=r"^[a-z0-9-]+$")
+    slug: str = Field(..., description="URL slug for the blog post", example='how-to-build-amazing-products', pattern=r"^[a-z0-9-]+$")
     excerpt: Optional[str] = Field(None, description="Short excerpt or summary")
     content: str = Field(..., description="Full blog post content")
     status: PostStatus = Field('draft', description="Post publication status")
@@ -20,7 +20,7 @@ class BlogPostBase(BaseModel):
 class BlogPostCreate(BlogPostBase):
     """Schema for creating BlogPost"""
     title: str = Field(..., description="Blog post title", example='How to Build Amazing Products', min_length=5, max_length=300)
-    slug: str = Field(..., description="URL slug for the blog post", example='how-to-build-amazing-products', regex=r"^[a-z0-9-]+$")
+    slug: str = Field(..., description="URL slug for the blog post", example='how-to-build-amazing-products', pattern=r"^[a-z0-9-]+$")
     excerpt: Optional[str] = Field(None, description="Short excerpt or summary")
     content: str = Field(..., description="Full blog post content")
     status: PostStatus = Field('draft', description="Post publication status")
@@ -32,7 +32,7 @@ class BlogPostCreate(BlogPostBase):
 class BlogPostUpdate(BaseModel):
     """Schema for updating BlogPost"""
     title: Optional[str] = Field(None, description="Blog post title", example='How to Build Amazing Products', min_length=5, max_length=300)
-    slug: Optional[str] = Field(None, description="URL slug for the blog post", example='how-to-build-amazing-products', regex=r"^[a-z0-9-]+$")
+    slug: Optional[str] = Field(None, description="URL slug for the blog post", example='how-to-build-amazing-products', pattern=r"^[a-z0-9-]+$")
     excerpt: Optional[str] = Field(None, description="Short excerpt or summary")
     content: Optional[str] = Field(None, description="Full blog post content")
     status: Optional[PostStatus] = Field(None, description="Post publication status")
@@ -45,7 +45,7 @@ class BlogPostResponse(BlogPostBase, BaseResponseModel):
     """Schema for BlogPost responses"""
     id: int
     title: str = Field(..., description="Blog post title", example='How to Build Amazing Products', min_length=5, max_length=300)
-    slug: str = Field(..., description="URL slug for the blog post", example='how-to-build-amazing-products', regex=r"^[a-z0-9-]+$")
+    slug: str = Field(..., description="URL slug for the blog post", example='how-to-build-amazing-products', pattern=r"^[a-z0-9-]+$")
     excerpt: str = Field(None, description="Short excerpt or summary")
     content: str = Field(..., description="Full blog post content")
     status: PostStatus = Field('draft', description="Post publication status")

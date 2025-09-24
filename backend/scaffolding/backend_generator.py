@@ -17,6 +17,12 @@ from enum import Enum
 import re
 
 
+def to_snake_case(name: str) -> str:
+    """Convert CamelCase to snake_case"""
+    s1 = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', name)
+    return re.sub('([a-z0-9])([A-Z])', r'\1_\2', s1).lower()
+
+
 class FieldType(Enum):
     """Supported field types for backend generation"""
     STRING = "string"
@@ -138,7 +144,7 @@ class ModelDefinition:
     def __post_init__(self):
         """Set defaults after initialization"""
         if self.table_name is None:
-            self.table_name = self._to_snake_case(self.name.lower() + 's')
+            self.table_name = to_snake_case(self.name.lower() + 's')
         
         if self.permission_category is None:
             self.permission_category = self.name.lower()
@@ -152,7 +158,7 @@ class BackendScaffoldGenerator:
         self.base_path = Path(base_path)
         self.model_name = model_def.name
         self.table_name = model_def.table_name
-        self.snake_name = self._to_snake_case(self.model_name)
+        self.snake_name = to_snake_case(self.model_name)
         self.plural_name = self.snake_name + 's'
         
     def generate_all(self):
@@ -192,7 +198,7 @@ class BackendScaffoldGenerator:
             if self.model_def.generate_service:
                 print(f"📁 Service: app/services/{self.snake_name}_service.py")
             if self.model_def.generate_migrations:
-                print(f"📁 Migration: alembic/versions/add_{self.table_name}.py")
+                print(f"📁 Migration: migrations/versions/add_{self.table_name}.py")
             print(f"📁 Router: Updated app/api/main.py")
             
         except Exception as error:
@@ -609,7 +615,8 @@ from sqlalchemy.orm import Session
 from typing import List, Optional
 
 from app.api.base_crud import BaseCRUDController, create_crud_routes
-from app.auth.dependencies import get_current_active_user, require_permission
+from app.auth.deps import get_current_active_user
+from app.auth.permissions import require_permission
 from app.db.session import get_db
 from app.models.{self.snake_name} import {self.model_name}
 from app.models.user import User
@@ -624,12 +631,17 @@ from app.schemas.{self.snake_name} import (
         """Generate FastAPI router with CRUD endpoints"""
         permission_decorators = self._generate_permission_decorators()
         
+        # Format owner and project field configurations
+        owner_field = self.model_def.owner_field or "user_id"
+        has_owner_field = "True" if self.model_def.owner_field else "False"
+        is_project_scoped = "True" if self.model_def.project_scoped else "False"
+        
         return f'''# Create CRUD controller
 controller = BaseCRUDController[{self.model_name}, {self.model_name}Create, {self.model_name}Update](
     model={self.model_name},
     resource_name="{self.snake_name}",
-    owner_field="{self.model_def.owner_field}" if self.model_def.owner_field else None,
-    project_field="project_id" if self.model_def.project_scoped else None
+    owner_field="{owner_field}" if {has_owner_field} else None,
+    project_field="project_id" if {is_project_scoped} else None
 )
 
 # Create router
@@ -917,7 +929,7 @@ from app.services.permission_service import PermissionService'''
         # Create a timestamp-based filename
         import time
         timestamp = str(int(time.time()))
-        filename = f"alembic/versions/{timestamp}_add_{self.table_name}.py"
+        filename = f"migrations/versions/{timestamp}_add_{self.table_name}.py"
         
         self._write_file(filename, migration_content)
     
@@ -1159,10 +1171,6 @@ api_router.include_router({self.plural_name}.router, prefix="/{self.plural_name}
             self._write_file("app/api/main.py", content)
     
     # Utility methods
-    def _to_snake_case(self, name: str) -> str:
-        """Convert CamelCase to snake_case"""
-        s1 = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', name)
-        return re.sub('([a-z0-9])([A-Z])', r'\1_\2', s1).lower()
     
     def _get_sqlalchemy_type(self, field: FieldDefinition, for_migration: bool = False) -> str:
         """Get SQLAlchemy column type for field"""

@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 # revision identifiers
 revision = '018d819e0910'
-down_revision = None
+down_revision = '352c907a73be'
 branch_labels = None
 depends_on = None
 
@@ -29,8 +29,8 @@ def upgrade() -> None:
         sa.Column('specifications', sa.JSON, nullable=False),
         sa.Column('website_url', sa.String(500), nullable=False),
         sa.Column('support_email', sa.String(255), nullable=False),
-        sa.Column('category_id', sa.Integer, nullable=False, sa.ForeignKey('categories.id')),
-        sa.Column('owner_id', sa.Integer, nullable=False, sa.ForeignKey('users.id')),
+        sa.Column('category_id', sa.Integer, sa.ForeignKey('categorys.id'), nullable=False),
+        sa.Column('owner_id', sa.Integer, sa.ForeignKey('users.id'), nullable=False),
         sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.func.now()),
         sa.Column('updated_at', sa.DateTime(timezone=True), onupdate=sa.func.now()),
         sa.Column('is_deleted', sa.Boolean(), default=False),

@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 # revision identifiers
 revision = '6e4b537d8354'
-down_revision = None
+down_revision = '018d819e0910'
 branch_labels = None
 depends_on = None
 
@@ -26,7 +26,7 @@ def upgrade() -> None:
         sa.Column('published_at', sa.DateTime(timezone=True), nullable=False),
         sa.Column('view_count', sa.Integer, nullable=False, default=0),
         sa.Column('tags', sa.JSON, nullable=False),
-        sa.Column('author_id', sa.Integer, nullable=False, sa.ForeignKey('users.id')),
+        sa.Column('author_id', sa.Integer, sa.ForeignKey('users.id'), nullable=False),
         sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.func.now()),
         sa.Column('updated_at', sa.DateTime(timezone=True), onupdate=sa.func.now()),
         sa.Column('created_by', sa.Integer(), sa.ForeignKey('users.id')),

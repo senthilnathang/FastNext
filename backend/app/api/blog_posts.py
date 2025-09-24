@@ -3,7 +3,8 @@ from sqlalchemy.orm import Session
 from typing import List, Optional
 
 from app.api.base_crud import BaseCRUDController, create_crud_routes
-from app.auth.dependencies import get_current_active_user, require_permission
+from app.auth.deps import get_current_active_user
+from app.auth.permissions import require_permission
 from app.db.session import get_db
 from app.models.blog_post import BlogPost
 from app.models.user import User
@@ -18,8 +19,8 @@ from app.schemas.blog_post import (
 controller = BaseCRUDController[BlogPost, BlogPostCreate, BlogPostUpdate](
     model=BlogPost,
     resource_name="blog_post",
-    owner_field="author_id" if self.model_def.owner_field else None,
-    project_field="project_id" if self.model_def.project_scoped else None
+    owner_field="author_id",
+    project_field=None
 )
 
 # Create router

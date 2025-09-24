@@ -1,7 +1,8 @@
-from sqlalchemy import Column, Integer, String, Boolean, DateTime, Text, Float, ForeignKey, JSON
+from sqlalchemy import Column, Integer, String, Boolean, DateTime, Text, Float, ForeignKey, JSON, Enum, Date
 from sqlalchemy.orm import relationship, Mapped, mapped_column
 from sqlalchemy.sql import func
-from typing import Optional, List
+from typing import Optional, List, Dict, Any
+from datetime import date
 
 from app.models.base import TimestampMixin, AuditMixin, SoftDeleteMixin, MetadataMixin
 from app.models.base import Base
@@ -39,13 +40,13 @@ class Product(Base, TimestampMixin, AuditMixin, SoftDeleteMixin, MetadataMixin):
     # Product support email
     support_email: Mapped[Optional[str]] = mapped_column(String(255), nullable=False)
     # Category foreign key
-    category_id: Mapped[Optional[int]] = mapped_column(Integer, nullable=False, ForeignKey("categories.id"))
+    category_id: Mapped[Optional[int]] = mapped_column(Integer, ForeignKey("categorys.id"), nullable=False)
     # Product owner (user)
     owner_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"))
 
     # Relationships
-    category_id: Mapped[Optional[Category]] = relationship("Category", back_populates="products")
-    owner_id: Mapped[Optional[User]] = relationship("User", back_populates="products")
+    # category = relationship("Category", back_populates="products")
+    # owner = relationship("User", back_populates="products")
 
     def __repr__(self) -> str:
         return f"<Product(id={self.id})>"
