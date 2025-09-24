@@ -32,10 +32,10 @@ function SidebarItem({
   const pathname = usePathname();
   const hasChildren = item.children && item.children.length > 0;
   const isExpanded = expandedItems.includes(item.title);
-  const isActive = item.href ? 
-    pathname === item.href || pathname.startsWith(item.href) : false;
+  // Only highlight the exact current page, not parent pages
+  const isActive = item.href ? pathname === item.href : false;
   const hasActiveChild = hasChildren && item.children?.some(child => 
-    child.href && (pathname === child.href || pathname.startsWith(child.href))
+    child.href && pathname === child.href
   );
 
   const handleToggle = () => {
@@ -58,7 +58,7 @@ function SidebarItem({
           </span>
           {hasChildren && (
             <div className="flex-shrink-0 transition-transform duration-200">
-              {isExpanded ? (
+              {(isExpanded || hasActiveChild) ? (
                 <ChevronDown className="w-3 h-3" />
               ) : (
                 <ChevronRight className="w-3 h-3" />
@@ -75,12 +75,16 @@ function SidebarItem({
     'hover:bg-sidebar-accent',
     'focus:outline-none focus:ring-1 focus:ring-primary/30',
     {
-      'bg-primary text-primary-foreground shadow-sm': isActive || hasActiveChild,
+      // Only highlight the exact current page
+      'bg-primary text-primary-foreground shadow-sm': isActive,
+      // Parent items with active children get subtle highlighting
+      'bg-sidebar-accent/50 text-primary font-medium': !isActive && hasActiveChild,
+      // Default styling for non-active items
       'text-sidebar-foreground hover:text-primary': !isActive && !hasActiveChild,
       'px-2 py-2': showText,
       'px-2 py-2 justify-center': !showText,
       'ml-3 pl-4': level > 0 && showText,
-      'relative': isActive || hasActiveChild
+      'relative': isActive
     }
   );
 
@@ -118,7 +122,7 @@ function SidebarItem({
     <div>
       {renderItem()}
 
-      {hasChildren && isExpanded && showText && (
+      {hasChildren && (isExpanded || hasActiveChild) && showText && (
         <div className="mt-1 space-y-0.5 pl-2">
           {item.children?.map((child) => (
             <SidebarItem 
