@@ -5,7 +5,7 @@ Example route demonstrating all optimization patterns and best practices.
 import asyncio
 import time
 from typing import List, Optional
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from fastapi import APIRouter, Depends, Query, HTTPException, BackgroundTasks
 from sqlalchemy import select, func
@@ -353,10 +353,14 @@ async def update_analytics_cache(analytics_data: dict, execution_time: float):
         await cache.set("user_analytics", analytics_data, ttl=1800)  # 30 minutes
         
         # Log cache update
+        import logging
+        logger = logging.getLogger(__name__)
         logger.info(
             "Analytics cache updated",
-            execution_time=execution_time,
-            data_size=len(str(analytics_data))
+            extra={
+                "execution_time": execution_time,
+                "data_size": len(str(analytics_data))
+            }
         )
 
 
@@ -485,6 +489,8 @@ async def batch_process_users(
 
 async def process_user_batch(user_ids: List[int], batch_number: int):
     """Background task for processing user batch"""
+    import logging
+    logger = logging.getLogger(__name__)
     logger.info(f"Processing batch {batch_number} with {len(user_ids)} users")
     
     # Simulate batch processing with controlled concurrency
@@ -500,9 +506,11 @@ async def process_user_batch(user_ids: List[int], batch_number: int):
     
     logger.info(
         f"Batch {batch_number} completed",
-        successful=successful,
-        failed=failed,
-        total=len(user_ids)
+        extra={
+            "successful": successful,
+            "failed": failed,
+            "total": len(user_ids)
+        }
     )
 
 

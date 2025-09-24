@@ -303,9 +303,10 @@ import { cn, formatDate, themeUtils } from '@/shared/utils'
 
 ### Core Framework
 - **Authentication & Security**: JWT-based authentication, password hashing, CORS middleware, protected routes
-- **Database & ORM**: PostgreSQL setup, SQLAlchemy ORM, Alembic migrations
-- **Frontend Foundation**: Next.js with TypeScript, Tailwind CSS, ShadcnUI components
+- **Database & ORM**: PostgreSQL setup, SQLAlchemy ORM, Alembic migrations, advanced query optimization
+- **Frontend Foundation**: Next.js with TypeScript, Tailwind CSS, ShadcnUI components, React optimization patterns
 - **Testing & Quality**: Comprehensive testing with pytest (backend) and Playwright (e2e), Jest testing, Storybook documentation, code linting
+- **Performance Optimization**: Advanced caching, database optimization, response compression, async patterns
 
 ### User Management & Settings
 - **Unified Navigation**: Responsive left sidebar with expandable menu sections
@@ -343,6 +344,14 @@ import { cn, formatDate, themeUtils } from '@/shared/utils'
 - **Project Membership**: Invite users to projects with specific roles
 - **Security Middleware**: Route protection with permission checks
 - **Enterprise UI**: Professional navigation, breadcrumbs, role-based menus
+
+### Performance & Optimization
+- **Advanced Caching**: Multi-tier caching with Memory, Redis, and Hybrid backends
+- **Database Optimization**: Query profiling, slow query detection, connection pooling
+- **Response Optimization**: Compression, minification, ETag support, conditional requests
+- **Async Patterns**: Task management, resource pooling, circuit breakers, retry mechanisms
+- **Performance Monitoring**: Real-time metrics, system monitoring, alert management
+- **Frontend Optimization**: React memoization, component lazy loading, virtual scrolling
 
 ### Audit & Security
 - **Activity Logging**: Comprehensive activity tracking with IP addresses, user agents, and metadata
@@ -393,7 +402,8 @@ import { cn, formatDate, themeUtils } from '@/shared/utils'
 - **[Backend Development Guide](docs/BACKEND_DEV.md)** - Backend development, testing, and deployment
 - **[Frontend Development Guide](docs/FRONTEND_DEV.md)** - Frontend development, Storybook, and testing
 - **[Testing Guide](TESTING.md)** - Comprehensive testing documentation for pytest and Playwright
-- **[Coding Standards](CODING_STANDARDS.md)** - Code quality guidelines and best practices
+- **[Frontend Coding Standards](CODING_STANDARDS.md)** - Frontend code quality guidelines and optimization patterns
+- **[Backend Coding Standards](BACKEND_CODING_STANDARDS.md)** - Backend optimization patterns and performance guidelines
 - **[CRUD System Documentation](CRUD_SYSTEM_DOCUMENTATION.md)** - Generic CRUD operations guide
 
 ## API Documentation & Testing
@@ -546,6 +556,13 @@ The application includes a comprehensive Swagger UI integration for interactive 
 - `PUT /api/v1/workflow-instances/{id}` - Update workflow instance
 - `POST /api/v1/workflow-instances/{id}/execute` - Execute workflow action
 - `GET /api/v1/workflow-instances/{id}/history` - Get workflow history
+
+### Performance & Optimization
+- `GET /api/v1/optimized-example/users` - Optimized paginated users with caching
+- `GET /api/v1/optimized-example/users/{id}` - Optimized single user retrieval
+- `GET /api/v1/optimized-example/analytics` - User analytics with async optimization
+- `GET /api/v1/optimized-example/health-check` - Health check with performance metrics
+- `POST /api/v1/optimized-example/users/batch-process` - Batch processing with optimization
 
 ## How to Use the Workflow System
 
@@ -770,20 +787,22 @@ For detailed information about the restructuring process, see `RESTRUCTURING_SUM
 ## Recent Updates & Improvements
 
 ### Latest Changes ✅
+- **🚀 Performance Optimization Framework**: Complete backend optimization with advanced caching, database optimization, and async patterns
+- **⚡ Frontend Optimization**: React memoization patterns, component lazy loading, virtual scrolling, and performance monitoring
+- **🔄 Advanced Caching System**: Multi-tier caching with Memory, Redis, and Hybrid backends with intelligent eviction
+- **📊 Performance Monitoring**: Real-time metrics, system monitoring, alert management, and comprehensive analytics
+- **🗄️ Database Optimization**: Query profiling, slow query detection, connection pooling, and batch processing
+- **🌐 Response Optimization**: Compression, minification, ETag support, and conditional request handling
+- **⚡ Async Optimization**: Task management, resource pooling, circuit breakers, and retry mechanisms
+- **📈 Performance Budgets**: Automated performance thresholds with alerting and monitoring
+- **🛠️ Optimization Patterns**: Comprehensive coding standards and best practices for both frontend and backend
 - **Comprehensive Testing Infrastructure**: Added pytest for backend testing and Playwright for e2e testing with complete documentation
 - **Test Coverage Requirements**: Implemented 80% minimum coverage with HTML/XML reporting and CI/CD integration
-- **Advanced Test Runner**: Built comprehensive test runner with multiple execution modes and cleanup utilities
-- **E2E Testing Suite**: Complete Playwright setup with multi-browser testing and authentication state management
 - **ReactFlow Workflow System**: Complete workflow management system with visual builder, custom nodes, and execution engine
 - **Database-Driven Workflows**: Dynamic workflow types, states, and templates stored in database instead of hardcoded
-- **Workflow Builder Removal**: Removed incompatible /builder system and replaced with ReactFlow-based workflow system
-- **Custom Node Types**: State, Conditional, Parallel Gateway, Timer, and User Task nodes for comprehensive workflow building
-- **Workflow Engine**: Complete execution engine with state transitions, SLA monitoring, and role-based permissions
 - **URL State Management**: Integrated nuqs for type-safe URL-based state management across the application
 - **Backend Architecture Enhancements**: Improved API structure, enhanced CRUD operations, and better error handling
-- **User, Role & Permission System**: Complete RBAC implementation with enhanced permission management
-- **Modular Frontend Architecture**: Complete restructuring into feature-based modules with clear separation of concerns and barrel exports
-- **Code Quality & Standards**: Comprehensive coding standards, linting improvements, and documentation
+- **Modular Frontend Architecture**: Complete restructuring into feature-based modules with clear separation of concerns
 
 ### Core Framework Features ✅
 - **Unified Navigation**: Responsive left sidebar with expandable sections
