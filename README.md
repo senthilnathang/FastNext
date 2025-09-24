@@ -26,6 +26,190 @@ A comprehensive full-stack web application framework built with modern technolog
 - **ESLint** - JavaScript/TypeScript linting and code quality
 - **Swagger UI** - Interactive API documentation and testing interface
 
+## Code Generation & Scaffolding System 🚀
+
+### FastNext Unified Scaffolding CLI
+
+FastNext includes a powerful unified scaffolding system that generates complete full-stack CRUD interfaces for both frontend (TypeScript/React) and backend (Python/FastAPI) from a single configuration file.
+
+#### Key Features ✅
+- **🔥 Unified CLI Tool**: Single command generates both frontend and backend
+- **📄 Configuration-Driven**: JSON configuration files define complete models
+- **🎯 Type-Safe Generation**: TypeScript interfaces align with Pydantic schemas
+- **🛠️ Interactive Builder**: Build models interactively with step-by-step prompts
+- **⚡ Production-Ready**: Generated code follows FastNext framework conventions
+- **🔧 Customizable**: Extensive field types, validation rules, and relationships
+- **🧪 Comprehensive Test Generation**: Includes unit, integration, performance, and security tests
+- **📚 API Documentation**: Automatic OpenAPI/Swagger documentation generation
+- **🗄️ Database Optimization**: Intelligent indexing and performance optimization
+- **🔐 Advanced Permissions**: RBAC integration with resource-level and field-level access control
+- **🎨 TypeScript Integration**: Frontend type definitions and React Query hooks
+- **📊 GraphQL Support**: Optional GraphQL schema generation with DataLoaders
+
+#### Installation & Usage
+
+```bash
+# Generate complete full-stack CRUD from configuration
+python scaffold-cli.py generate --config examples/product-config.json
+
+# Generate only frontend components
+python scaffold-cli.py generate --name BlogPost --type frontend
+
+# Generate only backend API
+python scaffold-cli.py generate --name Category --type backend
+
+# Interactive model builder
+python scaffold-cli.py interactive
+
+# Create example configuration
+python scaffold-cli.py example-config --name Product
+
+# List available field types
+python scaffold-cli.py field-types
+
+# Dry run to preview generation
+python scaffold-cli.py generate --config product.json --dry-run
+```
+
+#### What Gets Generated
+
+##### Frontend Generation
+- **API Services**: TypeScript API clients with proper typing
+- **React Hooks**: Custom hooks for data fetching and state management with React Query
+- **Form Components**: Complete forms with validation and error handling
+- **Data Tables**: Advanced data tables with sorting, filtering, and pagination
+- **Page Components**: Full CRUD pages (list, create, edit, view)
+- **Navigation Updates**: Automatic menu configuration updates
+- **Type Definitions**: TypeScript interfaces matching backend schemas
+- **GraphQL Integration**: GraphQL queries, mutations, and type definitions (optional)
+
+##### Backend Generation
+- **SQLAlchemy Models**: Modern SQLAlchemy 2.x models with proper typing
+- **Pydantic Schemas**: Validation schemas for create/update/response
+- **FastAPI Routes**: Complete CRUD endpoints with permission integration
+- **Service Layer**: Business logic separation with custom validation
+- **Database Migrations**: Alembic migrations with proper constraints
+- **Test Files**: Comprehensive test suites (unit, integration, performance, security)
+- **Router Updates**: Automatic API router configuration
+- **Permission System**: Advanced RBAC with resource-level permissions
+- **GraphQL Resolvers**: GraphQL schema and resolvers (optional)
+- **API Documentation**: OpenAPI/Swagger documentation with examples
+
+#### Advanced Features
+
+##### Backend Scaffolding Enhancements
+- **TypeScript Integration**: Generates TypeScript definitions alongside Python code
+- **Advanced Permission System**: Resource-level and field-level access control with RBAC
+- **GraphQL Schema Generation**: Automatic GraphQL schema with DataLoaders for N+1 query optimization
+- **Comprehensive Test Generation**: Unit, integration, performance, and security test suites
+- **API Documentation Generation**: OpenAPI/Swagger docs with request/response examples
+- **Database Indexing Optimization**: Intelligent index creation based on field usage patterns
+- **Enhanced Backend Generator Integration**: Seamless integration with existing FastNext architecture
+
+##### Field Types & Features
+
+```json
+{
+  "fields": [
+    {"name": "title", "type": "string", "required": true},
+    {"name": "price", "type": "number", "validation": {"min_value": 0}},
+    {"name": "is_active", "type": "boolean", "default": true},
+    {"name": "launch_date", "type": "date"},
+    {"name": "created_at", "type": "datetime"},
+    {"name": "description", "type": "text"},
+    {"name": "contact_email", "type": "email"},
+    {"name": "website", "type": "url"},
+    {"name": "metadata", "type": "json"},
+    {"name": "status", "type": "select", "options": ["draft", "published"]},
+    {"name": "tags", "type": "multiselect", "options": ["urgent", "important"]}
+  ]
+}
+```
+
+##### Advanced Configuration Options
+- **Validation Rules**: Min/max length, pattern matching, custom validators
+- **Database Constraints**: Unique fields, indexes, foreign keys
+- **UI Configuration**: Display in lists, searchable, sortable, filterable
+- **Model Mixins**: Timestamps, audit trails, soft delete, metadata
+- **Permission Integration**: RBAC permissions with owner fields
+- **API Configuration**: Pagination, search, filtering, sorting
+- **Test Configuration**: Test factories, fixtures, and coverage requirements
+- **Documentation Options**: API examples, field descriptions, and validation rules
+
+#### Example Configurations
+
+##### E-commerce Product Model
+```json
+{
+  "$schema": "https://fastNext.dev/schemas/scaffold-config.json",
+  "name": "Product",
+  "pluralName": "Products",
+  "description": "E-commerce product management model",
+  "icon": "Package",
+  "module": "inventory",
+  "hasTimestamps": true,
+  "hasAudit": true,
+  "hasSoftDelete": false,
+  "hasMetadata": true,
+  "fields": [
+    {
+      "name": "name",
+      "type": "string",
+      "required": true,
+      "validation": {"min_length": 2, "max_length": 200},
+      "unique": true,
+      "searchable": true,
+      "sortable": true
+    },
+    {
+      "name": "price",
+      "type": "number",
+      "required": true,
+      "validation": {"min_value": 0.01},
+      "sortable": true,
+      "filterable": true
+    },
+    {
+      "name": "category",
+      "type": "select",
+      "options": ["Electronics", "Clothing", "Books"],
+      "filterable": true
+    }
+  ],
+  "permissions": {
+    "category": "product",
+    "owner_field": "user_id"
+  },
+  "api": {
+    "enable_search": true,
+    "enable_filtering": true,
+    "page_size": 25
+  }
+}
+```
+
+#### Generated Code Quality
+
+The scaffolding system generates enterprise-grade, production-ready code that includes:
+
+- **Type Safety**: Complete type coverage across frontend and backend
+- **Error Handling**: Comprehensive error handling with proper HTTP status codes
+- **Validation**: Input validation at both frontend and backend levels
+- **Security**: RBAC permissions and input sanitization
+- **Performance**: Optimized queries with proper indexing
+- **Testing**: Full test coverage including edge cases
+- **Documentation**: Inline documentation and API specs
+- **Accessibility**: Frontend components with proper a11y attributes
+- **Responsive Design**: Mobile-first responsive layouts
+- **Code Standards**: Follows established coding standards and best practices
+
+#### Documentation
+
+- **[Backend Scaffolding Usage Guide](backend/docs/backend-scaffolding-usage.md)** - Comprehensive backend generation documentation
+- **Frontend Scaffolding Guide** - Frontend generation patterns and customization
+- **Configuration Schema** - Complete field type and option reference
+- **Example Configurations** - Ready-to-use configuration files
+
 ## Project Structure
 
 The FastNext Framework follows a modular architecture pattern that promotes scalability, maintainability, and developer productivity. The codebase is organized into feature-based modules with clear separation of concerns.
@@ -52,6 +236,14 @@ backend/
 │   ├── services/         # Business logic layer
 │   ├── middleware/       # Custom middleware
 │   └── utils/           # Utility functions
+├── scaffolding/         # Scaffolding generators
+│   ├── backend_generator.py     # Backend code generation
+│   ├── typescript_generator.py  # TypeScript integration
+│   ├── permissions_generator.py # Advanced RBAC system
+│   ├── graphql_generator.py     # GraphQL schema generation
+│   ├── test_generator.py        # Comprehensive test generation
+│   ├── docs_generator.py        # API documentation generation
+│   └── optimization_generator.py # Performance optimization
 ├── migrations/          # Alembic database migrations
 ├── tests/              # Backend test suite
 │   ├── conftest.py     # Test configuration and fixtures
@@ -63,6 +255,7 @@ backend/
 │   └── crud/           # CRUD operation tests
 ├── pytest.ini         # pytest configuration
 ├── test_runner.py      # Comprehensive test runner script
+├── scaffold-cli.py     # Unified scaffolding CLI
 ├── main.py             # FastAPI application entry point
 └── requirements.txt    # Python dependencies
 ```
@@ -73,231 +266,63 @@ frontend/src/
 ├── modules/                    # Feature-based modules
 │   ├── auth/                  # Authentication module
 │   │   ├── components/        # Auth-specific components
-│   │   │   ├── ChangePasswordForm.tsx
-│   │   │   ├── SecuritySettings.tsx
-│   │   │   ├── UpdateProfileForm.tsx
-│   │   │   └── index.ts
 │   │   ├── hooks/            # Authentication hooks
-│   │   │   └── useAuth.ts
 │   │   ├── services/         # Auth context and services
-│   │   │   └── AuthContext.tsx
-│   │   ├── types/           # Authentication types
-│   │   │   └── index.ts
-│   │   ├── client.ts        # Client-side auth utilities
-│   │   ├── server.ts        # Server-side auth utilities
-│   │   └── index.ts         # Module barrel exports
+│   │   └── types/           # Authentication types
 │   ├── admin/               # Administration module
 │   │   ├── components/      # Admin UI components
-│   │   │   ├── ActivityLogViewer.tsx
-│   │   │   ├── RoleCreateDialog.tsx
-│   │   │   ├── RoleEditDialog.tsx
-│   │   │   ├── UserCreateDialog.tsx
-│   │   │   ├── UserEditDialog.tsx
-│   │   │   └── index.ts
 │   │   ├── hooks/          # Admin management hooks
-│   │   │   ├── useGenericPermissions.ts
-│   │   │   ├── usePermissions.ts
-│   │   │   ├── useRoles.ts
-│   │   │   ├── useUserRole.ts
-│   │   │   └── useUsers.ts
-│   │   ├── types/          # Admin type definitions
-│   │   │   └── index.ts
-│   │   ├── pages/          # Admin page components
-│   │   ├── services/       # Admin services
-│   │   └── index.ts
-│   ├── api-docs/           # API documentation module
-│   │   ├── components/     # Swagger UI components
-│   │   │   ├── SwaggerErrorBoundary.tsx
-│   │   │   ├── SwaggerUI.tsx
-│   │   │   ├── SwaggerUINoStrict.tsx
-│   │   │   ├── __tests__/
-│   │   │   └── index.ts
-│   │   ├── types/         # API documentation types
-│   │   │   ├── swagger.d.ts
-│   │   │   └── index.ts
-│   │   ├── utils/         # API testing utilities
-│   │   │   └── api-test.ts
-│   │   ├── hooks/
-│   │   ├── pages/
-│   │   ├── services/
-│   │   └── index.ts
+│   │   └── types/          # Admin type definitions
+│   ├── product/            # Product management module (generated)
+│   │   ├── components/     # Product CRUD components
+│   │   ├── hooks/         # Product data hooks
+│   │   └── types/        # Product type definitions
 │   ├── workflow/         # ReactFlow-based workflow system
-│   │   ├── components/    # Workflow UI components (ReactFlow nodes/edges)
-│   │   │   ├── ConditionalNode.tsx
-│   │   │   ├── ParallelGatewayNode.tsx
-│   │   │   ├── TimerNode.tsx
-│   │   │   ├── UserTaskNode.tsx
-│   │   │   ├── WorkflowAnalytics.tsx
-│   │   │   ├── WorkflowBuilder.tsx
-│   │   │   ├── WorkflowStateNode.tsx
-│   │   │   └── __tests__/
-│   │   ├── hooks/        # Workflow state management
-│   │   │   └── useWorkflow.ts
-│   │   ├── types/       # Workflow type definitions
-│   │   │   ├── reactflow.ts
-│   │   │   └── index.ts
-│   │   ├── templates/   # Workflow template system
-│   │   │   └── index.ts
-│   │   └── index.ts
-│   ├── projects/         # Project management
-│   │   ├── components/   # Project components
-│   │   │   └── ProjectsList.tsx
-│   │   ├── hooks/       # Project management hooks
-│   │   │   └── useProjects.ts
-│   │   ├── types/      # Project types
-│   │   │   └── index.ts
-│   │   ├── pages/
-│   │   ├── services/
-│   │   └── index.ts
-│   ├── dashboard/        # Dashboard module
-│   │   ├── components/
-│   │   ├── hooks/
-│   │   ├── pages/
-│   │   ├── services/
-│   │   ├── types/
-│   │   └── index.ts
-│   └── settings/        # User settings module
-│       ├── components/
-│       ├── hooks/
-│       ├── pages/
-│       ├── services/
-│       ├── types/
-│       └── index.ts
+│   │   ├── components/   # Workflow UI components
+│   │   ├── hooks/       # Workflow state management
+│   │   └── types/      # Workflow type definitions
+│   └── api-docs/       # API documentation module
 ├── shared/             # Shared resources across modules
 │   ├── components/    # Reusable UI components
-│   │   ├── ui/       # Base UI components (Button, Card, etc.)
-│   │   │   ├── button.tsx, card.tsx, input.tsx
-│   │   │   ├── dialog.tsx, form.tsx, table.tsx
-│   │   │   ├── theme-toggle.tsx, spinner.tsx
-│   │   │   └── index.ts
+│   │   ├── ui/       # Base UI components
 │   │   ├── layout/   # Layout components
-│   │   │   ├── AppLayout.tsx
-│   │   │   ├── DashboardLayout.tsx
-│   │   │   ├── Header.tsx
-│   │   │   └── index.ts
 │   │   ├── navigation/  # Navigation components
-│   │   │   ├── Sidebar.tsx, MobileSidebar.tsx
-│   │   │   ├── Breadcrumb.tsx, UserMenu.tsx
-│   │   │   ├── menuConfig.ts, menuUtils.ts
-│   │   │   └── index.ts
-│   │   ├── data-visualization/  # Data components
-│   │   │   ├── data-table.tsx, kanban-board.tsx
-│   │   │   ├── analytics-dashboard.tsx
-│   │   │   └── index.ts
-│   │   ├── feedback/    # Feedback components
-│   │   │   ├── ErrorBoundary.tsx
-│   │   │   ├── ConfirmationDialog.tsx
-│   │   │   └── index.ts
-│   │   ├── form-fields/ # Form field components
-│   │   ├── media/       # Media components
-│   │   ├── providers/   # Provider components
-│   │   ├── views/       # Generic view components
-│   │   └── index.ts
-│   ├── hooks/        # Shared custom hooks
-│   │   ├── useURLState.ts      # URL state management
-│   │   ├── useApiQuery.ts      # API querying
-│   │   ├── useInfiniteScroll.ts
-│   │   ├── useAdvancedSearch.ts
-│   │   ├── useSwipeGesture.ts
-│   │   ├── useOfflineSync.ts
-│   │   └── index.ts
+│   │   ├── data-table/  # Advanced data table system
+│   │   └── feedback/    # Feedback components
 │   ├── services/     # API client and shared services
-│   │   ├── api/     # API service layer
-│   │   │   ├── client.ts, config.ts
-│   │   │   ├── users.ts, roles.ts, permissions.ts
-│   │   │   ├── projects.ts, components.ts
-│   │   │   ├── workflow.ts
-│   │   │   └── index.ts
-│   │   ├── ThemeContext.tsx
-│   │   ├── swagger.ts
-│   │   └── index.ts
+│   │   └── api/     # Generated API services
+│   ├── hooks/        # Shared custom hooks
 │   ├── types/       # Global type definitions
-│   │   ├── swagger-ui-react.d.ts
-│   │   ├── swagger-ui.d.ts
-│   │   └── index.ts
-│   ├── constants/   # Application constants
-│   │   └── index.ts
 │   ├── utils/      # Utility functions
-│   │   ├── theme-utils.ts
-│   │   ├── utils.ts
-│   │   └── index.ts
-│   ├── providers/  # Global providers
-│   │   └── EnhancedThemeProvider.tsx
-│   └── index.ts    # Shared barrel exports
-├── features/       # Cross-cutting features
-│   ├── components/
-│   ├── constants/
-│   ├── hooks/
-│   ├── services/
-│   ├── types/
-│   └── utils/
-├── lib/           # External library configurations
-│   ├── api/
-│   └── trpc/     # tRPC configuration
-│       ├── client.ts, server.ts
-│       ├── routers/
-│       └── provider.tsx
-├── contexts/      # React contexts
-├── hooks/         # Legacy hooks (being migrated)
-├── examples/      # Usage examples
-├── types/         # Global type definitions
-├── __tests__/     # Test organization
-│   ├── unit/     # Unit tests
-│   ├── integration/ # Integration tests
-│   └── e2e/     # End-to-end tests
-├── __dev__/      # Development tools
-│   └── stories/  # Storybook stories
-└── app/         # Next.js app directory (pages and layouts)
+│   │   └── scaffold-generator.ts # Frontend scaffolding utilities
+│   └── providers/  # Global providers
+└── app/           # Next.js app directory (pages and layouts)
+    ├── products/         # Generated product pages
     ├── admin/           # Admin pages
     ├── api-docs/        # API documentation pages
     ├── dashboard/       # Dashboard pages
-    ├── projects/        # Project pages
-    ├── settings/        # Settings pages
-    ├── workflows/       # Workflow pages
-    ├── login/, register/
-    └── layout.tsx, page.tsx
+    └── workflows/       # Workflow pages
 ```
 
 ### Key Architectural Benefits
 
 #### 1. **Modular Organization**
-- **Feature-based modules**: Each major feature (auth, admin, builder) is self-contained
+- **Feature-based modules**: Each major feature is self-contained
+- **Generated modules**: Scaffolding creates complete modules following established patterns
 - **Clear boundaries**: Modules have explicit interfaces and dependencies
 - **Scalable structure**: New features can be added as independent modules
 
 #### 2. **Shared Resources**
 - **Centralized UI components**: Reusable components in `/shared/components/`
+- **Generated API services**: Type-safe API clients with proper error handling
 - **Common services**: API clients and utilities available across modules
 - **Type safety**: Shared type definitions ensure consistency
 
-#### 3. **Developer Experience**
-- **Barrel exports**: Clean imports using module index files
-- **Predictable structure**: Consistent organization across all modules
-- **Easy navigation**: Intuitive file locations and naming conventions
-
-#### 4. **Import Patterns**
-```typescript
-// Module imports
-import { useAuth, ChangePasswordForm, SecuritySettings } from '@/modules/auth'
-import { useUsers, useRoles, ActivityLogViewer } from '@/modules/admin'
-import { WorkflowBuilder, WorkflowStateNode, ConditionalNode } from '@/modules/workflow'
-import { useProjects, ProjectsList } from '@/modules/projects'
-import { SwaggerUI, SwaggerErrorBoundary } from '@/modules/api-docs'
-
-// Shared component imports
-import { Button, Card, Input, Dialog, Table } from '@/shared/components/ui'
-import { Sidebar, Header, DashboardLayout } from '@/shared/components/layout'
-import { Breadcrumb, UserMenu } from '@/shared/components/navigation'
-import { DataTable, KanbanBoard } from '@/shared/components/data-visualization'
-
-// Shared service imports
-import { apiClient, usersApi, rolesApi, workflowApi } from '@/shared/services/api'
-import { useURLState, useApiQuery, useInfiniteScroll } from '@/shared/hooks'
-import { User, Project, Role, Permission } from '@/shared/types'
-
-// Utility imports
-import { cn, formatDate, themeUtils } from '@/shared/utils'
-```
+#### 3. **Code Generation Integration**
+- **Seamless integration**: Generated code follows existing architectural patterns
+- **Type consistency**: Generated TypeScript matches backend Pydantic schemas
+- **Component reuse**: Generated components leverage shared UI library
+- **Testing integration**: Generated tests follow established testing patterns
 
 ## Features
 
@@ -324,16 +349,6 @@ import { cn, formatDate, themeUtils } from '@/shared/utils'
 - **Workflow Engine**: Complete execution engine with state transitions and SLA monitoring
 - **Dynamic Templates**: Database-defined workflow types instead of hardcoded processes
 - **Real-time Workflow Canvas**: Live workflow building and editing interface
-
-### Workflow Capabilities
-- **Business Process Automation**: Sales, Purchase, Invoice, and Payment workflows
-- **State Management**: New, Confirmed, Cancelled, Done, Paid, Pending states
-- **Conditional Logic**: Decision nodes with true/false branching
-- **Parallel Processing**: Split and merge nodes for concurrent workflow paths
-- **Timer Integration**: Time-based delays and scheduling in workflows
-- **User Task Management**: Manual approval and assignment workflows
-- **Role-based Permissions**: Workflow actions restricted by user roles
-- **SLA Monitoring**: Automatic escalation and deadline tracking
 
 ### Enterprise Features
 - **Role-Based Access Control**: Complete RBAC implementation with roles and permissions
@@ -398,6 +413,21 @@ import { cn, formatDate, themeUtils } from '@/shared/utils'
    - API Documentation: http://localhost:8000/docs
    - Swagger UI: http://localhost:3000/api-docs (Interactive API documentation)
 
+### Generate Your First CRUD Module
+
+Once the application is running, you can generate a complete CRUD module:
+
+```bash
+# Generate a product management system
+cd backend
+python scaffold-cli.py generate --config examples/product-config.json
+
+# Run database migrations
+alembic upgrade head
+
+# Start the servers and visit http://localhost:3000/products
+```
+
 ### Documentation
 - **[Backend Development Guide](docs/BACKEND_DEV.md)** - Backend development, testing, and deployment
 - **[Frontend Development Guide](docs/FRONTEND_DEV.md)** - Frontend development, Storybook, and testing
@@ -405,6 +435,7 @@ import { cn, formatDate, themeUtils } from '@/shared/utils'
 - **[Frontend Coding Standards](CODING_STANDARDS.md)** - Frontend code quality guidelines and optimization patterns
 - **[Backend Coding Standards](BACKEND_CODING_STANDARDS.md)** - Backend optimization patterns and performance guidelines
 - **[CRUD System Documentation](CRUD_SYSTEM_DOCUMENTATION.md)** - Generic CRUD operations guide
+- **[Backend Scaffolding Usage Guide](backend/docs/backend-scaffolding-usage.md)** - Complete scaffolding documentation
 
 ## API Documentation & Testing
 
@@ -422,200 +453,6 @@ The application includes a comprehensive Swagger UI integration for interactive 
 - **Built-in Swagger UI**: Access at `http://localhost:3000/api-docs` (Frontend integration)
 - **FastAPI Docs**: Native documentation at `http://localhost:8000/docs`
 - **OpenAPI Spec**: Raw specification at `http://localhost:8000/api/v1/openapi.json`
-
-#### Usage
-1. Start both backend and frontend servers
-2. Navigate to `http://localhost:3000/api-docs`
-3. The interface will automatically check API connectivity
-4. Login to your account to test protected endpoints
-5. Use the "Try it out" feature to test endpoints with real data
-
-#### Authentication
-- Protected endpoints require authentication
-- Token is automatically injected when logged in
-- Authentication status is displayed in the UI toolbar
-- Failed authentication attempts are clearly indicated
-
-## API Endpoints
-
-### Authentication
-- `POST /api/v1/auth/login/access-token` - Login user
-- `POST /api/v1/auth/test-token` - Validate token
-
-### Users & Profile
-- `GET /api/v1/users/` - List users (protected)
-- `POST /api/v1/users/` - Create user
-- `GET /api/v1/users/me` - Get current user (protected)
-- `PUT /api/v1/users/me` - Update current user (protected)
-- `GET /api/v1/profile/me` - Get user profile
-- `PUT /api/v1/profile/me` - Update user profile
-- `PUT /api/v1/profile/me/password` - Change password
-
-### Security Settings
-- `GET /api/v1/security/settings` - Get security settings
-- `PUT /api/v1/security/settings` - Update security settings
-- `GET /api/v1/security/overview` - Get security overview
-- `POST /api/v1/security/2fa/disable` - Disable 2FA
-
-### Activity Logs
-- `GET /api/v1/activity-logs/` - List activity logs (with filtering)
-- `GET /api/v1/activity-logs/me` - Get current user's activity logs
-- `GET /api/v1/activity-logs/{id}` - Get specific activity log
-- `POST /api/v1/activity-logs/` - Create activity log (admin only)
-- `PUT /api/v1/activity-logs/{id}` - Update activity log (admin only)
-- `DELETE /api/v1/activity-logs/{id}` - Delete activity log (admin only)
-- `GET /api/v1/activity-logs/stats/summary` - Get activity statistics
-- `DELETE /api/v1/activity-logs/bulk` - Bulk delete activity logs (admin only)
-
-### Audit Trails
-- `GET /api/v1/audit-trails/` - List audit trails (admin only)
-- `GET /api/v1/audit-trails/entity/{type}/{id}` - Get entity audit history
-- `GET /api/v1/audit-trails/{id}` - Get specific audit trail
-- `GET /api/v1/audit-trails/{id}/comparison` - Get structured value comparison
-- `POST /api/v1/audit-trails/` - Create audit trail (admin only)
-- `PUT /api/v1/audit-trails/{id}` - Update audit trail (limited fields, admin only)
-- `GET /api/v1/audit-trails/stats/summary` - Get audit statistics
-- `DELETE /api/v1/audit-trails/bulk` - Bulk delete audit trails (admin only)
-- `GET /api/v1/audit-trails/export/{format}` - Export audit trails (CSV/JSON)
-
-### Projects
-- `GET /api/v1/projects/` - List user projects
-- `POST /api/v1/projects/` - Create project
-- `GET /api/v1/projects/{id}` - Get project details
-- `PUT /api/v1/projects/{id}` - Update project
-- `DELETE /api/v1/projects/{id}` - Delete project
-
-### Pages
-- `GET /api/v1/pages/project/{project_id}/pages` - List project pages
-- `POST /api/v1/pages/` - Create page
-- `GET /api/v1/pages/{id}` - Get page details
-- `PUT /api/v1/pages/{id}` - Update page
-- `DELETE /api/v1/pages/{id}` - Delete page
-
-### Components
-- `GET /api/v1/components/` - List components (global & project-specific)
-- `POST /api/v1/components/` - Create component
-- `GET /api/v1/components/{id}` - Get component details
-- `PUT /api/v1/components/{id}` - Update component
-
-### Component Instances
-- `GET /api/v1/components/instances/page/{page_id}` - List page components
-- `POST /api/v1/components/instances/` - Create component instance
-- `PUT /api/v1/components/instances/{id}` - Update component instance
-- `DELETE /api/v1/components/instances/{id}` - Delete component instance
-
-### Roles & Permissions
-- `GET /api/v1/roles/` - List all roles (admin only)
-- `POST /api/v1/roles/` - Create new role (admin only)
-- `GET /api/v1/roles/{id}` - Get role with permissions (admin only)
-- `PUT /api/v1/roles/{id}` - Update role (admin only)
-- `DELETE /api/v1/roles/{id}` - Delete role (admin only)
-- `POST /api/v1/roles/{id}/permissions` - Assign permission to role (admin only)
-- `DELETE /api/v1/roles/{id}/permissions/{permission_id}` - Remove permission from role (admin only)
-
-### Permissions
-- `GET /api/v1/permissions/` - List all permissions (admin only)
-- `POST /api/v1/permissions/` - Create new permission (admin only)
-- `GET /api/v1/permissions/{id}` - Get permission details (admin only)
-- `PUT /api/v1/permissions/{id}` - Update permission (admin only)
-- `DELETE /api/v1/permissions/{id}` - Delete permission (admin only)
-
-### Project Members
-- `GET /api/v1/project-members/project/{project_id}/members` - List project members
-- `POST /api/v1/project-members/project/{project_id}/members` - Add project member
-- `POST /api/v1/project-members/project/{project_id}/invite` - Invite user by email
-- `PUT /api/v1/project-members/members/{member_id}` - Update project member
-- `DELETE /api/v1/project-members/members/{member_id}` - Remove project member
-- `GET /api/v1/project-members/user/projects` - Get user's accessible projects
-
-### Workflow Management
-- `GET /api/v1/workflow-types/` - List workflow types
-- `POST /api/v1/workflow-types/` - Create workflow type
-- `GET /api/v1/workflow-types/{id}` - Get workflow type details
-- `PUT /api/v1/workflow-types/{id}` - Update workflow type
-- `DELETE /api/v1/workflow-types/{id}` - Delete workflow type (soft delete)
-
-### Workflow States
-- `GET /api/v1/workflow-states/` - List workflow states
-- `POST /api/v1/workflow-states/` - Create workflow state
-- `GET /api/v1/workflow-states/{id}` - Get workflow state details
-- `PUT /api/v1/workflow-states/{id}` - Update workflow state
-- `DELETE /api/v1/workflow-states/{id}` - Delete workflow state
-
-### Workflow Templates
-- `GET /api/v1/workflow-templates/` - List workflow templates
-- `POST /api/v1/workflow-templates/` - Create workflow template
-- `GET /api/v1/workflow-templates/{id}` - Get workflow template details
-- `PUT /api/v1/workflow-templates/{id}` - Update workflow template
-- `DELETE /api/v1/workflow-templates/{id}` - Delete workflow template
-
-### Workflow Instances
-- `GET /api/v1/workflow-instances/` - List workflow instances
-- `POST /api/v1/workflow-instances/` - Create workflow instance
-- `GET /api/v1/workflow-instances/{id}` - Get workflow instance details
-- `PUT /api/v1/workflow-instances/{id}` - Update workflow instance
-- `POST /api/v1/workflow-instances/{id}/execute` - Execute workflow action
-- `GET /api/v1/workflow-instances/{id}/history` - Get workflow history
-
-### Performance & Optimization
-- `GET /api/v1/optimized-example/users` - Optimized paginated users with caching
-- `GET /api/v1/optimized-example/users/{id}` - Optimized single user retrieval
-- `GET /api/v1/optimized-example/analytics` - User analytics with async optimization
-- `GET /api/v1/optimized-example/health-check` - Health check with performance metrics
-- `POST /api/v1/optimized-example/users/batch-process` - Batch processing with optimization
-
-## How to Use the Workflow System
-
-1. **Start the Backend**:
-   ```bash
-   cd backend
-   python main.py
-   ```
-
-2. **Start the Frontend**:
-   ```bash
-   cd frontend
-   npm run dev
-   ```
-
-3. **Access the Application**:
-   - Visit `http://localhost:3000` for the main page
-   - Register or login to access the platform
-   - Use the left sidebar navigation to access different sections
-
-### Application Navigation
-
-#### **Settings Dashboard** (`/settings`)
-- **Profile Tab**: Update personal information, bio, location, website
-- **Security Tab**: Configure 2FA, session settings, email notifications
-- **Password Tab**: Change password with strength validation
-- **Activity Tab**: View personal activity history with filtering
-
-#### **Administration** (Admin users only)
-- **User Management** (`/admin/users`): Manage all system users
-- **Role Management** (`/admin/roles`): Configure user roles and permissions
-- **Permission Management** (`/admin/permissions`): Manage system permissions
-
-#### **Projects & Workflows**
-- **Projects** (`/projects`): Manage and create new projects
-- **Workflows** (`/workflows`): ReactFlow-based workflow management system
-
-### Key Capabilities
-
-- **Unified Navigation**: Responsive left sidebar with role-based menu filtering
-- **URL State Management**: Type-safe URL-based state with shareable links and browser history support
-- **Comprehensive Settings**: Complete user profile and security management
-- **Activity Monitoring**: Real-time activity logging with detailed tracking and URL-based filtering
-- **Audit Trail**: Complete change history with old/new value comparisons
-- **Security Features**: 2FA support, session management, and threat monitoring
-- **ReactFlow Workflow System**: Visual workflow builder with custom node types
-- **Workflow Types & Templates**: Database-driven workflow configuration system
-- **State Management**: Configurable workflow states with transitions and permissions
-- **Business Process Automation**: Sales, Purchase, Invoice, and Payment workflows
-- **Execution Engine**: Complete workflow lifecycle management with SLA monitoring
-- **Real-time Canvas**: Interactive ReactFlow-based workflow building interface
-- **Enterprise Navigation**: Professional sidebar with breadcrumbs and role-based access
-- **User Management**: Complete RBAC system with project collaboration
 
 ## URL State Management
 
@@ -648,34 +485,7 @@ const { page, setPage, limit, offset } = usePaginationState(1, 20)
 
 // Sorting with field and direction
 const { sortBy, setSortBy, sortOrder, setSortOrder } = useSortState('name', 'asc')
-
-// View mode switching (grid/list)
-const [viewMode, setViewMode] = useViewModeState(['grid', 'list'], 'grid')
-
-// Tab navigation
-const [activeTab, setActiveTab] = useTabState(['profile', 'security'], 'profile')
 ```
-
-### Implementation Examples
-
-#### Activity Log Filtering
-The activity log viewer demonstrates comprehensive URL state management:
-- Search queries in URL
-- Pagination state preservation
-- Filter combinations (action, level, time range)
-- Sort preferences maintained
-
-#### Settings Tab Navigation
-Settings pages use URL-based tab state:
-- Direct navigation to specific tabs via URL
-- Shareable links to specific settings sections
-- Browser back/forward navigation between tabs
-
-#### Project Management
-Project lists showcase advanced filtering:
-- Search, status filtering, and sorting in URL
-- View mode (grid/list) preference stored
-- Pagination state across page refreshes
 
 ## Testing Infrastructure
 
@@ -688,8 +498,6 @@ The FastNext Framework includes comprehensive testing capabilities covering both
 - **Test Runner**: Advanced test runner script with multiple execution modes
 - **Database Testing**: SQLite test database with automatic cleanup
 - **Authentication Testing**: JWT token testing with admin and user fixtures
-- **API Testing**: Complete endpoint testing with httpx client
-- **Mock Support**: Factory-boy for test data generation and pytest-mock for mocking
 
 #### Running Backend Tests
 ```bash
@@ -699,13 +507,7 @@ python test_runner.py
 
 # Run specific test types
 python test_runner.py --type unit
-python test_runner.py --type api
-python test_runner.py --type auth
-
-# Run with parallel execution
 python test_runner.py --parallel
-
-# Generate comprehensive report
 python test_runner.py --report
 ```
 
@@ -713,39 +515,16 @@ python test_runner.py --report
 - **Multi-Browser Support**: Chrome, Firefox, Safari testing
 - **Authentication State**: Stored login sessions for different user roles
 - **Test Organization**: Structured tests for auth, admin, workflow, and API
-- **Test Utilities**: Comprehensive helper functions for common operations
-- **Responsive Testing**: Multi-device viewport testing
-- **API Testing**: Direct API endpoint testing through Playwright
 - **Screenshot/Video**: Automatic capture on test failures
 - **Parallel Execution**: Concurrent test execution for faster feedback
 
 #### Running E2E Tests
 ```bash
-# Install dependencies
 cd frontend
-npm install
-npx playwright install
-
-# Run all e2e tests
 npm run test:e2e
-
-# Run with UI mode for debugging
 npm run test:e2e:ui
-
-# Run specific test file
-npx playwright test tests/e2e/auth/login.test.ts
-
-# Generate test report
 npx playwright show-report
 ```
-
-### Test Coverage & Quality
-- **Backend Coverage**: Minimum 80% code coverage with detailed HTML reports
-- **Critical Path Coverage**: 100% coverage for authentication and security
-- **API Endpoint Coverage**: Complete testing of all public endpoints
-- **E2E Workflow Testing**: Full user journey testing across the application
-- **Performance Testing**: Response time monitoring and load testing capabilities
-- **Security Testing**: Authentication, authorization, and input validation testing
 
 ## Frontend Code Restructuring
 
@@ -773,280 +552,53 @@ The restructuring is complete with the following organization:
 - ✅ **Hook Organization**: Shared hooks for common functionality (URL state, API queries, etc.)
 - ✅ **Testing Structure**: E2E tests organized by feature with comprehensive utilities
 
-#### Development Workflow
-
-With the new structure, developers can:
-- Work on features in isolation within their respective modules
-- Import components and services using clean, predictable paths
-- Leverage shared resources across modules without duplication
-- Add new features by creating new modules following established patterns
-- Test features independently with organized test suites
-
-For detailed information about the restructuring process, see `RESTRUCTURING_SUMMARY.md`.
-
-## Code Generation & Scaffolding System 🚀
-
-### FastNext Unified Scaffolding CLI
-
-FastNext includes a powerful unified scaffolding system that generates complete full-stack CRUD interfaces for both frontend (TypeScript/React) and backend (Python/FastAPI) from a single configuration file.
-
-#### Key Features ✅
-- **🔥 Unified CLI Tool**: Single command generates both frontend and backend
-- **📄 Configuration-Driven**: JSON configuration files define complete models
-- **🎯 Type-Safe Generation**: TypeScript interfaces align with Pydantic schemas
-- **🛠️ Interactive Builder**: Build models interactively with step-by-step prompts
-- **⚡ Production-Ready**: Generated code follows FastNext framework conventions
-- **🔧 Customizable**: Extensive field types, validation rules, and relationships
-
-#### Installation & Usage
-
-```bash
-# Generate complete full-stack CRUD from configuration
-python scaffold-cli.py generate --config examples/product-config.json
-
-# Generate only frontend components
-python scaffold-cli.py generate --name BlogPost --type frontend
-
-# Generate only backend API
-python scaffold-cli.py generate --name Category --type backend
-
-# Interactive model builder
-python scaffold-cli.py interactive
-
-# Create example configuration
-python scaffold-cli.py example-config --name Product
-
-# List available field types
-python scaffold-cli.py field-types
-
-# Dry run to preview generation
-python scaffold-cli.py generate --config product.json --dry-run
-```
-
-#### What Gets Generated
-
-##### Frontend Generation
-- **API Services**: TypeScript API clients with proper typing
-- **React Hooks**: Custom hooks for data fetching and state management
-- **Form Components**: Complete forms with validation and error handling
-- **Data Tables**: Advanced data tables with sorting, filtering, and pagination
-- **Page Components**: Full CRUD pages (list, create, edit, view)
-- **Navigation Updates**: Automatic menu configuration updates
-- **Type Definitions**: TypeScript interfaces matching backend schemas
-
-##### Backend Generation
-- **SQLAlchemy Models**: Modern SQLAlchemy 2.x models with proper typing
-- **Pydantic Schemas**: Validation schemas for create/update/response
-- **FastAPI Routes**: Complete CRUD endpoints with permission integration
-- **Service Layer**: Business logic separation with custom validation
-- **Database Migrations**: Alembic migrations with proper constraints
-- **Test Files**: Comprehensive test suites for all generated components
-- **Router Updates**: Automatic API router configuration
-
-#### Field Types & Features
-
-##### Basic Field Types
-```json
-{
-  "fields": [
-    {"name": "title", "type": "string", "required": true},
-    {"name": "price", "type": "number", "validation": {"min_value": 0}},
-    {"name": "is_active", "type": "boolean", "default": true},
-    {"name": "launch_date", "type": "date"},
-    {"name": "created_at", "type": "datetime"},
-    {"name": "description", "type": "text"},
-    {"name": "contact_email", "type": "email"},
-    {"name": "website", "type": "url"},
-    {"name": "metadata", "type": "json"},
-    {"name": "status", "type": "select", "options": ["draft", "published"]},
-    {"name": "tags", "type": "multiselect", "options": ["urgent", "important"]}
-  ]
-}
-```
-
-##### Advanced Features
-- **Validation Rules**: Min/max length, pattern matching, custom validators
-- **Database Constraints**: Unique fields, indexes, foreign keys
-- **UI Configuration**: Display in lists, searchable, sortable, filterable
-- **Model Mixins**: Timestamps, audit trails, soft delete, metadata
-- **Permission Integration**: RBAC permissions with owner fields
-- **API Configuration**: Pagination, search, filtering, sorting
-
-#### Example Configurations
-
-##### E-commerce Product Model
-```json
-{
-  "$schema": "https://fastNext.dev/schemas/scaffold-config.json",
-  "name": "Product",
-  "pluralName": "Products",
-  "description": "E-commerce product management model",
-  "icon": "Package",
-  "module": "inventory",
-  "hasTimestamps": true,
-  "hasAudit": true,
-  "hasSoftDelete": false,
-  "hasMetadata": true,
-  "fields": [
-    {
-      "name": "name",
-      "type": "string",
-      "required": true,
-      "validation": {"min_length": 2, "max_length": 200},
-      "unique": true,
-      "searchable": true,
-      "sortable": true
-    },
-    {
-      "name": "price",
-      "type": "number",
-      "required": true,
-      "validation": {"min_value": 0.01},
-      "sortable": true,
-      "filterable": true
-    },
-    {
-      "name": "category",
-      "type": "select",
-      "options": ["Electronics", "Clothing", "Books"],
-      "filterable": true
-    }
-  ],
-  "permissions": {
-    "category": "product",
-    "owner_field": "user_id"
-  },
-  "api": {
-    "enable_search": true,
-    "enable_filtering": true,
-    "page_size": 25
-  }
-}
-```
-
-##### Blog Post Model
-```json
-{
-  "name": "BlogPost",
-  "description": "Blog post content management model",
-  "fields": [
-    {"name": "title", "type": "string", "required": true, "searchable": true},
-    {"name": "slug", "type": "string", "unique": true, "validation": {"pattern": "^[a-z0-9-]+$"}},
-    {"name": "content", "type": "text", "required": true, "searchable": true},
-    {"name": "status", "type": "select", "options": ["draft", "published", "archived"]},
-    {"name": "tags", "type": "json", "example": ["python", "web-development"]},
-    {"name": "published_at", "type": "datetime", "sortable": true}
-  ]
-}
-```
-
-#### CLI Commands Reference
-
-```bash
-# Generate scaffolding
-scaffold-cli.py generate [OPTIONS]
-  --name TEXT          Model name (e.g., Product, BlogPost)
-  --type [frontend|backend|both]  What to generate (default: both)
-  --config TEXT        JSON config file path
-  --output-frontend TEXT  Frontend output directory
-  --output-backend TEXT   Backend output directory
-  --dry-run           Show what would be generated without creating files
-
-# Interactive model builder
-scaffold-cli.py interactive
-
-# Generate example configuration
-scaffold-cli.py example-config --name TEXT [--output TEXT]
-
-# List available field types
-scaffold-cli.py field-types
-```
-
-#### Integration with FastNext Framework
-
-- **Consistent Architecture**: Generated code follows established patterns
-- **Type Safety**: TypeScript interfaces match Pydantic schemas exactly  
-- **Permission Integration**: RBAC works seamlessly across frontend/backend
-- **API Compatibility**: Generated endpoints work with existing middleware
-- **Database Integration**: Uses existing SQLAlchemy setup and mixins
-- **UI Components**: Leverages ShadcnUI and existing design system
-
-#### Development Workflow
-
-1. **Define Model**: Create JSON configuration or use interactive builder
-2. **Generate Code**: Run CLI to generate frontend and/or backend code
-3. **Run Migration**: Apply database changes with `alembic upgrade head`
-4. **Test & Customize**: Review generated code and add custom business logic
-5. **Deploy**: Generated code is production-ready
-
-#### Examples Included
-
-- **Product Management**: Complete e-commerce product CRUD
-- **Blog System**: Content management with SEO and categories
-- **User Profiles**: Extended user information management
-- **Project Tracking**: Task and project management system
-
-#### Documentation
-
-- **[Backend Scaffolding Usage Guide](backend/docs/backend-scaffolding-usage.md)** - Comprehensive backend generation documentation
-- **Frontend Scaffolding Guide** - Frontend generation patterns and customization
-- **Configuration Schema** - Complete field type and option reference
-- **Example Configurations** - Ready-to-use configuration files
-
----
-
 ## Recent Updates & Improvements
 
 ### Latest Changes ✅
-- **🔥 Unified Scaffolding System**: Complete full-stack CRUD generation from single configuration files
+
+#### Scaffolding System Enhancements
+- **🔥 Unified Full-Stack Scaffolding**: Complete CRUD generation for both frontend and backend from single configuration
 - **🎯 Interactive Model Builder**: Build models interactively with step-by-step prompts and validation
 - **📄 Configuration-Driven Development**: JSON schemas define complete models with validation and relationships
 - **⚡ Production-Ready Generation**: Generated code follows FastNext framework conventions and best practices
+- **🧪 Comprehensive Test Generation**: Unit, integration, performance, and security tests included
+- **🔐 Advanced Permission Integration**: RBAC with resource-level and field-level access control
+- **🎨 TypeScript Integration**: Frontend type definitions and React Query hooks generation
+- **📊 GraphQL Support**: Optional GraphQL schema generation with DataLoaders
+- **📚 API Documentation**: Automatic OpenAPI/Swagger documentation generation
+- **🗄️ Database Optimization**: Intelligent indexing and performance optimization
+
+#### Core Framework Improvements
 - **🚀 Performance Optimization Framework**: Complete backend optimization with advanced caching, database optimization, and async patterns
 - **⚡ Frontend Optimization**: React memoization patterns, component lazy loading, virtual scrolling, and performance monitoring
 - **🔄 Advanced Caching System**: Multi-tier caching with Memory, Redis, and Hybrid backends with intelligent eviction
 - **📊 Performance Monitoring**: Real-time metrics, system monitoring, alert management, and comprehensive analytics
-- **🗄️ Database Optimization**: Query profiling, slow query detection, connection pooling, and batch processing
 - **🌐 Response Optimization**: Compression, minification, ETag support, and conditional request handling
 - **⚡ Async Optimization**: Task management, resource pooling, circuit breakers, and retry mechanisms
-- **📈 Performance Budgets**: Automated performance thresholds with alerting and monitoring
-- **🛠️ Optimization Patterns**: Comprehensive coding standards and best practices for both frontend and backend
+
+#### Development & Testing
 - **Comprehensive Testing Infrastructure**: Added pytest for backend testing and Playwright for e2e testing with complete documentation
 - **Test Coverage Requirements**: Implemented 80% minimum coverage with HTML/XML reporting and CI/CD integration
 - **ReactFlow Workflow System**: Complete workflow management system with visual builder, custom nodes, and execution engine
 - **Database-Driven Workflows**: Dynamic workflow types, states, and templates stored in database instead of hardcoded
 - **URL State Management**: Integrated nuqs for type-safe URL-based state management across the application
-- **Backend Architecture Enhancements**: Improved API structure, enhanced CRUD operations, and better error handling
 - **Modular Frontend Architecture**: Complete restructuring into feature-based modules with clear separation of concerns
 
-### Core Framework Features ✅
-- **Unified Navigation**: Responsive left sidebar with expandable sections
-- **Settings Dashboard**: Complete user settings interface with tabbed navigation
+#### Enterprise Features
+- **Role-Based Access Control**: Complete RBAC implementation with roles and permissions
+- **System Roles**: Admin, Editor, Viewer, Member with predefined permissions
+- **Project Collaboration**: Multi-user project access with role-based permissions
 - **Security Management**: 2FA setup, session controls, and notification preferences
 - **Activity Monitoring**: Personal activity logs with filtering and export
 - **Audit Trail System**: Comprehensive change tracking with value comparisons
 - **Swagger UI Integration**: Interactive API documentation with authentication support
-- **Enhanced Backend Structure**: Organized API routes, services, and middleware layers
 
-### ReactFlow Workflow System ✅
-- **Visual Workflow Builder**: ReactFlow-based canvas with drag-and-drop interface
-- **5 Custom Node Types**: State, Conditional, Parallel Gateway, Timer, User Task nodes
-- **Database-Driven**: Workflow types, states, and templates stored in database
-- **Execution Engine**: Complete workflow lifecycle with state transitions
-- **Business Process Support**: Sales, Purchase, Invoice, Payment workflows
-- **Role-Based Permissions**: Action restrictions based on user roles
-- **SLA Monitoring**: Automatic escalation and deadline tracking
-- **Comprehensive Testing**: Backend models, APIs, engine, and frontend components
-- **Sidebar Integration**: Unified navigation with other application sections
-
-### Development & Code Quality ✅
-- **Modular Code Organization**: Feature-based modules with clear boundaries
-- **CRUD System Template**: Generic CRUD operations for rapid development
-- **Code Standards**: Established coding standards and best practices
-- **Import Path Structure**: Organized import paths with TypeScript path mapping
-- **Testing Infrastructure**: Complete pytest and Playwright testing setup with 80% coverage requirements
-- **Test Documentation**: Comprehensive testing guide with examples and CI/CD integration
-- **Development Tools**: Enhanced development workflow with better tooling
+#### Bug Fixes & Quality Improvements
+- **✅ Fixed TypeScript Errors**: Resolved all TypeScript compilation errors across the frontend
+- **✅ Type Safety Improvements**: Enhanced type definitions for optional fields and proper null handling
+- **✅ API Response Handling**: Fixed API client response extraction and error handling
+- **✅ Form Validation**: Improved form validation and default value handling
+- **✅ Build Optimization**: Frontend now builds successfully with full type checking
 
 ## Upcoming Features
 - **Advanced Workflow Features**: Enhanced conditional logic, loops, and dynamic routing
@@ -1055,9 +607,7 @@ scaffold-cli.py field-types
 - **Advanced Security**: TOTP 2FA implementation and hardware key support
 - **Data Visualization**: Activity and security analytics dashboards
 - **Notification System**: Real-time in-app notifications and email alerts
-- **Workflow Templates Library**: Pre-built workflow templates for common business processes
 - **Mobile Workflow Management**: Native mobile app for workflow monitoring and approvals
-- **Advanced SLA Management**: Complex escalation rules and automated notifications
 
 ## License
 
