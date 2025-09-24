@@ -1,14 +1,10 @@
 "use client"
 
 import * as React from "react"
-import { ColumnDef } from "@tanstack/react-table"
-import { Plus, Key, Loader2 } from "lucide-react"
-
+import { Plus, Loader2 } from "lucide-react"
+import { Button } from "@/shared/components/ui/button"
+import { PermissionsDataTable, type Permission as DataTablePermission } from "@/shared/components/data-table"
 import {
-  Button,
-  DataTable,
-  ActionColumn,
-  Badge,
   Dialog,
   DialogContent,
   DialogDescription,
@@ -16,20 +12,34 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-  Input,
-  Label,
+} from "@/shared/components/ui/dialog"
+import { Input } from "@/shared/components/ui/input"
+import { Label } from "@/shared/components/ui/label"
+import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-  useConfirmationDialog
-} from "@/shared/components"
+} from "@/shared/components/ui/select"
 
 // Import React Query hooks
 import { usePermissions, useCreatePermission, useDeletePermission } from "@/modules/admin/hooks/usePermissions"
 import { apiUtils } from "@/shared/services/api/client"
 import type { Permission } from "@/shared/services/api/permissions"
+
+// Adapter function to convert API Permission to DataTable Permission
+const adaptPermissionForDataTable = (permission: Permission): DataTablePermission => ({
+  id: permission.id,
+  name: permission.name,
+  description: permission.description,
+  category: permission.category,
+  action: permission.action,
+  resource: permission.resource,
+  is_system_permission: permission.is_system_permission,
+  created_at: '2023-01-15T10:00:00Z', // Default value since API Permission doesn't have this
+  updated_at: undefined
+})
 
 const categories = [
   "project",
@@ -49,85 +59,7 @@ const actions = [
   "deploy"
 ]
 
-// Define columns
-const createColumns = (handleRowAction: (permission: Permission, action: string) => void): ColumnDef<Permission>[] => [
-  {
-    accessorKey: "name",
-    header: "Permission Name",
-    cell: ({ row }) => {
-      const permission = row.original
-      return (
-        <div className="flex items-center gap-2">
-          <Key className="w-4 h-4 text-gray-500" />
-          <span className="font-medium">{permission.name}</span>
-        </div>
-      )
-    },
-  },
-  {
-    accessorKey: "description",
-    header: "Description",
-  },
-  {
-    accessorKey: "category",
-    header: "Category",
-    cell: ({ row }) => {
-      const category = row.getValue("category") as string
-      return (
-        <Badge variant="outline" className="text-xs">
-          {category}
-        </Badge>
-      )
-    },
-  },
-  {
-    accessorKey: "action",
-    header: "Action",
-    cell: ({ row }) => {
-      const action = row.getValue("action") as string
-      return (
-        <div className="font-mono text-sm">
-          {action}
-        </div>
-      )
-    },
-  },
-  {
-    id: "resource",
-    header: "Resource",
-    cell: ({ row }) => {
-      const resource = row.original.resource
-      return (
-        <div className="font-mono text-sm">
-          {resource || '-'}
-        </div>
-      )
-    },
-  },
-  {
-    accessorKey: "created_at",
-    header: "Created",
-    cell: ({ row }) => {
-      const createdAt = row.getValue("created_at") as string
-      return (
-        <span className="text-sm text-gray-500">
-          {new Date(createdAt).toLocaleDateString()}
-        </span>
-      )
-    },
-  },
-  {
-    id: "actions",
-    header: "Actions",
-    cell: ({ row }) => (
-      <ActionColumn 
-        row={row.original} 
-        onAction={handleRowAction}
-        actions={row.original.is_system_permission ? ["view"] : ["edit", "delete"]}
-      />
-    ),
-  },
-]
+// We no longer need the columns definition as it's handled by PermissionsDataTable
 
 export default function PermissionsPage() {
   // State
@@ -146,28 +78,6 @@ export default function PermissionsPage() {
   // Mutations
   const createPermissionMutation = useCreatePermission()
   const deletePermissionMutation = useDeletePermission()
-
-  // Confirmation dialog
-  const { confirmDelete, ConfirmationDialog } = useConfirmationDialog()
-
-  // Action handler
-  const handleRowAction = React.useCallback((permission: Permission, action: string) => {
-    switch (action) {
-      case "edit":
-        console.log("Edit permission:", permission)
-        break
-      case "delete":
-        confirmDelete(permission.name, () => {
-          deletePermissionMutation.mutate(permission.id)
-        })
-        break
-      case "view":
-        console.log("View permission:", permission)
-        break
-    }
-  }, [deletePermissionMutation, confirmDelete])
-
-  const columns = React.useMemo(() => createColumns(handleRowAction), [handleRowAction])
 
   // Handle create permission
   const handleCreatePermission = React.useCallback(() => {
@@ -209,6 +119,32 @@ export default function PermissionsPage() {
       }
     }
   }, [newPermission.action, newPermission.category, newPermission.name])
+
+  // Action handlers for the enhanced data table
+  const handleEditPermission = (permission: DataTablePermission) => {
+    console.log('Edit permission:', permission)
+    // TODO: Open edit permission dialog
+  }
+
+  const handleDeletePermission = (permission: DataTablePermission) => {
+    if (permission.is_system_permission) {
+      alert('System permissions cannot be deleted')
+      return
+    }
+    
+    if (window.confirm(`Are you sure you want to delete the permission "${permission.name}"?`)) {
+      deletePermissionMutation.mutate(permission.id)
+    }
+  }
+
+  const handleViewPermission = (permission: DataTablePermission) => {
+    console.log('View permission:', permission)
+    // TODO: Show permission details modal or navigate to details page
+  }
+
+  const handleAddPermission = () => {
+    setIsCreateDialogOpen(true)
+  }
 
   // Loading states
   const isLoading = permissionsLoading
@@ -352,21 +288,15 @@ export default function PermissionsPage() {
         </Dialog>
       </div>
 
-        {isLoading ? (
-          <div className="flex items-center justify-center py-12">
-            <Loader2 className="h-8 w-8 animate-spin" />
-            <span className="ml-2">Loading permissions...</span>
-          </div>
-        ) : (
-          <DataTable 
-            columns={columns} 
-            data={permissions} 
-            searchKey="name"
-          />
-        )}
+        <PermissionsDataTable
+          permissions={permissions.map(adaptPermissionForDataTable)}
+          onEditPermission={handleEditPermission}
+          onDeletePermission={handleDeletePermission}
+          onViewPermission={handleViewPermission}
+          onAddPermission={handleAddPermission}
+          isLoading={isLoading}
+        />
       </div>
-
-      <ConfirmationDialog />
     </div>
   )
 }

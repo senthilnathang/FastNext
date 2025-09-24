@@ -2,6 +2,8 @@
 
 import * as React from 'react'
 import { UserDataTableExample } from '@/shared/components/data-table/examples/UserDataTable'
+import { RolesDataTableExample } from '@/shared/components/data-table/examples/RolesDataTable'
+import { PermissionsDataTableExample } from '@/shared/components/data-table/examples/PermissionsDataTable'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/components/ui/tabs'
 
@@ -18,8 +20,9 @@ export default function DataTablesPage() {
       <Tabs defaultValue="users" className="space-y-4">
         <TabsList>
           <TabsTrigger value="users">Users</TabsTrigger>
+          <TabsTrigger value="roles">Roles</TabsTrigger>
+          <TabsTrigger value="permissions">Permissions</TabsTrigger>
           <TabsTrigger value="products">Products (Coming Soon)</TabsTrigger>
-          <TabsTrigger value="orders">Orders (Coming Soon)</TabsTrigger>
         </TabsList>
         
         <TabsContent value="users" className="space-y-4">
@@ -45,6 +48,50 @@ export default function DataTablesPage() {
           </Card>
         </TabsContent>
         
+        <TabsContent value="roles" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Roles Management</CardTitle>
+              <CardDescription>
+                Role management table with advanced features including:
+              </CardDescription>
+              <ul className="text-sm text-muted-foreground mt-2 space-y-1">
+                <li>• System vs custom role differentiation</li>
+                <li>• Permission summary with badges</li>
+                <li>• User count tracking</li>
+                <li>• Status management (active/inactive)</li>
+                <li>• Protected system role handling</li>
+                <li>• Bulk operations with safety checks</li>
+              </ul>
+            </CardHeader>
+            <CardContent>
+              <RolesDataTableExample />
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
+        <TabsContent value="permissions" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Permissions Management</CardTitle>
+              <CardDescription>
+                Permission management table with comprehensive features including:
+              </CardDescription>
+              <ul className="text-sm text-muted-foreground mt-2 space-y-1">
+                <li>• Category-based organization and filtering</li>
+                <li>• Action type indicators with color coding</li>
+                <li>• Automatic permission key generation</li>
+                <li>• System permission protection</li>
+                <li>• Resource-based grouping</li>
+                <li>• Advanced search across all fields</li>
+              </ul>
+            </CardHeader>
+            <CardContent>
+              <PermissionsDataTableExample />
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
         <TabsContent value="products" className="space-y-4">
           <Card>
             <CardHeader>
@@ -56,22 +103,6 @@ export default function DataTablesPage() {
             <CardContent>
               <div className="flex items-center justify-center h-32 text-muted-foreground">
                 Coming Soon - Products DataTable
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        <TabsContent value="orders" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Orders Table</CardTitle>
-              <CardDescription>
-                Order management table will be implemented here using the same DataTable component.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center justify-center h-32 text-muted-foreground">
-                Coming Soon - Orders DataTable
               </div>
             </CardContent>
           </Card>
