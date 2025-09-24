@@ -9,7 +9,8 @@ import {
   Workflow,
   Table,
   Sparkles,
-} from 'lucide-react';
+,
+  Package} from 'lucide-react';
 
 export interface MenuItem {
   title: string;
@@ -49,7 +50,13 @@ export const menuItems: MenuItem[] = [
     href: '/data-tables',
     icon: Table,
     module: 'data-tables',
+  },  {
+    title: 'Products',
+    href: '/products',
+    icon: Package,
+    module: 'inventory',
   },
+
   {
     title: 'Settings',
     href: '/settings',

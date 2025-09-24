@@ -1,4 +1,6 @@
 from fastapi import APIRouter
+from app.api import products
+from app.api import blog_posts
 from app.api.routes import (
     auth, auth_routes, users, projects, pages, components, roles, permissions, project_members,
     profile, security, activity_logs, audit_trails, assets, user_roles,
@@ -7,6 +9,8 @@ from app.api.routes import (
 
 api_router = APIRouter()
 api_router.include_router(auth_routes.router, prefix="/auth", tags=["authentication"])
+api_router.include_router(blog_posts.router, prefix="/blog_posts", tags=["blog_posts"])
+api_router.include_router(products.router, prefix="/products", tags=["products"])
 api_router.include_router(users.router, prefix="/users", tags=["users"])
 api_router.include_router(profile.router, prefix="/profile", tags=["profile"])
 api_router.include_router(security.router, prefix="/security", tags=["security"])

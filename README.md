@@ -784,9 +784,224 @@ With the new structure, developers can:
 
 For detailed information about the restructuring process, see `RESTRUCTURING_SUMMARY.md`.
 
+## Code Generation & Scaffolding System 🚀
+
+### FastNext Unified Scaffolding CLI
+
+FastNext includes a powerful unified scaffolding system that generates complete full-stack CRUD interfaces for both frontend (TypeScript/React) and backend (Python/FastAPI) from a single configuration file.
+
+#### Key Features ✅
+- **🔥 Unified CLI Tool**: Single command generates both frontend and backend
+- **📄 Configuration-Driven**: JSON configuration files define complete models
+- **🎯 Type-Safe Generation**: TypeScript interfaces align with Pydantic schemas
+- **🛠️ Interactive Builder**: Build models interactively with step-by-step prompts
+- **⚡ Production-Ready**: Generated code follows FastNext framework conventions
+- **🔧 Customizable**: Extensive field types, validation rules, and relationships
+
+#### Installation & Usage
+
+```bash
+# Generate complete full-stack CRUD from configuration
+python scaffold-cli.py generate --config examples/product-config.json
+
+# Generate only frontend components
+python scaffold-cli.py generate --name BlogPost --type frontend
+
+# Generate only backend API
+python scaffold-cli.py generate --name Category --type backend
+
+# Interactive model builder
+python scaffold-cli.py interactive
+
+# Create example configuration
+python scaffold-cli.py example-config --name Product
+
+# List available field types
+python scaffold-cli.py field-types
+
+# Dry run to preview generation
+python scaffold-cli.py generate --config product.json --dry-run
+```
+
+#### What Gets Generated
+
+##### Frontend Generation
+- **API Services**: TypeScript API clients with proper typing
+- **React Hooks**: Custom hooks for data fetching and state management
+- **Form Components**: Complete forms with validation and error handling
+- **Data Tables**: Advanced data tables with sorting, filtering, and pagination
+- **Page Components**: Full CRUD pages (list, create, edit, view)
+- **Navigation Updates**: Automatic menu configuration updates
+- **Type Definitions**: TypeScript interfaces matching backend schemas
+
+##### Backend Generation
+- **SQLAlchemy Models**: Modern SQLAlchemy 2.x models with proper typing
+- **Pydantic Schemas**: Validation schemas for create/update/response
+- **FastAPI Routes**: Complete CRUD endpoints with permission integration
+- **Service Layer**: Business logic separation with custom validation
+- **Database Migrations**: Alembic migrations with proper constraints
+- **Test Files**: Comprehensive test suites for all generated components
+- **Router Updates**: Automatic API router configuration
+
+#### Field Types & Features
+
+##### Basic Field Types
+```json
+{
+  "fields": [
+    {"name": "title", "type": "string", "required": true},
+    {"name": "price", "type": "number", "validation": {"min_value": 0}},
+    {"name": "is_active", "type": "boolean", "default": true},
+    {"name": "launch_date", "type": "date"},
+    {"name": "created_at", "type": "datetime"},
+    {"name": "description", "type": "text"},
+    {"name": "contact_email", "type": "email"},
+    {"name": "website", "type": "url"},
+    {"name": "metadata", "type": "json"},
+    {"name": "status", "type": "select", "options": ["draft", "published"]},
+    {"name": "tags", "type": "multiselect", "options": ["urgent", "important"]}
+  ]
+}
+```
+
+##### Advanced Features
+- **Validation Rules**: Min/max length, pattern matching, custom validators
+- **Database Constraints**: Unique fields, indexes, foreign keys
+- **UI Configuration**: Display in lists, searchable, sortable, filterable
+- **Model Mixins**: Timestamps, audit trails, soft delete, metadata
+- **Permission Integration**: RBAC permissions with owner fields
+- **API Configuration**: Pagination, search, filtering, sorting
+
+#### Example Configurations
+
+##### E-commerce Product Model
+```json
+{
+  "$schema": "https://fastNext.dev/schemas/scaffold-config.json",
+  "name": "Product",
+  "pluralName": "Products",
+  "description": "E-commerce product management model",
+  "icon": "Package",
+  "module": "inventory",
+  "hasTimestamps": true,
+  "hasAudit": true,
+  "hasSoftDelete": false,
+  "hasMetadata": true,
+  "fields": [
+    {
+      "name": "name",
+      "type": "string",
+      "required": true,
+      "validation": {"min_length": 2, "max_length": 200},
+      "unique": true,
+      "searchable": true,
+      "sortable": true
+    },
+    {
+      "name": "price",
+      "type": "number",
+      "required": true,
+      "validation": {"min_value": 0.01},
+      "sortable": true,
+      "filterable": true
+    },
+    {
+      "name": "category",
+      "type": "select",
+      "options": ["Electronics", "Clothing", "Books"],
+      "filterable": true
+    }
+  ],
+  "permissions": {
+    "category": "product",
+    "owner_field": "user_id"
+  },
+  "api": {
+    "enable_search": true,
+    "enable_filtering": true,
+    "page_size": 25
+  }
+}
+```
+
+##### Blog Post Model
+```json
+{
+  "name": "BlogPost",
+  "description": "Blog post content management model",
+  "fields": [
+    {"name": "title", "type": "string", "required": true, "searchable": true},
+    {"name": "slug", "type": "string", "unique": true, "validation": {"pattern": "^[a-z0-9-]+$"}},
+    {"name": "content", "type": "text", "required": true, "searchable": true},
+    {"name": "status", "type": "select", "options": ["draft", "published", "archived"]},
+    {"name": "tags", "type": "json", "example": ["python", "web-development"]},
+    {"name": "published_at", "type": "datetime", "sortable": true}
+  ]
+}
+```
+
+#### CLI Commands Reference
+
+```bash
+# Generate scaffolding
+scaffold-cli.py generate [OPTIONS]
+  --name TEXT          Model name (e.g., Product, BlogPost)
+  --type [frontend|backend|both]  What to generate (default: both)
+  --config TEXT        JSON config file path
+  --output-frontend TEXT  Frontend output directory
+  --output-backend TEXT   Backend output directory
+  --dry-run           Show what would be generated without creating files
+
+# Interactive model builder
+scaffold-cli.py interactive
+
+# Generate example configuration
+scaffold-cli.py example-config --name TEXT [--output TEXT]
+
+# List available field types
+scaffold-cli.py field-types
+```
+
+#### Integration with FastNext Framework
+
+- **Consistent Architecture**: Generated code follows established patterns
+- **Type Safety**: TypeScript interfaces match Pydantic schemas exactly  
+- **Permission Integration**: RBAC works seamlessly across frontend/backend
+- **API Compatibility**: Generated endpoints work with existing middleware
+- **Database Integration**: Uses existing SQLAlchemy setup and mixins
+- **UI Components**: Leverages ShadcnUI and existing design system
+
+#### Development Workflow
+
+1. **Define Model**: Create JSON configuration or use interactive builder
+2. **Generate Code**: Run CLI to generate frontend and/or backend code
+3. **Run Migration**: Apply database changes with `alembic upgrade head`
+4. **Test & Customize**: Review generated code and add custom business logic
+5. **Deploy**: Generated code is production-ready
+
+#### Examples Included
+
+- **Product Management**: Complete e-commerce product CRUD
+- **Blog System**: Content management with SEO and categories
+- **User Profiles**: Extended user information management
+- **Project Tracking**: Task and project management system
+
+#### Documentation
+
+- **[Backend Scaffolding Usage Guide](backend/docs/backend-scaffolding-usage.md)** - Comprehensive backend generation documentation
+- **Frontend Scaffolding Guide** - Frontend generation patterns and customization
+- **Configuration Schema** - Complete field type and option reference
+- **Example Configurations** - Ready-to-use configuration files
+
+---
+
 ## Recent Updates & Improvements
 
 ### Latest Changes ✅
+- **🔥 Unified Scaffolding System**: Complete full-stack CRUD generation from single configuration files
+- **🎯 Interactive Model Builder**: Build models interactively with step-by-step prompts and validation
+- **📄 Configuration-Driven Development**: JSON schemas define complete models with validation and relationships
+- **⚡ Production-Ready Generation**: Generated code follows FastNext framework conventions and best practices
 - **🚀 Performance Optimization Framework**: Complete backend optimization with advanced caching, database optimization, and async patterns
 - **⚡ Frontend Optimization**: React memoization patterns, component lazy loading, virtual scrolling, and performance monitoring
 - **🔄 Advanced Caching System**: Multi-tier caching with Memory, Redis, and Hybrid backends with intelligent eviction

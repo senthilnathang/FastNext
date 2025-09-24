@@ -1,0 +1,163 @@
+{
+  "$schema": "https://fastNext.dev/schemas/scaffold-config.json",
+  "name": "Product",
+  "pluralName": "Products",
+  "description": "E-commerce product management model",
+  "icon": "Package",
+  "module": "inventory",
+  "hasTimestamps": true,
+  "hasStatus": true,
+  "hasAudit": true,
+  "hasSoftDelete": false,
+  "hasMetadata": true,
+  "fields": [
+    {
+      "name": "name",
+      "type": "string",
+      "required": true,
+      "label": "Product Name",
+      "placeholder": "Enter product name...",
+      "validation": {
+        "min_length": 2,
+        "max_length": 200,
+        "error_message": "Product name must be between 2 and 200 characters"
+      },
+      "unique": true,
+      "indexed": true,
+      "displayInList": true,
+      "searchable": true,
+      "sortable": true
+    },
+    {
+      "name": "sku",
+      "type": "string",
+      "required": true,
+      "label": "SKU",
+      "placeholder": "e.g., PROD-001-BLK",
+      "validation": {
+        "pattern": "^[A-Z]{4}-\\d{3}-[A-Z]{3}$",
+        "error_message": "SKU must follow format: XXXX-000-XXX"
+      },
+      "unique": true,
+      "indexed": true,
+      "displayInList": true,
+      "sortable": true
+    },
+    {
+      "name": "description",
+      "type": "text",
+      "required": false,
+      "label": "Description",
+      "placeholder": "Enter detailed product description...",
+      "displayInList": false,
+      "searchable": true
+    },
+    {
+      "name": "price",
+      "type": "number",
+      "required": true,
+      "label": "Price ($)",
+      "validation": {
+        "min_value": 0.01,
+        "error_message": "Price must be greater than 0"
+      },
+      "displayInList": true,
+      "sortable": true,
+      "filterable": true
+    },
+    {
+      "name": "category",
+      "type": "select",
+      "required": true,
+      "label": "Category",
+      "options": ["Electronics", "Clothing", "Books", "Sports", "Home & Garden"],
+      "displayInList": true,
+      "filterable": true
+    },
+    {
+      "name": "tags",
+      "type": "multiselect",
+      "required": false,
+      "label": "Tags",
+      "options": ["New", "Sale", "Popular", "Limited", "Featured"],
+      "displayInList": true
+    },
+    {
+      "name": "stock_quantity",
+      "type": "number",
+      "required": true,
+      "label": "Stock Quantity",
+      "validation": {
+        "min_value": 0
+      },
+      "default": 0,
+      "displayInList": true,
+      "sortable": true,
+      "filterable": true
+    },
+    {
+      "name": "is_featured",
+      "type": "boolean",
+      "required": false,
+      "label": "Featured Product",
+      "default": false,
+      "displayInList": true,
+      "filterable": true
+    },
+    {
+      "name": "launch_date",
+      "type": "date",
+      "required": false,
+      "label": "Launch Date",
+      "displayInList": true,
+      "sortable": true,
+      "filterable": true
+    },
+    {
+      "name": "website_url",
+      "type": "url",
+      "required": false,
+      "label": "Product Website",
+      "placeholder": "https://example.com/product",
+      "displayInList": false
+    },
+    {
+      "name": "support_email",
+      "type": "email",
+      "required": false,
+      "label": "Support Email",
+      "placeholder": "support@example.com",
+      "displayInList": false
+    },
+    {
+      "name": "specifications",
+      "type": "json",
+      "required": false,
+      "label": "Specifications",
+      "description": "Product specifications as JSON",
+      "example": {
+        "weight": "1.2kg",
+        "dimensions": "30x20x10cm",
+        "material": "plastic"
+      },
+      "displayInList": false
+    }
+  ],
+  "permissions": {
+    "category": "product",
+    "owner_field": "user_id",
+    "project_scoped": false
+  },
+  "api": {
+    "enable_search": true,
+    "enable_filtering": true,
+    "enable_sorting": true,
+    "page_size": 25,
+    "max_page_size": 100
+  },
+  "generation": {
+    "generate_service": true,
+    "generate_migrations": true,
+    "generate_tests": true
+  }
+}

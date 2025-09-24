@@ -1,0 +1,184 @@
+{
+  "$schema": "https://fastNext.dev/schemas/scaffold-config.json",
+  "name": "BlogPost",
+  "pluralName": "BlogPosts",
+  "description": "Blog post content management model",
+  "icon": "FileText",
+  "module": "content",
+  "hasTimestamps": true,
+  "hasStatus": false,
+  "hasAudit": true,
+  "hasSoftDelete": false,
+  "hasMetadata": true,
+  "fields": [
+    {
+      "name": "title",
+      "type": "string",
+      "required": true,
+      "label": "Post Title",
+      "placeholder": "Enter blog post title...",
+      "validation": {
+        "min_length": 5,
+        "max_length": 300,
+        "error_message": "Title must be between 5 and 300 characters"
+      },
+      "unique": true,
+      "indexed": true,
+      "displayInList": true,
+      "searchable": true,
+      "sortable": true
+    },
+    {
+      "name": "slug",
+      "type": "string",
+      "required": true,
+      "label": "URL Slug",
+      "placeholder": "url-friendly-slug",
+      "validation": {
+        "pattern": "^[a-z0-9-]+$",
+        "error_message": "Slug must contain only lowercase letters, numbers, and hyphens"
+      },
+      "unique": true,
+      "indexed": true,
+      "displayInList": false,
+      "sortable": false
+    },
+    {
+      "name": "excerpt",
+      "type": "text",
+      "required": false,
+      "label": "Excerpt",
+      "placeholder": "Brief summary of the post...",
+      "validation": {
+        "max_length": 500
+      },
+      "displayInList": true,
+      "searchable": true
+    },
+    {
+      "name": "content",
+      "type": "text",
+      "required": true,
+      "label": "Content",
+      "placeholder": "Write your blog post content here...",
+      "displayInList": false,
+      "searchable": true
+    },
+    {
+      "name": "status",
+      "type": "select",
+      "required": true,
+      "label": "Status",
+      "options": ["draft", "published", "archived"],
+      "default": "draft",
+      "displayInList": true,
+      "filterable": true,
+      "sortable": true
+    },
+    {
+      "name": "categories",
+      "type": "multiselect",
+      "required": false,
+      "label": "Categories",
+      "options": ["Technology", "Design", "Business", "Tutorial", "News", "Opinion"],
+      "displayInList": true,
+      "filterable": true
+    },
+    {
+      "name": "tags",
+      "type": "json",
+      "required": false,
+      "label": "Tags",
+      "description": "Post tags as JSON array",
+      "example": ["python", "web-development", "tutorial"],
+      "displayInList": true,
+      "filterable": true
+    },
+    {
+      "name": "featured_image_url",
+      "type": "url",
+      "required": false,
+      "label": "Featured Image",
+      "placeholder": "https://example.com/image.jpg",
+      "displayInList": false
+    },
+    {
+      "name": "published_at",
+      "type": "datetime",
+      "required": false,
+      "label": "Published At",
+      "description": "When the post was published",
+      "displayInList": true,
+      "sortable": true,
+      "filterable": true
+    },
+    {
+      "name": "view_count",
+      "type": "number",
+      "required": false,
+      "label": "View Count",
+      "validation": {
+        "min_value": 0
+      },
+      "default": 0,
+      "displayInList": true,
+      "sortable": true
+    },
+    {
+      "name": "is_featured",
+      "type": "boolean",
+      "required": false,
+      "label": "Featured Post",
+      "default": false,
+      "displayInList": true,
+      "filterable": true
+    },
+    {
+      "name": "allow_comments",
+      "type": "boolean",
+      "required": false,
+      "label": "Allow Comments",
+      "default": true,
+      "displayInList": false
+    },
+    {
+      "name": "seo_title",
+      "type": "string",
+      "required": false,
+      "label": "SEO Title",
+      "placeholder": "Optional SEO title...",
+      "validation": {
+        "max_length": 60
+      },
+      "displayInList": false
+    },
+    {
+      "name": "seo_description",
+      "type": "text",
+      "required": false,
+      "label": "SEO Description",
+      "placeholder": "Meta description for search engines...",
+      "validation": {
+        "max_length": 160
+      },
+      "displayInList": false
+    }
+  ],
+  "permissions": {
+    "category": "blog_post",
+    "owner_field": "author_id",
+    "project_scoped": false
+  },
+  "api": {
+    "enable_search": true,
+    "enable_filtering": true,
+    "enable_sorting": true,
+    "page_size": 20,
+    "max_page_size": 50
+  },
+  "generation": {
+    "generate_service": true,
+    "generate_migrations": true,
+    "generate_tests": true
+  }
+}
