@@ -14,7 +14,7 @@ import {
   DropdownMenuTrigger,
 } from '@/shared/components/ui/dropdown-menu'
 import { Badge } from '@/shared/components/ui/badge'
-import { Avatar, AvatarFallback, AvatarImage } from '@/shared/components/ui/avatar'
+// Avatar components removed - not used in this component
 import { useDataTableExport } from '../hooks/useDataTableExport'
 import { useConfirmationDialog } from '@/shared/components/feedback/ConfirmationDialog'
 import type { ExportOptions } from '../types'
@@ -390,11 +390,10 @@ export function RolesDataTable({
     const systemRoleCount = selectedRoles.filter(role => role.is_system_role).length
     const rolesWithUsersCount = selectedRoles.filter(role => (role.user_count || 0) > 0).length
     
-    let description = `Are you sure you want to delete ${nonSystemRoles.length} role${nonSystemRoles.length > 1 ? 's' : ''}?`
+    // Create confirmation message for bulk delete
     if (systemRoleCount > 0 || rolesWithUsersCount > 0) {
-      description += ` Note: ${systemRoleCount} system role${systemRoleCount !== 1 ? 's' : ''} and ${rolesWithUsersCount} role${rolesWithUsersCount !== 1 ? 's' : ''} with assigned users will be skipped.`
+      // Note: system roles and roles with assigned users will be skipped.
     }
-    description += ' This action cannot be undone.'
 
     confirmBulkDelete('role', nonSystemRoles.length, async () => {
       for (const role of nonSystemRoles) {

@@ -9,8 +9,8 @@ import {
   Workflow,
   Table,
   Sparkles,
-,
-  Package} from 'lucide-react';
+  Package
+} from 'lucide-react';
 
 export interface MenuItem {
   title: string;

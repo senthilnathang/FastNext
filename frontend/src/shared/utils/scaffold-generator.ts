@@ -99,7 +99,7 @@ export class ScaffoldGenerator {
     const modelName = this.model.name
     const fields = this.model.fields
     
-    let interfaceFields = fields.map(field => {
+    const interfaceFields = fields.map(field => {
       const optional = field.required ? '' : '?'
       let type: string
       
@@ -630,7 +630,7 @@ export function ${pluralName}DataTableExample() {
   private generateFormComponents(): void {
     const modelName = this.model.name
     const lowercaseModel = modelName.toLowerCase()
-    const fields = this.model.fields
+    // Generate form content based on model fields
     
     const content = `'use client'
 
@@ -872,9 +872,7 @@ export function ${modelName}EditDialog({
 
   private generatePageComponents(): void {
     const modelName = this.model.name
-    const pluralName = this.model.pluralName!
-    const lowercaseModel = modelName.toLowerCase()
-    const lowercasePlural = pluralName.toLowerCase()
+    // Generate page components for the model
     
     // Generate list page
     this.generateListPage()
@@ -1643,7 +1641,6 @@ export default function View${modelName}Page() {
   }
 
   private updateNavigationMenu(): void {
-    const modelName = this.model.name
     const pluralName = this.model.pluralName!
     const lowercasePlural = pluralName.toLowerCase()
     
@@ -1683,8 +1680,6 @@ export default function View${modelName}Page() {
     
     // Find where to insert the new menu item
     // Look for the Administration section or add before Settings
-    let insertionPoint = -1
-    let insertAfterSettings = false
     
     // Try to find Administration section first
     const adminSectionMatch = content.match(/(\s*){\s*title:\s*['"]Administration['"][\s\S]*?children:\s*\[[\s\S]*?\],?\s*},/)

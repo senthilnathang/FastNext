@@ -471,11 +471,10 @@ export function PermissionsDataTable({
 
     const systemPermissionCount = selectedPermissions.filter(permission => permission.is_system_permission).length
     
-    let description = `Are you sure you want to delete ${nonSystemPermissions.length} permission${nonSystemPermissions.length > 1 ? 's' : ''}?`
+    // Create confirmation message for bulk delete
     if (systemPermissionCount > 0) {
-      description += ` Note: ${systemPermissionCount} system permission${systemPermissionCount !== 1 ? 's' : ''} will be skipped as they are protected.`
+      // Note: system permissions will be skipped as they are protected.
     }
-    description += ' This action cannot be undone.'
 
     confirmBulkDelete('permission', nonSystemPermissions.length, async () => {
       for (const permission of nonSystemPermissions) {

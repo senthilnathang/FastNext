@@ -22,16 +22,16 @@ import type { ExportOptions } from '../types'
 export interface Product {
   id: number
   name: string
-  description: string
+  description?: string
   price: number
   category: 'Electronics' | 'Clothing' | 'Books' | 'Sports' | 'Home & Garden'
-  tags: string[]
-  is_featured: boolean
-  website_url: string
-  release_date: string
+  tags?: string[]
+  is_featured?: boolean
+  website_url?: string
+  release_date?: string
   created_at: string
   updated_at?: string
-  is_active: boolean
+  is_active?: boolean
 }
 
 interface ProductsDataTableProps {
@@ -54,7 +54,7 @@ export function ProductsDataTable({
   isLoading = false,
 }: ProductsDataTableProps) {
   const [selectedProducts, setSelectedProducts] = React.useState<Product[]>([])
-  const { confirmBulkDelete, confirmBulkAction, ConfirmationDialog } = useConfirmationDialog()
+  const { confirmBulkDelete, ConfirmationDialog } = useConfirmationDialog()
 
   // Define columns
   const columns: ColumnDef<Product>[] = [
@@ -120,15 +120,18 @@ export function ProductsDataTable({
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       ),
-      cell: ({ row }) => (
-        <div className="flex flex-wrap gap-1">
-          {(row.getValue('tags') as string[]).map((item, index) => (
-            <Badge key={index} variant="outline" className="text-xs">
-              {item}
-            </Badge>
-          ))}
-        </div>
-      ),
+      cell: ({ row }) => {
+        const tags = row.getValue('tags') as string[] | undefined
+        return (
+          <div className="flex flex-wrap gap-1">
+            {tags ? tags.map((item, index) => (
+              <Badge key={index} variant="outline" className="text-xs">
+                {item}
+              </Badge>
+            )) : <span className="text-sm text-muted-foreground">No tags</span>}
+          </div>
+        )
+      },
     },
     {
       accessorKey: 'is_featured',
@@ -141,11 +144,14 @@ export function ProductsDataTable({
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       ),
-      cell: ({ row }) => (
-        <Badge variant={row.getValue('is_featured') ? 'default' : 'secondary'}>
-          {row.getValue('is_featured') ? 'Yes' : 'No'}
-        </Badge>
-      ),
+      cell: ({ row }) => {
+        const isFeatured = row.getValue('is_featured') as boolean | undefined
+        return (
+          <Badge variant={isFeatured ? 'default' : 'secondary'}>
+            {isFeatured ? 'Yes' : 'No'}
+          </Badge>
+        )
+      },
     },
     {
       accessorKey: 'release_date',
@@ -158,11 +164,14 @@ export function ProductsDataTable({
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       ),
-      cell: ({ row }) => (
-        <div className="text-sm">
-          {new Date(row.getValue('release_date')).toLocaleDateString()}
-        </div>
-      ),
+      cell: ({ row }) => {
+        const releaseDate = row.getValue('release_date') as string | undefined
+        return (
+          <div className="text-sm">
+            {releaseDate ? new Date(releaseDate).toLocaleDateString() : 'Not set'}
+          </div>
+        )
+      },
     },
     {
       accessorKey: 'created_at',
@@ -208,7 +217,7 @@ export function ProductsDataTable({
       accessorKey: 'is_active',
       header: 'Status',
       cell: ({ row }) => {
-        const isActive = row.getValue('is_active')
+        const isActive = row.getValue('is_active') as boolean | undefined
         return (
           <Badge variant={isActive ? 'default' : 'secondary'}>
             {isActive ? 'Active' : 'Inactive'}

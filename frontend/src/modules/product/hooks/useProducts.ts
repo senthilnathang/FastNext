@@ -1,10 +1,8 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { 
   productsApi, 
-  type CreateProductRequest, 
   type UpdateProductRequest, 
-  type ProductListParams, 
-  type Product 
+  type ProductListParams
 } from '@/shared/services/api/product'
 
 // Query keys for products

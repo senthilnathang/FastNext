@@ -127,7 +127,7 @@ const mockRoles: Role[] = [
 ]
 
 export default function EnhancedRolesPage() {
-  const [isLoading, setIsLoading] = React.useState(false)
+  const [isLoading] = React.useState(false)
 
   // Calculate statistics
   const stats = React.useMemo(() => {

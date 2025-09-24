@@ -6,7 +6,7 @@ import { ArrowLeft, Package, Loader2 } from 'lucide-react'
 import { Button } from '@/shared/components'
 import { ProductForm } from '@/modules/product/components/ProductForm'
 import { useProduct } from '@/modules/product/hooks/useProducts'
-import type { Product } from '@/shared/services/api/product'
+// Product type imported but not used in component
 
 export default function EditProductPage() {
   const router = useRouter()
@@ -15,7 +15,7 @@ export default function EditProductPage() {
 
   const { data: product, isLoading, error } = useProduct(productId)
 
-  const handleSuccess = (updatedProduct: Product) => {
+  const handleSuccess = () => {
     router.push('/products')
   }
 

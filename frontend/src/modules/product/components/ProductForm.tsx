@@ -12,7 +12,6 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
   Form,
@@ -35,7 +34,7 @@ import {
 
 import { 
   useCreateProduct, 
-  useUpdateProduct, useToggleProductStatus 
+  useUpdateProduct
 } from '@/modules/product/hooks/useProducts'
 import type { Product } from '@/shared/services/api/product'
 
@@ -77,7 +76,7 @@ export function ProductForm({
       name: '',
       description: '',
       price: 0,
-      category: '',
+      category: 'Electronics',
       tags: [],
       is_featured: false,
       website_url: '',
@@ -89,15 +88,15 @@ export function ProductForm({
   React.useEffect(() => {
     if (product) {
       form.reset({
-        name: name?.name || '',
-        description: description?.description || '',
-        price: price?.price || 0,
-        category: category?.category || '',
-        tags: tags?.tags || [],
-        is_featured: is_featured?.is_featured || false,
-        website_url: website_url?.website_url || '',
-        release_date: release_date?.release_date || '',
-        is_active: product?.is_active ?? true,
+        name: product.name || '',
+        description: product.description || '',
+        price: product.price || 0,
+        category: product.category || 'Electronics',
+        tags: product.tags || [],
+        is_featured: product.is_featured || false,
+        website_url: product.website_url || '',
+        release_date: product.release_date || '',
+        is_active: product.is_active ?? true,
       })
     }
   }, [product, form])

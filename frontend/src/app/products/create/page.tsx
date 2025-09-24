@@ -5,12 +5,12 @@ import { ArrowLeft, Package } from 'lucide-react'
 
 import { Button } from '@/shared/components'
 import { ProductForm } from '@/modules/product/components/ProductForm'
-import type { Product } from '@/shared/services/api/product'
+// Product type imported but not used in component
 
 export default function CreateProductPage() {
   const router = useRouter()
 
-  const handleSuccess = (product: Product) => {
+  const handleSuccess = () => {
     router.push('/products')
   }
 

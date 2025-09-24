@@ -1,14 +1,14 @@
 "use client"
 
 import * as React from "react"
-import { Plus, Loader2 } from "lucide-react"
+import { Plus } from "lucide-react"
 import { Button } from "@/shared/components/ui/button"
 import { RolesDataTable, type Role as DataTableRole } from "@/shared/components/data-table"
 
 // Import React Query hooks
 import { useRoles, useDeleteRole } from "@/modules/admin/hooks/useRoles"
 import { apiUtils } from "@/shared/services/api/client"
-import type { Role, Permission } from "@/shared/services/api/roles"
+import type { Role } from "@/shared/services/api/roles"
 
 // Import new dialog components
 import { RoleCreateDialog } from "@/modules/admin/components/RoleCreateDialog"

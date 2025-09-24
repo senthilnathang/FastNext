@@ -140,6 +140,7 @@ class ModelDefinition:
     generate_service: bool = True
     generate_migrations: bool = True
     generate_tests: bool = True
+    generate_typescript: bool = True
     
     def __post_init__(self):
         """Set defaults after initialization"""
@@ -190,6 +191,10 @@ class BackendScaffoldGenerator:
             # 7. Update API router
             self.update_main_router()
             
+            # 8. Generate TypeScript definitions
+            if self.model_def.generate_typescript:
+                self.generate_typescript()
+            
             print(f"✅ Successfully generated backend scaffolding for {self.model_name}!")
             print("\nGenerated files:")
             print(f"📁 Model: app/models/{self.snake_name}.py")
@@ -197,6 +202,8 @@ class BackendScaffoldGenerator:
             print(f"📁 Routes: app/api/{self.plural_name}.py")
             if self.model_def.generate_service:
                 print(f"📁 Service: app/services/{self.snake_name}_service.py")
+            if self.model_def.generate_typescript:
+                print(f"📁 TypeScript: ../frontend/src/types/{self.snake_name}*.ts")
             if self.model_def.generate_migrations:
                 print(f"📁 Migration: migrations/versions/add_{self.table_name}.py")
             print(f"📁 Router: Updated app/api/main.py")
@@ -1169,6 +1176,13 @@ api_router = APIRouter()
 api_router.include_router({self.plural_name}.router, prefix="/{self.plural_name}", tags=["{self.plural_name}"])
 '''
             self._write_file("app/api/main.py", content)
+    
+    def generate_typescript(self):
+        """Generate TypeScript definitions for frontend integration"""
+        from .typescript_generator import TypeScriptGenerator
+        
+        ts_generator = TypeScriptGenerator(self.model_def, "../frontend/src/types")
+        ts_generator.generate_all_types()
     
     # Utility methods
     

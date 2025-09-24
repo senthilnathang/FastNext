@@ -6,7 +6,7 @@ export interface Product {
   id: number
   created_at: string
   updated_at?: string
-  is_active: boolean
+  is_active?: boolean
   name: string
   description?: string
   price: number
@@ -20,7 +20,8 @@ export interface Product {
 export interface CreateProductRequest {
   name: string
   price: number
-  category: 'Electronics' | 'Clothing' | 'Books' | 'Sports' | 'Home & Garden'  description?: string
+  category: 'Electronics' | 'Clothing' | 'Books' | 'Sports' | 'Home & Garden'
+  description?: string
   tags?: string[]
   is_featured?: boolean
   website_url?: string
@@ -73,32 +74,37 @@ export const productsApi = {
     if (params?.is_featured) searchParams.set('is_featured', params.is_featured.toString())
     if (params?.release_date) searchParams.set('release_date', params.release_date.toString())
     
-    const url = `${API_CONFIG.BASE_URL}/products${searchParams.toString() ? '?' + searchParams.toString() : ''}`
-    return apiClient.get<ProductListResponse>(url)
+    const url = `${API_CONFIG.API_BASE_URL}/products${searchParams.toString() ? '?' + searchParams.toString() : ''}`
+    const response = await apiClient.get<ProductListResponse>(url)
+    return response.data
   },
 
   // Get single item
   getProduct: async (id: number): Promise<Product> => {
-    return apiClient.get<Product>(`${API_CONFIG.BASE_URL}/products/${id}`)
+    const response = await apiClient.get<Product>(`${API_CONFIG.API_BASE_URL}/products/${id}`)
+    return response.data
   },
 
   // Create new item
   createProduct: async (data: CreateProductRequest): Promise<Product> => {
-    return apiClient.post<Product>(`${API_CONFIG.BASE_URL}/products`, data)
+    const response = await apiClient.post<Product>(`${API_CONFIG.API_BASE_URL}/products`, data)
+    return response.data
   },
 
   // Update existing item
   updateProduct: async (id: number, data: UpdateProductRequest): Promise<Product> => {
-    return apiClient.patch<Product>(`${API_CONFIG.BASE_URL}/products/${id}`, data)
+    const response = await apiClient.patch<Product>(`${API_CONFIG.API_BASE_URL}/products/${id}`, data)
+    return response.data
   },
 
   // Delete item
   deleteProduct: async (id: number): Promise<void> => {
-    return apiClient.delete(`${API_CONFIG.BASE_URL}/products/${id}`)
+    await apiClient.delete(`${API_CONFIG.API_BASE_URL}/products/${id}`)
   },
 
   // Toggle active status
   toggleProductStatus: async (id: number): Promise<Product> => {
-    return apiClient.patch<Product>(`${API_CONFIG.BASE_URL}/products/${id}/toggle-status`)
+    const response = await apiClient.patch<Product>(`${API_CONFIG.API_BASE_URL}/products/${id}/toggle-status`)
+    return response.data
   },
 }

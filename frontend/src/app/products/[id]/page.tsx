@@ -23,7 +23,7 @@ export default function ViewProductPage() {
   const handleDelete = () => {
     if (!product) return
     
-    confirmDelete('product', product.id.toString(), async () => {
+    confirmDelete(`product ${product.name}`, async () => {
       try {
         await deleteProductMutation.mutateAsync(product.id)
         router.push('/products')
@@ -147,11 +147,11 @@ export default function ViewProductPage() {
                 <div className="mt-1">
                   
                   <div className="flex flex-wrap gap-1">
-                    {product.tags.map((item, index) => (
+                    {product.tags?.map((item, index) => (
                       <Badge key={index} variant="outline" className="text-xs">
                         {item}
                       </Badge>
-                    ))}
+                    )) || <span className="text-sm text-muted-foreground">No tags</span>}
                   </div>
                 </div>
               </div>
@@ -181,7 +181,7 @@ export default function ViewProductPage() {
               <div>
                 <label className="text-sm font-medium text-muted-foreground">Release Date</label>
                 <div className="mt-1">
-                  {new Date(product.release_date).toLocaleDateString()}
+                  {product.release_date ? new Date(product.release_date).toLocaleDateString() : 'Not set'}
                 </div>
               </div>
               <div>

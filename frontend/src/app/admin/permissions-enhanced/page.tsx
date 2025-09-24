@@ -5,7 +5,7 @@ import { PermissionsDataTable, type Permission } from '@/shared/components/data-
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/components/ui/tabs'
 import { Badge } from '@/shared/components/ui/badge'
-import { Key, Tag, Lock, Zap, Eye, AlertCircle, BarChart3 } from 'lucide-react'
+import { Key, Tag, Lock, Zap } from 'lucide-react'
 
 // Mock data for demonstration - in real app, this would come from API
 const mockPermissions: Permission[] = [
@@ -264,7 +264,7 @@ const mockPermissions: Permission[] = [
 ]
 
 export default function EnhancedPermissionsPage() {
-  const [isLoading, setIsLoading] = React.useState(false)
+  const [isLoading] = React.useState(false)
 
   // Calculate statistics
   const stats = React.useMemo(() => {

@@ -5,7 +5,6 @@ import { Plus, Loader2, Package } from 'lucide-react'
 
 import { 
   Button,
-  Badge,
   AdvancedSearch,
   type SearchState,
   type SearchFilter
@@ -27,7 +26,7 @@ type ProductsPageProps = Record<string, never>
 
 const ProductsPage: React.FC<ProductsPageProps> = () => {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = React.useState(false)
-  const [editingProduct, setEditingProduct] = React.useState<Product | null>(null)
+  const [editingProduct, setEditingProduct] = React.useState<Product | undefined>(undefined)
 
   const { data: productsData, isLoading: productsLoading, error: productsError } = useProducts()
 
@@ -167,7 +166,7 @@ const ProductsPage: React.FC<ProductsPageProps> = () => {
             if (product.is_featured !== filter.value) return false
             break
           case 'release_date':
-            if (filter.value?.from) {
+            if (filter.value?.from && product.release_date) {
               const fieldDate = new Date(product.release_date)
               const fromDate = new Date(filter.value.from)
               const toDate = filter.value.to ? new Date(filter.value.to) : new Date()
@@ -274,7 +273,7 @@ const ProductsPage: React.FC<ProductsPageProps> = () => {
       <ProductEditDialog
         product={editingProduct}
         open={!!editingProduct}
-        onOpenChange={(open) => !open && setEditingProduct(null)}
+        onOpenChange={(open) => !open && setEditingProduct(undefined)}
       />
     </div>
   )
