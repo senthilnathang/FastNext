@@ -1,6 +1,7 @@
 import { z } from 'zod'
 import { router, protectedProcedure } from '../server'
 import { apiClient } from '@/shared/services/api/client'
+import { API_CONFIG } from '@/shared/services/api/config'
 
 const projectSchema = z.object({
   id: z.string(),
@@ -27,7 +28,7 @@ export const projectsRouter = router({
     )
     .query(async ({ input }) => {
       try {
-        const response = await apiClient.get('/projects', {
+        const response = await apiClient.get(API_CONFIG.ENDPOINTS.PROJECTS, {
           params: {
             page: input.page,
             limit: input.limit,
@@ -44,7 +45,7 @@ export const projectsRouter = router({
     .input(z.string())
     .query(async ({ input: id }) => {
       try {
-        const response = await apiClient.get(`/projects/${id}`)
+        const response = await apiClient.get(`${API_CONFIG.ENDPOINTS.PROJECTS}/${id}`)
         return response.data
       } catch {
         throw new Error('Failed to fetch project')
@@ -55,7 +56,7 @@ export const projectsRouter = router({
     .input(createProjectSchema)
     .mutation(async ({ input }) => {
       try {
-        const response = await apiClient.post('/projects', input)
+        const response = await apiClient.post(API_CONFIG.ENDPOINTS.PROJECTS, input)
         return response.data
       } catch {
         throw new Error('Failed to create project')
@@ -71,7 +72,7 @@ export const projectsRouter = router({
     )
     .mutation(async ({ input }) => {
       try {
-        const response = await apiClient.put(`/projects/${input.id}`, input.data)
+        const response = await apiClient.put(`${API_CONFIG.ENDPOINTS.PROJECTS}/${input.id}`, input.data)
         return response.data
       } catch {
         throw new Error('Failed to update project')
@@ -82,7 +83,7 @@ export const projectsRouter = router({
     .input(z.string())
     .mutation(async ({ input: id }) => {
       try {
-        await apiClient.delete(`/projects/${id}`)
+        await apiClient.delete(`${API_CONFIG.ENDPOINTS.PROJECTS}/${id}`)
         return { success: true }
       } catch {
         throw new Error('Failed to delete project')

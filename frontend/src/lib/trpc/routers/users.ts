@@ -1,6 +1,7 @@
 import { z } from 'zod'
 import { router, protectedProcedure } from '../server'
 import { apiClient } from '@/shared/services/api/client'
+import { API_CONFIG } from '@/shared/services/api/config'
 
 const userSchema = z.object({
   id: z.string(),
@@ -32,7 +33,7 @@ export const usersRouter = router({
     )
     .query(async ({ input }) => {
       try {
-        const response = await apiClient.get('/users', {
+        const response = await apiClient.get(API_CONFIG.ENDPOINTS.USERS, {
           params: {
             page: input.page,
             limit: input.limit,
@@ -49,7 +50,7 @@ export const usersRouter = router({
     .input(z.string())
     .query(async ({ input: id }) => {
       try {
-        const response = await apiClient.get(`/users/${id}`)
+        const response = await apiClient.get(`${API_CONFIG.ENDPOINTS.USERS}/${id}`)
         return response.data
       } catch {
         throw new Error('Failed to fetch user')
@@ -60,7 +61,7 @@ export const usersRouter = router({
     .input(createUserSchema)
     .mutation(async ({ input }) => {
       try {
-        const response = await apiClient.post('/users', input)
+        const response = await apiClient.post(API_CONFIG.ENDPOINTS.USERS, input)
         return response.data
       } catch {
         throw new Error('Failed to create user')
@@ -76,7 +77,7 @@ export const usersRouter = router({
     )
     .mutation(async ({ input }) => {
       try {
-        const response = await apiClient.put(`/users/${input.id}`, input.data)
+        const response = await apiClient.put(`${API_CONFIG.ENDPOINTS.USERS}/${input.id}`, input.data)
         return response.data
       } catch {
         throw new Error('Failed to update user')
@@ -87,7 +88,7 @@ export const usersRouter = router({
     .input(z.string())
     .mutation(async ({ input: id }) => {
       try {
-        await apiClient.delete(`/users/${id}`)
+        await apiClient.delete(`${API_CONFIG.ENDPOINTS.USERS}/${id}`)
         return { success: true }
       } catch {
         throw new Error('Failed to delete user')

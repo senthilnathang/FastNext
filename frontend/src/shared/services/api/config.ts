@@ -30,9 +30,24 @@ export const API_CONFIG = {
     },
     USERS: '/api/v1/users',
     PROJECTS: '/api/v1/projects',
+    PAGES: '/api/v1/pages',
     COMPONENTS: '/api/v1/components',
     ROLES: '/api/v1/roles',
     PERMISSIONS: '/api/v1/permissions',
+    WORKFLOW: {
+      TYPES: '/api/v1/workflow-types',
+      STATES: '/api/v1/workflow-states', 
+      TEMPLATES: '/api/v1/workflow-templates',
+      INSTANCES: '/api/v1/workflow-instances',
+    },
+    USER_ROLES: '/api/v1/user-roles',
+    ASSETS: '/api/v1/assets',
+    AUDIT_TRAILS: '/api/v1/audit-trails',
+    PRODUCTS: '/api/v1/products',
+    BLOG_POSTS: '/api/v1/blog-posts',
+    CATEGORIES: '/api/v1/categories',
+    AUTHORS: '/api/v1/authors',
+    SALES: '/api/v1/sales',
   }
 }
 

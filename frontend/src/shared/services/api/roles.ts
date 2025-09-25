@@ -85,19 +85,19 @@ export const rolesApi = {
 
   // Toggle role active status
   toggleRoleStatus: async (id: number): Promise<Role> => {
-    const response = await apiClient.patch(`/roles/${id}/toggle-status`)
+    const response = await apiClient.patch(`${API_CONFIG.ENDPOINTS.ROLES}/${id}/toggle-status`)
     return response.data
   },
 
   // Get role permissions
   getRolePermissions: async (id: number): Promise<Permission[]> => {
-    const response = await apiClient.get(`/roles/${id}/permissions`)
+    const response = await apiClient.get(`${API_CONFIG.ENDPOINTS.ROLES}/${id}/permissions`)
     return response.data
   },
 
   // Assign permissions to role
   assignRolePermissions: async (id: number, permissionIds: number[]): Promise<Role> => {
-    const response = await apiClient.post(`/roles/${id}/permissions`, { 
+    const response = await apiClient.post(`${API_CONFIG.ENDPOINTS.ROLES}/${id}/permissions`, { 
       permission_ids: permissionIds 
     })
     return response.data
@@ -105,7 +105,7 @@ export const rolesApi = {
 
   // Remove permissions from role
   removeRolePermissions: async (id: number, permissionIds: number[]): Promise<Role> => {
-    const response = await apiClient.delete(`/roles/${id}/permissions`, {
+    const response = await apiClient.delete(`${API_CONFIG.ENDPOINTS.ROLES}/${id}/permissions`, {
       data: { permission_ids: permissionIds }
     })
     return response.data

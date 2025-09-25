@@ -56,7 +56,7 @@ export const useGenericPermissions = (
       setError(null)
 
       // Get user's permissions
-      const permissionsResponse = await apiClient.get('/auth/me/permissions')
+      const permissionsResponse = await apiClient.get('/api/v1/auth/me/permissions')
       setPermissions(permissionsResponse.data)
 
       // Get allowed actions for specific resource if provided

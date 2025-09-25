@@ -1,6 +1,7 @@
 import { z } from 'zod'
 import { router, protectedProcedure } from '../server'
 import { apiClient } from '@/shared/services/api/client'
+import { API_CONFIG } from '@/shared/services/api/config'
 
 const permissionSchema = z.object({
   id: z.string(),
@@ -32,7 +33,7 @@ export const permissionsRouter = router({
     )
     .query(async ({ input }) => {
       try {
-        const response = await apiClient.get('/permissions', {
+        const response = await apiClient.get(API_CONFIG.ENDPOINTS.PERMISSIONS, {
           params: {
             page: input.page,
             limit: input.limit,
@@ -50,7 +51,7 @@ export const permissionsRouter = router({
     .input(z.string())
     .query(async ({ input: id }) => {
       try {
-        const response = await apiClient.get(`/permissions/${id}`)
+        const response = await apiClient.get(`${API_CONFIG.ENDPOINTS.PERMISSIONS}/${id}`)
         return response.data
       } catch {
         throw new Error('Failed to fetch permission')
@@ -61,7 +62,7 @@ export const permissionsRouter = router({
     .input(createPermissionSchema)
     .mutation(async ({ input }) => {
       try {
-        const response = await apiClient.post('/permissions', input)
+        const response = await apiClient.post(API_CONFIG.ENDPOINTS.PERMISSIONS, input)
         return response.data
       } catch {
         throw new Error('Failed to create permission')
@@ -77,7 +78,7 @@ export const permissionsRouter = router({
     )
     .mutation(async ({ input }) => {
       try {
-        const response = await apiClient.put(`/permissions/${input.id}`, input.data)
+        const response = await apiClient.put(`${API_CONFIG.ENDPOINTS.PERMISSIONS}/${input.id}`, input.data)
         return response.data
       } catch {
         throw new Error('Failed to update permission')
@@ -88,7 +89,7 @@ export const permissionsRouter = router({
     .input(z.string())
     .mutation(async ({ input: id }) => {
       try {
-        await apiClient.delete(`/permissions/${id}`)
+        await apiClient.delete(`${API_CONFIG.ENDPOINTS.PERMISSIONS}/${id}`)
         return { success: true }
       } catch {
         throw new Error('Failed to delete permission')

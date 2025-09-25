@@ -1,4 +1,5 @@
-import { apiClient } from './client'
+import { apiClient } from './api/client'
+import { API_CONFIG } from './api/config'
 import type { 
   Component, 
   ComponentInstance,
@@ -12,27 +13,27 @@ export const componentsApi = {
     project_id?: number; 
     is_global?: boolean 
   }): Promise<Component[]> => {
-    const response = await apiClient.get('/components/', { params })
+    const response = await apiClient.get(API_CONFIG.ENDPOINTS.COMPONENTS, { params })
     return response.data
   },
 
   getComponent: async (id: number): Promise<Component> => {
-    const response = await apiClient.get(`/components/${id}`)
+    const response = await apiClient.get(`${API_CONFIG.ENDPOINTS.COMPONENTS}/${id}`)
     return response.data
   },
 
   createComponent: async (data: CreateComponentRequest): Promise<Component> => {
-    const response = await apiClient.post('/components/', data)
+    const response = await apiClient.post(API_CONFIG.ENDPOINTS.COMPONENTS, data)
     return response.data
   },
 
   getPageComponents: async (pageId: number): Promise<ComponentInstance[]> => {
-    const response = await apiClient.get(`/components/instances/page/${pageId}`)
+    const response = await apiClient.get(`${API_CONFIG.ENDPOINTS.COMPONENTS}/instances/page/${pageId}`)
     return response.data
   },
 
   createComponentInstance: async (data: CreateComponentInstanceRequest): Promise<ComponentInstance> => {
-    const response = await apiClient.post('/components/instances/', data)
+    const response = await apiClient.post(`${API_CONFIG.ENDPOINTS.COMPONENTS}/instances`, data)
     return response.data
   },
 
@@ -40,11 +41,11 @@ export const componentsApi = {
     id: number, 
     data: UpdateComponentInstanceRequest
   ): Promise<ComponentInstance> => {
-    const response = await apiClient.put(`/components/instances/${id}`, data)
+    const response = await apiClient.put(`${API_CONFIG.ENDPOINTS.COMPONENTS}/instances/${id}`, data)
     return response.data
   },
 
   deleteComponentInstance: async (id: number): Promise<void> => {
-    await apiClient.delete(`/components/instances/${id}`)
+    await apiClient.delete(`${API_CONFIG.ENDPOINTS.COMPONENTS}/instances/${id}`)
   },
 }
