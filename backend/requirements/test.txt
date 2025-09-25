@@ -1,0 +1,83 @@
+# FastNext Backend - Testing Requirements
+# Dependencies specifically for testing environments
+
+# Include base requirements
+-r base.txt
+
+# Core Testing Framework
+pytest==7.4.3  # Main testing framework
+pytest-asyncio==0.21.1  # Async test support
+pytest-xdist==3.5.0  # Parallel test execution
+pytest-cov==4.1.0  # Coverage reporting
+pytest-mock==3.12.0  # Mocking utilities
+pytest-html==4.1.1  # HTML test reports
+pytest-json-report==1.5.0  # JSON test reports
+pytest-benchmark==4.0.0  # Performance benchmarking
+
+# Database Testing
+pytest-postgresql==5.0.0  # PostgreSQL test fixtures
+pytest-redis==3.0.2  # Redis test fixtures
+testing.postgresql==1.3.0  # PostgreSQL testing utilities
+fakeredis==2.20.1  # Fake Redis for testing
+
+# Test Data & Factories
+factory-boy==3.3.0  # Test data factories
+faker==20.1.0  # Fake data generation
+mimesis==12.1.0  # Alternative fake data generator
+model-bakery==1.17.0  # Django-style model factories for SQLAlchemy
+
+# HTTP Testing
+httpx==0.25.2  # Async HTTP client for API testing
+responses==0.24.1  # HTTP request mocking
+requests-mock==1.11.0  # Mock HTTP requests
+vcr.py==5.1.0  # Record and replay HTTP interactions
+
+# API Testing
+tavern==2.3.0  # API testing framework
+postman-cli==0.1.0  # Postman collection runner
+newman==0.0.1  # Postman Newman for automated testing
+
+# Load & Performance Testing
+locust==2.17.0  # Load testing framework
+artillery==2.0.0  # Load testing toolkit
+pytest-benchmark==4.0.0  # Micro-benchmarking
+
+# Security Testing
+bandit==1.7.5  # Security vulnerability scanner
+safety==2.3.5  # Dependency vulnerability checking
+semgrep==1.51.0  # Static analysis security testing
+
+# Code Coverage & Analysis
+coverage==7.3.2  # Coverage measurement
+pytest-cov==4.1.0  # Coverage plugin for pytest
+codecov==2.1.13  # Codecov reporting
+
+# Mocking & Stubbing
+pytest-mock==3.12.0  # pytest mock integration
+responses==0.24.1  # HTTP mocking
+freezegun==1.2.2  # Time mocking
+time-machine==2.13.0  # Alternative time mocking
+
+# Property-based Testing
+hypothesis==6.92.1  # Property-based testing framework
+hypothesis-jsonschema==0.22.1  # JSON schema generation
+
+# Contract Testing
+pact-python==2.1.0  # Consumer-driven contract testing
+
+# E2E Testing Support
+selenium==4.16.0  # Web browser automation
+playwright==1.40.0  # Modern web testing framework
+
+# Test Utilities
+testcontainers==3.7.1  # Docker containers for testing
+docker==6.1.3  # Docker API client for test setup
+
+# Reporting & Visualization
+allure-pytest==2.13.2  # Allure test reporting
+pytest-html==4.1.1  # HTML test reports
+pytest-json-report==1.5.0  # JSON test reports
+
+# Environment Management
+python-dotenv==1.0.0  # Environment variable management
+pytest-env==1.1.3  # Environment variable setup for tests

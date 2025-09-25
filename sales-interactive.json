@@ -1,0 +1,27 @@
+{
+  "name": "Sales",
+  "description": "sales",
+  "icon": "sale",
+  "hasTimestamps": true,
+  "hasStatus": true,
+  "fields": [
+    {
+      "name": "name",
+      "type": "string",
+      "required": true,
+      "label": "Name",
+      "searchable": true,
+      "sortable": true,
+      "displayInList": true
+    }
+  ],
+  "permissions": {
+    "category": "sales",
+    "owner_field": "user_id"
+  },
+  "api": {
+    "enable_search": true,
+    "enable_filtering": true,
+    "page_size": 25
+  }
+}
