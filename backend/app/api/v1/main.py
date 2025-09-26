@@ -16,7 +16,7 @@ from . import (
 from app.api import products, blog_posts, categorys, authors, saless
 
 # Create v1 router
-v1_router = APIRouter(prefix="/v1")
+v1_router = APIRouter()
 
 # Authentication & User Management
 v1_router.include_router(auth_routes.router, prefix="/auth", tags=["v1-auth"])
