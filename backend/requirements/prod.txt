@@ -21,7 +21,8 @@ opentelemetry-exporter-prometheus==1.12.0rc1  # Prometheus metrics exporter
 opentelemetry-exporter-jaeger==1.21.0  # Distributed tracing
 
 # Caching & Performance
-redis[hiredis]==5.0.1  # Redis with hiredis for better performance
+redis[hiredis]>=4.5.0,<6.0.0  # Redis with hiredis for better performance
+aioredis>=2.0.0,<3.0.0  # Async Redis client
 python-memcached==1.62  # Memcached client
 
 # Production Database
@@ -36,7 +37,7 @@ python-jose[cryptography]==3.3.0  # Enhanced JWT with cryptography
 cryptography==41.0.7  # Latest cryptography library
 
 # Production Utilities
-python-json-logger==2.0.7  # JSON logging for structured logs
+python-json-logger>=2.0.0  # JSON logging for structured logs
 coloredlogs==15.0.1  # Colored logging output
 
 # Background Task Processing

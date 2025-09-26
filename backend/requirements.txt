@@ -1,28 +1,20 @@
-fastapi==0.116.2
-uvicorn[standard]==0.35.0
-python-multipart==0.0.20
-python-jose[cryptography]==3.3.0
-passlib[bcrypt]==1.7.4
-python-decouple==3.8
-sqlalchemy==2.0.43
-alembic==1.16.5
-psycopg2-binary==2.9.9
-fastapi-cors==0.0.6
-pydantic[email]==2.11.9
-pydantic-settings==2.1.0
+# FastNext Framework Backend Requirements
+# For development, use: pip install -r requirements/dev.txt
+# For production, use: pip install -r requirements/prod.txt
+
+# Base requirements for development
+-r requirements/base.txt
+
+# Development and testing tools
 pytest==7.4.3
 pytest-asyncio==0.21.1
 pytest-cov==4.1.0
 pytest-mock==3.12.0
-httpx==0.25.2
 factory-boy==3.3.0
 freezegun==1.2.2
 pylint==3.0.3
 black==23.11.0
-pyotp==2.9.0
-qrcode[pil]==7.4.2
-redis==5.2.0
-aioredis==2.0.1
-redis-py-cluster==2.1.3
-structlog==23.2.0
-pythonjsonlogger==2.0.7
+python-decouple==3.8
+
+# CORS for development
+fastapi-cors==0.0.6

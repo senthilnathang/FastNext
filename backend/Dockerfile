@@ -26,18 +26,13 @@ RUN python -m venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 
 # Copy requirements first for better caching
-COPY requirements.txt requirements/
 COPY requirements/ requirements/
 
 # Install Python dependencies
 RUN pip install --upgrade pip setuptools wheel && \
-    pip install -r requirements.txt
+    pip install -r requirements/prod.txt
 
-# Install additional performance packages
-RUN pip install \
-    uvloop \
-    httptools \
-    gunicorn
+# Additional packages are already included in requirements/prod.txt
 
 # Production stage
 FROM python:3.11-slim as production
@@ -118,14 +113,7 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Install development Python packages
-RUN pip install \
-    pytest \
-    pytest-asyncio \
-    pytest-cov \
-    black \
-    pylint \
-    ipython \
-    jupyter
+RUN pip install -r requirements/dev.txt
 
 # Set development environment
 ENV ENVIRONMENT=development \
