@@ -26,6 +26,7 @@ import {
 import { GitBranch, Plus, Edit, Eye, Settings } from 'lucide-react';
 import { useWorkflowTypes, useWorkflowTemplates, useCreateWorkflowType, useCreateWorkflowTemplate } from '@/modules/workflow/hooks/useWorkflow';
 import { WorkflowBuilder } from '@/modules/workflow';
+import AdvancedWorkflowBuilder from '@/modules/workflow/components/AdvancedWorkflowBuilder';
 import { formatDistanceToNow } from 'date-fns';
 
 export default function WorkflowsPage() {
@@ -34,6 +35,7 @@ export default function WorkflowsPage() {
   const [createTemplateDialogOpen, setCreateTemplateDialogOpen] = useState(false);
   const [builderDialogOpen, setBuilderDialogOpen] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState<number | null>(null);
+  const [useAdvancedBuilder, setUseAdvancedBuilder] = useState(true);
 
   const [newType, setNewType] = useState({
     name: '',
@@ -233,7 +235,15 @@ export default function WorkflowsPage() {
             <div className="flex space-x-2">
                 <Button variant="outline" onClick={() => openBuilder()}>
                   <GitBranch className="h-4 w-4 mr-2" />
-                  New Template
+                  {useAdvancedBuilder ? 'Advanced Builder' : 'New Template'}
+                </Button>
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={() => setUseAdvancedBuilder(!useAdvancedBuilder)}
+                  className="text-xs"
+                >
+                  {useAdvancedBuilder ? 'Basic' : 'Advanced'}
                 </Button>
                 <Dialog open={createTemplateDialogOpen} onOpenChange={setCreateTemplateDialogOpen}>
                   <DialogTrigger asChild>
@@ -371,14 +381,26 @@ export default function WorkflowsPage() {
             </DialogTitle>
           </DialogHeader>
           <div className="flex-1 h-[80vh]">
-            <WorkflowBuilder
-              templateId={selectedTemplate || undefined}
-              readOnly={false}
-              onSave={(nodes, edges) => {
-                console.log('Saving workflow:', { nodes, edges });
-                // Handle save logic here
-              }}
-            />
+            {useAdvancedBuilder ? (
+              <AdvancedWorkflowBuilder
+                templateId={selectedTemplate || undefined}
+                readOnly={false}
+                enableAdvancedFeatures={true}
+                onSave={(nodes, edges) => {
+                  console.log('Saving advanced workflow:', { nodes, edges });
+                  // Handle save logic here
+                }}
+              />
+            ) : (
+              <WorkflowBuilder
+                templateId={selectedTemplate || undefined}
+                readOnly={false}
+                onSave={(nodes, edges) => {
+                  console.log('Saving workflow:', { nodes, edges });
+                  // Handle save logic here
+                }}
+              />
+            )}
           </div>
         </DialogContent>
       </Dialog>
