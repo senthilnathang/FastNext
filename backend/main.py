@@ -40,9 +40,25 @@ async def lifespan(app: FastAPI):
         logger.error(f"❌ Database initialization failed: {e}")
         raise
     
+    # Initialize Redis
+    try:
+        from app.core.redis_config import startup_redis
+        await startup_redis()
+        logger.info("✅ Redis initialized")
+    except Exception as e:
+        logger.error(f"⚠️ Redis initialization failed: {e}")
+        logger.warning("Continuing without Redis caching...")
+    
     yield
     
     # Cleanup
+    try:
+        from app.core.redis_config import shutdown_redis
+        await shutdown_redis()
+        logger.info("✅ Redis connections closed")
+    except Exception as e:
+        logger.error(f"❌ Redis cleanup failed: {e}")
+    
     logger.info("🛑 Shutting down FastNext Framework...")
 
 
@@ -148,13 +164,62 @@ Use the **Authorize** button below to authenticate with your JWT token:
     # Add health check endpoint
     @app.get("/health")
     async def health_check():
-        """Health check endpoint"""
-        return {
+        """Health check endpoint with system status"""
+        health_data = {
             "status": "healthy",
             "version": settings.VERSION,
             "timestamp": datetime.utcnow().isoformat(),
-            "service": "FastNext Framework API"
+            "service": "FastNext Framework API",
+            "components": {
+                "database": "unknown",
+                "redis": "unknown",
+                "cache": "disabled" if not settings.CACHE_ENABLED else "unknown"
+            }
         }
+        
+        # Check database connection
+        try:
+            from app.db.session import get_db
+            async for db in get_db():
+                await db.execute("SELECT 1")
+                health_data["components"]["database"] = "healthy"
+                break
+        except Exception as e:
+            health_data["components"]["database"] = f"unhealthy: {str(e)}"
+            health_data["status"] = "degraded"
+        
+        # Check Redis connection
+        if settings.CACHE_ENABLED:
+            try:
+                from app.core.redis_config import redis_manager, cache
+                if redis_manager.is_connected:
+                    # Test Redis with a simple operation
+                    test_key = "health_check_test"
+                    await cache.set(test_key, "test_value", 10)
+                    test_result = await cache.get(test_key)
+                    await cache.delete(test_key)
+                    
+                    if test_result == "test_value":
+                        health_data["components"]["redis"] = "healthy"
+                        health_data["components"]["cache"] = "healthy"
+                        
+                        # Add cache stats
+                        cache_stats = await cache.get_stats()
+                        health_data["cache_stats"] = cache_stats
+                    else:
+                        health_data["components"]["redis"] = "unhealthy: test failed"
+                        health_data["components"]["cache"] = "unhealthy"
+                        health_data["status"] = "degraded"
+                else:
+                    health_data["components"]["redis"] = "disconnected"
+                    health_data["components"]["cache"] = "unavailable"
+                    health_data["status"] = "degraded"
+            except Exception as e:
+                health_data["components"]["redis"] = f"unhealthy: {str(e)}"
+                health_data["components"]["cache"] = "unhealthy"
+                health_data["status"] = "degraded"
+        
+        return health_data
     
     @app.get("/")
     async def root():
@@ -183,7 +248,25 @@ Use the **Authorize** button below to authenticate with your JWT token:
 def _setup_middleware(app: FastAPI):
     """Setup application middleware"""
     
-    # CORS middleware (must be first to handle preflight requests)
+    # Import middleware
+    from app.middleware.cache_middleware import CacheMiddleware, RateLimitMiddleware
+    
+    # Rate limiting middleware (first to protect against abuse)
+    if settings.CACHE_ENABLED:
+        app.add_middleware(
+            RateLimitMiddleware,
+            requests_per_minute=60,
+            requests_per_hour=1000
+        )
+    
+    # Cache middleware for HTTP responses
+    if settings.CACHE_ENABLED:
+        app.add_middleware(
+            CacheMiddleware,
+            default_ttl=settings.CACHE_DEFAULT_TTL
+        )
+    
+    # CORS middleware (must be before other middleware to handle preflight requests)
     app.add_middleware(
         CORSMiddleware,
         allow_origins=[str(origin) for origin in settings.BACKEND_CORS_ORIGINS],
