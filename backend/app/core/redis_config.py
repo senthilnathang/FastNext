@@ -3,7 +3,7 @@ Redis configuration and connection management for FastNext Framework
 """
 
 import redis
-import aioredis
+import redis.asyncio as aioredis
 import json
 import pickle
 from typing import Any, Optional, Union, Dict, List

@@ -21,8 +21,7 @@ opentelemetry-exporter-prometheus==1.12.0rc1  # Prometheus metrics exporter
 opentelemetry-exporter-jaeger==1.21.0  # Distributed tracing
 
 # Caching & Performance
-redis[hiredis]>=4.5.0,<6.0.0  # Redis with hiredis for better performance
-aioredis>=2.0.0,<3.0.0  # Async Redis client
+redis[hiredis]>=5.0.0  # Redis with hiredis for better performance and async support
 python-memcached==1.62  # Memcached client
 
 # Production Database

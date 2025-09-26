@@ -24,8 +24,7 @@ pydantic-settings==2.1.0  # Settings management
 httpx==0.25.2  # Async HTTP client
 
 # Caching & Session Management
-redis>=4.5.0,<6.0.0  # Redis client
-aioredis>=2.0.0,<3.0.0  # Async Redis client
+redis>=5.0.0  # Redis client with async support
 hiredis==2.2.3  # Fast Redis parser
 
 # Background Tasks
