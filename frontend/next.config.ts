@@ -60,30 +60,49 @@ const nextConfig: NextConfig = {
   // Headers for security and performance
   async headers() {
     const isDev = process.env.NODE_ENV === 'development';
+    const isProd = process.env.NODE_ENV === 'production';
     
     // Generate nonce for CSP
     const nonce = Buffer.from(require('crypto').randomBytes(16)).toString('base64');
     
-    // Content Security Policy
+    // Content Security Policy with environment-specific rules
     const cspDirectives = [
       "default-src 'self'",
-      `script-src 'self' 'unsafe-inline' ${isDev ? "'unsafe-eval'" : ''} https://cdn.jsdelivr.net https://unpkg.com https://vercel.live`,
-      `style-src 'self' 'unsafe-inline' https://fonts.googleapis.com`,
+      // Script sources - more restrictive in production
+      `script-src 'self' ${isDev ? "'unsafe-inline' 'unsafe-eval'" : "'unsafe-inline'"} https://cdn.jsdelivr.net https://unpkg.com https://vercel.live https://va.vercel-scripts.com`,
+      // Style sources
+      `style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net`,
+      // Font sources
       "font-src 'self' https://fonts.gstatic.com data:",
-      "img-src 'self' data: https: blob:",
-      "media-src 'self' https:",
+      // Image sources - allow common CDNs
+      "img-src 'self' data: https: blob: https://*.vercel.app https://*.vercel.com",
+      // Media sources
+      "media-src 'self' https: blob:",
+      // Object sources - completely blocked
       "object-src 'none'",
+      // Base URI - only self
       "base-uri 'self'",
+      // Form actions - only self
       "form-action 'self'",
+      // Frame ancestors - none (prevents clickjacking)
       "frame-ancestors 'none'",
+      // Frame sources - none (prevents embedding iframes)
       "frame-src 'none'",
-      `connect-src 'self' ${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'} https://vercel.live wss://vercel.live`,
+      // Connect sources - API and monitoring
+      `connect-src 'self' ${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'} https://vercel.live wss://vercel.live https://vitals.vercel-insights.com ${isDev ? 'ws://localhost:*' : ''}`,
+      // Worker sources
       "worker-src 'self' blob:",
+      // Manifest sources
       "manifest-src 'self'",
-      "upgrade-insecure-requests"
+      // Child sources (for workers)
+      "child-src 'self' blob:",
+      // Prefetch sources
+      "prefetch-src 'self'",
+      // Upgrade insecure requests in production
+      ...(isProd ? ["upgrade-insecure-requests"] : [])
     ];
 
-    const csp = cspDirectives.join('; ');
+    const csp = cspDirectives.filter(Boolean).join('; ');
 
     return [
       {
@@ -129,15 +148,36 @@ const nextConfig: NextConfig = {
             key: 'Strict-Transport-Security',
             value: 'max-age=31536000; includeSubDomains; preload',
           },
-          // Permissions Policy (Feature Policy)
+          // Permissions Policy (Feature Policy) - comprehensive restrictions
           {
             key: 'Permissions-Policy',
-            value: 'camera=(), microphone=(), geolocation=(), gyroscope=(), magnetometer=(), payment=(), usb=()',
+            value: [
+              'camera=()',
+              'microphone=()',
+              'geolocation=()',
+              'gyroscope=()',
+              'magnetometer=()',
+              'payment=()',
+              'usb=()',
+              'accelerometer=()',
+              'ambient-light-sensor=()',
+              'autoplay=()',
+              'battery=()',
+              'clipboard-read=()',
+              'clipboard-write=()',
+              'display-capture=()',
+              'document-domain=()',
+              'encrypted-media=()',
+              'fullscreen=()',
+              'picture-in-picture=()',
+              'web-share=()',
+              'speaker-selection=()'
+            ].join(', ')
           },
-          // Cross-Origin policies
+          // Cross-Origin policies for enhanced security
           {
             key: 'Cross-Origin-Embedder-Policy',
-            value: 'require-corp',
+            value: isDev ? 'unsafe-none' : 'require-corp',
           },
           {
             key: 'Cross-Origin-Opener-Policy',
@@ -146,6 +186,24 @@ const nextConfig: NextConfig = {
           {
             key: 'Cross-Origin-Resource-Policy',
             value: 'same-origin',
+          },
+          // Additional security headers
+          {
+            key: 'X-Permitted-Cross-Domain-Policies',
+            value: 'none',
+          },
+          {
+            key: 'X-DNS-Prefetch-Control',
+            value: 'off',
+          },
+          {
+            key: 'X-Download-Options',
+            value: 'noopen',
+          },
+          // Server header masking
+          {
+            key: 'Server',
+            value: 'FastNext',
           },
         ],
       },

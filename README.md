@@ -1,614 +1,685 @@
-# FastNext Framework
+# FastNext Framework 🚀
 
-A comprehensive full-stack web application framework built with modern technologies for rapid development and enterprise-grade app building.
+A comprehensive, production-ready full-stack web application framework built with Next.js 15, FastAPI, and enterprise-grade security features.
 
-## Tech Stack
+## ✨ Features
 
-### Backend
-- **FastAPI** - Modern, fast web framework for building APIs
-- **PostgreSQL** - Powerful, open source object-relational database
-- **SQLAlchemy** - Python SQL toolkit and Object-Relational Mapping
+### 🎯 Frontend (Next.js 15)
+- **Modern React Architecture**: App Router with TypeScript and Server Components
+- **Advanced UI Components**: Radix UI + Tailwind CSS + shadcn/ui
+- **State Management**: TanStack Query + tRPC for type-safe APIs
+- **Authentication**: Secure JWT-based authentication with auto-refresh
+- **Admin Dashboard**: Complete RBAC with roles, permissions, and audit trails
+- **Workflow Engine**: Visual workflow builder with advanced analytics
+- **Real-time Features**: WebSocket support for live updates
+- **Performance**: Optimized with Turbopack and intelligent caching
+- **Testing**: Jest, Playwright, and Storybook integration
 
-### Frontend
-- **Next.js** - React framework for production
-- **TypeScript** - Typed JavaScript at scale
-- **Tailwind CSS** - Utility-first CSS framework
-- **ShadcnUI** - Re-usable components built with Radix UI and Tailwind CSS
-- **nuqs** - Type-safe URL state management for React
+### ⚡ Backend (FastAPI)
+- **High-Performance API**: FastAPI with async/await and Pydantic v2
+- **Database**: PostgreSQL with SQLAlchemy 2.0 and Alembic migrations
+- **Authentication**: JWT with refresh tokens and role-based access control
+- **Security Middleware**: Comprehensive threat detection and rate limiting
+- **Caching Layer**: Redis integration with intelligent cache strategies
+- **Monitoring**: Structured logging, performance metrics, and health checks
+- **API Documentation**: Auto-generated OpenAPI/Swagger with export tools
+- **Workflow System**: Complete workflow orchestration with state management
 
-### Development Tools
-- **pytest** - Python testing framework with coverage reporting
-- **Playwright** - End-to-end testing framework for web applications
-- **Jest** - JavaScript testing framework
-- **Storybook** - Tool for building UI components in isolation
-- **Pylint** - Python code analysis tool
-- **Biome** - Fast formatter and linter for JavaScript/TypeScript
-- **ESLint** - JavaScript/TypeScript linting and code quality
-- **Swagger UI** - Interactive API documentation and testing interface
+### 🔐 Enterprise Security Features
+- **Content Security Policy**: Advanced CSP with nonces and environment-specific rules
+- **XSS Protection**: Real-time detection with pattern matching and sanitization
+- **Request Validation**: Multi-layer validation with malicious content filtering
+- **Rate Limiting**: Intelligent rate limiting with sliding window and token bucket algorithms
+- **Security Monitoring**: Real-time threat detection with automated alerting
+- **Bundle Security**: Dependency vulnerability scanning and secret detection
+- **Environment Validation**: Comprehensive environment variable validation with Zod
+- **Trusted Types**: Implementation with DOMPurify integration for XSS prevention
+- **Subresource Integrity**: SRI implementation for external resources
+- **Security Headers**: 20+ security headers with OWASP compliance
 
-## Code Generation & Scaffolding System 🚀
+### 🏗️ Infrastructure & DevOps
+- **Container Ready**: Multi-stage Docker builds with security scanning
+- **Orchestration**: Docker Compose with production and development configs
+- **CI/CD Pipeline**: GitHub Actions with automated testing and security checks
+- **Monitoring Stack**: Integrated logging, metrics, and error tracking
+- **Scalability**: Horizontal scaling with load balancer and database clustering
+- **Performance**: Bundle analysis, dependency auditing, and optimization tools
 
-### FastNext Unified Scaffolding CLI
+## 🛠️ Technology Stack
 
-FastNext includes a powerful unified scaffolding system that generates complete full-stack CRUD interfaces for both frontend (TypeScript/React) and backend (Python/FastAPI) from a single configuration file.
+### 🎨 Frontend
+- **Framework**: Next.js 15 with App Router and Turbopack
+- **Language**: TypeScript with strict mode
+- **Styling**: Tailwind CSS 4 + shadcn/ui + Radix UI
+- **State Management**: TanStack Query + Zustand + Nuqs for URL state
+- **Type Safety**: tRPC for end-to-end type safety
+- **Security**: CSP, Trusted Types, SRI, XSS protection
+- **Testing**: Jest + React Testing Library + Playwright + Storybook
+- **Development**: Hot reload, bundle analysis, and performance monitoring
 
-#### Key Features ✅
-- **🔥 Unified CLI Tool**: Single command generates both frontend and backend
-- **📄 Configuration-Driven**: JSON configuration files define complete models
-- **🎯 Type-Safe Generation**: TypeScript interfaces align with Pydantic schemas
-- **🛠️ Interactive Builder**: Build models interactively with step-by-step prompts
-- **⚡ Production-Ready**: Generated code follows FastNext framework conventions
-- **🔧 Customizable**: Extensive field types, validation rules, and relationships
-- **🧪 Comprehensive Test Generation**: Includes unit, integration, performance, and security tests
-- **📚 API Documentation**: Automatic OpenAPI/Swagger documentation generation
-- **🗄️ Database Optimization**: Intelligent indexing and performance optimization
-- **🔐 Advanced Permissions**: RBAC integration with resource-level and field-level access control
-- **🎨 TypeScript Integration**: Frontend type definitions and React Query hooks
-- **📊 GraphQL Support**: Optional GraphQL schema generation with DataLoaders
+### ⚙️ Backend
+- **Framework**: FastAPI (Python 3.11+) with async/await
+- **Database**: PostgreSQL 15+ with SQLAlchemy 2.0
+- **Caching**: Redis 7+ with intelligent strategies
+- **Migration**: Alembic with automatic generation
+- **Authentication**: JWT with refresh tokens and RBAC
+- **Validation**: Pydantic v2 with custom validators
+- **Security**: Multi-layer middleware with threat detection
+- **Testing**: pytest with async support and fixtures
+- **Monitoring**: Structured logging with performance metrics
 
-#### Installation & Usage
+### 🔒 Security & Infrastructure
+- **Containerization**: Multi-stage Docker with security scanning
+- **Orchestration**: Docker Compose with health checks
+- **Reverse Proxy**: Nginx with security headers
+- **CI/CD**: GitHub Actions with security checks
+- **Monitoring**: Comprehensive logging, metrics, and alerting
+- **Security**: OWASP compliance with 20+ security headers
+- **Performance**: Bundle optimization and dependency auditing
+
+## 🚀 Quick Start
+
+### Prerequisites
+- Node.js 18+ and npm/yarn/pnpm
+- Python 3.11+
+- PostgreSQL 15+
+- Redis 7+
+- Docker and Docker Compose (recommended)
+
+### Option 1: Docker Compose (Recommended)
 
 ```bash
-# Generate complete full-stack CRUD from configuration
-python scaffold-cli.py generate --config examples/product-config.json
+# Clone the repository
+git clone <repository-url>
+cd FastNext
 
-# Generate only frontend components
-python scaffold-cli.py generate --name BlogPost --type frontend
+# Start all services with production configuration
+docker-compose -f docker-compose.prod.yml up -d
 
-# Generate only backend API
-python scaffold-cli.py generate --name Category --type backend
+# Or start development environment
+docker-compose up -d
 
-# Interactive model builder
-python scaffold-cli.py interactive
-
-# Create example configuration
-python scaffold-cli.py example-config --name Product
-
-# List available field types
-python scaffold-cli.py field-types
-
-# Dry run to preview generation
-python scaffold-cli.py generate --config product.json --dry-run
+# Services will be available at:
+# Frontend: http://localhost:3000
+# Backend API: http://localhost:8000
+# API Documentation: http://localhost:8000/docs
+# Redis Commander: http://localhost:8081
 ```
 
-#### What Gets Generated
+### Option 2: Manual Setup
 
-##### Frontend Generation
-- **API Services**: TypeScript API clients with proper typing
-- **React Hooks**: Custom hooks for data fetching and state management with React Query
-- **Form Components**: Complete forms with validation and error handling
-- **Data Tables**: Advanced data tables with sorting, filtering, and pagination
-- **Page Components**: Full CRUD pages (list, create, edit, view)
-- **Navigation Updates**: Automatic menu configuration updates
-- **Type Definitions**: TypeScript interfaces matching backend schemas
-- **GraphQL Integration**: GraphQL queries, mutations, and type definitions (optional)
+#### Backend Setup
+```bash
+cd backend
 
-##### Backend Generation
-- **SQLAlchemy Models**: Modern SQLAlchemy 2.x models with proper typing
-- **Pydantic Schemas**: Validation schemas for create/update/response
-- **FastAPI Routes**: Complete CRUD endpoints with permission integration
-- **Service Layer**: Business logic separation with custom validation
-- **Database Migrations**: Alembic migrations with proper constraints
-- **Test Files**: Comprehensive test suites (unit, integration, performance, security)
-- **Router Updates**: Automatic API router configuration
-- **Permission System**: Advanced RBAC with resource-level permissions
-- **GraphQL Resolvers**: GraphQL schema and resolvers (optional)
-- **API Documentation**: OpenAPI/Swagger documentation with examples
+# Create virtual environment
+python -m venv venv
+source venv/bin/activate  # Windows: venv\Scripts\activate
 
-#### Advanced Features
+# Install dependencies
+pip install -r requirements.txt
 
-##### Backend Scaffolding Enhancements
-- **TypeScript Integration**: Generates TypeScript definitions alongside Python code
-- **Advanced Permission System**: Resource-level and field-level access control with RBAC
-- **GraphQL Schema Generation**: Automatic GraphQL schema with DataLoaders for N+1 query optimization
-- **Comprehensive Test Generation**: Unit, integration, performance, and security test suites
-- **API Documentation Generation**: OpenAPI/Swagger docs with request/response examples
-- **Database Indexing Optimization**: Intelligent index creation based on field usage patterns
-- **Enhanced Backend Generator Integration**: Seamless integration with existing FastNext architecture
+# Environment configuration
+cp .env.example .env
+# Configure database, Redis, and security settings
 
-##### Field Types & Features
+# Initialize database
+alembic upgrade head
+python create_admin_user.py  # Create initial admin user
 
-```json
+# Run security checks
+python -m pytest tests/ -v
+
+# Start server with auto-reload
+python start_server.py
+```
+
+#### Frontend Setup
+```bash
+cd frontend
+
+# Install dependencies (choose one)
+npm install
+# yarn install
+# pnpm install
+
+# Environment configuration
+cp .env.example .env.local
+# Configure API endpoints and feature flags
+
+# Run security audit
+npm run security:full
+
+# Start development server with Turbopack
+npm run dev
+```
+
+### 🔒 Security Setup
+
+```bash
+# Run comprehensive security audit
+cd frontend && npm run security:audit
+
+# Analyze bundle for vulnerabilities
+npm run security:bundle
+
+# Generate security report
+npm run security:full
+
+# Backend security verification
+cd ../backend && python test_workflow_comprehensive.py
+```
+
+## 📁 Project Structure
+
+```
+FastNext/
+├── frontend/                          # Next.js 15 Application
+│   ├── src/
+│   │   ├── app/                      # App Router (pages, layouts, APIs)
+│   │   │   ├── (dashboard)/          # Dashboard route group
+│   │   │   ├── admin/               # Admin interface
+│   │   │   ├── api/                 # API routes
+│   │   │   │   └── monitoring/      # Security monitoring endpoints
+│   │   │   ├── workflows/           # Workflow management
+│   │   │   └── layout.tsx           # Root layout with providers
+│   │   ├── lib/
+│   │   │   ├── config/              # Environment validation
+│   │   │   ├── security/            # Security utilities
+│   │   │   │   ├── sri.ts           # Subresource Integrity
+│   │   │   │   ├── trusted-types.ts # Trusted Types implementation
+│   │   │   │   ├── xss-protection.ts # XSS detection and prevention
+│   │   │   │   └── rate-limit.ts    # Rate limiting algorithms
+│   │   │   ├── monitoring/          # Security monitoring
+│   │   │   └── trpc/               # tRPC configuration
+│   │   ├── modules/                 # Feature modules
+│   │   │   ├── auth/               # Authentication
+│   │   │   ├── admin/              # Admin management
+│   │   │   ├── workflow/           # Workflow engine
+│   │   │   └── api-docs/           # API documentation
+│   │   └── shared/                 # Shared components and utilities
+│   │       ├── components/         # UI components
+│   │       ├── services/           # API clients
+│   │       └── hooks/              # Custom React hooks
+│   ├── scripts/                    # Security and build scripts
+│   │   ├── security-audit.js       # Dependency vulnerability scanner
+│   │   └── bundle-analyzer.js      # Bundle security analysis
+│   ├── middleware.ts               # Next.js security middleware
+│   ├── next.config.ts              # Next.js configuration with security headers
+│   └── package.json
+├── backend/                        # FastAPI Application
+│   ├── app/
+│   │   ├── api/                    # API routes with versioning
+│   │   │   ├── v1/                 # API v1 endpoints
+│   │   │   └── main.py             # API router configuration
+│   │   ├── core/                   # Core functionality
+│   │   │   ├── config.py           # Application configuration
+│   │   │   ├── security.py         # Security utilities
+│   │   │   └── database_optimization.py # Performance optimizations
+│   │   ├── middleware/             # Security middleware
+│   │   │   ├── security_middleware.py # Comprehensive security
+│   │   │   └── optimization_middleware.py # Performance
+│   │   ├── models/                 # SQLAlchemy models
+│   │   │   ├── workflow.py         # Workflow system models
+│   │   │   └── security_setting.py # Security configuration
+│   │   ├── schemas/                # Pydantic schemas
+│   │   ├── services/               # Business logic
+│   │   │   └── workflow_engine.py  # Workflow orchestration
+│   │   └── utils/                  # Utilities
+│   │       ├── security_utils.py   # Security functions
+│   │       └── activity_logger.py  # Audit logging
+│   ├── alembic/                    # Database migrations
+│   ├── tests/                      # Comprehensive test suite
+│   ├── docs/                       # Documentation
+│   ├── scaffolding/                # Code generation tools
+│   └── requirements/               # Dependency management
+├── docker/                         # Docker configurations
+│   ├── nginx/                      # Nginx proxy configs
+│   ├── postgres/                   # PostgreSQL setup
+│   └── redis/                      # Redis configuration
+├── docs/                           # Project documentation
+├── docker-compose.yml              # Development environment
+├── docker-compose.prod.yml         # Production environment
+└── README.md
+```
+
+## 🔐 Enterprise Security Features
+
+FastNext implements comprehensive security measures following OWASP guidelines and industry best practices:
+
+### 🛡️ Content Security & XSS Prevention
+- **Content Security Policy**: Advanced CSP with nonces and environment-specific rules
+- **Trusted Types**: Implementation with DOMPurify integration for safe DOM manipulation
+- **XSS Protection**: Real-time detection with pattern matching and automatic sanitization
+- **Subresource Integrity**: SRI implementation for external scripts and stylesheets
+- **Input Sanitization**: Multi-layer validation with malicious content filtering
+
+### 🔒 Authentication & Authorization
+- **JWT Security**: Secure token implementation with refresh rotation
+- **Role-Based Access Control**: Granular RBAC with permissions and audit trails
+- **Session Management**: Automatic token refresh with secure cookie handling
+- **Multi-Factor Ready**: Infrastructure for MFA/2FA implementation
+- **Account Security**: Lockout mechanisms and suspicious activity detection
+
+### 🚦 Request Security & Rate Limiting
+- **Intelligent Rate Limiting**: Multiple algorithms (sliding window, token bucket)
+- **Request Validation**: Comprehensive validation with threat pattern detection
+- **Malicious Content Detection**: Real-time scanning for injection attempts
+- **Geographic Filtering**: IP-based access control and geolocation validation
+- **Bot Detection**: User-agent analysis and behavioral pattern recognition
+
+### 📊 Security Monitoring & Alerting
+- **Real-Time Monitoring**: 13 security event types with automatic correlation
+- **Threat Detection**: Machine learning-based anomaly detection
+- **Alert System**: Configurable thresholds with multi-channel notifications
+- **Security Analytics**: Comprehensive dashboards with threat intelligence
+- **Incident Response**: Automated response workflows and escalation procedures
+
+### 🔍 Vulnerability Management
+- **Dependency Scanning**: Automated vulnerability detection in npm packages
+- **Bundle Security**: Analysis of bundled code for exposed secrets and vulnerabilities
+- **License Compliance**: Automatic checking for restrictive licenses
+- **Security Auditing**: Regular automated security assessments
+- **Penetration Testing**: Built-in security testing tools and frameworks
+
+### 🏗️ Infrastructure Security
+- **Security Headers**: 20+ security headers with OWASP compliance
+- **Environment Validation**: Comprehensive validation with secret detection
+- **Container Security**: Multi-stage Docker builds with vulnerability scanning
+- **Network Security**: Nginx security configuration with SSL/TLS hardening
+- **Database Security**: Encrypted connections and query optimization
+
+### 📋 Compliance & Governance
+- **Audit Trails**: Comprehensive logging of all security events
+- **Data Protection**: GDPR-ready with data anonymization and retention policies
+- **Security Policies**: Configurable security policies with version control
+- **Compliance Reporting**: Automated compliance reports and security metrics
+- **Documentation**: Complete security documentation and runbooks
+
+## 🧪 Testing & Quality Assurance
+
+### 🎯 Frontend Testing
+```bash
+cd frontend
+
+# Unit testing with Jest
+npm test                    # Run unit tests
+npm run test:coverage      # Coverage report
+npm run test:watch         # Watch mode
+
+# End-to-end testing with Playwright
+npm run test:e2e           # Run E2E tests
+npm run test:e2e:ui        # Interactive UI mode
+npm run test:e2e:headed    # Run in headed browser
+npm run test:e2e:debug     # Debug mode
+
+# Component testing with Storybook
+npm run storybook          # Start Storybook
+npm run build-storybook    # Build static Storybook
+
+# Code quality and linting
+npm run lint               # ESLint
+npm run biome              # Biome linting
+npm run biome:fix          # Auto-fix issues
+```
+
+### ⚙️ Backend Testing
+```bash
+cd backend
+
+# Comprehensive testing suite
+pytest                              # Run all tests
+pytest --cov=app --cov-report=html # Coverage report
+pytest tests/api/ -v               # API tests only
+pytest tests/workflow/ -v          # Workflow tests
+
+# Security testing
+python test_workflow_comprehensive.py  # Security validation
+python test_backend_scaffold.py        # Infrastructure tests
+
+# Load testing
+pytest tests/integration/ -v           # Integration tests
+python -m pytest tests/unit/ -v       # Unit tests only
+```
+
+### 🔒 Security Testing
+```bash
+# Frontend security audit
+npm run security:audit      # Dependency vulnerabilities
+npm run security:bundle     # Bundle analysis
+npm run security:full       # Complete security scan
+
+# Backend security validation
+cd backend
+python test_upgrade_verification.py    # Security upgrade tests
+pytest tests/auth/ -v                  # Authentication tests
+pytest tests/api/test_auth_api.py -v   # API security tests
+
+# Infrastructure testing
+docker-compose -f docker-compose.yml config    # Validate Docker config
+docker security scan fastnext-frontend         # Container security scan
+```
+
+### 📊 Performance Testing
+```bash
+# Bundle analysis
+npm run analyze             # Webpack bundle analyzer
+
+# Performance monitoring
+npm run build              # Production build analysis
+npm run start              # Production server testing
+
+# Backend performance
+cd backend
+python -m pytest tests/ --benchmark-only       # Benchmark tests
+uvicorn app.main:app --workers 4               # Multi-worker testing
+```
+
+## 🚀 Production Deployment
+
+### 🔧 Environment Configuration
+
+#### Frontend Environment Variables
+```bash
+# Production (.env.local)
+NODE_ENV=production
+NEXT_PUBLIC_API_URL=https://api.yourdomain.com
+NEXT_PUBLIC_ENVIRONMENT=production
+NEXT_PUBLIC_DOMAIN=yourdomain.com
+NEXT_PUBLIC_SENTRY_DSN=https://your-sentry-dsn
+NEXT_PUBLIC_ENABLE_ANALYTICS=true
+SECURITY_HEADERS_ENABLED=true
+```
+
+#### Backend Environment Variables
+```bash
+# Production (.env)
+SECRET_KEY=your-256-bit-secret-key
+ALGORITHM=HS256
+ACCESS_TOKEN_EXPIRE_MINUTES=30
+
+# Database
+POSTGRES_SERVER=your-db-host
+POSTGRES_USER=your-db-user
+POSTGRES_PASSWORD=your-secure-password
+POSTGRES_DB=fastnext_prod
+
+# Redis
+REDIS_HOST=your-redis-host
+REDIS_PASSWORD=your-redis-password
+
+# Security
+CORS_ORIGINS=https://yourdomain.com
+ENABLE_GZIP_COMPRESSION=true
+WORKERS=4
+```
+
+### 🐳 Docker Production Deployment
+```bash
+# Production deployment with security scanning
+docker-compose -f docker-compose.prod.yml up -d
+
+# Health checks and monitoring
+docker-compose -f docker-compose.prod.yml ps
+docker-compose -f docker-compose.prod.yml logs -f
+
+# Horizontal scaling
+docker-compose -f docker-compose.prod.yml up -d --scale backend=3 --scale frontend=2
+
+# Security updates
+docker-compose -f docker-compose.prod.yml pull
+docker-compose -f docker-compose.prod.yml up -d --force-recreate
+```
+
+### ☁️ Cloud Platform Deployment
+
+#### Vercel (Frontend)
+```bash
+cd frontend
+
+# Install Vercel CLI
+npm i -g vercel
+
+# Deploy with environment variables
+vercel --prod
+
+# Configure security headers in vercel.json
 {
-  "fields": [
-    {"name": "title", "type": "string", "required": true},
-    {"name": "price", "type": "number", "validation": {"min_value": 0}},
-    {"name": "is_active", "type": "boolean", "default": true},
-    {"name": "launch_date", "type": "date"},
-    {"name": "created_at", "type": "datetime"},
-    {"name": "description", "type": "text"},
-    {"name": "contact_email", "type": "email"},
-    {"name": "website", "type": "url"},
-    {"name": "metadata", "type": "json"},
-    {"name": "status", "type": "select", "options": ["draft", "published"]},
-    {"name": "tags", "type": "multiselect", "options": ["urgent", "important"]}
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "X-Frame-Options", "value": "DENY" },
+        { "key": "Content-Security-Policy", "value": "default-src 'self'" }
+      ]
+    }
   ]
 }
 ```
 
-##### Advanced Configuration Options
-- **Validation Rules**: Min/max length, pattern matching, custom validators
-- **Database Constraints**: Unique fields, indexes, foreign keys
-- **UI Configuration**: Display in lists, searchable, sortable, filterable
-- **Model Mixins**: Timestamps, audit trails, soft delete, metadata
-- **Permission Integration**: RBAC permissions with owner fields
-- **API Configuration**: Pagination, search, filtering, sorting
-- **Test Configuration**: Test factories, fixtures, and coverage requirements
-- **Documentation Options**: API examples, field descriptions, and validation rules
+#### AWS/GCP/Azure (Backend)
+```bash
+cd backend
 
-#### Example Configurations
+# Production requirements
+pip install -r requirements/prod.txt
 
-##### E-commerce Product Model
-```json
-{
-  "$schema": "https://fastNext.dev/schemas/scaffold-config.json",
-  "name": "Product",
-  "pluralName": "Products",
-  "description": "E-commerce product management model",
-  "icon": "Package",
-  "module": "inventory",
-  "hasTimestamps": true,
-  "hasAudit": true,
-  "hasSoftDelete": false,
-  "hasMetadata": true,
-  "fields": [
-    {
-      "name": "name",
-      "type": "string",
-      "required": true,
-      "validation": {"min_length": 2, "max_length": 200},
-      "unique": true,
-      "searchable": true,
-      "sortable": true
-    },
-    {
-      "name": "price",
-      "type": "number",
-      "required": true,
-      "validation": {"min_value": 0.01},
-      "sortable": true,
-      "filterable": true
-    },
-    {
-      "name": "category",
-      "type": "select",
-      "options": ["Electronics", "Clothing", "Books"],
-      "filterable": true
-    }
-  ],
-  "permissions": {
-    "category": "product",
-    "owner_field": "user_id"
-  },
-  "api": {
-    "enable_search": true,
-    "enable_filtering": true,
-    "page_size": 25
-  }
+# Database migrations
+alembic upgrade head
+
+# Production server with Gunicorn
+gunicorn app.main:app \
+  --workers 4 \
+  --worker-class uvicorn.workers.UvicornWorker \
+  --bind 0.0.0.0:8000 \
+  --access-logfile - \
+  --error-logfile - \
+  --log-level info
+```
+
+### 🔒 Security Hardening
+
+#### SSL/TLS Configuration
+```nginx
+# Nginx configuration (nginx/prod.conf)
+server {
+    listen 443 ssl http2;
+    ssl_certificate /path/to/cert.pem;
+    ssl_certificate_key /path/to/key.pem;
+    
+    # Security headers
+    add_header Strict-Transport-Security "max-age=31536000; includeSubDomains; preload";
+    add_header X-Frame-Options DENY;
+    add_header X-Content-Type-Options nosniff;
 }
 ```
 
-#### Generated Code Quality
-
-The scaffolding system generates enterprise-grade, production-ready code that includes:
-
-- **Type Safety**: Complete type coverage across frontend and backend
-- **Error Handling**: Comprehensive error handling with proper HTTP status codes
-- **Validation**: Input validation at both frontend and backend levels
-- **Security**: RBAC permissions and input sanitization
-- **Performance**: Optimized queries with proper indexing
-- **Testing**: Full test coverage including edge cases
-- **Documentation**: Inline documentation and API specs
-- **Accessibility**: Frontend components with proper a11y attributes
-- **Responsive Design**: Mobile-first responsive layouts
-- **Code Standards**: Follows established coding standards and best practices
-
-#### Documentation
-
-- **[Backend Scaffolding Usage Guide](backend/docs/backend-scaffolding-usage.md)** - Comprehensive backend generation documentation
-- **Frontend Scaffolding Guide** - Frontend generation patterns and customization
-- **Configuration Schema** - Complete field type and option reference
-- **Example Configurations** - Ready-to-use configuration files
-
-## Project Structure
-
-The FastNext Framework follows a modular architecture pattern that promotes scalability, maintainability, and developer productivity. The codebase is organized into feature-based modules with clear separation of concerns.
-
-### Backend Structure
-```
-backend/
-├── app/
-│   ├── api/              # API routes and endpoints
-│   │   ├── routes/       # Feature-specific route modules
-│   │   └── base_crud.py  # Base CRUD operations
-│   ├── auth/             # Authentication and authorization
-│   │   ├── deps.py       # Dependency injection
-│   │   └── permissions.py # Permission system
-│   ├── core/             # Core configurations
-│   │   ├── config.py     # Application settings
-│   │   ├── security.py   # Security utilities
-│   │   └── swagger_config.py # API documentation config
-│   ├── db/               # Database layer
-│   │   ├── session.py    # Database sessions
-│   │   └── init_db.py    # Database initialization
-│   ├── models/           # SQLAlchemy data models
-│   ├── schemas/          # Pydantic schemas for validation
-│   ├── services/         # Business logic layer
-│   ├── middleware/       # Custom middleware
-│   └── utils/           # Utility functions
-├── scaffolding/         # Scaffolding generators
-│   ├── backend_generator.py     # Backend code generation
-│   ├── typescript_generator.py  # TypeScript integration
-│   ├── permissions_generator.py # Advanced RBAC system
-│   ├── graphql_generator.py     # GraphQL schema generation
-│   ├── test_generator.py        # Comprehensive test generation
-│   ├── docs_generator.py        # API documentation generation
-│   └── optimization_generator.py # Performance optimization
-├── migrations/          # Alembic database migrations
-├── tests/              # Backend test suite
-│   ├── conftest.py     # Test configuration and fixtures
-│   ├── unit/           # Unit tests
-│   ├── integration/    # Integration tests
-│   ├── api/            # API endpoint tests
-│   ├── auth/           # Authentication tests
-│   ├── workflow/       # Workflow-specific tests
-│   └── crud/           # CRUD operation tests
-├── pytest.ini         # pytest configuration
-├── test_runner.py      # Comprehensive test runner script
-├── scaffold-cli.py     # Unified scaffolding CLI
-├── main.py             # FastAPI application entry point
-└── requirements.txt    # Python dependencies
-```
-
-### Frontend Modular Architecture
-```
-frontend/src/
-├── modules/                    # Feature-based modules
-│   ├── auth/                  # Authentication module
-│   │   ├── components/        # Auth-specific components
-│   │   ├── hooks/            # Authentication hooks
-│   │   ├── services/         # Auth context and services
-│   │   └── types/           # Authentication types
-│   ├── admin/               # Administration module
-│   │   ├── components/      # Admin UI components
-│   │   ├── hooks/          # Admin management hooks
-│   │   └── types/          # Admin type definitions
-│   ├── product/            # Product management module (generated)
-│   │   ├── components/     # Product CRUD components
-│   │   ├── hooks/         # Product data hooks
-│   │   └── types/        # Product type definitions
-│   ├── workflow/         # ReactFlow-based workflow system
-│   │   ├── components/   # Workflow UI components
-│   │   ├── hooks/       # Workflow state management
-│   │   └── types/      # Workflow type definitions
-│   └── api-docs/       # API documentation module
-├── shared/             # Shared resources across modules
-│   ├── components/    # Reusable UI components
-│   │   ├── ui/       # Base UI components
-│   │   ├── layout/   # Layout components
-│   │   ├── navigation/  # Navigation components
-│   │   ├── data-table/  # Advanced data table system
-│   │   └── feedback/    # Feedback components
-│   ├── services/     # API client and shared services
-│   │   └── api/     # Generated API services
-│   ├── hooks/        # Shared custom hooks
-│   ├── types/       # Global type definitions
-│   ├── utils/      # Utility functions
-│   │   └── scaffold-generator.ts # Frontend scaffolding utilities
-│   └── providers/  # Global providers
-└── app/           # Next.js app directory (pages and layouts)
-    ├── products/         # Generated product pages
-    ├── admin/           # Admin pages
-    ├── api-docs/        # API documentation pages
-    ├── dashboard/       # Dashboard pages
-    └── workflows/       # Workflow pages
-```
-
-### Key Architectural Benefits
-
-#### 1. **Modular Organization**
-- **Feature-based modules**: Each major feature is self-contained
-- **Generated modules**: Scaffolding creates complete modules following established patterns
-- **Clear boundaries**: Modules have explicit interfaces and dependencies
-- **Scalable structure**: New features can be added as independent modules
-
-#### 2. **Shared Resources**
-- **Centralized UI components**: Reusable components in `/shared/components/`
-- **Generated API services**: Type-safe API clients with proper error handling
-- **Common services**: API clients and utilities available across modules
-- **Type safety**: Shared type definitions ensure consistency
-
-#### 3. **Code Generation Integration**
-- **Seamless integration**: Generated code follows existing architectural patterns
-- **Type consistency**: Generated TypeScript matches backend Pydantic schemas
-- **Component reuse**: Generated components leverage shared UI library
-- **Testing integration**: Generated tests follow established testing patterns
-
-## Features
-
-### Core Framework
-- **Authentication & Security**: JWT-based authentication, password hashing, CORS middleware, protected routes
-- **Database & ORM**: PostgreSQL setup, SQLAlchemy ORM, Alembic migrations, advanced query optimization
-- **Frontend Foundation**: Next.js with TypeScript, Tailwind CSS, ShadcnUI components, React optimization patterns
-- **Testing & Quality**: Comprehensive testing with pytest (backend) and Playwright (e2e), Jest testing, Storybook documentation, code linting
-- **Performance Optimization**: Advanced caching, database optimization, response compression, async patterns
-
-### User Management & Settings
-- **Unified Navigation**: Responsive left sidebar with expandable menu sections
-- **User Settings Interface**: Comprehensive settings dashboard with tabbed navigation
-- **Profile Management**: Update profile form with bio, location, website, and avatar
-- **Security Settings**: 2FA setup, session management, email notifications, API access control
-- **Password Management**: Password change with strength validation and visual feedback
-- **Activity Monitoring**: Personal activity log viewer with filtering and export capabilities
-- **Account Overview**: Real-time account status, verification, and member information
-
-### ReactFlow Workflow System
-- **Database-Driven Workflows**: Complete data models for workflow types, states, templates, and instances
-- **Visual Workflow Builder**: ReactFlow-based canvas with drag-and-drop node creation
-- **Custom Node Types**: State, Conditional, Parallel Gateway, Timer, and User Task nodes
-- **Workflow Engine**: Complete execution engine with state transitions and SLA monitoring
-- **Dynamic Templates**: Database-defined workflow types instead of hardcoded processes
-- **Real-time Workflow Canvas**: Live workflow building and editing interface
-
-### Enterprise Features
-- **Role-Based Access Control**: Complete RBAC implementation with roles and permissions
-- **System Roles**: Admin, Editor, Viewer, Member with predefined permissions
-- **Project Collaboration**: Multi-user project access with role-based permissions
-- **Permission Categories**: System, Project, Page, Component, User permissions
-- **Permission Actions**: Create, Read, Update, Delete, Manage, Publish, Deploy
-- **Project Membership**: Invite users to projects with specific roles
-- **Security Middleware**: Route protection with permission checks
-- **Enterprise UI**: Professional navigation, breadcrumbs, role-based menus
-
-### Performance & Optimization
-- **Advanced Caching**: Multi-tier caching with Memory, Redis, and Hybrid backends
-- **Database Optimization**: Query profiling, slow query detection, connection pooling
-- **Response Optimization**: Compression, minification, ETag support, conditional requests
-- **Async Patterns**: Task management, resource pooling, circuit breakers, retry mechanisms
-- **Performance Monitoring**: Real-time metrics, system monitoring, alert management
-- **Frontend Optimization**: React memoization, component lazy loading, virtual scrolling
-
-### Audit & Security
-- **Activity Logging**: Comprehensive activity tracking with IP addresses, user agents, and metadata
-- **Audit Trail**: Complete change tracking with old/new value comparisons
-- **Security Events**: Login attempts, password changes, and suspicious activity monitoring
-- **Data Export**: Activity logs and audit trails export in JSON/CSV formats
-- **Bulk Operations**: Bulk cleanup and management of historical data
-- **Statistics Dashboard**: Real-time insights into user activities and security metrics
-
-## Getting Started
-
-### Prerequisites
-- Python 3.8+
-- Node.js 18+
-- PostgreSQL 12+
-
-### Quick Start
-1. **Clone the repository**
-   ```bash
-   git clone <repository-url>
-   cd FastNext
-   ```
-
-2. **Backend Setup**
-   ```bash
-   cd backend
-   python -m venv venv
-   source venv/bin/activate  # On Windows: venv\Scripts\activate
-   pip install -r requirements.txt
-   cp .env.example .env  # Edit with your database credentials
-   python main.py
-   ```
-
-3. **Frontend Setup** (in a new terminal)
-   ```bash
-   cd frontend
-   npm install
-   npm run dev
-   ```
-
-4. **Access the Application**
-   - Frontend: http://localhost:3000
-   - Backend API: http://localhost:8000
-   - API Documentation: http://localhost:8000/docs
-   - Swagger UI: http://localhost:3000/api-docs (Interactive API documentation)
-
-### Generate Your First CRUD Module
-
-Once the application is running, you can generate a complete CRUD module:
-
+#### Database Security
 ```bash
-# Generate a product management system
+# PostgreSQL security hardening
+# Enable SSL connections
+ssl = on
+ssl_cert_file = 'server.crt'
+ssl_key_file = 'server.key'
+
+# Connection limits
+max_connections = 100
+shared_preload_libraries = 'pg_stat_statements'
+```
+
+### 📊 Monitoring & Observability
+
+#### Application Monitoring
+```bash
+# Health check endpoints
+curl https://api.yourdomain.com/api/health
+curl https://yourdomain.com/api/health
+
+# Security monitoring
+curl https://api.yourdomain.com/api/monitoring/security-events
+curl https://api.yourdomain.com/api/monitoring/security-alerts
+```
+
+#### Performance Monitoring
+```bash
+# Frontend performance
+npm run analyze                    # Bundle analysis
+npm run security:full             # Security audit
+
+# Backend performance
+python -m pytest tests/ --benchmark-only
+curl https://api.yourdomain.com/metrics
+```
+
+### 🔄 CI/CD Pipeline
+
+#### GitHub Actions Workflow
+```yaml
+# .github/workflows/deploy.yml
+name: Deploy Production
+on:
+  push:
+    branches: [main]
+
+jobs:
+  security-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Security Audit
+        run: |
+          cd frontend && npm run security:full
+          cd backend && python -m safety check
+  
+  deploy:
+    needs: security-scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to production
+        run: |
+          docker-compose -f docker-compose.prod.yml up -d
+```
+
+## 📖 Documentation & Resources
+
+### 📚 API Documentation
+- **Interactive API Docs**: `http://localhost:8000/docs` (Swagger UI)
+- **ReDoc Documentation**: `http://localhost:8000/redoc`
+- **OpenAPI Export**: Available in JSON/YAML formats
+- **Postman Collection**: `backend/exports/fastnext-postman-collection.json`
+
+### 🏗️ Architecture Documentation
+- **Backend Architecture**: `backend/docs/ARCHITECTURE.md`
+- **Frontend Architecture**: `frontend/docs/scaffolding-usage.md`
+- **Database Schema**: `backend/docs/DEVELOPMENT.md`
+- **Security Guide**: `backend/docs/SECURITY.md`
+- **Workflow System**: `docs/WORKFLOW_SYSTEM.md`
+
+### 🎨 Component Documentation
+- **Storybook**: `http://localhost:6006` (Component library)
+- **UI Components**: `frontend/src/shared/components/README.md`
+- **Design System**: Built with Radix UI and Tailwind CSS
+- **Component Testing**: Jest and Testing Library integration
+
+### 📊 Monitoring & Analytics
+- **Security Dashboard**: Real-time security event monitoring
+- **Performance Metrics**: Bundle analysis and optimization reports
+- **Audit Trails**: Comprehensive logging and compliance reporting
+- **Health Checks**: Application and infrastructure monitoring
+
+## 🛠️ Development Tools & Scripts
+
+### 🔍 Security Tools
+```bash
+# Frontend security
+npm run security:audit          # Dependency vulnerability scan
+npm run security:bundle         # Bundle security analysis
+npm run security:full           # Complete security audit
+
+# Backend security
+python test_workflow_comprehensive.py  # Security validation
+python -m safety check                 # Dependency security scan
+```
+
+### 📦 Code Generation
+```bash
+# Backend scaffolding
 cd backend
-python scaffold-cli.py generate --config examples/product-config.json
+python scaffolding/backend_generator.py    # Generate CRUD operations
+python scaffolding/test_generator.py       # Generate test files
+python scaffolding/docs_generator.py       # Generate documentation
 
-# Run database migrations
-alembic upgrade head
-
-# Start the servers and visit http://localhost:3000/products
-```
-
-### Documentation
-- **[Backend Development Guide](docs/BACKEND_DEV.md)** - Backend development, testing, and deployment
-- **[Frontend Development Guide](docs/FRONTEND_DEV.md)** - Frontend development, Storybook, and testing
-- **[Testing Guide](TESTING.md)** - Comprehensive testing documentation for pytest and Playwright
-- **[Frontend Coding Standards](CODING_STANDARDS.md)** - Frontend code quality guidelines and optimization patterns
-- **[Backend Coding Standards](BACKEND_CODING_STANDARDS.md)** - Backend optimization patterns and performance guidelines
-- **[CRUD System Documentation](CRUD_SYSTEM_DOCUMENTATION.md)** - Generic CRUD operations guide
-- **[Backend Scaffolding Usage Guide](backend/docs/backend-scaffolding-usage.md)** - Complete scaffolding documentation
-
-## API Documentation & Testing
-
-### Swagger UI Integration
-The application includes a comprehensive Swagger UI integration for interactive API documentation and testing:
-
-#### Features
-- **Interactive Documentation**: Browse and test all API endpoints directly from the browser
-- **Authentication Support**: Automatic token injection for protected endpoints
-- **Real-time API Testing**: Test API endpoints with live data and see responses
-- **Connection Status**: Real-time API server connectivity monitoring
-- **Request/Response Inspection**: Detailed request and response information
-
-#### Access Points
-- **Built-in Swagger UI**: Access at `http://localhost:3000/api-docs` (Frontend integration)
-- **FastAPI Docs**: Native documentation at `http://localhost:8000/docs`
-- **OpenAPI Spec**: Raw specification at `http://localhost:8000/api/v1/openapi.json`
-
-## URL State Management
-
-The FastNext Framework includes comprehensive URL state management using nuqs, providing type-safe state synchronization with the browser URL. This enables shareable links, browser history support, and persistent filter states.
-
-### Features
-- **Type-safe URL parameters**: Automatic parsing and validation of URL query parameters
-- **Shareable links**: Share filtered views and application states via URL
-- **Browser history support**: Navigate back/forward through different states
-- **Persistent state**: Filters, pagination, and view modes persist across page refreshes
-
-### Built-in URL State Hooks
-
-```typescript
-import { 
-  useSearchState,
-  usePaginationState,
-  useSortState,
-  useViewModeState,
-  useTabState,
-  useFilterArrayState,
-  useBooleanFilterState
-} from '@/shared/hooks'
-
-// Search functionality
-const [search, setSearch] = useSearchState()
-
-// Pagination with page and limit
-const { page, setPage, limit, offset } = usePaginationState(1, 20)
-
-// Sorting with field and direction
-const { sortBy, setSortBy, sortOrder, setSortOrder } = useSortState('name', 'asc')
-```
-
-## Testing Infrastructure
-
-The FastNext Framework includes comprehensive testing capabilities covering both backend unit/integration testing and frontend end-to-end testing.
-
-### Backend Testing (pytest)
-- **Test Framework**: pytest with async support and comprehensive fixtures
-- **Coverage Reporting**: 80% minimum coverage requirement with HTML/XML reports
-- **Test Structure**: Organized unit, integration, API, auth, workflow, and CRUD tests
-- **Test Runner**: Advanced test runner script with multiple execution modes
-- **Database Testing**: SQLite test database with automatic cleanup
-- **Authentication Testing**: JWT token testing with admin and user fixtures
-
-#### Running Backend Tests
-```bash
-# Using the test runner (recommended)
-cd backend
-python test_runner.py
-
-# Run specific test types
-python test_runner.py --type unit
-python test_runner.py --parallel
-python test_runner.py --report
-```
-
-### Frontend E2E Testing (Playwright)
-- **Multi-Browser Support**: Chrome, Firefox, Safari testing
-- **Authentication State**: Stored login sessions for different user roles
-- **Test Organization**: Structured tests for auth, admin, workflow, and API
-- **Screenshot/Video**: Automatic capture on test failures
-- **Parallel Execution**: Concurrent test execution for faster feedback
-
-#### Running E2E Tests
-```bash
+# Frontend scaffolding
 cd frontend
-npm run test:e2e
-npm run test:e2e:ui
-npx playwright show-report
+npm run scaffold:component                 # Generate React components
+npm run scaffold:page                      # Generate Next.js pages
 ```
 
-## Frontend Code Restructuring
+### 🚀 Performance Tools
+```bash
+# Bundle analysis
+npm run analyze                 # Webpack bundle analyzer
+npm run build                   # Production build with optimization
 
-### Modular Architecture Implementation ✅
+# Performance testing
+npm run test:performance        # Performance benchmarks
+python -m pytest tests/ --benchmark-only   # Backend benchmarks
+```
 
-The FastNext Framework frontend has been completely restructured into a modular architecture that promotes scalability, maintainability, and developer productivity. The new structure organizes code into feature-based modules with clear separation of concerns.
+## 🤝 Contributing
 
-#### Key Restructuring Benefits
+We welcome contributions! Please follow these guidelines:
 
-- **Feature-based Organization**: Each major feature (auth, admin, workflow, etc.) is self-contained
-- **Clear Module Boundaries**: Explicit interfaces and dependencies between modules
-- **Shared Resource Management**: Centralized UI components, services, and utilities
-- **Improved Developer Experience**: Predictable file locations and clean import patterns
-- **Enhanced Scalability**: New features can be added as independent modules
-- **Better Testing Structure**: Organized test files with clear separation by feature
+### 🔒 Security First
+1. **Security Review**: All contributions undergo security review
+2. **Vulnerability Disclosure**: Report security issues privately
+3. **Code Standards**: Follow security coding standards
+4. **Testing**: Include security tests for new features
 
-#### Migration Status
+### 📋 Development Process
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Run security audit (`npm run security:full`)
+4. Write tests and ensure coverage
+5. Commit with conventional commits
+6. Push and create a Pull Request
 
-The restructuring is complete with the following organization:
-- ✅ **Modules Directory**: Feature-based modules (auth, admin, workflow, projects, api-docs, dashboard, settings)
-- ✅ **Shared Directory**: Reusable components, hooks, services, types, and utilities
-- ✅ **Component Organization**: UI components organized by category (ui, layout, navigation, data-visualization)
-- ✅ **Service Layer**: Structured API services with clear separation
-- ✅ **Type Definitions**: Centralized type management with module-specific types
-- ✅ **Hook Organization**: Shared hooks for common functionality (URL state, API queries, etc.)
-- ✅ **Testing Structure**: E2E tests organized by feature with comprehensive utilities
+### 📝 Code Standards
+- **TypeScript**: Strict mode with comprehensive typing
+- **Python**: PEP 8 compliance with type hints
+- **Security**: OWASP compliance and security reviews
+- **Testing**: Minimum 80% code coverage required
+- **Documentation**: Comprehensive docs for all features
 
-## Recent Updates & Improvements
+Please read our [Contributing Guidelines](CONTRIBUTING.md) and [Code of Conduct](CODE_OF_CONDUCT.md) for detailed information.
 
-### Latest Changes ✅
+## 📄 License
 
-#### Scaffolding System Enhancements
-- **🔥 Unified Full-Stack Scaffolding**: Complete CRUD generation for both frontend and backend from single configuration
-- **🎯 Interactive Model Builder**: Build models interactively with step-by-step prompts and validation
-- **📄 Configuration-Driven Development**: JSON schemas define complete models with validation and relationships
-- **⚡ Production-Ready Generation**: Generated code follows FastNext framework conventions and best practices
-- **🧪 Comprehensive Test Generation**: Unit, integration, performance, and security tests included
-- **🔐 Advanced Permission Integration**: RBAC with resource-level and field-level access control
-- **🎨 TypeScript Integration**: Frontend type definitions and React Query hooks generation
-- **📊 GraphQL Support**: Optional GraphQL schema generation with DataLoaders
-- **📚 API Documentation**: Automatic OpenAPI/Swagger documentation generation
-- **🗄️ Database Optimization**: Intelligent indexing and performance optimization
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-#### Core Framework Improvements
-- **🚀 Performance Optimization Framework**: Complete backend optimization with advanced caching, database optimization, and async patterns
-- **⚡ Frontend Optimization**: React memoization patterns, component lazy loading, virtual scrolling, and performance monitoring
-- **🔄 Advanced Caching System**: Multi-tier caching with Memory, Redis, and Hybrid backends with intelligent eviction
-- **📊 Performance Monitoring**: Real-time metrics, system monitoring, alert management, and comprehensive analytics
-- **🌐 Response Optimization**: Compression, minification, ETag support, and conditional request handling
-- **⚡ Async Optimization**: Task management, resource pooling, circuit breakers, and retry mechanisms
+## 🙏 Acknowledgments
 
-#### Development & Testing
-- **Comprehensive Testing Infrastructure**: Added pytest for backend testing and Playwright for e2e testing with complete documentation
-- **Test Coverage Requirements**: Implemented 80% minimum coverage with HTML/XML reporting and CI/CD integration
-- **ReactFlow Workflow System**: Complete workflow management system with visual builder, custom nodes, and execution engine
-- **Database-Driven Workflows**: Dynamic workflow types, states, and templates stored in database instead of hardcoded
-- **URL State Management**: Integrated nuqs for type-safe URL-based state management across the application
-- **Modular Frontend Architecture**: Complete restructuring into feature-based modules with clear separation of concerns
+- **Next.js Team**: Revolutionary React framework with App Router
+- **FastAPI Team**: High-performance Python web framework
+- **Radix UI**: Accessible component primitives
+- **Tailwind CSS**: Utility-first CSS framework
+- **tRPC**: End-to-end type safety
+- **Security Community**: OWASP and security researchers
+- **Open Source Contributors**: Amazing libraries and tools
 
-#### Enterprise Features
-- **Role-Based Access Control**: Complete RBAC implementation with roles and permissions
-- **System Roles**: Admin, Editor, Viewer, Member with predefined permissions
-- **Project Collaboration**: Multi-user project access with role-based permissions
-- **Security Management**: 2FA setup, session controls, and notification preferences
-- **Activity Monitoring**: Personal activity logs with filtering and export
-- **Audit Trail System**: Comprehensive change tracking with value comparisons
-- **Swagger UI Integration**: Interactive API documentation with authentication support
+## 🆘 Support & Community
 
-#### Bug Fixes & Quality Improvements
-- **✅ Fixed TypeScript Errors**: Resolved all TypeScript compilation errors across the frontend
-- **✅ Type Safety Improvements**: Enhanced type definitions for optional fields and proper null handling
-- **✅ API Response Handling**: Fixed API client response extraction and error handling
-- **✅ Form Validation**: Improved form validation and default value handling
-- **✅ Build Optimization**: Frontend now builds successfully with full type checking
+- **Issues**: [GitHub Issues](https://github.com/yourusername/fastnext/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/yourusername/fastnext/discussions)
+- **Security**: security@yourdomain.com
+- **Documentation**: [Project Wiki](https://github.com/yourusername/fastnext/wiki)
 
-## Upcoming Features
-- **Advanced Workflow Features**: Enhanced conditional logic, loops, and dynamic routing
-- **Workflow Analytics**: Performance metrics, bottleneck analysis, and optimization insights
-- **Integration Framework**: External system connectors and API integrations
-- **Advanced Security**: TOTP 2FA implementation and hardware key support
-- **Data Visualization**: Activity and security analytics dashboards
-- **Notification System**: Real-time in-app notifications and email alerts
-- **Mobile Workflow Management**: Native mobile app for workflow monitoring and approvals
+---
 
-## License
+<div align="center">
 
-MIT License - see LICENSE file for details.
+**FastNext Framework** - Production-ready full-stack development with enterprise security
+
+[⭐ Star this project](https://github.com/yourusername/fastnext) • [🐛 Report Bug](https://github.com/yourusername/fastnext/issues) • [✨ Request Feature](https://github.com/yourusername/fastnext/issues)
+
+</div>

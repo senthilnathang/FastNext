@@ -6,6 +6,7 @@ import { EnhancedThemeProvider } from "@/shared/providers/EnhancedThemeProvider"
 import { NuqsProvider, ConditionalAppLayout } from "@/shared/components";
 import { TRPCProvider } from "@/lib/trpc/provider";
 import { SecurityProvider } from "@/lib/security/SecurityProvider";
+import { SessionTimeoutWarning } from "@/shared/components/SessionTimeoutWarning";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -46,6 +47,14 @@ export default function RootLayout({
                   <ConditionalAppLayout>
                     {children}
                   </ConditionalAppLayout>
+                  <SessionTimeoutWarning 
+                    onTimeout={() => {
+                      window.location.href = '/auth/login?reason=session_timeout';
+                    }}
+                    onExtend={() => {
+                      console.log('Session extended by user');
+                    }}
+                  />
                 </AuthProvider>
               </EnhancedThemeProvider>
             </NuqsProvider>
