@@ -47,9 +47,7 @@ import {
   Workflow,
   Code,
   Play,
-  Pause,
-  Square,
-  Settings
+  Pause
 } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator, DropdownMenuLabel } from '@/shared/components/ui/dropdown-menu';
 

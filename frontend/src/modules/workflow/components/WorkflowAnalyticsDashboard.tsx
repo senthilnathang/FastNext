@@ -26,8 +26,7 @@ import {
   Clock, 
   CheckCircle, 
   AlertCircle, 
-  TrendingUp, 
-  Users,
+  TrendingUp,
   Zap,
   GitBranch
 } from 'lucide-react';
@@ -68,7 +67,6 @@ interface WorkflowAnalyticsDashboardProps {
   onTimeRangeChange: (range: '24h' | '7d' | '30d' | '90d') => void;
 }
 
-const COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899'];
 
 function WorkflowAnalyticsDashboard({ 
   metrics, 

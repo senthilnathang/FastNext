@@ -1,0 +1,418 @@
+// Trusted Types polyfill and configuration for XSS prevention
+// This implements the W3C Trusted Types specification
+
+declare global {
+  interface Window {
+    trustedTypes?: {
+      createPolicy(name: string, policy: TrustedTypePolicyOptions): TrustedTypePolicy;
+      defaultPolicy?: TrustedTypePolicy;
+      isHTML(value: any): boolean;
+      isScript(value: any): boolean;
+      isScriptURL(value: any): boolean;
+      emptyHTML: TrustedHTML;
+      emptyScript: TrustedScript;
+    };
+  }
+
+  interface TrustedHTML {
+    readonly __brand: 'TrustedHTML';
+  }
+
+  interface TrustedScript {
+    readonly __brand: 'TrustedScript';
+  }
+
+  interface TrustedScriptURL {
+    readonly __brand: 'TrustedScriptURL';
+  }
+
+  interface TrustedTypePolicy {
+    name: string;
+    createHTML?(input: string, ...args: any[]): TrustedHTML;
+    createScript?(input: string, ...args: any[]): TrustedScript;
+    createScriptURL?(input: string, ...args: any[]): TrustedScriptURL;
+  }
+
+  interface TrustedTypePolicyOptions {
+    createHTML?(input: string, ...args: any[]): string;
+    createScript?(input: string, ...args: any[]): string;
+    createScriptURL?(input: string, ...args: any[]): string;
+  }
+}
+
+// Simple polyfill for browsers that don't support Trusted Types
+class TrustedTypesPolyfill {
+  private policies = new Map<string, TrustedTypePolicy>();
+  public defaultPolicy?: TrustedTypePolicy;
+
+  createPolicy(name: string, policy: TrustedTypePolicyOptions): TrustedTypePolicy {
+    if (this.policies.has(name)) {
+      throw new Error(`Policy with name "${name}" already exists`);
+    }
+
+    const trustedPolicy: TrustedTypePolicy = {
+      name,
+      createHTML: policy.createHTML ? (input: string, ...args: any[]) => {
+        const result = policy.createHTML!(input, ...args);
+        return result as TrustedHTML;
+      } : undefined,
+      createScript: policy.createScript ? (input: string, ...args: any[]) => {
+        const result = policy.createScript!(input, ...args);
+        return result as TrustedScript;
+      } : undefined,
+      createScriptURL: policy.createScriptURL ? (input: string, ...args: any[]) => {
+        const result = policy.createScriptURL!(input, ...args);
+        return result as TrustedScriptURL;
+      } : undefined,
+    };
+
+    this.policies.set(name, trustedPolicy);
+    return trustedPolicy;
+  }
+
+  isHTML(value: any): boolean {
+    return typeof value === 'object' && value && value.__brand === 'TrustedHTML';
+  }
+
+  isScript(value: any): boolean {
+    return typeof value === 'object' && value && value.__brand === 'TrustedScript';
+  }
+
+  isScriptURL(value: any): boolean {
+    return typeof value === 'object' && value && value.__brand === 'TrustedScriptURL';
+  }
+
+  get emptyHTML(): TrustedHTML {
+    return '' as TrustedHTML;
+  }
+
+  get emptyScript(): TrustedScript {
+    return '' as TrustedScript;
+  }
+}
+
+// Initialize polyfill if Trusted Types is not supported
+if (typeof window !== 'undefined' && !window.trustedTypes) {
+  window.trustedTypes = new TrustedTypesPolyfill();
+}
+
+// DOMPurify integration for HTML sanitization
+let DOMPurify: any = null;
+
+// Dynamically import DOMPurify only when needed
+async function getDOMPurify() {
+  if (!DOMPurify && typeof window !== 'undefined') {
+    try {
+      const module = await import('dompurify');
+      DOMPurify = module.default;
+    } catch (error) {
+      console.warn('DOMPurify not available, using basic sanitization');
+    }
+  }
+  return DOMPurify;
+}
+
+// Basic HTML sanitization without DOMPurify
+function basicHTMLSanitize(html: string): string {
+  return html
+    .replace(/<script[\s\S]*?>[\s\S]*?<\/script>/gi, '')
+    .replace(/<iframe[\s\S]*?>/gi, '')
+    .replace(/<object[\s\S]*?>/gi, '')
+    .replace(/<embed[\s\S]*?>/gi, '')
+    .replace(/<applet[\s\S]*?>/gi, '')
+    .replace(/<meta[\s\S]*?>/gi, '')
+    .replace(/<link[\s\S]*?>/gi, '')
+    .replace(/on\w+\s*=/gi, '')
+    .replace(/javascript:/gi, '')
+    .replace(/vbscript:/gi, '')
+    .replace(/data:text\/html/gi, '');
+}
+
+// Advanced HTML sanitization with DOMPurify
+async function advancedHTMLSanitize(html: string): Promise<string> {
+  const purify = await getDOMPurify();
+  
+  if (purify) {
+    return purify.sanitize(html, {
+      ALLOWED_TAGS: [
+        'p', 'br', 'strong', 'em', 'u', 'i', 'b', 'a', 'ul', 'ol', 'li',
+        'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'blockquote', 'code', 'pre',
+        'div', 'span', 'img', 'table', 'thead', 'tbody', 'tr', 'td', 'th'
+      ],
+      ALLOWED_ATTR: [
+        'href', 'title', 'alt', 'src', 'width', 'height', 'class', 'id',
+        'target', 'rel', 'style'
+      ],
+      ALLOWED_URI_REGEXP: /^(?:(?:https?|ftp|mailto):|[^a-z]|[a-z+.-]+(?:[^a-z+.-:]|$))/i,
+    });
+  }
+  
+  return basicHTMLSanitize(html);
+}
+
+// URL validation and sanitization
+function sanitizeURL(url: string): string {
+  try {
+    const urlObj = new URL(url);
+    
+    // Block dangerous protocols
+    const dangerousProtocols = ['javascript:', 'vbscript:', 'data:', 'file:', 'ftp:'];
+    if (dangerousProtocols.some(protocol => url.toLowerCase().startsWith(protocol))) {
+      return 'about:blank';
+    }
+
+    // Only allow HTTP, HTTPS, and mailto
+    if (!['http:', 'https:', 'mailto:'].includes(urlObj.protocol)) {
+      return 'about:blank';
+    }
+
+    return urlObj.toString();
+  } catch (e) {
+    return 'about:blank';
+  }
+}
+
+// Script validation (basic - only allow known safe patterns)
+function validateScript(script: string): string {
+  // In production, you'd want more sophisticated validation
+  // For now, only allow very basic patterns
+  const dangerousPatterns = [
+    /eval\s*\(/gi,
+    /Function\s*\(/gi,
+    /setTimeout\s*\(/gi,
+    /setInterval\s*\(/gi,
+    /document\.write/gi,
+    /innerHTML/gi,
+    /outerHTML/gi,
+    /execScript/gi,
+    /javascript:/gi,
+    /vbscript:/gi
+  ];
+
+  for (const pattern of dangerousPatterns) {
+    if (pattern.test(script)) {
+      throw new Error('Script contains dangerous patterns');
+    }
+  }
+
+  return script;
+}
+
+// Create the main security policy
+export function createSecurityPolicy(): TrustedTypePolicy {
+  if (!window.trustedTypes) {
+    throw new Error('Trusted Types not supported');
+  }
+
+  return window.trustedTypes.createPolicy('fastnext-security', {
+    createHTML: async (input: string): Promise<string> => {
+      if (typeof input !== 'string') {
+        throw new Error('HTML input must be a string');
+      }
+
+      // Sanitize HTML content
+      return await advancedHTMLSanitize(input);
+    },
+
+    createScript: (input: string): string => {
+      if (typeof input !== 'string') {
+        throw new Error('Script input must be a string');
+      }
+
+      // Validate script content
+      return validateScript(input);
+    },
+
+    createScriptURL: (input: string): string => {
+      if (typeof input !== 'string') {
+        throw new Error('Script URL input must be a string');
+      }
+
+      // Sanitize and validate URL
+      return sanitizeURL(input);
+    }
+  });
+}
+
+// Create a stricter policy for user-generated content
+export function createStrictPolicy(): TrustedTypePolicy {
+  if (!window.trustedTypes) {
+    throw new Error('Trusted Types not supported');
+  }
+
+  return window.trustedTypes.createPolicy('fastnext-strict', {
+    createHTML: async (input: string): Promise<string> => {
+      if (typeof input !== 'string') {
+        throw new Error('HTML input must be a string');
+      }
+
+      const purify = await getDOMPurify();
+      
+      if (purify) {
+        // Very restrictive policy for user content
+        return purify.sanitize(input, {
+          ALLOWED_TAGS: ['p', 'br', 'strong', 'em', 'u', 'i', 'b'],
+          ALLOWED_ATTR: [],
+          STRIP_TAGS: true,
+          STRIP_COMMENTS: true
+        });
+      }
+      
+      // Fallback: strip all HTML tags
+      return input.replace(/<[^>]*>/g, '');
+    },
+
+    createScript: (): string => {
+      // Never allow scripts in strict policy
+      throw new Error('Scripts not allowed in strict policy');
+    },
+
+    createScriptURL: (): string => {
+      // Never allow script URLs in strict policy
+      throw new Error('Script URLs not allowed in strict policy');
+    }
+  });
+}
+
+// Utility class for working with Trusted Types
+export class TrustedTypesHelper {
+  private static securityPolicy: TrustedTypePolicy | null = null;
+  private static strictPolicy: TrustedTypePolicy | null = null;
+
+  static async getSecurityPolicy(): Promise<TrustedTypePolicy> {
+    if (!this.securityPolicy) {
+      this.securityPolicy = createSecurityPolicy();
+    }
+    return this.securityPolicy;
+  }
+
+  static async getStrictPolicy(): Promise<TrustedTypePolicy> {
+    if (!this.strictPolicy) {
+      this.strictPolicy = createStrictPolicy();
+    }
+    return this.strictPolicy;
+  }
+
+  // Safe HTML creation
+  static async createSafeHTML(html: string, strict = false): Promise<TrustedHTML> {
+    const policy = strict ? await this.getStrictPolicy() : await this.getSecurityPolicy();
+    
+    if (!policy.createHTML) {
+      throw new Error('Policy does not support HTML creation');
+    }
+
+    return policy.createHTML(html);
+  }
+
+  // Safe script creation
+  static async createSafeScript(script: string): Promise<TrustedScript> {
+    const policy = await this.getSecurityPolicy();
+    
+    if (!policy.createScript) {
+      throw new Error('Policy does not support script creation');
+    }
+
+    return policy.createScript(script);
+  }
+
+  // Safe script URL creation
+  static async createSafeScriptURL(url: string): Promise<TrustedScriptURL> {
+    const policy = await this.getSecurityPolicy();
+    
+    if (!policy.createScriptURL) {
+      throw new Error('Policy does not support script URL creation');
+    }
+
+    return policy.createScriptURL(url);
+  }
+
+  // Check if value is trusted
+  static isTrustedHTML(value: any): boolean {
+    return window.trustedTypes?.isHTML(value) ?? false;
+  }
+
+  static isTrustedScript(value: any): boolean {
+    return window.trustedTypes?.isScript(value) ?? false;
+  }
+
+  static isTrustedScriptURL(value: any): boolean {
+    return window.trustedTypes?.isScriptURL(value) ?? false;
+  }
+}
+
+// React hook for safe HTML rendering
+export function useSafeHTML(html: string, strict = false) {
+  const [trustedHTML, setTrustedHTML] = React.useState<TrustedHTML | null>(null);
+  const [error, setError] = React.useState<string | null>(null);
+  const [loading, setLoading] = React.useState(true);
+
+  React.useEffect(() => {
+    let isCancelled = false;
+
+    const createTrustedHTML = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        
+        const trusted = await TrustedTypesHelper.createSafeHTML(html, strict);
+        
+        if (!isCancelled) {
+          setTrustedHTML(trusted);
+        }
+      } catch (err) {
+        if (!isCancelled) {
+          setError(err instanceof Error ? err.message : 'Unknown error');
+          setTrustedHTML(null);
+        }
+      } finally {
+        if (!isCancelled) {
+          setLoading(false);
+        }
+      }
+    };
+
+    createTrustedHTML();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [html, strict]);
+
+  return { trustedHTML, error, loading };
+}
+
+// Initialize Trusted Types on app startup
+export function initializeTrustedTypes(): void {
+  if (typeof window === 'undefined') return;
+
+  try {
+    // Create default policy if it doesn't exist
+    if (window.trustedTypes && !window.trustedTypes.defaultPolicy) {
+      window.trustedTypes.createPolicy('default', {
+        createHTML: (input: string) => {
+          console.warn('Using default policy for HTML creation:', input);
+          return basicHTMLSanitize(input);
+        },
+        createScript: (input: string) => {
+          console.warn('Using default policy for script creation:', input);
+          throw new Error('Scripts must use explicit policy');
+        },
+        createScriptURL: (input: string) => {
+          console.warn('Using default policy for script URL creation:', input);
+          return sanitizeURL(input);
+        }
+      });
+    }
+
+    // Pre-create our main policies
+    createSecurityPolicy();
+    createStrictPolicy();
+
+    console.log('Trusted Types initialized successfully');
+  } catch (error) {
+    console.error('Failed to initialize Trusted Types:', error);
+  }
+}
+
+// Export React for the hook
+import React from 'react';

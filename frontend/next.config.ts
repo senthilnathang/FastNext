@@ -59,25 +59,93 @@ const nextConfig: NextConfig = {
 
   // Headers for security and performance
   async headers() {
+    const isDev = process.env.NODE_ENV === 'development';
+    
+    // Generate nonce for CSP
+    const nonce = Buffer.from(require('crypto').randomBytes(16)).toString('base64');
+    
+    // Content Security Policy
+    const cspDirectives = [
+      "default-src 'self'",
+      `script-src 'self' 'unsafe-inline' ${isDev ? "'unsafe-eval'" : ''} https://cdn.jsdelivr.net https://unpkg.com https://vercel.live`,
+      `style-src 'self' 'unsafe-inline' https://fonts.googleapis.com`,
+      "font-src 'self' https://fonts.gstatic.com data:",
+      "img-src 'self' data: https: blob:",
+      "media-src 'self' https:",
+      "object-src 'none'",
+      "base-uri 'self'",
+      "form-action 'self'",
+      "frame-ancestors 'none'",
+      "frame-src 'none'",
+      `connect-src 'self' ${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'} https://vercel.live wss://vercel.live`,
+      "worker-src 'self' blob:",
+      "manifest-src 'self'",
+      "upgrade-insecure-requests"
+    ];
+
+    const csp = cspDirectives.join('; ');
+
     return [
       {
         source: '/(.*)',
         headers: [
+          // Content Security Policy
+          {
+            key: 'Content-Security-Policy',
+            value: csp,
+          },
+          // Trusted Types (for browsers that support it)
+          {
+            key: 'Trusted-Types',
+            value: "dompurify default",
+          },
+          // Require Trusted Types for scripts
+          {
+            key: 'Require-Trusted-Types-For',
+            value: "'script'",
+          },
+          // Frame Options
           {
             key: 'X-Frame-Options',
-            value: 'SAMEORIGIN',
+            value: 'DENY',
           },
+          // Content Type Options
           {
             key: 'X-Content-Type-Options',
             value: 'nosniff',
           },
+          // XSS Protection
           {
             key: 'X-XSS-Protection',
             value: '1; mode=block',
           },
+          // Referrer Policy
           {
             key: 'Referrer-Policy',
             value: 'strict-origin-when-cross-origin',
+          },
+          // Strict Transport Security
+          {
+            key: 'Strict-Transport-Security',
+            value: 'max-age=31536000; includeSubDomains; preload',
+          },
+          // Permissions Policy (Feature Policy)
+          {
+            key: 'Permissions-Policy',
+            value: 'camera=(), microphone=(), geolocation=(), gyroscope=(), magnetometer=(), payment=(), usb=()',
+          },
+          // Cross-Origin policies
+          {
+            key: 'Cross-Origin-Embedder-Policy',
+            value: 'require-corp',
+          },
+          {
+            key: 'Cross-Origin-Opener-Policy',
+            value: 'same-origin',
+          },
+          {
+            key: 'Cross-Origin-Resource-Policy',
+            value: 'same-origin',
           },
         ],
       },
@@ -87,6 +155,24 @@ const nextConfig: NextConfig = {
           {
             key: 'Cache-Control',
             value: 'no-cache, no-store, must-revalidate',
+          },
+          {
+            key: 'X-Content-Type-Options',
+            value: 'nosniff',
+          },
+          {
+            key: 'X-Frame-Options',
+            value: 'DENY',
+          },
+        ],
+      },
+      // Special headers for static assets
+      {
+        source: '/static/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
           },
         ],
       },

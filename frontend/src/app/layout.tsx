@@ -5,6 +5,7 @@ import { AuthProvider } from "@/modules/auth";
 import { EnhancedThemeProvider } from "@/shared/providers/EnhancedThemeProvider";
 import { NuqsProvider, ConditionalAppLayout } from "@/shared/components";
 import { TRPCProvider } from "@/lib/trpc/provider";
+import { SecurityProvider } from "@/lib/security/SecurityProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -31,23 +32,25 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <TRPCProvider>
-          <NuqsProvider>
-            <EnhancedThemeProvider 
-              attribute="class" 
-              defaultTheme="system" 
-              enableSystem
-              defaultColorScheme="default"
-              colorSchemeStorageKey="color-scheme"
-            >
-              <AuthProvider>
-                <ConditionalAppLayout>
-                  {children}
-                </ConditionalAppLayout>
-              </AuthProvider>
-            </EnhancedThemeProvider>
-          </NuqsProvider>
-        </TRPCProvider>
+        <SecurityProvider>
+          <TRPCProvider>
+            <NuqsProvider>
+              <EnhancedThemeProvider 
+                attribute="class" 
+                defaultTheme="system" 
+                enableSystem
+                defaultColorScheme="default"
+                colorSchemeStorageKey="color-scheme"
+              >
+                <AuthProvider>
+                  <ConditionalAppLayout>
+                    {children}
+                  </ConditionalAppLayout>
+                </AuthProvider>
+              </EnhancedThemeProvider>
+            </NuqsProvider>
+          </TRPCProvider>
+        </SecurityProvider>
       </body>
     </html>
   );
