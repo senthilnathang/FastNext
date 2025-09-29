@@ -74,6 +74,7 @@
     "swagger-ui": "^5.29.0",
     "swagger-ui-react": "^5.29.0",
     "tailwind-merge": "^3.3.1",
+    "xlsx": "^0.18.5",
     "zod": "^4.1.11"
   },
   "devDependencies": {
@@ -92,6 +93,7 @@
     "@types/node": "^24.5.2",
     "@types/react": "^19.1.13",
     "@types/react-dom": "^19",
+    "@types/xlsx": "^0.0.36",
     "eslint": "^9.36.0",
     "eslint-config-next": "15.5.3",
     "eslint-plugin-storybook": "^9.1.7",
