@@ -135,6 +135,16 @@ export default function DataImportPage() {
     }
   };
 
+  const mapSqlTypeToImportType = (sqlType: string): 'string' | 'number' | 'boolean' | 'object' | 'url' | 'date' | 'email' => {
+    const type = sqlType.toLowerCase();
+    if (type.includes('int') || type.includes('serial')) return 'number';
+    if (type.includes('decimal') || type.includes('numeric') || type.includes('float') || type.includes('double')) return 'number';
+    if (type.includes('bool')) return 'boolean';
+    if (type.includes('date') || type.includes('time')) return 'date';
+    if (type.includes('json')) return 'object';
+    return 'string';
+  };
+
   const importColumns = useMemo(() => {
     if (!tableSchema) return [];
     
@@ -182,16 +192,6 @@ export default function DataImportPage() {
       console.error('Import error:', error);
       throw error;
     }
-  };
-
-  const mapSqlTypeToImportType = (sqlType: string): 'string' | 'number' | 'boolean' | 'object' | 'url' | 'date' | 'email' => {
-    const type = sqlType.toLowerCase();
-    if (type.includes('int') || type.includes('serial')) return 'number';
-    if (type.includes('decimal') || type.includes('numeric') || type.includes('float') || type.includes('double')) return 'number';
-    if (type.includes('bool')) return 'boolean';
-    if (type.includes('date') || type.includes('time')) return 'date';
-    if (type.includes('json')) return 'object';
-    return 'string';
   };
 
   const convertDataToCSV = (data: any[]): string => {

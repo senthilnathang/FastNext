@@ -792,23 +792,54 @@ async def get_table_permissions(
         export_result = await db.execute(export_query)
         export_permission = export_result.scalar_one_or_none()
         
+        # If no permissions exist, create default ones
+        if not import_permission:
+            import_permission = ImportPermission(
+                user_id=current_user.id,
+                table_name=table_name,
+                can_import=True,
+                can_validate=True,
+                can_preview=True,
+                max_file_size_mb=10,
+                max_rows_per_import=10000,
+                allowed_formats=["csv", "json", "excel"],
+                requires_approval=False
+            )
+            db.add(import_permission)
+            await db.commit()
+            await db.refresh(import_permission)
+        
+        if not export_permission:
+            export_permission = ExportPermission(
+                user_id=current_user.id,
+                table_name=table_name,
+                can_export=True,
+                can_preview=True,
+                max_rows_per_export=100000,
+                allowed_formats=["csv", "json", "excel"],
+                allowed_columns=[]
+            )
+            db.add(export_permission)
+            await db.commit()
+            await db.refresh(export_permission)
+        
         return {
             "table_name": table_name,
             "import_permission": {
-                "can_import": import_permission.can_import if import_permission else False,
-                "can_validate": import_permission.can_validate if import_permission else False,
-                "can_preview": import_permission.can_preview if import_permission else False,
-                "max_file_size_mb": import_permission.max_file_size_mb if import_permission else 10,
-                "max_rows_per_import": import_permission.max_rows_per_import if import_permission else 10000,
-                "allowed_formats": import_permission.allowed_formats if import_permission else ["csv", "json"],
-                "requires_approval": import_permission.requires_approval if import_permission else False
+                "can_import": import_permission.can_import,
+                "can_validate": import_permission.can_validate,
+                "can_preview": import_permission.can_preview,
+                "max_file_size_mb": import_permission.max_file_size_mb,
+                "max_rows_per_import": import_permission.max_rows_per_import,
+                "allowed_formats": import_permission.allowed_formats,
+                "requires_approval": import_permission.requires_approval
             },
             "export_permission": {
-                "can_export": export_permission.can_export if export_permission else False,
-                "can_preview": export_permission.can_preview if export_permission else False,
-                "max_rows_per_export": export_permission.max_rows_per_export if export_permission else 100000,
-                "allowed_formats": export_permission.allowed_formats if export_permission else ["csv", "json"],
-                "allowed_columns": export_permission.allowed_columns if export_permission else []
+                "can_export": export_permission.can_export,
+                "can_preview": export_permission.can_preview,
+                "max_rows_per_export": export_permission.max_rows_per_export,
+                "allowed_formats": export_permission.allowed_formats,
+                "allowed_columns": export_permission.allowed_columns
             }
         }
         

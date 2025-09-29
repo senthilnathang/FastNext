@@ -184,6 +184,16 @@ export default function DataExportPage() {
     }
   };
 
+  const mapSqlTypeToExportType = (sqlType: string): 'string' | 'number' | 'boolean' | 'object' | 'date' => {
+    const type = sqlType.toLowerCase();
+    if (type.includes('int') || type.includes('serial')) return 'number';
+    if (type.includes('decimal') || type.includes('numeric') || type.includes('float') || type.includes('double')) return 'number';
+    if (type.includes('bool')) return 'boolean';
+    if (type.includes('date') || type.includes('time')) return 'date';
+    if (type.includes('json')) return 'object';
+    return 'string';
+  };
+
   const exportColumns = useMemo(() => {
     if (!tableSchema) return [];
     
@@ -257,16 +267,6 @@ export default function DataExportPage() {
       console.error('Export error:', error);
       throw error;
     }
-  };
-
-  const mapSqlTypeToExportType = (sqlType: string): 'string' | 'number' | 'boolean' | 'object' | 'date' => {
-    const type = sqlType.toLowerCase();
-    if (type.includes('int') || type.includes('serial')) return 'number';
-    if (type.includes('decimal') || type.includes('numeric') || type.includes('float') || type.includes('double')) return 'number';
-    if (type.includes('bool')) return 'boolean';
-    if (type.includes('date') || type.includes('time')) return 'date';
-    if (type.includes('json')) return 'object';
-    return 'string';
   };
 
   const renderTableInfo = () => {
