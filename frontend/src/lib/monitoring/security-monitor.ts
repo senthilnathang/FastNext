@@ -67,6 +67,15 @@ class SecurityMonitor {
   };
 
   private constructor() {
+    // Check if security monitoring should be disabled
+    const disableMonitoring = process.env.NODE_ENV === 'development' || 
+                              process.env.DISABLE_SECURITY_MONITORING === 'true';
+    
+    if (disableMonitoring) {
+      this.isEnabled = false;
+      return;
+    }
+
     this.initializeMonitoring();
   }
 
@@ -261,8 +270,8 @@ class SecurityMonitor {
       threshold: this.alertThresholds[eventType].count,
       firstSeen: events[0].timestamp,
       lastSeen: events[events.length - 1].timestamp,
-      affectedIPs: [...new Set(events.map(e => e.clientIP).filter(Boolean))],
-      affectedUsers: [...new Set(events.map(e => e.userId).filter(Boolean))]
+      affectedIPs: [...new Set(events.map(e => e.clientIP).filter((ip): ip is string => Boolean(ip)))],
+      affectedUsers: [...new Set(events.map(e => e.userId).filter((id): id is string => Boolean(id)))]
     };
 
     this.alerts.push(alert);
@@ -487,10 +496,15 @@ export function getSecurityStatistics(timeRange?: number) {
 }
 
 // Initialize monitoring
-if (typeof window !== 'undefined') {
-  // Client-side initialization
-  console.log('Security monitoring initialized on client');
-} else {
-  // Server-side initialization
-  console.log('Security monitoring initialized on server');
+const disableMonitoring = process.env.NODE_ENV === 'development' || 
+                          process.env.DISABLE_SECURITY_MONITORING === 'true';
+
+if (!disableMonitoring) {
+  if (typeof window !== 'undefined') {
+    // Client-side initialization
+    console.log('Security monitoring initialized on client');
+  } else {
+    // Server-side initialization
+    console.log('Security monitoring initialized on server');
+  }
 }

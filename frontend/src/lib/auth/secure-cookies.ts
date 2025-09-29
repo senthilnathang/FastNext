@@ -12,7 +12,7 @@ export interface CookieSecurityOptions {
 
 export const SECURE_COOKIE_DEFAULTS: Required<Omit<CookieSecurityOptions, 'expires' | 'domain'>> = {
   httpOnly: true,
-  secure: process.env.NODE_ENV === 'production',
+  secure: (process.env.NODE_ENV === 'production' && process.env.BYPASS_HTTPS_CHECK !== 'true') || process.env.FORCE_SECURE_COOKIES === 'true',
   sameSite: 'strict',
   maxAge: 60 * 60 * 24 * 7, // 7 days
   path: '/'
@@ -32,7 +32,7 @@ export const REFRESH_TOKEN_CONFIG: CookieSecurityOptions = {
 
 export const CSRF_TOKEN_CONFIG: CookieSecurityOptions = {
   httpOnly: false, // CSRF tokens need to be readable by client
-  secure: process.env.NODE_ENV === 'production',
+  secure: (process.env.NODE_ENV === 'production' && process.env.BYPASS_HTTPS_CHECK !== 'true') || process.env.FORCE_SECURE_COOKIES === 'true',
   sameSite: 'strict',
   maxAge: 60 * 60 * 24, // 24 hours
   path: '/'
@@ -148,14 +148,19 @@ export class SecureCookieManager {
     const issues: string[] = [];
     const warnings: string[] = [];
 
-    // Check if running over HTTPS in production
-    if (process.env.NODE_ENV === 'production') {
-      const protocol = request.headers.get('x-forwarded-proto') || 
-                      request.nextUrl.protocol;
+    // Check if running over HTTPS in production (unless bypassed for dev)
+    const bypassHttpsCheck = process.env.BYPASS_HTTPS_CHECK === 'true';
+    
+    if (process.env.NODE_ENV === 'production' && !bypassHttpsCheck) {
+      const forwardedProto = request.headers.get('x-forwarded-proto');
+      const urlProtocol = request.nextUrl.protocol;
+      const isHttps = forwardedProto === 'https' || urlProtocol === 'https:';
       
-      if (protocol !== 'https:') {
+      if (!isHttps) {
         issues.push('Secure cookies require HTTPS in production');
       }
+    } else if (bypassHttpsCheck && process.env.NODE_ENV === 'production') {
+      warnings.push('HTTPS check bypassed - not recommended for production');
     }
 
     // Validate cookie headers

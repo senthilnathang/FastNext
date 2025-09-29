@@ -15,14 +15,10 @@ import { Progress } from '@/shared/components/ui/progress';
 import { Clock, Shield, AlertTriangle } from 'lucide-react';
 
 interface SessionTimeoutWarningProps {
-  onTimeout?: () => void;
-  onExtend?: () => void;
   userRole?: string;
 }
 
 export function SessionTimeoutWarning({ 
-  onTimeout, 
-  onExtend, 
   userRole 
 }: SessionTimeoutWarningProps) {
   const {
@@ -35,11 +31,12 @@ export function SessionTimeoutWarning({
     isActive
   } = useSessionTimeout({
     onTimeout: () => {
-      onTimeout?.();
       // Redirect to login or show expired message
-      window.location.href = '/auth/login?reason=session_expired';
+      window.location.href = '/auth/login?reason=session_timeout';
     },
-    onExtend,
+    onExtend: () => {
+      console.log('Session extended by user');
+    },
     onIdle: () => {
       // Could show idle notification
       console.log('User went idle');
@@ -57,7 +54,7 @@ export function SessionTimeoutWarning({
     extendSession();
     setAutoExtendCount(prev => prev + 1);
     setShowDialog(false);
-    onExtend?.();
+    console.log('Session extended by user');
   };
 
   const handleLogout = () => {

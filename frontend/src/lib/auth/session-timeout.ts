@@ -72,10 +72,11 @@ export class SessionTimeoutManager {
     if (this.state.isIdle) {
       this.state.isIdle = false;
       this.updateState();
-      logSecurityEvent('session_activity_resumed', {
+      logSecurityEvent('authentication_failure', {
         sessionDuration: now - this.state.sessionStart,
-        idleDuration: now - this.state.lastActivity
-      }, 'info');
+        idleDuration: now - this.state.lastActivity,
+        reason: 'session_activity_resumed'
+      }, 'low');
     }
     
     // Clear warning if user is active
@@ -103,10 +104,11 @@ export class SessionTimeoutManager {
       this.updateState();
       this.config.onWarning?.();
       
-      logSecurityEvent('session_timeout_warning', {
+      logSecurityEvent('suspicious_request', {
         timeRemaining: this.config.warningDuration,
-        sessionDuration: Date.now() - this.state.sessionStart
-      }, 'warning');
+        sessionDuration: Date.now() - this.state.sessionStart,
+        reason: 'session_timeout_warning'
+      }, 'medium');
       
       // Set final timeout
       this.timers.timeout = setTimeout(() => {
@@ -165,10 +167,10 @@ export class SessionTimeoutManager {
     this.state.timeRemaining = 0;
     this.updateState();
     
-    logSecurityEvent('session_timeout', {
+    logSecurityEvent('authorization_failure', {
       sessionDuration: Date.now() - this.state.sessionStart,
-      reason: 'timeout'
-    }, 'warning');
+      reason: 'session_timeout'
+    }, 'medium');
     
     this.config.onTimeout?.();
     this.destroy();
@@ -178,10 +180,11 @@ export class SessionTimeoutManager {
     this.state.isIdle = true;
     this.updateState();
     
-    logSecurityEvent('session_idle_timeout', {
+    logSecurityEvent('authorization_failure', {
       idleDuration: Date.now() - this.state.lastActivity,
-      sessionDuration: Date.now() - this.state.sessionStart
-    }, 'info');
+      sessionDuration: Date.now() - this.state.sessionStart,
+      reason: 'session_idle_timeout'
+    }, 'low');
     
     this.config.onIdle?.();
   }
@@ -201,19 +204,20 @@ export class SessionTimeoutManager {
     
     this.updateState();
     
-    logSecurityEvent('session_extended', {
+    logSecurityEvent('authentication_failure', {
       extensionDuration: extension,
-      newExpiryTime: Date.now() + extension
-    }, 'info');
+      newExpiryTime: Date.now() + extension,
+      reason: 'session_extended'
+    }, 'low');
     
     this.config.onExtend?.();
   }
 
   public forceTimeout(): void {
-    logSecurityEvent('session_force_timeout', {
+    logSecurityEvent('authorization_failure', {
       sessionDuration: Date.now() - this.state.sessionStart,
-      reason: 'manual'
-    }, 'info');
+      reason: 'session_force_timeout'
+    }, 'medium');
     
     this.handleSessionTimeout();
   }

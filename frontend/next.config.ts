@@ -4,13 +4,10 @@ const nextConfig: NextConfig = {
   // Enable standalone output for Docker
   output: process.env.DOCKER_BUILD === 'true' ? 'standalone' : undefined,
   
-  // Experimental features
-  experimental: {
-    // Enable turbopack for faster builds
-    turbo: {
-      rules: {
-        // Add custom turbopack rules if needed
-      }
+  // Turbopack configuration
+  turbopack: {
+    rules: {
+      // Add custom turbopack rules if needed
     }
   },
 

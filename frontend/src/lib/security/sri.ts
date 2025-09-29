@@ -1,4 +1,5 @@
 import crypto from 'crypto';
+import * as React from 'react';
 
 interface SRIResource {
   url: string;
@@ -117,17 +118,16 @@ export function SecureScript({
     console.warn(`No SRI hash provided for script: ${src}. This is a security risk.`);
   }
 
-  return (
-    <script
-      src={src}
-      integrity={finalIntegrity}
-      crossOrigin={crossOrigin}
-      async={async}
-      defer={defer}
-      onLoad={onLoad}
-      onError={onError}
-    />
-  );
+  const script = document.createElement('script');
+  script.src = src;
+  if (finalIntegrity) script.integrity = finalIntegrity;
+  if (crossOrigin) script.crossOrigin = crossOrigin;
+  script.async = async;
+  script.defer = defer;
+  if (onLoad) script.onload = onLoad;
+  if (onError) script.onerror = (event) => onError(event instanceof Event ? event : new Event('error'));
+  
+  return script;
 }
 
 // React component for secure stylesheet loading with SRI
@@ -155,17 +155,16 @@ export function SecureStylesheet({
     console.warn(`No SRI hash provided for stylesheet: ${href}. This is a security risk.`);
   }
 
-  return (
-    <link
-      rel="stylesheet"
-      href={href}
-      integrity={finalIntegrity}
-      crossOrigin={crossOrigin}
-      media={media}
-      onLoad={onLoad}
-      onError={onError}
-    />
-  );
+  const link = document.createElement('link');
+  link.rel = 'stylesheet';
+  link.href = href;
+  if (finalIntegrity) link.integrity = finalIntegrity;
+  if (crossOrigin) link.crossOrigin = crossOrigin;
+  if (media) link.media = media;
+  if (onLoad) link.onload = onLoad;
+  if (onError) link.onerror = (event) => onError(event instanceof Event ? event : new Event('error'));
+  
+  return link;
 }
 
 // Hook for dynamically loading scripts with SRI
@@ -312,5 +311,3 @@ export class SRIGenerator {
   }
 }
 
-// Export React namespace for the hook
-import React from 'react';

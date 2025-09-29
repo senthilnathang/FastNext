@@ -50,10 +50,10 @@ export function BasicExportExample() {
 // Example 2: DataTable Integration
 export function DataTableExportExample() {
   const tableColumns = [
-    { id: 'name', label: 'Name', accessor: 'name', type: 'string' },
-    { id: 'email', label: 'Email', accessor: 'email', type: 'string' },
-    { id: 'role', label: 'Role', accessor: 'role', type: 'string' },
-    { id: 'active', label: 'Status', accessor: 'active', type: 'boolean' },
+    { id: 'name', label: 'Name', accessor: 'name', type: 'string' as const },
+    { id: 'email', label: 'Email', accessor: 'email', type: 'string' as const },
+    { id: 'role', label: 'Role', accessor: 'role', type: 'string' as const },
+    { id: 'active', label: 'Status', accessor: 'active', type: 'boolean' as const },
   ];
 
   return (
@@ -77,9 +77,9 @@ export function DataTableExportExample() {
 // Example 3: Simple Export Buttons
 export function SimpleExportExample() {
   const tableColumns = [
-    { id: 'name', label: 'Name', accessor: 'name', type: 'string' },
-    { id: 'email', label: 'Email', accessor: 'email', type: 'string' },
-    { id: 'role', label: 'Role', accessor: 'role', type: 'string' },
+    { id: 'name', label: 'Name', accessor: 'name', type: 'string' as const },
+    { id: 'email', label: 'Email', accessor: 'email', type: 'string' as const },
+    { id: 'role', label: 'Role', accessor: 'role', type: 'string' as const },
   ];
 
   return (

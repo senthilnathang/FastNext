@@ -47,14 +47,7 @@ export default function RootLayout({
                   <ConditionalAppLayout>
                     {children}
                   </ConditionalAppLayout>
-                  <SessionTimeoutWarning 
-                    onTimeout={() => {
-                      window.location.href = '/auth/login?reason=session_timeout';
-                    }}
-                    onExtend={() => {
-                      console.log('Session extended by user');
-                    }}
-                  />
+                  <SessionTimeoutWarning />
                 </AuthProvider>
               </EnhancedThemeProvider>
             </NuqsProvider>

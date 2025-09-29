@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/components/ui/card';
-import { Button } from '@/shared/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/components/ui/select';
 import { Badge } from '@/shared/components/ui/badge';
 import { Alert, AlertDescription } from '@/shared/components/ui/alert';
@@ -15,12 +14,10 @@ import {
   Database, 
   FileText, 
   AlertCircle, 
-  CheckCircle, 
   Info,
   Columns,
   Key,
   Settings,
-  Filter,
   Search
 } from 'lucide-react';
 
@@ -262,13 +259,13 @@ export default function DataExportPage() {
     }
   };
 
-  const mapSqlTypeToExportType = (sqlType: string): string => {
+  const mapSqlTypeToExportType = (sqlType: string): 'string' | 'number' | 'boolean' | 'object' | 'date' => {
     const type = sqlType.toLowerCase();
     if (type.includes('int') || type.includes('serial')) return 'number';
     if (type.includes('decimal') || type.includes('numeric') || type.includes('float') || type.includes('double')) return 'number';
     if (type.includes('bool')) return 'boolean';
     if (type.includes('date') || type.includes('time')) return 'date';
-    if (type.includes('json')) return 'json';
+    if (type.includes('json')) return 'object';
     return 'string';
   };
 
@@ -562,7 +559,7 @@ export default function DataExportPage() {
             <Alert>
               <AlertCircle className="h-4 w-4" />
               <AlertDescription>
-                You don't have permission to export data from the "{selectedTable}" table. 
+                You don&apos;t have permission to export data from the &quot;{selectedTable}&quot; table. 
                 Please contact your administrator to request export permissions.
               </AlertDescription>
             </Alert>

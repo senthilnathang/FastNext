@@ -356,9 +356,6 @@ export function useDataImport({
     const options: ImportOptions = {
       format: 'csv', // This should be stored from the original import
       hasHeaders: true,
-      columns: fieldMappings.map(m => m.targetColumn),
-      filters: [],
-      includeHeaders: true,
       skipEmptyRows: true,
       onDuplicate: 'skip'
     };

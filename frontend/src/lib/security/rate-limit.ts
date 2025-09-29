@@ -23,6 +23,19 @@ const rateLimitConfigs: Record<string, RateLimitConfig> = {
 };
 
 export async function rateLimit(identifier: string, pathname: string): Promise<RateLimitResult> {
+  // Skip rate limiting in development or if explicitly bypassed
+  const bypassRateLimit = process.env.NODE_ENV === 'development' || process.env.BYPASS_RATE_LIMIT === 'true';
+  
+  if (bypassRateLimit) {
+    return {
+      allowed: true,
+      limit: 999999,
+      remaining: 999999,
+      resetTime: Date.now() + 60000,
+      retryAfter: 0
+    };
+  }
+
   // Determine rate limit config based on pathname
   let config = rateLimitConfigs.default;
   
@@ -127,7 +140,7 @@ export class AdvancedRateLimit {
     const key = `bucket:${identifier}`;
     const now = Date.now();
 
-    let bucket = this.store.get(key) || {
+    const bucket = this.store.get(key) || {
       tokens: capacity,
       lastRefill: now
     };

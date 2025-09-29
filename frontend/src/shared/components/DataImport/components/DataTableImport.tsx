@@ -33,8 +33,8 @@ interface DataTableImportProps<TData extends Record<string, any>> {
     required?: boolean;
     unique?: boolean;
   }>;
-  onImport?: (data: TData[], options: any) => Promise<any>;
-  onValidate?: (data: TData[], mappings: any[]) => Promise<any>;
+  onImport?: (data: Record<string, any>[], options: any) => Promise<any>;
+  onValidate?: (data: Record<string, any>[], mappings: any[]) => Promise<any>;
   permissions?: ImportPermission;
   className?: string;
   showAdvanced?: boolean;
@@ -212,7 +212,7 @@ export function DataTableIntegration<TData extends Record<string, any>>({
 }: {
   table: any; // React Table instance
   tableName?: string;
-  onImport?: (data: TData[], options: any) => Promise<any>;
+  onImport?: (data: Record<string, any>[], options: any) => Promise<any>;
   permissions?: ImportPermission;
   allowedFormats?: ImportFormat[];
   className?: string;
@@ -244,7 +244,7 @@ export function DataTableIntegration<TData extends Record<string, any>>({
 export function useDataTableImport<TData extends Record<string, any>>(
   table: any,
   tableName?: string,
-  onImport?: (data: TData[], options: any) => Promise<any>
+  onImport?: (data: Record<string, any>[], options: any) => Promise<any>
 ) {
   const ImportComponent = React.useMemo(() => {
     const Component = (props: { 

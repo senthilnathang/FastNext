@@ -57,7 +57,9 @@
       "Bash(timeout 30 npx tsc --noEmit --skipLibCheck)",
       "Bash(npx tsx:*)",
       "Bash(./verify_api_simple.sh:*)",
-      "Bash(tree:*)"
+      "Bash(tree:*)",
+      "Bash(./quick_fix.sh:*)",
+      "Bash(timeout:*)"
     ],
     "deny": []
   }

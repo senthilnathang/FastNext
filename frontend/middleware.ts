@@ -406,11 +406,11 @@ function createSecurityResponse(
 }
 
 function isProtectedRoute(pathname: string): boolean {
-  return protectedRoutes.some(route => pathname.startsWith(route));
+  return ROUTE_CONFIG.protected.some(route => pathname.startsWith(route));
 }
 
 function isPublicRoute(pathname: string): boolean {
-  return publicRoutes.some(route => pathname.startsWith(route));
+  return ROUTE_CONFIG.public.some(route => pathname.startsWith(route));
 }
 
 async function checkAuthentication(request: NextRequest): Promise<{

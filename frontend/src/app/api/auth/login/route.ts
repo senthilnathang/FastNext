@@ -8,17 +8,14 @@ export async function POST(request: NextRequest) {
   
   try {
     // Rate limiting for login attempts
-    const rateLimitResult = await rateLimit(clientIP, '/api/auth/login', {
-      requests: 5,
-      window: 15 * 60 * 1000 // 5 attempts per 15 minutes
-    });
+    const rateLimitResult = await rateLimit(clientIP, '/api/auth/login');
 
     if (!rateLimitResult.allowed) {
-      logSecurityEvent('login_rate_limit_exceeded', {
+      logSecurityEvent('rate_limit_exceeded', {
         clientIP,
-        attempts: rateLimitResult.count,
-        window: rateLimitResult.window
-      }, 'warning');
+        remaining: rateLimitResult.remaining,
+        limit: rateLimitResult.limit
+      }, 'medium');
 
       return NextResponse.json(
         { 
@@ -53,16 +50,24 @@ export async function POST(request: NextRequest) {
     const authResult = await authenticateUser(email, password, clientIP);
     
     if (!authResult.success) {
-      logSecurityEvent('login_failed', {
+      logSecurityEvent('authentication_failure', {
         email: email.substring(0, 3) + '***', // Partial email for privacy
         clientIP,
         reason: authResult.reason,
         userAgent: request.headers.get('user-agent')
-      }, 'warning');
+      }, 'medium');
 
       return NextResponse.json(
         { error: authResult.error },
         { status: 401 }
+      );
+    }
+
+    // Ensure user exists in successful authentication
+    if (!authResult.user) {
+      return NextResponse.json(
+        { error: 'Authentication failed: user data missing' },
+        { status: 500 }
       );
     }
 
@@ -94,25 +99,26 @@ export async function POST(request: NextRequest) {
     const csrfToken = createCSRFToken();
     SecureCookieManager.setCSRFToken(response, csrfToken);
 
-    // Log successful login
-    logSecurityEvent('login_successful', {
+    // Log successful login (for audit purposes)
+    // Note: Successful logins are typically logged separately from security events
+    console.log('Successful login:', {
       userId: authResult.user.id,
       email: email.substring(0, 3) + '***',
       clientIP,
       rememberMe,
-      userAgent: request.headers.get('user-agent')
-    }, 'info');
+      timestamp: new Date().toISOString()
+    });
 
     return response;
 
   } catch (error) {
     console.error('Login error:', error);
     
-    logSecurityEvent('login_error', {
+    logSecurityEvent('suspicious_request', {
       clientIP,
       error: error instanceof Error ? error.message : 'Unknown error',
       userAgent: request.headers.get('user-agent')
-    }, 'error');
+    }, 'high');
 
     return NextResponse.json(
       { error: 'Internal server error' },

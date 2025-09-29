@@ -64,6 +64,14 @@ const BYPASS_PATTERNS = [
 ];
 
 export function validateRequest(request: NextRequest): ValidationResult {
+  // Skip request validation in development or if explicitly bypassed
+  const bypassValidation = process.env.NODE_ENV === 'development' || 
+                          process.env.DISABLE_SECURITY_MONITORING === 'true';
+  
+  if (bypassValidation) {
+    return { isValid: true };
+  }
+
   const url = request.nextUrl;
   const userAgent = request.headers.get('user-agent') || '';
   const referer = request.headers.get('referer') || '';
@@ -246,6 +254,15 @@ function validateHeaders(headers: Headers): ValidationResult {
 }
 
 function validateRequestTiming(request: NextRequest): ValidationResult {
+  // Skip timing validation in development or if explicitly bypassed
+  const bypassTimingCheck = process.env.NODE_ENV === 'development' || 
+                           process.env.BYPASS_RATE_LIMIT === 'true' ||
+                           process.env.DISABLE_SECURITY_MONITORING === 'true';
+  
+  if (bypassTimingCheck) {
+    return { isValid: true };
+  }
+
   // This is a simplified check - in production, you'd use a more sophisticated system
   // Check for suspiciously short intervals between requests from same IP
   
@@ -300,6 +317,14 @@ function getClientIP(request: NextRequest): string {
 
 // Additional validation for specific content types
 export async function validateRequestBody(request: NextRequest): Promise<ValidationResult> {
+  // Skip body validation in development or if explicitly bypassed
+  const bypassValidation = process.env.NODE_ENV === 'development' || 
+                          process.env.DISABLE_SECURITY_MONITORING === 'true';
+  
+  if (bypassValidation) {
+    return { isValid: true };
+  }
+
   const contentType = request.headers.get('content-type');
   
   if (!contentType) {

@@ -116,15 +116,18 @@ async def upload_and_create_import_job(
 @router.post("/import/parse", response_model=Dict[str, Any])
 async def parse_import_file(
     file: UploadFile = File(...),
-    import_options: ImportOptionsSchema,
+    import_options: str = Query(...),
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)
 ):
     """Parse uploaded file and return preview data"""
     
     try:
+        # Parse import options JSON string
+        options = ImportOptionsSchema.parse_raw(import_options)
+        
         importer = get_data_importer(db)
-        parsed_data = await importer.parse_file(file, import_options)
+        parsed_data = await importer.parse_file(file, options)
         
         return {
             "headers": parsed_data["headers"],

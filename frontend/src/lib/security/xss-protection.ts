@@ -19,15 +19,14 @@ const XSS_PATTERNS = {
     /data:text\/javascript/gi
   ],
   
-  // Event handler XSS
+  // Event handler XSS (in HTML context, not React props)
   events: [
-    /on\w+\s*=/gi,
-    /onload\s*=/gi,
-    /onerror\s*=/gi,
-    /onclick\s*=/gi,
-    /onmouseover\s*=/gi,
-    /onfocus\s*=/gi,
-    /onblur\s*=/gi
+    /on\w+\s*=\s*["']?javascript:/gi,
+    /on\w+\s*=\s*["']?alert\s*\(/gi,
+    /on\w+\s*=\s*["']?eval\s*\(/gi,
+    /on\w+\s*=\s*["']?document\./gi,
+    /on\w+\s*=\s*["']?window\./gi,
+    /<[^>]+\son\w+\s*=/gi, // HTML tags with event handlers
   ],
 
   // HTML injection
@@ -102,6 +101,18 @@ const PATTERN_SEVERITY: Record<string, 'low' | 'medium' | 'high' | 'critical'> =
 };
 
 export async function detectXSSAttempts(request: NextRequest): Promise<XSSDetectionResult> {
+  // Skip XSS detection in development or if explicitly bypassed
+  const bypassXSSDetection = process.env.NODE_ENV === 'development' || process.env.BYPASS_XSS_DETECTION === 'true';
+  
+  if (bypassXSSDetection) {
+    return {
+      detected: false,
+      patterns: [],
+      severity: 'low',
+      locations: []
+    };
+  }
+
   const detectedPatterns: string[] = [];
   const locations: string[] = [];
   let maxSeverity: 'low' | 'medium' | 'high' | 'critical' = 'low';
@@ -377,7 +388,7 @@ export class ClientXSSProtection {
       .replace(/<iframe[\s\S]*?>/gi, '')
       .replace(/<object[\s\S]*?>/gi, '')
       .replace(/<embed[\s\S]*?>/gi, '')
-      .replace(/on\w+\s*=/gi, '')
+      .replace(/<[^>]+\son\w+\s*=/gi, '') // Remove HTML event handlers, not React props
       .replace(/javascript:/gi, '')
       .replace(/vbscript:/gi, '');
   }

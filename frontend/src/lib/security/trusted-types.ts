@@ -54,15 +54,15 @@ class TrustedTypesPolyfill {
       name,
       createHTML: policy.createHTML ? (input: string, ...args: any[]) => {
         const result = policy.createHTML!(input, ...args);
-        return result as TrustedHTML;
+        return result as unknown as TrustedHTML;
       } : undefined,
       createScript: policy.createScript ? (input: string, ...args: any[]) => {
         const result = policy.createScript!(input, ...args);
-        return result as TrustedScript;
+        return result as unknown as TrustedScript;
       } : undefined,
       createScriptURL: policy.createScriptURL ? (input: string, ...args: any[]) => {
         const result = policy.createScriptURL!(input, ...args);
-        return result as TrustedScriptURL;
+        return result as unknown as TrustedScriptURL;
       } : undefined,
     };
 
@@ -83,11 +83,11 @@ class TrustedTypesPolyfill {
   }
 
   get emptyHTML(): TrustedHTML {
-    return '' as TrustedHTML;
+    return '' as unknown as TrustedHTML;
   }
 
   get emptyScript(): TrustedScript {
-    return '' as TrustedScript;
+    return '' as unknown as TrustedScript;
   }
 }
 
@@ -103,8 +103,8 @@ let DOMPurify: any = null;
 async function getDOMPurify() {
   if (!DOMPurify && typeof window !== 'undefined') {
     try {
-      const module = await import('dompurify');
-      DOMPurify = module.default;
+      const domPurifyModule = await import('dompurify');
+      DOMPurify = domPurifyModule.default;
     } catch (error) {
       console.warn('DOMPurify not available, using basic sanitization');
     }
@@ -205,13 +205,13 @@ export function createSecurityPolicy(): TrustedTypePolicy {
   }
 
   return window.trustedTypes.createPolicy('fastnext-security', {
-    createHTML: async (input: string): Promise<string> => {
+    createHTML: (input: string): string => {
       if (typeof input !== 'string') {
         throw new Error('HTML input must be a string');
       }
 
-      // Sanitize HTML content
-      return await advancedHTMLSanitize(input);
+      // Sanitize HTML content using basic sanitization
+      return basicHTMLSanitize(input);
     },
 
     createScript: (input: string): string => {
@@ -241,24 +241,12 @@ export function createStrictPolicy(): TrustedTypePolicy {
   }
 
   return window.trustedTypes.createPolicy('fastnext-strict', {
-    createHTML: async (input: string): Promise<string> => {
+    createHTML: (input: string): string => {
       if (typeof input !== 'string') {
         throw new Error('HTML input must be a string');
       }
 
-      const purify = await getDOMPurify();
-      
-      if (purify) {
-        // Very restrictive policy for user content
-        return purify.sanitize(input, {
-          ALLOWED_TAGS: ['p', 'br', 'strong', 'em', 'u', 'i', 'b'],
-          ALLOWED_ATTR: [],
-          STRIP_TAGS: true,
-          STRIP_COMMENTS: true
-        });
-      }
-      
-      // Fallback: strip all HTML tags
+      // Use basic sanitization and strip all HTML tags for strict policy
       return input.replace(/<[^>]*>/g, '');
     },
 

@@ -52,6 +52,15 @@ emails==0.6  # Email sending
 python-magic==0.4.27  # File type detection
 pillow==10.1.0  # Image processing
 
+# Data Import/Export
+openpyxl==3.1.2  # Excel file handling
+xlsxwriter==3.1.9  # Excel file writing
+pandas==2.1.4  # Data manipulation and analysis
+xlrd==2.0.1  # Excel file reading
+lxml==4.9.3  # XML processing
+PyYAML==6.0.1  # YAML processing
+aiofiles==23.2.0  # Async file operations
+
 # Security
 python-owasp-zap-v2.4==0.0.21  # Security scanning
 bandit==1.7.5  # Security linter

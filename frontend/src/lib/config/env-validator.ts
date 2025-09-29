@@ -91,7 +91,7 @@ class EnvironmentValidator {
       const result = EnvSchema.safeParse(process.env);
       
       if (!result.success) {
-        this.errors = result.error.errors.map(err => 
+        this.errors = result.error.issues.map(err => 
           `${err.path.join('.')}: ${err.message}`
         );
         throw new Error(`Environment validation failed:\n${this.errors.join('\n')}`);
@@ -132,7 +132,7 @@ class EnvironmentValidator {
       const result = ClientEnvSchema.safeParse(clientEnv);
       
       if (!result.success) {
-        this.errors = result.error.errors.map(err => 
+        this.errors = result.error.issues.map(err => 
           `${err.path.join('.')}: ${err.message}`
         );
         throw new Error(`Client environment validation failed:\n${this.errors.join('\n')}`);
@@ -252,7 +252,7 @@ class EnvironmentValidator {
       isValid: this.isValid(),
       errors: this.errors,
       warnings: this.warnings,
-      environment: env.NODE_ENV || env.NEXT_PUBLIC_ENVIRONMENT || 'unknown',
+      environment: process.env.NODE_ENV || env.NEXT_PUBLIC_ENVIRONMENT || 'unknown',
       publicVariables: typeof window === 'undefined' 
         ? this.getPublicVariables(env as EnvConfig)
         : env
@@ -375,8 +375,6 @@ export function validateEnvironmentMiddleware() {
   };
 }
 
-// Export types
-export type { EnvConfig, ClientEnvConfig };
 
 // Initialize validation on module load
 if (typeof window === 'undefined') {

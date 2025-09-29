@@ -6,14 +6,7 @@ export { detectXSSAttempts, ClientXSSProtection } from './xss-protection';
 export { validateRequest, validateRequestBody } from './request-validator';
 export { rateLimit, AdvancedRateLimit } from './rate-limit';
 
-// Type exports
-export type {
-  TrustedHTML,
-  TrustedScript,
-  TrustedScriptURL,
-  TrustedTypePolicy,
-  TrustedTypePolicyOptions
-} from './trusted-types';
+// Global types from trusted-types are available without explicit export
 
 export type { SecureScriptProps, SecureStylesheetProps } from './sri';
 

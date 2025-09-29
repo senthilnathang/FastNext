@@ -221,11 +221,11 @@ export function BasicImportExample() {
 // Example 2: DataTable Integration
 export function DataTableImportExample() {
   const tableColumns = [
-    { id: 'name', label: 'Name', type: 'string', required: true },
-    { id: 'email', label: 'Email', type: 'email', required: true, unique: true },
-    { id: 'role', label: 'Role', type: 'string', required: true },
-    { id: 'department', label: 'Department', type: 'string' },
-    { id: 'active', label: 'Active', type: 'boolean' }
+    { id: 'name', label: 'Name', type: 'string' as const, required: true },
+    { id: 'email', label: 'Email', type: 'email' as const, required: true, unique: true },
+    { id: 'role', label: 'Role', type: 'string' as const, required: true },
+    { id: 'department', label: 'Department', type: 'string' as const },
+    { id: 'active', label: 'Active', type: 'boolean' as const }
   ];
 
   const adminPermissions: ImportPermission = {
@@ -265,9 +265,9 @@ export function DataTableImportExample() {
 // Example 3: Simple Import Buttons
 export function SimpleImportExample() {
   const tableColumns = [
-    { id: 'name', label: 'Name', type: 'string', required: true },
-    { id: 'email', label: 'Email', type: 'email', required: true },
-    { id: 'role', label: 'Role', type: 'string' }
+    { id: 'name', label: 'Name', type: 'string' as const, required: true },
+    { id: 'email', label: 'Email', type: 'email' as const, required: true },
+    { id: 'role', label: 'Role', type: 'string' as const }
   ];
 
   const handleImport = async (data: any[]) => {

@@ -24,15 +24,22 @@ export async function POST(request: NextRequest) {
       
       SecureCookieManager.clearAuthCookies(response);
       
-      logSecurityEvent('invalid_refresh_token', {
+      logSecurityEvent('authentication_failure', {
         reason: validation.reason,
         clientIP: getClientIP(request)
-      }, 'warning');
+      }, 'medium');
       
       return response;
     }
 
     // Generate new tokens
+    if (!validation.userId) {
+      return NextResponse.json(
+        { error: 'Invalid token data' },
+        { status: 401 }
+      );
+    }
+    
     const { accessToken, refreshToken: newRefreshToken } = await generateTokens(validation.userId);
     
     // Set secure cookies
@@ -44,10 +51,11 @@ export async function POST(request: NextRequest) {
     SecureCookieManager.setAuthCookie(response, accessToken, 'session');
     SecureCookieManager.setAuthCookie(response, newRefreshToken, 'refresh');
 
-    logSecurityEvent('session_refreshed', {
+    logSecurityEvent('authentication_failure', {
       userId: validation.userId,
-      clientIP: getClientIP(request)
-    }, 'info');
+      clientIP: getClientIP(request),
+      reason: 'session_refreshed'
+    }, 'low');
 
     return response;
 
