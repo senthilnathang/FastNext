@@ -2,29 +2,40 @@
 
 ## Overview
 
-The FastNext Import/Export system provides comprehensive data management capabilities with enterprise-grade features including multi-format support, validation, permissions, and progress tracking.
+The FastNext Import/Export system provides comprehensive data management capabilities with **Dynamic Table Selection** and enterprise-grade features including multi-format support, validation, permissions, and progress tracking.
 
 ## Table of Contents
 
 1. [Features](#features)
-2. [Architecture](#architecture)
-3. [Getting Started](#getting-started)
-4. [Import System](#import-system)
-5. [Export System](#export-system)
-6. [Security & Permissions](#security--permissions)
-7. [API Reference](#api-reference)
-8. [Frontend Components](#frontend-components)
-9. [Backend Implementation](#backend-implementation)
-10. [Configuration](#configuration)
-11. [Monitoring](#monitoring)
-12. [Troubleshooting](#troubleshooting)
+2. [Dynamic Table Management](#dynamic-table-management)
+3. [Settings Pages](#settings-pages)
+4. [Architecture](#architecture)
+5. [Getting Started](#getting-started)
+6. [Import System](#import-system)
+7. [Export System](#export-system)
+8. [Security & Permissions](#security--permissions)
+9. [API Reference](#api-reference)
+10. [Frontend Components](#frontend-components)
+11. [Backend Implementation](#backend-implementation)
+12. [Configuration](#configuration)
+13. [Monitoring](#monitoring)
+14. [Troubleshooting](#troubleshooting)
 
 ## Features
 
+### 🎯 Dynamic Table Management (NEW!)
+- **Auto-Discovery**: Automatically discover all database tables for import/export
+- **Schema Detection**: Real-time table schema analysis with column types and constraints  
+- **Smart Field Mapping**: Automatic field mapping based on actual table structure
+- **Permission Integration**: Table-specific permissions with real-time validation
+- **Settings Integration**: Dedicated settings pages for managing any table dynamically
+- **Live Data Preview**: Real-time data preview with search and filtering capabilities
+
 ### 🔄 Import Capabilities
 - **Multi-Format Support**: CSV, JSON, Excel (XLSX/XLS), XML, YAML
+- **Dynamic Table Selection**: Choose any database table from dropdown
 - **Schema Validation**: Automatic validation against target table schema
-- **Field Mapping**: Visual field mapping with transformation options
+- **Smart Field Mapping**: Intelligent field mapping with preview and transformation
 - **Progress Tracking**: Real-time progress updates for large files
 - **Error Handling**: Row-level error reporting with detailed messages
 - **Duplicate Management**: Configurable handling (skip, update, error)
@@ -34,12 +45,14 @@ The FastNext Import/Export system provides comprehensive data management capabil
 
 ### 📤 Export Capabilities
 - **Multiple Formats**: CSV, JSON, Excel, XML, YAML export
-- **Column Selection**: Choose specific columns to export
-- **Data Filtering**: Apply filters before export
+- **Dynamic Table Selection**: Export from any database table
+- **Column Selection**: Choose specific columns with permission-based filtering
+- **Data Filtering**: Apply filters and search before export
 - **Large Dataset Support**: Background processing for big exports
 - **Template System**: Save and reuse export configurations
 - **Download Management**: Secure file downloads with expiration
 - **Compression**: Automatic compression for large files
+- **Live Data Preview**: Real-time data preview with search and pagination
 - **Scheduling**: Schedule recurring exports (future feature)
 
 ### 🔐 Security Features
@@ -49,6 +62,148 @@ The FastNext Import/Export system provides comprehensive data management capabil
 - **Rate Limiting**: Prevent abuse with configurable limits
 - **Data Sanitization**: Clean input data to prevent injection
 - **Access Control**: Role-based access to import/export features
+
+## Dynamic Table Management
+
+The Dynamic Table Management system allows users to work with any database table without hardcoded configurations.
+
+### Table Discovery API
+
+```typescript
+// Get all available tables
+GET /api/v1/data/tables/available
+Response: {
+  "tables": ["users", "products", "orders", "customers", ...],
+  "total_count": 15
+}
+
+// Get table schema
+GET /api/v1/data/tables/{table_name}/schema
+Response: {
+  "table_name": "users",
+  "columns": [
+    {
+      "name": "id",
+      "type": "INTEGER",
+      "nullable": false,
+      "primary_key": true,
+      "autoincrement": true
+    },
+    {
+      "name": "email",
+      "type": "VARCHAR(255)",
+      "nullable": false,
+      "primary_key": false
+    }
+  ],
+  "primary_keys": ["id"],
+  "sample_data": [
+    {"id": 1, "email": "user@example.com", "name": "John Doe"}
+  ]
+}
+
+// Get table permissions
+GET /api/v1/data/tables/{table_name}/permissions
+Response: {
+  "table_name": "users",
+  "import_permission": {
+    "can_import": true,
+    "max_file_size_mb": 50,
+    "allowed_formats": ["csv", "json", "excel"]
+  },
+  "export_permission": {
+    "can_export": true,
+    "max_rows_per_export": 100000,
+    "allowed_columns": ["id", "email", "name"]
+  }
+}
+```
+
+### Smart Field Mapping
+
+The system automatically maps source columns to target fields based on:
+
+1. **Exact Name Matching**: Direct column name matches
+2. **Type Compatibility**: SQL types mapped to appropriate data types
+3. **Constraint Detection**: Required fields, primary keys, nullable columns
+4. **Default Values**: Automatic handling of defaults and auto-increments
+
+```typescript
+// Automatic type mapping
+const typeMapping = {
+  'INTEGER': 'number',
+  'VARCHAR': 'string', 
+  'TEXT': 'string',
+  'BOOLEAN': 'boolean',
+  'TIMESTAMP': 'date',
+  'DATE': 'date',
+  'JSON': 'json'
+};
+```
+
+## Settings Pages
+
+FastNext includes dedicated settings pages for dynamic import/export management.
+
+### Data Import Page (`/settings/data-import`)
+
+**Features:**
+- **Table Selection Dropdown**: Choose any database table
+- **Schema Visualization**: Complete table structure display
+- **Permission Display**: User's import permissions and limits
+- **Integrated Import Component**: Full import functionality
+- **Real-time Validation**: Column mapping based on actual schema
+
+**User Workflow:**
+1. Navigate to Settings → Data Import
+2. Select target table from dropdown
+3. View table schema and permissions
+4. Upload file and map fields automatically
+5. Validate data and import
+
+**Example Usage:**
+```typescript
+// The page automatically:
+// 1. Fetches available tables
+// 2. Loads schema when table is selected
+// 3. Configures DataImport component with proper columns
+// 4. Handles permissions and validation
+```
+
+### Data Export Page (`/settings/data-export`)
+
+**Features:**
+- **Table Selection Dropdown**: Choose any database table  
+- **Schema Information**: Complete table structure
+- **Data Preview**: Sample data with search and filtering
+- **Permission Controls**: Respects column restrictions
+- **Integrated Export Component**: Full export functionality
+
+**User Workflow:**
+1. Navigate to Settings → Data Export
+2. Select source table from dropdown
+3. View table schema and data preview
+4. Configure export options and column selection
+5. Generate and download export
+
+**Example Usage:**
+```typescript
+// The page automatically:
+// 1. Fetches available tables and data
+// 2. Displays schema and permissions
+// 3. Provides live data preview with filtering
+// 4. Configures DataExport component with proper columns
+```
+
+### Settings Navigation
+
+```typescript
+// Updated settings layout includes:
+const settingsNav = [
+  { title: 'Data Import', href: '/settings/data-import', badge: 'New' },
+  { title: 'Data Export', href: '/settings/data-export', badge: 'New' }
+];
+```
 
 ## Architecture
 
@@ -445,6 +600,76 @@ permission = ExportPermission(
 7. **Secure Storage**: Temporary file encryption
 
 ## API Reference
+
+### Table Discovery Endpoints (NEW!)
+
+#### Get Available Tables
+```http
+GET /api/v1/data/tables/available
+
+Response:
+{
+  "tables": ["users", "products", "orders", "customers"],
+  "total_count": 4
+}
+```
+
+#### Get Table Schema
+```http
+GET /api/v1/data/tables/{table_name}/schema
+
+Response:
+{
+  "table_name": "users",
+  "columns": [
+    {
+      "name": "id",
+      "type": "INTEGER",
+      "nullable": false,
+      "primary_key": true,
+      "autoincrement": true
+    },
+    {
+      "name": "email",
+      "type": "VARCHAR(255)",
+      "nullable": false,
+      "primary_key": false
+    }
+  ],
+  "primary_keys": ["id"],
+  "foreign_keys": [],
+  "indexes": [],
+  "sample_data": [
+    {"id": 1, "email": "user@example.com", "name": "John Doe"}
+  ]
+}
+```
+
+#### Get Table Permissions
+```http
+GET /api/v1/data/tables/{table_name}/permissions
+
+Response:
+{
+  "table_name": "users",
+  "import_permission": {
+    "can_import": true,
+    "can_validate": true,
+    "can_preview": true,
+    "max_file_size_mb": 50,
+    "max_rows_per_import": 25000,
+    "allowed_formats": ["csv", "json", "excel"],
+    "requires_approval": false
+  },
+  "export_permission": {
+    "can_export": true,
+    "can_preview": true,
+    "max_rows_per_export": 100000,
+    "allowed_formats": ["csv", "json", "excel"],
+    "allowed_columns": ["id", "email", "name"]
+  }
+}
+```
 
 ### Import Endpoints
 

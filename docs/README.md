@@ -27,6 +27,7 @@ Located in [`docs/frontend/`](frontend/):
 - [**Development Guide**](frontend/DEVELOPMENT.md) - Frontend development setup and guidelines
 - [**Data Fetching Guide**](frontend/DATA_FETCHING_GUIDE.md) - Data fetching patterns and best practices
 - [**API Migration Summary**](frontend/FRONTEND_API_MIGRATION_SUMMARY.md) - Frontend API integration guide
+- [**Dynamic Import/Export Guide**](frontend/DYNAMIC_IMPORT_EXPORT.md) - New dynamic settings pages documentation
 
 ## 🔄 Workflow System
 
@@ -37,8 +38,38 @@ Located in [`docs/frontend/`](frontend/):
 
 ## 📊 Data Management
 
-- [**Import/Export Guide**](IMPORT_EXPORT_GUIDE.md) - Comprehensive import/export system documentation
+- [**Import/Export Guide**](IMPORT_EXPORT_GUIDE.md) - Comprehensive import/export system documentation with **Dynamic Table Selection**
 - [**API Export Guide**](API_EXPORT_GUIDE.md) - API documentation export and management
+- [**Dynamic Import/Export Examples**](DYNAMIC_IMPORT_EXPORT_EXAMPLES.md) - Usage examples and troubleshooting
+
+## 🆕 Latest Updates
+
+### Dynamic Import/Export System (NEW!)
+
+FastNext now includes a revolutionary Dynamic Import/Export system with the following features:
+
+#### 🎯 Key Features
+- **Auto-Discovery**: Automatically discover all database tables
+- **Schema Detection**: Real-time table schema analysis
+- **Smart Field Mapping**: Automatic field mapping based on table structure
+- **Settings Integration**: Dedicated settings pages at `/settings/data-import` and `/settings/data-export`
+- **Permission Control**: Table-specific permissions with real-time validation
+
+#### 📱 User Interface
+- **Dynamic Table Selection**: Choose any database table from dropdown
+- **Live Data Preview**: Real-time data preview with search and filtering
+- **Permission Display**: Clear indication of user permissions and limits
+- **Integrated Components**: Full import/export functionality with field mapping
+
+#### 🔗 API Endpoints
+- `GET /api/v1/data/tables/available` - Get all available database tables
+- `GET /api/v1/data/tables/{table_name}/schema` - Get table schema and structure
+- `GET /api/v1/data/tables/{table_name}/permissions` - Get user permissions for table
+
+#### 📖 Documentation
+- [**Dynamic Import/Export Guide**](frontend/DYNAMIC_IMPORT_EXPORT.md) - Complete frontend implementation guide
+- [**Usage Examples**](DYNAMIC_IMPORT_EXPORT_EXAMPLES.md) - Comprehensive examples and troubleshooting
+- [**API Reference**](IMPORT_EXPORT_GUIDE.md#table-discovery-endpoints-new) - Updated API documentation
 
 ## 🏗️ Project Structure
 
@@ -60,14 +91,16 @@ docs/
 ├── frontend/                   # Frontend-specific documentation
 │   ├── DEVELOPMENT.md         # Frontend development guide
 │   ├── DATA_FETCHING_GUIDE.md # Data fetching patterns
-│   └── FRONTEND_API_MIGRATION_SUMMARY.md # API integration
+│   ├── FRONTEND_API_MIGRATION_SUMMARY.md # API integration
+│   └── DYNAMIC_IMPORT_EXPORT.md # Dynamic settings pages (NEW!)
 │
 ├── WORKFLOW_SYSTEM.md         # Workflow system overview
 ├── WORKFLOW_API_GUIDE.md      # Workflow API reference
 ├── WORKFLOW_TUTORIAL.md       # Workflow tutorial
 ├── WORKFLOW_README.md         # Workflow setup guide
-├── IMPORT_EXPORT_GUIDE.md     # Import/export system
-└── API_EXPORT_GUIDE.md        # API documentation export
+├── IMPORT_EXPORT_GUIDE.md     # Import/export system with dynamic features
+├── API_EXPORT_GUIDE.md        # API documentation export
+└── DYNAMIC_IMPORT_EXPORT_EXAMPLES.md # Usage examples (NEW!)
 ```
 
 ## 🚀 Quick Navigation
@@ -88,6 +121,13 @@ docs/
 - [Frontend Development Guide](frontend/DEVELOPMENT.md)
 - [Data Fetching Guide](frontend/DATA_FETCHING_GUIDE.md)
 - [API Migration Guide](frontend/FRONTEND_API_MIGRATION_SUMMARY.md)
+- [Dynamic Import/Export Guide](frontend/DYNAMIC_IMPORT_EXPORT.md) ⭐ **NEW!**
+
+### For Dynamic Import/Export Features ⭐
+- [Complete Guide](IMPORT_EXPORT_GUIDE.md) - System overview with dynamic features
+- [Frontend Implementation](frontend/DYNAMIC_IMPORT_EXPORT.md) - Settings pages and components
+- [Usage Examples](DYNAMIC_IMPORT_EXPORT_EXAMPLES.md) - Comprehensive examples and troubleshooting
+- **Quick Start**: Navigate to `/settings/data-import` or `/settings/data-export`
 
 ### For Workflow Features
 - [Workflow System Overview](WORKFLOW_SYSTEM.md)
@@ -95,8 +135,9 @@ docs/
 - [Workflow Tutorial](WORKFLOW_TUTORIAL.md)
 
 ### For Data Management
-- [Import/Export Guide](IMPORT_EXPORT_GUIDE.md)
+- [Import/Export Guide](IMPORT_EXPORT_GUIDE.md) - Complete system with dynamic table selection
 - [API Export Guide](API_EXPORT_GUIDE.md)
+- [Usage Examples](DYNAMIC_IMPORT_EXPORT_EXAMPLES.md) - Real-world scenarios
 
 ### For DevOps/Deployment
 - [Docker Deployment Guide](DOCKER_DEPLOYMENT.md)
@@ -122,6 +163,21 @@ When adding new documentation:
 - Use consistent markdown formatting
 - Include links to related documentation
 - Keep documentation up-to-date with code changes
+
+## 🎯 Recent Documentation Updates
+
+### Dynamic Import/Export System Documentation
+- ✅ Updated main README with dynamic features
+- ✅ Enhanced IMPORT_EXPORT_GUIDE with table discovery
+- ✅ Created frontend implementation guide
+- ✅ Added comprehensive usage examples
+- ✅ Updated API documentation with new endpoints
+
+### Navigation Improvements
+- ✅ Reorganized documentation structure
+- ✅ Added cross-references between related docs
+- ✅ Created quick navigation sections
+- ✅ Added feature badges for new functionality
 
 ---
 

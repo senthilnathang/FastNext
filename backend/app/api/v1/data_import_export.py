@@ -639,5 +639,183 @@ async def _run_export_process(db: AsyncSession, job_id: int, user_id: int):
         logger.error(f"Export process background task failed: {e}")
 
 
+# Table Discovery Endpoints
+
+@router.get("/tables/available")
+async def get_available_tables(
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    """Get list of available tables for import/export"""
+    try:
+        # Get tables from database metadata
+        from sqlalchemy import inspect
+        from app.db.base import engine
+        
+        inspector = inspect(engine)
+        tables = inspector.get_table_names()
+        
+        # Filter out internal tables
+        excluded_tables = {
+            'alembic_version', 'spatial_ref_sys', 'pg_stat_statements'
+        }
+        
+        available_tables = [
+            table for table in tables 
+            if not table.startswith('_') and table not in excluded_tables
+        ]
+        
+        return {
+            "tables": available_tables,
+            "total_count": len(available_tables)
+        }
+        
+    except Exception as e:
+        logger.error(f"Failed to get available tables: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to retrieve available tables: {str(e)}"
+        )
+
+
+@router.get("/tables/{table_name}/schema")
+async def get_table_schema(
+    table_name: str,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    """Get schema information for a specific table"""
+    try:
+        from sqlalchemy import inspect, MetaData, Table
+        from app.db.base import engine
+        
+        inspector = inspect(engine)
+        
+        # Check if table exists
+        if table_name not in inspector.get_table_names():
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Table '{table_name}' not found"
+            )
+        
+        # Get column information
+        columns = inspector.get_columns(table_name)
+        primary_keys = inspector.get_pk_constraint(table_name)
+        foreign_keys = inspector.get_foreign_keys(table_name)
+        indexes = inspector.get_indexes(table_name)
+        
+        # Format column information
+        formatted_columns = []
+        for col in columns:
+            column_info = {
+                "name": col["name"],
+                "type": str(col["type"]),
+                "nullable": col["nullable"],
+                "default": str(col["default"]) if col["default"] is not None else None,
+                "primary_key": col["name"] in primary_keys.get("constrained_columns", []),
+                "autoincrement": col.get("autoincrement", False)
+            }
+            formatted_columns.append(column_info)
+        
+        # Get sample data (first 5 rows)
+        sample_data = []
+        try:
+            from sqlalchemy import text
+            sample_query = text(f"SELECT * FROM {table_name} LIMIT 5")
+            sample_result = await db.execute(sample_query)
+            sample_rows = sample_result.fetchall()
+            sample_data = [dict(row._mapping) for row in sample_rows]
+        except Exception as e:
+            logger.warning(f"Could not fetch sample data for {table_name}: {e}")
+        
+        return {
+            "table_name": table_name,
+            "columns": formatted_columns,
+            "primary_keys": primary_keys.get("constrained_columns", []),
+            "foreign_keys": [
+                {
+                    "constrained_columns": fk["constrained_columns"],
+                    "referred_table": fk["referred_table"],
+                    "referred_columns": fk["referred_columns"]
+                }
+                for fk in foreign_keys
+            ],
+            "indexes": [
+                {
+                    "name": idx["name"],
+                    "columns": idx["column_names"],
+                    "unique": idx["unique"]
+                }
+                for idx in indexes
+            ],
+            "sample_data": sample_data
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Failed to get table schema for {table_name}: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to retrieve table schema: {str(e)}"
+        )
+
+
+@router.get("/tables/{table_name}/permissions")
+async def get_table_permissions(
+    table_name: str,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    """Get user permissions for a specific table"""
+    try:
+        # Get import permissions
+        import_query = select(ImportPermission).where(
+            and_(
+                ImportPermission.user_id == current_user.id,
+                ImportPermission.table_name == table_name
+            )
+        )
+        import_result = await db.execute(import_query)
+        import_permission = import_result.scalar_one_or_none()
+        
+        # Get export permissions
+        export_query = select(ExportPermission).where(
+            and_(
+                ExportPermission.user_id == current_user.id,
+                ExportPermission.table_name == table_name
+            )
+        )
+        export_result = await db.execute(export_query)
+        export_permission = export_result.scalar_one_or_none()
+        
+        return {
+            "table_name": table_name,
+            "import_permission": {
+                "can_import": import_permission.can_import if import_permission else False,
+                "can_validate": import_permission.can_validate if import_permission else False,
+                "can_preview": import_permission.can_preview if import_permission else False,
+                "max_file_size_mb": import_permission.max_file_size_mb if import_permission else 10,
+                "max_rows_per_import": import_permission.max_rows_per_import if import_permission else 10000,
+                "allowed_formats": import_permission.allowed_formats if import_permission else ["csv", "json"],
+                "requires_approval": import_permission.requires_approval if import_permission else False
+            },
+            "export_permission": {
+                "can_export": export_permission.can_export if export_permission else False,
+                "can_preview": export_permission.can_preview if export_permission else False,
+                "max_rows_per_export": export_permission.max_rows_per_export if export_permission else 100000,
+                "allowed_formats": export_permission.allowed_formats if export_permission else ["csv", "json"],
+                "allowed_columns": export_permission.allowed_columns if export_permission else []
+            }
+        }
+        
+    except Exception as e:
+        logger.error(f"Failed to get table permissions for {table_name}: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to retrieve table permissions: {str(e)}"
+        )
+
+
 # Add router tags
 router.tags = ["Data Import/Export"]

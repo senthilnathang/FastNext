@@ -300,12 +300,20 @@ FastNext implements comprehensive security measures following OWASP guidelines a
 
 ## 📊 Data Import/Export System
 
-FastNext includes a comprehensive data management system that supports importing and exporting data across multiple formats with enterprise-grade features:
+FastNext includes a comprehensive data management system with **Dynamic Table Selection** that supports importing and exporting data across multiple formats with enterprise-grade features:
+
+### 🎯 Dynamic Table Management
+- **Auto-Discovery**: Automatically discover all database tables for import/export
+- **Schema Detection**: Real-time table schema analysis with column types and constraints
+- **Smart Field Mapping**: Automatic field mapping based on actual table structure
+- **Permission Integration**: Table-specific permissions with real-time validation
+- **Settings Integration**: Dedicated settings pages for managing any table dynamically
 
 ### 🔄 Import Features
 - **Multi-Format Support**: CSV, JSON, Excel (XLSX/XLS), XML, YAML
+- **Dynamic Table Selection**: Choose any database table from dropdown
 - **Advanced Validation**: Schema validation, data type checking, and custom rules
-- **Field Mapping**: Intelligent field mapping with preview and transformation
+- **Smart Field Mapping**: Intelligent field mapping with preview and transformation
 - **Progress Tracking**: Real-time progress updates for large file imports
 - **Error Handling**: Detailed error reporting with row-level validation
 - **Permission Control**: Table-level permissions with approval workflows
@@ -314,16 +322,51 @@ FastNext includes a comprehensive data management system that supports importing
 
 ### 📤 Export Features
 - **Format Options**: CSV, JSON, Excel, XML, YAML export formats
-- **Column Selection**: Choose specific columns for export
-- **Data Filtering**: Apply filters before export
+- **Dynamic Table Selection**: Export from any database table
+- **Column Selection**: Choose specific columns with permission-based filtering
+- **Data Filtering**: Apply filters and search before export
 - **Large Dataset Support**: Background processing for large exports
 - **Download Management**: Secure file downloads with expiration
 - **Template System**: Reusable export templates
-- **Permission Control**: User-based export permissions and limits
+- **Permission Control**: User-based export permissions and column restrictions
+- **Live Data Preview**: Real-time data preview with search and pagination
 
 ### 🛠️ Usage Examples
 
-#### Frontend Integration
+#### Dynamic Settings Pages (New!)
+Navigate to **Settings → Data Import** or **Settings → Data Export** for the new dynamic interface:
+
+```typescript
+// Settings pages with automatic table discovery
+// Located at: /settings/data-import and /settings/data-export
+
+// Features:
+// ✅ Dropdown with all available database tables
+// ✅ Real-time schema detection and column mapping
+// ✅ Permission-based access control
+// ✅ Live data preview and validation
+// ✅ Integrated import/export components
+```
+
+#### Table Discovery API
+```typescript
+// Get all available tables
+const tablesResponse = await fetch('/api/v1/data/tables/available');
+const { tables } = await tablesResponse.json();
+// Returns: ["users", "products", "orders", "customers", ...]
+
+// Get table schema
+const schemaResponse = await fetch('/api/v1/data/tables/users/schema');
+const schema = await schemaResponse.json();
+// Returns: columns, primary keys, sample data, constraints
+
+// Get table permissions
+const permissionsResponse = await fetch('/api/v1/data/tables/users/permissions');
+const permissions = await permissionsResponse.json();
+// Returns: import/export permissions, limits, allowed formats
+```
+
+#### Component Integration
 ```typescript
 // Import Data Component
 import { DataImport } from '@/shared/components/DataImport';
@@ -380,6 +423,22 @@ const ExportPage = () => {
 
 #### Backend API Usage
 ```python
+# Table Discovery APIs (New!)
+from app.api.v1.data_import_export import get_available_tables, get_table_schema, get_table_permissions
+
+@app.get("/tables")
+async def list_tables(current_user: User = Depends(get_current_user)):
+    """Get all available tables for import/export"""
+    tables = await get_available_tables(current_user)
+    return tables
+
+@app.get("/tables/{table_name}/info")
+async def get_table_info(table_name: str, current_user: User = Depends(get_current_user)):
+    """Get complete table information including schema and permissions"""
+    schema = await get_table_schema(table_name, current_user)
+    permissions = await get_table_permissions(table_name, current_user)
+    return {"schema": schema, "permissions": permissions}
+
 # Import endpoint usage
 from fastapi import UploadFile
 from app.api.v1.data_import_export import upload_and_create_import_job
@@ -492,27 +551,54 @@ source venv/bin/activate
 python create_import_export_demo_data.py
 ```
 
-#### 2. Test Import Functionality
+#### 2. Start the System
 ```bash
-# Start backend server
+# Terminal 1: Start Backend
+cd backend
+source venv/bin/activate
 python main.py
 
-# Frontend usage
-# Navigate to /admin/data-import
-# Upload demo_data/sample_users.csv
-# Map fields and validate
-# Import data
+# Terminal 2: Start Frontend
+cd frontend
+npm run dev
 ```
 
-#### 3. Test Export Functionality
+#### 3. Access Dynamic Import/Export (New!)
 ```bash
-# Navigate to /admin/data-export
-# Select table and columns
-# Choose export format
-# Download generated file
+# Open browser and navigate to:
+# http://localhost:3000/settings/data-import   # Dynamic Import
+# http://localhost:3000/settings/data-export   # Dynamic Export
+
+# Features available:
+# ✅ Select any database table from dropdown
+# ✅ View table schema and sample data
+# ✅ Check permissions and limits
+# ✅ Import/export with field mapping
+# ✅ Real-time progress tracking
+```
+
+#### 4. Test with Demo Data
+```bash
+# Import Test:
+# 1. Go to Settings → Data Import
+# 2. Select "users" table
+# 3. Upload demo_data/sample_users.csv
+# 4. Map fields automatically
+# 5. Validate and import
+
+# Export Test:
+# 1. Go to Settings → Data Export  
+# 2. Select any table with data
+# 3. Choose columns and format
+# 4. Preview and export
 ```
 
 ### 📋 API Endpoints
+
+#### Table Discovery Endpoints (New!)
+- `GET /api/v1/data/tables/available` - Get all available database tables
+- `GET /api/v1/data/tables/{table_name}/schema` - Get table schema and structure
+- `GET /api/v1/data/tables/{table_name}/permissions` - Get user permissions for table
 
 #### Import Endpoints
 - `POST /api/v1/data/import/upload` - Upload file and create import job
