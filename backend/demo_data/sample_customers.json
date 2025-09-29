@@ -1,0 +1,28 @@
+{
+  "customers": [
+    {
+      "id": 1,
+      "name": "ACME Corp",
+      "email": "contact@acme.com",
+      "phone": "+1-555-0123",
+      "address": "123 Business St, City, State 12345",
+      "status": "active"
+    },
+    {
+      "id": 2,
+      "name": "Global Industries",
+      "email": "info@global.com",
+      "phone": "+1-555-0456",
+      "address": "456 Corporate Ave, City, State 67890",
+      "status": "active"
+    },
+    {
+      "id": 3,
+      "name": "Tech Solutions",
+      "email": "hello@techsolutions.com",
+      "phone": "+1-555-0789",
+      "address": "789 Innovation Blvd, City, State 11111",
+      "status": "pending"
+    }
+  ]
+}
