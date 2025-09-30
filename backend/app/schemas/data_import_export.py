@@ -22,6 +22,9 @@ class ImportOptionsSchema(BaseModel):
     on_duplicate: str = "skip"  # skip, update, error
     validate_only: bool = False
     batch_size: int = 1000
+    
+    class Config:
+        extra = "allow"  # Allow additional fields for flexibility
 
 
 class FieldMappingSchema(BaseModel):
@@ -137,6 +140,12 @@ class ExportOptionsSchema(BaseModel):
     sheet_name: Optional[str] = "Data"
     auto_fit_columns: bool = True
     freeze_headers: bool = True
+    # Additional filtering and limiting options
+    row_limit: Optional[int] = None
+    search_term: Optional[str] = None
+    
+    class Config:
+        extra = "allow"  # Allow additional fields for flexibility
 
 
 class ExportJobCreate(BaseModel):

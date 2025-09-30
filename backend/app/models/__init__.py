@@ -15,3 +15,7 @@ from .data_import_export import (
     ImportPermission, ExportPermission, ImportAuditLog, ExportAuditLog,
     ImportStatus, ExportStatus, DataFormat
 )
+from .system_configuration import (
+    SystemConfiguration, ConfigurationTemplate, ConfigurationAuditLog,
+    ConfigurationCategory
+)

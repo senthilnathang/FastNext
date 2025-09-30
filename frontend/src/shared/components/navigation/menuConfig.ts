@@ -9,7 +9,15 @@ import {
   Workflow,
   Table,
   Sparkles,
-  Package
+  Package,
+  Cog,
+  Database,
+  Lock,
+  Bell,
+  Globe,
+  Palette,
+  Mail,
+  FileText
 } from 'lucide-react';
 
 export interface MenuItem {
@@ -62,6 +70,25 @@ export const menuItems: MenuItem[] = [
     href: '/settings',
     icon: Settings,
    },
+  {
+    title: 'Configuration',
+    icon: Cog,
+    module: 'configuration',
+    children: [
+      {
+        title: 'Data Import/Export Config',
+        href: '/configuration/data-import-export',
+        icon: Database,
+        requiredPermission: 'admin.data_config',
+      },
+      {
+        title: 'Permissions Config',
+        href: '/configuration/permissions',
+        icon: Shield,
+        requiredPermission: 'admin.permissions',
+      }
+    ],
+  },
   {
     title: 'Administration',
     icon: Shield,

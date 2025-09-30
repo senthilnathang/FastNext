@@ -159,7 +159,7 @@ class CacheMiddleware:
                     "content": parsed_content,
                     "status_code": status_code,
                     "headers": {k: v for k, v in response_data.get("headers", {}).items() 
-                              if not k.lower().startswith("x-cache")},
+                              if not str(k).lower().startswith("x-cache")},
                     "cached_at": time.time()
                 }
                 

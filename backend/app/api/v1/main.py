@@ -9,7 +9,7 @@ from . import (
     auth_routes, users, projects, pages, components, roles, permissions, 
     project_members, profile, security, activity_logs, audit_trails, 
     assets, user_roles, workflow_types, workflow_states, 
-    workflow_templates, workflow_instances, data_import_export
+    workflow_templates, workflow_instances, data_import_export, system_configuration
 )
 
 # Import resource routes (move these to v1 structure later)
@@ -57,3 +57,6 @@ v1_router.include_router(audit_trails.router, prefix="/audit-trails", tags=["v1-
 
 # Data Import/Export
 v1_router.include_router(data_import_export.router, prefix="/data", tags=["v1-data-import-export"])
+
+# System Configuration
+v1_router.include_router(system_configuration.router, prefix="/config", tags=["v1-configuration"])
