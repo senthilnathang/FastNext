@@ -28,7 +28,7 @@ class CacheMiddleware:
         self.app = app
         self.default_ttl = default_ttl
         self.cache_key_prefix = cache_key_prefix
-        self.cacheable_methods = {"GET"}
+        self.cacheable_methods = {"GET", "HEAD"}
         self.non_cacheable_paths = {
             "/health",
             "/docs",
@@ -36,7 +36,11 @@ class CacheMiddleware:
             "/openapi.json",
             "/auth/login",
             "/auth/logout",
-            "/auth/refresh"
+            "/auth/refresh",
+            "/api/v1/data/import/upload",
+            "/api/v1/data/export/create",
+            "/upload",
+            "/download"
         }
     
     async def __call__(self, scope: dict, receive: Callable, send: Callable) -> None:
@@ -59,15 +63,32 @@ class CacheMiddleware:
             cached_response = await cache.get(cache_key)
             if cached_response:
                 logger.debug(f"🎯 Cache hit for: {request.url.path}")
-                response = JSONResponse(
-                    content=cached_response["content"],
-                    status_code=cached_response["status_code"],
-                    headers={
-                        **cached_response.get("headers", {}),
-                        "X-Cache": "HIT",
-                        "X-Cache-Key": cache_key[:16] + "..."
-                    }
-                )
+                
+                # Handle binary content reconstruction
+                content = cached_response["content"]
+                if isinstance(content, dict) and content.get("_binary_content"):
+                    import base64
+                    from fastapi import Response
+                    binary_data = base64.b64decode(content["_data"])
+                    response = Response(
+                        content=binary_data,
+                        status_code=cached_response["status_code"],
+                        headers={
+                            **cached_response.get("headers", {}),
+                            "X-Cache": "HIT",
+                            "X-Cache-Key": cache_key[:16] + "..."
+                        }
+                    )
+                else:
+                    response = JSONResponse(
+                        content=content,
+                        status_code=cached_response["status_code"],
+                        headers={
+                            **cached_response.get("headers", {}),
+                            "X-Cache": "HIT",
+                            "X-Cache-Key": cache_key[:16] + "..."
+                        }
+                    )
                 await response(scope, receive, send)
                 return
         
@@ -153,7 +174,16 @@ class CacheMiddleware:
                     else:
                         parsed_content = None
                 except (json.JSONDecodeError, UnicodeDecodeError):
-                    parsed_content = content.decode() if content else ""
+                    # Handle binary content that can't be decoded as text
+                    try:
+                        parsed_content = content.decode() if content else ""
+                    except UnicodeDecodeError:
+                        # For binary content, encode as base64 for JSON serialization
+                        import base64
+                        parsed_content = {
+                            "_binary_content": True,
+                            "_data": base64.b64encode(content).decode('utf-8')
+                        }
                 
                 cache_data = {
                     "content": parsed_content,

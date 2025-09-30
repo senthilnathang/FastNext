@@ -137,7 +137,10 @@ class RedisCache:
                 if json_serialize:
                     try:
                         serialized_value = json.dumps(value, default=str)
-                    except (TypeError, ValueError):
+                    except (TypeError, ValueError) as e:
+                        # Check if the error is specifically about bytes serialization
+                        if "bytes" in str(e).lower() or "not JSON serializable" in str(e):
+                            logger.debug(f"Using pickle serialization for bytes data in key: {key}")
                         # Fallback to pickle for complex objects
                         serialized_value = pickle.dumps(value)
                         json_serialize = False
@@ -152,16 +155,26 @@ class RedisCache:
                     'ttl': ttl
                 }
                 
+                # Serialize the cache_data itself
+                try:
+                    cache_data_serialized = json.dumps(cache_data)
+                except (TypeError, ValueError) as e:
+                    # If cache_data contains non-JSON serializable content, use pickle
+                    logger.debug(f"Cache metadata contains non-JSON serializable data for key {key}, using pickle")
+                    cache_data_serialized = pickle.dumps(cache_data).decode('latin1')
+                    cache_data = {'_pickled_metadata': True, 'data': cache_data_serialized}
+                    cache_data_serialized = json.dumps(cache_data)
+                
                 if ttl:
                     result = await redis_client.setex(
                         f"cache:{key}", 
                         ttl, 
-                        json.dumps(cache_data)
+                        cache_data_serialized
                     )
                 else:
                     result = await redis_client.set(
                         f"cache:{key}", 
-                        json.dumps(cache_data)
+                        cache_data_serialized
                     )
                 
                 logger.debug(f"✅ Cached key: {key} (TTL: {ttl})")
@@ -182,6 +195,11 @@ class RedisCache:
                 
                 # Parse cache metadata
                 cache_info = json.loads(cached_data)
+                
+                # Handle pickled metadata
+                if cache_info.get('_pickled_metadata'):
+                    cache_info = pickle.loads(cache_info['data'].encode('latin1'))
+                
                 serialized_value = cache_info['value']
                 json_serialized = cache_info['json_serialized']
                 

@@ -53,62 +53,158 @@ async def upload_and_create_import_job(
 ):
     """Upload file and create import job"""
     
+    # Generate job ID for tracking throughout process
+    job_id = str(uuid.uuid4())
+    
+    logger.info(f"🚀 Starting file upload process - Job ID: {job_id}")
+    logger.info(f"📂 File: {file.filename} ({file.size} bytes) for table: {table_name}")
+    logger.info(f"👤 User: {current_user.id} ({current_user.email if hasattr(current_user, 'email') else 'N/A'})")
+    
     try:
         import json
         
+        logger.info("📋 Parsing JSON parameters...")
         # Parse JSON parameters
-        options = ImportOptionsSchema.model_validate_json(import_options)
-        mappings = json.loads(field_mappings)
+        try:
+            options = ImportOptionsSchema.model_validate_json(import_options)
+            logger.info(f"✅ Import options parsed: format={options.format}, has_headers={options.has_headers}")
+        except Exception as e:
+            logger.error(f"❌ Failed to parse import options: {e}")
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST, 
+                detail=f"Invalid import options: {e}"
+            )
         
+        try:
+            mappings = json.loads(field_mappings)
+            logger.info(f"✅ Field mappings parsed: {len(mappings)} mappings")
+        except Exception as e:
+            logger.error(f"❌ Failed to parse field mappings: {e}")
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST, 
+                detail=f"Invalid field mappings: {e}"
+            )
+        
+        logger.info("🔐 Checking permissions...")
         # Check permissions - use default permissions if none found
         permission = _check_import_permission(db, current_user.id, table_name)
-        if permission and not permission.can_import:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="No import permission for this table"
-            )
+        if permission:
+            logger.info(f"✅ Permissions found: can_import={permission.can_import}, max_size={permission.max_file_size_mb}MB")
+            if not permission.can_import:
+                logger.warning(f"❌ Import permission denied for user {current_user.id} on table {table_name}")
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail="No import permission for this table"
+                )
+        else:
+            logger.info("⚠️  No permission record found, using defaults")
         
         # Validate file size (use default 100MB if no permission record)
         max_file_size_mb = permission.max_file_size_mb if permission else 100
+        logger.info(f"📏 Validating file size: {file.size} bytes (max: {max_file_size_mb}MB)")
         if file.size > max_file_size_mb * 1024 * 1024:
+            logger.error(f"❌ File too large: {file.size} bytes > {max_file_size_mb}MB")
             raise HTTPException(
                 status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
                 detail=f"File too large. Maximum size: {max_file_size_mb}MB"
             )
+        logger.info("✅ File size validation passed")
         
-        # Create import job
-        job_id = str(uuid.uuid4())
+        # Read and store file content
+        logger.info("📖 Reading file content...")
+        try:
+            file_content = await file.read()
+            logger.info(f"✅ File content read successfully: {len(file_content)} bytes")
+        except Exception as e:
+            logger.error(f"❌ Failed to read file content: {e}")
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Failed to read uploaded file"
+            )
         
-        import_job = ImportJob(
-            job_id=job_id,
-            table_name=table_name,
-            status=ImportStatus.PENDING,
-            original_filename=file.filename,
-            file_size=file.size,
-            file_format=options.format,
-            import_options=options.model_dump(),
-            field_mappings={"mappings": mappings},
-            requires_approval=requires_approval or (permission.requires_approval if permission else False),
-            created_by=current_user.id
-        )
+        # Parse and validate file content immediately
+        logger.info(f"🔍 Parsing file content (format: {options.format})...")
+        try:
+            parsed_data = _parse_uploaded_file(file_content, file.filename, options)
+            logger.info(f"✅ File parsed successfully: {parsed_data.get('total_rows', 0)} rows, {len(parsed_data.get('headers', []))} columns")
+            logger.info(f"📊 Columns found: {parsed_data.get('headers', [])}")
+        except Exception as e:
+            logger.error(f"❌ Failed to parse file: {e}")
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Failed to parse file: {e}"
+            )
         
-        db.add(import_job)
-        db.commit()
-        db.refresh(import_job)
+        # Store file content as base64 for later processing
+        logger.info("🔐 Encoding file content for storage...")
+        try:
+            import base64
+            file_content_b64 = base64.b64encode(file_content).decode('utf-8')
+            logger.info(f"✅ File content encoded: {len(file_content_b64)} characters")
+        except Exception as e:
+            logger.error(f"❌ Failed to encode file content: {e}")
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Failed to process file content"
+            )
+        
+        # Create import job with parsed data
+        logger.info(f"💾 Creating import job in database (job_id: {job_id})...")
+        try:
+            import_job = ImportJob(
+                job_id=job_id,
+                table_name=table_name,
+                status=ImportStatus.PARSED,  # Already parsed
+                original_filename=file.filename,
+                file_size=file.size,
+                file_format=options.format,
+                import_options=options.model_dump(),
+                field_mappings={"mappings": mappings},
+                requires_approval=requires_approval or (permission.requires_approval if permission else False),
+                total_rows=parsed_data["total_rows"],
+                import_results={"file_content": file_content_b64, "parsed_data": parsed_data},
+                created_by=current_user.id
+            )
+            
+            db.add(import_job)
+            db.commit()
+            db.refresh(import_job)
+            logger.info(f"✅ Import job created successfully: ID={import_job.id}")
+        except Exception as e:
+            logger.error(f"❌ Failed to create import job: {e}")
+            db.rollback()
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Failed to create import job"
+            )
         
         # Log audit event
-        _log_import_audit(db, import_job.id, current_user.id, "created", {
-            "table_name": table_name,
-            "filename": file.filename,
-            "file_size": file.size
-        })
+        logger.info("📝 Logging audit event...")
+        try:
+            _log_import_audit(db, import_job.id, current_user.id, "created", {
+                "table_name": table_name,
+                "filename": file.filename,
+                "file_size": file.size
+            })
+            logger.info("✅ Audit event logged")
+        except Exception as e:
+            logger.warning(f"⚠️  Failed to log audit event: {e}")
+        
+        logger.info(f"🎉 File upload completed successfully - Job ID: {job_id}")
+        logger.info(f"📈 Summary: {parsed_data.get('total_rows', 0)} rows, {len(parsed_data.get('headers', []))} columns, Status: {ImportStatus.PARSED}")
         
         return ImportJobResponse.model_validate(import_job)
         
     except ImportError as e:
+        logger.error(f"❌ Import error in job {job_id}: {e}")
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+    except HTTPException:
+        # Re-raise HTTP exceptions (they're already logged above)
+        raise
     except Exception as e:
-        logger.error(f"Import job creation failed: {e}")
+        logger.error(f"❌ Unexpected error in job {job_id}: {e}")
+        import traceback
+        logger.error(f"💥 Traceback: {traceback.format_exc()}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to create import job"
@@ -128,8 +224,11 @@ async def parse_import_file(
         # Parse import options JSON string
         options = ImportOptionsSchema.model_validate_json(import_options)
         
-        importer = get_data_importer(db)
-        parsed_data = await importer.parse_file(file, options)
+        # Read file content
+        file_content = await file.read()
+        
+        # Parse the file
+        parsed_data = _parse_uploaded_file(file_content, file.filename, options)
         
         return {
             "headers": parsed_data["headers"],
@@ -138,13 +237,11 @@ async def parse_import_file(
             "format": parsed_data["format"]
         }
         
-    except ImportError as e:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
     except Exception as e:
         logger.error(f"File parsing failed: {e}")
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to parse file"
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Failed to parse file: {str(e)}"
         )
 
 
@@ -167,30 +264,40 @@ async def validate_import_data(
         if import_job.created_by != current_user.id:
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access denied")
         
+        # Check if job has parsed data
+        if not import_job.import_results or 'parsed_data' not in import_job.import_results:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="No validation data available. Please upload a file first."
+            )
+        
         # Update job status
         import_job.status = ImportStatus.VALIDATING
         db.commit()
         
-        # Start background validation
-        background_tasks.add_task(
-            _run_import_validation,
-            db, import_job.id, current_user.id
-        )
+        # Perform validation on parsed data
+        parsed_data = import_job.import_results['parsed_data']
+        validation_result = _validate_import_data(import_job, parsed_data, db)
+        
+        # Update job with validation results
+        import_job.status = ImportStatus.VALIDATED
+        import_job.validation_results = validation_result
+        db.commit()
         
         return ValidationResultSchema(
-            is_valid=False,
-            total_rows=0,
-            valid_rows=0,
-            error_rows=0,
-            errors=[],
-            warnings=[]
-        )  # Placeholder response
+            is_valid=validation_result["is_valid"],
+            total_rows=validation_result["total_rows"],
+            valid_rows=validation_result["valid_rows"],
+            error_rows=validation_result["error_rows"],
+            errors=validation_result["errors"],
+            warnings=validation_result["warnings"]
+        )
         
     except Exception as e:
         logger.error(f"Import validation failed: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to start validation"
+            detail=f"Validation failed: {str(e)}"
         )
 
 
@@ -213,8 +320,15 @@ async def start_import(
         if import_job.created_by != current_user.id:
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access denied")
         
+        # Check if data is validated
+        if not import_job.validation_results or not import_job.validation_results.get("is_valid"):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Import data must be validated before starting"
+            )
+        
         # Check if approval is required
-        if import_job.requires_approval and not import_job.approved_by:
+        if import_job.requires_approval and not hasattr(import_job, 'approved_by'):
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Import requires approval before starting"
@@ -225,20 +339,32 @@ async def start_import(
         import_job.started_at = datetime.utcnow()
         db.commit()
         
-        # Start background import
-        background_tasks.add_task(
-            _run_import_process,
-            db, import_job.id, current_user.id
-        )
+        # Perform the actual import
+        import_result = _perform_data_import(import_job, db, current_user)
+        
+        # Update job with results
+        import_job.status = ImportStatus.COMPLETED
+        import_job.completed_at = datetime.utcnow()
+        import_job.processed_rows = import_result["processed_rows"]
+        import_job.valid_rows = import_result["valid_rows"]
+        import_job.error_rows = import_result["error_rows"]
+        import_job.import_results.update({"import_summary": import_result})
+        db.commit()
         
         db.refresh(import_job)
         return ImportJobResponse.model_validate(import_job)
         
     except Exception as e:
         logger.error(f"Import start failed: {e}")
+        # Update job status to failed
+        if 'import_job' in locals():
+            import_job.status = ImportStatus.FAILED
+            import_job.error_message = str(e)
+            db.commit()
+        
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to start import"
+            detail=f"Import failed: {str(e)}"
         )
 
 
@@ -299,6 +425,115 @@ async def list_import_jobs(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to list import jobs"
         )
+
+
+
+
+@router.get("/import/{job_id}/progress", response_model=Dict[str, Any])
+async def get_import_progress(
+    job_id: str,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Get real-time progress of import job"""
+    
+    logger.info(f"📊 Getting progress for job {job_id}")
+    
+    try:
+        # Get import job
+        import_job = db.query(ImportJob).filter(ImportJob.job_id == job_id).first()
+        if not import_job:
+            logger.warning(f"❌ Job {job_id} not found")
+            raise HTTPException(status_code=404, detail="Import job not found")
+        
+        # Check ownership
+        if import_job.created_by != current_user.id and not current_user.is_superuser:
+            logger.warning(f"❌ Access denied to job {job_id} for user {current_user.id}")
+            raise HTTPException(status_code=403, detail="Access denied")
+        
+        # Calculate progress based on status
+        progress_map = {
+            ImportStatus.PENDING: {"percent": 0, "message": "Waiting to start"},
+            ImportStatus.UPLOADING: {"percent": 25, "message": "Uploading file"},
+            ImportStatus.PARSING: {"percent": 40, "message": "Parsing file content"},
+            ImportStatus.PARSED: {"percent": 50, "message": "File parsed successfully"},
+            ImportStatus.VALIDATING: {"percent": 60, "message": "Validating data"},
+            ImportStatus.VALIDATED: {"percent": 70, "message": "Data validated"},
+            ImportStatus.IMPORTING: {"percent": 85, "message": "Importing to database"},
+            ImportStatus.COMPLETED: {"percent": 100, "message": "Import completed successfully"},
+            ImportStatus.FAILED: {"percent": 0, "message": "Import failed"},
+            ImportStatus.CANCELLED: {"percent": 0, "message": "Import cancelled"}
+        }
+        
+        current_progress = progress_map.get(import_job.status, {"percent": 0, "message": "Unknown status"})
+        
+        # Get detailed info based on current status
+        details = {
+            "job_id": job_id,
+            "status": import_job.status,
+            "progress": current_progress,
+            "file_info": {
+                "filename": import_job.original_filename,
+                "size": import_job.file_size,
+                "format": import_job.file_format
+            },
+            "table_name": import_job.table_name,
+            "total_rows": import_job.total_rows,
+            "processed_rows": import_job.processed_rows or 0,
+            "valid_rows": import_job.valid_rows or 0,
+            "error_rows": import_job.error_rows or 0,
+            "created_at": import_job.created_at.isoformat(),
+            "updated_at": import_job.updated_at.isoformat() if import_job.updated_at else None,
+            "logs": []
+        }
+        
+        # Add error details if failed
+        if import_job.status == ImportStatus.FAILED and import_job.error_message:
+            details["error"] = {
+                "message": import_job.error_message,
+                "details": import_job.error_details or {}
+            }
+        
+        # Add validation results if available
+        if import_job.import_results and "validation_results" in import_job.import_results:
+            validation = import_job.import_results["validation_results"]
+            details["validation"] = {
+                "is_valid": validation.get("is_valid", False),
+                "errors": validation.get("errors", []),
+                "warnings": validation.get("warnings", [])
+            }
+        
+        # Get recent logs from audit trail (if available)
+        try:
+            from app.models.data_import_export import ImportAuditLog
+            recent_logs = db.query(ImportAuditLog).filter(
+                ImportAuditLog.import_job_id == import_job.id
+            ).order_by(ImportAuditLog.timestamp.desc()).limit(10).all()
+            
+            details["logs"] = [
+                {
+                    "timestamp": log.timestamp.isoformat(),
+                    "action": log.action,
+                    "message": log.details.get("message", "") if log.details else "",
+                    "level": log.details.get("level", "info") if log.details else "info"
+                }
+                for log in recent_logs
+            ]
+        except Exception as e:
+            logger.warning(f"Could not fetch audit logs: {e}")
+        
+        logger.info(f"✅ Progress retrieved for job {job_id}: {current_progress['percent']}%")
+        return details
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"❌ Failed to get progress for job {job_id}: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to get import progress"
+        )
+
 
 
 # Export endpoints
@@ -657,6 +892,412 @@ async def get_import_export_health(
 
 
 # Helper functions
+
+def _parse_uploaded_file(file_content: bytes, filename: str, options) -> dict:
+    """Parse uploaded file content and return structured data"""
+    
+    logger.info(f"🔍 Starting file parsing: {filename}")
+    logger.info(f"📊 File details: {len(file_content)} bytes, format: {getattr(options, 'format', 'auto')}")
+    
+    try:
+        # Decode file content
+        logger.info("🔤 Decoding file content...")
+        if isinstance(file_content, bytes):
+            try:
+                content_str = file_content.decode('utf-8')
+                logger.info(f"✅ File decoded successfully: {len(content_str)} characters")
+            except UnicodeDecodeError as e:
+                logger.error(f"❌ Failed to decode file as UTF-8: {e}")
+                try:
+                    content_str = file_content.decode('latin1')
+                    logger.info("✅ File decoded using latin1 fallback")
+                except Exception as e2:
+                    logger.error(f"❌ Failed to decode file with fallback: {e2}")
+                    raise ValueError(f"Unable to decode file content: {e}")
+        else:
+            content_str = file_content
+            logger.info("✅ File content already in string format")
+        
+        # Determine file format
+        logger.info("🎯 Detecting file format...")
+        file_format = _detect_file_format(filename, options)
+        logger.info(f"✅ File format detected: {file_format}")
+        
+        # Parse based on format
+        logger.info(f"📋 Parsing file as {file_format.upper()}...")
+        if file_format == "csv":
+            parsed_data = _parse_csv_content(content_str, options)
+            logger.info(f"✅ CSV parsing completed: {parsed_data.get('total_rows', 0)} rows")
+            return parsed_data
+        elif file_format == "json":
+            parsed_data = _parse_json_content(content_str, options)
+            logger.info(f"✅ JSON parsing completed: {parsed_data.get('total_rows', 0)} rows")
+            return parsed_data
+        else:
+            logger.error(f"❌ Unsupported file format: {file_format}")
+            raise ValueError(f"Unsupported file format: {file_format}")
+            
+    except Exception as e:
+        logger.error(f"❌ File parsing failed for {filename}: {e}")
+        import traceback
+        logger.error(f"💥 Parsing traceback: {traceback.format_exc()}")
+        raise ValueError(f"Could not parse file: {str(e)}")
+
+
+def _detect_file_format(filename: str, options) -> str:
+    """Detect file format from filename and options"""
+    
+    # Check options first
+    if hasattr(options, 'format') and options.format:
+        return options.format.lower()
+    
+    # Detect from filename extension
+    if filename.lower().endswith('.csv'):
+        return "csv"
+    elif filename.lower().endswith('.json'):
+        return "json"
+    elif filename.lower().endswith(('.xlsx', '.xls')):
+        return "excel"
+    else:
+        # Default to CSV for unknown formats
+        return "csv"
+
+
+def _parse_csv_content(content: str, options) -> dict:
+    """Parse CSV file content"""
+    
+    import csv
+    from io import StringIO
+    
+    # Get delimiter from options
+    delimiter = getattr(options, 'delimiter', ',')
+    
+    # Parse CSV
+    csv_reader = csv.reader(StringIO(content), delimiter=delimiter)
+    rows = list(csv_reader)
+    
+    if not rows:
+        raise ValueError("CSV file is empty")
+    
+    # Extract headers
+    has_headers = getattr(options, 'has_headers', True)
+    if has_headers and len(rows) > 0:
+        headers = rows[0]
+        data_rows = rows[1:]
+    else:
+        # Generate column names if no headers
+        first_row = rows[0] if rows else []
+        headers = [f"column_{i+1}" for i in range(len(first_row))]
+        data_rows = rows
+    
+    # Convert rows to dictionaries
+    parsed_rows = []
+    for row in data_rows[:100]:  # Limit to first 100 rows for preview
+        if len(row) == len(headers):
+            row_dict = dict(zip(headers, row))
+            parsed_rows.append(row_dict)
+    
+    return {
+        "headers": headers,
+        "rows": parsed_rows,
+        "total_rows": len(data_rows),
+        "format": "csv"
+    }
+
+
+def _parse_json_content(content: str, options) -> dict:
+    """Parse JSON file content"""
+    
+    import json
+    
+    try:
+        data = json.loads(content)
+        
+        # Handle different JSON structures
+        if isinstance(data, list):
+            rows = data
+        elif isinstance(data, dict):
+            # Check for common data keys
+            if 'data' in data:
+                rows = data['data']
+            elif 'records' in data:
+                rows = data['records']
+            elif 'rows' in data:
+                rows = data['rows']
+            else:
+                # Treat the dict as a single row
+                rows = [data]
+        else:
+            raise ValueError("JSON must contain an array or object")
+        
+        if not rows:
+            raise ValueError("JSON file contains no data")
+        
+        # Extract headers from first row
+        if rows and isinstance(rows[0], dict):
+            headers = list(rows[0].keys())
+        else:
+            raise ValueError("JSON rows must be objects/dictionaries")
+        
+        return {
+            "headers": headers,
+            "rows": rows[:100],  # Limit to first 100 rows for preview
+            "total_rows": len(rows),
+            "format": "json"
+        }
+        
+    except json.JSONDecodeError as e:
+        raise ValueError(f"Invalid JSON format: {str(e)}")
+
+
+def _validate_import_data(import_job, parsed_data: dict, db: Session) -> dict:
+    """Validate parsed import data against target table schema"""
+    
+    try:
+        # Handle different input types for parsed_data
+        if isinstance(parsed_data, str):
+            # If it's a string, try to parse as JSON
+            import json
+            try:
+                parsed_data = json.loads(parsed_data)
+            except json.JSONDecodeError:
+                return {
+                    "is_valid": False,
+                    "total_rows": 0,
+                    "valid_rows": 0,
+                    "error_rows": 0,
+                    "errors": ["Invalid parsed data format - not a valid JSON string"],
+                    "warnings": []
+                }
+        
+        if not isinstance(parsed_data, dict):
+            return {
+                "is_valid": False,
+                "total_rows": 0,
+                "valid_rows": 0,
+                "error_rows": 0,
+                "errors": ["Invalid parsed data format - expected dictionary"],
+                "warnings": []
+            }
+            
+        headers = parsed_data.get("headers", [])
+        rows = parsed_data.get("rows", [])
+        total_rows = len(rows)
+        
+        # Get target table model
+        model_class = _get_model_class(import_job.table_name)
+        if not model_class:
+            return {
+                "is_valid": False,
+                "total_rows": total_rows,
+                "valid_rows": 0,
+                "error_rows": total_rows,
+                "errors": [f"Target table '{import_job.table_name}' not found"],
+                "warnings": []
+            }
+        
+        # Get table columns
+        table_columns = [col.name for col in model_class.__table__.columns]
+        
+        errors = []
+        warnings = []
+        valid_rows = 0
+        error_rows = 0
+        
+        # Check headers against table schema
+        missing_columns = []
+        extra_columns = []
+        
+        for header in headers:
+            if header not in table_columns:
+                extra_columns.append(header)
+        
+        # Check for required columns (non-nullable without defaults)
+        for column in model_class.__table__.columns:
+            if not column.nullable and column.default is None and column.name not in headers:
+                # Skip auto-incrementing primary keys
+                if not (column.primary_key and hasattr(column.type, 'python_type') and column.type.python_type == int):
+                    missing_columns.append(column.name)
+        
+        if missing_columns:
+            errors.append(f"Missing required columns: {', '.join(missing_columns)}")
+        
+        if extra_columns:
+            warnings.append(f"Extra columns will be ignored: {', '.join(extra_columns)}")
+        
+        # Validate each row
+        for i, row in enumerate(rows):
+            row_errors = []
+            
+            # Check for empty required fields
+            for column in model_class.__table__.columns:
+                if not column.nullable and column.default is None:
+                    if column.name in headers:
+                        value = row.get(column.name, "")
+                        if not value or str(value).strip() == "":
+                            row_errors.append(f"Row {i+1}: Required field '{column.name}' is empty")
+            
+            if row_errors:
+                errors.extend(row_errors)
+                error_rows += 1
+            else:
+                valid_rows += 1
+        
+        is_valid = len(errors) == 0 and valid_rows > 0
+        
+        return {
+            "is_valid": is_valid,
+            "total_rows": total_rows,
+            "valid_rows": valid_rows,
+            "error_rows": error_rows,
+            "errors": errors,
+            "warnings": warnings
+        }
+        
+    except Exception as e:
+        logger.error(f"Validation failed: {e}")
+        return {
+            "is_valid": False,
+            "total_rows": parsed_data.get("total_rows", 0),
+            "valid_rows": 0,
+            "error_rows": parsed_data.get("total_rows", 0),
+            "errors": [f"Validation error: {str(e)}"],
+            "warnings": []
+        }
+
+
+def _perform_data_import(import_job, db: Session, current_user) -> dict:
+    """Perform the actual data import into the target table"""
+    
+    try:
+        # Get parsed data
+        parsed_data = import_job.import_results['parsed_data']
+        headers = parsed_data.get("headers", [])
+        rows = parsed_data.get("rows", [])
+        
+        # Get target table model
+        model_class = _get_model_class(import_job.table_name)
+        if not model_class:
+            raise ValueError(f"Target table '{import_job.table_name}' not found")
+        
+        # Get table columns for mapping
+        table_columns = {col.name: col for col in model_class.__table__.columns}
+        
+        processed_rows = 0
+        valid_rows = 0
+        error_rows = 0
+        errors = []
+        
+        # Import each row
+        for i, row in enumerate(rows):
+            try:
+                # Prepare data for insertion
+                insert_data = {}
+                
+                for header in headers:
+                    if header in table_columns:
+                        value = row.get(header, "")
+                        
+                        # Convert value based on column type
+                        converted_value = _convert_value_for_column(value, table_columns[header])
+                        insert_data[header] = converted_value
+                
+                # Add metadata fields if they exist
+                if 'created_by' in table_columns and current_user:
+                    insert_data['created_by'] = current_user.id
+                if 'created_at' in table_columns:
+                    insert_data['created_at'] = datetime.utcnow()
+                
+                # Create new record
+                new_record = model_class(**insert_data)
+                db.add(new_record)
+                db.flush()  # Flush to catch any database errors
+                
+                valid_rows += 1
+                
+            except Exception as row_error:
+                error_rows += 1
+                errors.append(f"Row {i+1}: {str(row_error)}")
+                logger.warning(f"Failed to import row {i+1}: {row_error}")
+                continue
+            
+            processed_rows += 1
+        
+        # Commit all changes
+        db.commit()
+        
+        logger.info(f"Import completed: {valid_rows} valid, {error_rows} errors out of {processed_rows} processed")
+        
+        return {
+            "processed_rows": processed_rows,
+            "valid_rows": valid_rows,
+            "error_rows": error_rows,
+            "errors": errors,
+            "success": True
+        }
+        
+    except Exception as e:
+        db.rollback()
+        logger.error(f"Import failed: {e}")
+        raise ValueError(f"Import failed: {str(e)}")
+
+
+def _convert_value_for_column(value, column):
+    """Convert string value to appropriate type for database column"""
+    
+    if value is None or str(value).strip() == "":
+        if column.nullable:
+            return None
+        elif column.default is not None:
+            return column.default
+        else:
+            # For non-nullable columns without defaults, return empty string or 0
+            if hasattr(column.type, 'python_type'):
+                if column.type.python_type == str:
+                    return ""
+                elif column.type.python_type == int:
+                    return 0
+                elif column.type.python_type == float:
+                    return 0.0
+                elif column.type.python_type == bool:
+                    return False
+            return ""
+    
+    try:
+        # Convert based on column type
+        if hasattr(column.type, 'python_type'):
+            target_type = column.type.python_type
+            
+            if target_type == str:
+                return str(value)
+            elif target_type == int:
+                # Handle numeric strings
+                if isinstance(value, str) and value.isdigit():
+                    return int(value)
+                elif isinstance(value, (int, float)):
+                    return int(value)
+                else:
+                    return 0
+            elif target_type == float:
+                return float(value)
+            elif target_type == bool:
+                if isinstance(value, str):
+                    return value.lower() in ('true', '1', 'yes', 'on', 'enabled')
+                return bool(value)
+            elif target_type == datetime:
+                if isinstance(value, str):
+                    # Try to parse datetime
+                    from dateutil import parser
+                    return parser.parse(value)
+                return value
+        
+        # Default: return as string
+        return str(value)
+        
+    except Exception as e:
+        logger.warning(f"Could not convert value '{value}' for column {column.name}: {e}")
+        return str(value)
+
 
 def _generate_export_file(export_request, current_user, db: Session) -> tuple[str, int]:
     """Generate export file content based on request"""
