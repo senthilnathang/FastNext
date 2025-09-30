@@ -300,7 +300,18 @@ FastNext implements comprehensive security measures following OWASP guidelines a
 
 ## 📊 Data Import/Export System
 
-FastNext includes a comprehensive data management system with **Dynamic Table Selection** that supports importing and exporting data across multiple formats with enterprise-grade features:
+FastNext includes a comprehensive data management system with **Dynamic Table Selection** that supports importing and exporting data across multiple formats with enterprise-grade features.
+
+### 🎯 Demo Data Available
+
+The system includes comprehensive demo data for testing import functionality:
+
+- **Location**: `examples/data-import/`
+- **Ready-to-use files**: Projects table demo data in multiple formats
+- **Validation testing**: Files with intentional errors for testing validation
+- **Documentation**: Detailed guides and setup instructions
+
+For quick testing, see the [Demo Import Guide](examples/data-import/DEMO_IMPORT_GUIDE.md).
 
 ### 🎯 Dynamic Table Management
 - **Auto-Discovery**: Automatically discover all database tables for import/export
