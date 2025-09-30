@@ -5,6 +5,7 @@ from sqlalchemy.orm import selectinload
 from sqlalchemy import select, func, and_, desc, or_
 from typing import List, Optional, Dict, Any, Union
 import uuid
+import json
 from datetime import datetime, timedelta
 import logging
 
@@ -274,6 +275,103 @@ async def parse_import_file(
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"Failed to parse file: {str(e)}"
+        )
+
+
+@router.post("/import/validate-file", response_model=ValidationResultSchema)
+async def validate_import_file(
+    file: UploadFile = File(...),
+    table_name: str = Query(...),
+    import_options: str = Query(...),
+    field_mappings: str = Query(default="[]"),
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+    request: Request = None
+):
+    """Validate uploaded file without creating an import job"""
+    
+    try:
+        logger.info(f"🔍 Starting file validation: {file.filename} for table: {table_name}")
+        
+        # Parse import options and field mappings
+        try:
+            options = ImportOptionsSchema.model_validate_json(import_options)
+            mappings = json.loads(field_mappings)
+            logger.info(f"✅ Options parsed: format={options.format}, mappings={len(mappings)}")
+        except Exception as e:
+            logger.error(f"❌ Failed to parse parameters: {e}")
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Invalid parameters: {e}"
+            )
+        
+        # Check permissions
+        permission = _check_import_permission(db, current_user.id, table_name)
+        if permission and not permission.can_import:
+            logger.warning(f"❌ Validation permission denied for user {current_user.id} on table {table_name}")
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="No validation permission for this table"
+            )
+        
+        # Read and parse file content
+        logger.info("📖 Reading and parsing file content...")
+        try:
+            file_content = await file.read()
+            parsed_data = _parse_uploaded_file(file_content, file.filename, options)
+            logger.info(f"✅ File parsed: {parsed_data.get('total_rows', 0)} rows, {len(parsed_data.get('headers', []))} columns")
+        except Exception as e:
+            logger.error(f"❌ Failed to parse file: {e}")
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Failed to parse file: {e}"
+            )
+        
+        # Create a temporary import job object for validation
+        temp_import_job = type('TempImportJob', (), {
+            'table_name': table_name,
+            'import_results': {'parsed_data': parsed_data},
+            'total_rows': parsed_data.get('total_rows', 0)
+        })()
+        
+        # Perform validation
+        logger.info("🔍 Performing data validation...")
+        validation_result = _validate_import_data(temp_import_job, parsed_data, db)
+        
+        # Log validation activity
+        try:
+            temp_audit_data = {
+                "table_name": table_name,
+                "filename": file.filename,
+                "file_size": len(file_content),
+                "total_rows": parsed_data.get('total_rows', 0),
+                "is_valid": validation_result["is_valid"],
+                "valid_rows": validation_result["valid_rows"],
+                "error_rows": validation_result["error_rows"],
+                "action": "file_validation_performed"
+            }
+            logger.info(f"✅ File validation completed: {validation_result['valid_rows']}/{validation_result['total_rows']} valid rows")
+        except Exception as e:
+            logger.warning(f"Failed to log validation activity: {e}")
+        
+        return ValidationResultSchema(
+            is_valid=validation_result["is_valid"],
+            total_rows=validation_result["total_rows"],
+            valid_rows=validation_result["valid_rows"],
+            error_rows=validation_result["error_rows"],
+            errors=validation_result["errors"],
+            warnings=validation_result["warnings"]
+        )
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"❌ File validation failed: {e}")
+        import traceback
+        logger.error(f"💥 Validation traceback: {traceback.format_exc()}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Validation failed: {str(e)}"
         )
 
 

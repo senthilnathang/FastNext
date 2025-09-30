@@ -111,7 +111,7 @@ export default function DataImportPage() {
       title: 'Validate Records',
       description: 'Preview and validate your data',
       icon: <CheckCircle className="w-5 h-5" />,
-      isValid: !!importData.validationResults
+      isValid: !!importData.validationResults && importData.validationResults.isValid
     },
     {
       id: 'execute',
@@ -446,9 +446,9 @@ export default function DataImportPage() {
 
     setIsLoading(true);
     try {
-      // Parse the file first
-      const formData = new FormData();
-      formData.append('file', importData.file);
+      // First parse the file to get preview data
+      const parseFormData = new FormData();
+      parseFormData.append('file', importData.file);
       
       const importOptions = {
         format: importData.format,
@@ -464,30 +464,56 @@ export default function DataImportPage() {
         batch_size: importConfig.batch_size
       };
       
-      formData.append('import_options', JSON.stringify(importOptions));
+      parseFormData.append('import_options', JSON.stringify(importOptions));
 
-      const response = await fetch('/api/v1/data/import/parse', {
+      const parseResponse = await fetch('/api/v1/data/import/parse', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('access_token')}`
         },
-        body: formData
+        body: parseFormData
       });
 
-      if (!response.ok) {
+      if (!parseResponse.ok) {
         throw new Error('Failed to parse file');
       }
 
-      const result = await response.json();
+      const parseResult = await parseResponse.json();
+      
+      // Now perform actual validation using the new endpoint
+      const validateFormData = new FormData();
+      validateFormData.append('file', importData.file);
+      validateFormData.append('table_name', importData.selectedTable);
+      validateFormData.append('import_options', JSON.stringify(importOptions));
+      validateFormData.append('field_mappings', JSON.stringify(importData.fieldMappings));
+
+      const validateResponse = await fetch('/api/v1/data/import/validate-file', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+        },
+        body: validateFormData
+      });
+
+      if (!validateResponse.ok) {
+        const errorText = await validateResponse.text();
+        throw new Error(`Validation failed: ${errorText}`);
+      }
+
+      const validationResult = await validateResponse.json();
       
       setImportData(prev => ({
         ...prev,
-        previewData: result.sample_rows || [],
+        previewData: parseResult.sample_rows || [],
         validationResults: {
-          isValid: true,
-          totalRows: result.total_rows,
-          headers: result.headers,
-          format: result.format
+          isValid: validationResult.is_valid,
+          totalRows: validationResult.total_rows,
+          validRows: validationResult.valid_rows,
+          errorRows: validationResult.error_rows,
+          errors: validationResult.errors || [],
+          warnings: validationResult.warnings || [],
+          headers: parseResult.headers,
+          format: parseResult.format
         }
       }));
 
@@ -503,7 +529,7 @@ export default function DataImportPage() {
     switch (currentStep) {
       case 0: return !!importData.selectedTable;
       case 1: return !!importData.file;
-      case 2: return !!importData.validationResults;
+      case 2: return !!importData.validationResults && importData.validationResults.isValid;
       case 3: return true;
       default: return false;
     }
@@ -718,7 +744,27 @@ export default function DataImportPage() {
         <CardContent>
           {importData.validationResults ? (
             <div className="space-y-4">
-              <div className="grid grid-cols-3 gap-4 text-center">
+              {/* Validation Status */}
+              <div className={`p-4 rounded-lg border ${
+                importData.validationResults.isValid 
+                  ? 'bg-green-50 dark:bg-green-950 border-green-200 dark:border-green-800' 
+                  : 'bg-red-50 dark:bg-red-950 border-red-200 dark:border-red-800'
+              }`}>
+                <div className="flex items-center space-x-2 mb-2">
+                  {importData.validationResults.isValid ? (
+                    <CheckCircle className="h-5 w-5 text-green-600" />
+                  ) : (
+                    <AlertCircle className="h-5 w-5 text-red-600" />
+                  )}
+                  <span className={`font-medium ${
+                    importData.validationResults.isValid ? 'text-green-800 dark:text-green-200' : 'text-red-800 dark:text-red-200'
+                  }`}>
+                    {importData.validationResults.isValid ? 'Data is valid and ready for import' : 'Data validation failed'}
+                  </span>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-4 gap-4 text-center">
                 <div className="p-4 bg-blue-50 dark:bg-blue-950 rounded-lg">
                   <div className="text-2xl font-bold text-blue-600">
                     {importData.validationResults.totalRows}
@@ -727,17 +773,67 @@ export default function DataImportPage() {
                 </div>
                 <div className="p-4 bg-green-50 dark:bg-green-950 rounded-lg">
                   <div className="text-2xl font-bold text-green-600">
+                    {importData.validationResults.validRows || 0}
+                  </div>
+                  <div className="text-sm text-muted-foreground">Valid Rows</div>
+                </div>
+                <div className="p-4 bg-red-50 dark:bg-red-950 rounded-lg">
+                  <div className="text-2xl font-bold text-red-600">
+                    {importData.validationResults.errorRows || 0}
+                  </div>
+                  <div className="text-sm text-muted-foreground">Error Rows</div>
+                </div>
+                <div className="p-4 bg-purple-50 dark:bg-purple-950 rounded-lg">
+                  <div className="text-2xl font-bold text-purple-600">
                     {importData.validationResults.headers?.length || 0}
                   </div>
                   <div className="text-sm text-muted-foreground">Columns</div>
                 </div>
-                <div className="p-4 bg-purple-50 dark:bg-purple-950 rounded-lg">
-                  <div className="text-2xl font-bold text-purple-600">
-                    {importData.validationResults.format?.toUpperCase()}
-                  </div>
-                  <div className="text-sm text-muted-foreground">Format</div>
-                </div>
               </div>
+
+              {/* Display Errors */}
+              {importData.validationResults.errors && importData.validationResults.errors.length > 0 && (
+                <div className="space-y-2">
+                  <h4 className="font-medium text-red-700 dark:text-red-300 flex items-center space-x-2">
+                    <AlertCircle className="h-4 w-4" />
+                    <span>Validation Errors ({importData.validationResults.errors.length})</span>
+                  </h4>
+                  <div className="max-h-32 overflow-y-auto space-y-1 p-3 bg-red-50 dark:bg-red-950 rounded-lg border border-red-200 dark:border-red-800">
+                    {importData.validationResults.errors.slice(0, 10).map((error: any, index: number) => (
+                      <div key={index} className="text-sm text-red-700 dark:text-red-300">
+                        {error.row ? `Row ${error.row}: ` : ''}{error.message}
+                      </div>
+                    ))}
+                    {importData.validationResults.errors.length > 10 && (
+                      <div className="text-sm text-red-600 dark:text-red-400 font-medium">
+                        ... and {importData.validationResults.errors.length - 10} more errors
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Display Warnings */}
+              {importData.validationResults.warnings && importData.validationResults.warnings.length > 0 && (
+                <div className="space-y-2">
+                  <h4 className="font-medium text-yellow-700 dark:text-yellow-300 flex items-center space-x-2">
+                    <AlertCircle className="h-4 w-4" />
+                    <span>Warnings ({importData.validationResults.warnings.length})</span>
+                  </h4>
+                  <div className="max-h-24 overflow-y-auto space-y-1 p-3 bg-yellow-50 dark:bg-yellow-950 rounded-lg border border-yellow-200 dark:border-yellow-800">
+                    {importData.validationResults.warnings.slice(0, 5).map((warning: any, index: number) => (
+                      <div key={index} className="text-sm text-yellow-700 dark:text-yellow-300">
+                        {warning.row ? `Row ${warning.row}: ` : ''}{warning.message}
+                      </div>
+                    ))}
+                    {importData.validationResults.warnings.length > 5 && (
+                      <div className="text-sm text-yellow-600 dark:text-yellow-400 font-medium">
+                        ... and {importData.validationResults.warnings.length - 5} more warnings
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
 
               {importData.previewData.length > 0 && (
                 <div>
