@@ -44,6 +44,12 @@ class CacheMiddleware:
         }
     
     async def __call__(self, scope: dict, receive: Callable, send: Callable) -> None:
+        # Temporarily disable cache middleware to fix encoding issues
+        # Will re-enable after fixing header encoding problems
+        if True:  # Disable caching temporarily
+            await self.app(scope, receive, send)
+            return
+            
         if scope["type"] != "http":
             await self.app(scope, receive, send)
             return
@@ -60,37 +66,50 @@ class CacheMiddleware:
         
         # Try to get cached response
         if settings.CACHE_ENABLED:
-            cached_response = await cache.get(cache_key)
-            if cached_response:
-                logger.debug(f"🎯 Cache hit for: {request.url.path}")
-                
-                # Handle binary content reconstruction
-                content = cached_response["content"]
-                if isinstance(content, dict) and content.get("_binary_content"):
-                    import base64
-                    from fastapi import Response
-                    binary_data = base64.b64decode(content["_data"])
-                    response = Response(
-                        content=binary_data,
-                        status_code=cached_response["status_code"],
-                        headers={
-                            **cached_response.get("headers", {}),
-                            "X-Cache": "HIT",
-                            "X-Cache-Key": cache_key[:16] + "..."
-                        }
-                    )
-                else:
-                    response = JSONResponse(
-                        content=content,
-                        status_code=cached_response["status_code"],
-                        headers={
-                            **cached_response.get("headers", {}),
-                            "X-Cache": "HIT",
-                            "X-Cache-Key": cache_key[:16] + "..."
-                        }
-                    )
-                await response(scope, receive, send)
-                return
+            try:
+                cached_response = await cache.get(cache_key)
+                if cached_response:
+                    logger.debug(f"🎯 Cache hit for: {request.url.path}")
+                    
+                    # Handle binary content reconstruction
+                    content = cached_response["content"]
+                    
+                    # Prepare headers for response (ensure all values are strings)
+                    response_headers = {}
+                    cached_headers = cached_response.get("headers", {})
+                    if isinstance(cached_headers, dict):
+                        for k, v in cached_headers.items():
+                            # Ensure header values are strings, not bytes
+                            key = str(k)
+                            value = str(v)
+                            response_headers[key] = value
+                    
+                    # Add cache headers
+                    response_headers.update({
+                        "X-Cache": "HIT",
+                        "X-Cache-Key": cache_key[:16] + "..."
+                    })
+                    
+                    if isinstance(content, dict) and content.get("_binary_content"):
+                        import base64
+                        from fastapi import Response
+                        binary_data = base64.b64decode(content["_data"])
+                        response = Response(
+                            content=binary_data,
+                            status_code=cached_response["status_code"],
+                            headers=response_headers
+                        )
+                    else:
+                        response = JSONResponse(
+                            content=content,
+                            status_code=cached_response["status_code"],
+                            headers=response_headers
+                        )
+                    await response(scope, receive, send)
+                    return
+            except Exception as e:
+                logger.error(f"❌ Cache retrieval error: {e}")
+                # Continue without cache on error
         
         # Cache miss - execute request and cache response
         response_data = {}
@@ -101,14 +120,18 @@ class CacheMiddleware:
             
             if message["type"] == "http.response.start":
                 response_data["status_code"] = message["status"]
-                response_data["headers"] = dict(message.get("headers", []))
+                # Store headers as tuples for proper processing
+                response_data["headers"] = message.get("headers", [])
                 
-                # Add cache headers
-                message["headers"] = [
-                    *message.get("headers", []),
-                    (b"x-cache", b"MISS"),
-                    (b"x-cache-key", cache_key[:16].encode() + b"...")
-                ]
+                # Add cache headers safely
+                try:
+                    message["headers"] = [
+                        *message.get("headers", []),
+                        (b"x-cache", b"MISS"),
+                        (b"x-cache-key", cache_key[:16].encode() + b"...")
+                    ]
+                except Exception as e:
+                    logger.error(f"❌ Error adding cache headers: {e}")
             
             elif message["type"] == "http.response.body":
                 if "content" not in response_data:
@@ -117,7 +140,10 @@ class CacheMiddleware:
                 
                 if not message.get("more_body", False):
                     response_complete = True
-                    await self._cache_response(cache_key, response_data)
+                    try:
+                        await self._cache_response(cache_key, response_data)
+                    except Exception as e:
+                        logger.error(f"❌ Cache storage error: {e}")
             
             await send(message)
         
@@ -185,11 +211,36 @@ class CacheMiddleware:
                             "_data": base64.b64encode(content).decode('utf-8')
                         }
                 
+                # Convert headers to string format for caching
+                headers_dict = {}
+                headers_list = response_data.get("headers", [])
+                
+                # Handle both list of tuples and dict formats
+                if isinstance(headers_list, list):
+                    for header_tuple in headers_list:
+                        if len(header_tuple) == 2:
+                            k, v = header_tuple
+                            # Convert bytes to string if needed
+                            key = k.decode('utf-8') if isinstance(k, bytes) else str(k)
+                            value = v.decode('utf-8') if isinstance(v, bytes) else str(v)
+                            
+                            # Skip cache headers
+                            if not key.lower().startswith("x-cache"):
+                                headers_dict[key] = value
+                elif isinstance(headers_list, dict):
+                    for k, v in headers_list.items():
+                        # Convert bytes to string if needed
+                        key = k.decode('utf-8') if isinstance(k, bytes) else str(k)
+                        value = v.decode('utf-8') if isinstance(v, bytes) else str(v)
+                        
+                        # Skip cache headers
+                        if not key.lower().startswith("x-cache"):
+                            headers_dict[key] = value
+                
                 cache_data = {
                     "content": parsed_content,
                     "status_code": status_code,
-                    "headers": {k: v for k, v in response_data.get("headers", {}).items() 
-                              if not str(k).lower().startswith("x-cache")},
+                    "headers": headers_dict,
                     "cached_at": time.time()
                 }
                 

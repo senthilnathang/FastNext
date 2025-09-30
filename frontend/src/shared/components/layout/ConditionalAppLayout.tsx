@@ -3,6 +3,7 @@
 import React from 'react';
 import { usePathname } from 'next/navigation';
 import AppLayout from './AppLayout';
+import RouteProtection from '../auth/RouteProtection';
 
 interface ConditionalAppLayoutProps {
   children: React.ReactNode;
@@ -42,20 +43,27 @@ const shouldShowSidebar = (pathname: string): boolean => {
 };
 
 /**
- * ConditionalAppLayout - A smart layout wrapper that conditionally applies the sidebar
+ * ConditionalAppLayout - A smart layout wrapper that conditionally applies the sidebar with authentication
  * 
- * This component automatically wraps pages with AppLayout (including sidebar) based on the current route.
+ * This component automatically wraps pages with:
+ * 1. Route protection (authentication guards)
+ * 2. AppLayout (including sidebar) based on the current route
+ * 
  * Routes like login, register, and landing page are excluded from having the sidebar.
- * This allows for a global sidebar implementation while respecting pages that shouldn't have navigation.
+ * All protected routes automatically require authentication.
  * 
- * Used at the root layout level to provide consistent navigation across the application.
+ * Used at the root layout level to provide consistent navigation and security across the application.
  */
 export default function ConditionalAppLayout({ children }: ConditionalAppLayoutProps) {
   const pathname = usePathname();
   
-  if (shouldShowSidebar(pathname)) {
-    return <AppLayout>{children}</AppLayout>;
-  }
-  
-  return <>{children}</>;
+  return (
+    <RouteProtection>
+      {shouldShowSidebar(pathname) ? (
+        <AppLayout>{children}</AppLayout>
+      ) : (
+        <>{children}</>
+      )}
+    </RouteProtection>
+  );
 }

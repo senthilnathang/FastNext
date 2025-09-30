@@ -161,6 +161,25 @@ Use the **Authorize** button below to authenticate with your JWT token:
     
     app.openapi = custom_openapi
     
+    # Debug endpoints
+    @app.get("/debug")
+    async def debug_endpoint():
+        """Simple debug endpoint to test basic functionality"""
+        return {"status": "ok", "message": "Debug endpoint working"}
+    
+    @app.get("/debug/headers")
+    async def debug_headers(request: Request):
+        """Debug endpoint to check headers"""
+        try:
+            return {
+                "headers": dict(request.headers),
+                "method": request.method,
+                "url": str(request.url),
+                "status": "ok"
+            }
+        except Exception as e:
+            return {"error": str(e), "status": "error"}
+    
     # Add health check endpoint
     @app.get("/health")
     async def health_check():
@@ -251,59 +270,43 @@ def _setup_middleware(app: FastAPI):
     # Import middleware
     from app.middleware.cache_middleware import CacheMiddleware, RateLimitMiddleware
     
-    # Rate limiting middleware (first to protect against abuse)
-    if settings.CACHE_ENABLED:
-        app.add_middleware(
-            RateLimitMiddleware,
-            requests_per_minute=60,
-            requests_per_hour=1000
-        )
+    # Temporarily disable cache and rate limiting middleware to fix encoding issues
+    # TODO: Re-enable after fixing header encoding problems
     
-    # Cache middleware for HTTP responses
-    if settings.CACHE_ENABLED:
-        app.add_middleware(
-            CacheMiddleware,
-            default_ttl=settings.CACHE_DEFAULT_TTL
-        )
+    # Rate limiting middleware (disabled temporarily)
+    # if settings.CACHE_ENABLED:
+    #     app.add_middleware(
+    #         RateLimitMiddleware,
+    #         requests_per_minute=60,
+    #         requests_per_hour=1000
+    #     )
     
-    # CORS middleware (must be before other middleware to handle preflight requests)
+    # Cache middleware for HTTP responses (disabled temporarily)
+    # if settings.CACHE_ENABLED:
+    #     app.add_middleware(
+    #         CacheMiddleware,
+    #         default_ttl=settings.CACHE_DEFAULT_TTL
+    #     )
+    
+    # CORS middleware (simplified to fix encoding issues)
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=[str(origin) for origin in settings.BACKEND_CORS_ORIGINS],
-        allow_credentials=True,  # Enable credentials for authentication
-        allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH", "HEAD"],
-        allow_headers=[
-            "accept",
-            "accept-encoding",
-            "authorization",
-            "content-type",
-            "dnt",
-            "origin",
-            "user-agent",
-            "x-csrftoken",
-            "x-requested-with",
-            "x-request-id",
-            "cache-control",
-            "pragma"
-        ],
-        expose_headers=[
-            "x-process-time",
-            "x-request-id",
-            "x-auth-status",
-            "x-redirect-to",
-            "x-auto-logout"
-        ],
+        allow_origins=["*"],  # Simplified for debugging
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+        expose_headers=[],  # Temporarily empty to avoid encoding issues
         max_age=3600,
     )
     
-    # Security middleware (disabled for CORS debugging)
+    # Security middleware (disabled for debugging)
     # app.add_middleware(SecurityMiddleware, enable_rate_limiting=True)
     
-    # Auto-logout middleware
-    app.add_middleware(AutoLogoutMiddleware)
+    # Auto-logout middleware (disabled temporarily to fix encoding issues)
+    # app.add_middleware(AutoLogoutMiddleware)
     
-    # Session expiration middleware
-    app.add_middleware(SessionExpirationMiddleware, session_timeout_minutes=60)
+    # Session expiration middleware (disabled temporarily to fix encoding issues)
+    # app.add_middleware(SessionExpirationMiddleware, session_timeout_minutes=60)
     
     # Compression middleware
     app.add_middleware(GZipMiddleware, minimum_size=1000)

@@ -145,6 +145,9 @@ export { GenericFormView } from './views/GenericFormView';
 export { GenericKanbanView } from './views/GenericKanbanView';
 export { GenericListView } from './views/GenericListView';
 
+// Authentication Components
+export { AuthGuard, RouteProtection, withAuthGuard, useAuthGuard } from './auth';
+
 // Navigation utilities
 export * from './navigation/menuConfig';
 export * from './navigation/menuUtils';
