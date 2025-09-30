@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File, BackgroundTasks, Query
+from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File, BackgroundTasks, Query, Request
 from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 from sqlalchemy.orm import selectinload
@@ -49,7 +49,8 @@ async def upload_and_create_import_job(
     field_mappings: str = Query(default="[]"),  # JSON string
     requires_approval: bool = Query(default=False),
     current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    request: Request = None
 ):
     """Upload file and create import job"""
     
@@ -178,17 +179,32 @@ async def upload_and_create_import_job(
                 detail="Failed to create import job"
             )
         
-        # Log audit event
-        logger.info("📝 Logging audit event...")
+        # Log comprehensive audit events
+        logger.info("📝 Logging audit events...")
         try:
-            _log_import_audit(db, import_job.id, current_user.id, "created", {
+            # Log file upload event
+            _log_import_audit(db, import_job.id, current_user.id, "file_uploaded", {
                 "table_name": table_name,
                 "filename": file.filename,
-                "file_size": file.size
-            })
-            logger.info("✅ Audit event logged")
+                "file_size": file.size,
+                "file_format": options.format,
+                "total_rows": parsed_data.get('total_rows', 0),
+                "columns": parsed_data.get('headers', []),
+                "upload_stage": "file_processing_complete"
+            }, request)
+            
+            # Log job creation event
+            _log_import_audit(db, import_job.id, current_user.id, "job_created", {
+                "job_id": job_id,
+                "table_name": table_name,
+                "status": ImportStatus.PARSED,
+                "requires_approval": import_job.requires_approval,
+                "creation_stage": "database_record_created"
+            }, request)
+            
+            logger.info("✅ All audit events logged successfully")
         except Exception as e:
-            logger.warning(f"⚠️  Failed to log audit event: {e}")
+            logger.warning(f"⚠️  Failed to log audit events: {e}")
         
         logger.info(f"🎉 File upload completed successfully - Job ID: {job_id}")
         logger.info(f"📈 Summary: {parsed_data.get('total_rows', 0)} rows, {len(parsed_data.get('headers', []))} columns, Status: {ImportStatus.PARSED}")
@@ -216,7 +232,8 @@ async def parse_import_file(
     file: UploadFile = File(...),
     import_options: str = Query(...),
     current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    request: Request = None
 ):
     """Parse uploaded file and return preview data"""
     
@@ -229,6 +246,21 @@ async def parse_import_file(
         
         # Parse the file
         parsed_data = _parse_uploaded_file(file_content, file.filename, options)
+        
+        # Log file parsing activity (temporary job for tracking)
+        try:
+            temp_job_id = str(uuid.uuid4())
+            temp_audit_data = {
+                "filename": file.filename,
+                "file_size": len(file_content),
+                "total_rows": parsed_data["total_rows"],
+                "format": parsed_data["format"],
+                "action": "file_preview_parsed",
+                "temp_job_id": temp_job_id
+            }
+            logger.info(f"📋 File preview parsed: {file.filename} ({parsed_data['total_rows']} rows)")
+        except Exception as e:
+            logger.warning(f"Failed to log file parsing activity: {e}")
         
         return {
             "headers": parsed_data["headers"],
@@ -271,9 +303,18 @@ async def validate_import_data(
                 detail="No validation data available. Please upload a file first."
             )
         
-        # Update job status
+        # Update job status and log validation start
         import_job.status = ImportStatus.VALIDATING
         db.commit()
+        
+        # Log validation start
+        try:
+            _log_import_audit(db, import_job.id, current_user.id, "validation_started", {
+                "total_rows": import_job.total_rows,
+                "validation_stage": "data_validation_initiated"
+            })
+        except Exception as e:
+            logger.warning(f"Failed to log validation start: {e}")
         
         # Perform validation on parsed data
         parsed_data = import_job.import_results['parsed_data']
@@ -283,6 +324,17 @@ async def validate_import_data(
         import_job.status = ImportStatus.VALIDATED
         import_job.validation_results = validation_result
         db.commit()
+        
+        # Log validation completion
+        try:
+            _log_import_audit(db, import_job.id, current_user.id, "validation_completed", {
+                "is_valid": validation_result["is_valid"],
+                "valid_rows": validation_result["valid_rows"],
+                "error_rows": validation_result["error_rows"],
+                "validation_stage": "data_validation_completed"
+            })
+        except Exception as e:
+            logger.warning(f"Failed to log validation completion: {e}")
         
         return ValidationResultSchema(
             is_valid=validation_result["is_valid"],
@@ -334,10 +386,20 @@ async def start_import(
                 detail="Import requires approval before starting"
             )
         
-        # Update job status
+        # Update job status and log import start
         import_job.status = ImportStatus.IMPORTING
         import_job.started_at = datetime.utcnow()
         db.commit()
+        
+        # Log import start
+        try:
+            _log_import_audit(db, import_job.id, current_user.id, "import_started", {
+                "total_rows": import_job.total_rows,
+                "table_name": import_job.table_name,
+                "import_stage": "data_import_initiated"
+            })
+        except Exception as e:
+            logger.warning(f"Failed to log import start: {e}")
         
         # Perform the actual import
         import_result = _perform_data_import(import_job, db, current_user)
@@ -351,6 +413,18 @@ async def start_import(
         import_job.import_results.update({"import_summary": import_result})
         db.commit()
         
+        # Log import completion
+        try:
+            _log_import_audit(db, import_job.id, current_user.id, "import_completed", {
+                "processed_rows": import_result["processed_rows"],
+                "valid_rows": import_result["valid_rows"],
+                "error_rows": import_result["error_rows"],
+                "success_rate": import_result.get("success_rate", 0),
+                "import_stage": "data_import_completed"
+            })
+        except Exception as e:
+            logger.warning(f"Failed to log import completion: {e}")
+        
         db.refresh(import_job)
         return ImportJobResponse.model_validate(import_job)
         
@@ -361,6 +435,17 @@ async def start_import(
             import_job.status = ImportStatus.FAILED
             import_job.error_message = str(e)
             db.commit()
+            
+            # Log import failure
+            try:
+                _log_import_audit(db, import_job.id, current_user.id, "import_failed", {
+                    "error_message": str(e),
+                    "failure_stage": "import_execution",
+                    "total_rows": import_job.total_rows,
+                    "table_name": import_job.table_name
+                })
+            except Exception as audit_error:
+                logger.warning(f"Failed to log import failure: {audit_error}")
         
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -513,9 +598,12 @@ async def get_import_progress(
             details["logs"] = [
                 {
                     "timestamp": log.timestamp.isoformat(),
-                    "action": log.action,
-                    "message": log.details.get("message", "") if log.details else "",
-                    "level": log.details.get("level", "info") if log.details else "info"
+                    "event_type": log.event_type,
+                    "action": log.event_type,  # For backwards compatibility
+                    "message": log.event_data.get("message", f"{log.event_type.replace('_', ' ').title()}") if log.event_data else f"{log.event_type.replace('_', ' ').title()}",
+                    "level": log.event_data.get("level", "info") if log.event_data else "info",
+                    "stage": log.event_data.get("upload_stage") or log.event_data.get("validation_stage") or log.event_data.get("import_stage") or log.event_data.get("failure_stage", ""),
+                    "details": log.event_data if log.event_data else {}
                 }
                 for log in recent_logs
             ]
@@ -1815,17 +1903,35 @@ def _check_export_permission(db: Session, user_id: int, table_name: str) -> Opti
     ).first()
 
 
-def _log_import_audit(db: Session, job_id: int, user_id: int, event_type: str, event_data: Dict[str, Any]):
-    """Log import audit event"""
+def _log_import_audit(db: Session, job_id: int, user_id: int, event_type: str, event_data: Dict[str, Any], request=None):
+    """Log import audit event with enhanced tracking"""
+    
+    # Enhance event data with additional context
+    enhanced_event_data = {
+        **event_data,
+        "timestamp": datetime.utcnow().isoformat(),
+        "event_type": event_type
+    }
+    
+    # Add request context if available
+    if request:
+        enhanced_event_data.update({
+            "ip_address": getattr(request.client, 'host', None),
+            "user_agent": request.headers.get("user-agent", "")
+        })
     
     audit_log = ImportAuditLog(
         import_job_id=job_id,
         user_id=user_id,
         event_type=event_type,
-        event_data=event_data
+        event_data=enhanced_event_data,
+        ip_address=enhanced_event_data.get("ip_address"),
+        user_agent=enhanced_event_data.get("user_agent")
     )
     db.add(audit_log)
     db.commit()
+    
+    logger.info(f"🔍 Audit logged: {event_type} for job {job_id} by user {user_id}")
 
 
 def _log_export_audit(db: Session, job_id: int, user_id: int, event_type: str, event_data: Dict[str, Any]):
