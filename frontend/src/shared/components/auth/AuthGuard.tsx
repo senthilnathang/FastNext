@@ -32,9 +32,11 @@ const ROLE_PROTECTED_ROUTES: Record<string, { roles?: string[]; permissions?: st
   '/admin/users': { roles: ['admin', 'superuser'], permissions: ['user.manage'] },
   '/admin/roles': { roles: ['admin', 'superuser'], permissions: ['role.manage'] },
   '/admin/permissions': { roles: ['admin', 'superuser'], permissions: ['permission.manage'] },
-  '/admin/data-import': { permissions: ['data.import'] },
-  '/admin/data-export': { permissions: ['data.export'] },
-  '/configuration': { permissions: ['config.manage'] },
+  '/admin/data-import': { roles: ['admin', 'superuser'] },
+  '/admin/data-export': { roles: ['admin', 'superuser'] },
+  '/configuration/data-import-export': { roles: ['admin', 'superuser'] },
+  '/configuration/permissions': { roles: ['admin', 'superuser'] },
+  '/configuration': { roles: ['admin', 'superuser'] },
   '/settings': { permissions: ['profile.edit'] },
 };
 
@@ -68,15 +70,19 @@ const getRouteRequirements = (pathname: string) => {
 /**
  * Checks if user has required roles
  */
-const hasRequiredRoles = (userRoles: string[] = [], requiredRoles: string[] = []): boolean => {
+const hasRequiredRoles = (userRoles: string[] = [], requiredRoles: string[] = [], isSuperuser: boolean = false): boolean => {
+  // Superusers bypass all role checks
+  if (isSuperuser) return true;
   if (requiredRoles.length === 0) return true;
-  return requiredRoles.some(role => userRoles.includes(role));
+  return requiredRoles.some(role => userRoles.includes(role) || role === 'superuser');
 };
 
 /**
  * Checks if user has required permissions
  */
-const hasRequiredPermissions = (userPermissions: string[] = [], requiredPermissions: string[] = []): boolean => {
+const hasRequiredPermissions = (userPermissions: string[] = [], requiredPermissions: string[] = [], isSuperuser: boolean = false): boolean => {
+  // Superusers bypass all permission checks
+  if (isSuperuser) return true;
   if (requiredPermissions.length === 0) return true;
   return requiredPermissions.every(permission => userPermissions.includes(permission));
 };
@@ -249,8 +255,8 @@ export default function AuthGuard({
         const combinedRoles = [...allowedRoles, ...(routeRequirements.roles || [])];
         const combinedPermissions = [...requiredPermissions, ...(routeRequirements.permissions || [])];
 
-        const hasRoles = hasRequiredRoles(user.roles, combinedRoles);
-        const hasPermissions = hasRequiredPermissions(user.permissions, combinedPermissions);
+        const hasRoles = hasRequiredRoles(user.roles, combinedRoles, user.is_superuser);
+        const hasPermissions = hasRequiredPermissions(user.permissions, combinedPermissions, user.is_superuser);
 
         if (!hasRoles || !hasPermissions) {
           // Don't redirect, just show unauthorized component
@@ -287,8 +293,8 @@ export default function AuthGuard({
     const combinedRoles = [...allowedRoles, ...(routeRequirements.roles || [])];
     const combinedPermissions = [...requiredPermissions, ...(routeRequirements.permissions || [])];
 
-    const hasRoles = hasRequiredRoles(user.roles, combinedRoles);
-    const hasPermissions = hasRequiredPermissions(user.permissions, combinedPermissions);
+    const hasRoles = hasRequiredRoles(user.roles, combinedRoles, user.is_superuser);
+    const hasPermissions = hasRequiredPermissions(user.permissions, combinedPermissions, user.is_superuser);
 
     if (!hasRoles) {
       return (
@@ -345,8 +351,8 @@ export function useAuthGuard(requirements?: {
   const combinedRoles = [...(requirements?.roles || []), ...(routeRequirements.roles || [])];
   const combinedPermissions = [...(requirements?.permissions || []), ...(routeRequirements.permissions || [])];
 
-  const hasRoles = hasRequiredRoles(user?.roles, combinedRoles);
-  const hasPermissions = hasRequiredPermissions(user?.permissions, combinedPermissions);
+  const hasRoles = hasRequiredRoles(user?.roles, combinedRoles, user?.is_superuser);
+  const hasPermissions = hasRequiredPermissions(user?.permissions, combinedPermissions, user?.is_superuser);
 
   return {
     isAuthenticated,

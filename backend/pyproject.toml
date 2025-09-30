@@ -288,31 +288,5 @@ ignore = [
 "__init__.py" = ["F401"]
 "tests/**/*" = ["B011", "B018"]
 
-# Pre-commit hooks
-[tool.pre-commit]
-repos = [
-    {
-        repo = "https://github.com/pre-commit/pre-commit-hooks",
-        rev = "v4.5.0",
-        hooks = [
-            { id = "trailing-whitespace" },
-            { id = "end-of-file-fixer" },
-            { id = "check-yaml" },
-            { id = "check-added-large-files" },
-        ]
-    },
-    {
-        repo = "https://github.com/psf/black",
-        rev = "23.11.0",
-        hooks = [
-            { id = "black" }
-        ]
-    },
-    {
-        repo = "https://github.com/pycqa/isort",
-        rev = "5.12.0",
-        hooks = [
-            { id = "isort" }
-        ]
-    },
-]
+# Pre-commit hooks configuration (separate .pre-commit-config.yaml file recommended)
+# This section is included for reference but should be moved to .pre-commit-config.yaml

@@ -59,7 +59,9 @@
       "Bash(./verify_api_simple.sh:*)",
       "Bash(tree:*)",
       "Bash(./quick_fix.sh:*)",
-      "Bash(timeout:*)"
+      "Bash(timeout:*)",
+      "Bash(uv:*)",
+      "Bash(~/.local/bin/uv:*)"
     ],
     "deny": []
   }
