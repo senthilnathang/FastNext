@@ -7,6 +7,11 @@ import { Badge } from '@/shared/components/ui/badge';
 import { Alert, AlertDescription } from '@/shared/components/ui/alert';
 import { Separator } from '@/shared/components/ui/separator';
 import { Skeleton } from '@/shared/components/ui/skeleton';
+import { Button } from '@/shared/components/ui/button';
+import { Input } from '@/shared/components/ui/input';
+import { Label } from '@/shared/components/ui/label';
+import { Textarea } from '@/shared/components/ui/textarea';
+import { Checkbox } from '@/shared/components/ui/checkbox';
 import { 
   Upload, 
   Database, 
@@ -15,9 +20,14 @@ import {
   Info,
   Columns,
   Key,
-  Settings
+  Settings,
+  CheckCircle,
+  PlayCircle,
+  FileUp,
+  Cog
 } from 'lucide-react';
 
+import { MultiStepWizard, WizardStep } from '@/shared/components/ui/multi-step-wizard';
 import { DataImport } from '@/shared/components/DataImport';
 import type { ImportFormat } from '@/shared/components/DataImport/types';
 
@@ -47,14 +57,68 @@ interface TablePermissions {
   };
 }
 
+interface ImportData {
+  selectedTable: string;
+  file: File | null;
+  format: string;
+  options: any;
+  fieldMappings: any[];
+  validationResults: any;
+  previewData: any[];
+}
+
 export default function DataImportPage() {
+  const [currentStep, setCurrentStep] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  
+  // Data states
   const [availableTables, setAvailableTables] = useState<string[]>([]);
-  const [selectedTable, setSelectedTable] = useState<string>('');
   const [tableSchema, setTableSchema] = useState<TableInfo | null>(null);
   const [tablePermissions, setTablePermissions] = useState<TablePermissions | null>(null);
   const [isLoadingTables, setIsLoadingTables] = useState(true);
-  const [isLoadingSchema, setIsLoadingSchema] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  
+  // Import wizard data
+  const [importData, setImportData] = useState<ImportData>({
+    selectedTable: '',
+    file: null,
+    format: 'csv',
+    options: {},
+    fieldMappings: [],
+    validationResults: null,
+    previewData: []
+  });
+
+  const steps: WizardStep[] = [
+    {
+      id: 'table-selection',
+      title: 'Choose Table',
+      description: 'Select the database table for import',
+      icon: <Database className="w-5 h-5" />,
+      isValid: !!importData.selectedTable
+    },
+    {
+      id: 'file-format',
+      title: 'File & Format',
+      description: 'Upload file and configure import settings',
+      icon: <FileUp className="w-5 h-5" />,
+      isValid: !!importData.file
+    },
+    {
+      id: 'validate',
+      title: 'Validate Records',
+      description: 'Preview and validate your data',
+      icon: <CheckCircle className="w-5 h-5" />,
+      isValid: !!importData.validationResults
+    },
+    {
+      id: 'execute',
+      title: 'Execute Import',
+      description: 'Review and execute the import',
+      icon: <PlayCircle className="w-5 h-5" />,
+      isValid: true
+    }
+  ];
 
   // Fetch available tables on component mount
   useEffect(() => {
@@ -63,14 +127,14 @@ export default function DataImportPage() {
 
   // Fetch table schema when table is selected
   useEffect(() => {
-    if (selectedTable) {
-      fetchTableSchema(selectedTable);
-      fetchTablePermissions(selectedTable);
+    if (importData.selectedTable) {
+      fetchTableSchema(importData.selectedTable);
+      fetchTablePermissions(importData.selectedTable);
     } else {
       setTableSchema(null);
       setTablePermissions(null);
     }
-  }, [selectedTable]);
+  }, [importData.selectedTable]);
 
   const fetchAvailableTables = async () => {
     try {
@@ -94,7 +158,7 @@ export default function DataImportPage() {
   };
 
   const fetchTableSchema = async (tableName: string) => {
-    setIsLoadingSchema(true);
+    setIsLoading(true);
     try {
       const response = await fetch(`/api/v1/data/tables/${tableName}/schema`, {
         headers: {
@@ -111,7 +175,7 @@ export default function DataImportPage() {
     } catch (err) {
       setError(`Failed to load table schema: ${err instanceof Error ? err.message : 'Unknown error'}`);
     } finally {
-      setIsLoadingSchema(false);
+      setIsLoading(false);
     }
   };
 
@@ -158,21 +222,23 @@ export default function DataImportPage() {
   }, [tableSchema]);
 
   const handleImport = async (data: any[], options: any) => {
-    if (!selectedTable) return;
+    if (!importData.selectedTable) return;
 
     try {
+      setIsLoading(true);
+      
       // Use the existing import API
       const formData = new FormData();
       
       // Create a temporary CSV file from the data
       const csvContent = convertDataToCSV(data);
       const blob = new Blob([csvContent], { type: 'text/csv' });
-      const file = new File([blob], `import_${selectedTable}_${Date.now()}.csv`, { type: 'text/csv' });
+      const file = new File([blob], `import_${importData.selectedTable}_${Date.now()}.csv`, { type: 'text/csv' });
       
       formData.append('file', file);
-      formData.append('table_name', selectedTable);
+      formData.append('table_name', importData.selectedTable);
       formData.append('import_options', JSON.stringify(options));
-      formData.append('field_mappings', JSON.stringify([]));
+      formData.append('field_mappings', JSON.stringify(importData.fieldMappings));
       
       const response = await fetch('/api/v1/data/import/upload', {
         method: 'POST',
@@ -191,6 +257,8 @@ export default function DataImportPage() {
     } catch (error) {
       console.error('Import error:', error);
       throw error;
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -213,177 +281,122 @@ export default function DataImportPage() {
     return csvRows.join('\n');
   };
 
-  const renderTableInfo = () => {
-    if (!tableSchema) return null;
+  const validateImportData = async () => {
+    if (!importData.file || !importData.selectedTable) return;
 
-    return (
-      <div className="space-y-4">
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="flex items-center space-x-2">
-              <Columns className="h-5 w-5" />
-              <span>Table Structure</span>
-            </CardTitle>
-            <CardDescription>
-              Schema information for {tableSchema.table_name}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4 text-sm">
-                <div>
-                  <span className="text-gray-600 dark:text-gray-400">Total Columns:</span>
-                  <span className="ml-2 font-medium">{tableSchema.columns.length}</span>
-                </div>
-                <div>
-                  <span className="text-gray-600 dark:text-gray-400">Primary Keys:</span>
-                  <span className="ml-2 font-medium">{tableSchema.primary_keys.length}</span>
-                </div>
-              </div>
+    setIsLoading(true);
+    try {
+      // Parse the file first
+      const formData = new FormData();
+      formData.append('file', importData.file);
+      formData.append('import_options', JSON.stringify(importData.options));
 
-              <Separator />
+      const response = await fetch('/api/v1/data/import/parse', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+        },
+        body: formData
+      });
 
-              <div>
-                <h4 className="font-medium mb-2 flex items-center space-x-2">
-                  <Key className="h-4 w-4" />
-                  <span>Column Details</span>
-                </h4>
-                <div className="space-y-2 max-h-64 overflow-y-auto">
-                  {tableSchema.columns.map((col, index) => (
-                    <div key={index} className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-800 rounded">
-                      <div className="flex items-center space-x-2">
-                        <span className="font-medium">{col.name}</span>
-                        {col.primary_key && <Badge variant="outline" className="text-xs">PK</Badge>}
-                        {!col.nullable && <Badge variant="secondary" className="text-xs">Required</Badge>}
-                      </div>
-                      <span className="text-sm text-gray-600 dark:text-gray-400">{col.type}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
+      if (!response.ok) {
+        throw new Error('Failed to parse file');
+      }
 
-              {tableSchema.sample_data.length > 0 && (
-                <>
-                  <Separator />
-                  <div>
-                    <h4 className="font-medium mb-2 flex items-center space-x-2">
-                      <FileText className="h-4 w-4" />
-                      <span>Sample Data</span>
-                    </h4>
-                    <div className="overflow-x-auto">
-                      <table className="w-full text-xs border-collapse border border-gray-200 dark:border-gray-700">
-                        <thead>
-                          <tr className="bg-gray-50 dark:bg-gray-800">
-                            {Object.keys(tableSchema.sample_data[0] || {}).map(key => (
-                              <th key={key} className="border border-gray-200 dark:border-gray-700 px-2 py-1 text-left font-medium">
-                                {key}
-                              </th>
-                            ))}
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {tableSchema.sample_data.slice(0, 3).map((row, index) => (
-                            <tr key={index} className="hover:bg-gray-50 dark:hover:bg-gray-800">
-                              {Object.values(row).map((value, colIndex) => (
-                                <td key={colIndex} className="border border-gray-200 dark:border-gray-700 px-2 py-1">
-                                  {String(value || '')}
-                                </td>
-                              ))}
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
-                </>
-              )}
-            </div>
-          </CardContent>
-        </Card>
+      const result = await response.json();
+      
+      setImportData(prev => ({
+        ...prev,
+        previewData: result.sample_rows || [],
+        validationResults: {
+          isValid: true,
+          totalRows: result.total_rows,
+          headers: result.headers,
+          format: result.format
+        }
+      }));
 
-        {tablePermissions && (
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="flex items-center space-x-2">
-                <Settings className="h-5 w-5" />
-                <span>Import Permissions</span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm">Can Import:</span>
-                  <Badge variant={tablePermissions.import_permission.can_import ? "default" : "secondary"}>
-                    {tablePermissions.import_permission.can_import ? "Yes" : "No"}
-                  </Badge>
-                </div>
-                
-                <div className="flex items-center justify-between">
-                  <span className="text-sm">Max File Size:</span>
-                  <span className="text-sm font-medium">{tablePermissions.import_permission.max_file_size_mb} MB</span>
-                </div>
-                
-                <div className="flex items-center justify-between">
-                  <span className="text-sm">Max Rows:</span>
-                  <span className="text-sm font-medium">{tablePermissions.import_permission.max_rows_per_import.toLocaleString()}</span>
-                </div>
-                
-                <div className="flex items-center justify-between">
-                  <span className="text-sm">Allowed Formats:</span>
-                  <div className="flex space-x-1">
-                    {tablePermissions.import_permission.allowed_formats.map(format => (
-                      <Badge key={format} variant="outline" className="text-xs">{format.toUpperCase()}</Badge>
-                    ))}
-                  </div>
-                </div>
-
-                {tablePermissions.import_permission.requires_approval && (
-                  <Alert>
-                    <Info className="h-4 w-4" />
-                    <AlertDescription>
-                      Imports to this table require approval before processing.
-                    </AlertDescription>
-                  </Alert>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        )}
-      </div>
-    );
+      setCurrentStep(2); // Move to validation step
+    } catch (error) {
+      setError(`Validation failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold">Data Import</h1>
-        <p className="text-gray-600 dark:text-gray-400 mt-1">
-          Import data into any table with field mapping and validation
-        </p>
-      </div>
+  const canGoNext = () => {
+    switch (currentStep) {
+      case 0: return !!importData.selectedTable;
+      case 1: return !!importData.file;
+      case 2: return !!importData.validationResults;
+      case 3: return true;
+      default: return false;
+    }
+  };
 
-      {error && (
-        <Alert variant="destructive">
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
-      )}
+  const handleStepChange = (step: number) => {
+    if (step <= currentStep || canGoNext()) {
+      setCurrentStep(step);
+    }
+  };
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center space-x-2">
-            <Database className="h-5 w-5" />
-            <span>Select Table</span>
-          </CardTitle>
-          <CardDescription>
-            Choose the database table you want to import data into
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {isLoadingTables ? (
-            <Skeleton className="h-10 w-full" />
-          ) : (
-            <Select value={selectedTable} onValueChange={setSelectedTable}>
+  const handleNext = async () => {
+    if (currentStep === 1 && importData.file) {
+      // Auto-validate when moving from step 2 to 3
+      await validateImportData();
+    } else if (currentStep < steps.length - 1) {
+      setCurrentStep(currentStep + 1);
+    }
+  };
+
+  const handleComplete = async () => {
+    try {
+      setIsLoading(true);
+      await handleImport(importData.previewData, importData.options);
+      // Handle success - maybe show success message or redirect
+      alert('Import completed successfully!');
+    } catch (error) {
+      setError(`Import failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const renderStepContent = () => {
+    switch (currentStep) {
+      case 0:
+        return renderTableSelection();
+      case 1:
+        return renderFileAndFormat();
+      case 2:
+        return renderValidation();
+      case 3:
+        return renderExecution();
+      default:
+        return null;
+    }
+  };
+
+  const renderTableSelection = () => (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center space-x-2">
+          <Database className="h-5 w-5" />
+          <span>Select Table</span>
+        </CardTitle>
+        <CardDescription>
+          Choose the database table you want to import data into
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        {isLoadingTables ? (
+          <Skeleton className="h-10 w-full" />
+        ) : (
+          <div className="space-y-4">
+            <Select 
+              value={importData.selectedTable} 
+              onValueChange={(value) => setImportData(prev => ({ ...prev, selectedTable: value }))}
+            >
               <SelectTrigger>
                 <SelectValue placeholder="Select a table to import data into..." />
               </SelectTrigger>
@@ -395,70 +408,280 @@ export default function DataImportPage() {
                 ))}
               </SelectContent>
             </Select>
+
+            {tableSchema && (
+              <div className="mt-4 p-4 bg-muted rounded-lg">
+                <h4 className="font-medium mb-2 flex items-center space-x-2">
+                  <Columns className="h-4 w-4" />
+                  <span>Table Information</span>
+                </h4>
+                <div className="text-sm space-y-1">
+                  <p><strong>Columns:</strong> {tableSchema.columns.length}</p>
+                  <p><strong>Primary Keys:</strong> {tableSchema.primary_keys.join(', ')}</p>
+                  <p><strong>Sample Data:</strong> {tableSchema.sample_data.length} rows</p>
+                </div>
+              </div>
+            )}
+
+            {tablePermissions && (
+              <div className="mt-4 p-4 bg-blue-50 dark:bg-blue-950 rounded-lg">
+                <h4 className="font-medium mb-2 flex items-center space-x-2">
+                  <Settings className="h-4 w-4" />
+                  <span>Import Permissions</span>
+                </h4>
+                <div className="text-sm space-y-1">
+                  <p><strong>Can Import:</strong> {tablePermissions.import_permission.can_import ? 'Yes' : 'No'}</p>
+                  <p><strong>Max File Size:</strong> {tablePermissions.import_permission.max_file_size_mb} MB</p>
+                  <p><strong>Max Rows:</strong> {tablePermissions.import_permission.max_rows_per_import.toLocaleString()}</p>
+                  <p><strong>Allowed Formats:</strong> {tablePermissions.import_permission.allowed_formats.join(', ')}</p>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+
+  const renderFileAndFormat = () => (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center space-x-2">
+          <Upload className="h-5 w-5" />
+          <span>File Upload & Format Settings</span>
+        </CardTitle>
+        <CardDescription>
+          Upload your data file and configure import settings
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        {/* File Upload */}
+        <div className="space-y-2">
+          <Label htmlFor="file-upload">Select File</Label>
+          <Input
+            id="file-upload"
+            type="file"
+            accept=".csv,.json,.xlsx,.xls"
+            onChange={(e) => {
+              const file = e.target.files?.[0] || null;
+              setImportData(prev => ({ ...prev, file }));
+            }}
+          />
+          {importData.file && (
+            <div className="text-sm text-muted-foreground">
+              Selected: {importData.file.name} ({(importData.file.size / 1024 / 1024).toFixed(2)} MB)
+            </div>
+          )}
+        </div>
+
+        {/* Format Selection */}
+        <div className="space-y-2">
+          <Label>File Format</Label>
+          <Select 
+            value={importData.format} 
+            onValueChange={(value) => setImportData(prev => ({ ...prev, format: value }))}
+          >
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="csv">CSV (Comma Separated Values)</SelectItem>
+              <SelectItem value="json">JSON (JavaScript Object Notation)</SelectItem>
+              <SelectItem value="excel">Excel (.xlsx/.xls)</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Import Options */}
+        <div className="space-y-4">
+          <Label>Import Options</Label>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="flex items-center space-x-2">
+              <Checkbox 
+                id="skip-header"
+                checked={importData.options.skipHeader || false}
+                onCheckedChange={(checked) => 
+                  setImportData(prev => ({ 
+                    ...prev, 
+                    options: { ...prev.options, skipHeader: checked }
+                  }))
+                }
+              />
+              <Label htmlFor="skip-header">Skip header row</Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Checkbox 
+                id="validate-data"
+                checked={importData.options.validateData || true}
+                onCheckedChange={(checked) => 
+                  setImportData(prev => ({ 
+                    ...prev, 
+                    options: { ...prev.options, validateData: checked }
+                  }))
+                }
+              />
+              <Label htmlFor="validate-data">Validate data types</Label>
+            </div>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+
+  const renderValidation = () => (
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center space-x-2">
+            <CheckCircle className="h-5 w-5" />
+            <span>Data Validation</span>
+          </CardTitle>
+          <CardDescription>
+            Preview and validate your import data
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {importData.validationResults ? (
+            <div className="space-y-4">
+              <div className="grid grid-cols-3 gap-4 text-center">
+                <div className="p-4 bg-blue-50 dark:bg-blue-950 rounded-lg">
+                  <div className="text-2xl font-bold text-blue-600">
+                    {importData.validationResults.totalRows}
+                  </div>
+                  <div className="text-sm text-muted-foreground">Total Rows</div>
+                </div>
+                <div className="p-4 bg-green-50 dark:bg-green-950 rounded-lg">
+                  <div className="text-2xl font-bold text-green-600">
+                    {importData.validationResults.headers?.length || 0}
+                  </div>
+                  <div className="text-sm text-muted-foreground">Columns</div>
+                </div>
+                <div className="p-4 bg-purple-50 dark:bg-purple-950 rounded-lg">
+                  <div className="text-2xl font-bold text-purple-600">
+                    {importData.validationResults.format?.toUpperCase()}
+                  </div>
+                  <div className="text-sm text-muted-foreground">Format</div>
+                </div>
+              </div>
+
+              {importData.previewData.length > 0 && (
+                <div>
+                  <h4 className="font-medium mb-2">Data Preview (First 5 rows)</h4>
+                  <div className="overflow-x-auto border rounded-lg">
+                    <table className="w-full text-sm">
+                      <thead className="bg-muted">
+                        <tr>
+                          {importData.validationResults.headers?.map((header: string, index: number) => (
+                            <th key={index} className="px-3 py-2 text-left font-medium">
+                              {header}
+                            </th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {importData.previewData.slice(0, 5).map((row, index) => (
+                          <tr key={index} className="border-t">
+                            {importData.validationResults.headers?.map((header: string, colIndex: number) => (
+                              <td key={colIndex} className="px-3 py-2">
+                                {String(row[header] || '')}
+                              </td>
+                            ))}
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="text-center py-8">
+              <AlertCircle className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+              <p className="text-muted-foreground">No validation data available. Please go back and upload a file.</p>
+            </div>
           )}
         </CardContent>
       </Card>
+    </div>
+  );
 
-      {selectedTable && (
-        <>
-          {isLoadingSchema ? (
-            <Card>
-              <CardContent className="p-6">
-                <div className="space-y-3">
-                  <Skeleton className="h-4 w-1/4" />
-                  <Skeleton className="h-4 w-1/2" />
-                  <Skeleton className="h-4 w-3/4" />
-                </div>
-              </CardContent>
-            </Card>
-          ) : (
-            renderTableInfo()
-          )}
+  const renderExecution = () => (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center space-x-2">
+          <PlayCircle className="h-5 w-5" />
+          <span>Execute Import</span>
+        </CardTitle>
+        <CardDescription>
+          Review your settings and execute the import
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        <div className="grid grid-cols-2 gap-6">
+          <div className="space-y-2">
+            <Label>Target Table</Label>
+            <div className="p-3 bg-muted rounded-lg font-medium">
+              {importData.selectedTable}
+            </div>
+          </div>
+          <div className="space-y-2">
+            <Label>File</Label>
+            <div className="p-3 bg-muted rounded-lg">
+              {importData.file?.name}
+            </div>
+          </div>
+          <div className="space-y-2">
+            <Label>Format</Label>
+            <div className="p-3 bg-muted rounded-lg">
+              {importData.format.toUpperCase()}
+            </div>
+          </div>
+          <div className="space-y-2">
+            <Label>Total Rows</Label>
+            <div className="p-3 bg-muted rounded-lg">
+              {importData.validationResults?.totalRows || 0}
+            </div>
+          </div>
+        </div>
 
-          {tableSchema && tablePermissions?.import_permission.can_import && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <Upload className="h-5 w-5" />
-                  <span>Import Data</span>
-                </CardTitle>
-                <CardDescription>
-                  Upload and import data into {selectedTable}
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <DataImport
-                  tableName={selectedTable}
-                  columns={importColumns}
-                  onImport={handleImport}
-                  maxFileSize={tablePermissions.import_permission.max_file_size_mb * 1024 * 1024}
-                  maxRows={tablePermissions.import_permission.max_rows_per_import}
-                  allowedFormats={tablePermissions.import_permission.allowed_formats as any[]}
-                  permissions={{
-                    canImport: tablePermissions.import_permission.can_import,
-                    canValidate: tablePermissions.import_permission.can_validate,
-                    canPreview: tablePermissions.import_permission.can_preview,
-                    requireApproval: tablePermissions.import_permission.requires_approval,
-                    maxFileSize: tablePermissions.import_permission.max_file_size_mb,
-                    allowedFormats: tablePermissions.import_permission.allowed_formats as ImportFormat[]
-                  }}
-                  embedded={true}
-                />
-              </CardContent>
-            </Card>
-          )}
+        <Alert>
+          <Info className="h-4 w-4" />
+          <AlertDescription>
+            Click "Complete Import" to start importing your data. This process may take some time depending on the file size.
+          </AlertDescription>
+        </Alert>
+      </CardContent>
+    </Card>
+  );
 
-          {tablePermissions && !tablePermissions.import_permission.can_import && (
-            <Alert>
-              <AlertCircle className="h-4 w-4" />
-              <AlertDescription>
-                You don&apos;t have permission to import data into the &quot;{selectedTable}&quot; table. 
-                Please contact your administrator to request import permissions.
-              </AlertDescription>
-            </Alert>
-          )}
-        </>
+  return (
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-2xl font-semibold">Data Import Wizard</h1>
+        <p className="text-gray-600 dark:text-gray-400 mt-1">
+          Import data into any table with guided steps and validation
+        </p>
+      </div>
+
+      {error && (
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
       )}
+
+      <MultiStepWizard
+        steps={steps}
+        currentStep={currentStep}
+        onStepChange={handleStepChange}
+        onComplete={handleComplete}
+        isLoading={isLoading}
+        canGoNext={canGoNext()}
+        nextButtonText={currentStep === 1 ? "Validate Data" : "Next"}
+        completeButtonText="Complete Import"
+      >
+        {renderStepContent()}
+      </MultiStepWizard>
     </div>
   );
 }
