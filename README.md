@@ -33,6 +33,7 @@ A comprehensive, production-ready full-stack web application framework built wit
 - **Request Validation**: Multi-layer validation with malicious content filtering
 - **Rate Limiting**: Intelligent rate limiting with sliding window and token bucket algorithms
 - **Security Monitoring**: Real-time threat detection with automated alerting
+- **Event Logging**: Comprehensive audit trails and activity monitoring system
 - **Bundle Security**: Dependency vulnerability scanning and secret detection
 - **Environment Validation**: Comprehensive environment variable validation with Zod
 - **Trusted Types**: Implementation with DOMPurify integration for XSS prevention
@@ -197,6 +198,7 @@ FastNext/
 │   │   ├── modules/                 # Feature modules
 │   │   │   ├── auth/               # Authentication
 │   │   │   ├── admin/              # Admin management
+│   │   │   │   └── events/         # Event logging dashboard
 │   │   │   ├── workflow/           # Workflow engine
 │   │   │   └── api-docs/           # API documentation
 │   │   └── shared/                 # Shared components and utilities
@@ -213,6 +215,7 @@ FastNext/
 │   ├── app/
 │   │   ├── api/                    # API routes with versioning
 │   │   │   ├── v1/                 # API v1 endpoints
+│   │   │   │   └── events.py       # Event logging API endpoints
 │   │   │   └── main.py             # API router configuration
 │   │   ├── core/                   # Core functionality
 │   │   │   ├── config.py           # Application configuration
@@ -222,6 +225,7 @@ FastNext/
 │   │   │   ├── security_middleware.py # Comprehensive security
 │   │   │   └── optimization_middleware.py # Performance
 │   │   ├── models/                 # SQLAlchemy models
+│   │   │   ├── activity_log.py     # Enhanced event logging model
 │   │   │   ├── workflow.py         # Workflow system models
 │   │   │   └── security_setting.py # Security configuration
 │   │   ├── schemas/                # Pydantic schemas
@@ -229,7 +233,8 @@ FastNext/
 │   │   │   └── workflow_engine.py  # Workflow orchestration
 │   │   └── utils/                  # Utilities
 │   │       ├── security_utils.py   # Security functions
-│   │       └── activity_logger.py  # Audit logging
+│   │       ├── activity_logger.py  # Basic audit logging
+│   │       └── enhanced_logger.py  # Enhanced event logging system
 │   ├── alembic/                    # Database migrations
 │   ├── tests/                      # Comprehensive test suite
 │   ├── docs/                       # Documentation
@@ -240,6 +245,8 @@ FastNext/
 │   ├── postgres/                   # PostgreSQL setup
 │   └── redis/                      # Redis configuration
 ├── docs/                           # Project documentation
+│   ├── features/                   # Feature-specific documentation
+│   │   └── EVENT_LOGGING_SYSTEM.md # Event logging comprehensive guide
 ├── docker-compose.yml              # Development environment
 ├── docker-compose.prod.yml         # Production environment
 └── README.md
@@ -297,6 +304,57 @@ FastNext implements comprehensive security measures following OWASP guidelines a
 - **Security Policies**: Configurable security policies with version control
 - **Compliance Reporting**: Automated compliance reports and security metrics
 - **Documentation**: Complete security documentation and runbooks
+
+## 📈 Event Logging & Activity Monitoring
+
+FastNext includes an enterprise-grade event logging and activity monitoring system inspired by VerifyWise's WatchTower Events, providing comprehensive audit trails and real-time security monitoring.
+
+### 🎯 Core Features
+- **Comprehensive Event Tracking**: Authentication, data operations, security events, API calls
+- **Real-Time Dashboard**: Live event monitoring with auto-refresh and statistics
+- **Advanced Analytics**: Event trends, user activity patterns, and risk assessment
+- **Export Capabilities**: JSON and CSV export with advanced filtering
+- **Risk Scoring**: Automatic risk assessment (0-100) based on event patterns
+- **Geographic Tracking**: IP geolocation and session monitoring
+
+### 📊 Event Categories
+- **Authentication**: Login/logout events, failed attempts, session management
+- **Authorization**: Permission changes, access control, role assignments
+- **User Management**: User creation, updates, profile changes
+- **Data Management**: CRUD operations, imports/exports, data access
+- **Security**: Security incidents, suspicious activities, threat detection
+- **System**: Configuration changes, system events, maintenance activities
+- **API**: API calls, rate limiting, response times, errors
+- **Workflow**: Workflow executions, state changes, approvals
+
+### 🔍 Advanced Filtering & Search
+- **Multi-level Filtering**: Level, category, action, user, date range, risk score
+- **Full-text Search**: Search across descriptions, usernames, entity names
+- **Real-time Updates**: Auto-refresh with configurable intervals (30s-5m)
+- **Correlation Tracking**: Event correlation with unique correlation IDs
+- **Geographic Filtering**: Filter by country, city, IP ranges
+
+### 📈 Analytics & Insights
+- **Event Statistics**: Real-time metrics and trend analysis
+- **User Activity**: Top active users and behavior patterns
+- **Risk Assessment**: Critical events identification and alerting
+- **Performance Metrics**: API response times and error rates
+- **Compliance Reports**: Automated audit trail generation
+
+### 🔧 Technical Implementation
+- **Dual Logging**: Database + file-based logging with daily rotation
+- **Enhanced Models**: Extended ActivityLog with JSON metadata and indexing
+- **Performance Optimized**: Efficient querying with proper database indexes
+- **API Endpoints**: RESTful API with pagination and advanced filtering
+- **Frontend Dashboard**: React-based real-time monitoring interface
+
+### 📍 Access & Navigation
+- **Admin Interface**: Navigate to **Admin → Event Logs** in the dashboard
+- **API Documentation**: Available at `/docs#/v1-events` for API reference
+- **Real-time Monitoring**: Auto-refresh dashboard with configurable intervals
+- **Export Functions**: One-click export in JSON/CSV formats
+
+For detailed documentation, see [Event Logging System Guide](docs/features/EVENT_LOGGING_SYSTEM.md).
 
 ## 📊 Data Import/Export System
 

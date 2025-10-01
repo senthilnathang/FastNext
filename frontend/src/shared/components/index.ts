@@ -3,6 +3,7 @@
 // ============================================================================
 
 // UI Components
+export { Alert, AlertTitle, AlertDescription } from './ui/alert';
 export { 
   AlertDialog,
   AlertDialogAction,
@@ -30,6 +31,7 @@ export { Input } from './ui/input';
 export { Label } from './ui/label';
 export { MultiSelect } from './ui/multi-select';
 export { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
+export { ScrollArea, ScrollBar } from './ui/scroll-area';
 export { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 export { Separator } from './ui/separator';
 export { Sheet, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle, SheetTrigger } from './ui/sheet';

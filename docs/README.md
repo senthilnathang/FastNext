@@ -42,7 +42,44 @@ Located in [`docs/frontend/`](frontend/):
 - [**API Export Guide**](API_EXPORT_GUIDE.md) - API documentation export and management
 - [**Dynamic Import/Export Examples**](DYNAMIC_IMPORT_EXPORT_EXAMPLES.md) - Usage examples and troubleshooting
 
+## 📈 Event Logging & Monitoring
+
+Located in [`docs/features/`](features/):
+
+- [**Event Logging System Guide**](features/EVENT_LOGGING_SYSTEM.md) - Comprehensive event logging and activity monitoring documentation
+- [**Quick Start Guide**](QUICK_START_EVENT_LOGGING.md) - Get started with event logging in 5 minutes
+- [**Authentication Verification**](features/AUTHENTICATION_VERIFICATION.md) - Authentication system verification and testing
+
 ## 🆕 Latest Updates
+
+### Event Logging & Activity Monitoring System (NEW!) 🎉
+
+FastNext now includes an enterprise-grade event logging and activity monitoring system inspired by VerifyWise's WatchTower Events:
+
+#### 🎯 Key Features
+- **Comprehensive Event Tracking**: Authentication, data operations, security events, API calls
+- **Real-Time Dashboard**: Live event monitoring with auto-refresh and statistics
+- **Advanced Analytics**: Event trends, user activity patterns, and risk assessment
+- **Export Capabilities**: JSON and CSV export with advanced filtering
+- **Risk Scoring**: Automatic risk assessment (0-100) based on event patterns
+- **Geographic Tracking**: IP geolocation and session monitoring
+
+#### 📱 User Interface
+- **Admin Dashboard**: Navigate to **Admin → Event Logs** for real-time monitoring
+- **Event Details**: Comprehensive drill-down with request info and metadata
+- **Advanced Filtering**: Multi-level filtering by level, category, action, user, risk score
+- **Auto-refresh**: Configurable refresh intervals (30s-5m) for real-time updates
+
+#### 🔧 Technical Implementation
+- **Dual Logging**: Database + file-based logging with daily rotation
+- **Enhanced Models**: Extended ActivityLog with JSON metadata and indexing
+- **Performance Optimized**: Efficient querying with proper database indexes
+- **API Endpoints**: RESTful API with pagination and advanced filtering
+
+#### 📖 Documentation
+- [**Event Logging System Guide**](features/EVENT_LOGGING_SYSTEM.md) - Complete implementation documentation
+- [**Quick Start Guide**](QUICK_START_EVENT_LOGGING.md) - Get started in 5 minutes
+- **API Reference**: Available at `/docs#/v1-events` for API documentation
 
 ### Dynamic Import/Export System (NEW!)
 
@@ -81,6 +118,7 @@ docs/
 ├── CODING_STANDARDS.md         # General coding standards
 ├── TESTING.md                  # Testing documentation
 ├── DOCKER_DEPLOYMENT.md        # Docker deployment guide
+├── QUICK_START_EVENT_LOGGING.md # Event logging quick start (NEW!)
 │
 ├── backend/                    # Backend-specific documentation
 │   ├── DEVELOPMENT.md         # Backend development guide
@@ -93,6 +131,10 @@ docs/
 │   ├── DATA_FETCHING_GUIDE.md # Data fetching patterns
 │   ├── FRONTEND_API_MIGRATION_SUMMARY.md # API integration
 │   └── DYNAMIC_IMPORT_EXPORT.md # Dynamic settings pages (NEW!)
+│
+├── features/                   # Feature-specific documentation (NEW!)
+│   ├── EVENT_LOGGING_SYSTEM.md # Complete event logging guide (NEW!)
+│   └── AUTHENTICATION_VERIFICATION.md # Auth verification
 │
 ├── WORKFLOW_SYSTEM.md         # Workflow system overview
 ├── WORKFLOW_API_GUIDE.md      # Workflow API reference
@@ -122,6 +164,12 @@ docs/
 - [Data Fetching Guide](frontend/DATA_FETCHING_GUIDE.md)
 - [API Migration Guide](frontend/FRONTEND_API_MIGRATION_SUMMARY.md)
 - [Dynamic Import/Export Guide](frontend/DYNAMIC_IMPORT_EXPORT.md) ⭐ **NEW!**
+
+### For Event Logging & Monitoring ⭐ **NEW!**
+- [Complete Event Logging Guide](features/EVENT_LOGGING_SYSTEM.md) - System overview and implementation
+- [Quick Start Guide](QUICK_START_EVENT_LOGGING.md) - Get started in 5 minutes
+- **Admin Interface**: Navigate to **Admin → Event Logs** in the dashboard
+- **API Reference**: Available at `/docs#/v1-events` for API documentation
 
 ### For Dynamic Import/Export Features ⭐
 - [Complete Guide](IMPORT_EXPORT_GUIDE.md) - System overview with dynamic features
@@ -166,6 +214,14 @@ When adding new documentation:
 
 ## 🎯 Recent Documentation Updates
 
+### Event Logging & Activity Monitoring System Documentation (NEW!)
+- ✅ Created comprehensive Event Logging System Guide
+- ✅ Added Quick Start Guide for immediate usage
+- ✅ Updated main README with event logging features
+- ✅ Added project structure documentation
+- ✅ Updated navigation and documentation index
+- ✅ API reference available at `/docs#/v1-events`
+
 ### Dynamic Import/Export System Documentation
 - ✅ Updated main README with dynamic features
 - ✅ Enhanced IMPORT_EXPORT_GUIDE with table discovery
@@ -178,6 +234,7 @@ When adding new documentation:
 - ✅ Added cross-references between related docs
 - ✅ Created quick navigation sections
 - ✅ Added feature badges for new functionality
+- ✅ Created features/ directory for feature-specific docs
 
 ---
 

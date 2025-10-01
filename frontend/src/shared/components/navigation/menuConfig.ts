@@ -17,7 +17,8 @@ import {
   Globe,
   Palette,
   Mail,
-  FileText
+  FileText,
+  Activity
 } from 'lucide-react';
 
 export interface MenuItem {
@@ -123,6 +124,12 @@ export const menuItems: MenuItem[] = [
         href: '/admin/permissions-enhanced',
         icon: Sparkles,
         requiredPermission: 'admin.permissions',
+      },
+      {
+        title: 'Event Logs',
+        href: '/admin/events',
+        icon: Activity,
+        requiredPermission: 'admin.events',
       },
     ],
   },
