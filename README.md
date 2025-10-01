@@ -7,6 +7,7 @@ A comprehensive, production-ready full-stack web application framework built wit
 ### 🎯 Frontend (Next.js 15)
 - **Modern React Architecture**: App Router with TypeScript and Server Components
 - **Advanced UI Components**: Radix UI + Tailwind CSS + shadcn/ui
+- **Universal ViewManager**: Multi-view data display (List, Card, Kanban, Gantt, Cohort) with advanced filtering
 - **State Management**: TanStack Query + tRPC for type-safe APIs
 - **Authentication**: Secure JWT-based authentication with auto-refresh
 - **Admin Dashboard**: Complete RBAC with roles, permissions, and audit trails
@@ -47,6 +48,60 @@ A comprehensive, production-ready full-stack web application framework built wit
 - **Monitoring Stack**: Integrated logging, metrics, and error tracking
 - **Scalability**: Horizontal scaling with load balancer and database clustering
 - **Performance**: Bundle analysis, dependency auditing, and optimization tools
+
+## 🧩 Component Architecture
+
+### 🎯 **ViewManager - Universal Data Component**
+
+The centerpiece of FastNext's frontend is the **ViewManager** component - a powerful, enterprise-grade data visualization system:
+
+```typescript
+import { ViewManager } from '@/shared/components/views';
+
+<ViewManager
+  title="Projects"
+  data={projects}
+  columns={columns}
+  views={availableViews}
+  activeView={currentView}
+  onViewChange={setCurrentView}
+  sortOptions={sortOptions}
+  groupOptions={groupOptions}
+  selectable={true}
+  bulkActions={bulkActions}
+  onExport={handleExport}
+  onImport={handleImport}
+/>
+```
+
+**Key Features:**
+- **5 View Types**: List, Card, Kanban, Gantt, Cohort views
+- **Advanced Controls**: Search, filter, sort, group, and column management
+- **Data Operations**: Export/import, bulk actions, selection management
+- **Enterprise Ready**: Performance optimized, fully accessible, mobile responsive
+
+### 🔧 **Component System**
+
+```
+Frontend Architecture
+├── 🎯 Views (Universal Data Display)
+│   ├── ViewManager           # Main universal component
+│   ├── SortControl          # Advanced sorting interface  
+│   ├── GroupControl         # Data grouping interface
+│   └── Column Management    # Drag-and-drop columns
+├── 📊 Data Visualization
+│   ├── Enhanced DataTable   # Advanced table with features
+│   ├── Kanban Board         # Project management boards
+│   └── Analytics Dashboard  # Charts and metrics
+├── 🎨 UI Components (shadcn/ui)
+│   ├── Form Controls        # Type-safe form components
+│   ├── Layout Components    # Responsive layouts
+│   └── Navigation          # Advanced navigation system
+└── 🔐 Security Components
+    ├── Auth Guards         # Route protection
+    ├── RBAC Controls       # Role-based access
+    └── XSS Protection      # Security middleware
+```
 
 ## 🛠️ Technology Stack
 
@@ -968,6 +1023,7 @@ jobs:
 ### 🏗️ Architecture Documentation
 - **Backend Architecture**: `backend/docs/ARCHITECTURE.md`
 - **Frontend Architecture**: `frontend/docs/scaffolding-usage.md`
+- **ViewManager Component**: `frontend/docs/ViewManager.md` - Universal data visualization component
 - **Database Schema**: `backend/docs/DEVELOPMENT.md`
 - **Security Guide**: `backend/docs/SECURITY.md`
 - **Workflow System**: `docs/WORKFLOW_SYSTEM.md`
