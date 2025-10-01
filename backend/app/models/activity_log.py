@@ -87,7 +87,7 @@ class ActivityLog(Base):
     session_id = Column(String(100), nullable=True, index=True)
     
     # Additional context and metadata
-    event_metadata = Column(JSON, nullable=True)  # Structured metadata as JSON
+    event_metadata = Column('metadata', JSON, nullable=True)  # Structured metadata as JSON
     tags = Column(JSON, nullable=True)  # Tags for filtering and categorization
     
     # Event impact and risk assessment

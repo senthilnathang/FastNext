@@ -11,6 +11,7 @@ from pydantic import BaseModel, Field
 
 from app.db.session import get_db
 from app.auth.deps import get_current_user
+from app.auth.optional_deps import get_current_user_dev_friendly
 from app.models.user import User
 from app.models.activity_log import ActivityLog, ActivityLevel, ActivityAction, EventCategory
 from app.utils.enhanced_logger import enhanced_logger, log_api_call
@@ -97,7 +98,7 @@ async def get_events(
     end_date: Optional[datetime] = Query(None, description="End date (ISO format)"),
     search_query: Optional[str] = Query(None, description="Search in description, entity name, username"),
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_user_dev_friendly)
 ):
     """
     Get filtered list of events with pagination
@@ -182,7 +183,7 @@ async def get_event_statistics(
     request: Request,
     hours: int = Query(24, ge=1, le=168, description="Hours to look back (max 1 week)"),
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_user_dev_friendly)
 ):
     """
     Get event statistics for dashboard
@@ -238,7 +239,7 @@ async def get_event_by_id(
     event_id: str,
     request: Request,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_user_dev_friendly)
 ):
     """
     Get specific event by ID
@@ -298,7 +299,7 @@ async def get_logs_from_file(
     date: Optional[str] = Query(None, description="Date in YYYY-MM-DD format (default: today)"),
     lines: int = Query(500, ge=1, le=5000, description="Number of recent lines to retrieve"),
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_user_dev_friendly)
 ):
     """
     Get logs from file (inspired by VerifyWise getLogsQuery)
@@ -351,7 +352,7 @@ async def export_events(
     end_date: Optional[datetime] = Query(None, description="End date"),
     limit: int = Query(10000, ge=1, le=50000, description="Maximum events to export"),
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_user_dev_friendly)
 ):
     """
     Export events in specified format
@@ -473,7 +474,7 @@ async def cleanup_old_events(
     days: int = Query(90, ge=7, le=365, description="Delete events older than N days"),
     dry_run: bool = Query(True, description="Preview deletion without actually deleting"),
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_user_dev_friendly)
 ):
     """
     Cleanup old events (admin only)

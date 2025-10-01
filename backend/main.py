@@ -139,6 +139,10 @@ Use the **Authorize** button below to authenticate with your JWT token:
     # Register routes
     app.include_router(api_router, prefix=settings.API_V1_STR)
     
+    # Add events endpoints directly (for frontend compatibility)
+    from app.api.v1.events import router as events_router
+    app.include_router(events_router, tags=["events"])
+    
     # Setup custom Swagger UI
     customize_swagger_ui(app)
     

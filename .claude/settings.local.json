@@ -61,7 +61,11 @@
       "Bash(./quick_fix.sh:*)",
       "Bash(timeout:*)",
       "Bash(uv:*)",
-      "Bash(~/.local/bin/uv:*)"
+      "Bash(~/.local/bin/uv:*)",
+      "Bash(export ENVIRONMENT=development)",
+      "Bash(true)",
+      "Bash(PGPASSWORD=password psql:*)",
+      "Bash(export PGPASSWORD=password)"
     ],
     "deny": []
   }
