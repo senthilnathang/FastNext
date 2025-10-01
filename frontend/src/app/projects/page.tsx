@@ -1,13 +1,8 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
+import { ViewManager, ViewConfig, Column } from '@/shared/components/views';
 import { 
-  Card, 
-  CardContent, 
-  CardDescription, 
-  CardHeader, 
-  CardTitle,
-  Button,
   Dialog,
   DialogContent,
   DialogDescription,
@@ -18,20 +13,26 @@ import {
   Label,
   Textarea,
   Checkbox,
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger
+  Button
 } from '@/shared/components';
-import { Building2, Plus, Edit, Trash2, Calendar, Globe, Lock, MoreVertical } from 'lucide-react';
+import { Building2, Globe, Lock, Calendar, User, Clock, Trash2 } from 'lucide-react';
 import { useProjects, useCreateProject, useUpdateProject, useDeleteProject } from '@/modules/projects/hooks/useProjects';
 import { formatDistanceToNow } from 'date-fns';
 import type { Project, CreateProjectRequest, UpdateProjectRequest } from '@/shared/types';
+import { Badge } from '@/shared/components/ui/badge';
+import type { SortOption, GroupOption } from '@/shared/components/ui';
 
 export default function ProjectsPage() {
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  const [activeView, setActiveView] = useState('projects-list');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filters, setFilters] = useState<Record<string, any>>({});
+  const [sortBy, setSortBy] = useState<string>('created_at');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+  const [groupBy, setGroupBy] = useState<string>('');
+  const [selectedItems, setSelectedItems] = useState<Project[]>([]);
   
   const { data: projectsData, isLoading, error } = useProjects();
   const createProject = useCreateProject();
@@ -44,6 +45,169 @@ export default function ProjectsPage() {
     is_public: false,
     settings: {}
   });
+
+  // Define columns for the ViewManager
+  const columns: Column<Project>[] = useMemo(() => [
+    {
+      id: 'name',
+      key: 'name',
+      label: 'Project Name',
+      sortable: true,
+      searchable: true,
+      render: (value, project) => (
+        <div className="flex items-center space-x-3">
+          <Building2 className="h-4 w-4 text-blue-600" />
+          <div>
+            <div className="font-medium">{value as string}</div>
+            <div className="text-sm text-muted-foreground">
+              {project.description || 'No description'}
+            </div>
+          </div>
+        </div>
+      )
+    },
+    {
+      id: 'visibility',
+      key: 'is_public',
+      label: 'Visibility',
+      sortable: true,
+      filterable: true,
+      type: 'select',
+      filterOptions: [
+        { label: 'Public', value: true },
+        { label: 'Private', value: false }
+      ],
+      render: (value) => (
+        <div className="flex items-center space-x-2">
+          {value ? (
+            <>
+              <Globe className="h-4 w-4 text-blue-500" />
+              <Badge variant="secondary">Public</Badge>
+            </>
+          ) : (
+            <>
+              <Lock className="h-4 w-4 text-gray-500" />
+              <Badge variant="outline">Private</Badge>
+            </>
+          )}
+        </div>
+      )
+    },
+    {
+      id: 'created_at',
+      key: 'created_at',
+      label: 'Created',
+      sortable: true,
+      render: (value) => (
+        <div className="flex items-center space-x-2">
+          <Calendar className="h-4 w-4 text-muted-foreground" />
+          <span className="text-sm">
+            {formatDistanceToNow(new Date(value as string), { addSuffix: true })}
+          </span>
+        </div>
+      )
+    },
+    {
+      id: 'status',
+      key: 'id',
+      label: 'Status',
+      sortable: false,
+      render: () => (
+        <Badge variant="default" className="bg-green-100 text-green-800">
+          Active
+        </Badge>
+      )
+    }
+  ], []);
+
+  // Define sort options
+  const sortOptions: SortOption[] = useMemo(() => [
+    {
+      key: 'name',
+      label: 'Project Name',
+      defaultOrder: 'asc'
+    },
+    {
+      key: 'created_at',
+      label: 'Created Date',
+      defaultOrder: 'desc'
+    },
+    {
+      key: 'updated_at',
+      label: 'Last Modified',
+      defaultOrder: 'desc'
+    },
+    {
+      key: 'is_public',
+      label: 'Visibility',
+      defaultOrder: 'desc'
+    }
+  ], []);
+
+  // Define group options
+  const groupOptions: GroupOption[] = useMemo(() => [
+    {
+      key: 'is_public',
+      label: 'Visibility',
+      icon: <Globe className="h-4 w-4" />
+    },
+    {
+      key: 'owner',
+      label: 'Owner',
+      icon: <User className="h-4 w-4" />
+    },
+    {
+      key: 'created_month',
+      label: 'Created Month',
+      icon: <Calendar className="h-4 w-4" />
+    },
+    {
+      key: 'status',
+      label: 'Status',
+      icon: <Clock className="h-4 w-4" />
+    }
+  ], []);
+
+  // Define available views
+  const views: ViewConfig[] = useMemo(() => [
+    {
+      id: 'projects-card',
+      name: 'Card View',
+      type: 'card',
+      columns,
+      filters: {},
+      sortBy: 'created_at',
+      sortOrder: 'desc'
+    },
+    {
+      id: 'projects-list',
+      name: 'List View',
+      type: 'list',
+      columns,
+      filters: {},
+      sortBy: 'created_at',
+      sortOrder: 'desc'
+    },
+    {
+      id: 'projects-kanban',
+      name: 'Kanban Board',
+      type: 'kanban',
+      columns,
+      filters: {},
+      groupBy: 'status'
+    },
+    {
+      id: 'projects-gantt',
+      name: 'Timeline View',
+      type: 'gantt',
+      columns,
+      filters: {},
+      sortBy: 'created_at',
+      sortOrder: 'asc'
+    }
+  ], [columns]);
+
+  const projects = projectsData?.items || [];
 
   const handleCreateProject = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -75,17 +239,19 @@ export default function ProjectsPage() {
     }
   };
 
-  const handleDeleteProject = async (projectId: number) => {
-    if (confirm('Are you sure you want to delete this project?')) {
+  const handleDeleteProject = async (project: Project) => {
+    if (confirm(`Are you sure you want to delete "${project.name}"?`)) {
       try {
-        await deleteProject.mutateAsync(projectId);
+        await deleteProject.mutateAsync(project.id);
+        // Remove deleted project from selection if it was selected
+        setSelectedItems(prev => prev.filter(item => item.id !== project.id));
       } catch (error) {
         console.error('Failed to delete project:', error);
       }
     }
   };
 
-  const openEditDialog = (project: Project) => {
+  const handleEditProject = (project: Project) => {
     setSelectedProject(project);
     setFormData({
       name: project.name,
@@ -96,7 +262,36 @@ export default function ProjectsPage() {
     setEditDialogOpen(true);
   };
 
-  const projects = projectsData?.items || [];
+  const handleViewProject = (project: Project) => {
+    // Navigate to project detail page or open view dialog
+    console.log('View project:', project);
+  };
+
+  const handleExport = (format: 'csv' | 'json' | 'excel') => {
+    console.log('Export projects as:', format);
+    // Implement export functionality
+  };
+
+  const handleImport = (file: File) => {
+    console.log('Import projects from file:', file.name);
+    // Implement import functionality
+  };
+
+  const bulkActions = [
+    {
+      label: 'Delete Selected',
+      icon: <Trash2 className="h-4 w-4 mr-2" />,
+      action: (selectedProjects: Project[]) => {
+        if (confirm(`Delete ${selectedProjects.length} selected projects?`)) {
+          selectedProjects.forEach(project => {
+            deleteProject.mutate(project.id);
+          });
+          // Clear selection after deletion
+          setSelectedItems([]);
+        }
+      }
+    }
+  ];
 
   if (error) {
     return (
@@ -115,175 +310,100 @@ export default function ProjectsPage() {
 
   return (
     <div className="container mx-auto px-4 py-6 max-w-7xl">
-      <div className="space-y-6">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <Building2 className="h-7 w-7 text-blue-600" />
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Projects</h1>
-              <p className="text-sm text-gray-600 dark:text-gray-400">
-                Manage your projects and applications
-              </p>
+      <ViewManager
+        title="Projects"
+        subtitle="Manage your projects and applications"
+        data={projects}
+        columns={columns}
+        views={views}
+        activeView={activeView}
+        onViewChange={setActiveView}
+        loading={isLoading}
+        error={error?.message || null}
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+        filters={filters}
+        onFiltersChange={setFilters}
+        sortBy={sortBy}
+        sortOrder={sortOrder}
+        onSortChange={(field, order) => {
+          setSortBy(field);
+          setSortOrder(order);
+        }}
+        sortOptions={sortOptions}
+        groupBy={groupBy}
+        onGroupChange={setGroupBy}
+        groupOptions={groupOptions}
+        onExport={handleExport}
+        onImport={handleImport}
+        onCreateClick={() => setCreateDialogOpen(true)}
+        onEditClick={handleEditProject}
+        onDeleteClick={handleDeleteProject}
+        onViewClick={handleViewProject}
+        selectable={true}
+        selectedItems={selectedItems}
+        onSelectionChange={setSelectedItems}
+        bulkActions={bulkActions}
+        showToolbar={true}
+        showSearch={true}
+        showFilters={true}
+        showExport={true}
+        showImport={true}
+        showColumnSelector={true}
+        showViewSelector={true}
+      />
+
+      {/* Create Project Dialog */}
+      <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Create New Project</DialogTitle>
+            <DialogDescription>
+              Create a new project to start building your application.
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleCreateProject} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="name">Project Name</Label>
+              <Input
+                id="name"
+                placeholder="Enter project name"
+                value={formData.name}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                required
+              />
             </div>
-          </div>
-        <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
-          <DialogTrigger asChild>
-            <Button>
-              <Plus className="h-4 w-4 mr-2" />
-              New Project
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-[425px]">
-            <DialogHeader>
-              <DialogTitle>Create New Project</DialogTitle>
-              <DialogDescription>
-                Create a new project to start building your application.
-              </DialogDescription>
-            </DialogHeader>
-            <form onSubmit={handleCreateProject} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="name">Project Name</Label>
-                <Input
-                  id="name"
-                  placeholder="Enter project name"
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="description">Description</Label>
-                <Textarea
-                  id="description"
-                  placeholder="Enter project description (optional)"
-                  value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                />
-              </div>
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="is_public"
-                  checked={formData.is_public}
-                  onCheckedChange={(checked) => setFormData({ ...formData, is_public: !!checked })}
-                />
-                <Label htmlFor="is_public">Make this project public</Label>
-              </div>
-              <div className="flex justify-end space-x-2">
-                <Button type="button" variant="outline" onClick={() => setCreateDialogOpen(false)}>
-                  Cancel
-                </Button>
-                <Button type="submit" disabled={createProject.isPending}>
-                  {createProject.isPending ? 'Creating...' : 'Create Project'}
-                </Button>
-              </div>
-            </form>
-          </DialogContent>
-        </Dialog>
-      </div>
+            <div className="space-y-2">
+              <Label htmlFor="description">Description</Label>
+              <Textarea
+                id="description"
+                placeholder="Enter project description (optional)"
+                value={formData.description}
+                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              />
+            </div>
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="is_public"
+                checked={formData.is_public}
+                onCheckedChange={(checked) => setFormData({ ...formData, is_public: !!checked })}
+              />
+              <Label htmlFor="is_public">Make this project public</Label>
+            </div>
+            <div className="flex justify-end space-x-2">
+              <Button type="button" variant="outline" onClick={() => setCreateDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button type="submit" disabled={createProject.isPending}>
+                {createProject.isPending ? 'Creating...' : 'Create Project'}
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
 
-        {/* Projects Grid */}
-        {isLoading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            {[...Array(8)].map((_, i) => (
-              <Card key={i} className="animate-pulse" variant="flat">
-                <CardHeader compact>
-                  <div className="h-4 bg-gray-300 rounded w-3/4"></div>
-                  <div className="h-3 bg-gray-200 rounded w-full"></div>
-                </CardHeader>
-                <CardContent compact>
-                  <div className="h-3 bg-gray-200 rounded w-1/2"></div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            {projects.map((project) => (
-              <Card key={project.id} className="hover:shadow-md transition-shadow" variant="default">
-                <CardHeader compact className="pb-2">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1 min-w-0">
-                      <CardTitle size="sm" className="truncate">{project.name}</CardTitle>
-                      <CardDescription className="mt-1 line-clamp-2 text-xs">
-                        {project.description || 'No description provided'}
-                      </CardDescription>
-                    </div>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon-sm" className="shrink-0">
-                          <MoreVertical className="h-3 w-3" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => openEditDialog(project)}>
-                          <Edit className="h-3 w-3 mr-2" />
-                          Edit
-                        </DropdownMenuItem>
-                        <DropdownMenuItem 
-                          onClick={() => handleDeleteProject(project.id)}
-                          className="text-red-600"
-                        >
-                          <Trash2 className="h-3 w-3 mr-2" />
-                          Delete
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </div>
-                </CardHeader>
-                <CardContent compact>
-                  <div className="space-y-2">
-                    <div className="flex items-center text-xs text-gray-500">
-                      <Calendar className="h-3 w-3 mr-1" />
-                      <span className="truncate">
-                        {formatDistanceToNow(new Date(project.created_at), { addSuffix: true })}
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-1">
-                        {project.is_public ? (
-                          <div title="Public project">
-                            <Globe className="h-3 w-3 text-blue-500" />
-                          </div>
-                        ) : (
-                          <div title="Private project">
-                            <Lock className="h-3 w-3 text-gray-500" />
-                          </div>
-                        )}
-                        <span className="text-xs text-gray-500">
-                          {project.is_public ? 'Public' : 'Private'}
-                        </span>
-                      </div>
-                      <span className="bg-green-100 text-green-800 text-xs px-1.5 py-0.5 rounded-full">
-                        Active
-                      </span>
-                    </div>
-                  </div>
-                </CardContent>
-            </Card>
-          ))}
-          
-          {/* Create new project card */}
-          <Card 
-            className="border-dashed border-2 hover:border-blue-500 transition-colors cursor-pointer"
-            onClick={() => setCreateDialogOpen(true)}
-            variant="outlined"
-          >
-            <CardContent compact className="flex flex-col items-center justify-center py-8">
-              <Plus className="h-8 w-8 text-gray-400 mb-3" />
-              <h3 className="text-sm font-medium text-gray-900 dark:text-white mb-1">
-                Create New Project
-              </h3>
-              <p className="text-xs text-gray-500 text-center">
-                Start building something amazing
-              </p>
-            </CardContent>
-          </Card>
-          </div>
-        )}
-
-        {/* Edit Project Dialog */}
-        <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+      {/* Edit Project Dialog */}
+      <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle>Edit Project</DialogTitle>
@@ -329,8 +449,7 @@ export default function ProjectsPage() {
             </div>
           </form>
         </DialogContent>
-        </Dialog>
-      </div>
+      </Dialog>
     </div>
   );
 }

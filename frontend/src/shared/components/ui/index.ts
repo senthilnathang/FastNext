@@ -54,3 +54,7 @@ export { default as QuickActionsMenu } from './QuickActionsMenu';
 export { default as PWAInstallPrompt } from './PWAInstallPrompt';
 export { ResourceManagementExamples } from './ResourceExamples';
 export { default as WindowControls } from './window-controls';
+export { SortControl } from './sort-control';
+export { GroupControl } from './group-control';
+export type { SortOption, SortControlProps } from './sort-control';
+export type { GroupOption, GroupControlProps } from './group-control';
