@@ -319,7 +319,7 @@ export default function ProjectsPage() {
         activeView={activeView}
         onViewChange={setActiveView}
         loading={isLoading}
-        error={error?.message || null}
+        error={error ? (error as any)?.message || String(error) : null}
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
         filters={filters}
