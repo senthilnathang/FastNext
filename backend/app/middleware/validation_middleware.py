@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Optional, Union, Callable
+from typing import Any, Dict, List, Optional, Union, Callable, Type
 from fastapi import Request, Response, HTTPException, status
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import JSONResponse
@@ -11,6 +11,7 @@ import ipaddress
 from urllib.parse import unquote
 
 from app.core.logging import log_security_event
+from app.services.validation_service import ValidationService
 
 logger = logging.getLogger(__name__)
 
@@ -602,3 +603,292 @@ class InputSanitizer:
             return True
         except ValueError:
             return False
+
+
+# Enhanced validation utilities using ValidationService
+class EnhancedRequestValidator:
+    """Enhanced request validator using ValidationService"""
+    
+    @staticmethod
+    def validate_json_body(
+        body: bytes,
+        schema_class: Type[BaseModel],
+        strict: bool = True
+    ) -> BaseModel:
+        """Validate JSON request body against a Pydantic schema"""
+        try:
+            if not body:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Request body is required"
+                )
+            
+            data = json.loads(body)
+            
+            # Use ValidationService for enhanced validation
+            result = ValidationService.validate_pydantic_model(schema_class, data)
+            
+            if not result["is_valid"]:
+                raise HTTPException(
+                    status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                    detail={
+                        "message": "Validation failed",
+                        "errors": result["errors"]
+                    }
+                )
+            
+            return result["model"]
+            
+        except json.JSONDecodeError as e:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Invalid JSON: {str(e)}"
+            )
+    
+    @staticmethod
+    def validate_email_field(email: str) -> str:
+        """Validate email using enhanced validation"""
+        result = ValidationService.validate_email(email)
+        if not result["is_valid"]:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail=result["error"]
+            )
+        return result["normalized_email"]
+    
+    @staticmethod
+    def validate_password_field(password: str) -> Dict[str, Any]:
+        """Validate password using enhanced validation"""
+        result = ValidationService.validate_password(password)
+        if not result["is_valid"]:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail={
+                    "message": "Password validation failed",
+                    "errors": result["errors"],
+                    "strength": result.get("strength", "weak")
+                }
+            )
+        return result
+    
+    @staticmethod
+    def validate_file_upload_enhanced(
+        file_size: int,
+        file_name: str,
+        file_type: str,
+        max_size: int = 10 * 1024 * 1024,
+        allowed_types: Optional[List[str]] = None,
+        allowed_extensions: Optional[List[str]] = None
+    ):
+        """Enhanced file upload validation"""
+        result = ValidationService.validate_file_upload(
+            file_size=file_size,
+            file_name=file_name,
+            file_type=file_type,
+            max_size=max_size,
+            allowed_types=allowed_types,
+            allowed_extensions=allowed_extensions
+        )
+        
+        if not result["is_valid"]:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail={
+                    "message": "File validation failed",
+                    "error": result["error"]
+                }
+            )
+    
+    @staticmethod
+    def sanitize_html_content(content: str) -> str:
+        """Sanitize HTML content using ValidationService"""
+        return ValidationService.sanitize_html(content)
+
+
+# Validation decorators for API endpoints
+class ZodValidationDecorators:
+    """Decorators that provide Zod-like validation for FastAPI endpoints"""
+    
+    @staticmethod
+    def validate_json_body(schema_class: Type[BaseModel]):
+        """Decorator to validate JSON request body with enhanced validation"""
+        def decorator(func: Callable):
+            async def wrapper(*args, **kwargs):
+                # Extract request from arguments
+                request = None
+                for arg in args:
+                    if isinstance(arg, Request):
+                        request = arg
+                        break
+                
+                if request:
+                    body = await request.body()
+                    validated_data = EnhancedRequestValidator.validate_json_body(
+                        body, schema_class
+                    )
+                    kwargs['validated_data'] = validated_data
+                
+                return await func(*args, **kwargs)
+            return wrapper
+        return decorator
+    
+    @staticmethod
+    def validate_email_param(param_name: str = 'email'):
+        """Decorator to validate email parameter"""
+        def decorator(func: Callable):
+            async def wrapper(*args, **kwargs):
+                if param_name in kwargs:
+                    kwargs[param_name] = EnhancedRequestValidator.validate_email_field(
+                        kwargs[param_name]
+                    )
+                return await func(*args, **kwargs)
+            return wrapper
+        return decorator
+    
+    @staticmethod  
+    def validate_password_strength():
+        """Decorator to validate password strength"""
+        def decorator(func: Callable):
+            async def wrapper(*args, **kwargs):
+                if 'validated_data' in kwargs:
+                    data = kwargs['validated_data']
+                    if hasattr(data, 'password'):
+                        password_result = EnhancedRequestValidator.validate_password_field(
+                            data.password
+                        )
+                        # Add password strength info to request context
+                        kwargs['password_strength'] = password_result
+                
+                return await func(*args, **kwargs)
+            return wrapper
+        return decorator
+    
+    @staticmethod
+    def sanitize_html_fields(html_fields: List[str]):
+        """Decorator to sanitize HTML content in specified fields"""
+        def decorator(func: Callable):
+            async def wrapper(*args, **kwargs):
+                if 'validated_data' in kwargs:
+                    data = kwargs['validated_data']
+                    for field in html_fields:
+                        if hasattr(data, field):
+                            sanitized_content = EnhancedRequestValidator.sanitize_html_content(
+                                getattr(data, field)
+                            )
+                            setattr(data, field, sanitized_content)
+                
+                return await func(*args, **kwargs)
+            return wrapper
+        return decorator
+
+
+# Enhanced validation response helpers
+def create_validation_error_response(
+    message: str,
+    errors: Optional[List[Dict[str, Any]]] = None,
+    error_code: str = "VALIDATION_ERROR"
+) -> HTTPException:
+    """Create standardized validation error response"""
+    detail = {
+        "message": message,
+        "code": error_code,
+        "timestamp": datetime.utcnow().isoformat()
+    }
+    
+    if errors:
+        detail["errors"] = errors
+    
+    return HTTPException(
+        status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+        detail=detail
+    )
+
+
+def create_success_response(
+    data: Any,
+    message: str = "Success"
+) -> Dict[str, Any]:
+    """Create standardized success response"""
+    return {
+        "success": True,
+        "message": message,
+        "data": data,
+        "timestamp": datetime.utcnow().isoformat()
+    }
+
+
+# Utility functions for common validation patterns
+async def validate_and_parse_request_body(
+    request: Request,
+    schema_class: Type[BaseModel]
+) -> BaseModel:
+    """Utility to validate and parse request body"""
+    body = await request.body()
+    return EnhancedRequestValidator.validate_json_body(body, schema_class)
+
+
+def validate_uuid_param(uuid_str: str, param_name: str = "id") -> str:
+    """Validate UUID parameter"""
+    result = ValidationService.validate_uuid(uuid_str)
+    if not result["is_valid"]:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail=f"Invalid {param_name} format: {result['error']}"
+        )
+    return uuid_str
+
+
+def validate_pagination_params_enhanced(
+    page: int = 1,
+    limit: int = 10,
+    max_limit: int = 100,
+    sort_by: Optional[str] = None,
+    sort_order: str = "desc"
+) -> Dict[str, Any]:
+    """Enhanced pagination parameter validation"""
+    
+    # Validate page and limit
+    if page < 1:
+        raise create_validation_error_response(
+            "Page must be greater than 0",
+            error_code="INVALID_PAGE"
+        )
+    
+    if limit < 1 or limit > max_limit:
+        raise create_validation_error_response(
+            f"Limit must be between 1 and {max_limit}",
+            error_code="INVALID_LIMIT"
+        )
+    
+    # Validate sort_order
+    if sort_order not in ["asc", "desc"]:
+        raise create_validation_error_response(
+            "Sort order must be 'asc' or 'desc'",
+            error_code="INVALID_SORT_ORDER"
+        )
+    
+    return {
+        "page": page,
+        "limit": limit,
+        "sort_by": sort_by,
+        "sort_order": sort_order,
+        "offset": (page - 1) * limit
+    }
+
+
+# Export enhanced components
+__all__ = [
+    # Original middleware components
+    'ValidationMiddleware',
+    'ValidationResult',
+    'InputSanitizer',
+    
+    # Enhanced validation components
+    'EnhancedRequestValidator',
+    'ZodValidationDecorators',
+    'validate_and_parse_request_body',
+    'validate_uuid_param',
+    'validate_pagination_params_enhanced',
+    'create_validation_error_response',
+    'create_success_response'
+]
