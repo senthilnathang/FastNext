@@ -5,30 +5,23 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/sha
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/components/ui/select';
 import { Badge } from '@/shared/components/ui/badge';
 import { Alert, AlertDescription } from '@/shared/components/ui/alert';
-import { Separator } from '@/shared/components/ui/separator';
 import { Skeleton } from '@/shared/components/ui/skeleton';
 import { Input } from '@/shared/components/ui/input';
 import { Label } from '@/shared/components/ui/label';
 import { Button } from '@/shared/components/ui/button';
 import { Checkbox } from '@/shared/components/ui/checkbox';
 import { 
-  Download, 
   Database, 
-  FileText, 
   AlertCircle, 
   Info,
   Columns,
-  Key,
   Settings,
-  Search,
-  CheckCircle,
   PlayCircle,
   FileDown,
   Filter
 } from 'lucide-react';
 
 import { MultiStepWizard, WizardStep } from '@/shared/components/ui/multi-step-wizard';
-import { DataExport } from '@/shared/components/DataExport';
 import { useDataImportExportConfig } from '@/shared/hooks/useDataImportExportConfig';
 
 interface TableInfo {
@@ -73,7 +66,7 @@ interface ExportData {
 }
 
 export default function DataExportPage() {
-  const { config: exportConfig, loading: configLoading, error: configError } = useDataImportExportConfig();
+  const { config: exportConfig } = useDataImportExportConfig();
   const [currentStep, setCurrentStep] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -378,30 +371,30 @@ export default function DataExportPage() {
         // If API endpoint fails, use sample data from schema as fallback
         if (tableSchema?.sample_data) {
           const fallbackData = {
-            data: tableSchema.sample_data,
-            total_rows: tableSchema.sample_data.length
+            rows: tableSchema.sample_data,
+            total_count: tableSchema.sample_data.length
           };
           setTableData(fallbackData);
           setExportData(prev => ({ 
             ...prev, 
-            previewData: fallbackData.data,
-            totalRows: fallbackData.total_rows
+            previewData: fallbackData.rows,
+            totalRows: fallbackData.total_count
           }));
         }
       }
     } catch (err) {
-      console.warn('Could not fetch table data, using sample data');
+      console.warn('Could not fetch table data, using sample data:', err);
       // Use sample data from schema as fallback
       if (tableSchema?.sample_data) {
         const fallbackData = {
-          data: tableSchema.sample_data,
-          total_rows: tableSchema.sample_data.length
+          rows: tableSchema.sample_data,
+          total_count: tableSchema.sample_data.length
         };
         setTableData(fallbackData);
         setExportData(prev => ({ 
           ...prev, 
-          previewData: fallbackData.data,
-          totalRows: fallbackData.total_rows
+          previewData: fallbackData.rows,
+          totalRows: fallbackData.total_count
         }));
       }
     } finally {
@@ -441,9 +434,9 @@ export default function DataExportPage() {
   }, [tableSchema, tablePermissions]);
 
   const filteredData = useMemo(() => {
-    if (!tableData || !tableData.data) return [];
+    if (!tableData || !tableData.rows) return [];
     
-    let filtered = tableData.data;
+    let filtered = tableData.rows;
     
     // Apply search filter
     if (exportData.searchTerm) {
@@ -997,7 +990,7 @@ export default function DataExportPage() {
           <div className="space-y-2">
             <Label>Applied Filters</Label>
             <div className="p-3 bg-muted rounded-lg">
-              Search: "{exportData.searchTerm}"
+              Search: &quot;{exportData.searchTerm}&quot;
             </div>
           </div>
         )}
@@ -1005,7 +998,7 @@ export default function DataExportPage() {
         <Alert>
           <Info className="h-4 w-4" />
           <AlertDescription>
-            Click "Complete Export" to start exporting your data. The file will be downloaded automatically when ready.
+            Click &quot;Complete Export&quot; to start exporting your data. The file will be downloaded automatically when ready.
           </AlertDescription>
         </Alert>
       </CardContent>

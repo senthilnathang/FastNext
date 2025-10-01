@@ -176,7 +176,7 @@ export default function OfflinePage() {
               <div className="flex items-center space-x-2">
                 <WifiOff className="h-4 w-4 text-yellow-600" />
                 <span>
-                  You're currently offline. FastNext will continue to work with cached data and queue actions for when you're back online.
+                  You&apos;re currently offline. FastNext will continue to work with cached data and queue actions for when you&apos;re back online.
                 </span>
               </div>
             )}
@@ -244,7 +244,7 @@ export default function OfflinePage() {
                     {Object.entries(cacheStatus.caches || {}).map(([name, count]) => (
                       <div key={name} className="flex justify-between">
                         <span>{name.replace('fastnext-', '').replace('-v1.2.0', '')}:</span>
-                        <span>{count} items</span>
+                        <span>{String(count)} items</span>
                       </div>
                     ))}
                   </div>

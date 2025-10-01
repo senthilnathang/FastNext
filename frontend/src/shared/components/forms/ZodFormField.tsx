@@ -13,7 +13,7 @@ import { Calendar } from '@/shared/components/ui/calendar'
 import { Popover, PopoverContent, PopoverTrigger } from '@/shared/components/ui/popover'
 import { Switch } from '@/shared/components/ui/switch'
 import { Badge } from '@/shared/components/ui/badge'
-import { cn } from '@/shared/lib/utils'
+import { cn } from '@/shared/utils'
 import { CalendarIcon, X } from 'lucide-react'
 import { format } from 'date-fns'
 
@@ -479,7 +479,7 @@ export function TagsField<T extends FieldValues>({
   suggestions = []
 }: TagsFieldProps<T>) {
   const error = form.formState.errors[name]?.message as string | undefined
-  const value = form.watch(name) || []
+  const value = (form.watch(name) || []) as string[]
   const [inputValue, setInputValue] = React.useState('')
 
   const addTag = (tag: string) => {

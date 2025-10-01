@@ -217,7 +217,7 @@ export function useServiceWorker(): ServiceWorkerState & ServiceWorkerActions {
         resolve(event.data)
       }
       
-      navigator.serviceWorker.controller.postMessage(
+      navigator.serviceWorker.controller?.postMessage(
         { type: 'GET_CACHE_STATUS' },
         [channel.port2]
       )
@@ -240,7 +240,7 @@ export function useServiceWorker(): ServiceWorkerState & ServiceWorkerActions {
         resolve(event.data.success || false)
       }
       
-      navigator.serviceWorker.controller.postMessage(
+      navigator.serviceWorker.controller?.postMessage(
         { type: 'CLEAR_CACHE' },
         [channel.port2]
       )
@@ -306,7 +306,7 @@ export function useOfflineQueue() {
     if ('serviceWorker' in navigator && 'sync' in window.ServiceWorkerRegistration.prototype) {
       try {
         const registration = await navigator.serviceWorker.ready
-        await registration.sync.register('user-actions-queue')
+        await (registration as any).sync.register('user-actions-queue')
         setIsProcessing(true)
       } catch (error) {
         console.error('Background sync registration failed:', error)

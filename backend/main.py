@@ -21,6 +21,9 @@ from app.db.init_db import init_db
 from app.middleware.security_middleware import (
     SecurityMiddleware, AutoLogoutMiddleware, SessionExpirationMiddleware
 )
+from app.middleware.enhanced_logging_middleware import (
+    create_enhanced_logging_middleware, create_auth_event_middleware
+)
 
 # Setup comprehensive logging
 setup_logging()
@@ -269,6 +272,22 @@ def _setup_middleware(app: FastAPI):
     
     # Import middleware
     from app.middleware.cache_middleware import CacheMiddleware, RateLimitMiddleware
+    
+    # Enhanced Event Logging Middleware
+    # Add authentication event tracking
+    app.add_middleware(create_auth_event_middleware())
+    
+    # Add comprehensive event logging
+    app.add_middleware(
+        create_enhanced_logging_middleware(
+            enable_enhanced_logging=True,
+            log_all_requests=False,  # Only log sensitive endpoints and errors
+            exclude_paths={
+                '/health', '/metrics', '/favicon.ico', '/static/', '/_next/',
+                '/docs', '/redoc', '/openapi.json', '/ping', '/version', '/debug'
+            }
+        )
+    )
     
     # Temporarily disable cache and rate limiting middleware to fix encoding issues
     # TODO: Re-enable after fixing header encoding problems

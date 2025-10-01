@@ -1,11 +1,11 @@
 'use client';
 
-import React, { useState, ReactNode } from 'react';
+import React, { ReactNode } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from './card';
 import { Button } from './button';
 import { Badge } from './badge';
 import { Separator } from './separator';
-import { CheckCircle, Circle, ChevronLeft, ChevronRight } from 'lucide-react';
+import { CheckCircle, ChevronLeft, ChevronRight } from 'lucide-react';
 import { cn } from '@/shared/utils';
 
 export interface WizardStep {

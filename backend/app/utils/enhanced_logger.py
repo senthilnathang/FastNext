@@ -114,7 +114,7 @@ class EnhancedLogger:
             country_code=request_info.get('country_code'),
             city=request_info.get('city'),
             session_id=request_info.get('session_id'),
-            metadata=metadata,
+            event_metadata=metadata,
             tags=tags,
             risk_score=risk_score,
             affected_users_count=affected_users_count,
@@ -191,7 +191,7 @@ class EnhancedLogger:
             'ip_address': activity_log.ip_address,
             'entity_type': activity_log.entity_type,
             'entity_id': activity_log.entity_id,
-            'metadata': activity_log.metadata
+            'metadata': activity_log.event_metadata
         }
         
         log_message = json.dumps(log_data, default=str)

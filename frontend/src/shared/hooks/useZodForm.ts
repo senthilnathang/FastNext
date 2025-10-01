@@ -6,7 +6,7 @@ import { toast } from 'sonner'
 
 // Extended form options that include Zod schema
 export interface ZodFormOptions<T extends FieldValues> extends Omit<UseFormProps<T>, 'resolver'> {
-  schema: z.ZodType<T>
+  schema: z.ZodType<T, any, any>
   onSubmit?: (data: T) => Promise<void> | void
   onSuccess?: (data: T) => void
   onError?: (error: Error) => void
@@ -17,7 +17,7 @@ export interface ZodFormOptions<T extends FieldValues> extends Omit<UseFormProps
 }
 
 // Extended form return type
-export interface ZodFormReturn<T extends FieldValues> extends UseFormReturn<T> {
+export interface ZodFormReturn<T extends FieldValues> extends Omit<UseFormReturn<T>, 'handleSubmit'> {
   handleSubmit: () => Promise<void>
   isSubmitting: boolean
   submitError: string | null
@@ -90,7 +90,7 @@ export function useZodForm<T extends FieldValues>({
 
       // If it's a Zod validation error, set field-specific errors
       if (error instanceof z.ZodError) {
-        error.errors.forEach(({ path, message }) => {
+        error.issues.forEach(({ path, message }) => {
           if (path.length > 0) {
             form.setError(path.join('.') as FieldPath<T>, {
               type: 'manual',
@@ -126,7 +126,7 @@ export function useZodForm<T extends FieldValues>({
 /**
  * Validation helper to check if a field value is valid according to a Zod schema
  */
-export function validateField<T>(schema: z.ZodType<T>, value: unknown): {
+export function validateField<T>(schema: z.ZodType<T, any, any>, value: unknown): {
   isValid: boolean
   error?: string
 } {
@@ -137,7 +137,7 @@ export function validateField<T>(schema: z.ZodType<T>, value: unknown): {
     if (error instanceof z.ZodError) {
       return {
         isValid: false,
-        error: error.errors[0]?.message || 'Validation failed'
+        error: error.issues[0]?.message || 'Validation failed'
       }
     }
     return {
@@ -151,7 +151,7 @@ export function validateField<T>(schema: z.ZodType<T>, value: unknown): {
  * Async validation helper for form fields
  */
 export function createAsyncValidator<T>(
-  schema: z.ZodType<T>
+  schema: z.ZodType<T, any, any>
 ) {
   return async (value: unknown): Promise<boolean | string> => {
     const result = validateField(schema, value)
@@ -163,7 +163,7 @@ export function createAsyncValidator<T>(
  * Helper to extract default values from a Zod schema
  */
 export function getDefaultValues<T extends Record<string, any>>(
-  schema: z.ZodType<T>
+  schema: z.ZodType<T, any, any>
 ): Partial<T> {
   try {
     // Try to parse an empty object to get defaults

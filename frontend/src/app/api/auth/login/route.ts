@@ -187,7 +187,7 @@ async function authenticateUser(
     }
 
     // Check for account lockout, suspicious activity, etc.
-    const securityCheck = await checkAccountSecurity(user.id, clientIP);
+    const securityCheck = await checkAccountSecurity();
     if (!securityCheck.allowed) {
       return {
         success: false,
@@ -217,7 +217,7 @@ async function authenticateUser(
   }
 }
 
-async function checkAccountSecurity(userId: string, clientIP: string): Promise<{
+async function checkAccountSecurity(): Promise<{
   allowed: boolean;
   reason?: string;
 }> {

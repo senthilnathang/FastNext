@@ -398,11 +398,7 @@ export function IntegrationHub() {
                           </DialogContent>
                         </Dialog>
                         
-                        {template.documentation && (
-                          <Button variant="outline" size="sm">
-                            <ExternalLink className="h-4 w-4" />
-                          </Button>
-                        )}
+                        {/* Documentation button removed - property doesn't exist on IntegrationTemplate */}
                       </div>
                     </div>
                   </CardContent>

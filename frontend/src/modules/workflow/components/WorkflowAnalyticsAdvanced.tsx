@@ -21,7 +21,7 @@ import { Button } from '@/shared/components/ui/button'
 import { Progress } from '@/shared/components/ui/progress'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/components/ui/tabs'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/components/ui/select'
-import { DatePickerWithRange } from '@/shared/components/ui/date-picker'
+// DatePickerWithRange import removed - component doesn't exist
 
 interface WorkflowMetrics {
   totalExecutions: number

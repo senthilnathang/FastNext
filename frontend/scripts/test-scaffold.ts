@@ -1,4 +1,4 @@
-import { ScaffoldGenerator, ModelDefinition } from './src/shared/utils/scaffold-generator';
+import { ScaffoldGenerator, ModelDefinition } from '../src/shared/utils/scaffold-generator';
 
 // Define a sample Product model for testing
 const productModel: ModelDefinition = {

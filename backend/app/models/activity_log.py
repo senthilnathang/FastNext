@@ -87,7 +87,7 @@ class ActivityLog(Base):
     session_id = Column(String(100), nullable=True, index=True)
     
     # Additional context and metadata
-    metadata = Column(JSON, nullable=True)  # Structured metadata as JSON
+    event_metadata = Column(JSON, nullable=True)  # Structured metadata as JSON
     tags = Column(JSON, nullable=True)  # Tags for filtering and categorization
     
     # Event impact and risk assessment
@@ -131,7 +131,7 @@ class ActivityLog(Base):
             'country_code': self.country_code,
             'city': self.city,
             'session_id': self.session_id,
-            'metadata': self.metadata,
+            'metadata': self.event_metadata,
             'tags': self.tags,
             'risk_score': self.risk_score,
             'affected_users_count': self.affected_users_count,
@@ -173,7 +173,7 @@ class ActivityLog(Base):
                 'city': self.city
             } if self.country_code or self.city else None,
             'description': self.description,
-            'metadata': self.metadata,
+            'metadata': self.event_metadata,
             'tags': self.tags,
             'riskScore': self.risk_score,
             'affectedUsersCount': self.affected_users_count,

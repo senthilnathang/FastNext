@@ -76,7 +76,7 @@ export function ResponsiveLayout({
         <Alert className="rounded-none border-x-0 border-t-0 border-yellow-200 bg-yellow-50">
           <WifiOff className="h-4 w-4" />
           <AlertDescription className="flex items-center justify-between w-full">
-            <span>You're currently offline. Some features may be limited.</span>
+            <span>You&apos;re currently offline. Some features may be limited.</span>
             {offlineRequests > 0 && (
               <div className="flex items-center space-x-2">
                 <Badge variant="secondary">{offlineRequests} queued</Badge>

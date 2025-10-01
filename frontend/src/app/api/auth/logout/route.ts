@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { SecureCookieManager } from '@/lib/auth/secure-cookies';
-import { logSecurityEvent } from '@/lib/monitoring/security-monitor';
 
 export async function POST(request: NextRequest) {
   try {
@@ -13,7 +12,7 @@ export async function POST(request: NextRequest) {
       try {
         const payload = JSON.parse(atob(authToken.split('.')[1]));
         userId = payload.sub || payload.user_id;
-      } catch (error) {
+      } catch {
         // Invalid token, but we'll still proceed with logout
       }
     }

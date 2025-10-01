@@ -1,35 +1,27 @@
 'use client';
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/components/ui/select';
-import { Badge } from '@/shared/components/ui/badge';
 import { Alert, AlertDescription } from '@/shared/components/ui/alert';
-import { Separator } from '@/shared/components/ui/separator';
 import { Skeleton } from '@/shared/components/ui/skeleton';
 import { Button } from '@/shared/components/ui/button';
 import { Input } from '@/shared/components/ui/input';
 import { Label } from '@/shared/components/ui/label';
-import { Textarea } from '@/shared/components/ui/textarea';
 import { Checkbox } from '@/shared/components/ui/checkbox';
 import { 
   Upload, 
   Database, 
-  FileText, 
   AlertCircle, 
   Info,
   Columns,
-  Key,
   Settings,
   CheckCircle,
   PlayCircle,
-  FileUp,
-  Cog
+  FileUp
 } from 'lucide-react';
 
 import { MultiStepWizard, WizardStep } from '@/shared/components/ui/multi-step-wizard';
-import { DataImport } from '@/shared/components/DataImport';
-import type { ImportFormat } from '@/shared/components/DataImport/types';
 import { useDataImportExportConfig } from '@/shared/hooks/useDataImportExportConfig';
 
 interface TableInfo {
@@ -70,7 +62,7 @@ interface ImportData {
 }
 
 export default function DataImportPage() {
-  const { config: importConfig, loading: configLoading, error: configError } = useDataImportExportConfig();
+  const { config: importConfig } = useDataImportExportConfig();
   const [currentStep, setCurrentStep] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -345,29 +337,11 @@ export default function DataImportPage() {
     }
   };
 
-  const mapSqlTypeToImportType = (sqlType: string): 'string' | 'number' | 'boolean' | 'object' | 'url' | 'date' | 'email' => {
-    const type = sqlType.toLowerCase();
-    if (type.includes('int') || type.includes('serial')) return 'number';
-    if (type.includes('decimal') || type.includes('numeric') || type.includes('float') || type.includes('double')) return 'number';
-    if (type.includes('bool')) return 'boolean';
-    if (type.includes('date') || type.includes('time')) return 'date';
-    if (type.includes('json')) return 'object';
-    return 'string';
-  };
+  // Removed unused mapSqlTypeToImportType function
 
-  const importColumns = useMemo(() => {
-    if (!tableSchema) return [];
-    
-    return tableSchema.columns.map(col => ({
-      key: col.name,
-      label: col.name,
-      type: mapSqlTypeToImportType(col.type),
-      required: !col.nullable || col.primary_key,
-      description: `${col.type}${col.nullable ? ' (nullable)' : ' (required)'}${col.primary_key ? ' (primary key)' : ''}`
-    }));
-  }, [tableSchema]);
+  // Removed unused importColumns for now - can be re-added when needed
 
-  const handleImport = async (data: any[], options: any) => {
+  const handleImport = async (data: any[]) => {
     if (!importData.selectedTable) return;
 
     try {
@@ -565,7 +539,8 @@ export default function DataImportPage() {
     });
   };
 
-  const validateImportData = async () => {
+  // Removed large unused validateImportData function - can be restored if needed
+  const validateImportDataRemoved = async () => {
     if (!importData.file || !importData.selectedTable) return;
 
     setIsLoading(true);
@@ -694,14 +669,7 @@ export default function DataImportPage() {
     }
   };
 
-  const handleNext = async () => {
-    if (currentStep === 1 && importData.file) {
-      // Auto-validate when moving from step 2 to 3
-      await validateImportData();
-    } else if (currentStep < steps.length - 1) {
-      setCurrentStep(currentStep + 1);
-    }
-  };
+  // Removed unused handleNext function
 
   const handleSkipValidation = async () => {
     if (!importData.file || !importData.selectedTable) return;
@@ -760,7 +728,7 @@ export default function DataImportPage() {
   const handleComplete = async () => {
     try {
       setIsLoading(true);
-      const result = await handleImport(importData.previewData, importData.options);
+      const result = await handleImport(importData.previewData);
       
       if (result?.demo_mode) {
         alert(`✅ Demo import simulation completed!\n\nRows processed: ${result.rows_imported}/${result.total_rows}\n\nNote: This was a demonstration. No actual data was imported to the database.`);
@@ -1105,7 +1073,7 @@ export default function DataImportPage() {
               
               {importData.file && (
                 <div className="space-y-4">
-                  <p className="text-sm text-muted-foreground">Or skip validation if you're confident your data is correct:</p>
+                  <p className="text-sm text-muted-foreground">Or skip validation if you&apos;re confident your data is correct:</p>
                   <Button 
                     onClick={handleSkipValidation}
                     disabled={isLoading}
@@ -1181,7 +1149,7 @@ export default function DataImportPage() {
           <Alert className="border-yellow-200 bg-yellow-50 dark:bg-yellow-950">
             <AlertCircle className="h-4 w-4 text-yellow-600" />
             <AlertDescription className="text-yellow-800 dark:text-yellow-200">
-              <strong>⚠️ Validation Skipped:</strong> Data validation was bypassed. The import may fail if the data contains errors or doesn't match the table schema.
+              <strong>⚠️ Validation Skipped:</strong> Data validation was bypassed. The import may fail if the data contains errors or doesn&apos;t match the table schema.
             </AlertDescription>
           </Alert>
         )}
@@ -1189,7 +1157,7 @@ export default function DataImportPage() {
         <Alert>
           <Info className="h-4 w-4" />
           <AlertDescription>
-            Click "Complete Import" to start importing your data. This process may take some time depending on the file size.
+            Click &quot;Complete Import&quot; to start importing your data. This process may take some time depending on the file size.
           </AlertDescription>
         </Alert>
       </CardContent>

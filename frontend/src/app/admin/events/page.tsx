@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { ColumnDef } from "@tanstack/react-table"
-import { Download, Filter, Calendar, Activity, AlertTriangle, Shield, UserCheck, Eye, RefreshCw } from "lucide-react"
+import { AlertTriangle, Eye, RefreshCw } from "lucide-react"
 
 import { 
   Button,
@@ -43,7 +43,7 @@ const EventsPage: React.FC<EventsPageProps> = () => {
   const [selectedEvent, setSelectedEvent] = React.useState<EventResponse | null>(null)
   const [timeRange, setTimeRange] = React.useState<number>(24) // Hours
   const [autoRefresh, setAutoRefresh] = React.useState<boolean>(false)
-  const [refreshInterval, setRefreshInterval] = React.useState<number>(30) // Seconds
+  const [refreshInterval] = React.useState<number>(30) // Seconds
 
   // Queries
   const { 
@@ -58,7 +58,6 @@ const EventsPage: React.FC<EventsPageProps> = () => {
 
   const {
     data: statisticsData,
-    isLoading: statsLoading,
     refetch: refetchStats
   } = useEventStatistics(timeRange)
 
@@ -555,7 +554,6 @@ const EventsPage: React.FC<EventsPageProps> = () => {
               data={filteredEvents} 
               searchKey="description"
               enableSearch={false}
-              loading={eventsLoading}
             />
           </TabsContent>
           

@@ -43,7 +43,7 @@ import {
   UuidSchema,
   SlugSchema,
   ColorSchema
-} from '@fastnext/schemas'
+} from '../schemas'
 
 /**
  * Validation service that provides type-safe validation for all form data
@@ -158,7 +158,7 @@ export class ValidationService {
       return { isValid: true }
     } catch (error) {
       if (error instanceof z.ZodError) {
-        return { isValid: false, error: error.errors[0]?.message }
+        return { isValid: false, error: error.issues[0]?.message }
       }
       return { isValid: false, error: 'Invalid email format' }
     }
@@ -170,7 +170,7 @@ export class ValidationService {
       return { isValid: true }
     } catch (error) {
       if (error instanceof z.ZodError) {
-        return { isValid: false, error: error.errors[0]?.message }
+        return { isValid: false, error: error.issues[0]?.message }
       }
       return { isValid: false, error: 'Invalid password format' }
     }
@@ -182,7 +182,7 @@ export class ValidationService {
       return { isValid: true }
     } catch (error) {
       if (error instanceof z.ZodError) {
-        return { isValid: false, error: error.errors[0]?.message }
+        return { isValid: false, error: error.issues[0]?.message }
       }
       return { isValid: false, error: 'Invalid URL format' }
     }
@@ -194,7 +194,7 @@ export class ValidationService {
       return { isValid: true }
     } catch (error) {
       if (error instanceof z.ZodError) {
-        return { isValid: false, error: error.errors[0]?.message }
+        return { isValid: false, error: error.issues[0]?.message }
       }
       return { isValid: false, error: 'Invalid UUID format' }
     }
@@ -206,7 +206,7 @@ export class ValidationService {
       return { isValid: true }
     } catch (error) {
       if (error instanceof z.ZodError) {
-        return { isValid: false, error: error.errors[0]?.message }
+        return { isValid: false, error: error.issues[0]?.message }
       }
       return { isValid: false, error: 'Invalid slug format' }
     }
@@ -218,14 +218,14 @@ export class ValidationService {
       return { isValid: true }
     } catch (error) {
       if (error instanceof z.ZodError) {
-        return { isValid: false, error: error.errors[0]?.message }
+        return { isValid: false, error: error.issues[0]?.message }
       }
       return { isValid: false, error: 'Invalid color format' }
     }
   }
 
   // Generic validation method
-  static validate<T>(schema: z.ZodType<T>, data: unknown): {
+  static validate<T>(schema: z.ZodType<T, any, any>, data: unknown): {
     success: boolean
     data?: T
     error?: string
@@ -238,8 +238,8 @@ export class ValidationService {
       if (error instanceof z.ZodError) {
         return {
           success: false,
-          error: error.errors[0]?.message || 'Validation failed',
-          errors: error.errors.map(err => ({
+          error: error.issues[0]?.message || 'Validation failed',
+          errors: error.issues.map(err => ({
             path: err.path.join('.'),
             message: err.message
           }))
@@ -253,36 +253,36 @@ export class ValidationService {
   }
 
   // Safe parsing with detailed error information
-  static safeParse<T>(schema: z.ZodType<T>, data: unknown): z.SafeParseReturnType<unknown, T> {
+  static safeParse<T>(schema: z.ZodType<T, any, any>, data: unknown) {
     return schema.safeParse(data)
   }
 
   // Check if data matches schema without throwing
-  static isValid<T>(schema: z.ZodType<T>, data: unknown): boolean {
+  static isValid<T>(schema: z.ZodType<T, any, any>, data: unknown): boolean {
     const result = schema.safeParse(data)
     return result.success
   }
 
   // Get validation errors without throwing
-  static getValidationErrors<T>(schema: z.ZodType<T>, data: unknown): Array<{ path: string; message: string }> | null {
+  static getValidationErrors<T>(schema: z.ZodType<T, any, any>, data: unknown): Array<{ path: string; message: string }> | null {
     const result = schema.safeParse(data)
     if (result.success) return null
     
-    return result.error.errors.map(err => ({
+    return result.error.issues.map(err => ({
       path: err.path.join('.'),
       message: err.message
     }))
   }
 
   // Create a validator function for async validation
-  static createAsyncValidator<T>(schema: z.ZodType<T>) {
+  static createAsyncValidator<T>(schema: z.ZodType<T, any, any>) {
     return async (data: unknown): Promise<{ isValid: boolean; error?: string }> => {
       try {
         await Promise.resolve(schema.parse(data))
         return { isValid: true }
       } catch (error) {
         if (error instanceof z.ZodError) {
-          return { isValid: false, error: error.errors[0]?.message }
+          return { isValid: false, error: error.issues[0]?.message }
         }
         return { isValid: false, error: 'Validation failed' }
       }
@@ -313,7 +313,7 @@ export class ValidationService {
   static transformErrorsForForm(errors: z.ZodError): Record<string, { message: string; type: string }> {
     const formErrors: Record<string, { message: string; type: string }> = {}
     
-    errors.errors.forEach(error => {
+    errors.issues.forEach(error => {
       const path = error.path.join('.')
       formErrors[path] = {
         message: error.message,
@@ -325,7 +325,7 @@ export class ValidationService {
   }
 
   // Get default values from schema
-  static getDefaults<T extends Record<string, any>>(schema: z.ZodType<T>): Partial<T> {
+  static getDefaults<T extends Record<string, any>>(schema: z.ZodType<T, any, any>): Partial<T> {
     try {
       return schema.parse({})
     } catch {
@@ -372,7 +372,7 @@ export class ValidationService {
   }
 
   // Validate array of items
-  static validateArray<T>(schema: z.ZodType<T>, items: unknown[]): {
+  static validateArray<T>(schema: z.ZodType<T, any, any>, items: unknown[]): {
     isValid: boolean
     validItems: T[]
     invalidItems: Array<{ index: number; error: string }>

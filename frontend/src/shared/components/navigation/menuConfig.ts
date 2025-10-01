@@ -12,12 +12,6 @@ import {
   Package,
   Cog,
   Database,
-  Lock,
-  Bell,
-  Globe,
-  Palette,
-  Mail,
-  FileText,
   Activity
 } from 'lucide-react';
 
