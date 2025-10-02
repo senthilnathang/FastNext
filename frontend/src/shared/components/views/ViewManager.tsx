@@ -28,8 +28,9 @@ import {
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd'
 import { KanbanView, KanbanColumn } from './KanbanView'
 import { GanttView } from './GanttView'
+import { CalendarView, CalendarItem } from './CalendarView'
 
-export type ViewType = 'card' | 'list' | 'kanban' | 'gantt' | 'cohort'
+export type ViewType = 'card' | 'list' | 'kanban' | 'gantt' | 'calendar' | 'cohort'
 
 export interface Column<T = any> {
   id: string
@@ -153,6 +154,21 @@ export interface ViewManagerProps<T = any> {
   showDependencies?: boolean
   allowResize?: boolean
   allowMove?: boolean
+  
+  // Calendar-specific props
+  calendarIdField?: keyof T | string
+  calendarTitleField?: keyof T | string
+  calendarDateField?: keyof T | string
+  calendarDescriptionField?: keyof T | string
+  calendarStatusField?: keyof T | string
+  calendarPriorityField?: keyof T | string
+  onDateChange?: (itemId: string | number, newDate: Date) => void
+  calendarView?: 'month' | 'week'
+  calendarShowWeekends?: boolean
+  calendarShowToday?: boolean
+  calendarAllowDragDrop?: boolean
+  calendarEnableQuickAdd?: boolean
+  onCalendarQuickAdd?: (date: Date, title: string) => void
 }
 
 export function ViewManager<T extends { id: number | string }>({
@@ -217,7 +233,20 @@ export function ViewManager<T extends { id: number | string }>({
   showProgress = true,
   showDependencies = false,
   allowResize = true,
-  allowMove = true
+  allowMove = true,
+  calendarIdField,
+  calendarTitleField,
+  calendarDateField,
+  calendarDescriptionField,
+  calendarStatusField,
+  calendarPriorityField,
+  onDateChange,
+  calendarView = 'month',
+  calendarShowWeekends = true,
+  calendarShowToday = true,
+  calendarAllowDragDrop = true,
+  calendarEnableQuickAdd = false,
+  onCalendarQuickAdd
 }: ViewManagerProps<T>) {
   const [localSearchQuery, setLocalSearchQuery] = useState(searchQuery)
   const [columnOrder, setColumnOrder] = useState<string[]>(initialColumns.map(col => col.id))
@@ -327,7 +356,8 @@ export function ViewManager<T extends { id: number | string }>({
           {currentViewType === 'card' && <LayoutGrid className="h-4 w-4 mr-2" />}
           {currentViewType === 'list' && <List className="h-4 w-4 mr-2" />}
           {currentViewType === 'kanban' && <Kanban className="h-4 w-4 mr-2" />}
-          {currentViewType === 'gantt' && <Calendar className="h-4 w-4 mr-2" />}
+          {currentViewType === 'gantt' && <BarChart3 className="h-4 w-4 mr-2" />}
+          {currentViewType === 'calendar' && <Calendar className="h-4 w-4 mr-2" />}
           {currentViewType === 'cohort' && <BarChart3 className="h-4 w-4 mr-2" />}
           {currentView?.name || 'Select View'}
         </Button>
@@ -342,7 +372,8 @@ export function ViewManager<T extends { id: number | string }>({
             {view.type === 'card' && <LayoutGrid className="h-4 w-4 mr-2" />}
             {view.type === 'list' && <List className="h-4 w-4 mr-2" />}
             {view.type === 'kanban' && <Kanban className="h-4 w-4 mr-2" />}
-            {view.type === 'gantt' && <Calendar className="h-4 w-4 mr-2" />}
+            {view.type === 'gantt' && <BarChart3 className="h-4 w-4 mr-2" />}
+            {view.type === 'calendar' && <Calendar className="h-4 w-4 mr-2" />}
             {view.type === 'cohort' && <BarChart3 className="h-4 w-4 mr-2" />}
             {view.name}
           </DropdownMenuItem>
@@ -822,6 +853,64 @@ export function ViewManager<T extends { id: number | string }>({
     )
   }
 
+  const renderCalendarView = () => {
+    // Default field mappings if not specified
+    const idField = calendarIdField || 'id'
+    const titleField = calendarTitleField || 'title' || 'name'
+    const dateField = calendarDateField || 'created_at' || 'date'
+    
+    // Validate that required date field exists in data
+    const hasRequiredFields = processedData.length === 0 || (
+      processedData.some(item => 
+        item[dateField as keyof T]
+      )
+    )
+
+    if (!hasRequiredFields) {
+      return (
+        <div className="flex items-center justify-center h-64">
+          <div className="text-center">
+            <h3 className="text-lg font-semibold mb-2">Calendar view unavailable</h3>
+            <p className="text-muted-foreground">
+              Data must include a date field to display as calendar.
+            </p>
+            <p className="text-sm text-muted-foreground mt-1">
+              Configure calendarDateField prop to specify the date field.
+            </p>
+          </div>
+        </div>
+      )
+    }
+
+    return (
+      <CalendarView
+        data={processedData}
+        loading={loading}
+        error={error}
+        idField={idField}
+        titleField={titleField}
+        dateField={dateField}
+        descriptionField={calendarDescriptionField}
+        statusField={calendarStatusField}
+        priorityField={calendarPriorityField}
+        onCreateClick={onCreateClick ? (date?: Date) => onCreateClick() : undefined}
+        onEditClick={onEditClick}
+        onDeleteClick={onDeleteClick}
+        onViewClick={onViewClick}
+        onDateChange={onDateChange}
+        enableQuickAdd={calendarEnableQuickAdd}
+        onQuickAdd={onCalendarQuickAdd}
+        view={calendarView}
+        showWeekends={calendarShowWeekends}
+        showToday={calendarShowToday}
+        allowDragDrop={calendarAllowDragDrop}
+        canCreate={true}
+        canEdit={true}
+        canDelete={true}
+      />
+    )
+  }
+
   const renderCurrentView = () => {
     if (loading) {
       return (
@@ -873,6 +962,8 @@ export function ViewManager<T extends { id: number | string }>({
         return renderKanbanView()
       case 'gantt':
         return renderGanttView()
+      case 'calendar':
+        return renderCalendarView()
       case 'cohort':
         return <div className="text-center py-8 text-muted-foreground">Cohort view coming soon...</div>
       default:

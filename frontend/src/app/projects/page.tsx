@@ -204,6 +204,15 @@ export default function ProjectsPage() {
       filters: {},
       sortBy: 'created_at',
       sortOrder: 'asc'
+    },
+    {
+      id: 'projects-calendar',
+      name: 'Calendar View',
+      type: 'calendar',
+      columns,
+      filters: {},
+      sortBy: 'created_at',
+      sortOrder: 'asc'
     }
   ], [columns]);
 
@@ -275,6 +284,23 @@ export default function ProjectsPage() {
   const handleImport = (file: File) => {
     console.log('Import projects from file:', file.name);
     // Implement import functionality
+  };
+
+  const handleDateChange = (itemId: string | number, newDate: Date) => {
+    // In a real implementation, this would update the project's created date or relevant date field
+    console.log('Date change requested for project:', itemId, 'to:', newDate);
+    // For now, we'll just log it since projects typically don't change their creation date
+  };
+
+  const handleCalendarQuickAdd = (date: Date, title: string) => {
+    const newProject: CreateProjectRequest = {
+      name: title,
+      description: `Project created on ${date.toLocaleDateString()}`,
+      is_public: false,
+      settings: {}
+    };
+    
+    createProject.mutate(newProject);
   };
 
   const bulkActions = [
@@ -351,6 +377,15 @@ export default function ProjectsPage() {
         showImport={true}
         showColumnSelector={true}
         showViewSelector={true}
+        calendarIdField="id"
+        calendarTitleField="name"
+        calendarDateField="created_at"
+        calendarDescriptionField="description"
+        onDateChange={handleDateChange}
+        calendarEnableQuickAdd={true}
+        onCalendarQuickAdd={handleCalendarQuickAdd}
+        calendarView="month"
+        calendarShowToday={true}
       />
 
       {/* Create Project Dialog */}
