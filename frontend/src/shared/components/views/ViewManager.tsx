@@ -4,7 +4,6 @@ import React, { useState, useCallback, useMemo } from 'react'
 import { Button } from '@/shared/components/ui/button'
 import { Input } from '@/shared/components/ui/input'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator, DropdownMenuCheckboxItem } from '@/shared/components/ui/dropdown-menu'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/shared/components/ui/dialog'
 import { Badge } from '@/shared/components/ui/badge'
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/shared/components/ui/sheet'
 import { SortControl, GroupControl } from '@/shared/components/ui'
@@ -21,13 +20,13 @@ import {
   SortDesc, 
   Download, 
   Upload, 
-  Settings, 
   Columns,
   GripVertical,
   Eye,
   EyeOff
 } from 'lucide-react'
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd'
+import { KanbanView, KanbanColumn } from './KanbanView'
 
 export type ViewType = 'card' | 'list' | 'kanban' | 'gantt' | 'cohort'
 
@@ -94,7 +93,7 @@ export interface ViewManagerProps<T = any> {
   onImport?: (file: File) => void
   
   // CRUD operations
-  onCreateClick?: () => void
+  onCreateClick?: (columnId?: string) => void
   onEditClick?: (item: T) => void
   onDeleteClick?: (item: T) => void
   onViewClick?: (item: T) => void
@@ -121,6 +120,21 @@ export interface ViewManagerProps<T = any> {
   showImport?: boolean
   showColumnSelector?: boolean
   showViewSelector?: boolean
+  
+  // Kanban-specific props
+  kanbanColumns?: KanbanColumn[]
+  onMoveCard?: (cardId: string | number, sourceColumnId: string, targetColumnId: string) => void
+  enableQuickAdd?: boolean
+  onQuickAdd?: (columnId: string, title: string) => void
+  kanbanGroupByField?: keyof T | string
+  kanbanCardTitleField?: keyof T | string
+  kanbanCardDescriptionField?: keyof T | string
+  kanbanCardFields?: Array<{
+    key: keyof T | string
+    label: string
+    render?: (value: unknown, item: T) => React.ReactNode
+    type?: 'text' | 'badge' | 'date' | 'avatar' | 'priority'
+  }>
 }
 
 export function ViewManager<T extends { id: number | string }>({
@@ -162,7 +176,15 @@ export function ViewManager<T extends { id: number | string }>({
   showExport = true,
   showImport = true,
   showColumnSelector = true,
-  showViewSelector = true
+  showViewSelector = true,
+  kanbanColumns = [],
+  onMoveCard,
+  enableQuickAdd = false,
+  onQuickAdd,
+  kanbanGroupByField,
+  kanbanCardTitleField,
+  kanbanCardDescriptionField,
+  kanbanCardFields = []
 }: ViewManagerProps<T>) {
   const [localSearchQuery, setLocalSearchQuery] = useState(searchQuery)
   const [columnOrder, setColumnOrder] = useState<string[]>(initialColumns.map(col => col.id))
@@ -535,7 +557,7 @@ export function ViewManager<T extends { id: number | string }>({
         )}
         
         {onCreateClick && (
-          <Button onClick={onCreateClick}>
+          <Button onClick={() => onCreateClick()}>
             Create New
           </Button>
         )}
@@ -660,6 +682,51 @@ export function ViewManager<T extends { id: number | string }>({
     </div>
   )
 
+  const renderKanbanView = () => {
+    // Default groupBy field if not specified
+    const groupByField = kanbanGroupByField || groupBy || 'status'
+    
+    // Default card title field if not specified
+    const cardTitleField = kanbanCardTitleField || 'name' || 'title'
+    
+    // Use provided kanban columns or auto-generate from data
+    let columns = [...kanbanColumns]
+    
+    // Auto-generate columns if none provided and we have a groupBy field
+    if (columns.length === 0 && groupByField) {
+      const uniqueGroups = [...new Set(processedData.map(item => String(item[groupByField as keyof T] || 'Unknown')))]
+      columns = uniqueGroups.map(group => ({
+        id: group,
+        title: group.charAt(0).toUpperCase() + group.slice(1).replace(/_/g, ' '),
+        count: processedData.filter(item => String(item[groupByField as keyof T]) === group).length
+      }))
+    }
+
+    return (
+      <KanbanView
+        data={processedData}
+        columns={columns}
+        loading={loading}
+        error={error}
+        groupByField={groupByField}
+        cardTitleField={cardTitleField}
+        cardDescriptionField={kanbanCardDescriptionField}
+        onCreateClick={onCreateClick}
+        onEditClick={onEditClick}
+        onDeleteClick={onDeleteClick}
+        onViewClick={onViewClick}
+        onMoveCard={onMoveCard}
+        enableQuickAdd={enableQuickAdd}
+        onQuickAdd={onQuickAdd}
+        cardFields={kanbanCardFields}
+        canCreate={true}
+        canEdit={true}
+        canDelete={true}
+        canMove={true}
+      />
+    )
+  }
+
   const renderCurrentView = () => {
     if (loading) {
       return (
@@ -695,7 +762,7 @@ export function ViewManager<T extends { id: number | string }>({
               }
             </p>
             {onCreateClick && (
-              <Button onClick={onCreateClick}>Create New</Button>
+              <Button onClick={() => onCreateClick()}>Create New</Button>
             )}
           </div>
         </div>
@@ -708,7 +775,7 @@ export function ViewManager<T extends { id: number | string }>({
       case 'list':
         return renderListView()
       case 'kanban':
-        return <div className="text-center py-8 text-muted-foreground">Kanban view coming soon...</div>
+        return renderKanbanView()
       case 'gantt':
         return <div className="text-center py-8 text-muted-foreground">Gantt view coming soon...</div>
       case 'cohort':

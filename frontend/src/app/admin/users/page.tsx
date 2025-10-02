@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { ViewManager, ViewConfig, Column } from '@/shared/components/views'
+import { ViewManager, ViewConfig, Column, KanbanColumn } from '@/shared/components/views'
 import { 
   Dialog,
   DialogContent,
@@ -79,7 +79,7 @@ const UsersPage: React.FC<UsersPageProps> = () => {
       label: 'Full Name',
       sortable: true,
       searchable: true,
-      render: (value) => value || '-'
+      render: (value) => (value as string) || '-'
     },
     {
       id: 'roles',
@@ -245,6 +245,49 @@ const UsersPage: React.FC<UsersPageProps> = () => {
 
   const users = React.useMemo(() => usersData?.items || [], [usersData])
 
+  // Define kanban columns for user status
+  const kanbanColumns: KanbanColumn[] = React.useMemo(() => [
+    { 
+      id: 'true', 
+      title: 'Active Users', 
+      color: '#10b981',
+      count: users.filter(user => user.is_active).length
+    },
+    { 
+      id: 'false', 
+      title: 'Inactive Users', 
+      color: '#ef4444',
+      count: users.filter(user => !user.is_active).length
+    }
+  ], [users])
+
+  // Define kanban card fields
+  const kanbanCardFields = React.useMemo(() => [
+    {
+      key: 'email',
+      label: 'Email',
+      type: 'text' as const
+    },
+    {
+      key: 'is_superuser',
+      label: 'Admin',
+      type: 'badge' as const,
+      render: (value: unknown) => value ? 'Admin' : null
+    },
+    {
+      key: 'is_verified',
+      label: 'Verified',
+      type: 'badge' as const,
+      render: (value: unknown) => value ? 'Verified' : 'Unverified'
+    },
+    {
+      key: 'last_login_at',
+      label: 'Last Login',
+      type: 'date' as const,
+      render: (value: unknown) => value ? formatDistanceToNow(new Date(value as string), { addSuffix: true }) : 'Never'
+    }
+  ], [])
+
   // Handle actions
   const handleCreateUser = () => {
     if (!formData.email || !formData.username || !formData.password) {
@@ -292,6 +335,31 @@ const UsersPage: React.FC<UsersPageProps> = () => {
   const handleImport = () => {
     console.log('Import users')
     // TODO: Implement import
+  }
+
+  const handleMoveCard = (cardId: string | number, sourceColumnId: string, targetColumnId: string) => {
+    const userId = Number(cardId)
+    const shouldBeActive = targetColumnId === 'true'
+    
+    // Find the user to toggle
+    const user = users.find(u => u.id === userId)
+    if (user && user.is_active !== shouldBeActive) {
+      toggleUserStatus.mutate(userId)
+    }
+  }
+
+  const handleQuickAdd = (columnId: string, title: string) => {
+    // Extract email from title for quick user creation
+    const email = title.includes('@') ? title : `${title}@example.com`
+    const username = title.replace('@', '_').replace(/[^a-zA-Z0-9_]/g, '_')
+    
+    createUser.mutate({
+      email,
+      username,
+      full_name: title,
+      password: 'TempPassword123!', // Should prompt for password in real app
+      is_active: columnId === 'true'
+    })
   }
 
   const bulkActions = [
@@ -370,10 +438,18 @@ const UsersPage: React.FC<UsersPageProps> = () => {
         showToolbar={true}
         showSearch={true}
         showFilters={true}
-        showSort={true}
-        showGroup={true}
         showExport={true}
         showImport={true}
+        
+        // Kanban-specific props
+        kanbanColumns={kanbanColumns}
+        onMoveCard={handleMoveCard}
+        enableQuickAdd={true}
+        onQuickAdd={handleQuickAdd}
+        kanbanGroupByField="is_active"
+        kanbanCardTitleField="full_name"
+        kanbanCardDescriptionField="email"
+        kanbanCardFields={kanbanCardFields}
       />
 
       {/* Create User Dialog */}
