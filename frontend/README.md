@@ -26,6 +26,8 @@ A modern, mobile-first full-stack admin dashboard built with Next.js, featuring 
 - **Responsive Dashboard** - Adaptive grid layouts
 - **Mobile Tables** - Touch-optimized data views
 - **Bottom Navigation** - Tab-based mobile navigation
+- **ViewManager** - Universal data visualization with multiple view types
+- **Advanced Views** - Kanban, Gantt, and Calendar layouts for data management
 
 ## Getting Started
 
@@ -222,12 +224,130 @@ npm run storybook
 npm run build-storybook
 ```
 
+## ViewManager & Advanced Data Views
+
+### ViewManager
+Universal data visualization component supporting multiple view types with advanced features.
+
+```tsx
+import { ViewManager } from '@/shared/components/views'
+
+function DataPage() {
+  const [activeView, setActiveView] = useState('data-list')
+  const [selectedItems, setSelectedItems] = useState([])
+  
+  return (
+    <ViewManager
+      title="My Data"
+      data={data}
+      columns={columns}
+      views={views}
+      activeView={activeView}
+      onViewChange={setActiveView}
+      selectedItems={selectedItems}
+      onSelectionChange={setSelectedItems}
+      showToolbar={true}
+      showSearch={true}
+      showFilters={true}
+      onCreateClick={() => console.log('Create')}
+      onEditClick={(item) => console.log('Edit', item)}
+      onDeleteClick={(item) => console.log('Delete', item)}
+    />
+  )
+}
+```
+
+### Kanban View
+Project management style boards with drag & drop functionality.
+
+```tsx
+import { KanbanView } from '@/shared/components/views'
+
+function ProjectBoard() {
+  const kanbanColumns = [
+    { id: 'todo', title: 'To Do', color: '#94a3b8' },
+    { id: 'in_progress', title: 'In Progress', color: '#3b82f6' },
+    { id: 'done', title: 'Done', color: '#10b981' }
+  ]
+  
+  return (
+    <KanbanView
+      data={tasks}
+      columns={kanbanColumns}
+      groupByField="status"
+      cardTitleField="title"
+      cardDescriptionField="description"
+      onMoveCard={handleMoveCard}
+      enableQuickAdd={true}
+      onQuickAdd={handleQuickAdd}
+    />
+  )
+}
+```
+
+### Gantt Chart View
+Timeline visualization for project scheduling and task management.
+
+```tsx
+import { GanttView } from '@/shared/components/views'
+
+function ProjectTimeline() {
+  return (
+    <GanttView
+      data={projects}
+      idField="id"
+      titleField="name"
+      startDateField="start_date"
+      endDateField="end_date"
+      progressField="progress"
+      viewMode="weeks"
+      showProgress={true}
+      allowResize={true}
+      allowMove={true}
+      onUpdateDates={handleDateUpdate}
+      onUpdateProgress={handleProgressUpdate}
+    />
+  )
+}
+```
+
+### Calendar View
+Calendar-based data management with month/week views and drag & drop.
+
+```tsx
+import { CalendarView } from '@/shared/components/views'
+
+function EventCalendar() {
+  return (
+    <CalendarView
+      data={events}
+      idField="id"
+      titleField="title"
+      dateField="event_date"
+      descriptionField="description"
+      view="month"
+      showToday={true}
+      allowDragDrop={true}
+      enableQuickAdd={true}
+      onDateChange={handleDateChange}
+      onQuickAdd={handleQuickAdd}
+    />
+  )
+}
+```
+
 ## Project Structure
 
 ```
 src/
 ├── shared/
 │   ├── components/          # Reusable UI components
+│   │   ├── views/          # Data visualization components
+│   │   │   ├── ViewManager.tsx      # Universal data manager
+│   │   │   ├── KanbanView.tsx       # Kanban board layout
+│   │   │   ├── GanttView.tsx        # Timeline visualization
+│   │   │   ├── CalendarView.tsx     # Calendar layout
+│   │   │   └── index.ts            # View exports
 │   │   ├── MobileSidebar.tsx
 │   │   ├── MobileSearch.tsx
 │   │   ├── MobileTable.tsx
@@ -241,6 +361,28 @@ src/
 └── __tests__/             # Jest test files
 ```
 
+## Advanced View Features
+
+### 🎯 Multi-View Support
+- **List View** - Traditional table with advanced sorting/filtering
+- **Card View** - Grid-based layout for visual data presentation
+- **Kanban Board** - Project management style columns with drag & drop
+- **Gantt Chart** - Timeline visualization for project scheduling
+- **Calendar View** - Calendar-based data management with quick add
+
+### 🔧 Data Management
+- **Smart Search** - Real-time search across all searchable columns
+- **Advanced Filters** - Column-specific filters with custom options
+- **Multi-Column Sorting** - Sort by multiple fields with visual indicators
+- **Flexible Grouping** - Organize data by any field with visual grouping
+- **Bulk Operations** - Select multiple items for batch operations
+
+### 📊 Export & Import
+- **Multiple Formats** - CSV, JSON, Excel export support
+- **Selective Export** - Export selected items or entire dataset
+- **Import Validation** - File format validation and error handling
+- **Data Mapping** - Flexible field mapping for imports
+
 ## Mobile Optimization Features
 
 - **Touch-First Design** - Optimized for mobile interactions
@@ -249,6 +391,7 @@ src/
 - **Performance Optimized** - Lazy loading and code splitting
 - **Accessibility** - ARIA labels and keyboard navigation
 - **PWA Ready** - Service worker and offline support
+- **Advanced Views** - All view types work seamlessly on mobile devices
 
 ## Browser Support
 

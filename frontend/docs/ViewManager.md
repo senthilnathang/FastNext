@@ -9,8 +9,9 @@ The ViewManager is a powerful, universal data visualization component that provi
 ### 🎯 **Multi-View Support**
 - **Card View**: Grid-based card layout for visual data presentation
 - **List View**: Traditional table layout with sortable columns
-- **Kanban Board**: Board-style organization (coming soon)
-- **Gantt Chart**: Timeline visualization (coming soon)
+- **Kanban Board**: Project management style boards with drag & drop functionality
+- **Gantt Chart**: Timeline visualization for project scheduling and task management
+- **Calendar View**: Calendar-based data management with month/week views
 - **Cohort Analysis**: Data cohort visualization (coming soon)
 
 ### 🔧 **Data Management**
@@ -255,10 +256,11 @@ interface ViewConfig {
 
 ### View Types
 
-- **`list`**: Traditional table layout
-- **`card`**: Grid of cards layout
-- **`kanban`**: Board-style columns (coming soon)
-- **`gantt`**: Timeline visualization (coming soon)
+- **`list`**: Traditional table layout with advanced sorting and filtering
+- **`card`**: Grid of cards layout for visual data presentation
+- **`kanban`**: Board-style columns with drag & drop functionality
+- **`gantt`**: Timeline visualization for project scheduling
+- **`calendar`**: Calendar-based data management with quick add
 - **`cohort`**: Cohort analysis view (coming soon)
 
 ## Sort & Group Options
@@ -364,6 +366,242 @@ const handleExport = async (format: 'csv' | 'json' | 'excel') => {
       break;
   }
 };
+```
+
+## Advanced View Configurations
+
+### Kanban View Setup
+
+```typescript
+// Define kanban columns
+const kanbanColumns: KanbanColumn[] = [
+  { id: 'todo', title: 'To Do', color: '#94a3b8' },
+  { id: 'in_progress', title: 'In Progress', color: '#3b82f6' },
+  { id: 'review', title: 'Review', color: '#f59e0b' },
+  { id: 'done', title: 'Done', color: '#10b981' }
+];
+
+// Configure ViewManager for kanban
+<ViewManager
+  // ... other props
+  kanbanColumns={kanbanColumns}
+  kanbanGroupByField="status"
+  kanbanCardTitleField="title"
+  kanbanCardDescriptionField="description"
+  onMoveCard={(cardId, sourceCol, targetCol) => {
+    // Handle card movement between columns
+    updateItemStatus(cardId, targetCol);
+  }}
+  enableQuickAdd={true}
+  onQuickAdd={(columnId, title) => {
+    // Handle quick add functionality
+    createNewItem({ title, status: columnId });
+  }}
+/>
+```
+
+### Gantt Chart Setup
+
+```typescript
+// Configure ViewManager for gantt chart
+<ViewManager
+  // ... other props
+  ganttIdField="id"
+  ganttTitleField="name"
+  ganttStartDateField="start_date"
+  ganttEndDateField="end_date"
+  ganttProgressField="progress"
+  ganttStatusField="status"
+  ganttViewMode="weeks"
+  showWeekends={false}
+  showProgress={true}
+  allowResize={true}
+  allowMove={true}
+  onUpdateDates={(itemId, startDate, endDate) => {
+    // Handle date updates from drag & drop
+    updateProjectDates(itemId, { startDate, endDate });
+  }}
+  onUpdateProgress={(itemId, progress) => {
+    // Handle progress updates
+    updateProjectProgress(itemId, progress);
+  }}
+/>
+```
+
+### Calendar View Setup
+
+```typescript
+// Configure ViewManager for calendar view
+<ViewManager
+  // ... other props
+  calendarIdField="id"
+  calendarTitleField="title"
+  calendarDateField="event_date"
+  calendarDescriptionField="description"
+  calendarStatusField="status"
+  calendarView="month"
+  calendarShowWeekends={true}
+  calendarShowToday={true}
+  calendarAllowDragDrop={true}
+  calendarEnableQuickAdd={true}
+  onDateChange={(itemId, newDate) => {
+    // Handle item date changes from drag & drop
+    updateItemDate(itemId, newDate);
+  }}
+  onCalendarQuickAdd={(date, title) => {
+    // Handle quick add on specific dates
+    createNewItem({ title, date });
+  }}
+/>
+```
+
+### Complete Advanced View Example
+
+```typescript
+import React, { useState, useMemo } from 'react';
+import { ViewManager, ViewConfig, Column, KanbanColumn } from '@/shared/components/views';
+
+function ProjectManagement() {
+  const [activeView, setActiveView] = useState('projects-kanban');
+  const [projects, setProjects] = useState<Project[]>([]);
+
+  // Column definitions
+  const columns: Column<Project>[] = useMemo(() => [
+    {
+      id: 'name',
+      key: 'name',
+      label: 'Project Name',
+      sortable: true,
+      searchable: true,
+      render: (value, project) => (
+        <div className="font-medium">{value}</div>
+      )
+    },
+    {
+      id: 'status',
+      key: 'status',
+      label: 'Status',
+      filterable: true,
+      type: 'select',
+      filterOptions: [
+        { label: 'To Do', value: 'todo' },
+        { label: 'In Progress', value: 'in_progress' },
+        { label: 'Done', value: 'done' }
+      ]
+    },
+    {
+      id: 'start_date',
+      key: 'start_date',
+      label: 'Start Date',
+      type: 'date',
+      sortable: true
+    },
+    {
+      id: 'end_date',
+      key: 'end_date',
+      label: 'End Date',
+      type: 'date',
+      sortable: true
+    }
+  ], []);
+
+  // View configurations
+  const views: ViewConfig[] = useMemo(() => [
+    {
+      id: 'projects-list',
+      name: 'List View',
+      type: 'list',
+      columns,
+      filters: {},
+      sortBy: 'created_at',
+      sortOrder: 'desc'
+    },
+    {
+      id: 'projects-kanban',
+      name: 'Kanban Board',
+      type: 'kanban',
+      columns,
+      filters: {},
+      groupBy: 'status'
+    },
+    {
+      id: 'projects-gantt',
+      name: 'Timeline',
+      type: 'gantt',
+      columns,
+      filters: {},
+      sortBy: 'start_date',
+      sortOrder: 'asc'
+    },
+    {
+      id: 'projects-calendar',
+      name: 'Calendar',
+      type: 'calendar',
+      columns,
+      filters: {},
+      sortBy: 'start_date',
+      sortOrder: 'asc'
+    }
+  ], [columns]);
+
+  // Kanban columns
+  const kanbanColumns: KanbanColumn[] = [
+    { id: 'todo', title: 'To Do', color: '#94a3b8' },
+    { id: 'in_progress', title: 'In Progress', color: '#3b82f6' },
+    { id: 'done', title: 'Done', color: '#10b981' }
+  ];
+
+  return (
+    <ViewManager
+      title="Project Management"
+      subtitle="Manage projects across multiple views"
+      data={projects}
+      columns={columns}
+      views={views}
+      activeView={activeView}
+      onViewChange={setActiveView}
+      
+      // Kanban configuration
+      kanbanColumns={kanbanColumns}
+      kanbanGroupByField="status"
+      kanbanCardTitleField="name"
+      kanbanCardDescriptionField="description"
+      onMoveCard={handleMoveCard}
+      enableQuickAdd={true}
+      onQuickAdd={handleQuickAdd}
+      
+      // Gantt configuration
+      ganttIdField="id"
+      ganttTitleField="name"
+      ganttStartDateField="start_date"
+      ganttEndDateField="end_date"
+      ganttProgressField="progress"
+      ganttViewMode="weeks"
+      showProgress={true}
+      allowResize={true}
+      allowMove={true}
+      onUpdateDates={handleUpdateDates}
+      
+      // Calendar configuration
+      calendarIdField="id"
+      calendarTitleField="name"
+      calendarDateField="start_date"
+      calendarDescriptionField="description"
+      calendarView="month"
+      calendarShowToday={true}
+      calendarEnableQuickAdd={true}
+      onDateChange={handleDateChange}
+      onCalendarQuickAdd={handleCalendarQuickAdd}
+      
+      // Common functionality
+      onCreateClick={handleCreate}
+      onEditClick={handleEdit}
+      onDeleteClick={handleDelete}
+      showToolbar={true}
+      showViewSelector={true}
+    />
+  );
+}
 ```
 
 ## Styling & Theming
