@@ -27,6 +27,7 @@ import {
 } from 'lucide-react'
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd'
 import { KanbanView, KanbanColumn } from './KanbanView'
+import { GanttView } from './GanttView'
 
 export type ViewType = 'card' | 'list' | 'kanban' | 'gantt' | 'cohort'
 
@@ -135,6 +136,23 @@ export interface ViewManagerProps<T = any> {
     render?: (value: unknown, item: T) => React.ReactNode
     type?: 'text' | 'badge' | 'date' | 'avatar' | 'priority'
   }>
+  
+  // Gantt-specific props
+  ganttIdField?: keyof T | string
+  ganttTitleField?: keyof T | string
+  ganttStartDateField?: keyof T | string
+  ganttEndDateField?: keyof T | string
+  ganttProgressField?: keyof T | string
+  ganttStatusField?: keyof T | string
+  ganttPriorityField?: keyof T | string
+  onUpdateDates?: (itemId: string | number, startDate: Date, endDate: Date) => void
+  onUpdateProgress?: (itemId: string | number, progress: number) => void
+  ganttViewMode?: 'days' | 'weeks' | 'months'
+  showWeekends?: boolean
+  showProgress?: boolean
+  showDependencies?: boolean
+  allowResize?: boolean
+  allowMove?: boolean
 }
 
 export function ViewManager<T extends { id: number | string }>({
@@ -184,7 +202,22 @@ export function ViewManager<T extends { id: number | string }>({
   kanbanGroupByField,
   kanbanCardTitleField,
   kanbanCardDescriptionField,
-  kanbanCardFields = []
+  kanbanCardFields = [],
+  ganttIdField,
+  ganttTitleField,
+  ganttStartDateField,
+  ganttEndDateField,
+  ganttProgressField,
+  ganttStatusField,
+  ganttPriorityField,
+  onUpdateDates,
+  onUpdateProgress,
+  ganttViewMode = 'weeks',
+  showWeekends = false,
+  showProgress = true,
+  showDependencies = false,
+  allowResize = true,
+  allowMove = true
 }: ViewManagerProps<T>) {
   const [localSearchQuery, setLocalSearchQuery] = useState(searchQuery)
   const [columnOrder, setColumnOrder] = useState<string[]>(initialColumns.map(col => col.id))
@@ -727,6 +760,68 @@ export function ViewManager<T extends { id: number | string }>({
     )
   }
 
+  const renderGanttView = () => {
+    // Default field mappings if not specified
+    const idField = ganttIdField || 'id'
+    const titleField = ganttTitleField || 'title' || 'name'
+    const startDateField = ganttStartDateField || 'start_date' || 'startDate'
+    const endDateField = ganttEndDateField || 'end_date' || 'endDate'
+    
+    // Validate that required date fields exist in data
+    const hasRequiredFields = processedData.length === 0 || (
+      processedData.some(item => 
+        item[startDateField as keyof T] && 
+        item[endDateField as keyof T]
+      )
+    )
+
+    if (!hasRequiredFields) {
+      return (
+        <div className="flex items-center justify-center h-64">
+          <div className="text-center">
+            <h3 className="text-lg font-semibold mb-2">Gantt chart unavailable</h3>
+            <p className="text-muted-foreground">
+              Data must include start and end date fields to display as Gantt chart.
+            </p>
+            <p className="text-sm text-muted-foreground mt-1">
+              Configure ganttStartDateField and ganttEndDateField props.
+            </p>
+          </div>
+        </div>
+      )
+    }
+
+    return (
+      <GanttView
+        data={processedData}
+        loading={loading}
+        error={error}
+        idField={idField}
+        titleField={titleField}
+        startDateField={startDateField}
+        endDateField={endDateField}
+        progressField={ganttProgressField}
+        statusField={ganttStatusField}
+        priorityField={ganttPriorityField}
+        onCreateClick={onCreateClick ? () => onCreateClick() : undefined}
+        onEditClick={onEditClick}
+        onDeleteClick={onDeleteClick}
+        onViewClick={onViewClick}
+        onUpdateDates={onUpdateDates}
+        onUpdateProgress={onUpdateProgress}
+        viewMode={ganttViewMode}
+        showWeekends={showWeekends}
+        showProgress={showProgress}
+        showDependencies={showDependencies}
+        allowResize={allowResize}
+        allowMove={allowMove}
+        canCreate={true}
+        canEdit={true}
+        canDelete={true}
+      />
+    )
+  }
+
   const renderCurrentView = () => {
     if (loading) {
       return (
@@ -777,7 +872,7 @@ export function ViewManager<T extends { id: number | string }>({
       case 'kanban':
         return renderKanbanView()
       case 'gantt':
-        return <div className="text-center py-8 text-muted-foreground">Gantt view coming soon...</div>
+        return renderGanttView()
       case 'cohort':
         return <div className="text-center py-8 text-muted-foreground">Cohort view coming soon...</div>
       default:
