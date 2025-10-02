@@ -1,28 +1,27 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Plus, Key, Calendar, Code, Settings } from 'lucide-react';
+import { ViewManager, ViewConfig, Column } from '@/shared/components/views';
 import { 
-  Button,
-  Badge,
-  EnhancedListView,
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
   Input,
   Label,
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue
+  SelectValue,
+  Button
 } from '@/shared/components';
-import type { ListViewColumn, ListViewAction } from '@/shared/components/data-visualization/EnhancedListView';
-import { usePermissions, useCreatePermission, useDeletePermission } from '@/modules/admin/hooks/usePermissions';
+import { Key, Tag, Calendar, Shield } from 'lucide-react';
+import { Badge } from '@/shared/components/ui/badge';
+import type { SortOption, GroupOption } from '@/shared/components/ui';
+import { formatDistanceToNow } from 'date-fns';
+import { usePermissions, useCreatePermission, useDeletePermission, useUpdatePermission } from '@/modules/admin/hooks/usePermissions';
 import { apiUtils } from '@/shared/services/api/client';
 import type { Permission } from '@/shared/services/api/permissions';
 
@@ -45,8 +44,18 @@ const permissionActions = [
 ];
 
 export default function PermissionsSimplePage() {
-  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
-  const [newPermission, setNewPermission] = useState({
+  const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [selectedPermission, setSelectedPermission] = useState<Permission | null>(null);
+  const [activeView, setActiveView] = useState('permissions-list');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filters, setFilters] = useState<Record<string, any>>({});
+  const [sortBy, setSortBy] = useState<string>('created_at');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+  const [groupBy, setGroupBy] = useState<string>('');
+  const [selectedItems, setSelectedItems] = useState<Permission[]>([]);
+  
+  const [formData, setFormData] = useState({
     name: '',
     description: '',
     category: '',
@@ -54,145 +63,209 @@ export default function PermissionsSimplePage() {
     resource: '',
   });
 
-  // Queries
-  const { data: permissionsData, isLoading: permissionsLoading, error: permissionsError } = usePermissions();
+  const { data: permissionsData, isLoading, error } = usePermissions();
+  const createPermission = useCreatePermission();
+  const updatePermission = useUpdatePermission();
+  const deletePermission = useDeletePermission();
 
-  // Mutations
-  const createPermissionMutation = useCreatePermission();
-  const deletePermissionMutation = useDeletePermission();
+  const permissions = React.useMemo(() => permissionsData?.items || [], [permissionsData]);
 
-  const permissions = permissionsData?.items || [];
-
-  // Define columns
-  const columns: ListViewColumn<Permission>[] = [
+  // Define columns for the ViewManager
+  const columns: Column<Permission>[] = React.useMemo(() => [
     {
+      id: 'name',
       key: 'name',
-      title: 'Permission Name',
+      label: 'Permission Name',
       sortable: true,
+      searchable: true,
       render: (value, permission) => (
-        <div className="flex items-center space-x-3">
-          <div className="w-8 h-8 bg-orange-100 dark:bg-orange-900 rounded-full flex items-center justify-center">
-            <Key className="h-4 w-4 text-orange-600 dark:text-orange-400" />
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-orange-100">
+            <Key className="h-5 w-5 text-orange-600" />
           </div>
           <div>
-            <div className="font-medium">{String(value)}</div>
-            {permission.is_system_permission && (
-              <Badge variant="outline" className="text-xs mt-1">
-                System Permission
-              </Badge>
-            )}
+            <div className="font-medium">{value as string}</div>
+            <div className="text-sm text-muted-foreground">
+              {permission.description || 'No description'}
+            </div>
           </div>
         </div>
-      ),
+      )
     },
     {
-      key: 'description',
-      title: 'Description',
-      render: (value) => (
-        <span className="text-gray-600 dark:text-gray-400">
-          {String(value) || 'No description provided'}
-        </span>
-      ),
-    },
-    {
+      id: 'category',
       key: 'category',
-      title: 'Category',
+      label: 'Category',
       sortable: true,
+      filterable: true,
+      type: 'select',
+      filterOptions: categories.map(cat => ({ label: cat.charAt(0).toUpperCase() + cat.slice(1), value: cat })),
       render: (value) => (
-        <Badge variant="outline" className="text-xs capitalize">
-          {String(value)}
+        <Badge variant="outline" className="capitalize">
+          {value as string}
         </Badge>
-      ),
+      )
     },
     {
+      id: 'action',
       key: 'action',
-      title: 'Action',
+      label: 'Action',
+      sortable: true,
+      filterable: true,
+      type: 'select',
+      filterOptions: permissionActions.map(action => ({ label: action.charAt(0).toUpperCase() + action.slice(1), value: action })),
+      render: (value) => (
+        <div className="flex items-center space-x-2">
+          <Tag className="h-4 w-4 text-muted-foreground" />
+          <span className="font-mono text-sm">{value as string}</span>
+        </div>
+      )
+    },
+    {
+      id: 'resource',
+      key: 'resource',
+      label: 'Resource',
+      sortable: true,
+      searchable: true,
+      render: (value) => (
+        <span className="font-mono text-sm text-muted-foreground">
+          {(value as string) || '-'}
+        </span>
+      )
+    },
+    {
+      id: 'is_system_permission',
+      key: 'is_system_permission',
+      label: 'Type',
+      sortable: true,
+      filterable: true,
+      type: 'select',
+      filterOptions: [
+        { label: 'System Permission', value: true },
+        { label: 'Custom Permission', value: false }
+      ],
+      render: (value) => (
+        <Badge variant={value ? "secondary" : "default"}>
+          {value ? "System" : "Custom"}
+        </Badge>
+      )
+    },
+    {
+      id: 'created_at',
+      key: 'created_at',
+      label: 'Created',
       sortable: true,
       render: (value) => (
         <div className="flex items-center space-x-2">
-          <Code className="h-4 w-4 text-gray-400" />
-          <span className="font-mono text-sm">{String(value)}</span>
+          <Calendar className="h-4 w-4 text-muted-foreground" />
+          <span className="text-sm">
+            {formatDistanceToNow(new Date(value as string), { addSuffix: true })}
+          </span>
         </div>
-      ),
+      )
+    }
+  ], []);
+
+  // Define sort options
+  const sortOptions: SortOption[] = React.useMemo(() => [
+    {
+      key: 'name',
+      label: 'Permission Name',
+      defaultOrder: 'asc'
     },
     {
-      key: 'resource',
-      title: 'Resource',
-      render: (value) => (
-        <span className="font-mono text-sm text-gray-600 dark:text-gray-400">
-          {String(value) || '-'}
-        </span>
-      ),
+      key: 'category',
+      label: 'Category',
+      defaultOrder: 'asc'
+    },
+    {
+      key: 'action',
+      label: 'Action',
+      defaultOrder: 'asc'
     },
     {
       key: 'created_at',
-      title: 'Created',
-      sortable: true,
-      render: (value) => (
-        <div className="flex items-center space-x-2 text-sm text-gray-500">
-          <Calendar className="h-4 w-4" />
-          <span>{new Date(String(value)).toLocaleDateString()}</span>
-        </div>
-      ),
-    },
-  ];
+      label: 'Created Date',
+      defaultOrder: 'desc'
+    }
+  ], []);
 
-  // Define actions
-  const actions: ListViewAction<Permission>[] = [
+  // Define group options
+  const groupOptions: GroupOption[] = React.useMemo(() => [
     {
-      key: 'edit',
-      label: 'Edit',
-      icon: Settings,
-      onClick: (permission) => console.log('Edit permission:', permission),
-      show: (permission) => !permission.is_system_permission,
+      key: 'category',
+      label: 'Category',
+      icon: <Tag className="h-4 w-4" />
     },
     {
-      key: 'delete',
-      label: 'Delete',
-      variant: 'destructive',
-      onClick: (permission) => {
-        if (window.confirm(`Are you sure you want to delete permission "${permission.name}"?`)) {
-          deletePermissionMutation.mutate(permission.id);
-        }
-      },
-      show: (permission) => !permission.is_system_permission,
+      key: 'action',
+      label: 'Action',
+      icon: <Key className="h-4 w-4" />
     },
-  ];
+    {
+      key: 'is_system_permission',
+      label: 'Permission Type',
+      icon: <Shield className="h-4 w-4" />
+    }
+  ], []);
+
+  // Define available views
+  const views: ViewConfig[] = React.useMemo(() => [
+    {
+      id: 'permissions-card',
+      name: 'Card View',
+      type: 'card',
+      columns,
+      filters: {},
+      sortBy: 'created_at',
+      sortOrder: 'desc'
+    },
+    {
+      id: 'permissions-list',
+      name: 'List View',
+      type: 'list',
+      columns,
+      filters: {},
+      sortBy: 'created_at',
+      sortOrder: 'desc'
+    },
+    {
+      id: 'permissions-kanban',
+      name: 'Kanban Board',
+      type: 'kanban',
+      columns,
+      filters: {},
+      groupBy: 'category'
+    }
+  ], [columns]);
 
   // Auto-generate permission name
   React.useEffect(() => {
-    if (newPermission.action && newPermission.category) {
-      const generatedName = `${newPermission.action.charAt(0).toUpperCase() + newPermission.action.slice(1)} ${newPermission.category.charAt(0).toUpperCase() + newPermission.category.slice(1)}`;
-      if (newPermission.name !== generatedName) {
-        setNewPermission(prev => ({ ...prev, name: generatedName }));
+    if (formData.action && formData.category) {
+      const generatedName = `${formData.action.charAt(0).toUpperCase() + formData.action.slice(1)} ${formData.category.charAt(0).toUpperCase() + formData.category.slice(1)}`;
+      if (formData.name !== generatedName) {
+        setFormData(prev => ({ ...prev, name: generatedName }));
       }
     }
-  }, [newPermission.action, newPermission.category, newPermission.name]);
+  }, [formData.action, formData.category, formData.name]);
 
-  const generatePermissionId = () => {
-    if (newPermission.resource && newPermission.action) {
-      return `${newPermission.resource}.${newPermission.action}`;
-    }
-    return '';
-  };
-
-  // Handle create permission
+  // Handle actions
   const handleCreatePermission = () => {
-    if (!newPermission.name || !newPermission.category || !newPermission.action) {
+    if (!formData.name || !formData.category || !formData.action) {
       alert('Please fill in all required fields');
       return;
     }
 
-    createPermissionMutation.mutate({
-      name: newPermission.name,
-      description: newPermission.description,
-      category: newPermission.category,
-      action: newPermission.action,
-      resource: newPermission.resource,
+    createPermission.mutate({
+      name: formData.name,
+      description: formData.description,
+      category: formData.category,
+      action: formData.action,
+      resource: formData.resource,
     }, {
       onSuccess: () => {
-        setNewPermission({ name: '', description: '', category: '', action: '', resource: '' });
-        setIsCreateDialogOpen(false);
+        setFormData({ name: '', description: '', category: '', action: '', resource: '' });
+        setCreateDialogOpen(false);
       },
       onError: (error) => {
         alert(`Failed to create permission: ${apiUtils.getErrorMessage(error)}`);
@@ -200,150 +273,198 @@ export default function PermissionsSimplePage() {
     });
   };
 
-  if (permissionsError) {
+  const handleEditPermission = (permission: Permission) => {
+    setSelectedPermission(permission);
+    setEditDialogOpen(true);
+  };
+
+  const handleDeletePermission = (permission: Permission) => {
+    if (confirm(`Are you sure you want to delete permission "${permission.name}"?`)) {
+      deletePermission.mutate(permission.id);
+    }
+  };
+
+  const handleViewPermission = (permission: Permission) => {
+    console.log('View permission:', permission);
+    // TODO: Navigate to permission details page
+  };
+
+  const handleExport = (format: string) => {
+    console.log('Export permissions as', format);
+    // TODO: Implement export
+  };
+
+  const handleImport = () => {
+    console.log('Import permissions');
+    // TODO: Implement import
+  };
+
+  const bulkActions = [
+    {
+      label: 'Delete Selected',
+      action: (items: Permission[]) => {
+        const customPermissions = items.filter(p => !p.is_system_permission);
+        if (customPermissions.length > 0 && confirm(`Delete ${customPermissions.length} permissions?`)) {
+          customPermissions.forEach(permission => deletePermission.mutate(permission.id));
+        }
+      },
+      variant: 'destructive' as const
+    }
+  ];
+
+  if (error) {
     return (
-      <div className="space-y-6">
-        <div className="text-center py-12">
-          <h2 className="text-xl font-semibold text-red-600 mb-2">Failed to load permissions</h2>
-          <p className="text-gray-600">{apiUtils.getErrorMessage(permissionsError)}</p>
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+            Failed to load permissions
+          </h3>
+          <p className="text-gray-600 dark:text-gray-400">
+            {error.message || 'An error occurred while loading permissions'}
+          </p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Permissions Management</h1>
-          <p className="text-muted-foreground">
-            Manage system permissions and access controls ({permissions.length} total)
-          </p>
-        </div>
+    <div className="container mx-auto px-4 py-6 max-w-7xl">
+      <ViewManager
+        title="Permissions"
+        subtitle="Manage system permissions and access controls"
+        data={permissions}
+        columns={columns}
+        views={views}
+        activeView={activeView}
+        onViewChange={setActiveView}
+        loading={isLoading}
+        error={error ? (error as any)?.message || String(error) : null}
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+        filters={filters}
+        onFiltersChange={setFilters}
+        sortBy={sortBy}
+        sortOrder={sortOrder}
+        onSortChange={(field, order) => {
+          setSortBy(field);
+          setSortOrder(order);
+        }}
+        sortOptions={sortOptions}
+        groupBy={groupBy}
+        onGroupChange={setGroupBy}
+        groupOptions={groupOptions}
+        onExport={handleExport}
+        onImport={handleImport}
+        onCreateClick={() => setCreateDialogOpen(true)}
+        onEditClick={handleEditPermission}
+        onDeleteClick={handleDeletePermission}
+        onViewClick={handleViewPermission}
+        selectable={true}
+        selectedItems={selectedItems}
+        onSelectionChange={setSelectedItems}
+        bulkActions={bulkActions}
+        showToolbar={true}
+        showSearch={true}
+        showFilters={true}
+        showSort={true}
+        showGroup={true}
+        showExport={true}
+        showImport={true}
+      />
 
-        <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-          <DialogTrigger asChild>
-            <Button disabled={permissionsLoading}>
-              <Plus className="mr-2 h-4 w-4" />
-              Add Permission
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-[425px]">
-            <DialogHeader>
-              <DialogTitle>Create New Permission</DialogTitle>
-              <DialogDescription>
-                Define a new permission by specifying the resource and action it controls.
-              </DialogDescription>
-            </DialogHeader>
-            <div className="grid gap-4 py-4">
+      {/* Create Permission Dialog */}
+      <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Create New Permission</DialogTitle>
+            <DialogDescription>
+              Define a new permission by specifying the resource and action it controls.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="category">Category *</Label>
+              <Select 
+                value={formData.category} 
+                onValueChange={(value) => setFormData({ ...formData, category: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a category" />
+                </SelectTrigger>
+                <SelectContent>
+                  {categories.map((category) => (
+                    <SelectItem key={category} value={category}>
+                      <span className="capitalize">{category}</span>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4">
               <div className="grid gap-2">
-                <Label htmlFor="category">Category</Label>
+                <Label htmlFor="action">Action *</Label>
                 <Select 
-                  value={newPermission.category} 
-                  onValueChange={(value) => setNewPermission({ ...newPermission, category: value })}
-                  disabled={createPermissionMutation.isPending}
+                  value={formData.action} 
+                  onValueChange={(value) => setFormData({ ...formData, action: value })}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select a category" />
+                    <SelectValue placeholder="Action" />
                   </SelectTrigger>
                   <SelectContent>
-                    {categories.map((category) => (
-                      <SelectItem key={category} value={category}>
-                        <span className="capitalize">{category}</span>
+                    {permissionActions.map((action) => (
+                      <SelectItem key={action} value={action}>
+                        <span className="capitalize">{action}</span>
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
               
-              <div className="grid grid-cols-2 gap-4">
-                <div className="grid gap-2">
-                  <Label htmlFor="action">Action</Label>
-                  <Select 
-                    value={newPermission.action} 
-                    onValueChange={(value) => setNewPermission({ ...newPermission, action: value })}
-                    disabled={createPermissionMutation.isPending}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Action" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {permissionActions.map((action) => (
-                        <SelectItem key={action} value={action}>
-                          <span className="capitalize">{action}</span>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                
-                <div className="grid gap-2">
-                  <Label htmlFor="resource">Resource (Optional)</Label>
-                  <Input
-                    id="resource"
-                    placeholder="e.g., projects"
-                    value={newPermission.resource}
-                    onChange={(e) => setNewPermission({ ...newPermission, resource: e.target.value })}
-                    disabled={createPermissionMutation.isPending}
-                  />
-                </div>
-              </div>
-
-              {generatePermissionId() && (
-                <div className="grid gap-2">
-                  <Label>Permission ID</Label>
-                  <div className="p-2 bg-gray-100 dark:bg-gray-800 rounded font-mono text-sm">
-                    {generatePermissionId()}
-                  </div>
-                </div>
-              )}
-
               <div className="grid gap-2">
-                <Label htmlFor="name">Permission Name</Label>
+                <Label htmlFor="resource">Resource</Label>
                 <Input
-                  id="name"
-                  placeholder="e.g., Create Users"
-                  value={newPermission.name}
-                  onChange={(e) => setNewPermission({ ...newPermission, name: e.target.value })}
-                  disabled={createPermissionMutation.isPending}
-                />
-              </div>
-
-              <div className="grid gap-2">
-                <Label htmlFor="description">Description</Label>
-                <Input
-                  id="description"
-                  placeholder="Brief description of what this permission allows"
-                  value={newPermission.description}
-                  onChange={(e) => setNewPermission({ ...newPermission, description: e.target.value })}
-                  disabled={createPermissionMutation.isPending}
+                  id="resource"
+                  placeholder="users"
+                  value={formData.resource}
+                  onChange={(e) => setFormData({ ...formData, resource: e.target.value })}
                 />
               </div>
             </div>
-            <DialogFooter>
-              <Button 
-                type="submit" 
-                onClick={handleCreatePermission}
-                disabled={createPermissionMutation.isPending}
-              >
-                {createPermissionMutation.isPending ? 'Creating...' : 'Create Permission'}
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-      </div>
 
-      {/* Permissions List */}
-      <EnhancedListView
-        data={permissions}
-        columns={columns}
-        actions={actions}
-        loading={permissionsLoading}
-        searchKey="name"
-        emptyMessage="No permissions found. Create your first permission to get started."
-        pageSize={15}
-      />
+            <div className="grid gap-2">
+              <Label htmlFor="name">Permission Name *</Label>
+              <Input
+                id="name"
+                placeholder="Manage Users"
+                value={formData.name}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              />
+            </div>
+
+            <div className="grid gap-2">
+              <Label htmlFor="description">Description</Label>
+              <Input
+                id="description"
+                placeholder="Allows managing user accounts and settings"
+                value={formData.description}
+                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              />
+            </div>
+          </div>
+          <div className="flex justify-end space-x-2">
+            <Button variant="outline" onClick={() => setCreateDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleCreatePermission}
+              disabled={createPermission.isPending || !formData.name || !formData.category || !formData.action}
+            >
+              {createPermission.isPending ? 'Creating...' : 'Create Permission'}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

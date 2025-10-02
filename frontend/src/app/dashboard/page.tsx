@@ -229,23 +229,6 @@ export default function DashboardPage() {
   return (
     <div className="container mx-auto px-4 py-6 max-w-7xl">
       <div className="space-y-6">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <BarChart3 className="h-7 w-7 text-blue-600" />
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Dashboard</h1>
-              <p className="text-sm text-gray-600 dark:text-gray-400">
-                Welcome back, {user?.full_name || user?.username}! Track your project metrics and progress.
-              </p>
-            </div>
-          </div>
-          <Button>
-            <Plus className="h-4 w-4 mr-2" />
-            New Project
-          </Button>
-        </div>
-
         {/* Enhanced Analytics Dashboard */}
         <AnalyticsDashboard
           kpis={kpiData}

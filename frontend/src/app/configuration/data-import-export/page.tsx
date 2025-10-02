@@ -168,24 +168,14 @@ export default function DataImportExportConfigPage() {
 
   return (
     <div className="container mx-auto px-4 py-6 max-w-6xl">
-      {/* Header */}
-      <div className="mb-8">
-        <div className="flex items-center space-x-3 mb-2">
-          <Database className="h-8 w-8 text-blue-600" />
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Data Import/Export Configuration</h1>
-        </div>
-        <p className="text-gray-600 dark:text-gray-400">
-          Configure settings for data import and export operations, file handling, and processing options.
-        </p>
-        {error && (
-          <div className="mt-4 p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
-            <div className="flex items-start space-x-2">
-              <AlertCircle className="h-5 w-5 text-red-600 mt-0.5" />
-              <p className="text-sm text-red-800 dark:text-red-200">{error}</p>
-            </div>
+      {error && (
+        <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
+          <div className="flex items-start space-x-2">
+            <AlertCircle className="h-5 w-5 text-red-600 mt-0.5" />
+            <p className="text-sm text-red-800 dark:text-red-200">{error}</p>
           </div>
-        )}
-      </div>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Import Settings */}

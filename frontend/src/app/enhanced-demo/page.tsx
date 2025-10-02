@@ -317,15 +317,6 @@ export default function EnhancedDemoPage() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="text-center space-y-4">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-          Enhanced UI Features Demo
-        </h1>
-        <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-          Explore the enhanced sidebar, theme switcher, and interactive features inspired by Midday.ai
-        </p>
-      </div>
 
       {/* Navigation */}
       <div className="flex flex-wrap gap-2 justify-center">

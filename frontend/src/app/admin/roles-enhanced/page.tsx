@@ -1,187 +1,320 @@
 'use client'
 
 import * as React from 'react'
-// import { RolesDataTable, type Role } from '@/shared/components/data-table'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/components/ui/card'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/components/ui/tabs'
+import { ViewManager, ViewConfig, Column } from '@/shared/components/views'
+import { 
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  Input,
+  Label,
+  Textarea,
+  Button
+} from '@/shared/components'
+import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card'
 import { Badge } from '@/shared/components/ui/badge'
-import { Shield, Users, Crown, AlertCircle } from 'lucide-react'
+import { Shield, Users, Key, Calendar, Clock, Crown } from 'lucide-react'
+import type { SortOption, GroupOption } from '@/shared/components/ui'
+import { formatDistanceToNow } from 'date-fns'
 
-// Mock data for demonstration - in real app, this would come from API
-const mockRoles: Role[] = [
-  {
-    id: 1,
-    name: 'Super Administrator',
-    description: 'Full system access with all permissions. Can manage system settings and other administrators.',
-    is_system_role: true,
-    is_active: true,
-    created_at: '2023-01-15T10:00:00Z',
-    updated_at: '2024-01-20T14:30:00Z',
-    user_count: 2,
-    permissions: [
-      { id: 1, name: 'Manage Users', category: 'user', action: 'manage', is_system_permission: true },
-      { id: 2, name: 'Manage Roles', category: 'role', action: 'manage', is_system_permission: true },
-      { id: 3, name: 'System Settings', category: 'system', action: 'manage', is_system_permission: true },
-      { id: 4, name: 'View Reports', category: 'reports', action: 'read', is_system_permission: true },
-    ]
-  },
-  {
-    id: 2,
-    name: 'Administrator',
-    description: 'Administrative access to most system functions. Cannot manage system settings.',
-    is_system_role: true,
-    is_active: true,
-    created_at: '2023-01-15T10:05:00Z',
-    updated_at: '2024-01-15T16:20:00Z',
-    user_count: 3,
-    permissions: [
-      { id: 1, name: 'Manage Users', category: 'user', action: 'manage', is_system_permission: true },
-      { id: 5, name: 'Manage Content', category: 'content', action: 'manage', is_system_permission: false },
-      { id: 4, name: 'View Reports', category: 'reports', action: 'read', is_system_permission: true },
-    ]
-  },
-  {
-    id: 3,
-    name: 'Content Manager',
-    description: 'Can create, edit, and publish content. Has access to content management tools.',
-    is_system_role: false,
-    is_active: true,
-    created_at: '2023-02-10T09:15:00Z',
-    updated_at: '2024-01-10T11:45:00Z',
-    user_count: 8,
-    permissions: [
-      { id: 6, name: 'Create Content', category: 'content', action: 'create', is_system_permission: false },
-      { id: 7, name: 'Edit Content', category: 'content', action: 'update', is_system_permission: false },
-      { id: 8, name: 'Publish Content', category: 'content', action: 'publish', is_system_permission: false },
-      { id: 9, name: 'Moderate Comments', category: 'content', action: 'moderate', is_system_permission: false },
-    ]
-  },
-  {
-    id: 4,
-    name: 'Editor',
-    description: 'Can create and edit content but cannot publish. Requires approval for publishing.',
-    is_system_role: false,
-    is_active: true,
-    created_at: '2023-02-15T14:20:00Z',
-    updated_at: '2023-12-20T09:30:00Z',
-    user_count: 12,
-    permissions: [
-      { id: 6, name: 'Create Content', category: 'content', action: 'create', is_system_permission: false },
-      { id: 7, name: 'Edit Content', category: 'content', action: 'update', is_system_permission: false },
-      { id: 10, name: 'View Content', category: 'content', action: 'read', is_system_permission: false },
-    ]
-  },
-  {
-    id: 5,
-    name: 'Reviewer',
-    description: 'Can review and approve content for publishing. Cannot create or edit content.',
-    is_system_role: false,
-    is_active: true,
-    created_at: '2023-03-01T11:30:00Z',
-    user_count: 5,
-    permissions: [
-      { id: 10, name: 'View Content', category: 'content', action: 'read', is_system_permission: false },
-      { id: 11, name: 'Review Content', category: 'content', action: 'review', is_system_permission: false },
-      { id: 8, name: 'Publish Content', category: 'content', action: 'publish', is_system_permission: false },
-    ]
-  },
-  {
-    id: 6,
-    name: 'Viewer',
-    description: 'Read-only access to content and basic system information.',
-    is_system_role: false,
-    is_active: true,
-    created_at: '2023-03-20T16:20:00Z',
-    user_count: 25,
-    permissions: [
-      { id: 10, name: 'View Content', category: 'content', action: 'read', is_system_permission: false },
-      { id: 12, name: 'View User Profiles', category: 'user', action: 'read', is_system_permission: false },
-    ]
-  },
-  {
-    id: 7,
-    name: 'Guest',
-    description: 'Limited access for temporary or trial users. Very restricted permissions.',
-    is_system_role: false,
-    is_active: false,
-    created_at: '2023-05-12T08:30:00Z',
-    user_count: 0,
-    permissions: [
-      { id: 13, name: 'Basic Access', category: 'system', action: 'read', is_system_permission: false },
-    ]
-  },
-  {
-    id: 8,
-    name: 'API User',
-    description: 'Programmatic access for API integrations and automated systems.',
-    is_system_role: false,
-    is_active: true,
-    created_at: '2023-04-05T12:10:00Z',
-    updated_at: '2024-01-05T10:15:00Z',
-    user_count: 3,
-    permissions: [
-      { id: 14, name: 'API Access', category: 'api', action: 'read', is_system_permission: false },
-      { id: 15, name: 'API Write', category: 'api', action: 'write', is_system_permission: false },
-    ]
-  }
-]
+// Import React Query hooks
+import { useRoles, useDeleteRole, useCreateRole, useUpdateRole } from '@/modules/admin/hooks/useRoles'
+import { apiUtils } from '@/shared/services/api/client'
+import type { Role } from '@/shared/services/api/roles'
 
 export default function EnhancedRolesPage() {
-  const [isLoading] = React.useState(false)
+  const [createDialogOpen, setCreateDialogOpen] = React.useState(false)
+  const [editDialogOpen, setEditDialogOpen] = React.useState(false)
+  const [selectedRole, setSelectedRole] = React.useState<Role | null>(null)
+  const [activeView, setActiveView] = React.useState('roles-list')
+  const [searchQuery, setSearchQuery] = React.useState('')
+  const [filters, setFilters] = React.useState<Record<string, any>>({})
+  const [sortBy, setSortBy] = React.useState<string>('created_at')
+  const [sortOrder, setSortOrder] = React.useState<'asc' | 'desc'>('desc')
+  const [groupBy, setGroupBy] = React.useState<string>('')
+  const [selectedItems, setSelectedItems] = React.useState<Role[]>([])
+  
+  const { data: rolesData, isLoading, error } = useRoles()
+  const createRole = useCreateRole()
+  const updateRole = useUpdateRole()
+  const deleteRole = useDeleteRole()
+
+  const [formData, setFormData] = React.useState({
+    name: '',
+    description: ''
+  })
+
+  const roles = React.useMemo(() => rolesData?.items || [], [rolesData])
 
   // Calculate statistics
   const stats = React.useMemo(() => {
-    const totalRoles = mockRoles.length
-    const systemRoles = mockRoles.filter(role => role.is_system_role).length
-    const activeRoles = mockRoles.filter(role => role.is_active).length
-    const totalUsers = mockRoles.reduce((sum, role) => sum + (role.user_count || 0), 0)
-    const avgPermissions = mockRoles.reduce((sum, role) => sum + (role.permissions?.length || 0), 0) / totalRoles
+    const totalRoles = roles.length
+    const systemRoles = roles.filter(role => role.is_system_role).length
+    const customRoles = totalRoles - systemRoles
+    const activeRoles = roles.filter(role => role.is_active).length
+    const inactiveRoles = totalRoles - activeRoles
+    const totalUsers = roles.reduce((sum, role) => sum + (role.user_count || 0), 0)
+    const avgPermissions = roles.length > 0 
+      ? roles.reduce((sum, role) => sum + (role.permissions?.length || 0), 0) / roles.length 
+      : 0
 
     return {
       totalRoles,
       systemRoles,
-      customRoles: totalRoles - systemRoles,
+      customRoles,
       activeRoles,
-      inactiveRoles: totalRoles - activeRoles,
+      inactiveRoles,
       totalUsers,
       avgPermissions: Math.round(avgPermissions * 10) / 10
     }
-  }, [])
+  }, [roles])
+
+  // Define columns for the ViewManager
+  const columns: Column<Role>[] = React.useMemo(() => [
+    {
+      id: 'name',
+      key: 'name',
+      label: 'Role Name',
+      sortable: true,
+      searchable: true,
+      render: (value, role) => (
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100">
+            {role.is_system_role ? (
+              <Crown className="h-5 w-5 text-blue-600" />
+            ) : (
+              <Shield className="h-5 w-5 text-blue-600" />
+            )}
+          </div>
+          <div>
+            <div className="font-medium">{value as string}</div>
+            <div className="text-sm text-muted-foreground">
+              {role.description || 'No description'}
+            </div>
+          </div>
+        </div>
+      )
+    },
+    {
+      id: 'user_count',
+      key: 'user_count',
+      label: 'Users',
+      sortable: true,
+      render: (value) => (
+        <div className="flex items-center space-x-2">
+          <Users className="h-4 w-4 text-muted-foreground" />
+          <span className="text-sm font-medium">{value || 0}</span>
+        </div>
+      )
+    },
+    {
+      id: 'permissions_count',
+      key: 'permissions',
+      label: 'Permissions',
+      render: (value) => {
+        const permissions = (value as any[]) || []
+        return (
+          <div className="flex items-center space-x-2">
+            <Key className="h-4 w-4 text-muted-foreground" />
+            <span className="text-sm font-medium">{permissions.length}</span>
+            <div className="flex gap-1">
+              {permissions.slice(0, 3).map((permission, idx) => (
+                <Badge key={idx} variant="outline" className="text-xs">
+                  {permission.category}
+                </Badge>
+              ))}
+              {permissions.length > 3 && (
+                <Badge variant="outline" className="text-xs">
+                  +{permissions.length - 3}
+                </Badge>
+              )}
+            </div>
+          </div>
+        )
+      }
+    },
+    {
+      id: 'is_system_role',
+      key: 'is_system_role',
+      label: 'Type',
+      sortable: true,
+      filterable: true,
+      type: 'select',
+      filterOptions: [
+        { label: 'System Role', value: true },
+        { label: 'Custom Role', value: false }
+      ],
+      render: (value, role) => (
+        <div className="flex gap-2">
+          <Badge variant={role.is_system_role ? "secondary" : "default"}>
+            {role.is_system_role ? "System" : "Custom"}
+          </Badge>
+          {role.is_active && (
+            <Badge variant="outline" className="text-xs">
+              Active
+            </Badge>
+          )}
+        </div>
+      )
+    },
+    {
+      id: 'created_at',
+      key: 'created_at',
+      label: 'Created',
+      sortable: true,
+      render: (value) => (
+        <div className="flex items-center space-x-2">
+          <Calendar className="h-4 w-4 text-muted-foreground" />
+          <span className="text-sm">
+            {formatDistanceToNow(new Date(value as string), { addSuffix: true })}
+          </span>
+        </div>
+      )
+    }
+  ], [])
+
+  // Define sort options
+  const sortOptions: SortOption[] = React.useMemo(() => [
+    {
+      key: 'name',
+      label: 'Role Name',
+      defaultOrder: 'asc'
+    },
+    {
+      key: 'user_count',
+      label: 'User Count',
+      defaultOrder: 'desc'
+    },
+    {
+      key: 'created_at',
+      label: 'Created Date',
+      defaultOrder: 'desc'
+    }
+  ], [])
+
+  // Define group options
+  const groupOptions: GroupOption[] = React.useMemo(() => [
+    {
+      key: 'is_system_role',
+      label: 'Role Type',
+      icon: <Shield className="h-4 w-4" />
+    },
+    {
+      key: 'is_active',
+      label: 'Status',
+      icon: <Clock className="h-4 w-4" />
+    }
+  ], [])
+
+  // Define available views
+  const views: ViewConfig[] = React.useMemo(() => [
+    {
+      id: 'roles-card',
+      name: 'Card View',
+      type: 'card',
+      columns,
+      filters: {},
+      sortBy: 'created_at',
+      sortOrder: 'desc'
+    },
+    {
+      id: 'roles-list',
+      name: 'List View',
+      type: 'list',
+      columns,
+      filters: {},
+      sortBy: 'created_at',
+      sortOrder: 'desc'
+    },
+    {
+      id: 'roles-kanban',
+      name: 'Kanban Board',
+      type: 'kanban',
+      columns,
+      filters: {},
+      groupBy: 'is_system_role'
+    }
+  ], [columns])
+
+  // Handle actions
+  const handleCreateRole = () => {
+    if (!formData.name) {
+      alert('Please enter a role name')
+      return
+    }
+
+    createRole.mutate({
+      name: formData.name,
+      description: formData.description,
+    }, {
+      onSuccess: () => {
+        setFormData({ name: '', description: '' })
+        setCreateDialogOpen(false)
+      },
+      onError: (error) => {
+        alert(`Failed to create role: ${apiUtils.getErrorMessage(error)}`)
+      },
+    })
+  }
 
   const handleEditRole = (role: Role) => {
-    console.log('Edit role:', role)
-    // TODO: Implement role editing dialog
+    setSelectedRole(role)
+    setEditDialogOpen(true)
   }
 
   const handleDeleteRole = (role: Role) => {
-    console.log('Delete role:', role)
-    // TODO: Implement role deletion with confirmation
+    if (confirm(`Are you sure you want to delete role "${role.name}"?${role.user_count ? ` This role is assigned to ${role.user_count} user(s).` : ''}`)) {
+      deleteRole.mutate(role.id)
+    }
   }
 
   const handleViewRole = (role: Role) => {
     console.log('View role:', role)
-    // TODO: Navigate to role details page or show details modal
+    // TODO: Navigate to role details page
   }
 
-  const handleAddRole = () => {
-    console.log('Add new role')
-    // TODO: Open add role dialog/form
+  const handleExport = (format: string) => {
+    console.log('Export roles as', format)
+    // TODO: Implement export
   }
 
-  const handleToggleStatus = (role: Role) => {
-    console.log('Toggle role status:', role)
-    // TODO: Toggle role active/inactive status
+  const handleImport = () => {
+    console.log('Import roles')
+    // TODO: Implement import
+  }
+
+  const bulkActions = [
+    {
+      label: 'Delete Selected',
+      action: (items: Role[]) => {
+        const customRoles = items.filter(role => !role.is_system_role)
+        if (customRoles.length > 0 && confirm(`Delete ${customRoles.length} roles?`)) {
+          customRoles.forEach(role => deleteRole.mutate(role.id))
+        }
+      },
+      variant: 'destructive' as const
+    }
+  ]
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+            Failed to load roles
+          </h3>
+          <p className="text-gray-600 dark:text-gray-400">
+            {error.message || 'An error occurred while loading roles'}
+          </p>
+        </div>
+      </div>
+    )
   }
 
   return (
     <div className="container mx-auto py-6 space-y-6">
-      <div className="space-y-2">
-        <h1 className="text-3xl font-bold tracking-tight">Enhanced Roles Management</h1>
-        <p className="text-muted-foreground">
-          Advanced role management with comprehensive features including pagination, filtering, sorting, bulk operations, and export capabilities.
-        </p>
-      </div>
-
       {/* Statistics Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card>
@@ -196,11 +329,11 @@ export default function EnhancedRolesPage() {
             </p>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Active Roles</CardTitle>
-            <Crown className="h-4 w-4 text-muted-foreground" />
+            <Clock className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.activeRoles}</div>
@@ -209,7 +342,7 @@ export default function EnhancedRolesPage() {
             </p>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Users</CardTitle>
@@ -222,11 +355,11 @@ export default function EnhancedRolesPage() {
             </p>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Avg Permissions</CardTitle>
-            <AlertCircle className="h-4 w-4 text-muted-foreground" />
+            <Key className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.avgPermissions}</div>
@@ -237,151 +370,92 @@ export default function EnhancedRolesPage() {
         </Card>
       </div>
 
-      <Tabs defaultValue="all" className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="all">All Roles</TabsTrigger>
-          <TabsTrigger value="system">System Roles</TabsTrigger>
-          <TabsTrigger value="custom">Custom Roles</TabsTrigger>
-          <TabsTrigger value="inactive">Inactive</TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="all" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>All Roles</CardTitle>
-              <CardDescription>
-                Complete list of all system and custom roles with advanced table features
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <RolesDataTable
-                roles={mockRoles}
-                onEditRole={handleEditRole}
-                onDeleteRole={handleDeleteRole}
-                onViewRole={handleViewRole}
-                onAddRole={handleAddRole}
-                onToggleStatus={handleToggleStatus}
-                isLoading={isLoading}
-              />
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        <TabsContent value="system" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>System Roles</CardTitle>
-              <CardDescription>
-                System roles are protected and have limited editing capabilities to maintain system security.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <RolesDataTable
-                roles={mockRoles.filter(role => role.is_system_role)}
-                onEditRole={handleEditRole}
-                onDeleteRole={handleDeleteRole}
-                onViewRole={handleViewRole}
-                onAddRole={handleAddRole}
-                onToggleStatus={handleToggleStatus}
-                isLoading={isLoading}
-              />
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        <TabsContent value="custom" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Custom Roles</CardTitle>
-              <CardDescription>
-                User-created roles that can be fully customized
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <RolesDataTable
-                roles={mockRoles.filter(role => !role.is_system_role)}
-                onEditRole={handleEditRole}
-                onDeleteRole={handleDeleteRole}
-                onViewRole={handleViewRole}
-                onAddRole={handleAddRole}
-                onToggleStatus={handleToggleStatus}
-                isLoading={isLoading}
-              />
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        <TabsContent value="inactive" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Inactive Roles</CardTitle>
-              <CardDescription>
-                Inactive roles cannot be assigned to users but are retained for historical purposes.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <RolesDataTable
-                roles={mockRoles.filter(role => !role.is_active)}
-                onEditRole={handleEditRole}
-                onDeleteRole={handleDeleteRole}
-                onViewRole={handleViewRole}
-                onAddRole={handleAddRole}
-                onToggleStatus={handleToggleStatus}
-                isLoading={isLoading}
-              />
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+      {/* Enhanced Roles Management */}
+      <ViewManager
+        title="Enhanced Roles Management"
+        subtitle="Advanced role management with comprehensive features including pagination, filtering, sorting, bulk operations, and export capabilities"
+        data={roles}
+        columns={columns}
+        views={views}
+        activeView={activeView}
+        onViewChange={setActiveView}
+        loading={isLoading}
+        error={error ? (error as any)?.message || String(error) : null}
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+        filters={filters}
+        onFiltersChange={setFilters}
+        sortBy={sortBy}
+        sortOrder={sortOrder}
+        onSortChange={(field, order) => {
+          setSortBy(field)
+          setSortOrder(order)
+        }}
+        sortOptions={sortOptions}
+        groupBy={groupBy}
+        onGroupChange={setGroupBy}
+        groupOptions={groupOptions}
+        onExport={handleExport}
+        onImport={handleImport}
+        onCreateClick={() => setCreateDialogOpen(true)}
+        onEditClick={handleEditRole}
+        onDeleteClick={handleDeleteRole}
+        onViewClick={handleViewRole}
+        selectable={true}
+        selectedItems={selectedItems}
+        onSelectionChange={setSelectedItems}
+        bulkActions={bulkActions}
+        showToolbar={true}
+        showSearch={true}
+        showFilters={true}
+        showSort={true}
+        showGroup={true}
+        showExport={true}
+        showImport={true}
+      />
 
-      <Card className="mt-8">
-        <CardHeader>
-          <CardTitle>Enhanced Features</CardTitle>
-          <CardDescription>
-            Available features in the enhanced roles table
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            <div className="flex items-center space-x-2">
-              <Badge variant="secondary">✓</Badge>
-              <span className="text-sm">Multi-column sorting</span>
+      {/* Create Role Dialog */}
+      <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Create New Role</DialogTitle>
+            <DialogDescription>
+              Add a new role to organize user permissions.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="name">Role Name *</Label>
+              <Input
+                id="name"
+                placeholder="Editor"
+                value={formData.name}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              />
             </div>
-            <div className="flex items-center space-x-2">
-              <Badge variant="secondary">✓</Badge>
-              <span className="text-sm">Global search filtering</span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Badge variant="secondary">✓</Badge>
-              <span className="text-sm">Column show/hide controls</span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Badge variant="secondary">✓</Badge>
-              <span className="text-sm">Row selection & bulk actions</span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Badge variant="secondary">✓</Badge>
-              <span className="text-sm">Export to CSV/Excel/JSON</span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Badge variant="secondary">✓</Badge>
-              <span className="text-sm">Responsive pagination</span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Badge variant="secondary">✓</Badge>
-              <span className="text-sm">Individual row actions</span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Badge variant="secondary">✓</Badge>
-              <span className="text-sm">Loading states & skeletons</span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Badge variant="secondary">✓</Badge>
-              <span className="text-sm">Status indicators & badges</span>
+            <div className="grid gap-2">
+              <Label htmlFor="description">Description</Label>
+              <Textarea
+                id="description"
+                placeholder="Can edit and manage content"
+                value={formData.description}
+                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              />
             </div>
           </div>
-        </CardContent>
-      </Card>
+          <div className="flex justify-end space-x-2">
+            <Button variant="outline" onClick={() => setCreateDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleCreateRole}
+              disabled={createRole.isPending || !formData.name}
+            >
+              {createRole.isPending ? 'Creating...' : 'Create Role'}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

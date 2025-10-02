@@ -148,12 +148,6 @@ export default function ComponentsDemoPage() {
 
   return (
     <div className="container mx-auto p-6 space-y-8">
-      <div>
-        <h1 className="text-3xl font-bold mb-2">UI Components Demo</h1>
-        <p className="text-muted-foreground">
-          Showcase of reusable form fields and view components
-        </p>
-      </div>
 
       {/* Form Fields Section */}
       <div className="space-y-6">

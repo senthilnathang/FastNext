@@ -83,6 +83,14 @@ function EnhancedDataTable<TData>({
   globalFilterPlaceholder = "Search...",
   ...other
 }: DataTableProps<TData>): React.JSX.Element {
+  if (!table) {
+    return (
+      <div className="text-center py-4 text-muted-foreground">
+        Table not initialized
+      </div>
+    );
+  }
+
   const visibleColumns = table
     .getAllColumns()
     .filter((c) => c.getIsVisible()).length;

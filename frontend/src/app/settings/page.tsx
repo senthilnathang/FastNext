@@ -45,16 +45,6 @@ function SettingsContent() {
 
   return (
     <div className="container mx-auto px-4 py-6 max-w-6xl">
-      {/* Header */}
-      <div className="mb-8">
-        <div className="flex items-center space-x-3 mb-2">
-          <SettingsIcon className="h-8 w-8 text-blue-600" />
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Settings</h1>
-        </div>
-        <p className="text-gray-600 dark:text-gray-400">
-          Manage your account settings, security preferences, and view your activity.
-        </p>
-      </div>
 
       {/* Settings Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">

@@ -90,15 +90,6 @@ export default function WorkflowsPage() {
       <div className="space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <GitBranch className="h-7 w-7 text-blue-600" />
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Workflows</h1>
-              <p className="text-sm text-gray-600 dark:text-gray-400">
-                Create and manage workflow types and templates
-              </p>
-            </div>
-          </div>
         </div>
 
       {/* Tabs */}

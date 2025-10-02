@@ -182,15 +182,7 @@ export default function UsersSimplePage() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Users Management</h1>
-          <p className="text-muted-foreground">
-            Manage user accounts and their permissions ({users.length} total)
-          </p>
-        </div>
-
+      <div className="flex justify-end">
         <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
           <DialogTrigger asChild>
             <Button disabled={usersLoading}>

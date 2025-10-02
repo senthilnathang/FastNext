@@ -1,14 +1,58 @@
 'use client'
 
 import * as React from 'react'
-// import { PermissionsDataTable, type Permission } from '@/shared/components/data-table'
+import { ViewManager, ViewConfig, Column } from '@/shared/components/views'
+import { 
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  Input,
+  Label,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+  Button
+} from '@/shared/components'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/components/ui/tabs'
 import { Badge } from '@/shared/components/ui/badge'
-import { Key, Tag, Lock, Zap } from 'lucide-react'
+import { Key, Tag, Lock, Zap, Calendar, Shield } from 'lucide-react'
+import type { SortOption, GroupOption } from '@/shared/components/ui'
+import { formatDistanceToNow } from 'date-fns'
+import type { Permission } from '@/shared/services/api/permissions'
+
+// Categories and actions for permission management
+const categories = [
+  'project',
+  'page', 
+  'component',
+  'user',
+  'system',
+  'content',
+  'reports',
+  'api'
+]
+
+const permissionActions = [
+  'create',
+  'read', 
+  'update',
+  'delete',
+  'manage',
+  'publish',
+  'deploy',
+  'archive',
+  'export',
+  'moderate',
+  'write'
+]
 
 // Mock data for demonstration - in real app, this would come from API
-const mockPermissions: Permission[] = [
+const mockPermissions = [
   // User Management Permissions
   {
     id: 1,
@@ -264,28 +308,46 @@ const mockPermissions: Permission[] = [
 ]
 
 export default function EnhancedPermissionsPage() {
+  const [createDialogOpen, setCreateDialogOpen] = React.useState(false)
+  const [editDialogOpen, setEditDialogOpen] = React.useState(false)
+  const [selectedPermission, setSelectedPermission] = React.useState<Permission | null>(null)
+  const [activeView, setActiveView] = React.useState('permissions-list')
+  const [searchQuery, setSearchQuery] = React.useState('')
+  const [filters, setFilters] = React.useState<Record<string, any>>({})
+  const [sortBy, setSortBy] = React.useState<string>('created_at')
+  const [sortOrder, setSortOrder] = React.useState<'asc' | 'desc'>('desc')
+  const [groupBy, setGroupBy] = React.useState<string>('')
+  const [selectedItems, setSelectedItems] = React.useState<Permission[]>([])
   const [isLoading] = React.useState(false)
+  
+  const [formData, setFormData] = React.useState({
+    name: '',
+    description: '',
+    category: '',
+    action: '',
+    resource: '',
+  })
 
   // Calculate statistics
   const stats = React.useMemo(() => {
     const totalPermissions = mockPermissions.length
-    const systemPermissions = mockPermissions.filter(p => p.is_system_permission).length
+    const systemPermissions = mockPermissions.filter((p: any) => p.is_system_permission).length
     const customPermissions = totalPermissions - systemPermissions
     
     // Group by category
-    const categoryStats = mockPermissions.reduce((acc, permission) => {
+    const categoryStats = mockPermissions.reduce((acc: any, permission: any) => {
       acc[permission.category] = (acc[permission.category] || 0) + 1
       return acc
     }, {} as Record<string, number>)
     
     // Group by action
-    const actionStats = mockPermissions.reduce((acc, permission) => {
+    const actionStats = mockPermissions.reduce((acc: any, permission: any) => {
       acc[permission.action] = (acc[permission.action] || 0) + 1
       return acc
     }, {} as Record<string, number>)
 
-    const topCategory = Object.entries(categoryStats).sort(([,a], [,b]) => b - a)[0]
-    const topAction = Object.entries(actionStats).sort(([,a], [,b]) => b - a)[0]
+    const topCategory = Object.entries(categoryStats).sort(([,a], [,b]) => (b as number) - (a as number))[0]
+    const topAction = Object.entries(actionStats).sort(([,a], [,b]) => (b as number) - (a as number))[0]
 
     return {
       totalPermissions,
@@ -302,14 +364,206 @@ export default function EnhancedPermissionsPage() {
     }
   }, [])
 
+  // Define columns for the ViewManager
+  const columns: Column<Permission>[] = React.useMemo(() => [
+    {
+      id: 'name',
+      key: 'name',
+      label: 'Permission Name',
+      sortable: true,
+      searchable: true,
+      render: (value, permission) => (
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-orange-100">
+            <Key className="h-5 w-5 text-orange-600" />
+          </div>
+          <div>
+            <div className="font-medium">{value as string}</div>
+            <div className="text-sm text-muted-foreground">
+              {permission.description || 'No description'}
+            </div>
+          </div>
+        </div>
+      )
+    },
+    {
+      id: 'category',
+      key: 'category',
+      label: 'Category',
+      sortable: true,
+      filterable: true,
+      type: 'select',
+      filterOptions: categories.map(cat => ({ label: cat.charAt(0).toUpperCase() + cat.slice(1), value: cat })),
+      render: (value) => (
+        <Badge variant="outline" className="capitalize">
+          {value as string}
+        </Badge>
+      )
+    },
+    {
+      id: 'action',
+      key: 'action',
+      label: 'Action',
+      sortable: true,
+      filterable: true,
+      type: 'select',
+      filterOptions: permissionActions.map(action => ({ label: action.charAt(0).toUpperCase() + action.slice(1), value: action })),
+      render: (value) => (
+        <div className="flex items-center space-x-2">
+          <Tag className="h-4 w-4 text-muted-foreground" />
+          <span className="font-mono text-sm">{value as string}</span>
+        </div>
+      )
+    },
+    {
+      id: 'resource',
+      key: 'resource',
+      label: 'Resource',
+      sortable: true,
+      searchable: true,
+      render: (value) => (
+        <span className="font-mono text-sm text-muted-foreground">
+          {(value as string) || '-'}
+        </span>
+      )
+    },
+    {
+      id: 'is_system_permission',
+      key: 'is_system_permission',
+      label: 'Type',
+      sortable: true,
+      filterable: true,
+      type: 'select',
+      filterOptions: [
+        { label: 'System Permission', value: true },
+        { label: 'Custom Permission', value: false }
+      ],
+      render: (value) => (
+        <Badge variant={value ? "secondary" : "default"}>
+          {value ? "System" : "Custom"}
+        </Badge>
+      )
+    },
+    {
+      id: 'created_at',
+      key: 'created_at',
+      label: 'Created',
+      sortable: true,
+      render: (value) => (
+        <div className="flex items-center space-x-2">
+          <Calendar className="h-4 w-4 text-muted-foreground" />
+          <span className="text-sm">
+            {formatDistanceToNow(new Date(value as string), { addSuffix: true })}
+          </span>
+        </div>
+      )
+    }
+  ], [])
+
+  // Define sort options
+  const sortOptions: SortOption[] = React.useMemo(() => [
+    {
+      key: 'name',
+      label: 'Permission Name',
+      defaultOrder: 'asc'
+    },
+    {
+      key: 'category',
+      label: 'Category',
+      defaultOrder: 'asc'
+    },
+    {
+      key: 'action',
+      label: 'Action',
+      defaultOrder: 'asc'
+    },
+    {
+      key: 'created_at',
+      label: 'Created Date',
+      defaultOrder: 'desc'
+    }
+  ], [])
+
+  // Define group options
+  const groupOptions: GroupOption[] = React.useMemo(() => [
+    {
+      key: 'category',
+      label: 'Category',
+      icon: <Tag className="h-4 w-4" />
+    },
+    {
+      key: 'action',
+      label: 'Action',
+      icon: <Key className="h-4 w-4" />
+    },
+    {
+      key: 'is_system_permission',
+      label: 'Permission Type',
+      icon: <Shield className="h-4 w-4" />
+    }
+  ], [])
+
+  // Define available views
+  const views: ViewConfig[] = React.useMemo(() => [
+    {
+      id: 'permissions-card',
+      name: 'Card View',
+      type: 'card',
+      columns,
+      filters: {},
+      sortBy: 'created_at',
+      sortOrder: 'desc'
+    },
+    {
+      id: 'permissions-list',
+      name: 'List View',
+      type: 'list',
+      columns,
+      filters: {},
+      sortBy: 'created_at',
+      sortOrder: 'desc'
+    },
+    {
+      id: 'permissions-kanban',
+      name: 'Kanban Board',
+      type: 'kanban',
+      columns,
+      filters: {},
+      groupBy: 'category'
+    }
+  ], [columns])
+
+  // Auto-generate permission name
+  React.useEffect(() => {
+    if (formData.action && formData.category) {
+      const generatedName = `${formData.action.charAt(0).toUpperCase() + formData.action.slice(1)} ${formData.category.charAt(0).toUpperCase() + formData.category.slice(1)}`
+      if (formData.name !== generatedName) {
+        setFormData(prev => ({ ...prev, name: generatedName }))
+      }
+    }
+  }, [formData.action, formData.category, formData.name])
+
+  const handleCreatePermission = () => {
+    if (!formData.name || !formData.category || !formData.action) {
+      alert('Please fill in all required fields')
+      return
+    }
+    console.log('Create permission:', formData)
+    // TODO: Implement API call
+    setFormData({ name: '', description: '', category: '', action: '', resource: '' })
+    setCreateDialogOpen(false)
+  }
+
   const handleEditPermission = (permission: Permission) => {
-    console.log('Edit permission:', permission)
-    // TODO: Implement permission editing dialog
+    setSelectedPermission(permission)
+    setEditDialogOpen(true)
   }
 
   const handleDeletePermission = (permission: Permission) => {
-    console.log('Delete permission:', permission)
-    // TODO: Implement permission deletion with confirmation
+    if (confirm(`Are you sure you want to delete permission "${permission.name}"?`)) {
+      console.log('Delete permission:', permission)
+      // TODO: Implement API call
+    }
   }
 
   const handleViewPermission = (permission: Permission) => {
@@ -317,19 +571,31 @@ export default function EnhancedPermissionsPage() {
     // TODO: Navigate to permission details page or show details modal
   }
 
-  const handleAddPermission = () => {
-    console.log('Add new permission')
-    // TODO: Open add permission dialog/form
+  const handleExport = (format: string) => {
+    console.log('Export permissions as', format)
+    // TODO: Implement export
   }
+
+  const handleImport = () => {
+    console.log('Import permissions')
+    // TODO: Implement import
+  }
+
+  const bulkActions = [
+    {
+      label: 'Delete Selected',
+      action: (items: Permission[]) => {
+        const customPermissions = items.filter(p => !p.is_system_permission)
+        if (customPermissions.length > 0 && confirm(`Delete ${customPermissions.length} permissions?`)) {
+          customPermissions.forEach(permission => console.log('Delete permission:', permission.id))
+        }
+      },
+      variant: 'destructive' as const
+    }
+  ]
 
   return (
     <div className="container mx-auto py-6 space-y-6">
-      <div className="space-y-2">
-        <h1 className="text-3xl font-bold tracking-tight">Enhanced Permissions Management</h1>
-        <p className="text-muted-foreground">
-          Advanced permission management with comprehensive features including categorization, action types, bulk operations, and detailed analytics.
-        </p>
-      </div>
 
       {/* Statistics Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -354,7 +620,7 @@ export default function EnhancedPermissionsPage() {
           <CardContent>
             <div className="text-2xl font-bold">{stats.categoriesCount}</div>
             <p className="text-xs text-muted-foreground">
-              Top: {stats.topCategory} ({stats.topCategoryCount})
+              Top: {String(stats.topCategory)} ({stats.topCategoryCount})
             </p>
           </CardContent>
         </Card>
@@ -367,7 +633,7 @@ export default function EnhancedPermissionsPage() {
           <CardContent>
             <div className="text-2xl font-bold">{stats.actionsCount}</div>
             <p className="text-xs text-muted-foreground">
-              Top: {stats.topAction} ({stats.topActionCount})
+              Top: {String(stats.topAction)} ({stats.topActionCount})
             </p>
           </CardContent>
         </Card>
@@ -386,120 +652,55 @@ export default function EnhancedPermissionsPage() {
         </Card>
       </div>
 
-      <Tabs defaultValue="all" className="space-y-4">
+      {/* Enhanced Permissions Management with ViewManager */}
+      <ViewManager
+        title="Enhanced Permissions Management"
+        subtitle="Advanced permission management with comprehensive features including analytics, filtering, sorting, bulk operations, and export capabilities"
+        data={mockPermissions as Permission[]}
+        columns={columns}
+        views={views}
+        activeView={activeView}
+        onViewChange={setActiveView}
+        loading={isLoading}
+        error={null}
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+        filters={filters}
+        onFiltersChange={setFilters}
+        sortBy={sortBy}
+        sortOrder={sortOrder}
+        onSortChange={(field, order) => {
+          setSortBy(field)
+          setSortOrder(order)
+        }}
+        sortOptions={sortOptions}
+        groupBy={groupBy}
+        onGroupChange={setGroupBy}
+        groupOptions={groupOptions}
+        onExport={handleExport}
+        onImport={handleImport}
+        onCreateClick={() => setCreateDialogOpen(true)}
+        onEditClick={handleEditPermission}
+        onDeleteClick={handleDeletePermission}
+        onViewClick={handleViewPermission}
+        selectable={true}
+        selectedItems={selectedItems}
+        onSelectionChange={setSelectedItems}
+        bulkActions={bulkActions}
+        showToolbar={true}
+        showSearch={true}
+        showFilters={true}
+        showSort={true}
+        showGroup={true}
+        showExport={true}
+        showImport={true}
+      />
+
+      <Tabs defaultValue="analytics" className="space-y-4">
         <TabsList>
-          <TabsTrigger value="all">All Permissions</TabsTrigger>
-          <TabsTrigger value="user">User</TabsTrigger>
-          <TabsTrigger value="content">Content</TabsTrigger>
-          <TabsTrigger value="system">System</TabsTrigger>
-          <TabsTrigger value="project">Project</TabsTrigger>
           <TabsTrigger value="analytics">Analytics</TabsTrigger>
+          <TabsTrigger value="insights">Distribution Insights</TabsTrigger>
         </TabsList>
-        
-        <TabsContent value="all" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>All Permissions</CardTitle>
-              <CardDescription>
-                Complete list of all system permissions with advanced table features
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <PermissionsDataTable
-                permissions={mockPermissions}
-                onEditPermission={handleEditPermission}
-                onDeletePermission={handleDeletePermission}
-                onViewPermission={handleViewPermission}
-                onAddPermission={handleAddPermission}
-                isLoading={isLoading}
-              />
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        <TabsContent value="user" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>User Management Permissions</CardTitle>
-              <CardDescription>
-                Permissions related to user account management and profile access
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <PermissionsDataTable
-                permissions={mockPermissions.filter(p => p.category === 'user')}
-                onEditPermission={handleEditPermission}
-                onDeletePermission={handleDeletePermission}
-                onViewPermission={handleViewPermission}
-                onAddPermission={handleAddPermission}
-                isLoading={isLoading}
-              />
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        <TabsContent value="content" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Content Management Permissions</CardTitle>
-              <CardDescription>
-                Permissions for content creation, editing, publishing, and moderation
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <PermissionsDataTable
-                permissions={mockPermissions.filter(p => p.category === 'content')}
-                onEditPermission={handleEditPermission}
-                onDeletePermission={handleDeletePermission}
-                onViewPermission={handleViewPermission}
-                onAddPermission={handleAddPermission}
-                isLoading={isLoading}
-              />
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        <TabsContent value="system" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>System Permissions</CardTitle>
-              <CardDescription>
-                System permissions are critical for application security and should be managed carefully.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <PermissionsDataTable
-                permissions={mockPermissions.filter(p => p.category === 'system')}
-                onEditPermission={handleEditPermission}
-                onDeletePermission={handleDeletePermission}
-                onViewPermission={handleViewPermission}
-                onAddPermission={handleAddPermission}
-                isLoading={isLoading}
-              />
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        <TabsContent value="project" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Project Management Permissions</CardTitle>
-              <CardDescription>
-                Permissions for project lifecycle management including deployment
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <PermissionsDataTable
-                permissions={mockPermissions.filter(p => p.category === 'project')}
-                onEditPermission={handleEditPermission}
-                onDeletePermission={handleDeletePermission}
-                onViewPermission={handleViewPermission}
-                onAddPermission={handleAddPermission}
-                isLoading={isLoading}
-              />
-            </CardContent>
-          </Card>
-        </TabsContent>
         
         <TabsContent value="analytics" className="space-y-4">
           <Card>
@@ -553,6 +754,48 @@ export default function EnhancedPermissionsPage() {
             </CardContent>
           </Card>
         </TabsContent>
+        
+        <TabsContent value="insights" className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>Category Breakdown</CardTitle>
+                <CardDescription>Most common permission categories</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  {Object.entries(stats.categoryStats)
+                    .sort(([,a], [,b]) => b - a)
+                    .map(([category, count]) => (
+                      <div key={category} className="flex justify-between items-center">
+                        <span className="capitalize text-sm">{category}</span>
+                        <Badge variant="outline">{count}</Badge>
+                      </div>
+                    ))}
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader>
+                <CardTitle>Action Distribution</CardTitle>
+                <CardDescription>Most common permission actions</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  {Object.entries(stats.actionStats)
+                    .sort(([,a], [,b]) => b - a)
+                    .map(([action, count]) => (
+                      <div key={action} className="flex justify-between items-center">
+                        <span className="capitalize text-sm">{action}</span>
+                        <Badge variant="outline">{count}</Badge>
+                      </div>
+                    ))}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
       </Tabs>
 
       <Card className="mt-8">
@@ -603,6 +846,100 @@ export default function EnhancedPermissionsPage() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Create Permission Dialog */}
+      <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Create New Permission</DialogTitle>
+            <DialogDescription>
+              Define a new permission by specifying the resource and action it controls.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="category">Category *</Label>
+              <Select 
+                value={formData.category} 
+                onValueChange={(value) => setFormData({ ...formData, category: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a category" />
+                </SelectTrigger>
+                <SelectContent>
+                  {categories.map((category) => (
+                    <SelectItem key={category} value={category}>
+                      <span className="capitalize">{category}</span>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4">
+              <div className="grid gap-2">
+                <Label htmlFor="action">Action *</Label>
+                <Select 
+                  value={formData.action} 
+                  onValueChange={(value) => setFormData({ ...formData, action: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Action" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {permissionActions.map((action) => (
+                      <SelectItem key={action} value={action}>
+                        <span className="capitalize">{action}</span>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div className="grid gap-2">
+                <Label htmlFor="resource">Resource</Label>
+                <Input
+                  id="resource"
+                  placeholder="users"
+                  value={formData.resource}
+                  onChange={(e) => setFormData({ ...formData, resource: e.target.value })}
+                />
+              </div>
+            </div>
+
+            <div className="grid gap-2">
+              <Label htmlFor="name">Permission Name *</Label>
+              <Input
+                id="name"
+                placeholder="Manage Users"
+                value={formData.name}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              />
+            </div>
+
+            <div className="grid gap-2">
+              <Label htmlFor="description">Description</Label>
+              <Input
+                id="description"
+                placeholder="Allows managing user accounts and settings"
+                value={formData.description}
+                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              />
+            </div>
+          </div>
+          <div className="flex justify-end space-x-2">
+            <Button variant="outline" onClick={() => setCreateDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleCreatePermission}
+              disabled={!formData.name || !formData.category || !formData.action}
+            >
+              Create Permission
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

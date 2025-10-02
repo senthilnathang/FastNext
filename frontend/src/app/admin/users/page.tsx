@@ -1,160 +1,92 @@
 "use client"
 
 import * as React from "react"
-import { ColumnDef } from "@tanstack/react-table"
-import { Plus, Shield, UserCheck, Loader2 } from "lucide-react"
-
+import { ViewManager, ViewConfig, Column } from '@/shared/components/views'
+import { 
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  Input,
+  Label,
+  Button
+} from '@/shared/components'
+import { User as UserIcon, Shield, UserCheck, Mail, Calendar, Clock } from "lucide-react"
 import { Badge } from "@/shared/components/ui/badge"
-import { Button } from "@/shared/components/ui/button"
-import { AdvancedSearch, type SearchState, type SearchFilter } from "@/shared/components/navigation/AdvancedSearch"
-import { EnhancedDataTable as DataTable } from "@/shared/components/data-visualization/enhanced-data-table"
-import { useAdvancedSearch } from "@/shared/hooks/useAdvancedSearch"
-import { useConfirmationDialog } from "@/shared/components/feedback/ConfirmationDialog"
+import type { SortOption, GroupOption } from '@/shared/components/ui'
+import { formatDistanceToNow } from 'date-fns'
 
 // Import React Query hooks
-import { useUsers, useDeleteUser, useToggleUserStatus } from "@/modules/admin/hooks/useUsers"
+import { useUsers, useDeleteUser, useToggleUserStatus, useCreateUser, useUpdateUser } from "@/modules/admin/hooks/useUsers"
 import { apiUtils } from "@/shared/services/api/client"
 import type { User } from "@/shared/services/api/users"
-
-// Import new dialog components
-import { UserCreateDialog } from "@/modules/admin/components/UserCreateDialog"
-import { UserEditDialog } from "@/modules/admin/components/UserEditDialog"
 
 
 type UsersPageProps = Record<string, never>
 
 const UsersPage: React.FC<UsersPageProps> = () => {
-  // State
-  const [isCreateDialogOpen, setIsCreateDialogOpen] = React.useState(false)
-  const [editingUser, setEditingUser] = React.useState<User | null>(null)
+  const [createDialogOpen, setCreateDialogOpen] = React.useState(false)
+  const [editDialogOpen, setEditDialogOpen] = React.useState(false)
+  const [selectedUser, setSelectedUser] = React.useState<User | null>(null)
+  const [activeView, setActiveView] = React.useState('users-list')
+  const [searchQuery, setSearchQuery] = React.useState('')
+  const [filters, setFilters] = React.useState<Record<string, any>>({})
+  const [sortBy, setSortBy] = React.useState<string>('created_at')
+  const [sortOrder, setSortOrder] = React.useState<'asc' | 'desc'>('desc')
+  const [groupBy, setGroupBy] = React.useState<string>('')
+  const [selectedItems, setSelectedItems] = React.useState<User[]>([])
+  
+  const { data: usersData, isLoading, error } = useUsers()
+  const createUser = useCreateUser()
+  const updateUser = useUpdateUser()
+  const deleteUser = useDeleteUser()
+  const toggleUserStatus = useToggleUserStatus()
 
-  // Queries
-  const { data: usersData, isLoading: usersLoading, error: usersError } = useUsers()
-
-  // Advanced search setup
-  const availableFilters: Omit<SearchFilter, 'value'>[] = [
-    {
-      id: 'status',
-      field: 'is_active',
-      label: 'Status',
-      type: 'select',
-      options: [
-        { value: 'true', label: 'Active' },
-        { value: 'false', label: 'Inactive' }
-      ]
-    },
-    {
-      id: 'verified',
-      field: 'is_verified',
-      label: 'Verified',
-      type: 'boolean'
-    },
-    {
-      id: 'superuser',
-      field: 'is_superuser',
-      label: 'Admin User',
-      type: 'boolean'
-    },
-    {
-      id: 'created_date',
-      field: 'created_at',
-      label: 'Created Date',
-      type: 'daterange'
-    },
-    {
-      id: 'last_login',
-      field: 'last_login_at',
-      label: 'Last Login',
-      type: 'daterange'
-    }
-  ]
-
-  const availableSorts = [
-    { field: 'username', label: 'Username' },
-    { field: 'email', label: 'Email' },
-    { field: 'full_name', label: 'Full Name' },
-    { field: 'created_at', label: 'Created Date' },
-    { field: 'last_login_at', label: 'Last Login' }
-  ]
-
-  const {
-    searchState,
-    updateSearchState,
-    hasActiveSearch
-  } = useAdvancedSearch({
-    initialPageSize: 20,
-    onSearch: (state: SearchState) => {
-      console.log('Search state changed:', state)
-      // TODO: Implement API call with search parameters
-    }
+  const [formData, setFormData] = React.useState({
+    email: '',
+    username: '',
+    full_name: '',
+    password: ''
   })
 
-  // Mutations
-  const deleteUserMutation = useDeleteUser()
-  const toggleStatusMutation = useToggleUserStatus()
-
-  // Confirmation dialog
-  const { confirmUserDelete, confirmStatusToggle, ConfirmationDialog } = useConfirmationDialog()
-
-  // Action handler
-  const handleRowAction = React.useCallback((user: User, action: string) => {
-    switch (action) {
-      case "edit":
-        setEditingUser(user)
-        break
-      case "delete":
-        confirmUserDelete(user.username, () => {
-          deleteUserMutation.mutate(user.id)
-        })
-        break
-      case "toggle-status":
-        confirmStatusToggle(user.username, user.is_active, () => {
-          toggleStatusMutation.mutate(user.id)
-        })
-        break
-      case "reset-password":
-        // TODO: Implement password reset
-        console.log("Reset password for user:", user)
-        break
-      case "send-invitation":
-        // TODO: Implement send invitation
-        console.log("Send invitation to user:", user)
-        break
-    }
-  }, [deleteUserMutation, toggleStatusMutation, confirmUserDelete, confirmStatusToggle])
-
-  // Table columns
-  const columns: ColumnDef<User>[] = React.useMemo(() => [
+  // Define columns for the ViewManager
+  const columns: Column<User>[] = React.useMemo(() => [
     {
-      accessorKey: "username",
-      header: "User",
-      cell: ({ row }) => {
-        const user = row.original
-        return (
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
-              <span className="text-sm font-medium text-primary">
-                {user.username.charAt(0).toUpperCase()}
-              </span>
-            </div>
-            <div>
-              <div className="font-medium">{user.username}</div>
-              <div className="text-sm text-muted-foreground">{user.email}</div>
-            </div>
+      id: 'username',
+      key: 'username',
+      label: 'User',
+      sortable: true,
+      searchable: true,
+      render: (value, user) => (
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
+            <span className="text-sm font-medium text-primary">
+              {user.username.charAt(0).toUpperCase()}
+            </span>
           </div>
-        )
-      },
+          <div>
+            <div className="font-medium">{value as string}</div>
+            <div className="text-sm text-muted-foreground">{user.email}</div>
+          </div>
+        </div>
+      )
     },
     {
-      accessorKey: "full_name",
-      header: "Full Name",
-      cell: ({ row }) => row.getValue("full_name") || "-",
+      id: 'full_name',
+      key: 'full_name',
+      label: 'Full Name',
+      sortable: true,
+      searchable: true,
+      render: (value) => value || '-'
     },
     {
-      accessorKey: "roles",
-      header: "Role",
-      cell: ({ row }) => {
-        const roles = row.getValue("roles") as string[] || []
+      id: 'roles',
+      key: 'roles',
+      label: 'Roles',
+      render: (value) => {
+        const roles = (value as string[]) || []
         return (
           <div className="flex gap-1 flex-wrap">
             {roles.length > 0 ? (
@@ -173,205 +105,227 @@ const UsersPage: React.FC<UsersPageProps> = () => {
             )}
           </div>
         )
-      },
+      }
     },
     {
-      accessorKey: "status",
-      header: "Status",
-      cell: ({ row }) => {
-        const user = row.original
-        return (
-          <div className="flex gap-2">
-            <Badge variant={user.is_active ? "default" : "destructive"}>
-              {user.is_active ? "Active" : "Inactive"}
+      id: 'status',
+      key: 'is_active',
+      label: 'Status',
+      sortable: true,
+      filterable: true,
+      type: 'select',
+      filterOptions: [
+        { label: 'Active', value: true },
+        { label: 'Inactive', value: false }
+      ],
+      render: (value, user) => (
+        <div className="flex gap-2">
+          <Badge variant={user.is_active ? "default" : "destructive"}>
+            {user.is_active ? "Active" : "Inactive"}
+          </Badge>
+          {user.is_superuser && (
+            <Badge variant="outline" className="text-xs">
+              <Shield className="w-3 h-3 mr-1" />
+              Admin
             </Badge>
-            {user.is_superuser && (
-              <Badge variant="outline" className="text-xs">
-                <Shield className="w-3 h-3 mr-1" />
-                Admin
-              </Badge>
-            )}
-            {user.is_verified && (
-              <Badge variant="outline" className="text-xs">
-                <UserCheck className="w-3 h-3 mr-1" />
-                Verified
-              </Badge>
-            )}
-          </div>
-        )
-      },
+          )}
+          {user.is_verified && (
+            <Badge variant="outline" className="text-xs">
+              <UserCheck className="w-3 h-3 mr-1" />
+              Verified
+            </Badge>
+          )}
+        </div>
+      )
     },
     {
-      accessorKey: "last_login_at",
-      header: "Last Login",
-      cell: ({ row }) => {
-        const lastLogin = row.getValue("last_login_at") as string | null
-        return (
-          <span className="text-sm text-muted-foreground">
-            {lastLogin ? new Date(lastLogin).toLocaleDateString() : "Never"}
+      id: 'last_login_at',
+      key: 'last_login_at',
+      label: 'Last Login',
+      sortable: true,
+      render: (value) => (
+        <span className="text-sm text-muted-foreground">
+          {value ? formatDistanceToNow(new Date(value as string), { addSuffix: true }) : "Never"}
+        </span>
+      )
+    },
+    {
+      id: 'created_at',
+      key: 'created_at',
+      label: 'Created',
+      sortable: true,
+      render: (value) => (
+        <div className="flex items-center space-x-2">
+          <Calendar className="h-4 w-4 text-muted-foreground" />
+          <span className="text-sm">
+            {formatDistanceToNow(new Date(value as string), { addSuffix: true })}
           </span>
-        )
-      },
+        </div>
+      )
+    }
+  ], [])
+
+  // Define sort options
+  const sortOptions: SortOption[] = React.useMemo(() => [
+    {
+      key: 'username',
+      label: 'Username',
+      defaultOrder: 'asc'
     },
     {
-      accessorKey: "created_at",
-      header: "Created",
-      cell: ({ row }) => {
-        const createdAt = row.getValue("created_at") as string
-        return (
-          <span className="text-sm text-muted-foreground">
-            {new Date(createdAt).toLocaleDateString()}
-          </span>
-        )
-      },
+      key: 'email',
+      label: 'Email',
+      defaultOrder: 'asc'
     },
     {
-      id: "actions",
-      header: "Actions",
-      cell: ({ row }) => {
-        const user = row.original
-        const actions = ["edit", "toggle-status"]
-        
-        // Add conditional actions
-        if (!user.is_superuser) {
-          actions.push("delete")
-        }
-        if (!user.is_verified) {
-          actions.push("send-invitation")
-        }
-        actions.push("reset-password")
-        
-        return (
-          <div className="flex space-x-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => handleRowAction('edit', user)}
-            >
-              Edit
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => handleRowAction('toggle_status', user)}
-            >
-              {user.is_active ? 'Deactivate' : 'Activate'}
-            </Button>
-          </div>
-        )
-      },
+      key: 'full_name',
+      label: 'Full Name',
+      defaultOrder: 'asc'
     },
-  ], [handleRowAction])
+    {
+      key: 'created_at',
+      label: 'Created Date',
+      defaultOrder: 'desc'
+    },
+    {
+      key: 'last_login_at',
+      label: 'Last Login',
+      defaultOrder: 'desc'
+    }
+  ], [])
 
-  // Loading states
-  const isLoading = usersLoading
+  // Define group options
+  const groupOptions: GroupOption[] = React.useMemo(() => [
+    {
+      key: 'is_active',
+      label: 'Status',
+      icon: <UserIcon className="h-4 w-4" />
+    },
+    {
+      key: 'is_verified',
+      label: 'Verification',
+      icon: <UserCheck className="h-4 w-4" />
+    },
+    {
+      key: 'is_superuser',
+      label: 'Admin Status',
+      icon: <Shield className="h-4 w-4" />
+    }
+  ], [])
 
-  // Prepare data with hooks (must be called before any early returns)
+  // Define available views
+  const views: ViewConfig[] = React.useMemo(() => [
+    {
+      id: 'users-card',
+      name: 'Card View',
+      type: 'card',
+      columns,
+      filters: {},
+      sortBy: 'created_at',
+      sortOrder: 'desc'
+    },
+    {
+      id: 'users-list',
+      name: 'List View',
+      type: 'list',
+      columns,
+      filters: {},
+      sortBy: 'created_at',
+      sortOrder: 'desc'
+    },
+    {
+      id: 'users-kanban',
+      name: 'Kanban Board',
+      type: 'kanban',
+      columns,
+      filters: {},
+      groupBy: 'is_active'
+    }
+  ], [columns])
+
   const users = React.useMemo(() => usersData?.items || [], [usersData])
-  
-  // Filter users based on search state
-  const filteredUsers = React.useMemo(() => {
-    if (!hasActiveSearch()) return users
-    
-    return users.filter(user => {
-      // Apply search query
-      if (searchState.query) {
-        const query = searchState.query.toLowerCase()
-        if (!(
-          user.username.toLowerCase().includes(query) ||
-          user.email.toLowerCase().includes(query) ||
-          (user.full_name && user.full_name.toLowerCase().includes(query))
-        )) {
-          return false
-        }
-      }
-      
-      // Apply filters
-      for (const filter of searchState.filters) {
-        if (filter.value === undefined || filter.value === '') continue
-        
-        switch (filter.field) {
-          case 'is_active':
-            if (user.is_active !== (filter.value === 'true')) return false
-            break
-          case 'is_verified':
-            if (user.is_verified !== filter.value) return false
-            break
-          case 'is_superuser':
-            if (user.is_superuser !== filter.value) return false
-            break
-          case 'created_at':
-            if (filter.value?.from) {
-              const createdAt = new Date(user.created_at)
-              const fromDate = new Date(filter.value.from)
-              const toDate = filter.value.to ? new Date(filter.value.to) : new Date()
-              if (createdAt < fromDate || createdAt > toDate) return false
-            }
-            break
-          case 'last_login_at':
-            if (filter.value?.from && user.last_login_at) {
-              const lastLogin = new Date(user.last_login_at)
-              const fromDate = new Date(filter.value.from)
-              const toDate = filter.value.to ? new Date(filter.value.to) : new Date()
-              if (lastLogin < fromDate || lastLogin > toDate) return false
-            }
-            break
-        }
-      }
-      
-      return true
-    })
-  }, [users, searchState, hasActiveSearch])
-  
-  // Sort filtered users
-  const sortedUsers = React.useMemo(() => {
-    if (!searchState.sort) return filteredUsers
-    
-    return [...filteredUsers].sort((a, b) => {
-      const field = searchState.sort!.field
-      const direction = searchState.sort!.direction
-      
-      let aValue: any
-      let bValue: any
-      
-      switch (field) {
-        case 'username':
-          aValue = a.username
-          bValue = b.username
-          break
-        case 'email':
-          aValue = a.email
-          bValue = b.email
-          break
-        case 'full_name':
-          aValue = a.full_name || ''
-          bValue = b.full_name || ''
-          break
-        case 'created_at':
-          aValue = new Date(a.created_at)
-          bValue = new Date(b.created_at)
-          break
-        case 'last_login_at':
-          aValue = a.last_login_at ? new Date(a.last_login_at) : new Date(0)
-          bValue = b.last_login_at ? new Date(b.last_login_at) : new Date(0)
-          break
-        default:
-          return 0
-      }
-      
-      if (aValue < bValue) return direction === 'asc' ? -1 : 1
-      if (aValue > bValue) return direction === 'asc' ? 1 : -1
-      return 0
-    })
-  }, [filteredUsers, searchState.sort])
 
-  // Handle errors
-  if (usersError) {
+  // Handle actions
+  const handleCreateUser = () => {
+    if (!formData.email || !formData.username || !formData.password) {
+      alert('Please fill in all required fields')
+      return
+    }
+
+    createUser.mutate({
+      email: formData.email,
+      username: formData.username,
+      full_name: formData.full_name || undefined,
+      password: formData.password,
+    }, {
+      onSuccess: () => {
+        setFormData({ email: '', username: '', full_name: '', password: '' })
+        setCreateDialogOpen(false)
+      },
+      onError: (error) => {
+        alert(`Failed to create user: ${apiUtils.getErrorMessage(error)}`)
+      },
+    })
+  }
+
+  const handleEditUser = (user: User) => {
+    setSelectedUser(user)
+    setEditDialogOpen(true)
+  }
+
+  const handleDeleteUser = (user: User) => {
+    if (confirm(`Are you sure you want to delete user "${user.username}"?`)) {
+      deleteUser.mutate(user.id)
+    }
+  }
+
+  const handleViewUser = (user: User) => {
+    console.log('View user:', user)
+    // TODO: Navigate to user details page
+  }
+
+  const handleExport = (format: string) => {
+    console.log('Export users as', format)
+    // TODO: Implement export
+  }
+
+  const handleImport = () => {
+    console.log('Import users')
+    // TODO: Implement import
+  }
+
+  const bulkActions = [
+    {
+      label: 'Delete Selected',
+      action: (items: User[]) => {
+        if (confirm(`Delete ${items.length} users?`)) {
+          items.forEach(user => deleteUser.mutate(user.id))
+        }
+      },
+      variant: 'destructive' as const
+    },
+    {
+      label: 'Activate Selected',
+      action: (items: User[]) => {
+        items.forEach(user => {
+          if (!user.is_active) {
+            toggleUserStatus.mutate(user.id)
+          }
+        })
+      }
+    }
+  ]
+
+  if (error) {
     return (
-      <div className="space-y-6">
-        <div className="text-center py-12">
-          <h2 className="text-xl font-semibold text-red-600 mb-2">Failed to load users</h2>
-          <p className="text-gray-600">{apiUtils.getErrorMessage(usersError)}</p>
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+            Failed to load users
+          </h3>
+          <p className="text-gray-600 dark:text-gray-400">
+            {error.message || 'An error occurred while loading users'}
+          </p>
         </div>
       </div>
     )
@@ -379,53 +333,111 @@ const UsersPage: React.FC<UsersPageProps> = () => {
 
   return (
     <div className="container mx-auto px-4 py-6 max-w-7xl">
-      <div className="space-y-6">
-        <div className="flex justify-end">
-          <Button onClick={() => setIsCreateDialogOpen(true)} disabled={isLoading}>
-            <Plus className="mr-2 h-4 w-4" />
-            Add User
-          </Button>
-        </div>
+      <ViewManager
+        title="Users"
+        subtitle="Manage user accounts and permissions"
+        data={users}
+        columns={columns}
+        views={views}
+        activeView={activeView}
+        onViewChange={setActiveView}
+        loading={isLoading}
+        error={error ? (error as any)?.message || String(error) : null}
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+        filters={filters}
+        onFiltersChange={setFilters}
+        sortBy={sortBy}
+        sortOrder={sortOrder}
+        onSortChange={(field, order) => {
+          setSortBy(field)
+          setSortOrder(order)
+        }}
+        sortOptions={sortOptions}
+        groupBy={groupBy}
+        onGroupChange={setGroupBy}
+        groupOptions={groupOptions}
+        onExport={handleExport}
+        onImport={handleImport}
+        onCreateClick={() => setCreateDialogOpen(true)}
+        onEditClick={handleEditUser}
+        onDeleteClick={handleDeleteUser}
+        onViewClick={handleViewUser}
+        selectable={true}
+        selectedItems={selectedItems}
+        onSelectionChange={setSelectedItems}
+        bulkActions={bulkActions}
+        showToolbar={true}
+        showSearch={true}
+        showFilters={true}
+        showSort={true}
+        showGroup={true}
+        showExport={true}
+        showImport={true}
+      />
 
-        {/* Advanced Search */}
-        <AdvancedSearch
-          searchState={searchState}
-          onSearchChange={updateSearchState}
-          availableFilters={availableFilters}
-          availableSorts={availableSorts}
-          placeholder="Search users by username, email, or name..."
-          resultCount={sortedUsers.length}
-          loading={isLoading}
-        />
-
-        {isLoading ? (
-          <div className="flex items-center justify-center py-12">
-            <Loader2 className="h-8 w-8 animate-spin" />
-            <span className="ml-2">Loading users...</span>
+      {/* Create User Dialog */}
+      <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Create New User</DialogTitle>
+            <DialogDescription>
+              Add a new user to the system. They will receive an email with login instructions.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="email">Email *</Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="user@example.com"
+                value={formData.email}
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="username">Username *</Label>
+              <Input
+                id="username"
+                placeholder="username"
+                value={formData.username}
+                onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="full_name">Full Name</Label>
+              <Input
+                id="full_name"
+                placeholder="John Doe"
+                value={formData.full_name}
+                onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="password">Password *</Label>
+              <Input
+                id="password"
+                type="password"
+                placeholder="Password"
+                value={formData.password}
+                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+              />
+            </div>
           </div>
-        ) : (
-          <DataTable 
-            columns={columns} 
-            data={sortedUsers} 
-            searchKey="username"
-            enableSearch={false}
-          />
-        )}
-      </div>
-
-      {/* Dialog Components */}
-      <UserCreateDialog
-        open={isCreateDialogOpen}
-        onOpenChange={setIsCreateDialogOpen}
-      />
-      
-      <UserEditDialog
-        user={editingUser}
-        open={!!editingUser}
-        onOpenChange={(open) => !open && setEditingUser(null)}
-      />
-
-      <ConfirmationDialog />
+          <div className="flex justify-end space-x-2">
+            <Button variant="outline" onClick={() => setCreateDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleCreateUser}
+              disabled={createUser.isPending || !formData.email || !formData.username || !formData.password}
+            >
+              {createUser.isPending ? 'Creating...' : 'Create User'}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

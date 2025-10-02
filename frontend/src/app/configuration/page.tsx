@@ -62,15 +62,6 @@ export default function ConfigurationPage() {
   return (
     <div className="container mx-auto px-4 py-6 max-w-7xl">
       {/* Header */}
-      <div className="mb-8">
-        <div className="flex items-center space-x-3 mb-2">
-          <Settings className="h-8 w-8 text-blue-600" />
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Configuration</h1>
-        </div>
-        <p className="text-gray-600 dark:text-gray-400">
-          Manage system configuration, integrations, and administrative settings.
-        </p>
-      </div>
 
       {/* Configuration Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
