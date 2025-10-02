@@ -230,69 +230,77 @@ export default function DashboardPage() {
     <div className="container mx-auto px-4 py-6 max-w-7xl">
       <div className="space-y-6">
         {/* Enhanced Analytics Dashboard */}
-        <AnalyticsDashboard
-          kpis={kpiData}
-          chartData={projectActivityData}
-          chartType="bar"
-          xAxisKey="date"
-          yAxisKeys={['projects', 'pages', 'components']}
-          chartHeight={350}
-          loading={loading}
-          showTrends={true}
-        />
+        <div className="bg-gradient-to-br from-white via-gray-50 to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-blue-950 rounded-xl border shadow-sm p-6">
+          <AnalyticsDashboard
+            kpis={kpiData}
+            chartData={projectActivityData}
+            chartType="bar"
+            xAxisKey="date"
+            yAxisKeys={['projects', 'pages', 'components']}
+            chartHeight={350}
+            loading={loading}
+            showTrends={true}
+          />
+        </div>
 
         {/* Enhanced Features Highlight */}
-        <Card className="border-l-4 border-l-blue-500 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20">
-          <CardHeader>
-            <div className="flex items-center space-x-2">
-              <Sparkles className="h-5 w-5 text-blue-600" />
-              <CardTitle className="text-lg">✨ New Enhanced Features</CardTitle>
+        <Card className="border-l-4 border-l-blue-500 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20 shadow-lg hover:shadow-xl transition-shadow duration-300">
+          <CardHeader className="pb-4">
+            <div className="flex items-center space-x-3">
+              <div className="p-2 bg-blue-100 dark:bg-blue-900 rounded-lg">
+                <Sparkles className="h-5 w-5 text-blue-600" />
+              </div>
+              <div>
+                <CardTitle className="text-xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                  ✨ New Enhanced Features
+                </CardTitle>
+                <CardDescription className="text-sm mt-1">
+                  Advanced data management tools now available with powerful table features
+                </CardDescription>
+              </div>
             </div>
-            <CardDescription>
-              Advanced data management tools now available with powerful table features
-            </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="flex items-center space-x-3 p-3 rounded-lg bg-white/50 dark:bg-gray-900/50">
-                <div className="p-2 bg-blue-100 dark:bg-blue-900 rounded-lg">
-                  <Table className="h-4 w-4 text-blue-600" />
+              <div className="group flex items-center space-x-3 p-4 rounded-xl bg-white/70 dark:bg-gray-900/70 border border-gray-200/50 dark:border-gray-700/50 hover:bg-white dark:hover:bg-gray-800 hover:shadow-md transition-all duration-200">
+                <div className="p-3 bg-blue-100 dark:bg-blue-900 rounded-xl group-hover:scale-110 transition-transform duration-200">
+                  <Table className="h-5 w-5 text-blue-600" />
                 </div>
                 <div className="flex-1">
-                  <h4 className="text-sm font-medium">Advanced Data Tables</h4>
-                  <p className="text-xs text-gray-600 dark:text-gray-400">Sorting, filtering, export</p>
+                  <h4 className="text-sm font-semibold text-gray-900 dark:text-white">Advanced Data Tables</h4>
+                  <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">Sorting, filtering, export</p>
                 </div>
-                <Button variant="ghost" size="sm" asChild>
+                <Button variant="ghost" size="sm" className="opacity-0 group-hover:opacity-100 transition-opacity duration-200" asChild>
                   <a href="/data-tables">
                     <ArrowRight className="h-4 w-4" />
                   </a>
                 </Button>
               </div>
               
-              <div className="flex items-center space-x-3 p-3 rounded-lg bg-white/50 dark:bg-gray-900/50">
-                <div className="p-2 bg-purple-100 dark:bg-purple-900 rounded-lg">
-                  <Shield className="h-4 w-4 text-purple-600" />
+              <div className="group flex items-center space-x-3 p-4 rounded-xl bg-white/70 dark:bg-gray-900/70 border border-gray-200/50 dark:border-gray-700/50 hover:bg-white dark:hover:bg-gray-800 hover:shadow-md transition-all duration-200">
+                <div className="p-3 bg-purple-100 dark:bg-purple-900 rounded-xl group-hover:scale-110 transition-transform duration-200">
+                  <Shield className="h-5 w-5 text-purple-600" />
                 </div>
                 <div className="flex-1">
-                  <h4 className="text-sm font-medium">Enhanced Roles</h4>
-                  <p className="text-xs text-gray-600 dark:text-gray-400">Analytics & bulk operations</p>
+                  <h4 className="text-sm font-semibold text-gray-900 dark:text-white">Enhanced Roles</h4>
+                  <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">Analytics & bulk operations</p>
                 </div>
-                <Button variant="ghost" size="sm" asChild>
+                <Button variant="ghost" size="sm" className="opacity-0 group-hover:opacity-100 transition-opacity duration-200" asChild>
                   <a href="/admin/roles-enhanced">
                     <ArrowRight className="h-4 w-4" />
                   </a>
                 </Button>
               </div>
               
-              <div className="flex items-center space-x-3 p-3 rounded-lg bg-white/50 dark:bg-gray-900/50">
-                <div className="p-2 bg-green-100 dark:bg-green-900 rounded-lg">
-                  <Key className="h-4 w-4 text-green-600" />
+              <div className="group flex items-center space-x-3 p-4 rounded-xl bg-white/70 dark:bg-gray-900/70 border border-gray-200/50 dark:border-gray-700/50 hover:bg-white dark:hover:bg-gray-800 hover:shadow-md transition-all duration-200">
+                <div className="p-3 bg-green-100 dark:bg-green-900 rounded-xl group-hover:scale-110 transition-transform duration-200">
+                  <Key className="h-5 w-5 text-green-600" />
                 </div>
                 <div className="flex-1">
-                  <h4 className="text-sm font-medium">Enhanced Permissions</h4>
-                  <p className="text-xs text-gray-600 dark:text-gray-400">Category management & insights</p>
+                  <h4 className="text-sm font-semibold text-gray-900 dark:text-white">Enhanced Permissions</h4>
+                  <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">Category management & insights</p>
                 </div>
-                <Button variant="ghost" size="sm" asChild>
+                <Button variant="ghost" size="sm" className="opacity-0 group-hover:opacity-100 transition-opacity duration-200" asChild>
                   <a href="/admin/permissions-enhanced">
                     <ArrowRight className="h-4 w-4" />
                   </a>
@@ -304,37 +312,48 @@ export default function DashboardPage() {
 
         {/* Dashboard Widgets Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <QuickActionsWidget className="lg:col-span-1" />
-          <SystemStatusWidget className="lg:col-span-1" loading={loading} />
-          <RecentStatsWidget className="lg:col-span-1" loading={loading} />
+          <div className="transform hover:scale-[1.02] transition-transform duration-200">
+            <QuickActionsWidget className="lg:col-span-1 shadow-md hover:shadow-lg transition-shadow duration-200" />
+          </div>
+          <div className="transform hover:scale-[1.02] transition-transform duration-200">
+            <SystemStatusWidget className="lg:col-span-1 shadow-md hover:shadow-lg transition-shadow duration-200" loading={loading} />
+          </div>
+          <div className="transform hover:scale-[1.02] transition-transform duration-200">
+            <RecentStatsWidget className="lg:col-span-1 shadow-md hover:shadow-lg transition-shadow duration-200" loading={loading} />
+          </div>
         </div>
 
         {/* Activity Feed */}
-        <ActivityFeed 
-          loading={loading}
-          maxItems={8}
-          className="lg:col-span-2"
-        />
+        <div className="bg-gradient-to-br from-white to-gray-50 dark:from-gray-900 dark:to-gray-800 rounded-xl border shadow-md p-6">
+          <ActivityFeed 
+            loading={loading}
+            maxItems={8}
+            className="lg:col-span-2"
+          />
+        </div>
 
         {/* Recent Projects Grid */}
-        <div>
-          <div className="flex items-center justify-between mb-4">
+        <div className="bg-gradient-to-br from-white to-gray-50 dark:from-gray-900 dark:to-gray-800 rounded-xl border shadow-md p-6">
+          <div className="flex items-center justify-between mb-6">
             <div>
-              <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Recent Projects</h2>
-              <p className="text-sm text-gray-600 dark:text-gray-400">
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center">
+                <Building2 className="h-6 w-6 mr-3 text-blue-600" />
+                Recent Projects
+              </h2>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
                 Your latest projects and their status
               </p>
             </div>
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" className="hover:bg-blue-50 hover:border-blue-300 transition-colors duration-200">
               <Eye className="h-4 w-4 mr-2" />
               View All
             </Button>
           </div>
 
           {loading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {[...Array(4)].map((_, i) => (
-                <Card key={i} className="animate-pulse" variant="flat">
+                <Card key={i} className="animate-pulse shadow-sm border-0 bg-white/60 dark:bg-gray-800/60" variant="flat">
                   <CardHeader compact>
                     <div className="h-4 bg-gray-300 dark:bg-gray-700 rounded w-3/4"></div>
                     <div className="h-3 bg-gray-200 dark:bg-gray-600 rounded w-full"></div>
@@ -346,9 +365,9 @@ export default function DashboardPage() {
               ))}
             </div>
           ) : projects.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {projects.map((project) => (
-                <Card key={project.id} className="hover:shadow-md transition-shadow" variant="default">
+                <Card key={project.id} className="group hover:shadow-xl hover:scale-[1.02] transition-all duration-300 bg-white/80 dark:bg-gray-800/80 border-0 shadow-md" variant="default">
                   <CardHeader compact className="pb-2">
                     <div className="flex items-start justify-between">
                       <div className="flex-1 min-w-0">
@@ -357,7 +376,7 @@ export default function DashboardPage() {
                           {project.description || 'No description provided'}
                         </CardDescription>
                       </div>
-                      <Button variant="ghost" size="icon-sm" className="shrink-0">
+                      <Button variant="ghost" size="icon-sm" className="shrink-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                         <Edit3 className="h-3 w-3" />
                       </Button>
                     </div>
@@ -387,30 +406,34 @@ export default function DashboardPage() {
               
               {/* Create new project card */}
               <Card 
-                className="border-dashed border-2 hover:border-blue-500 transition-colors cursor-pointer"
+                className="group border-dashed border-2 border-gray-300 dark:border-gray-600 hover:border-blue-500 hover:bg-blue-50/50 dark:hover:bg-blue-950/20 transition-all duration-300 cursor-pointer hover:shadow-lg"
                 variant="outlined"
               >
                 <CardContent compact className="flex flex-col items-center justify-center py-8">
-                  <Plus className="h-8 w-8 text-gray-400 mb-3" />
-                  <h3 className="text-sm font-medium text-gray-900 dark:text-white mb-1">
+                  <div className="p-3 bg-gray-100 dark:bg-gray-800 rounded-full group-hover:bg-blue-100 dark:group-hover:bg-blue-900 transition-colors duration-200 mb-4">
+                    <Plus className="h-6 w-6 text-gray-400 group-hover:text-blue-600 transition-colors duration-200" />
+                  </div>
+                  <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-1 group-hover:text-blue-600 transition-colors duration-200">
                     Create New Project
                   </h3>
-                  <p className="text-xs text-gray-500 text-center">
+                  <p className="text-xs text-gray-500 dark:text-gray-400 text-center">
                     Start building something amazing
                   </p>
                 </CardContent>
               </Card>
             </div>
           ) : (
-            <div className="text-center py-12">
-              <Building2 className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+            <div className="text-center py-16">
+              <div className="p-4 bg-gray-100 dark:bg-gray-800 rounded-full w-20 h-20 mx-auto mb-6 flex items-center justify-center">
+                <Building2 className="h-10 w-10 text-gray-400" />
+              </div>
+              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
                 No projects yet
               </h3>
-              <p className="text-gray-500 dark:text-gray-400 mb-4">
-                Get started by creating your first project
+              <p className="text-gray-500 dark:text-gray-400 mb-6 max-w-sm mx-auto">
+                Get started by creating your first project and begin building something amazing
               </p>
-              <Button>
+              <Button className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg">
                 <Plus className="h-4 w-4 mr-2" />
                 Create Project
               </Button>

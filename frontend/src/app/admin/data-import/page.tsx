@@ -762,13 +762,15 @@ export default function DataImportPage() {
   };
 
   const renderTableSelection = () => (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center space-x-2">
-          <Database className="h-5 w-5" />
-          <span>Select Table</span>
+    <Card className="border-0 shadow-lg bg-gradient-to-br from-white to-blue-50 dark:from-gray-800 dark:to-blue-950">
+      <CardHeader className="pb-6">
+        <CardTitle className="flex items-center space-x-3 text-2xl">
+          <div className="p-2 bg-blue-100 dark:bg-blue-900 rounded-lg">
+            <Database className="h-6 w-6 text-blue-600" />
+          </div>
+          <span>Select Target Table</span>
         </CardTitle>
-        <CardDescription>
+        <CardDescription className="text-base">
           Choose the database table you want to import data into
         </CardDescription>
       </CardHeader>
@@ -794,30 +796,67 @@ export default function DataImportPage() {
             </Select>
 
             {tableSchema && (
-              <div className="mt-4 p-4 bg-muted rounded-lg">
-                <h4 className="font-medium mb-2 flex items-center space-x-2">
-                  <Columns className="h-4 w-4" />
+              <div className="mt-6 p-6 bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-950 dark:to-purple-950 rounded-xl border border-indigo-200 dark:border-indigo-800">
+                <h4 className="font-semibold mb-4 flex items-center space-x-2 text-indigo-800 dark:text-indigo-200">
+                  <div className="p-1.5 bg-indigo-100 dark:bg-indigo-900 rounded-lg">
+                    <Columns className="h-4 w-4 text-indigo-600" />
+                  </div>
                   <span>Table Information</span>
                 </h4>
-                <div className="text-sm space-y-1">
-                  <p><strong>Columns:</strong> {tableSchema.columns.length}</p>
-                  <p><strong>Primary Keys:</strong> {tableSchema.primary_keys.join(', ')}</p>
-                  <p><strong>Sample Data:</strong> {tableSchema.sample_data.length} rows</p>
+                <div className="grid grid-cols-3 gap-4">
+                  <div className="text-center p-3 bg-white/70 dark:bg-gray-800/70 rounded-lg">
+                    <div className="text-xl font-bold text-indigo-600">{tableSchema.columns.length}</div>
+                    <div className="text-xs text-gray-600 dark:text-gray-400">Columns</div>
+                  </div>
+                  <div className="text-center p-3 bg-white/70 dark:bg-gray-800/70 rounded-lg">
+                    <div className="text-xl font-bold text-indigo-600">{tableSchema.primary_keys.length}</div>
+                    <div className="text-xs text-gray-600 dark:text-gray-400">Primary Keys</div>
+                  </div>
+                  <div className="text-center p-3 bg-white/70 dark:bg-gray-800/70 rounded-lg">
+                    <div className="text-xl font-bold text-indigo-600">{tableSchema.sample_data.length}</div>
+                    <div className="text-xs text-gray-600 dark:text-gray-400">Sample Rows</div>
+                  </div>
                 </div>
               </div>
             )}
 
             {tablePermissions && (
-              <div className="mt-4 p-4 bg-blue-50 dark:bg-blue-950 rounded-lg">
-                <h4 className="font-medium mb-2 flex items-center space-x-2">
-                  <Settings className="h-4 w-4" />
+              <div className="mt-6 p-6 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950 dark:to-emerald-950 rounded-xl border border-green-200 dark:border-green-800">
+                <h4 className="font-semibold mb-4 flex items-center space-x-2 text-green-800 dark:text-green-200">
+                  <div className="p-1.5 bg-green-100 dark:bg-green-900 rounded-lg">
+                    <Settings className="h-4 w-4 text-green-600" />
+                  </div>
                   <span>Import Permissions</span>
                 </h4>
-                <div className="text-sm space-y-1">
-                  <p><strong>Can Import:</strong> {tablePermissions.import_permission.can_import ? 'Yes' : 'No'}</p>
-                  <p><strong>Max File Size:</strong> {tablePermissions.import_permission.max_file_size_mb} MB</p>
-                  <p><strong>Max Rows:</strong> {tablePermissions.import_permission.max_rows_per_import.toLocaleString()}</p>
-                  <p><strong>Allowed Formats:</strong> {tablePermissions.import_permission.allowed_formats.join(', ')}</p>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between p-3 bg-white/70 dark:bg-gray-800/70 rounded-lg">
+                      <span className="text-sm font-medium">Can Import</span>
+                      <span className={`px-2 py-1 rounded-full text-xs font-semibold ${tablePermissions.import_permission.can_import ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                        {tablePermissions.import_permission.can_import ? 'Yes' : 'No'}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between p-3 bg-white/70 dark:bg-gray-800/70 rounded-lg">
+                      <span className="text-sm font-medium">Max File Size</span>
+                      <span className="text-sm font-bold text-green-600">{tablePermissions.import_permission.max_file_size_mb} MB</span>
+                    </div>
+                  </div>
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between p-3 bg-white/70 dark:bg-gray-800/70 rounded-lg">
+                      <span className="text-sm font-medium">Max Rows</span>
+                      <span className="text-sm font-bold text-green-600">{tablePermissions.import_permission.max_rows_per_import.toLocaleString()}</span>
+                    </div>
+                    <div className="p-3 bg-white/70 dark:bg-gray-800/70 rounded-lg">
+                      <span className="text-sm font-medium block mb-2">Allowed Formats</span>
+                      <div className="flex flex-wrap gap-1">
+                        {tablePermissions.import_permission.allowed_formats.map(format => (
+                          <span key={format} className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full font-medium">
+                            {format.toUpperCase()}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             )}
@@ -828,32 +867,48 @@ export default function DataImportPage() {
   );
 
   const renderFileAndFormat = () => (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center space-x-2">
-          <Upload className="h-5 w-5" />
+    <Card className="border-0 shadow-lg bg-gradient-to-br from-white to-orange-50 dark:from-gray-800 dark:to-orange-950">
+      <CardHeader className="pb-6">
+        <CardTitle className="flex items-center space-x-3 text-2xl">
+          <div className="p-2 bg-orange-100 dark:bg-orange-900 rounded-lg">
+            <Upload className="h-6 w-6 text-orange-600" />
+          </div>
           <span>File Upload & Format Settings</span>
         </CardTitle>
-        <CardDescription>
+        <CardDescription className="text-base">
           Upload your data file and configure import settings
         </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-6">
+      <CardContent className="space-y-8">
         {/* File Upload */}
-        <div className="space-y-2">
-          <Label htmlFor="file-upload">Select File</Label>
-          <Input
-            id="file-upload"
-            type="file"
-            accept=".csv,.json,.xlsx,.xls"
-            onChange={(e) => {
-              const file = e.target.files?.[0] || null;
-              setImportData(prev => ({ ...prev, file }));
-            }}
-          />
+        <div className="space-y-4">
+          <Label htmlFor="file-upload" className="text-lg font-semibold">Select File</Label>
+          <div className="relative">
+            <Input
+              id="file-upload"
+              type="file"
+              accept=".csv,.json,.xlsx,.xls"
+              onChange={(e) => {
+                const file = e.target.files?.[0] || null;
+                setImportData(prev => ({ ...prev, file }));
+              }}
+              className="file:mr-4 file:py-3 file:px-4 file:rounded-lg file:border-0 file:bg-gradient-to-r file:from-orange-500 file:to-red-500 file:text-white file:font-semibold hover:file:from-orange-600 hover:file:to-red-600 transition-all duration-200"
+            />
+          </div>
           {importData.file && (
-            <div className="text-sm text-muted-foreground">
-              Selected: {importData.file.name} ({(importData.file.size / 1024 / 1024).toFixed(2)} MB)
+            <div className="p-4 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950 dark:to-emerald-950 rounded-lg border border-green-200 dark:border-green-800">
+              <div className="flex items-center space-x-3">
+                <div className="p-2 bg-green-100 dark:bg-green-900 rounded-lg">
+                  <CheckCircle className="h-5 w-5 text-green-600" />
+                </div>
+                <div>
+                  <div className="font-semibold text-green-800 dark:text-green-200">{importData.file.name}</div>
+                  <div className="text-sm text-green-600 dark:text-green-400">
+                    Size: {(importData.file.size / 1024 / 1024).toFixed(2)} MB • 
+                    Type: {importData.file.type || 'Unknown'}
+                  </div>
+                </div>
+              </div>
             </div>
           )}
         </div>
@@ -1167,33 +1222,44 @@ export default function DataImportPage() {
   );
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold">Data Import Wizard</h1>
-        <p className="text-gray-600 dark:text-gray-400 mt-1">
-          Import data into any table with guided steps and validation
-        </p>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-blue-950 p-6">
+      <div className="max-w-6xl mx-auto space-y-8">
+        <div className="text-center">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl mb-4">
+            <Upload className="h-8 w-8 text-white" />
+          </div>
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+            Data Import Wizard
+          </h1>
+          <p className="text-lg text-gray-600 dark:text-gray-400 mt-2 max-w-2xl mx-auto">
+            Import data into any table with guided steps, real-time validation, and smart error detection
+          </p>
+        </div>
+
+        {error && (
+          <Alert variant="destructive" className="shadow-lg border-0 bg-red-50 dark:bg-red-950">
+            <AlertCircle className="h-5 w-5" />
+            <AlertDescription className="text-red-800 dark:text-red-200 font-medium">
+              {error}
+            </AlertDescription>
+          </Alert>
+        )}
+
+        <div className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm rounded-2xl border border-gray-200/50 dark:border-gray-700/50 shadow-xl p-8">
+          <MultiStepWizard
+            steps={steps}
+            currentStep={currentStep}
+            onStepChange={handleStepChange}
+            onComplete={handleComplete}
+            isLoading={isLoading}
+            canGoNext={canGoNext()}
+            nextButtonText={currentStep === 1 ? "Validate Data" : "Next"}
+            completeButtonText="Complete Import"
+          >
+            {renderStepContent()}
+          </MultiStepWizard>
+        </div>
       </div>
-
-      {error && (
-        <Alert variant="destructive">
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
-      )}
-
-      <MultiStepWizard
-        steps={steps}
-        currentStep={currentStep}
-        onStepChange={handleStepChange}
-        onComplete={handleComplete}
-        isLoading={isLoading}
-        canGoNext={canGoNext()}
-        nextButtonText={currentStep === 1 ? "Validate Data" : "Next"}
-        completeButtonText="Complete Import"
-      >
-        {renderStepContent()}
-      </MultiStepWizard>
     </div>
   );
 }
