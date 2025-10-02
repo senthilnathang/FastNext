@@ -11,7 +11,9 @@ import {
   Package,
   Cog,
   Database,
-  Activity
+  Activity,
+  Upload,
+  Download
 } from 'lucide-react';
 
 export interface MenuItem {
@@ -118,6 +120,18 @@ export const menuItems: MenuItem[] = [
         href: '/admin/events',
         icon: Activity,
         requiredPermission: 'admin.events',
+      },
+      {
+        title: 'Data Import',
+        href: '/admin/data-import',
+        icon: Upload,
+        requiredPermission: 'admin.users',
+      },
+      {
+        title: 'Data Export',
+        href: '/admin/data-export',
+        icon: Download,
+        requiredPermission: 'admin.users',
       },
     ],
   },
