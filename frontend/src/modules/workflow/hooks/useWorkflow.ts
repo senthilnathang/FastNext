@@ -127,3 +127,62 @@ export function useDeleteWorkflowTemplate() {
     },
   });
 }
+
+// Workflow Instances hooks
+export function useWorkflowInstances(params: {
+  skip?: number;
+  limit?: number;
+  entity_type?: string;
+  status?: string;
+  workflow_type_id?: number;
+} = {}) {
+  return useQuery({
+    queryKey: ['workflow-instances', params],
+    queryFn: () => workflowAPI.getWorkflowInstances(params),
+  });
+}
+
+export function useWorkflowInstance(id: number) {
+  return useQuery({
+    queryKey: ['workflow-instance', id],
+    queryFn: () => workflowAPI.getWorkflowInstance(id),
+    enabled: !!id,
+  });
+}
+
+export function useCreateWorkflowInstance() {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: (data: any) => workflowAPI.createWorkflowInstance(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['workflow-instances'] });
+    },
+  });
+}
+
+export function useUpdateWorkflowInstance() {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: ({ id, data }: { id: number; data: any }) => 
+      workflowAPI.updateWorkflowInstance(id, data),
+    onSuccess: (_, { id }) => {
+      queryClient.invalidateQueries({ queryKey: ['workflow-instances'] });
+      queryClient.invalidateQueries({ queryKey: ['workflow-instance', id] });
+    },
+  });
+}
+
+export function useExecuteWorkflowAction() {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: ({ instanceId, action }: { instanceId: number; action: any }) => 
+      workflowAPI.executeWorkflowAction(instanceId, action),
+    onSuccess: (_, { instanceId }) => {
+      queryClient.invalidateQueries({ queryKey: ['workflow-instances'] });
+      queryClient.invalidateQueries({ queryKey: ['workflow-instance', instanceId] });
+    },
+  });
+}

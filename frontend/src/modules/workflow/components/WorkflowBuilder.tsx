@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useCallback, useRef, useState, memo, useMemo } from 'react';
+import React, { useCallback, useRef, useState, memo, useMemo, useEffect } from 'react';
 import ReactFlow, {
   addEdge,
   useNodesState,
@@ -38,6 +38,7 @@ import {
   ChevronDown
 } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/shared/components/ui/dropdown-menu';
+import { useWorkflowTemplate } from '../hooks/useWorkflow';
 
 interface WorkflowBuilderProps {
   templateId?: number;
@@ -71,6 +72,17 @@ const WorkflowBuilderInner = memo(({
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
   const [reactFlowInstance, setReactFlowInstance] = useState<ReactFlowInstance | null>(null);
+
+  // Load template data if templateId is provided
+  const { data: templateData, isLoading: templateLoading } = useWorkflowTemplate(templateId || 0);
+
+  // Update nodes and edges when template data is loaded
+  useEffect(() => {
+    if (templateData && templateData.nodes && templateData.edges) {
+      setNodes(templateData.nodes);
+      setEdges(templateData.edges);
+    }
+  }, [templateData, setNodes, setEdges]);
 
   // Handle connection creation
   const onConnect = useCallback(
@@ -209,6 +221,8 @@ const WorkflowBuilderInner = memo(({
           {templateId && (
             <span className="text-sm text-gray-500">
               Template #{templateId}
+              {templateLoading && <span className="ml-2 text-xs">(Loading...)</span>}
+              {templateData && <span className="ml-2 text-xs">({templateData.name})</span>}
             </span>
           )}
         </div>

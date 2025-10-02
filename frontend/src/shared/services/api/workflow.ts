@@ -291,6 +291,113 @@ class WorkflowAPI {
 
     return response.json();
   }
+
+  // Workflow Instances API
+  async getWorkflowInstances(params: {
+    skip?: number;
+    limit?: number;
+    entity_type?: string;
+    status?: string;
+    workflow_type_id?: number;
+  } = {}): Promise<PaginatedResponse<any>> {
+    const searchParams = new URLSearchParams();
+    if (params.skip) searchParams.set('skip', params.skip.toString());
+    if (params.limit) searchParams.set('limit', params.limit.toString());
+    if (params.entity_type) searchParams.set('entity_type', params.entity_type);
+    if (params.status) searchParams.set('status', params.status);
+    if (params.workflow_type_id) searchParams.set('workflow_type_id', params.workflow_type_id.toString());
+
+    const response = await fetch(
+      `${getApiUrl('/api/v1/workflow-instances')}?${searchParams}`,
+      {
+        headers: this.getAuthHeaders(),
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch workflow instances');
+    }
+
+    return response.json();
+  }
+
+  async getWorkflowInstance(id: number): Promise<any> {
+    const response = await fetch(getApiUrl(`/api/v1/workflow-instances/${id}`), {
+      headers: this.getAuthHeaders(),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch workflow instance');
+    }
+
+    return response.json();
+  }
+
+  async createWorkflowInstance(data: any): Promise<any> {
+    const response = await fetch(getApiUrl('/api/v1/workflow-instances'), {
+      method: 'POST',
+      headers: this.getAuthHeaders(),
+      body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to create workflow instance');
+    }
+
+    return response.json();
+  }
+
+  async updateWorkflowInstance(id: number, data: any): Promise<any> {
+    const response = await fetch(getApiUrl(`/api/v1/workflow-instances/${id}`), {
+      method: 'PUT',
+      headers: this.getAuthHeaders(),
+      body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to update workflow instance');
+    }
+
+    return response.json();
+  }
+
+  async executeWorkflowAction(instanceId: number, action: any): Promise<any> {
+    const response = await fetch(getApiUrl(`/api/v1/workflow-instances/${instanceId}/actions`), {
+      method: 'POST',
+      headers: this.getAuthHeaders(),
+      body: JSON.stringify(action),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to execute workflow action');
+    }
+
+    return response.json();
+  }
+
+  async getWorkflowHistory(instanceId: number): Promise<any[]> {
+    const response = await fetch(getApiUrl(`/api/v1/workflow-instances/${instanceId}/history`), {
+      headers: this.getAuthHeaders(),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch workflow history');
+    }
+
+    return response.json();
+  }
+
+  async getAvailableActions(instanceId: number): Promise<any> {
+    const response = await fetch(getApiUrl(`/api/v1/workflow-instances/${instanceId}/available-actions`), {
+      headers: this.getAuthHeaders(),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch available actions');
+    }
+
+    return response.json();
+  }
 }
 
 export const workflowAPI = new WorkflowAPI();

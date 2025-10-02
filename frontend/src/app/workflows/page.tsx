@@ -24,7 +24,7 @@ import {
   SelectValue
 } from '@/shared/components';
 import { GitBranch, Plus, Edit, Eye, Settings } from 'lucide-react';
-import { useWorkflowTypes, useWorkflowTemplates, useCreateWorkflowType, useCreateWorkflowTemplate } from '@/modules/workflow/hooks/useWorkflow';
+import { useWorkflowTypes, useWorkflowTemplates, useCreateWorkflowType, useCreateWorkflowTemplate, useUpdateWorkflowTemplate } from '@/modules/workflow/hooks/useWorkflow';
 import { WorkflowBuilder } from '@/modules/workflow';
 import AdvancedWorkflowBuilder from '@/modules/workflow/components/AdvancedWorkflowBuilder';
 import { formatDistanceToNow } from 'date-fns';
@@ -54,6 +54,7 @@ export default function WorkflowsPage() {
   const { data: templatesData, isLoading: templatesLoading } = useWorkflowTemplates();
   const createTypeMutation = useCreateWorkflowType();
   const createTemplateMutation = useCreateWorkflowTemplate();
+  const updateTemplateMutation = useUpdateWorkflowTemplate();
 
   const workflowTypes = typesData?.items || [];
   const workflowTemplates = templatesData?.items || [];
@@ -83,6 +84,54 @@ export default function WorkflowsPage() {
   const openBuilder = (templateId?: number) => {
     setSelectedTemplate(templateId || null);
     setBuilderDialogOpen(true);
+  };
+
+  const handleSaveWorkflowTemplate = async (nodes: any[], edges: any[]) => {
+    try {
+      if (selectedTemplate) {
+        // Update existing template with nodes and edges
+        await updateTemplateMutation.mutateAsync({
+          id: selectedTemplate,
+          data: {
+            nodes,
+            edges,
+            settings: {
+              lastModified: new Date().toISOString(),
+              nodeCount: nodes.length,
+              edgeCount: edges.length
+            }
+          }
+        });
+        console.log('Workflow template updated successfully');
+      } else {
+        // Create new template with default values
+        const defaultWorkflowType = workflowTypes[0];
+        if (!defaultWorkflowType) {
+          throw new Error('No workflow types available. Please create a workflow type first.');
+        }
+
+        const newTemplate = await createTemplateMutation.mutateAsync({
+          name: 'New Workflow Template',
+          description: 'Created from workflow builder',
+          workflow_type_id: defaultWorkflowType.id,
+          nodes,
+          edges,
+          settings: {
+            created: new Date().toISOString(),
+            nodeCount: nodes.length,
+            edgeCount: edges.length
+          }
+        });
+        setSelectedTemplate(newTemplate.id);
+        console.log('New workflow template created successfully');
+      }
+      
+      // Optionally close the dialog
+      // setBuilderDialogOpen(false);
+    } catch (error) {
+      console.error('Failed to save workflow template:', error);
+      alert(`Failed to save workflow: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
   };
 
   return (
@@ -377,19 +426,13 @@ export default function WorkflowsPage() {
                 templateId={selectedTemplate || undefined}
                 readOnly={false}
                 enableAdvancedFeatures={true}
-                onSave={(nodes, edges) => {
-                  console.log('Saving advanced workflow:', { nodes, edges });
-                  // Handle save logic here
-                }}
+                onSave={handleSaveWorkflowTemplate}
               />
             ) : (
               <WorkflowBuilder
                 templateId={selectedTemplate || undefined}
                 readOnly={false}
-                onSave={(nodes, edges) => {
-                  console.log('Saving workflow:', { nodes, edges });
-                  // Handle save logic here
-                }}
+                onSave={handleSaveWorkflowTemplate}
               />
             )}
           </div>
