@@ -1,12 +1,15 @@
 "use client"
 
 import * as React from "react"
+import { ColumnDef } from "@tanstack/react-table"
 import { Plus, Shield, UserCheck, Loader2 } from "lucide-react"
 
 import { Badge } from "@/shared/components/ui/badge"
 import { Button } from "@/shared/components/ui/button"
-import { AdvancedSearch } from "@/shared/components/navigation/AdvancedSearch"
+import { AdvancedSearch, type SearchState, type SearchFilter } from "@/shared/components/navigation/AdvancedSearch"
 import { EnhancedDataTable as DataTable } from "@/shared/components/data-visualization/enhanced-data-table"
+import { useAdvancedSearch } from "@/shared/hooks/useAdvancedSearch"
+import { useConfirmationDialog } from "@/shared/components/feedback/ConfirmationDialog"
 
 // Import React Query hooks
 import { useUsers, useDeleteUser, useToggleUserStatus } from "@/modules/admin/hooks/useUsers"
@@ -377,14 +380,7 @@ const UsersPage: React.FC<UsersPageProps> = () => {
   return (
     <div className="container mx-auto px-4 py-6 max-w-7xl">
       <div className="space-y-6">
-        <div className="flex justify-between items-center">
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight">Users</h1>
-            <p className="text-sm text-muted-foreground">
-              Manage user accounts and their permissions. {users.length} total users.
-            </p>
-          </div>
-
+        <div className="flex justify-end">
           <Button onClick={() => setIsCreateDialogOpen(true)} disabled={isLoading}>
             <Plus className="mr-2 h-4 w-4" />
             Add User

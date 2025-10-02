@@ -96,14 +96,7 @@ export default function RolesPage() {
   return (
     <div className="container mx-auto px-4 py-6 max-w-7xl">
       <div className="space-y-6">
-        <div className="flex justify-between items-center">
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight">Roles Management</h1>
-            <p className="text-sm text-muted-foreground">
-              Manage user roles and their permissions with advanced table features. {roles.length} total roles.
-            </p>
-          </div>
-
+        <div className="flex justify-end">
           <Button onClick={handleAddRole} disabled={rolesLoading}>
             <Plus className="mr-2 h-4 w-4" />
             Add Role
