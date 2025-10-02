@@ -43,7 +43,7 @@ export const API_CONFIG = {
     USER_ROLES: '/api/v1/user-roles',
     ASSETS: '/api/v1/assets',
     AUDIT_TRAILS: '/api/v1/audit-trails',
-    PRODUCTS: '/api/v1/products',
+    PRODUCTS: '/api/v1/products/',
     BLOG_POSTS: '/api/v1/blog-posts',
     CATEGORIES: '/api/v1/categories',
     AUTHORS: '/api/v1/authors',

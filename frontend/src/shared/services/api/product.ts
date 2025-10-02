@@ -73,37 +73,37 @@ export const productsApi = {
     if (params?.is_featured) searchParams.set('is_featured', params.is_featured.toString())
     if (params?.release_date) searchParams.set('release_date', params.release_date.toString())
     
-    const endpoint = `/api/v1/products${searchParams.toString() ? '?' + searchParams.toString() : ''}`
+    const endpoint = `/api/v1/products${searchParams.toString() ? '/?' + searchParams.toString() : '/'}`
     const response = await apiClient.get<ProductListResponse>(endpoint)
     return response.data
   },
 
   // Get single item
   getProduct: async (id: number): Promise<Product> => {
-    const response = await apiClient.get<Product>(`/api/v1/products/${id}`)
+    const response = await apiClient.get<Product>(`/api/v1/products/${id}/`)
     return response.data
   },
 
   // Create new item
   createProduct: async (data: CreateProductRequest): Promise<Product> => {
-    const response = await apiClient.post<Product>(`/api/v1/products`, data)
+    const response = await apiClient.post<Product>(`/api/v1/products/`, data)
     return response.data
   },
 
   // Update existing item
   updateProduct: async (id: number, data: UpdateProductRequest): Promise<Product> => {
-    const response = await apiClient.patch<Product>(`/api/v1/products/${id}`, data)
+    const response = await apiClient.patch<Product>(`/api/v1/products/${id}/`, data)
     return response.data
   },
 
   // Delete item
   deleteProduct: async (id: number): Promise<void> => {
-    await apiClient.delete(`/api/v1/products/${id}`)
+    await apiClient.delete(`/api/v1/products/${id}/`)
   },
 
   // Toggle active status
   toggleProductStatus: async (id: number): Promise<Product> => {
-    const response = await apiClient.patch<Product>(`/api/v1/products/${id}/toggle-delete`)
+    const response = await apiClient.patch<Product>(`/api/v1/products/${id}/toggle-delete/`)
     return response.data
   },
 }

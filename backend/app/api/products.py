@@ -37,7 +37,32 @@ async def list_products(
     current_user: User = Depends(get_current_active_user)
 ):
     """Get list of products with pagination and search"""
-    return await controller.get_list(db, current_user, skip=skip, limit=limit, search=search)
+    filters = {}
+    if search:
+        filters["search"] = search
+    
+    products = controller.get_list(db, current_user, skip=skip, limit=limit, filters=filters)
+    
+    # Get total count for pagination
+    total_query = db.query(controller.model)
+    if filters:
+        for field, value in filters.items():
+            if hasattr(controller.model, field) and value is not None:
+                total_query = total_query.filter(getattr(controller.model, field) == value)
+    
+    # Filter by owner if needed (same logic as get_list)
+    if not controller._check_permission(db, current_user, "manage"):
+        if hasattr(controller.model, controller.owner_field):
+            total_query = total_query.filter(getattr(controller.model, controller.owner_field) == current_user.id)
+    
+    total = total_query.count()
+    
+    return ProductListResponse(
+        items=products,
+        total=total,
+        skip=skip,
+        limit=limit
+    )
 
 # Get single product
 @router.get("/{id}", response_model=ProductResponse)
@@ -48,7 +73,7 @@ async def get_product(
     current_user: User = Depends(get_current_active_user)
 ):
     """Get a specific product by ID"""
-    return await controller.get_by_id(db, current_user, id)
+    return controller.get_by_id(db, current_user, id)
 
 # Create new product
 @router.post("/", response_model=ProductResponse, status_code=status.HTTP_201_CREATED)
@@ -59,7 +84,7 @@ async def create_product(
     current_user: User = Depends(get_current_active_user)
 ):
     """Create a new product"""
-    return await controller.create(db, current_user, product_in)
+    return controller.create(db, current_user, product_in)
 
 # Update product
 @router.put("/{id}", response_model=ProductResponse)
@@ -71,7 +96,7 @@ async def update_product(
     current_user: User = Depends(get_current_active_user)
 ):
     """Update an existing product"""
-    return await controller.update(db, current_user, id, product_in)
+    return controller.update(db, current_user, id, product_in)
 
 # Delete product
 @router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
@@ -82,7 +107,7 @@ async def delete_product(
     current_user: User = Depends(get_current_active_user)
 ):
     """Delete a product"""
-    await controller.delete(db, current_user, id)
+    controller.delete(db, current_user, id)
 
 
 # Toggle product deletion status
@@ -94,7 +119,7 @@ async def toggle_product_delete(
     current_user: User = Depends(get_current_active_user)
 ):
     """Toggle soft delete status of a product"""
-    product = await controller.get_by_id(db, current_user, id)
+    product = controller.get_by_id(db, current_user, id)
     product.is_deleted = not product.is_deleted
     db.commit()
     db.refresh(product)
@@ -112,4 +137,27 @@ async def search_products(
 ):
     """Advanced search for products"""
     # TODO: Implement advanced search logic
-    return await controller.get_list(db, current_user, skip=skip, limit=limit, search=q)
+    filters = {"search": q} if q else {}
+    
+    products = controller.get_list(db, current_user, skip=skip, limit=limit, filters=filters)
+    
+    # Get total count for pagination
+    total_query = db.query(controller.model)
+    if filters:
+        for field, value in filters.items():
+            if hasattr(controller.model, field) and value is not None:
+                total_query = total_query.filter(getattr(controller.model, field) == value)
+    
+    # Filter by owner if needed (same logic as get_list)
+    if not controller._check_permission(db, current_user, "manage"):
+        if hasattr(controller.model, controller.owner_field):
+            total_query = total_query.filter(getattr(controller.model, controller.owner_field) == current_user.id)
+    
+    total = total_query.count()
+    
+    return ProductListResponse(
+        items=products,
+        total=total,
+        skip=skip,
+        limit=limit
+    )
