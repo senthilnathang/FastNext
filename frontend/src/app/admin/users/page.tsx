@@ -1,20 +1,12 @@
 "use client"
 
 import * as React from "react"
-import { ColumnDef } from "@tanstack/react-table"
-import { Plus, Loader2, Shield, UserCheck } from "lucide-react"
+import { useState, useMemo, useCallback } from "react"
+import { Plus, Shield, UserCheck, Calendar, Mail, User } from "lucide-react"
 
-import { 
-  Button,
-  DataTable,
-  ActionColumn,
-  Badge,
-  useConfirmationDialog,
-  AdvancedSearch,
-  type SearchState,
-  type SearchFilter
-} from "@/shared/components"
-import { useAdvancedSearch } from "@/shared/hooks/useAdvancedSearch"
+import { Badge } from "@/shared/components/ui/badge"
+import { ViewManager } from "@/shared/components/views"
+import type { Column, ViewConfig, SortOption, GroupOption, BulkAction } from "@/shared/components/views"
 
 // Import React Query hooks
 import { useUsers, useDeleteUser, useToggleUserStatus } from "@/modules/admin/hooks/useUsers"

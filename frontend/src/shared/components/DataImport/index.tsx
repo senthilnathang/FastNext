@@ -6,12 +6,6 @@ export { FileUpload } from './components/FileUpload';
 export { FieldMapper } from './components/FieldMapper';
 export { ImportProgress, ImportProgressIndicator } from './components/ImportProgress';
 export { PermissionManager } from './components/PermissionManager';
-export { 
-  DataTableImport, 
-  SimpleImportButton, 
-  DataTableIntegration,
-  useDataTableImport 
-} from './components/DataTableImport';
 
 // Hooks
 export { useDataImport } from './hooks/useDataImport';

@@ -1,7 +1,7 @@
 'use client'
 
 import * as React from 'react'
-import { PermissionsDataTable, type Permission } from '@/shared/components/data-table'
+// import { PermissionsDataTable, type Permission } from '@/shared/components/data-table'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/components/ui/tabs'
 import { Badge } from '@/shared/components/ui/badge'

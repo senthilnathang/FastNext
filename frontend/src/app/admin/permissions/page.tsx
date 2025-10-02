@@ -3,7 +3,7 @@
 import * as React from "react"
 import { Plus, Loader2 } from "lucide-react"
 import { Button } from "@/shared/components/ui/button"
-import { PermissionsDataTable, type Permission as DataTablePermission } from "@/shared/components/data-table"
+// import { PermissionsDataTable, type Permission as DataTablePermission } from "@/shared/components/data-table"
 import {
   Dialog,
   DialogContent,

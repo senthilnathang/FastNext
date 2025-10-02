@@ -911,7 +911,8 @@ import {
   type SearchFilter
 } from '@/shared/components'
 import { useAdvancedSearch } from '@/shared/hooks/useAdvancedSearch'
-import { ${pluralName}DataTable } from '@/shared/components/data-table/examples/${pluralName}DataTable'
+// import { ${pluralName}DataTable } from '@/shared/components/data-table/examples/${pluralName}DataTable'
+// TODO: Update scaffold generator to use ViewManager instead of DataTable
 
 import { 
   use${pluralName}, 

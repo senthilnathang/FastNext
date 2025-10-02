@@ -3,7 +3,7 @@
 import * as React from "react"
 import { Plus } from "lucide-react"
 import { Button } from "@/shared/components/ui/button"
-import { RolesDataTable, type Role as DataTableRole } from "@/shared/components/data-table"
+// import { RolesDataTable, type Role as DataTableRole } from "@/shared/components/data-table"
 
 // Import React Query hooks
 import { useRoles, useDeleteRole } from "@/modules/admin/hooks/useRoles"

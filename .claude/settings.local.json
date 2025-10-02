@@ -65,7 +65,8 @@
       "Bash(export ENVIRONMENT=development)",
       "Bash(true)",
       "Bash(PGPASSWORD=password psql:*)",
-      "Bash(export PGPASSWORD=password)"
+      "Bash(export PGPASSWORD=password)",
+      "Bash(npx next:*)"
     ],
     "deny": []
   }

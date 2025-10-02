@@ -11,6 +11,7 @@ class PermissionCategory(str, enum.Enum):
     COMPONENT = "component"
     USER = "user"
     SYSTEM = "system"
+    PRODUCT = "product"
 
 
 class PermissionAction(str, enum.Enum):

@@ -1,5 +1,4 @@
 // Data Visualization Components Index
-export { DataTable } from './data-table';
 export {
   EnhancedDataTable,
   EnhancedDataTableBulkActions,

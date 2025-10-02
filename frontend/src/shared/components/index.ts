@@ -101,7 +101,6 @@ export { default as AdvancedSearch, type SearchState, type SearchFilter } from '
 export { default as MobileSearch } from './navigation/MobileSearch';
 
 // Data Visualization Components
-export { DataTable, ActionColumn } from './data-visualization/data-table';
 export {
   EnhancedDataTable,
   EnhancedDataTableBulkActions,

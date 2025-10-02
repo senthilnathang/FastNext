@@ -7,7 +7,6 @@ import {
   Building2,
   Book,
   Workflow,
-  Table,
   Sparkles,
   Package,
   Cog,
@@ -49,11 +48,6 @@ export const menuItems: MenuItem[] = [
     module: 'api-docs',
   },
   {
-    title: 'Data Tables',
-    href: '/data-tables',
-    icon: Table,
-    module: 'data-tables',
-  },  {
     title: 'Products',
     href: '/products',
     icon: Package,
