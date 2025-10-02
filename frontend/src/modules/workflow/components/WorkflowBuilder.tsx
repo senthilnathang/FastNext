@@ -78,11 +78,37 @@ const WorkflowBuilderInner = memo(({
 
   // Update nodes and edges when template data is loaded
   useEffect(() => {
-    if (templateData && templateData.nodes && templateData.edges) {
-      setNodes(templateData.nodes);
-      setEdges(templateData.edges);
+    if (templateData) {
+      // Initialize with template data if available
+      if (templateData.nodes && Array.isArray(templateData.nodes) && templateData.nodes.length > 0) {
+        setNodes(templateData.nodes);
+      }
+      if (templateData.edges && Array.isArray(templateData.edges) && templateData.edges.length > 0) {
+        setEdges(templateData.edges);
+      }
+    } else if (templateId === undefined || templateId === null) {
+      // Reset to initial state if no template is selected
+      setNodes(initialNodes);
+      setEdges(initialEdges);
     }
-  }, [templateData, setNodes, setEdges]);
+  }, [templateData, templateId, initialNodes, initialEdges, setNodes, setEdges]);
+
+  // Handle node data updates from edit dialogs
+  useEffect(() => {
+    const handleNodeDataUpdate = (event: CustomEvent) => {
+      const { nodeId, newData } = event.detail;
+      setNodes(nds => nds.map(node => 
+        node.id === nodeId 
+          ? { ...node, data: { ...node.data, ...newData } }
+          : node
+      ));
+    };
+
+    window.addEventListener('updateNodeData', handleNodeDataUpdate as EventListener);
+    return () => {
+      window.removeEventListener('updateNodeData', handleNodeDataUpdate as EventListener);
+    };
+  }, [setNodes]);
 
   // Handle connection creation
   const onConnect = useCallback(

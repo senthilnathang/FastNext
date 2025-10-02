@@ -92,6 +92,23 @@ const AdvancedWorkflowBuilderInner = memo(({
   const [isExecuting, setIsExecuting] = useState(false);
   const [executionStatus, setExecutionStatus] = useState<'idle' | 'running' | 'paused' | 'completed' | 'error'>('idle');
 
+  // Handle node data updates from edit dialogs
+  React.useEffect(() => {
+    const handleNodeDataUpdate = (event: CustomEvent) => {
+      const { nodeId, newData } = event.detail;
+      setNodes(nds => nds.map(node => 
+        node.id === nodeId 
+          ? { ...node, data: { ...node.data, ...newData } }
+          : node
+      ));
+    };
+
+    window.addEventListener('updateNodeData', handleNodeDataUpdate as EventListener);
+    return () => {
+      window.removeEventListener('updateNodeData', handleNodeDataUpdate as EventListener);
+    };
+  }, [setNodes]);
+
   // Handle connection creation with advanced validation
   const onConnect = useCallback(
     (params: Connection) => {

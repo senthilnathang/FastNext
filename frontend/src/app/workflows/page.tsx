@@ -103,6 +103,17 @@ export default function WorkflowsPage() {
           }
         });
         console.log('Workflow template updated successfully');
+        
+        // Show success feedback
+        if (typeof window !== 'undefined') {
+          const event = new CustomEvent('showNotification', {
+            detail: { 
+              type: 'success', 
+              message: 'Workflow template updated successfully!' 
+            }
+          });
+          window.dispatchEvent(event);
+        }
       } else {
         // Create new template with default values
         const defaultWorkflowType = workflowTypes[0];
@@ -111,7 +122,7 @@ export default function WorkflowsPage() {
         }
 
         const newTemplate = await createTemplateMutation.mutateAsync({
-          name: 'New Workflow Template',
+          name: `Workflow Template ${new Date().toLocaleDateString()}`,
           description: 'Created from workflow builder',
           workflow_type_id: defaultWorkflowType.id,
           nodes,
@@ -124,13 +135,37 @@ export default function WorkflowsPage() {
         });
         setSelectedTemplate(newTemplate.id);
         console.log('New workflow template created successfully');
+        
+        // Show success feedback
+        if (typeof window !== 'undefined') {
+          const event = new CustomEvent('showNotification', {
+            detail: { 
+              type: 'success', 
+              message: 'New workflow template created successfully!' 
+            }
+          });
+          window.dispatchEvent(event);
+        }
       }
       
       // Optionally close the dialog
       // setBuilderDialogOpen(false);
     } catch (error) {
       console.error('Failed to save workflow template:', error);
-      alert(`Failed to save workflow: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      
+      // Show error feedback
+      if (typeof window !== 'undefined') {
+        const event = new CustomEvent('showNotification', {
+          detail: { 
+            type: 'error', 
+            message: `Failed to save workflow: ${errorMessage}` 
+          }
+        });
+        window.dispatchEvent(event);
+      }
+      
+      alert(`Failed to save workflow: ${errorMessage}`);
     }
   };
 
