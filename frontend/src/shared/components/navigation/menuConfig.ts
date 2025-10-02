@@ -38,24 +38,17 @@ export const menuItems: MenuItem[] = [
     module: 'projects',
   },
   {
-    title: 'Workflows',
-    href: '/workflows',
-    icon: Workflow,
-    module: 'workflows',
-  },
-  {
-    title: 'API Documentation',
-    href: '/api-docs',
-    icon: Book,
-    module: 'api-docs',
-  },
-  {
     title: 'Products',
     href: '/products',
     icon: Package,
     module: 'inventory',
   },
-
+  {
+    title: 'Workflows',
+    href: '/workflows',
+    icon: Workflow,
+    module: 'workflows',
+  },
   {
     title: 'Settings',
     href: '/settings',
@@ -77,6 +70,12 @@ export const menuItems: MenuItem[] = [
         href: '/configuration/permissions',
         icon: Shield,
         requiredPermission: 'admin.permissions',
+      },
+      {
+    	title: 'API Documentation',
+        href: '/api-docs',
+    	icon: Book,
+    	module: 'api-docs',
       }
     ],
   },
