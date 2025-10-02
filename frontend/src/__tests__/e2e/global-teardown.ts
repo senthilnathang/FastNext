@@ -9,7 +9,7 @@ import { FullConfig } from '@playwright/test';
  * - Performs cleanup operations
  */
 
-async function globalTeardown(config: FullConfig) {
+async function globalTeardown() {
   console.log('🧹 Starting global teardown for FastNext E2E tests...');
 
   try {
@@ -29,8 +29,8 @@ async function globalTeardown(config: FullConfig) {
 }
 
 async function cleanupAuthFiles() {
-  const fs = require('fs');
-  const path = require('path');
+  const fs = await import('fs');
+  const path = await import('path');
   
   try {
     const authDir = path.join(process.cwd(), 'tests/e2e/.auth');
@@ -57,8 +57,8 @@ async function cleanupTestArtifacts() {
     return; // Keep artifacts in local development
   }
 
-  const fs = require('fs');
-  const path = require('path');
+  const fs = await import('fs');
+  const path = await import('path');
   
   try {
     // Clean up old screenshots (keep recent ones)
@@ -95,8 +95,8 @@ async function cleanupTestArtifacts() {
 }
 
 async function generateTestSummary() {
-  const fs = require('fs');
-  const path = require('path');
+  const fs = await import('fs');
+  const path = await import('path');
   
   try {
     const resultsFile = path.join(process.cwd(), 'test-results/results.json');

@@ -188,7 +188,7 @@ export function getFieldError<T extends FieldValues>(
 /**
  * Helper to create a form submit handler that automatically prevents default
  */
-export function createSubmitHandler<T extends FieldValues>(
+export function createSubmitHandler(
   handleSubmit: () => Promise<void>
 ) {
   return (event?: React.FormEvent) => {
@@ -211,20 +211,15 @@ export function useDebouncedField<T>(
   const [value, setValue] = useState<T>(initialValue)
 
   // Debounce the onChange callback
-  const debouncedOnChange = useCallback(
-    (() => {
-      let timeoutId: NodeJS.Timeout
-      return (newValue: T) => {
-        clearTimeout(timeoutId)
-        timeoutId = setTimeout(() => onChange(newValue), delay)
-      }
-    })(),
-    [onChange, delay]
-  )
+  const debouncedOnChange = useCallback((newValue: T) => {
+    const timeoutId = setTimeout(() => onChange(newValue), delay)
+    return () => clearTimeout(timeoutId)
+  }, [onChange, delay])
 
   const handleChange = useCallback((newValue: T) => {
     setValue(newValue)
-    debouncedOnChange(newValue)
+    const cleanup = debouncedOnChange(newValue)
+    return cleanup
   }, [debouncedOnChange])
 
   return [value, handleChange] as const

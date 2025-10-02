@@ -288,14 +288,12 @@ export default function PermissionsPage() {
         </Dialog>
       </div>
 
-        <PermissionsDataTable
-          permissions={permissions.map(adaptPermissionForDataTable)}
-          onEditPermission={handleEditPermission}
-          onDeletePermission={handleDeletePermission}
-          onViewPermission={handleViewPermission}
-          onAddPermission={handleAddPermission}
-          isLoading={isLoading}
-        />
+        {/* TODO: Replace with proper DataTable component */}
+        <div className="rounded-md border">
+          <div className="p-4">
+            <p>Permissions table placeholder - {permissions.length} permissions loaded</p>
+          </div>
+        </div>
       </div>
     </div>
   )

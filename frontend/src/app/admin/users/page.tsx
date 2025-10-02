@@ -1,12 +1,12 @@
 "use client"
 
 import * as React from "react"
-import { useState, useMemo, useCallback } from "react"
-import { Plus, Shield, UserCheck, Calendar, Mail, User } from "lucide-react"
+import { Plus, Shield, UserCheck, Loader2 } from "lucide-react"
 
 import { Badge } from "@/shared/components/ui/badge"
-import { ViewManager } from "@/shared/components/views"
-import type { Column, ViewConfig, SortOption, GroupOption, BulkAction } from "@/shared/components/views"
+import { Button } from "@/shared/components/ui/button"
+import { AdvancedSearch } from "@/shared/components/navigation/AdvancedSearch"
+import { EnhancedDataTable as DataTable } from "@/shared/components/data-visualization/enhanced-data-table"
 
 // Import React Query hooks
 import { useUsers, useDeleteUser, useToggleUserStatus } from "@/modules/admin/hooks/useUsers"
@@ -239,11 +239,22 @@ const UsersPage: React.FC<UsersPageProps> = () => {
         actions.push("reset-password")
         
         return (
-          <ActionColumn 
-            row={user} 
-            onAction={handleRowAction}
-            actions={actions}
-          />
+          <div className="flex space-x-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => handleRowAction('edit', user)}
+            >
+              Edit
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => handleRowAction('toggle_status', user)}
+            >
+              {user.is_active ? 'Deactivate' : 'Activate'}
+            </Button>
+          </div>
         )
       },
     },

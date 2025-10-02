@@ -540,6 +540,7 @@ export default function DataImportPage() {
   };
 
   // Removed large unused validateImportData function - can be restored if needed
+  /*
   const validateImportDataRemoved = async () => {
     if (!importData.file || !importData.selectedTable) return;
 
@@ -652,6 +653,7 @@ export default function DataImportPage() {
       setIsLoading(false);
     }
   };
+  */
 
   const canGoNext = () => {
     switch (currentStep) {

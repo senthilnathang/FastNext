@@ -1,5 +1,4 @@
 import { chromium, FullConfig } from '@playwright/test';
-import path from 'path';
 
 /**
  * Global setup for Playwright tests.
@@ -13,7 +12,7 @@ import path from 'path';
 async function globalSetup(config: FullConfig) {
   console.log('🚀 Starting global setup for FastNext E2E tests...');
 
-  const { baseURL, storageState } = config.projects[0].use;
+  const { baseURL } = config.projects[0].use;
   const browser = await chromium.launch();
 
   try {
@@ -58,7 +57,7 @@ async function setupUserAuth(browser: any, baseURL: string, authFile: string) {
     await page.context().storageState({ path: authFile });
     
     console.log('✅ Regular user authentication setup complete');
-  } catch (error) {
+  } catch {
     console.log('⚠️  Regular user auth failed, using fallback setup');
     // Create a minimal auth state for testing
     await createFallbackAuthState(authFile, 'user');
@@ -93,7 +92,7 @@ async function setupAdminAuth(browser: any, baseURL: string, authFile: string) {
     await page.context().storageState({ path: authFile });
     
     console.log('✅ Admin user authentication setup complete');
-  } catch (error) {
+  } catch {
     console.log('⚠️  Admin user auth failed, using fallback setup');
     // Create a minimal auth state for testing
     await createFallbackAuthState(authFile, 'admin');
@@ -103,8 +102,8 @@ async function setupAdminAuth(browser: any, baseURL: string, authFile: string) {
 }
 
 async function createFallbackAuthState(authFile: string, userType: string) {
-  const fs = require('fs');
-  const path = require('path');
+  const fs = await import('fs');
+  const path = await import('path');
   
   // Ensure directory exists
   const dir = path.dirname(authFile);

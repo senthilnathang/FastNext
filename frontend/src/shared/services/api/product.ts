@@ -1,5 +1,4 @@
 import { apiClient } from './client'
-import { API_CONFIG } from './config'
 
 // Product types
 export interface Product {

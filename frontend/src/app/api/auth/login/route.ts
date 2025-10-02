@@ -130,7 +130,7 @@ export async function POST(request: NextRequest) {
 async function authenticateUser(
   email: string, 
   password: string, 
-  clientIP: string
+  _clientIP: string
 ): Promise<{
   success: boolean;
   user?: {

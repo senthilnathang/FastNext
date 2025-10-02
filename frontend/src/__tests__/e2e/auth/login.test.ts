@@ -70,7 +70,7 @@ test.describe('Authentication', () => {
       
       // Verify we're on dashboard
       expect(page.url()).toContain('/dashboard');
-    } catch (error) {
+    } catch {
       // If test users aren't set up, just verify the form works
       console.log('⚠️  Test users not available, skipping login test');
     }

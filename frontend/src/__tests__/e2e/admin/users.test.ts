@@ -142,9 +142,6 @@ test.describe('User Management (Admin)', () => {
     const paginationNext = page.locator(
       'button:has-text("Next"), [aria-label="Next"], .pagination-next'
     );
-    const paginationPrev = page.locator(
-      'button:has-text("Previous"), [aria-label="Previous"], .pagination-prev'
-    );
     
     // Check if pagination exists
     if (await paginationNext.count() > 0) {

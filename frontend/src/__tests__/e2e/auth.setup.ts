@@ -45,11 +45,11 @@ setup('authenticate regular user', async ({ page }) => {
     await page.context().storageState({ path: authFile });
     
     console.log('✅ Regular user authenticated successfully');
-  } catch (error) {
+  } catch {
     console.log('⚠️  Regular user authentication failed, creating mock state');
     
     // Create a basic mock authentication state
-    const fs = require('fs');
+    const fs = await import('fs');
     const mockAuthState = {
       cookies: [],
       origins: [{
@@ -100,11 +100,11 @@ setup('authenticate admin user', async ({ page }) => {
     await page.context().storageState({ path: adminAuthFile });
     
     console.log('✅ Admin user authenticated successfully');
-  } catch (error) {
+  } catch {
     console.log('⚠️  Admin user authentication failed, creating mock state');
     
     // Create a basic mock authentication state
-    const fs = require('fs');
+    const fs = await import('fs');
     const mockAuthState = {
       cookies: [],
       origins: [{

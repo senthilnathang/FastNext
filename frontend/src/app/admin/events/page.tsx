@@ -6,7 +6,7 @@ import { AlertTriangle, Eye, RefreshCw } from "lucide-react"
 
 import { 
   Button,
-  DataTable,
+  EnhancedDataTable,
   Badge,
   Card,
   CardContent,
@@ -549,11 +549,9 @@ const EventsPage: React.FC<EventsPageProps> = () => {
           </TabsList>
           
           <TabsContent value="events" className="space-y-4">
-            <DataTable 
+            <EnhancedDataTable 
               columns={columns} 
               data={filteredEvents} 
-              searchKey="description"
-              enableSearch={false}
             />
           </TabsContent>
           
