@@ -13,7 +13,7 @@ interface LoopNodeData extends WorkflowNodeData {
   collection?: string;
 }
 
-function LoopNode({ data, selected }: NodeProps<LoopNodeData>) {
+function LoopNode({ data, selected, id }: NodeProps<LoopNodeData>) {
   const getLoopTypeIcon = () => {
     switch (data.loopType) {
       case 'for':

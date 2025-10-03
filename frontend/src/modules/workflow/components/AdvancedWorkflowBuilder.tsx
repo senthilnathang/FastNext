@@ -50,6 +50,7 @@ import {
   Pause
 } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator, DropdownMenuLabel } from '@/shared/components/ui/dropdown-menu';
+import { useWorkflowTemplate } from '../hooks/useWorkflow';
 
 interface AdvancedWorkflowBuilderProps {
   templateId?: number;
@@ -91,6 +92,26 @@ const AdvancedWorkflowBuilderInner = memo(({
   const [reactFlowInstance, setReactFlowInstance] = useState<ReactFlowInstance | null>(null);
   const [isExecuting, setIsExecuting] = useState(false);
   const [executionStatus, setExecutionStatus] = useState<'idle' | 'running' | 'paused' | 'completed' | 'error'>('idle');
+
+  // Load template data if templateId is provided
+  const { data: templateData, isLoading: templateLoading } = useWorkflowTemplate(templateId || 0);
+
+  // Update nodes and edges when template data is loaded
+  React.useEffect(() => {
+    if (templateData) {
+      // Initialize with template data if available
+      if (templateData.nodes && Array.isArray(templateData.nodes) && templateData.nodes.length > 0) {
+        setNodes(templateData.nodes);
+      }
+      if (templateData.edges && Array.isArray(templateData.edges) && templateData.edges.length > 0) {
+        setEdges(templateData.edges);
+      }
+    } else if (templateId === undefined || templateId === null) {
+      // Reset to initial state if no template is selected
+      setNodes(initialNodes);
+      setEdges(initialEdges);
+    }
+  }, [templateData, templateId, initialNodes, initialEdges, setNodes, setEdges]);
 
   // Handle node data updates from edit dialogs
   React.useEffect(() => {
@@ -442,6 +463,8 @@ const AdvancedWorkflowBuilderInner = memo(({
           {templateId && (
             <span className="text-sm text-gray-500">
               Template #{templateId}
+              {templateLoading && <span className="ml-2 text-xs">(Loading...)</span>}
+              {templateData && <span className="ml-2 text-xs">({templateData.name})</span>}
             </span>
           )}
           {enableAdvancedFeatures && (

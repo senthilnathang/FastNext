@@ -16,7 +16,7 @@ interface SubWorkflowNodeData extends WorkflowNodeData {
   retryCount?: number;
 }
 
-function SubWorkflowNode({ data, selected }: NodeProps<SubWorkflowNodeData>) {
+function SubWorkflowNode({ data, selected, id }: NodeProps<SubWorkflowNodeData>) {
   const getModeColor = () => {
     return data.executionMode === 'synchronous' 
       ? 'bg-blue-100 text-blue-700' 

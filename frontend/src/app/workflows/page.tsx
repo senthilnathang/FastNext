@@ -21,10 +21,23 @@ import {
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue
+  SelectValue,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle
 } from '@/shared/components';
-import { GitBranch, Plus, Edit, Eye, Settings } from 'lucide-react';
-import { useWorkflowTypes, useWorkflowTemplates, useCreateWorkflowType, useCreateWorkflowTemplate, useUpdateWorkflowTemplate } from '@/modules/workflow/hooks/useWorkflow';
+import { GitBranch, Plus, Edit, Eye, Settings, Trash2, MoreHorizontal } from 'lucide-react';
+import { useWorkflowTypes, useWorkflowTemplates, useCreateWorkflowType, useCreateWorkflowTemplate, useUpdateWorkflowTemplate, useUpdateWorkflowType, useDeleteWorkflowType, useDeleteWorkflowTemplate } from '@/modules/workflow/hooks/useWorkflow';
 import { WorkflowBuilder } from '@/modules/workflow';
 import AdvancedWorkflowBuilder from '@/modules/workflow/components/AdvancedWorkflowBuilder';
 import { formatDistanceToNow } from 'date-fns';
@@ -33,8 +46,16 @@ export default function WorkflowsPage() {
   const [activeTab, setActiveTab] = useState<'types' | 'templates'>('types');
   const [createTypeDialogOpen, setCreateTypeDialogOpen] = useState(false);
   const [createTemplateDialogOpen, setCreateTemplateDialogOpen] = useState(false);
+  const [editTypeDialogOpen, setEditTypeDialogOpen] = useState(false);
+  const [editTemplateDialogOpen, setEditTemplateDialogOpen] = useState(false);
   const [builderDialogOpen, setBuilderDialogOpen] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState<number | null>(null);
+  const [selectedType, setSelectedType] = useState<any>(null);
+  const [selectedTemplateForEdit, setSelectedTemplateForEdit] = useState<any>(null);
+  const [deleteTypeDialogOpen, setDeleteTypeDialogOpen] = useState(false);
+  const [deleteTemplateDialogOpen, setDeleteTemplateDialogOpen] = useState(false);
+  const [typeToDelete, setTypeToDelete] = useState<any>(null);
+  const [templateToDelete, setTemplateToDelete] = useState<any>(null);
   const [useAdvancedBuilder, setUseAdvancedBuilder] = useState(true);
 
   const [newType, setNewType] = useState({
@@ -50,11 +71,27 @@ export default function WorkflowsPage() {
     workflow_type_id: 0
   });
 
+  const [editTypeData, setEditTypeData] = useState({
+    name: '',
+    description: '',
+    icon: '',
+    color: ''
+  });
+
+  const [editTemplateData, setEditTemplateData] = useState({
+    name: '',
+    description: '',
+    workflow_type_id: 0
+  });
+
   const { data: typesData, isLoading: typesLoading } = useWorkflowTypes();
   const { data: templatesData, isLoading: templatesLoading } = useWorkflowTemplates();
   const createTypeMutation = useCreateWorkflowType();
   const createTemplateMutation = useCreateWorkflowTemplate();
   const updateTemplateMutation = useUpdateWorkflowTemplate();
+  const updateTypeMutation = useUpdateWorkflowType();
+  const deleteTypeMutation = useDeleteWorkflowType();
+  const deleteTemplateMutation = useDeleteWorkflowTemplate();
 
   const workflowTypes = typesData?.items || [];
   const workflowTemplates = templatesData?.items || [];
@@ -65,8 +102,30 @@ export default function WorkflowsPage() {
       await createTypeMutation.mutateAsync(newType);
       setCreateTypeDialogOpen(false);
       setNewType({ name: '', description: '', icon: 'GitBranch', color: '#3B82F6' });
+      
+      // Show success notification
+      if (typeof window !== 'undefined') {
+        const event = new CustomEvent('showNotification', {
+          detail: { 
+            type: 'success', 
+            message: 'Workflow type created successfully!' 
+          }
+        });
+        window.dispatchEvent(event);
+      }
     } catch (error) {
       console.error('Failed to create workflow type:', error);
+      
+      // Show error notification
+      if (typeof window !== 'undefined') {
+        const event = new CustomEvent('showNotification', {
+          detail: { 
+            type: 'error', 
+            message: 'Failed to create workflow type. Please try again.' 
+          }
+        });
+        window.dispatchEvent(event);
+      }
     }
   };
 
@@ -78,6 +137,162 @@ export default function WorkflowsPage() {
       setNewTemplate({ name: '', description: '', workflow_type_id: 0 });
     } catch (error) {
       console.error('Failed to create workflow template:', error);
+    }
+  };
+
+  // Edit handlers
+  const handleEditType = (type: any) => {
+    setSelectedType(type);
+    setEditTypeData({
+      name: type.name,
+      description: type.description || '',
+      icon: type.icon || 'GitBranch',
+      color: type.color || '#3B82F6'
+    });
+    setEditTypeDialogOpen(true);
+  };
+
+  const handleEditTemplate = (template: any) => {
+    setSelectedTemplateForEdit(template);
+    setEditTemplateData({
+      name: template.name,
+      description: template.description || '',
+      workflow_type_id: template.workflow_type_id
+    });
+    setEditTemplateDialogOpen(true);
+  };
+
+  // Update handlers
+  const handleUpdateType = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedType) return;
+    
+    try {
+      await updateTypeMutation.mutateAsync({
+        id: selectedType.id,
+        data: editTypeData
+      });
+      setEditTypeDialogOpen(false);
+      setSelectedType(null);
+      
+      // Show success notification
+      if (typeof window !== 'undefined') {
+        const event = new CustomEvent('showNotification', {
+          detail: { 
+            type: 'success', 
+            message: 'Workflow type updated successfully!' 
+          }
+        });
+        window.dispatchEvent(event);
+      }
+    } catch (error) {
+      console.error('Failed to update workflow type:', error);
+      
+      // Show error notification
+      if (typeof window !== 'undefined') {
+        const event = new CustomEvent('showNotification', {
+          detail: { 
+            type: 'error', 
+            message: 'Failed to update workflow type. Please try again.' 
+          }
+        });
+        window.dispatchEvent(event);
+      }
+    }
+  };
+
+  const handleUpdateTemplate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedTemplateForEdit) return;
+    
+    try {
+      await updateTemplateMutation.mutateAsync({
+        id: selectedTemplateForEdit.id,
+        data: editTemplateData
+      });
+      setEditTemplateDialogOpen(false);
+      setSelectedTemplateForEdit(null);
+    } catch (error) {
+      console.error('Failed to update workflow template:', error);
+    }
+  };
+
+  // Delete handlers
+  const handleDeleteType = (type: any) => {
+    setTypeToDelete(type);
+    setDeleteTypeDialogOpen(true);
+  };
+
+  const handleDeleteTemplate = (template: any) => {
+    setTemplateToDelete(template);
+    setDeleteTemplateDialogOpen(true);
+  };
+
+  const confirmDeleteType = async () => {
+    if (!typeToDelete) return;
+    
+    try {
+      await deleteTypeMutation.mutateAsync(typeToDelete.id);
+      setDeleteTypeDialogOpen(false);
+      setTypeToDelete(null);
+      
+      // Show success notification
+      if (typeof window !== 'undefined') {
+        const event = new CustomEvent('showNotification', {
+          detail: { 
+            type: 'success', 
+            message: 'Workflow type deleted successfully!' 
+          }
+        });
+        window.dispatchEvent(event);
+      }
+    } catch (error) {
+      console.error('Failed to delete workflow type:', error);
+      
+      // Show error notification
+      if (typeof window !== 'undefined') {
+        const event = new CustomEvent('showNotification', {
+          detail: { 
+            type: 'error', 
+            message: 'Failed to delete workflow type. It may be in use by templates.' 
+          }
+        });
+        window.dispatchEvent(event);
+      }
+    }
+  };
+
+  const confirmDeleteTemplate = async () => {
+    if (!templateToDelete) return;
+    
+    try {
+      await deleteTemplateMutation.mutateAsync(templateToDelete.id);
+      setDeleteTemplateDialogOpen(false);
+      setTemplateToDelete(null);
+      
+      // Show success notification
+      if (typeof window !== 'undefined') {
+        const event = new CustomEvent('showNotification', {
+          detail: { 
+            type: 'success', 
+            message: 'Workflow template deleted successfully!' 
+          }
+        });
+        window.dispatchEvent(event);
+      }
+    } catch (error) {
+      console.error('Failed to delete workflow template:', error);
+      
+      // Show error notification
+      if (typeof window !== 'undefined') {
+        const event = new CustomEvent('showNotification', {
+          detail: { 
+            type: 'error', 
+            message: 'Failed to delete workflow template. It may be in use by workflow instances.' 
+          }
+        });
+        window.dispatchEvent(event);
+      }
     }
   };
 
@@ -287,9 +502,27 @@ export default function WorkflowsPage() {
                           />
                           <CardTitle size="sm" className="truncate">{type.name}</CardTitle>
                         </div>
-                        <Button variant="ghost" size="icon-sm" className="shrink-0">
-                          <Settings className="h-3 w-3" />
-                        </Button>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon-sm" className="shrink-0">
+                              <MoreHorizontal className="h-3 w-3" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => handleEditType(type)}>
+                              <Edit className="h-4 w-4 mr-2" />
+                              Edit
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem 
+                              onClick={() => handleDeleteType(type)}
+                              className="text-red-600 hover:text-red-700"
+                            >
+                              <Trash2 className="h-4 w-4 mr-2" />
+                              Delete
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </div>
                       <CardDescription className="mt-1 line-clamp-2 text-xs">
                         {type.description || 'No description provided'}
@@ -412,14 +645,31 @@ export default function WorkflowsPage() {
                             {template.description || 'No description provided'}
                           </CardDescription>
                         </div>
-                        <div className="flex space-x-1 shrink-0">
-                          <Button variant="ghost" size="icon-sm" onClick={() => openBuilder(template.id)}>
-                            <Eye className="h-3 w-3" />
-                          </Button>
-                          <Button variant="ghost" size="icon-sm">
-                            <Edit className="h-3 w-3" />
-                          </Button>
-                        </div>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon-sm" className="shrink-0">
+                              <MoreHorizontal className="h-3 w-3" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => openBuilder(template.id)}>
+                              <Eye className="h-4 w-4 mr-2" />
+                              View/Edit Workflow
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleEditTemplate(template)}>
+                              <Edit className="h-4 w-4 mr-2" />
+                              Edit Details
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem 
+                              onClick={() => handleDeleteTemplate(template)}
+                              className="text-red-600 hover:text-red-700"
+                            >
+                              <Trash2 className="h-4 w-4 mr-2" />
+                              Delete
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </div>
                     </CardHeader>
                     <CardContent compact>
@@ -473,6 +723,161 @@ export default function WorkflowsPage() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Edit Workflow Type Dialog */}
+      <Dialog open={editTypeDialogOpen} onOpenChange={setEditTypeDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Workflow Type</DialogTitle>
+            <DialogDescription>
+              Update the workflow type details.
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleUpdateType} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="edit-type-name">Name</Label>
+              <Input
+                id="edit-type-name"
+                placeholder="e.g., Sales, Purchase, Invoice"
+                value={editTypeData.name}
+                onChange={(e) => setEditTypeData({ ...editTypeData, name: e.target.value })}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-type-description">Description</Label>
+              <Textarea
+                id="edit-type-description"
+                placeholder="Describe this workflow type"
+                value={editTypeData.description}
+                onChange={(e) => setEditTypeData({ ...editTypeData, description: e.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-type-color">Color</Label>
+              <Input
+                id="edit-type-color"
+                type="color"
+                value={editTypeData.color}
+                onChange={(e) => setEditTypeData({ ...editTypeData, color: e.target.value })}
+              />
+            </div>
+            <div className="flex justify-end space-x-2">
+              <Button type="button" variant="outline" onClick={() => setEditTypeDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button type="submit" disabled={updateTypeMutation.isPending}>
+                {updateTypeMutation.isPending ? 'Updating...' : 'Update Type'}
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Workflow Template Dialog */}
+      <Dialog open={editTemplateDialogOpen} onOpenChange={setEditTemplateDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Workflow Template</DialogTitle>
+            <DialogDescription>
+              Update the workflow template details.
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleUpdateTemplate} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="edit-template-name">Name</Label>
+              <Input
+                id="edit-template-name"
+                placeholder="e.g., Standard Sales Process"
+                value={editTemplateData.name}
+                onChange={(e) => setEditTemplateData({ ...editTemplateData, name: e.target.value })}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-template-description">Description</Label>
+              <Textarea
+                id="edit-template-description"
+                placeholder="Describe this workflow template"
+                value={editTemplateData.description}
+                onChange={(e) => setEditTemplateData({ ...editTemplateData, description: e.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-template-type">Workflow Type</Label>
+              <Select
+                value={editTemplateData.workflow_type_id.toString()}
+                onValueChange={(value) => setEditTemplateData({ ...editTemplateData, workflow_type_id: parseInt(value) })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a workflow type" />
+                </SelectTrigger>
+                <SelectContent>
+                  {workflowTypes.map((type) => (
+                    <SelectItem key={type.id} value={type.id.toString()}>
+                      {type.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex justify-end space-x-2">
+              <Button type="button" variant="outline" onClick={() => setEditTemplateDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button type="submit" disabled={updateTemplateMutation.isPending}>
+                {updateTemplateMutation.isPending ? 'Updating...' : 'Update Template'}
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Workflow Type Dialog */}
+      <AlertDialog open={deleteTypeDialogOpen} onOpenChange={setDeleteTypeDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Workflow Type</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete the workflow type "{typeToDelete?.name}"? 
+              This action cannot be undone and may affect existing templates.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDeleteType}
+              disabled={deleteTypeMutation.isPending}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              {deleteTypeMutation.isPending ? 'Deleting...' : 'Delete'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Delete Workflow Template Dialog */}
+      <AlertDialog open={deleteTemplateDialogOpen} onOpenChange={setDeleteTemplateDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Workflow Template</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete the workflow template "{templateToDelete?.name}"? 
+              This action cannot be undone and may affect existing workflow instances.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDeleteTemplate}
+              disabled={deleteTemplateMutation.isPending}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              {deleteTemplateMutation.isPending ? 'Deleting...' : 'Delete'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
       </div>
     </div>
   );
