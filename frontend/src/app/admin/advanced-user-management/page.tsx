@@ -23,18 +23,14 @@ import { DataTable } from '@/shared/components/ui/data-table';
 import { 
   Users, 
   UserPlus, 
-  UserMinus, 
   UserCheck, 
   UserX,
   Shield, 
-  Key, 
   Clock,
   Activity,
   Eye,
-  Settings,
   MoreHorizontal,
   Search,
-  Filter,
   Download,
   Upload,
   AlertTriangle,
@@ -43,21 +39,18 @@ import {
   Lock,
   Unlock,
   Mail,
-  Phone,
   Calendar,
   MapPin,
   Edit,
   Trash2,
   RefreshCw,
-  History,
   BarChart3,
   TrendingUp,
-  TrendingDown,
   Zap
 } from 'lucide-react';
 import { useUsers, useUpdateUser, useDeleteUser, useToggleUserStatus, useResetUserPassword } from '@/modules/admin/hooks/useUsers';
 import { useRoles } from '@/modules/admin/hooks/useRoles';
-import { format, subDays, subMonths } from 'date-fns';
+import { format, subDays } from 'date-fns';
 
 interface UserActivity {
   id: string;
@@ -107,14 +100,15 @@ export default function AdvancedUserManagementPage() {
 
   // API hooks
   const { data: usersData, isLoading: usersLoading, error: usersError } = useUsers();
-  const { data: roles = [] } = useRoles();
+  const { data: rolesData } = useRoles();
   const updateUserMutation = useUpdateUser();
   const deleteUserMutation = useDeleteUser();
   const toggleStatusMutation = useToggleUserStatus();
   const resetPasswordMutation = useResetUserPassword();
 
-  // Extract users array from response
+  // Extract data arrays from responses
   const users = usersData?.items || [];
+  const roles = rolesData?.items || [];
 
   // Mock data for demo - in real app, these would come from API
   const mockUserActivities: UserActivity[] = [
@@ -247,7 +241,7 @@ export default function AdvancedUserManagementPage() {
       enableHiding: false,
     },
     {
-      accessorKey: 'name',
+      accessorKey: 'full_name',
       header: 'User',
       cell: ({ row }: any) => {
         const user = row.original;
@@ -257,7 +251,7 @@ export default function AdvancedUserManagementPage() {
               <Users className="h-4 w-4" />
             </div>
             <div>
-              <div className="font-medium">{user.name}</div>
+              <div className="font-medium">{user.full_name}</div>
               <div className="text-sm text-gray-500">{user.email}</div>
             </div>
           </div>
@@ -281,10 +275,10 @@ export default function AdvancedUserManagementPage() {
       },
     },
     {
-      accessorKey: 'isActive',
+      accessorKey: 'is_active',
       header: 'Status',
       cell: ({ row }: any) => {
-        const isActive = row.original.isActive;
+        const isActive = row.original.is_active;
         return (
           <Badge variant={isActive ? 'default' : 'secondary'}>
             {isActive ? (
@@ -303,18 +297,18 @@ export default function AdvancedUserManagementPage() {
       },
     },
     {
-      accessorKey: 'lastLogin',
+      accessorKey: 'last_login_at',
       header: 'Last Login',
       cell: ({ row }: any) => {
-        const lastLogin = row.original.lastLogin;
+        const lastLogin = row.original.last_login_at;
         return lastLogin ? format(new Date(lastLogin), 'MMM dd, yyyy HH:mm') : 'Never';
       },
     },
     {
-      accessorKey: 'createdAt',
+      accessorKey: 'created_at',
       header: 'Joined',
       cell: ({ row }: any) => {
-        const createdAt = row.original.createdAt;
+        const createdAt = row.original.created_at;
         return createdAt ? format(new Date(createdAt), 'MMM dd, yyyy') : '-';
       },
     },
@@ -342,7 +336,7 @@ export default function AdvancedUserManagementPage() {
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={() => handleUserAction(user.id, 'toggle_status')}>
-                {user.isActive ? (
+                {user.is_active ? (
                   <>
                     <Lock className="mr-2 h-4 w-4" />
                     Deactivate
@@ -790,7 +784,7 @@ export default function AdvancedUserManagementPage() {
         <Dialog open={!!selectedUser} onOpenChange={() => setSelectedUser(null)}>
           <DialogContent className="max-w-4xl">
             <DialogHeader>
-              <DialogTitle>User Details - {selectedUser.name}</DialogTitle>
+              <DialogTitle>User Details - {selectedUser.full_name}</DialogTitle>
               <DialogDescription>
                 Comprehensive user information and activity
               </DialogDescription>
@@ -806,13 +800,13 @@ export default function AdvancedUserManagementPage() {
                     </div>
                     <div className="flex items-center space-x-2">
                       <Calendar className="h-4 w-4 text-gray-400" />
-                      <span>Joined {format(new Date(selectedUser.createdAt), 'MMM dd, yyyy')}</span>
+                      <span>Joined {format(new Date(selectedUser.created_at), 'MMM dd, yyyy')}</span>
                     </div>
                     <div className="flex items-center space-x-2">
                       <Clock className="h-4 w-4 text-gray-400" />
                       <span>
-                        Last login: {selectedUser.lastLogin 
-                          ? format(new Date(selectedUser.lastLogin), 'MMM dd, yyyy HH:mm')
+                        Last login: {selectedUser.last_login_at 
+                          ? format(new Date(selectedUser.last_login_at), 'MMM dd, yyyy HH:mm')
                           : 'Never'
                         }
                       </span>
@@ -836,8 +830,8 @@ export default function AdvancedUserManagementPage() {
                 <div>
                   <Label>Account Status</Label>
                   <div className="mt-2">
-                    <Badge variant={selectedUser.isActive ? 'default' : 'secondary'}>
-                      {selectedUser.isActive ? 'Active' : 'Inactive'}
+                    <Badge variant={selectedUser.is_active ? 'default' : 'secondary'}>
+                      {selectedUser.is_active ? 'Active' : 'Inactive'}
                     </Badge>
                   </div>
                 </div>

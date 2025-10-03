@@ -317,7 +317,7 @@ export default function EnhancedPermissionsPage() {
   const [sortBy, setSortBy] = React.useState<string>('created_at')
   const [sortOrder, setSortOrder] = React.useState<'asc' | 'desc'>('desc')
   const [groupBy, setGroupBy] = React.useState<string>('')
-  const [selectedItems, setSelectedItems] = React.useState<Permission[]>([])
+  const [selectedItems, setSelectedItems] = React.useState<any[]>([])
   const [isLoading] = React.useState(false)
   
   const [formData, setFormData] = React.useState({
@@ -365,7 +365,7 @@ export default function EnhancedPermissionsPage() {
   }, [])
 
   // Define columns for the ViewManager
-  const columns: Column<Permission>[] = React.useMemo(() => [
+  const columns: Column[] = React.useMemo(() => [
     {
       id: 'name',
       key: 'name',
@@ -554,19 +554,19 @@ export default function EnhancedPermissionsPage() {
     setCreateDialogOpen(false)
   }
 
-  const handleEditPermission = (permission: Permission) => {
+  const handleEditPermission = (permission: any) => {
     setSelectedPermission(permission)
     setEditDialogOpen(true)
   }
 
-  const handleDeletePermission = (permission: Permission) => {
+  const handleDeletePermission = (permission: any) => {
     if (confirm(`Are you sure you want to delete permission "${permission.name}"?`)) {
       console.log('Delete permission:', permission)
       // TODO: Implement API call
     }
   }
 
-  const handleViewPermission = (permission: Permission) => {
+  const handleViewPermission = (permission: any) => {
     console.log('View permission:', permission)
     // TODO: Navigate to permission details page or show details modal
   }
@@ -584,7 +584,7 @@ export default function EnhancedPermissionsPage() {
   const bulkActions = [
     {
       label: 'Delete Selected',
-      action: (items: Permission[]) => {
+      action: (items: any[]) => {
         const customPermissions = items.filter(p => !p.is_system_permission)
         if (customPermissions.length > 0 && confirm(`Delete ${customPermissions.length} permissions?`)) {
           customPermissions.forEach(permission => console.log('Delete permission:', permission.id))
@@ -620,7 +620,7 @@ export default function EnhancedPermissionsPage() {
           <CardContent>
             <div className="text-2xl font-bold">{stats.categoriesCount}</div>
             <p className="text-xs text-muted-foreground">
-              Top: {String(stats.topCategory)} ({stats.topCategoryCount})
+              Top: {stats.topCategory ? String(stats.topCategory) : 'N/A'} ({String(stats.topCategoryCount)})
             </p>
           </CardContent>
         </Card>
@@ -633,7 +633,7 @@ export default function EnhancedPermissionsPage() {
           <CardContent>
             <div className="text-2xl font-bold">{stats.actionsCount}</div>
             <p className="text-xs text-muted-foreground">
-              Top: {String(stats.topAction)} ({stats.topActionCount})
+              Top: {String(stats.topAction)} ({String(stats.topActionCount)})
             </p>
           </CardContent>
         </Card>
@@ -690,8 +690,6 @@ export default function EnhancedPermissionsPage() {
         showToolbar={true}
         showSearch={true}
         showFilters={true}
-        showSort={true}
-        showGroup={true}
         showExport={true}
         showImport={true}
       />
@@ -717,7 +715,7 @@ export default function EnhancedPermissionsPage() {
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
                   {Object.entries(stats.categoryStats).map(([category, count]) => (
                     <div key={category} className="text-center p-3 border rounded-lg">
-                      <div className="text-lg font-bold">{count}</div>
+                      <div className="text-lg font-bold">{String(count)}</div>
                       <div className="text-sm text-muted-foreground capitalize">{category}</div>
                     </div>
                   ))}
@@ -730,7 +728,7 @@ export default function EnhancedPermissionsPage() {
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
                   {Object.entries(stats.actionStats).map(([action, count]) => (
                     <div key={action} className="text-center p-3 border rounded-lg">
-                      <div className="text-lg font-bold">{count}</div>
+                      <div className="text-lg font-bold">{String(count)}</div>
                       <div className="text-sm text-muted-foreground capitalize">{action}</div>
                     </div>
                   ))}
@@ -765,11 +763,11 @@ export default function EnhancedPermissionsPage() {
               <CardContent>
                 <div className="space-y-2">
                   {Object.entries(stats.categoryStats)
-                    .sort(([,a], [,b]) => b - a)
+                    .sort(([,a], [,b]) => (b as number) - (a as number))
                     .map(([category, count]) => (
                       <div key={category} className="flex justify-between items-center">
                         <span className="capitalize text-sm">{category}</span>
-                        <Badge variant="outline">{count}</Badge>
+                        <Badge variant="outline">{String(count)}</Badge>
                       </div>
                     ))}
                 </div>
@@ -784,11 +782,11 @@ export default function EnhancedPermissionsPage() {
               <CardContent>
                 <div className="space-y-2">
                   {Object.entries(stats.actionStats)
-                    .sort(([,a], [,b]) => b - a)
+                    .sort(([,a], [,b]) => (b as number) - (a as number))
                     .map(([action, count]) => (
                       <div key={action} className="flex justify-between items-center">
                         <span className="capitalize text-sm">{action}</span>
-                        <Badge variant="outline">{count}</Badge>
+                        <Badge variant="outline">{String(count)}</Badge>
                       </div>
                     ))}
                 </div>

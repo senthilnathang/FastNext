@@ -18,7 +18,6 @@ import {
   DialogTrigger,
 } from '@/shared/components/ui/dialog';
 import { Badge } from '@/shared/components/ui/badge';
-import { Separator } from '@/shared/components/ui/separator';
 import {
   Tabs,
   TabsContent,
@@ -27,12 +26,10 @@ import {
 } from '@/shared/components/ui/tabs';
 import {
   Upload,
-  FileText,
   Settings,
   CheckCircle,
   AlertCircle,
   FileCheck,
-  Users,
   ArrowRight,
   RotateCcw
 } from 'lucide-react';
@@ -40,14 +37,12 @@ import {
 import { FileUpload } from './components/FileUpload';
 import { FieldMapper } from './components/FieldMapper';
 import { ImportProgress } from './components/ImportProgress';
-import { PermissionManager } from './components/PermissionManager';
 import { useDataImport } from './hooks/useDataImport';
 
 import type {
   ImportComponentProps,
   ImportOptions,
-  ImportValidationResult,
-  UserImportPermissions
+  ImportValidationResult
 } from './types';
 
 export function DataImport({
@@ -75,8 +70,6 @@ export function DataImport({
     isParsing,
     parsedData,
     parseError,
-    preview,
-    isGeneratingPreview,
     fieldMappings,
     setFieldMappings,
     isValidating,
@@ -85,10 +78,8 @@ export function DataImport({
     isImporting,
     importJobs,
     currentJob,
-    importProgress,
     importError,
     parseFile,
-    generatePreview,
     validateData,
     startImport,
     cancelImport,

@@ -34,7 +34,7 @@ export default function EnhancedRolesPage() {
   const [sortBy, setSortBy] = React.useState<string>('created_at')
   const [sortOrder, setSortOrder] = React.useState<'asc' | 'desc'>('desc')
   const [groupBy, setGroupBy] = React.useState<string>('')
-  const [selectedItems, setSelectedItems] = React.useState<Role[]>([])
+  const [selectedItems, setSelectedItems] = React.useState<any[]>([])
   
   const { data: rolesData, isLoading, error } = useRoles()
   const createRole = useCreateRole()
@@ -72,7 +72,7 @@ export default function EnhancedRolesPage() {
   }, [roles])
 
   // Define columns for the ViewManager
-  const columns: Column<Role>[] = React.useMemo(() => [
+  const columns: Column[] = React.useMemo(() => [
     {
       id: 'name',
       key: 'name',
@@ -105,7 +105,7 @@ export default function EnhancedRolesPage() {
       render: (value) => (
         <div className="flex items-center space-x-2">
           <Users className="h-4 w-4 text-muted-foreground" />
-          <span className="text-sm font-medium">{value || 0}</span>
+          <span className="text-sm font-medium">{String(value) || 0}</span>
         </div>
       )
     },
@@ -259,18 +259,18 @@ export default function EnhancedRolesPage() {
     })
   }
 
-  const handleEditRole = (role: Role) => {
+  const handleEditRole = (role: any) => {
     setSelectedRole(role)
     setEditDialogOpen(true)
   }
 
-  const handleDeleteRole = (role: Role) => {
+  const handleDeleteRole = (role: any) => {
     if (confirm(`Are you sure you want to delete role "${role.name}"?${role.user_count ? ` This role is assigned to ${role.user_count} user(s).` : ''}`)) {
       deleteRole.mutate(role.id)
     }
   }
 
-  const handleViewRole = (role: Role) => {
+  const handleViewRole = (role: any) => {
     console.log('View role:', role)
     // TODO: Navigate to role details page
   }
@@ -288,7 +288,7 @@ export default function EnhancedRolesPage() {
   const bulkActions = [
     {
       label: 'Delete Selected',
-      action: (items: Role[]) => {
+      action: (items: any[]) => {
         const customRoles = items.filter(role => !role.is_system_role)
         if (customRoles.length > 0 && confirm(`Delete ${customRoles.length} roles?`)) {
           customRoles.forEach(role => deleteRole.mutate(role.id))
@@ -408,8 +408,6 @@ export default function EnhancedRolesPage() {
         showToolbar={true}
         showSearch={true}
         showFilters={true}
-        showSort={true}
-        showGroup={true}
         showExport={true}
         showImport={true}
       />

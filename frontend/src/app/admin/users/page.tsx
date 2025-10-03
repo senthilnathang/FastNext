@@ -37,7 +37,7 @@ const UsersPage: React.FC<UsersPageProps> = () => {
   const [sortBy, setSortBy] = React.useState<string>('created_at')
   const [sortOrder, setSortOrder] = React.useState<'asc' | 'desc'>('desc')
   const [groupBy, setGroupBy] = React.useState<string>('')
-  const [selectedItems, setSelectedItems] = React.useState<User[]>([])
+  const [selectedItems, setSelectedItems] = React.useState<any[]>([])
   
   const { data: usersData, isLoading, error } = useUsers()
   const createUser = useCreateUser()
@@ -63,7 +63,7 @@ const UsersPage: React.FC<UsersPageProps> = () => {
   }, [createDialogOpen])
 
   // Define columns for the ViewManager (memoized for performance)
-  const columns: Column<User>[] = React.useMemo(() => [
+  const columns: Column[] = React.useMemo(() => [
     {
       id: 'username',
       key: 'username',
@@ -322,18 +322,18 @@ const UsersPage: React.FC<UsersPageProps> = () => {
     })
   }
 
-  const handleEditUser = (user: User) => {
+  const handleEditUser = (user: any) => {
     setSelectedUser(user)
     setEditDialogOpen(true)
   }
 
-  const handleDeleteUser = (user: User) => {
+  const handleDeleteUser = (user: any) => {
     if (confirm(`Are you sure you want to delete user "${user.username}"?`)) {
       deleteUser.mutate(user.id)
     }
   }
 
-  const handleViewUser = (user: User) => {
+  const handleViewUser = (user: any) => {
     console.log('View user:', user)
     // TODO: Navigate to user details page
   }
@@ -376,7 +376,7 @@ const UsersPage: React.FC<UsersPageProps> = () => {
   const bulkActions = [
     {
       label: 'Delete Selected',
-      action: (items: User[]) => {
+      action: (items: any[]) => {
         if (confirm(`Delete ${items.length} users?`)) {
           items.forEach(user => deleteUser.mutate(user.id))
         }
@@ -385,7 +385,7 @@ const UsersPage: React.FC<UsersPageProps> = () => {
     },
     {
       label: 'Activate Selected',
-      action: (items: User[]) => {
+      action: (items: any[]) => {
         items.forEach(user => {
           if (!user.is_active) {
             toggleUserStatus.mutate(user.id)

@@ -9,45 +9,27 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/components/ui
 import { Alert, AlertDescription, AlertTitle } from '@/shared/components/ui/alert';
 import { Label } from '@/shared/components/ui/label';
 import { 
-  Server, 
   Activity, 
   Cpu, 
   HardDrive, 
   MemoryStick,
   Network,
   Database,
-  Globe,
   AlertTriangle,
   CheckCircle,
   XCircle,
-  Clock,
   RefreshCw,
   TrendingUp,
   TrendingDown,
   Zap,
-  Thermometer,
-  Wifi,
-  Users,
-  FileText,
-  Shield,
-  Settings,
   Download,
   Eye,
-  BarChart3,
-  PieChart,
-  LineChart,
-  Monitor,
-  Smartphone,
-  ChevronUp,
-  ChevronDown,
-  Calendar,
-  Timer,
-  Cloud,
+  Shield,
+  Users,
   AlertCircle,
   Info
 } from 'lucide-react';
-import { format, subMinutes, subHours, subDays } from 'date-fns';
-import { getSecurityStatistics } from '@/lib/monitoring/security-monitor';
+import { format, subMinutes, subHours } from 'date-fns';
 
 interface SystemMetrics {
   timestamp: string;

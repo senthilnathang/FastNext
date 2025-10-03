@@ -29,16 +29,14 @@ import { apiUtils } from "@/shared/services/api/client"
 import type { Permission } from "@/shared/services/api/permissions"
 
 // Adapter function to convert API Permission to DataTable Permission
-const adaptPermissionForDataTable = (permission: Permission): DataTablePermission => ({
+const adaptPermissionForDataTable = (permission: Permission): Permission => ({
   id: permission.id,
   name: permission.name,
   description: permission.description,
   category: permission.category,
   action: permission.action,
   resource: permission.resource,
-  is_system_permission: permission.is_system_permission,
-  created_at: '2023-01-15T10:00:00Z', // Default value since API Permission doesn't have this
-  updated_at: undefined
+  is_system_permission: permission.is_system_permission
 })
 
 const categories = [
@@ -121,12 +119,12 @@ export default function PermissionsPage() {
   }, [newPermission.action, newPermission.category, newPermission.name])
 
   // Action handlers for the enhanced data table
-  const handleEditPermission = (permission: DataTablePermission) => {
+  const handleEditPermission = (permission: Permission) => {
     console.log('Edit permission:', permission)
     // TODO: Open edit permission dialog
   }
 
-  const handleDeletePermission = (permission: DataTablePermission) => {
+  const handleDeletePermission = (permission: Permission) => {
     if (permission.is_system_permission) {
       alert('System permissions cannot be deleted')
       return
@@ -137,7 +135,7 @@ export default function PermissionsPage() {
     }
   }
 
-  const handleViewPermission = (permission: DataTablePermission) => {
+  const handleViewPermission = (permission: Permission) => {
     console.log('View permission:', permission)
     // TODO: Show permission details modal or navigate to details page
   }

@@ -53,7 +53,7 @@ export default function PermissionsSimplePage() {
   const [sortBy, setSortBy] = useState<string>('created_at');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [groupBy, setGroupBy] = useState<string>('');
-  const [selectedItems, setSelectedItems] = useState<Permission[]>([]);
+  const [selectedItems, setSelectedItems] = useState<any[]>([]);
   
   const [formData, setFormData] = useState({
     name: '',
@@ -71,7 +71,7 @@ export default function PermissionsSimplePage() {
   const permissions = React.useMemo(() => permissionsData?.items || [], [permissionsData]);
 
   // Define columns for the ViewManager
-  const columns: Column<Permission>[] = React.useMemo(() => [
+  const columns: Column[] = React.useMemo(() => [
     {
       id: 'name',
       key: 'name',
@@ -273,18 +273,18 @@ export default function PermissionsSimplePage() {
     });
   };
 
-  const handleEditPermission = (permission: Permission) => {
+  const handleEditPermission = (permission: any) => {
     setSelectedPermission(permission);
     setEditDialogOpen(true);
   };
 
-  const handleDeletePermission = (permission: Permission) => {
+  const handleDeletePermission = (permission: any) => {
     if (confirm(`Are you sure you want to delete permission "${permission.name}"?`)) {
       deletePermission.mutate(permission.id);
     }
   };
 
-  const handleViewPermission = (permission: Permission) => {
+  const handleViewPermission = (permission: any) => {
     console.log('View permission:', permission);
     // TODO: Navigate to permission details page
   };
@@ -302,7 +302,7 @@ export default function PermissionsSimplePage() {
   const bulkActions = [
     {
       label: 'Delete Selected',
-      action: (items: Permission[]) => {
+      action: (items: any[]) => {
         const customPermissions = items.filter(p => !p.is_system_permission);
         if (customPermissions.length > 0 && confirm(`Delete ${customPermissions.length} permissions?`)) {
           customPermissions.forEach(permission => deletePermission.mutate(permission.id));
@@ -366,8 +366,6 @@ export default function PermissionsSimplePage() {
         showToolbar={true}
         showSearch={true}
         showFilters={true}
-        showSort={true}
-        showGroup={true}
         showExport={true}
         showImport={true}
       />

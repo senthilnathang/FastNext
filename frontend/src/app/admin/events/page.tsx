@@ -95,7 +95,7 @@ const EventsPage: React.FC<EventsPageProps> = () => {
   }
 
   // Define columns for the ViewManager
-  const columns: Column<EventResponse>[] = React.useMemo(() => [
+  const columns: Column[] = React.useMemo(() => [
     {
       id: 'timestamp',
       key: 'timestamp',
