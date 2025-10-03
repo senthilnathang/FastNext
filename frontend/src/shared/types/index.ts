@@ -21,6 +21,8 @@ export interface Project {
   user_id: number
   is_public: boolean
   settings: Record<string, unknown>
+  start_date?: string
+  end_date?: string
   created_at: string
   updated_at?: string
 }
@@ -100,6 +102,8 @@ export interface CreateProjectRequest {
   description?: string
   is_public?: boolean
   settings?: Record<string, unknown>
+  start_date?: string
+  end_date?: string
 }
 
 export interface UpdateProjectRequest {
@@ -107,6 +111,8 @@ export interface UpdateProjectRequest {
   description?: string
   is_public?: boolean
   settings?: Record<string, unknown>
+  start_date?: string
+  end_date?: string
 }
 
 export interface CreatePageRequest {

@@ -43,7 +43,9 @@ export default function ProjectsPage() {
     name: '',
     description: '',
     is_public: false,
-    settings: {}
+    settings: {},
+    start_date: '',
+    end_date: ''
   });
 
   // Define columns for the ViewManager
@@ -94,6 +96,38 @@ export default function ProjectsPage() {
       )
     },
     {
+      id: 'start_date',
+      key: 'start_date',
+      label: 'Start Date',
+      sortable: true,
+      filterable: true,
+      type: 'date',
+      render: (value) => (
+        <div className="flex items-center space-x-2">
+          <Calendar className="h-4 w-4 text-green-500" />
+          <span className="text-sm">
+            {value ? new Date(value as string).toLocaleDateString() : 'Not set'}
+          </span>
+        </div>
+      )
+    },
+    {
+      id: 'end_date',
+      key: 'end_date',
+      label: 'End Date',
+      sortable: true,
+      filterable: true,
+      type: 'date',
+      render: (value) => (
+        <div className="flex items-center space-x-2">
+          <Calendar className="h-4 w-4 text-red-500" />
+          <span className="text-sm">
+            {value ? new Date(value as string).toLocaleDateString() : 'Not set'}
+          </span>
+        </div>
+      )
+    },
+    {
       id: 'created_at',
       key: 'created_at',
       label: 'Created',
@@ -125,6 +159,16 @@ export default function ProjectsPage() {
     {
       key: 'name',
       label: 'Project Name',
+      defaultOrder: 'asc'
+    },
+    {
+      key: 'start_date',
+      label: 'Start Date',
+      defaultOrder: 'asc'
+    },
+    {
+      key: 'end_date',
+      label: 'End Date',
       defaultOrder: 'asc'
     },
     {
@@ -221,9 +265,15 @@ export default function ProjectsPage() {
   const handleCreateProject = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await createProject.mutateAsync(formData);
+      // Clean up empty date strings to avoid backend issues
+      const cleanedData = {
+        ...formData,
+        start_date: formData.start_date || undefined,
+        end_date: formData.end_date || undefined
+      };
+      await createProject.mutateAsync(cleanedData);
       setCreateDialogOpen(false);
-      setFormData({ name: '', description: '', is_public: false, settings: {} });
+      setFormData({ name: '', description: '', is_public: false, settings: {}, start_date: '', end_date: '' });
     } catch (error) {
       console.error('Failed to create project:', error);
     }
@@ -238,7 +288,9 @@ export default function ProjectsPage() {
         name: formData.name,
         description: formData.description,
         is_public: formData.is_public,
-        settings: formData.settings
+        settings: formData.settings,
+        start_date: formData.start_date || undefined,
+        end_date: formData.end_date || undefined
       };
       await updateProject.mutateAsync({ id: selectedProject.id, data: updateData });
       setEditDialogOpen(false);
@@ -266,7 +318,9 @@ export default function ProjectsPage() {
       name: project.name,
       description: project.description || '',
       is_public: project.is_public,
-      settings: project.settings
+      settings: project.settings,
+      start_date: project.start_date || '',
+      end_date: project.end_date || ''
     });
     setEditDialogOpen(true);
   };
@@ -386,6 +440,12 @@ export default function ProjectsPage() {
         onCalendarQuickAdd={handleCalendarQuickAdd}
         calendarView="month"
         calendarShowToday={true}
+        ganttIdField="id"
+        ganttTitleField="name"
+        ganttStartDateField="start_date"
+        ganttEndDateField="end_date"
+        ganttStatusField="status"
+        ganttProgressField="progress"
       />
 
       {/* Create Project Dialog */}
@@ -416,6 +476,26 @@ export default function ProjectsPage() {
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
               />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="start_date">Start Date</Label>
+                <Input
+                  id="start_date"
+                  type="date"
+                  value={formData.start_date}
+                  onChange={(e) => setFormData({ ...formData, start_date: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="end_date">End Date</Label>
+                <Input
+                  id="end_date"
+                  type="date"
+                  value={formData.end_date}
+                  onChange={(e) => setFormData({ ...formData, end_date: e.target.value })}
+                />
+              </div>
             </div>
             <div className="flex items-center space-x-2">
               <Checkbox
@@ -465,6 +545,26 @@ export default function ProjectsPage() {
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
               />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="edit-start_date">Start Date</Label>
+                <Input
+                  id="edit-start_date"
+                  type="date"
+                  value={formData.start_date}
+                  onChange={(e) => setFormData({ ...formData, start_date: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-end_date">End Date</Label>
+                <Input
+                  id="edit-end_date"
+                  type="date"
+                  value={formData.end_date}
+                  onChange={(e) => setFormData({ ...formData, end_date: e.target.value })}
+                />
+              </div>
             </div>
             <div className="flex items-center space-x-2">
               <Checkbox

@@ -1,6 +1,6 @@
 // API Configuration
 export const API_CONFIG = {
-  API_BASE_URL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000',
+  API_BASE_URL: process.env.NEXT_PUBLIC_API_URL || '',
   TIMEOUT: 30000,
   
   ENDPOINTS: {
@@ -54,6 +54,12 @@ export const API_CONFIG = {
 export const getApiUrl = (endpoint: string): string => {
   const baseUrl = API_CONFIG.API_BASE_URL.replace(/\/$/, '')
   const cleanEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`
+  
+  // If no base URL is configured, use relative URLs (for Next.js API routes)
+  if (!baseUrl) {
+    return cleanEndpoint
+  }
+  
   return `${baseUrl}${cleanEndpoint}`
 }
 

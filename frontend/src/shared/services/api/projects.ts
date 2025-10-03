@@ -22,7 +22,7 @@ export const projectsApi = {
   // Get list of projects
   getProjects: async (params?: ProjectListParams): Promise<ProjectListResponse> => {
     const response = await apiClient.get(API_CONFIG.ENDPOINTS.PROJECTS, { params })
-    // Backend currently returns array directly, adapt to expected format
+    // Backend returns array directly, adapt to expected format
     const items = Array.isArray(response.data) ? response.data : response.data.items || []
     return {
       items,
