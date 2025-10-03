@@ -27,31 +27,8 @@ const nextConfig: NextConfig = {
 
   // Environment variables
   env: {
-    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000',
+    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || '',
     NEXT_PUBLIC_ENVIRONMENT: process.env.NEXT_PUBLIC_ENVIRONMENT || 'development',
-  },
-
-  // Webpack configuration
-  webpack: (config, { buildId, dev, isServer, defaultLoaders, webpack }) => {
-    // Optimize bundle size
-    if (!dev && !isServer) {
-      config.optimization = {
-        ...config.optimization,
-        splitChunks: {
-          chunks: 'all',
-          cacheGroups: {
-            vendor: {
-              test: /[\\/]node_modules[\\/]/,
-              name: 'vendors',
-              priority: 10,
-              reuseExistingChunk: true,
-            },
-          },
-        },
-      };
-    }
-
-    return config;
   },
 
   // Headers for security and performance
@@ -85,8 +62,8 @@ const nextConfig: NextConfig = {
       "frame-ancestors 'none'",
       // Frame sources - none (prevents embedding iframes)
       "frame-src 'none'",
-      // Connect sources - API and monitoring
-      `connect-src 'self' ${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'} https://vercel.live wss://vercel.live https://vitals.vercel-insights.com ${isDev ? 'ws://localhost:*' : ''}`,
+      // Connect sources - API and monitoring  
+      `connect-src 'self' https://vercel.live wss://vercel.live https://vitals.vercel-insights.com ${isDev ? 'ws://localhost:*' : ''}`,
       // Worker sources
       "worker-src 'self' blob:",
       // Manifest sources
@@ -241,17 +218,11 @@ const nextConfig: NextConfig = {
     ];
   },
 
-  // Rewrites for API proxy in development
+  // Rewrites
   async rewrites() {
-    if (process.env.NODE_ENV === 'development') {
-      return [
-        {
-          source: '/api/:path*',
-          destination: `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/:path*`,
-        },
-      ];
-    }
-    return [];
+    return [
+      // Add rewrites as needed
+    ];
   },
 };
 

@@ -67,7 +67,8 @@
       "Bash(PGPASSWORD=password psql:*)",
       "Bash(export PGPASSWORD=password)",
       "Bash(npx next:*)",
-      "Bash(echo:*)"
+      "Bash(echo:*)",
+      "WebFetch(domain:api.github.com)"
     ],
     "deny": []
   }
