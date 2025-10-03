@@ -166,8 +166,8 @@ function ParallelGatewayNode({ data, selected, id }: NodeProps<WorkflowNodeData>
             </div>
             
             <div className="text-xs text-gray-500">
-              <strong>Tip:</strong> Use "split" or "fork" in the name for splitting gateways, 
-              "merge" or "join" for merging gateways.
+              <strong>Tip:</strong> Use &quot;split&quot; or &quot;fork&quot; in the name for splitting gateways, 
+              &quot;merge&quot; or &quot;join&quot; for merging gateways.
             </div>
             
             <div className="flex justify-end space-x-2">

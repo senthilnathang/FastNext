@@ -7,6 +7,7 @@ import { Badge } from '@/shared/components/ui/badge';
 import { Progress } from '@/shared/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/components/ui/tabs';
 import { Alert, AlertDescription, AlertTitle } from '@/shared/components/ui/alert';
+import { Label } from '@/shared/components/ui/label';
 import { 
   Server, 
   Activity, 

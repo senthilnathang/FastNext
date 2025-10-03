@@ -5,10 +5,11 @@ import { projectsStore } from '@/lib/data/projects';
 // GET /api/v1/projects/[id] - Get single project
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const id = parseInt(params.id);
+    const { id: idString } = await params;
+    const id = parseInt(idString);
     
     if (isNaN(id)) {
       return NextResponse.json(
@@ -39,10 +40,11 @@ export async function GET(
 // PUT /api/v1/projects/[id] - Update project
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const id = parseInt(params.id);
+    const { id: idString } = await params;
+    const id = parseInt(idString);
     
     if (isNaN(id)) {
       return NextResponse.json(
@@ -96,10 +98,11 @@ export async function PUT(
 // DELETE /api/v1/projects/[id] - Delete project
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const id = parseInt(params.id);
+    const { id: idString } = await params;
+    const id = parseInt(idString);
     
     if (isNaN(id)) {
       return NextResponse.json(

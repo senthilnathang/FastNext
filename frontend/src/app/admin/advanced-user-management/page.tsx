@@ -106,12 +106,15 @@ export default function AdvancedUserManagementPage() {
   const [activeTab, setActiveTab] = useState('overview');
 
   // API hooks
-  const { data: users = [], isLoading: usersLoading, error: usersError } = useUsers();
+  const { data: usersData, isLoading: usersLoading, error: usersError } = useUsers();
   const { data: roles = [] } = useRoles();
   const updateUserMutation = useUpdateUser();
   const deleteUserMutation = useDeleteUser();
   const toggleStatusMutation = useToggleUserStatus();
   const resetPasswordMutation = useResetUserPassword();
+
+  // Extract users array from response
+  const users = usersData?.items || [];
 
   // Mock data for demo - in real app, these would come from API
   const mockUserActivities: UserActivity[] = [
@@ -152,9 +155,9 @@ export default function AdvancedUserManagementPage() {
 
   const mockAnalytics: UserAnalytics = {
     totalUsers: users.length,
-    activeUsers: users.filter(u => u.isActive).length,
+    activeUsers: users.filter(u => u.is_active).length,
     newUsersToday: 5,
-    suspendedUsers: users.filter(u => !u.isActive).length,
+    suspendedUsers: users.filter(u => !u.is_active).length,
     userGrowth: {
       daily: 2.5,
       weekly: 8.3,
@@ -176,15 +179,15 @@ export default function AdvancedUserManagementPage() {
   const filteredUsers = useMemo(() => {
     return users.filter(user => {
       const matchesSearch = !searchTerm || 
-        user.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        user.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         user.email?.toLowerCase().includes(searchTerm.toLowerCase());
       
       const matchesRole = roleFilter === 'all' || 
         user.roles?.some(role => role.toLowerCase() === roleFilter.toLowerCase());
       
       const matchesStatus = statusFilter === 'all' ||
-        (statusFilter === 'active' && user.isActive) ||
-        (statusFilter === 'inactive' && !user.isActive);
+        (statusFilter === 'active' && user.is_active) ||
+        (statusFilter === 'inactive' && !user.is_active);
 
       return matchesSearch && matchesRole && matchesStatus;
     });

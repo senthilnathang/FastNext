@@ -839,7 +839,7 @@ export default function WorkflowsPage() {
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Workflow Type</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete the workflow type "{typeToDelete?.name}"? 
+              Are you sure you want to delete the workflow type &quot;{typeToDelete?.name}&quot;? 
               This action cannot be undone and may affect existing templates.
             </AlertDialogDescription>
           </AlertDialogHeader>
@@ -862,7 +862,7 @@ export default function WorkflowsPage() {
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Workflow Template</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete the workflow template "{templateToDelete?.name}"? 
+              Are you sure you want to delete the workflow template &quot;{templateToDelete?.name}&quot;? 
               This action cannot be undone and may affect existing workflow instances.
             </AlertDialogDescription>
           </AlertDialogHeader>
