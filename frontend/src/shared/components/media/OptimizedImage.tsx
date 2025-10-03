@@ -24,7 +24,7 @@ const aspectRatios = {
   'auto': ''
 }
 
-function ImageSkeleton({ className }: { className?: string }) {
+const ImageSkeleton = React.memo(function ImageSkeleton({ className }: { className?: string }) {
   return (
     <div 
       className={cn(
@@ -33,9 +33,9 @@ function ImageSkeleton({ className }: { className?: string }) {
       )}
     />
   )
-}
+})
 
-export function OptimizedImage({
+export const OptimizedImage = React.memo(function OptimizedImage({
   src,
   alt,
   fallbackSrc = '/images/placeholder.png',
@@ -173,7 +173,7 @@ export function OptimizedImage({
       )}
     </div>
   )
-}
+})
 
 // Gallery component for multiple optimized images
 interface ImageGalleryProps {
@@ -188,7 +188,7 @@ interface ImageGalleryProps {
   className?: string
 }
 
-export function ImageGallery({
+export const ImageGallery = React.memo(function ImageGallery({
   images,
   columns = 3,
   gap = 'md',
@@ -232,6 +232,6 @@ export function ImageGallery({
       ))}
     </div>
   )
-}
+})
 
 export default OptimizedImage

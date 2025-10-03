@@ -30,6 +30,7 @@ const UsersPage: React.FC<UsersPageProps> = () => {
   const [createDialogOpen, setCreateDialogOpen] = React.useState(false)
   const [editDialogOpen, setEditDialogOpen] = React.useState(false)
   const [selectedUser, setSelectedUser] = React.useState<User | null>(null)
+  const firstInputRef = React.useRef<HTMLInputElement>(null)
   const [activeView, setActiveView] = React.useState('users-list')
   const [searchQuery, setSearchQuery] = React.useState('')
   const [filters, setFilters] = React.useState<Record<string, any>>({})
@@ -51,7 +52,17 @@ const UsersPage: React.FC<UsersPageProps> = () => {
     password: ''
   })
 
-  // Define columns for the ViewManager
+  // Focus management for dialog
+  React.useEffect(() => {
+    if (createDialogOpen && firstInputRef.current) {
+      const timer = setTimeout(() => {
+        firstInputRef.current?.focus()
+      }, 100)
+      return () => clearTimeout(timer)
+    }
+  }, [createDialogOpen])
+
+  // Define columns for the ViewManager (memoized for performance)
   const columns: Column<User>[] = React.useMemo(() => [
     {
       id: 'username',
@@ -470,6 +481,9 @@ const UsersPage: React.FC<UsersPageProps> = () => {
                 placeholder="user@example.com"
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                ref={firstInputRef}
+                aria-required="true"
+                aria-describedby="email-error"
               />
             </div>
             <div className="grid gap-2">
@@ -479,6 +493,8 @@ const UsersPage: React.FC<UsersPageProps> = () => {
                 placeholder="username"
                 value={formData.username}
                 onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+                aria-required="true"
+                aria-describedby="username-error"
               />
             </div>
             <div className="grid gap-2">
@@ -498,7 +514,12 @@ const UsersPage: React.FC<UsersPageProps> = () => {
                 placeholder="Password"
                 value={formData.password}
                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                aria-required="true"
+                aria-describedby="password-error password-help"
               />
+              <div id="password-help" className="text-xs text-muted-foreground">
+                Password must be at least 8 characters long
+              </div>
             </div>
           </div>
           <div className="flex justify-end space-x-2">

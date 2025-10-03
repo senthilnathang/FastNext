@@ -25,7 +25,9 @@ interface VirtualizedRowProps<TData> {
   style: React.CSSProperties
 }
 
-function VirtualizedRow<TData>({ row, index, style }: VirtualizedRowProps<TData>) {
+const VirtualizedRow = React.memo(function VirtualizedRow<TData>({ row, index, style }: VirtualizedRowProps<TData>) {
+  const cells = React.useMemo(() => row.getVisibleCells(), [row]);
+  
   return (
     <div 
       style={style} 
@@ -34,7 +36,7 @@ function VirtualizedRow<TData>({ row, index, style }: VirtualizedRowProps<TData>
         index % 2 === 0 ? "bg-white dark:bg-gray-900" : "bg-gray-50/50 dark:bg-gray-800/20"
       )}
     >
-      {row.getVisibleCells().map((cell: any, cellIndex: number) => (
+      {cells.map((cell: any, cellIndex: number) => (
         <div
           key={cell.id}
           className={cn(
@@ -50,10 +52,10 @@ function VirtualizedRow<TData>({ row, index, style }: VirtualizedRowProps<TData>
       ))}
     </div>
   )
-}
+})
 
-function TableHeader<TData>({ table }: { columns: ColumnDef<TData, any>[], table: any }) {
-  const headerGroups = table.getHeaderGroups()
+const TableHeader = React.memo(function TableHeader<TData>({ table }: { columns: ColumnDef<TData, any>[], table: any }) {
+  const headerGroups = React.useMemo(() => table.getHeaderGroups(), [table]);
 
   return (
     <div className="flex items-center bg-gray-100 dark:bg-gray-800 border-b-2 border-gray-200 dark:border-gray-700 font-medium text-gray-900 dark:text-gray-100">
@@ -90,7 +92,7 @@ function TableHeader<TData>({ table }: { columns: ColumnDef<TData, any>[], table
       ))}
     </div>
   )
-}
+})
 
 export function VirtualizedTable<TData, TValue>({
   columns,
@@ -151,6 +153,8 @@ export function VirtualizedTable<TData, TValue>({
               value={searchValue}
               onChange={(e) => setSearchValue(e.target.value)}
               className="pl-10"
+              aria-label={`Search by ${searchKey}`}
+              role="searchbox"
             />
           </div>
           {searchValue && (
@@ -179,7 +183,12 @@ export function VirtualizedTable<TData, TValue>({
       </div>
 
       {/* Virtualized Table */}
-      <div className="border rounded-lg overflow-hidden bg-white dark:bg-gray-900">
+      <div 
+        className="border rounded-lg overflow-hidden bg-white dark:bg-gray-900"
+        role="table"
+        aria-label={`Virtualized table with ${filteredData.length} rows`}
+        aria-rowcount={filteredData.length}
+      >
         {/* Header */}
         <TableHeader columns={columns} table={table} />
         

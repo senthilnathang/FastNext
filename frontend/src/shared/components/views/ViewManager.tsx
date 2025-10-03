@@ -171,7 +171,7 @@ export interface ViewManagerProps<T = any> {
   onCalendarQuickAdd?: (date: Date, title: string) => void
 }
 
-export function ViewManager<T extends { id: number | string }>({
+export const ViewManager = React.memo(function ViewManager<T extends { id: number | string }>({
   data,
   columns: initialColumns,
   loading = false,
@@ -571,6 +571,8 @@ export function ViewManager<T extends { id: number | string }>({
               value={localSearchQuery}
               onChange={(e) => handleSearchChange(e.target.value)}
               className="pl-10 w-64"
+              aria-label="Search through table data"
+              role="searchbox"
             />
           </div>
         )}
@@ -630,9 +632,25 @@ export function ViewManager<T extends { id: number | string }>({
   )
 
   const renderCardView = () => (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-      {processedData.map((item) => (
-        <div key={item.id} className="bg-background border rounded-lg p-4 hover:shadow-md transition-shadow">
+    <div 
+      className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
+      role="grid"
+      aria-label={`${title || 'Data'} cards`}
+    >
+      {processedData.map((item, index) => (
+        <div 
+          key={item.id} 
+          className="bg-background border rounded-lg p-4 hover:shadow-md transition-shadow focus-within:ring-2 focus-within:ring-primary"
+          role="gridcell"
+          tabIndex={0}
+          aria-label={`Item ${index + 1} of ${processedData.length}`}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              onViewClick?.(item);
+            }
+          }}
+        >
           {orderedColumns.slice(0, 3).map((column) => (
             <div key={column.id} className="mb-2">
               <span className="text-sm font-medium text-muted-foreground">{column.label}: </span>
@@ -641,12 +659,22 @@ export function ViewManager<T extends { id: number | string }>({
           ))}
           <div className="flex justify-end space-x-2 mt-4">
             {onViewClick && (
-              <Button variant="outline" size="sm" onClick={() => onViewClick(item)}>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => onViewClick(item)}
+                aria-label={`View details for item ${item.id}`}
+              >
                 View
               </Button>
             )}
             {onEditClick && (
-              <Button variant="outline" size="sm" onClick={() => onEditClick(item)}>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => onEditClick(item)}
+                aria-label={`Edit item ${item.id}`}
+              >
                 Edit
               </Button>
             )}
@@ -659,22 +687,36 @@ export function ViewManager<T extends { id: number | string }>({
   const renderListView = () => (
     <div className="bg-background border rounded-lg overflow-hidden">
       <div className="overflow-x-auto">
-        <table className="w-full">
+        <table 
+          className="w-full" 
+          role="table" 
+          aria-label={`${title || 'Data'} table with ${processedData.length} rows`}
+        >
           <thead className="bg-muted/50">
             <tr>
               {selectable && (
-                <th className="w-12 p-4">
+                <th className="w-12 p-4" scope="col">
                   <input
                     type="checkbox"
                     checked={selectedItems.length === processedData.length && processedData.length > 0}
                     onChange={(e) => {
                       onSelectionChange?.(e.target.checked ? processedData : [])
                     }}
+                    aria-label="Select all rows"
                   />
                 </th>
               )}
               {orderedColumns.map((column) => (
-                <th key={column.id} className="text-left p-4 font-medium">
+                <th 
+                  key={column.id} 
+                  className="text-left p-4 font-medium" 
+                  scope="col"
+                  aria-sort={
+                    sortBy === column.key 
+                      ? sortOrder === 'asc' ? 'ascending' : 'descending'
+                      : column.sortable !== false ? 'none' : undefined
+                  }
+                >
                   <div className="flex items-center space-x-2">
                     <span>{column.label}</span>
                     {column.sortable !== false && (
@@ -683,6 +725,11 @@ export function ViewManager<T extends { id: number | string }>({
                         size="sm"
                         onClick={() => handleSortChange(column.key as string)}
                         className="h-auto p-0"
+                        aria-label={`Sort by ${column.label} ${
+                          sortBy === column.key 
+                            ? sortOrder === 'asc' ? 'descending' : 'ascending'
+                            : 'ascending'
+                        }`}
                       >
                         {sortBy === column.key ? (
                           sortOrder === 'asc' ? <SortAsc className="h-4 w-4" /> : <SortDesc className="h-4 w-4" />
@@ -694,7 +741,7 @@ export function ViewManager<T extends { id: number | string }>({
                   </div>
                 </th>
               ))}
-              <th className="w-32 p-4 font-medium">Actions</th>
+              <th className="w-32 p-4 font-medium" scope="col">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -711,6 +758,7 @@ export function ViewManager<T extends { id: number | string }>({
                           : selectedItems.filter(selected => selected.id !== item.id)
                         onSelectionChange?.(newSelection)
                       }}
+                      aria-label={`Select row ${item.id}`}
                     />
                   </td>
                 )}
@@ -988,4 +1036,4 @@ export function ViewManager<T extends { id: number | string }>({
       {renderCurrentView()}
     </div>
   )
-}
+})
