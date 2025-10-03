@@ -12,7 +12,11 @@ import {
   Upload, 
   Download, 
   Settings,
-  ArrowRight
+  ArrowRight,
+  Activity,
+  FileText,
+  Server,
+  Database
 } from 'lucide-react';
 
 const adminMenuItems = [
@@ -21,6 +25,13 @@ const adminMenuItems = [
     href: '/admin/users',
     icon: Users,
     description: 'Manage user accounts and access'
+  },
+  {
+    title: 'Advanced User Management',
+    href: '/admin/advanced-user-management',
+    icon: Users,
+    description: 'Advanced user administration and analytics',
+    badge: 'Enhanced'
   },
   {
     title: 'Role Management',
@@ -35,18 +46,37 @@ const adminMenuItems = [
     description: 'Define and manage system permissions'
   },
   {
+    title: 'Audit Logs',
+    href: '/admin/audit-logs',
+    icon: FileText,
+    description: 'Track and monitor all system activities',
+    badge: 'New'
+  },
+  {
+    title: 'System Monitoring',
+    href: '/admin/system-monitoring',
+    icon: Server,
+    description: 'Real-time system performance and health monitoring',
+    badge: 'New'
+  },
+  {
+    title: 'Configuration Management',
+    href: '/admin/configuration',
+    icon: Settings,
+    description: 'Manage system configuration and settings',
+    badge: 'New'
+  },
+  {
     title: 'Data Import',
     href: '/admin/data-import',
     icon: Upload,
-    description: 'Import data into database tables',
-    badge: 'New'
+    description: 'Import data into database tables'
   },
   {
     title: 'Data Export',
     href: '/admin/data-export',
     icon: Download,
-    description: 'Export data from database tables',
-    badge: 'New'
+    description: 'Export data from database tables'
   }
 ];
 
