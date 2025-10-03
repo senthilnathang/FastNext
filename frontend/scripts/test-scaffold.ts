@@ -1,4 +1,4 @@
-import { ScaffoldGenerator, ModelDefinition } from '../src/shared/utils/scaffold-generator';
+import { ScaffoldGenerator, type ModelDefinition } from '../src/shared/utils/scaffold-generator';
 
 // Define a sample Product model for testing
 const productModel: ModelDefinition = {
@@ -99,7 +99,5 @@ try {
   console.log('✅ Frontend scaffolding test completed successfully!');
 } catch (error) {
   console.error('❌ Frontend scaffolding test failed:', error);
-  if (error instanceof Error) {
-    console.error(error.stack);
-  }
+  console.error(error.stack);
 }

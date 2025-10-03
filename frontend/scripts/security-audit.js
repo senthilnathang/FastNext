@@ -5,10 +5,10 @@
  * Analyzes dependencies for vulnerabilities and security issues
  */
 
-const fs = require('fs');
-const path = require('path');
-const { execSync } = require('child_process');
-const crypto = require('crypto');
+import fs from 'fs';
+import path from 'path';
+import { execSync } from 'child_process';
+import crypto from 'crypto';
 
 class SecurityAuditor {
   constructor() {
@@ -436,7 +436,7 @@ class SecurityAuditor {
 }
 
 // Run the audit
-if (require.main === module) {
+if (import.meta.url.startsWith('file://') && process.argv[1] === new URL(import.meta.url).pathname) {
   const auditor = new SecurityAuditor();
   auditor.runAudit().catch(error => {
     console.error('Audit failed:', error);
@@ -444,4 +444,4 @@ if (require.main === module) {
   });
 }
 
-module.exports = SecurityAuditor;
+export default SecurityAuditor;

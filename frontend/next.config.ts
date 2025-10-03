@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import crypto from 'crypto';
 
 const nextConfig: NextConfig = {
   // Enable standalone output for Docker
@@ -37,7 +38,7 @@ const nextConfig: NextConfig = {
     const isProd = process.env.NODE_ENV === 'production';
     
     // Generate nonce for CSP
-    const nonce = Buffer.from(require('crypto').randomBytes(16)).toString('base64');
+    const nonce = Buffer.from(crypto.randomBytes(16)).toString('base64');
     
     // Content Security Policy with environment-specific rules
     const cspDirectives = [

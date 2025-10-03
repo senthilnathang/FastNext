@@ -3,8 +3,8 @@
  * Verify frontend upload integration with backend API
  */
 
-const fs = require('fs');
-const path = require('path');
+import fs from 'fs';
+import path from 'path';
 
 function verifyApiEndpoints() {
   console.log('🔍 Verifying Frontend API Integration...');
@@ -269,6 +269,6 @@ function main() {
   }
 }
 
-if (require.main === module) {
+if (import.meta.url.startsWith('file://') && process.argv[1] === new URL(import.meta.url).pathname) {
   main();
 }
