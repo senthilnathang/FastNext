@@ -24,6 +24,7 @@ from app.middleware.security_middleware import (
 from app.middleware.enhanced_logging_middleware import (
     create_enhanced_logging_middleware, create_auth_event_middleware
 )
+from app.middleware.rls_middleware import RLSMiddleware
 
 # Setup comprehensive logging
 setup_logging()
@@ -291,6 +292,17 @@ def _setup_middleware(app: FastAPI):
                 '/docs', '/redoc', '/openapi.json', '/ping', '/version', '/debug'
             }
         )
+    )
+    
+    # Add Row Level Security middleware
+    app.add_middleware(
+        RLSMiddleware,
+        enable_audit=True,
+        exclude_paths=[
+            '/health', '/docs', '/redoc', '/openapi.json', 
+            '/static/', '/_next/', '/favicon.ico', '/debug',
+            '/api/v1/auth/login', '/api/v1/auth/register'  # Don't apply RLS to auth endpoints
+        ]
     )
     
     # Temporarily disable cache and rate limiting middleware to fix encoding issues

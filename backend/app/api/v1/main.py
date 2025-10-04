@@ -10,7 +10,7 @@ from . import (
     project_members, profile, security, activity_logs, audit_trails, 
     assets, user_roles, workflow_types, workflow_states, 
     workflow_templates, workflow_instances, data_import_export, system_configuration,
-    events
+    events, rls, projects_rls
 )
 
 # Import resource routes (move these to v1 structure later)
@@ -62,3 +62,9 @@ v1_router.include_router(data_import_export.router, prefix="/data", tags=["v1-da
 
 # System Configuration
 v1_router.include_router(system_configuration.router, prefix="/config", tags=["v1-configuration"])
+
+# Row Level Security
+v1_router.include_router(rls.router, prefix="/rls", tags=["v1-rls"])
+
+# RLS-Enhanced Endpoints (Examples)
+v1_router.include_router(projects_rls.router, prefix="/projects-rls", tags=["v1-projects-rls"])
