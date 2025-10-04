@@ -6,10 +6,14 @@ import { NuqsProvider, ConditionalAppLayout } from "@/shared/components";
 import { TRPCProvider } from "@/lib/trpc/provider";
 import { SecurityProvider } from "@/lib/security/SecurityProvider";
 import { SessionTimeoutWarning } from "@/shared/components/SessionTimeoutWarning";
+// import { fontVariables } from "./fonts";
 
 export const metadata: Metadata = {
   title: "FastNext Framework",
   description: "Secure, comprehensive web application framework with enhanced authentication",
+  icons: {
+    icon: '/favicon.ico',
+  },
 };
 
 export default function RootLayout({

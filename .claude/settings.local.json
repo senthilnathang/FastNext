@@ -68,7 +68,9 @@
       "Bash(export PGPASSWORD=password)",
       "Bash(npx next:*)",
       "Bash(echo:*)",
-      "WebFetch(domain:api.github.com)"
+      "WebFetch(domain:api.github.com)",
+      "Bash(wget:*)",
+      "Bash(unzip:*)"
     ],
     "deny": []
   }

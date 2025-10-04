@@ -1,5 +1,35 @@
 @import "tailwindcss";
 
+/* Inter Font - Modern, highly readable sans-serif */
+@font-face {
+  font-family: 'Inter';
+  src: url('/fonts/InterVariable.ttf') format('truetype-variations');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+  font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+}
+
+@font-face {
+  font-family: 'Inter';
+  src: url('/fonts/InterVariable-Italic.ttf') format('truetype-variations');
+  font-weight: 100 900;
+  font-style: italic;
+  font-display: swap;
+  font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+}
+
+/* Fira Code - Programming font with ligatures */
+@font-face {
+  font-family: 'Fira Code';
+  src: url('/fonts/FiraCode-Variable.ttf') format('truetype-variations');
+  font-weight: 300 700;
+  font-style: normal;
+  font-display: swap;
+  font-feature-settings: 'calt' 1, 'liga' 1;
+}
+
+/* Fallback fonts for backward compatibility */
 @font-face {
   font-family: 'Geist';
   src: url('./fonts/GeistVF.woff2') format('woff2');
@@ -166,8 +196,8 @@
   --color-primary-rgb: rgb(var(--primary-rgb));
   --color-destructive-rgb: rgb(var(--destructive-rgb));
   
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-mono: 'Fira Code', ui-monospace, monospace;
   --radius: var(--radius);
 }
 
@@ -178,9 +208,12 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-geist-sans), system-ui, -apple-system, sans-serif;
-  line-height: 1.5;
-  font-feature-settings: "rlig" 1, "calt" 1;
+  font-family: var(--font-sans);
+  line-height: 1.6;
+  font-feature-settings: "cv02" 1, "cv03" 1, "cv04" 1, "cv11" 1, "calt" 1;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 /* Smooth transitions for theme changes */
@@ -259,6 +292,74 @@ body {
   .container {
     max-width: 1536px;
   }
+}
+
+/* Enhanced Typography Classes */
+.font-feature-default {
+  font-feature-settings: "cv02" 1, "cv03" 1, "cv04" 1, "cv11" 1, "calt" 1;
+}
+
+.font-feature-tabular {
+  font-feature-settings: "tnum" 1, "lnum" 1;
+}
+
+.font-feature-ligatures {
+  font-feature-settings: "liga" 1, "calt" 1;
+}
+
+/* Typography scale with better proportions */
+.text-display-2xl {
+  font-size: 4.5rem; /* 72px */
+  line-height: 1.1;
+  letter-spacing: -0.025em;
+  font-weight: 700;
+}
+
+.text-display-xl {
+  font-size: 3.75rem; /* 60px */
+  line-height: 1.1;
+  letter-spacing: -0.025em;
+  font-weight: 700;
+}
+
+.text-display-lg {
+  font-size: 3rem; /* 48px */
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  font-weight: 600;
+}
+
+.text-display-md {
+  font-size: 2.25rem; /* 36px */
+  line-height: 1.2;
+  letter-spacing: -0.015em;
+  font-weight: 600;
+}
+
+.text-display-sm {
+  font-size: 1.875rem; /* 30px */
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+  font-weight: 600;
+}
+
+/* Reading optimization */
+.text-reading {
+  font-size: 1.125rem; /* 18px */
+  line-height: 1.7;
+  color: var(--foreground);
+}
+
+.text-reading-lg {
+  font-size: 1.25rem; /* 20px */
+  line-height: 1.75;
+  color: var(--foreground);
+}
+
+/* Code and monospace improvements */
+.font-mono {
+  font-family: var(--font-mono);
+  font-feature-settings: "liga" 1, "calt" 1;
 }
 
 /* Mobile-first responsive text sizes */
