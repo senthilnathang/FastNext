@@ -13,7 +13,8 @@ import {
   Label,
   Button
 } from '@/shared/components'
-import { User as UserIcon, Shield, UserCheck, Mail, Calendar, Clock } from "lucide-react"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/components/ui/card'
+import { User as UserIcon, Shield, UserCheck, Mail, Calendar, Clock, Users, Crown } from "lucide-react"
 import { Badge } from "@/shared/components/ui/badge"
 import type { SortOption, GroupOption } from '@/shared/components/ui'
 import { formatDistanceToNow } from 'date-fns'
@@ -256,6 +257,34 @@ const UsersPage: React.FC<UsersPageProps> = () => {
 
   const users = React.useMemo(() => usersData?.items || [], [usersData])
 
+  // Calculate statistics
+  const stats = React.useMemo(() => {
+    const totalUsers = users.length
+    const activeUsers = users.filter(user => user.is_active).length
+    const inactiveUsers = totalUsers - activeUsers
+    const verifiedUsers = users.filter(user => user.is_verified).length
+    const superUsers = users.filter(user => user.is_superuser).length
+    const recentLogins = users.filter(user => {
+      if (!user.last_login_at) return false
+      const lastLogin = new Date(user.last_login_at)
+      const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
+      return lastLogin > thirtyDaysAgo
+    }).length
+    const neverLoggedIn = users.filter(user => !user.last_login_at).length
+
+    return {
+      totalUsers,
+      activeUsers,
+      inactiveUsers,
+      verifiedUsers,
+      superUsers,
+      recentLogins,
+      neverLoggedIn,
+      verificationRate: totalUsers > 0 ? Math.round((verifiedUsers / totalUsers) * 100) : 0,
+      activityRate: totalUsers > 0 ? Math.round((recentLogins / totalUsers) * 100) : 0
+    }
+  }, [users])
+
   // Define kanban columns for user status
   const kanbanColumns: KanbanColumn[] = React.useMemo(() => [
     { 
@@ -411,10 +440,65 @@ const UsersPage: React.FC<UsersPageProps> = () => {
   }
 
   return (
-    <div className="container mx-auto px-4 py-6 max-w-7xl">
+    <div className="container mx-auto py-6 space-y-6">
+      {/* Statistics Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Users</CardTitle>
+            <Users className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats.totalUsers}</div>
+            <p className="text-xs text-muted-foreground">
+              {stats.activeUsers} active, {stats.inactiveUsers} inactive
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Verified Users</CardTitle>
+            <UserCheck className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats.verifiedUsers}</div>
+            <p className="text-xs text-muted-foreground">
+              {stats.verificationRate}% verification rate
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Recent Activity</CardTitle>
+            <Clock className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats.recentLogins}</div>
+            <p className="text-xs text-muted-foreground">
+              Logged in last 30 days ({stats.activityRate}%)
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Administrators</CardTitle>
+            <Crown className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats.superUsers}</div>
+            <p className="text-xs text-muted-foreground">
+              {stats.neverLoggedIn} never logged in
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+
       <ViewManager
-        title="Users"
-        subtitle="Manage user accounts and permissions"
+        title="Users Management"
+        subtitle="Comprehensive user management with analytics, filtering, sorting, bulk operations, and export capabilities"
         data={users}
         columns={columns}
         views={views}
