@@ -3,7 +3,7 @@
 /* Inter Font - Modern, highly readable sans-serif */
 @font-face {
   font-family: 'Inter';
-  src: url('/fonts/InterVariable.ttf') format('truetype-variations');
+  src: url('/fonts/InterVariable.ttf') format('truetype');
   font-weight: 100 900;
   font-style: normal;
   font-display: swap;
@@ -11,8 +11,8 @@
 }
 
 @font-face {
-  font-family: 'Inter';
-  src: url('/fonts/InterVariable-Italic.ttf') format('truetype-variations');
+  font-family: 'Inter Italic';
+  src: url('/fonts/InterVariable-Italic.ttf') format('truetype');
   font-weight: 100 900;
   font-style: italic;
   font-display: swap;
@@ -22,7 +22,7 @@
 /* Fira Code - Programming font with ligatures */
 @font-face {
   font-family: 'Fira Code';
-  src: url('/fonts/FiraCode-Variable.ttf') format('truetype-variations');
+  src: url('/fonts/FiraCode-Variable.ttf') format('truetype');
   font-weight: 300 700;
   font-style: normal;
   font-display: swap;

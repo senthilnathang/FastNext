@@ -28,6 +28,12 @@ export const API_CONFIG = {
       STATS: '/api/v1/activity-logs/stats',
       EXPORT: '/api/v1/activity-logs/export',
     },
+    EVENTS: {
+      LIST: '/api/v1/events',
+      ME: '/api/v1/events/me',
+      STATS: '/api/v1/events/stats',
+      EXPORT: '/api/v1/events/export',
+    },
     USERS: '/api/v1/users',
     PROJECTS: '/api/v1/projects',
     PAGES: '/api/v1/pages',

@@ -20,6 +20,7 @@ import {
   RefreshCw
 } from 'lucide-react';
 import { API_CONFIG, getApiUrl } from '@/shared/services/api/config';
+import { fetchUserEvents, UserEvent, EventsResponse } from '@/shared/services/api/events';
 import { 
   useSearchState, 
   usePaginationState, 
@@ -27,34 +28,21 @@ import {
   useBooleanFilterState
 } from '@/shared/hooks';
 
-interface ActivityLog {
-  id: number;
-  user_id: number | null;
-  action: string;
-  entity_type: string;
-  entity_id: number | null;
-  entity_name: string | null;
-  description: string;
+// Use UserEvent from events API
+type ActivityLog = UserEvent & {
   level: 'info' | 'warning' | 'error' | 'critical';
-  ip_address: string | null;
-  user_agent: string | null;
-  request_method: string | null;
-  request_path: string | null;
-  status_code: number | null;
-  metadata: string | null;
   created_at: string;
 }
 
 interface ActivityLogStats {
-  total_activities: number;
-  activities_by_action: Record<string, number>;
-  activities_by_level: Record<string, number>;
-  activities_by_entity_type: Record<string, number>;
-  unique_users: number;
-  date_range: {
-    earliest: string | null;
-    latest: string | null;
-  };
+  total_events: number;
+  events_by_action: Record<string, number>;
+  events_by_category: Record<string, number>;
+  events_by_day: Record<string, number>;
+  unique_sessions: number;
+  unique_devices: number;
+  most_active_hours: Record<string, number>;
+  recent_activity_count: number;
 }
 
 interface ActivityLogViewerProps {
@@ -108,9 +96,9 @@ const ActivityItem = memo(({
           <div className="flex items-center space-x-2">
             <Badge
               variant="secondary"
-              className={actionColors[activity.action as keyof typeof actionColors] || 'bg-gray-100 text-gray-800'}
+              className={actionColors[activity.event_action as keyof typeof actionColors] || 'bg-gray-100 text-gray-800'}
             >
-              {activity.action}
+              {activity.event_action}
             </Badge>
             <span className="text-sm text-gray-500">{activity.entity_type}</span>
             {activity.entity_name && (
@@ -132,11 +120,11 @@ const ActivityItem = memo(({
           {activity.ip_address && (
             <span>IP: {activity.ip_address}</span>
           )}
-          {activity.status_code && (
-            <span>Status: {activity.status_code}</span>
+          {activity.user_agent && (
+            <span>Device: {activity.device_info || 'Unknown'}</span>
           )}
-          {activity.request_method && activity.request_path && (
-            <span>{activity.request_method} {activity.request_path}</span>
+          {activity.session_id && (
+            <span>Session: {activity.session_id.substring(0, 8)}...</span>
           )}
         </div>
       </div>
@@ -169,39 +157,32 @@ export default function ActivityLogViewer({ showUserActivitiesOnly = false }: Ac
   const fetchActivityLogs = React.useCallback(async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('access_token');
       
-      const queryParams = new URLSearchParams({
-        skip: ((currentPage - 1) * pageSize).toString(),
-        limit: pageSize.toString(),
+      const filters = {
+        page: currentPage,
+        per_page: pageSize,
         ...(search && { search }),
-        ...(action && { action }),
+        ...(action && { event_action: action }),
         ...(entityType && { entity_type: entityType }),
-        ...(level && { level }),
+        ...(level && { event_category: level }),
         ...(startDate && { start_date: startDate }),
-        ...(endDate && { end_date: endDate })
-      });
+        ...(endDate && { end_date: endDate }),
+        ...(days && { days: parseInt(days) })
+      };
 
-      const endpoint = showUserActivitiesOnly 
-        ? getApiUrl(`${API_CONFIG.ENDPOINTS.ACTIVITY_LOGS.ME}?${queryParams}&days=${days}`)
-        : getApiUrl(`${API_CONFIG.ENDPOINTS.ACTIVITY_LOGS.LIST}?${queryParams}`);
-
-      const response = await fetch(endpoint, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (!response.ok) throw new Error('Failed to fetch activity logs');
+      const response: EventsResponse = await fetchUserEvents(filters);
       
-      const data = await response.json();
-      setActivities(data);
+      // Transform events to match ActivityLog interface
+      const transformedActivities: ActivityLog[] = response.items.map(event => ({
+        ...event,
+        level: (event.event_category as 'info' | 'warning' | 'error' | 'critical') || 'info',
+        created_at: event.timestamp
+      }));
       
-      // Calculate total pages (this is simplified - ideally the API should return total count)
-      setTotalPages(Math.max(1, Math.ceil(data.length / pageSize)));
+      setActivities(transformedActivities);
+      setTotalPages(response.pages);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load activity logs');
+      setError(err instanceof Error ? err.message : 'Failed to load user events');
     } finally {
       setLoading(false);
     }
@@ -210,7 +191,7 @@ export default function ActivityLogViewer({ showUserActivitiesOnly = false }: Ac
   const fetchStats = React.useCallback(async () => {
     try {
       const token = localStorage.getItem('access_token');
-      const response = await fetch(getApiUrl(`${API_CONFIG.ENDPOINTS.ACTIVITY_LOGS.STATS}?days=${days}`), {
+      const response = await fetch(getApiUrl(`${API_CONFIG.ENDPOINTS.EVENTS.STATS}?days=${days}`), {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -222,7 +203,7 @@ export default function ActivityLogViewer({ showUserActivitiesOnly = false }: Ac
         setStats(data);
       }
     } catch (err) {
-      console.error('Failed to fetch activity stats:', err);
+      console.error('Failed to fetch event stats:', err);
     }
   }, [days]);
 
@@ -259,7 +240,7 @@ export default function ActivityLogViewer({ showUserActivitiesOnly = false }: Ac
         format: 'json'
       });
 
-      const response = await fetch(getApiUrl(`${API_CONFIG.ENDPOINTS.ACTIVITY_LOGS.EXPORT}?${queryParams}`), {
+      const response = await fetch(getApiUrl(`${API_CONFIG.ENDPOINTS.EVENTS.EXPORT}?${queryParams}`), {
         headers: {
           'Authorization': `Bearer ${token}`,
         },
@@ -274,7 +255,7 @@ export default function ActivityLogViewer({ showUserActivitiesOnly = false }: Ac
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `activity-logs-${new Date().toISOString().split('T')[0]}.json`;
+      a.download = `user-events-${new Date().toISOString().split('T')[0]}.json`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -296,23 +277,23 @@ export default function ActivityLogViewer({ showUserActivitiesOnly = false }: Ac
 
   // Memoized computed values
   const mostCommonAction = useMemo(() => {
-    if (!stats?.activities_by_action || Object.keys(stats.activities_by_action).length === 0) {
+    if (!stats?.events_by_action || Object.keys(stats.events_by_action).length === 0) {
       return 'N/A';
     }
-    return Object.entries(stats.activities_by_action).reduce((a, b) => 
+    return Object.entries(stats.events_by_action).reduce((a, b) => 
       a[1] > b[1] ? a : b
     )[0];
-  }, [stats?.activities_by_action]);
+  }, [stats?.events_by_action]);
 
   const criticalEventsCount = useMemo(() => {
-    return stats?.activities_by_level?.critical || 0;
-  }, [stats?.activities_by_level?.critical]);
+    return stats?.events_by_category?.critical || 0;
+  }, [stats?.events_by_category?.critical]);
 
   if (loading && activities.length === 0) {
     return (
       <div className="flex items-center justify-center py-8">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-        <span className="ml-2 text-gray-600 dark:text-gray-300">Loading activity logs...</span>
+        <span className="ml-2 text-gray-600 dark:text-gray-300">Loading user events...</span>
       </div>
     );
   }
@@ -324,7 +305,7 @@ export default function ActivityLogViewer({ showUserActivitiesOnly = false }: Ac
         <div className="flex items-center space-x-2">
           <Activity className="h-6 w-6 text-blue-600" />
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-            {showUserActivitiesOnly ? 'My Activity Log' : 'Activity Logs'}
+{showUserActivitiesOnly ? 'My Activity Events' : 'User Events'}
           </h1>
         </div>
         
@@ -362,21 +343,21 @@ export default function ActivityLogViewer({ showUserActivitiesOnly = false }: Ac
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <Card className="p-4">
             <div className="flex items-center justify-between">
-              <span className="text-sm font-medium text-gray-700">Total Activities</span>
+              <span className="text-sm font-medium text-gray-700">Total Events</span>
               <Activity className="h-4 w-4 text-blue-600" />
             </div>
             <div className="text-2xl font-bold text-blue-600">
-              {stats.total_activities.toLocaleString()}
+              {stats.total_events.toLocaleString()}
             </div>
           </Card>
           
           <Card className="p-4">
             <div className="flex items-center justify-between">
-              <span className="text-sm font-medium text-gray-700">Unique Users</span>
+              <span className="text-sm font-medium text-gray-700">Recent Activity</span>
               <User className="h-4 w-4 text-green-600" />
             </div>
             <div className="text-2xl font-bold text-green-600">
-              {stats.unique_users}
+              {stats.recent_activity_count}
             </div>
           </Card>
           
@@ -499,9 +480,9 @@ export default function ActivityLogViewer({ showUserActivitiesOnly = false }: Ac
           {activities.length === 0 ? (
             <div className="p-8 text-center">
               <Activity className="mx-auto h-12 w-12 text-gray-400" />
-              <h3 className="mt-2 text-sm font-medium text-gray-900">No activities found</h3>
+              <h3 className="mt-2 text-sm font-medium text-gray-900">No events found</h3>
               <p className="mt-1 text-sm text-gray-500">
-                No activities match your current filters.
+                No events match your current filters.
               </p>
             </div>
           ) : (
