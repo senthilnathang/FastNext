@@ -21,6 +21,7 @@ import {
   Save,
   RotateCcw,
   Eye,
+  Edit,
   Plus,
   History,
   AlertTriangle,

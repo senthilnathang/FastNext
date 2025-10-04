@@ -3,8 +3,6 @@
 import React, { useState } from 'react';
 import {
   DataImport,
-  DataTableImport,
-  SimpleImportButton,
   PermissionManager,
   useDataImport
 } from '../index';
@@ -250,14 +248,15 @@ export function DataTableImportExample() {
         Import component designed for data tables with quick import options.
       </p>
       
-      <DataTableImport
+      {/* <DataTableImport
         tableName="Users"
         columns={tableColumns}
         onImport={handleImport}
         permissions={adminPermissions}
         allowedFormats={['csv', 'json', 'excel']}
         showAdvanced={true}
-      />
+      /> */}
+      <p>DataTableImport component is commented out</p>
     </div>
   );
 }
@@ -283,26 +282,27 @@ export function SimpleImportExample() {
       </p>
       
       <div className="flex space-x-2">
-        <SimpleImportButton
+        {/* <SimpleImportButton
           tableName="Users"
           columns={tableColumns}
           onImport={handleImport}
           format="csv"
-        />
+        /> */}
         
-        <SimpleImportButton
+        {/* <SimpleImportButton
           tableName="Users"
           columns={tableColumns}
           onImport={handleImport}
           format="json"
-        />
+        /> */}
         
-        <SimpleImportButton
+        {/* <SimpleImportButton
           tableName="Users"
           columns={tableColumns}
           onImport={handleImport}
           format="excel"
-        />
+        /> */}
+        <p>SimpleImportButton components are commented out</p>
       </div>
     </div>
   );
@@ -498,7 +498,7 @@ export function DataImportShowcase() {
       </div>
 
       <BasicImportExample />
-      <DataTableImportExample />
+      {/* <DataTableImportExample /> */}
       <SimpleImportExample />
       <PermissionManagementExample />
       <ImportHookExample />

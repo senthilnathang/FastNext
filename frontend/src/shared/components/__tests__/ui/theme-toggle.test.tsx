@@ -1,8 +1,8 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import { ThemeToggle, SimpleThemeToggle } from '../theme-toggle';
-import { ThemeProvider } from '@/contexts/ThemeContext';
+import { ThemeToggle, SimpleThemeToggle } from '../../ui/theme-toggle';
+import { ThemeProvider } from '@/shared/services/ThemeContext';
 
 // Mock localStorage
 const localStorageMock = {

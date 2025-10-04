@@ -153,7 +153,10 @@ def get_client_ip(request: Request) -> str:
     if real_ip:
         return real_ip
     
-    return request.client.host if request.client else "unknown"
+    try:
+        return request.client.host if request.client and hasattr(request.client, 'host') else "unknown"
+    except (AttributeError, TypeError):
+        return "unknown"
 
 
 def get_logger(name: str) -> logging.Logger:

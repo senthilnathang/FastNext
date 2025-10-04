@@ -20,7 +20,6 @@ interface VirtualizedTableProps<TData, TValue> {
 
 interface VirtualizedRowProps<TData> {
   row: any
-  columns: ColumnDef<TData, any>[]
   index: number
   style: React.CSSProperties
 }
@@ -54,7 +53,7 @@ const VirtualizedRow = React.memo(function VirtualizedRow<TData>({ row, index, s
   )
 })
 
-const TableHeader = React.memo(function TableHeader<TData>({ table }: { columns: ColumnDef<TData, any>[], table: any }) {
+const TableHeader = React.memo(function TableHeader<TData>({ table }: { table: any }) {
   const headerGroups = React.useMemo(() => table.getHeaderGroups(), [table]);
 
   return (
@@ -190,7 +189,7 @@ export function VirtualizedTable<TData, TValue>({
         aria-rowcount={filteredData.length}
       >
         {/* Header */}
-        <TableHeader columns={columns} table={table} />
+        <TableHeader table={table} />
         
         {/* Virtual Container */}
         {filteredData.length > 0 ? (
@@ -206,7 +205,6 @@ export function VirtualizedTable<TData, TValue>({
                   <VirtualizedRow
                     key={row.id}
                     row={row}
-                    columns={columns}
                     index={startIndex + index}
                     style={{
                       height: itemHeight,

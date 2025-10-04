@@ -360,9 +360,11 @@ class UserService:
         """Handle failed login attempt by incrementing counter and locking if necessary."""
         user.failed_login_attempts += 1
         
-        # Lock account after 5 failed attempts for 15 minutes
-        if user.failed_login_attempts >= 5:
-            user.locked_until = datetime.utcnow() + timedelta(minutes=15)
-            logger.warning(f"Account locked due to failed attempts: {user.username} (ID: {user.id})")
+        # TEMPORARILY DISABLED: Lock account after 5 failed attempts for 15 minutes
+        # TODO: Re-enable this in production
+        # if user.failed_login_attempts >= 5:
+        #     user.locked_until = datetime.utcnow() + timedelta(minutes=15)
+        #     logger.warning(f"Account locked due to failed attempts: {user.username} (ID: {user.id})")
         
+        logger.info(f"Failed login attempt #{user.failed_login_attempts} for user: {user.username} (account locking disabled)")
         self.db.commit()

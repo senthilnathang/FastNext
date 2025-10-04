@@ -1,7 +1,7 @@
 import React from 'react'
 import { render, screen } from '@testing-library/react'
 import '@testing-library/jest-dom'
-import Breadcrumb from '../Breadcrumb'
+import Breadcrumb from '../navigation/Breadcrumb'
 
 // Mock Next.js navigation
 

@@ -1,6 +1,6 @@
 import React from 'react'
 import { render, screen, fireEvent } from '@testing-library/react'
-import { MobileSidebar, useMobileSidebar } from '../MobileSidebar'
+import { MobileSidebar, useMobileSidebar } from '../navigation/MobileSidebar'
 
 // Mock framer-motion
 jest.mock('framer-motion', () => ({

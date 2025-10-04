@@ -1,6 +1,6 @@
 import React from 'react'
 import { render, screen, fireEvent } from '@testing-library/react'
-import { MobileSearch } from '../MobileSearch'
+import { MobileSearch } from '../navigation/MobileSearch'
 
 // Mock Web Speech API
 const mockRecognition = {

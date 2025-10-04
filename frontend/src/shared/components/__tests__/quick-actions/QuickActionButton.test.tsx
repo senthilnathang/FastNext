@@ -1,5 +1,5 @@
 import { render, screen, fireEvent } from '@testing-library/react'
-import QuickActionButton from '../QuickActionButton'
+import QuickActionButton from '../../ui/QuickActionButton'
 
 // Mock the QuickActionsMenu component
 jest.mock('../QuickActionsMenu', () => {

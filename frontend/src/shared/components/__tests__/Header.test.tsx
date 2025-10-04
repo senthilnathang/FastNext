@@ -1,9 +1,9 @@
 import React from 'react'
 import { render, screen, fireEvent } from '@testing-library/react'
 import '@testing-library/jest-dom'
-import Header from '../Header'
+import Header from '../layout/Header'
 import { AuthProvider } from '@/modules/auth'
-import { ThemeProvider } from '@/contexts/ThemeContext'
+import { ThemeProvider } from '@/shared/services/ThemeContext'
 
 // Mock Next.js navigation
 jest.mock('next/navigation', () => ({

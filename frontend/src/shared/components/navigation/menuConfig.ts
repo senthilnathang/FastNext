@@ -103,18 +103,6 @@ export const menuItems: MenuItem[] = [
         requiredPermission: 'admin.permissions',
       },
       {
-        title: 'Enhanced Roles',
-        href: '/admin/roles-enhanced',
-        icon: Sparkles,
-        requiredPermission: 'admin.roles',
-      },
-      {
-        title: 'Enhanced Permissions',
-        href: '/admin/permissions-enhanced',
-        icon: Sparkles,
-        requiredPermission: 'admin.permissions',
-      },
-      {
         title: 'Event Logs',
         href: '/admin/events',
         icon: Activity,

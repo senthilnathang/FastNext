@@ -1,6 +1,6 @@
 import React from 'react'
 import { render, screen, fireEvent } from '@testing-library/react'
-import { Button } from '../button'
+import { Button } from '../../ui/button'
 
 describe('Button Component', () => {
   it('renders button with default props', () => {

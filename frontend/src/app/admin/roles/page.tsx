@@ -14,7 +14,9 @@ import {
   Textarea,
   Button
 } from '@/shared/components'
-import { Shield, Users, Key, Calendar, Clock } from "lucide-react"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/components/ui/card'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/components/ui/tabs'
+import { Shield, Users, Key, Calendar, Clock, Crown, Plus, Loader2 } from "lucide-react"
 import { Badge } from "@/shared/components/ui/badge"
 import type { SortOption, GroupOption } from '@/shared/components/ui'
 import { formatDistanceToNow } from 'date-fns'
@@ -57,7 +59,11 @@ export default function RolesPage() {
       render: (value, role) => (
         <div className="flex items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100">
-            <Shield className="h-5 w-5 text-blue-600" />
+            {role.is_system_role ? (
+              <Crown className="h-5 w-5 text-blue-600" />
+            ) : (
+              <Shield className="h-5 w-5 text-blue-600" />
+            )}
           </div>
           <div>
             <div className="font-medium">{value as string}</div>
@@ -76,7 +82,7 @@ export default function RolesPage() {
       render: (value) => (
         <div className="flex items-center space-x-2">
           <Users className="h-4 w-4 text-muted-foreground" />
-          <span className="text-sm">{String(value) || 0}</span>
+          <span className="text-sm font-medium">{String(value) || 0}</span>
         </div>
       )
     },
@@ -89,7 +95,19 @@ export default function RolesPage() {
         return (
           <div className="flex items-center space-x-2">
             <Key className="h-4 w-4 text-muted-foreground" />
-            <span className="text-sm">{permissions.length}</span>
+            <span className="text-sm font-medium">{permissions.length}</span>
+            <div className="flex gap-1">
+              {permissions.slice(0, 3).map((permission, idx) => (
+                <Badge key={idx} variant="outline" className="text-xs">
+                  {permission.category}
+                </Badge>
+              ))}
+              {permissions.length > 3 && (
+                <Badge variant="outline" className="text-xs">
+                  +{permissions.length - 3}
+                </Badge>
+              )}
+            </div>
           </div>
         )
       }
@@ -199,6 +217,29 @@ export default function RolesPage() {
 
   const roles = React.useMemo(() => rolesData?.items || [], [rolesData])
 
+  // Calculate statistics
+  const stats = React.useMemo(() => {
+    const totalRoles = roles.length
+    const systemRoles = roles.filter(role => role.is_system_role).length
+    const customRoles = totalRoles - systemRoles
+    const activeRoles = roles.filter(role => role.is_active).length
+    const inactiveRoles = totalRoles - activeRoles
+    const totalUsers = roles.reduce((sum, role) => sum + (role.user_count || 0), 0)
+    const avgPermissions = roles.length > 0 
+      ? roles.reduce((sum, role) => sum + (role.permissions?.length || 0), 0) / roles.length 
+      : 0
+
+    return {
+      totalRoles,
+      systemRoles,
+      customRoles,
+      activeRoles,
+      inactiveRoles,
+      totalUsers,
+      avgPermissions: Math.round(avgPermissions * 10) / 10
+    }
+  }, [roles])
+
   // Handle actions
   const handleCreateRole = () => {
     if (!formData.name) {
@@ -250,8 +291,9 @@ export default function RolesPage() {
     {
       label: 'Delete Selected',
       action: (items: any[]) => {
-        if (confirm(`Delete ${items.length} roles?`)) {
-          items.forEach(role => deleteRole.mutate(role.id))
+        const customRoles = items.filter(role => !role.is_system_role)
+        if (customRoles.length > 0 && confirm(`Delete ${customRoles.length} roles?`)) {
+          customRoles.forEach(role => deleteRole.mutate(role.id))
         }
       },
       variant: 'destructive' as const
@@ -274,10 +316,65 @@ export default function RolesPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-6 max-w-7xl">
+    <div className="container mx-auto py-6 space-y-6">
+      {/* Statistics Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Roles</CardTitle>
+            <Shield className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats.totalRoles}</div>
+            <p className="text-xs text-muted-foreground">
+              {stats.systemRoles} system, {stats.customRoles} custom
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Active Roles</CardTitle>
+            <Clock className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats.activeRoles}</div>
+            <p className="text-xs text-muted-foreground">
+              {stats.inactiveRoles} inactive
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Users</CardTitle>
+            <Users className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats.totalUsers}</div>
+            <p className="text-xs text-muted-foreground">
+              Across all roles
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Avg Permissions</CardTitle>
+            <Key className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats.avgPermissions}</div>
+            <p className="text-xs text-muted-foreground">
+              Per role
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+
       <ViewManager
-        title="Roles"
-        subtitle="Manage user roles and permissions"
+        title="Roles Management"
+        subtitle="Comprehensive role management with analytics, filtering, sorting, bulk operations, and export capabilities"
         data={roles}
         columns={columns}
         views={views}
@@ -353,6 +450,7 @@ export default function RolesPage() {
               onClick={handleCreateRole}
               disabled={createRole.isPending || !formData.name}
             >
+              {createRole.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               {createRole.isPending ? 'Creating...' : 'Create Role'}
             </Button>
           </div>

@@ -1,7 +1,7 @@
 import React from 'react'
 import { render, screen, fireEvent } from '@testing-library/react'
 import '@testing-library/jest-dom'
-import Sidebar from '../Sidebar'
+import Sidebar from '../navigation/Sidebar'
 import { AuthContext } from '@/modules/auth'
 
 // Mock Next.js navigation

@@ -15,10 +15,9 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger 
 } from '@/shared/components/ui/dropdown-menu';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/shared/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/shared/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/shared/components/ui/alert-dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/components/ui/select';
-import { Switch } from '@/shared/components/ui/switch';
 import { DataTable } from '@/shared/components/ui/data-table';
 import { 
   Users, 
@@ -28,6 +27,7 @@ import {
   Shield, 
   Clock,
   Activity,
+  Filter,
   Eye,
   MoreHorizontal,
   Search,

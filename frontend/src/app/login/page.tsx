@@ -217,8 +217,8 @@ export default function LoginPage() {
             <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-md">
               <h4 className="text-sm font-medium text-blue-800 mb-2">Demo Credentials:</h4>
               <div className="text-xs text-blue-700 space-y-1">
-                <p><strong>Username:</strong> demo@fastnext.com</p>
-                <p><strong>Password:</strong> Demo123!</p>
+                <p><strong>Admin:</strong> admin / AdminPass123</p>
+                <p><strong>Demo:</strong> demo / DemoPass123</p>
               </div>
             </div>
           </CardContent>

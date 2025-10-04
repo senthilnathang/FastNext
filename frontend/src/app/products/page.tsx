@@ -2,11 +2,11 @@
 
 import * as React from 'react'
 import { useState, useMemo, useCallback } from 'react'
-import { Package, Building2, DollarSign, Calendar, User, Globe, ExternalLink, Star } from 'lucide-react'
+import { Package, DollarSign, Calendar, Globe, ExternalLink, Star } from 'lucide-react'
 
 import { Badge } from '@/shared/components/ui/badge'
 import { ViewManager } from '@/shared/components/views'
-import type { Column, ViewConfig, SortOption, GroupOption, BulkAction } from '@/shared/components/views'
+import type { Column, ViewConfig } from '@/shared/components/views'
 
 import { 
   useProducts, 
@@ -48,7 +48,7 @@ const ProductsPage: React.FC<ProductsPageProps> = () => {
         <div className="flex items-center space-x-3">
           <Package className="h-4 w-4 text-blue-600" />
           <div>
-            <div className="font-medium">{value}</div>
+            <div className="font-medium">{String(value)}</div>
             <div className="text-sm text-muted-foreground">
               {product.description || 'No description'}
             </div>
@@ -66,7 +66,7 @@ const ProductsPage: React.FC<ProductsPageProps> = () => {
       render: (value) => (
         <div className="flex items-center space-x-1">
           <DollarSign className="h-3 w-3 text-green-600" />
-          <span className="font-medium">${value}</span>
+          <span className="font-medium">${String(value)}</span>
         </div>
       )
     },
@@ -85,7 +85,7 @@ const ProductsPage: React.FC<ProductsPageProps> = () => {
         { label: 'Home & Garden', value: 'Home & Garden' }
       ],
       render: (value) => (
-        <Badge variant="outline">{value}</Badge>
+        <Badge variant="outline">{String(value)}</Badge>
       )
     },
     {
@@ -133,7 +133,7 @@ const ProductsPage: React.FC<ProductsPageProps> = () => {
       render: (value) => (
         value ? (
           <a 
-            href={value}
+            href={String(value)}
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center space-x-1 text-blue-600 hover:text-blue-800"
@@ -156,7 +156,7 @@ const ProductsPage: React.FC<ProductsPageProps> = () => {
         <div className="flex items-center space-x-1">
           <Calendar className="h-3 w-3 text-gray-500" />
           <span className="text-sm">
-            {new Date(value).toLocaleDateString()}
+            {new Date(String(value)).toLocaleDateString()}
           </span>
         </div>
       )
@@ -184,27 +184,27 @@ const ProductsPage: React.FC<ProductsPageProps> = () => {
   ], [columns])
 
   // Define sort options
-  const sortOptions: SortOption[] = [
-    { key: 'name', label: 'Product Name', defaultOrder: 'asc' },
-    { key: 'price', label: 'Price', defaultOrder: 'desc' },
-    { key: 'category', label: 'Category', defaultOrder: 'asc' },
-    { key: 'created_at', label: 'Created Date', defaultOrder: 'desc' },
-    { key: 'updated_at', label: 'Last Modified', defaultOrder: 'desc' }
+  const sortOptions = [
+    { key: 'name', label: 'Product Name', defaultOrder: 'asc' as const },
+    { key: 'price', label: 'Price', defaultOrder: 'desc' as const },
+    { key: 'category', label: 'Category', defaultOrder: 'asc' as const },
+    { key: 'created_at', label: 'Created Date', defaultOrder: 'desc' as const },
+    { key: 'updated_at', label: 'Last Modified', defaultOrder: 'desc' as const }
   ]
 
   // Define group options
-  const groupOptions: GroupOption[] = [
+  const groupOptions = [
     { key: 'category', label: 'Category', icon: <Package className="h-4 w-4" /> },
     { key: 'is_featured', label: 'Featured Status', icon: <Star className="h-4 w-4" /> },
     { key: 'is_active', label: 'Status', icon: <Globe className="h-4 w-4" /> }
   ]
 
   // Define bulk actions
-  const bulkActions: BulkAction<Product>[] = [
+  const bulkActions = [
     {
       label: 'Delete Selected',
       icon: <Package className="h-4 w-4" />,
-      action: async (items) => {
+      action: async (items: Product[]) => {
         for (const item of items) {
           await deleteProductMutation.mutateAsync(item.id)
         }
@@ -214,7 +214,7 @@ const ProductsPage: React.FC<ProductsPageProps> = () => {
     {
       label: 'Toggle Status',
       icon: <Globe className="h-4 w-4" />,
-      action: async (items) => {
+      action: async (items: Product[]) => {
         for (const item of items) {
           await toggleStatusMutation.mutateAsync(item.id)
         }
@@ -270,7 +270,7 @@ const ProductsPage: React.FC<ProductsPageProps> = () => {
         title="Products"
         subtitle="Manage your product inventory and catalog"
         data={products}
-        columns={columns}
+        columns={columns as any}
         views={views}
         activeView={activeView}
         onViewChange={setActiveView}
@@ -295,15 +295,15 @@ const ProductsPage: React.FC<ProductsPageProps> = () => {
         
         // Selection & Actions
         selectedItems={selectedItems}
-        onSelectionChange={setSelectedItems}
+        onSelectionChange={setSelectedItems as any}
         selectable={true}
-        bulkActions={bulkActions}
+        bulkActions={bulkActions as any}
         
         // CRUD Operations
         onCreateClick={handleCreateProduct}
-        onEditClick={handleProductEdit}
-        onDeleteClick={handleProductDelete}
-        onViewClick={handleProductView}
+        onEditClick={handleProductEdit as any}
+        onDeleteClick={handleProductDelete as any}
+        onViewClick={handleProductView as any}
         
         // Export/Import
         onExport={handleExport}

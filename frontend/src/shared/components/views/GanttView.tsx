@@ -121,6 +121,7 @@ export function GanttView<T extends Record<string, any>>({
   customActions = []
 }: GanttViewProps<T>) {
   const [currentDate, setCurrentDate] = useState(new Date())
+  const [internalViewMode, setInternalViewMode] = useState<'days' | 'weeks' | 'months'>(viewMode)
   const [dragState, setDragState] = useState<{
     isDragging: boolean
     itemId?: string | number
@@ -130,7 +131,7 @@ export function GanttView<T extends Record<string, any>>({
   }>({ isDragging: false })
 
   const containerRef = useRef<HTMLDivElement>(null)
-  const cellWidth = CELL_WIDTH[viewMode]
+  const cellWidth = CELL_WIDTH[internalViewMode]
 
   // Convert raw data to GanttItem format
   const ganttItems: GanttItem<T>[] = useMemo(() => {
@@ -174,40 +175,40 @@ export function GanttView<T extends Record<string, any>>({
     const current = new Date(dateRange.start)
     
     while (current <= dateRange.end) {
-      if (viewMode === 'days') {
+      if (internalViewMode === 'days') {
         if (showWeekends || (current.getDay() !== 0 && current.getDay() !== 6)) {
           columns.push(new Date(current))
         }
         current.setDate(current.getDate() + 1)
-      } else if (viewMode === 'weeks') {
+      } else if (internalViewMode === 'weeks') {
         columns.push(new Date(current))
         current.setDate(current.getDate() + 7)
-      } else if (viewMode === 'months') {
+      } else if (internalViewMode === 'months') {
         columns.push(new Date(current))
         current.setMonth(current.getMonth() + 1)
       }
     }
     
     return columns
-  }, [dateRange, viewMode, showWeekends])
+  }, [dateRange, internalViewMode, showWeekends])
 
   const formatColumnHeader = useCallback((date: Date) => {
-    if (viewMode === 'days') {
+    if (internalViewMode === 'days') {
       return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-    } else if (viewMode === 'weeks') {
+    } else if (internalViewMode === 'weeks') {
       const weekEnd = new Date(date)
       weekEnd.setDate(weekEnd.getDate() + 6)
       return `${date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${weekEnd.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`
     } else {
       return date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
     }
-  }, [viewMode])
+  }, [internalViewMode])
 
   const getItemPosition = useCallback((item: GanttItem<T>) => {
     const startIndex = timelineColumns.findIndex(col => {
-      if (viewMode === 'days') {
+      if (internalViewMode === 'days') {
         return col.toDateString() === item.startDate.toDateString()
-      } else if (viewMode === 'weeks') {
+      } else if (internalViewMode === 'weeks') {
         const weekEnd = new Date(col)
         weekEnd.setDate(weekEnd.getDate() + 6)
         return item.startDate >= col && item.startDate <= weekEnd
@@ -217,9 +218,9 @@ export function GanttView<T extends Record<string, any>>({
     })
 
     const endIndex = timelineColumns.findIndex(col => {
-      if (viewMode === 'days') {
+      if (internalViewMode === 'days') {
         return col.toDateString() === item.endDate.toDateString()
-      } else if (viewMode === 'weeks') {
+      } else if (internalViewMode === 'weeks') {
         const weekEnd = new Date(col)
         weekEnd.setDate(weekEnd.getDate() + 6)
         return item.endDate >= col && item.endDate <= weekEnd
@@ -232,7 +233,7 @@ export function GanttView<T extends Record<string, any>>({
     const width = Math.max(cellWidth, (endIndex - startIndex + 1) * cellWidth)
 
     return { left, width }
-  }, [timelineColumns, cellWidth, viewMode])
+  }, [timelineColumns, cellWidth, internalViewMode])
 
   const handleMouseDown = useCallback((e: React.MouseEvent, item: GanttItem<T>) => {
     if (!allowMove && !allowResize) return
@@ -430,8 +431,8 @@ export function GanttView<T extends Record<string, any>>({
               size="sm"
               onClick={() => {
                 const newDate = new Date(currentDate)
-                if (viewMode === 'days') newDate.setDate(newDate.getDate() - 7)
-                else if (viewMode === 'weeks') newDate.setDate(newDate.getDate() - 28)
+                if (internalViewMode === 'days') newDate.setDate(newDate.getDate() - 7)
+                else if (internalViewMode === 'weeks') newDate.setDate(newDate.getDate() - 28)
                 else newDate.setMonth(newDate.getMonth() - 3)
                 setCurrentDate(newDate)
               }}
@@ -446,8 +447,8 @@ export function GanttView<T extends Record<string, any>>({
               size="sm"
               onClick={() => {
                 const newDate = new Date(currentDate)
-                if (viewMode === 'days') newDate.setDate(newDate.getDate() + 7)
-                else if (viewMode === 'weeks') newDate.setDate(newDate.getDate() + 28)
+                if (internalViewMode === 'days') newDate.setDate(newDate.getDate() + 7)
+                else if (internalViewMode === 'weeks') newDate.setDate(newDate.getDate() + 28)
                 else newDate.setMonth(newDate.getMonth() + 3)
                 setCurrentDate(newDate)
               }}
@@ -460,9 +461,9 @@ export function GanttView<T extends Record<string, any>>({
             {(['days', 'weeks', 'months'] as const).map((mode) => (
               <Button
                 key={mode}
-                variant={viewMode === mode ? 'default' : 'ghost'}
+                variant={internalViewMode === mode ? 'default' : 'ghost'}
                 size="sm"
-                onClick={() => setViewMode(mode)}
+                onClick={() => setInternalViewMode(mode)}
                 className="rounded-none first:rounded-l-md last:rounded-r-md"
               >
                 {mode.charAt(0).toUpperCase() + mode.slice(1)}

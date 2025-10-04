@@ -63,7 +63,7 @@ const nextConfig: NextConfig = {
       // Frame sources - none (prevents embedding iframes)
       "frame-src 'none'",
       // Connect sources - API and monitoring  
-      `connect-src 'self' https://vercel.live wss://vercel.live https://vitals.vercel-insights.com ${isDev ? 'ws://localhost:*' : ''}`,
+      `connect-src 'self' https://vercel.live wss://vercel.live https://vitals.vercel-insights.com ${isDev ? 'ws://localhost:* http://localhost:8000' : ''}`,
       // Worker sources
       "worker-src 'self' blob:",
       // Manifest sources

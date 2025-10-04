@@ -2,7 +2,7 @@ import React from 'react'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { Home, Users, Settings } from 'lucide-react'
-import { BottomNavigation, useBottomNavigation } from '../BottomNavigation'
+import { BottomNavigation, useBottomNavigation } from '../navigation/BottomNavigation'
 
 // Mock framer-motion
 jest.mock('framer-motion', () => ({

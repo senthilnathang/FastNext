@@ -299,8 +299,9 @@ export default function ProjectsPage() {
     }
   };
 
-  const handleDeleteProject = async (project: Project) => {
-    if (confirm(`Are you sure you want to delete "${project.name}"?`)) {
+  const handleDeleteProject = async (item: { id: string | number }) => {
+    const project = projectsData?.items?.find(p => p.id === item.id);
+    if (project && confirm(`Are you sure you want to delete "${project.name}"?`)) {
       try {
         await deleteProject.mutateAsync(project.id);
         // Remove deleted project from selection if it was selected
@@ -311,22 +312,28 @@ export default function ProjectsPage() {
     }
   };
 
-  const handleEditProject = (project: Project) => {
-    setSelectedProject(project);
-    setFormData({
-      name: project.name,
-      description: project.description || '',
-      is_public: project.is_public,
-      settings: project.settings,
-      start_date: project.start_date || '',
-      end_date: project.end_date || ''
-    });
-    setEditDialogOpen(true);
+  const handleEditProject = (item: { id: string | number }) => {
+    const project = projectsData?.items?.find(p => p.id === item.id);
+    if (project) {
+      setSelectedProject(project);
+      setFormData({
+        name: project.name,
+        description: project.description || '',
+        is_public: project.is_public,
+        settings: project.settings,
+        start_date: project.start_date || '',
+        end_date: project.end_date || ''
+      });
+      setEditDialogOpen(true);
+    }
   };
 
-  const handleViewProject = (project: Project) => {
-    // Navigate to project detail page or open view dialog
-    console.log('View project:', project);
+  const handleViewProject = (item: { id: string | number }) => {
+    const project = projectsData?.items?.find(p => p.id === item.id);
+    if (project) {
+      // Navigate to project detail page or open view dialog
+      console.log('View project:', project);
+    }
   };
 
   const handleExport = (format: 'csv' | 'json' | 'excel') => {
@@ -360,7 +367,10 @@ export default function ProjectsPage() {
     {
       label: 'Delete Selected',
       icon: <Trash2 className="h-4 w-4 mr-2" />,
-      action: (selectedProjects: Project[]) => {
+      action: (items: { id: string | number }[]) => {
+        const selectedProjects = items.map(item => 
+          projectsData?.items?.find(p => p.id === item.id)
+        ).filter(Boolean) as Project[];
         if (confirm(`Delete ${selectedProjects.length} selected projects?`)) {
           selectedProjects.forEach(project => {
             deleteProject.mutate(project.id);
@@ -393,7 +403,7 @@ export default function ProjectsPage() {
         title="Projects"
         subtitle="Manage your projects and applications"
         data={projects}
-        columns={columns}
+        columns={columns as any}
         views={views}
         activeView={activeView}
         onViewChange={setActiveView}
@@ -421,7 +431,12 @@ export default function ProjectsPage() {
         onViewClick={handleViewProject}
         selectable={true}
         selectedItems={selectedItems}
-        onSelectionChange={setSelectedItems}
+        onSelectionChange={(items: { id: string | number }[]) => {
+          const fullProjects = items.map(item => 
+            projectsData?.items?.find(p => p.id === item.id)
+          ).filter(Boolean) as Project[];
+          setSelectedItems(fullProjects);
+        }}
         bulkActions={bulkActions}
         showToolbar={true}
         showSearch={true}
