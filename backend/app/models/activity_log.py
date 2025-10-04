@@ -184,6 +184,27 @@ class ActivityLog(Base):
             }
         }
     
+    def to_user_event_dict(self):
+        """Convert to frontend UserEvent interface format"""
+        return {
+            'id': self.id,
+            'user_id': self.user_id,
+            'event_type': self.entity_type,
+            'event_category': self.category.value if self.category else None,
+            'event_action': self.action.value if self.action else None,
+            'entity_type': self.entity_type,
+            'entity_id': int(self.entity_id) if self.entity_id and str(self.entity_id).isdigit() else None,
+            'entity_name': self.entity_name,
+            'description': self.description,
+            'ip_address': self.ip_address,
+            'user_agent': self.user_agent,
+            'location': f"{self.city}, {self.country_code}" if self.city and self.country_code else self.country_code,
+            'metadata': self.event_metadata,
+            'timestamp': self.created_at.isoformat() if self.created_at else None,
+            'session_id': self.session_id,
+            'device_info': self.user_agent  # Using user_agent as device_info
+        }
+    
     @property
     def severity_color(self):
         """Get color code for severity level"""

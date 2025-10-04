@@ -70,7 +70,8 @@
       "Bash(echo:*)",
       "WebFetch(domain:api.github.com)",
       "Bash(wget:*)",
-      "Bash(unzip:*)"
+      "Bash(unzip:*)",
+      "Bash(ss:*)"
     ],
     "deny": []
   }

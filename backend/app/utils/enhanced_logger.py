@@ -276,7 +276,7 @@ class EnhancedLogger:
             
             return {
                 'success': True,
-                'data': [event.to_event_dict() for event in events],
+                'data': [event.to_user_event_dict() for event in events],
                 'total': total_count,
                 'page': (offset // limit) + 1,
                 'pages': (total_count + limit - 1) // limit

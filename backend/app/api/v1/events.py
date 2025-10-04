@@ -67,6 +67,14 @@ class EventListResponse(BaseModel):
     message: Optional[str] = None
 
 
+class UserEventResponse(BaseModel):
+    items: List[EventResponse]
+    total: int
+    page: int
+    per_page: int
+    pages: int
+
+
 class EventStatistics(BaseModel):
     success: bool
     timeRange: Dict[str, Any]
@@ -75,6 +83,17 @@ class EventStatistics(BaseModel):
     byCategory: Dict[str, int]
     criticalEvents: List[EventResponse]
     topUsers: List[Dict[str, Any]]
+
+
+class UserEventStatistics(BaseModel):
+    total_events: int
+    events_by_category: Dict[str, int]
+    events_by_action: Dict[str, int]
+    events_by_day: Dict[str, int]
+    unique_sessions: int
+    unique_devices: int
+    most_active_hours: Dict[str, int]
+    recent_activity_count: int
 
 
 class LogFileResponse(BaseModel):
@@ -175,6 +194,186 @@ async def get_events(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to retrieve events: {str(e)}"
+        )
+
+
+@router.get("/events/me", response_model=UserEventResponse)
+async def get_user_events(
+    request: Request,
+    page: int = Query(1, ge=1, description="Page number"),
+    limit: int = Query(50, ge=1, le=500, description="Events per page"),
+    level: Optional[ActivityLevel] = Query(None, description="Filter by level"),
+    category: Optional[EventCategory] = Query(None, description="Filter by category"),
+    action: Optional[ActivityAction] = Query(None, description="Filter by action"),
+    start_date: Optional[datetime] = Query(None, description="Start date (ISO format)"),
+    end_date: Optional[datetime] = Query(None, description="End date (ISO format)"),
+    search_query: Optional[str] = Query(None, description="Search in description, entity name"),
+    days: Optional[int] = Query(None, ge=1, le=365, description="Number of days to look back"),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Get events for the current user only
+    """
+    
+    start_time = datetime.now()
+    
+    try:
+        # Validate pagination
+        pagination = validate_pagination_params_enhanced(
+            page=page,
+            limit=limit,
+            max_limit=500
+        )
+        
+        # Calculate offset
+        offset = (page - 1) * limit
+        
+        # If days parameter is provided, calculate start_date
+        if days and not start_date:
+            start_date = datetime.now() - timedelta(days=days)
+        
+        # Get events from database for current user only
+        result = enhanced_logger.get_events_from_db(
+            db=db,
+            limit=limit,
+            offset=offset,
+            level=level,
+            category=category,
+            action=action,
+            user_id=current_user.id,  # Filter by current user
+            start_date=start_date,
+            end_date=end_date,
+            search_query=search_query
+        )
+        
+        if not result['success']:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=result['error']
+            )
+        
+        # Log the API call
+        response_time = int((datetime.now() - start_time).total_seconds() * 1000)
+        log_api_call(
+            db=db,
+            request=request,
+            response_time_ms=response_time,
+            status_code=200,
+            user_id=current_user.id,
+            username=current_user.username
+        )
+        
+        return UserEventResponse(
+            items=result['data'],
+            total=result['total'],
+            page=result['page'],
+            per_page=limit,
+            pages=result['pages']
+        )
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        # Log error
+        response_time = int((datetime.now() - start_time).total_seconds() * 1000)
+        log_api_call(
+            db=db,
+            request=request,
+            response_time_ms=response_time,
+            status_code=500,
+            user_id=current_user.id,
+            username=current_user.username
+        )
+        
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to retrieve user events: {str(e)}"
+        )
+
+
+@router.get("/events/stats", response_model=UserEventStatistics)
+async def get_event_stats(
+    request: Request,
+    days: int = Query(30, ge=1, le=365, description="Days to look back"),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Get event statistics for current user
+    """
+    
+    start_time = datetime.now()
+    
+    try:
+        # Convert days to hours for the existing function
+        hours = days * 24
+        
+        # Get basic statistics for current user
+        # For now, return simple statistics - can be enhanced later
+        start_date = datetime.now() - timedelta(days=days)
+        
+        user_events = db.query(ActivityLog).filter(
+            ActivityLog.user_id == current_user.id,
+            ActivityLog.created_at >= start_date
+        )
+        
+        total_events = user_events.count()
+        events_by_category = {}
+        events_by_action = {}
+        
+        # Count by category
+        for event in user_events.all():
+            category = event.category.value if event.category else 'unknown'
+            action = event.action.value if event.action else 'unknown'
+            
+            events_by_category[category] = events_by_category.get(category, 0) + 1
+            events_by_action[action] = events_by_action.get(action, 0) + 1
+        
+        result = {
+            'success': True,
+            'total_events': total_events,
+            'events_by_category': events_by_category,
+            'events_by_action': events_by_action,
+            'events_by_day': {},
+            'unique_sessions': 0,
+            'unique_devices': 0,
+            'most_active_hours': {},
+            'recent_activity_count': total_events
+        }
+        
+        # Result is always successful in our simple implementation
+        
+        # Log the API call
+        response_time = int((datetime.now() - start_time).total_seconds() * 1000)
+        log_api_call(
+            db=db,
+            request=request,
+            response_time_ms=response_time,
+            status_code=200,
+            user_id=current_user.id,
+            username=current_user.username
+        )
+        
+        return UserEventStatistics(**result)
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        # Log error
+        response_time = int((datetime.now() - start_time).total_seconds() * 1000)
+        log_api_call(
+            db=db,
+            request=request,
+            response_time_ms=response_time,
+            status_code=500,
+            user_id=current_user.id,
+            username=current_user.username
+        )
+        
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to retrieve user statistics: {str(e)}"
         )
 
 
