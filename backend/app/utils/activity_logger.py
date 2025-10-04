@@ -1,6 +1,6 @@
 from typing import Optional
 from sqlalchemy.orm import Session
-from app.models.activity_log import ActivityLog, ActivityAction, ActivityLevel
+from app.models.activity_log import ActivityLog, ActivityAction, ActivityLevel, EventCategory
 import json
 
 
@@ -13,6 +13,7 @@ def log_activity(
     entity_name: Optional[str],
     description: str,
     level: ActivityLevel = ActivityLevel.INFO,
+    category: EventCategory = EventCategory.USER_MANAGEMENT,
     ip_address: Optional[str] = None,
     user_agent: Optional[str] = None,
     request_method: Optional[str] = None,
@@ -24,9 +25,10 @@ def log_activity(
     
     activity_log = ActivityLog(
         user_id=user_id,
+        category=category,
         action=action,
         entity_type=entity_type,
-        entity_id=entity_id,
+        entity_id=str(entity_id) if entity_id else None,
         entity_name=entity_name,
         description=description,
         level=level,
@@ -35,7 +37,7 @@ def log_activity(
         request_method=request_method,
         request_path=request_path,
         status_code=status_code,
-        extra_data=json.dumps(extra_data) if extra_data else None
+        event_metadata=extra_data
     )
     
     try:

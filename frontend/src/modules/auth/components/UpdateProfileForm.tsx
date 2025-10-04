@@ -7,7 +7,7 @@ import { Input } from '@/shared/components/ui/input';
 import { Label } from '@/shared/components/ui/label';
 import { Card } from '@/shared/components/ui/card';
 import { useAuth } from '@/modules/auth';
-import { User, MapPin, Globe, FileText } from 'lucide-react';
+import { User, MapPin, Globe, FileText, Trash2, Upload, Download, Eye } from 'lucide-react';
 import { API_CONFIG, getApiUrl } from '@/shared/services/api/config';
 
 interface ProfileFormData {
@@ -28,6 +28,9 @@ export default function UpdateProfileForm({ onSuccess, onCancel }: UpdateProfile
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [showProfileData, setShowProfileData] = useState(false);
+  const [profileBackup, setProfileBackup] = useState<ProfileFormData | null>(null);
 
   const {
     register,
@@ -91,6 +94,99 @@ export default function UpdateProfileForm({ onSuccess, onCancel }: UpdateProfile
       setValue('website', user.website || '');
       setValue('avatar_url', user.avatar_url || '');
     }
+  };
+
+  const handleBackupProfile = () => {
+    const currentData = {
+      full_name: user?.full_name || '',
+      bio: user?.bio || '',
+      location: user?.location || '',
+      website: user?.website || '',
+      avatar_url: user?.avatar_url || ''
+    };
+    setProfileBackup(currentData);
+    setSuccess(true);
+    setTimeout(() => setSuccess(false), 2000);
+  };
+
+  const handleRestoreProfile = () => {
+    if (profileBackup) {
+      setValue('full_name', profileBackup.full_name);
+      setValue('bio', profileBackup.bio);
+      setValue('location', profileBackup.location);
+      setValue('website', profileBackup.website);
+      setValue('avatar_url', profileBackup.avatar_url);
+      setSuccess(true);
+      setTimeout(() => setSuccess(false), 2000);
+    }
+  };
+
+  const handleClearProfile = async () => {
+    if (!confirm('Are you sure you want to clear all profile information? This action cannot be undone.')) {
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      const token = localStorage.getItem('access_token');
+      const clearData = {
+        full_name: '',
+        bio: '',
+        location: '',
+        website: '',
+        avatar_url: ''
+      };
+
+      const response = await fetch(getApiUrl(API_CONFIG.ENDPOINTS.PROFILE.ME), {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify(clearData),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.detail || 'Failed to clear profile');
+      }
+
+      const updatedUser = await response.json();
+      updateUser(updatedUser);
+      reset();
+      setSuccess(true);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleExportProfile = () => {
+    const profileData = {
+      full_name: user?.full_name || '',
+      bio: user?.bio || '',
+      location: user?.location || '',
+      website: user?.website || '',
+      avatar_url: user?.avatar_url || '',
+      username: user?.username || '',
+      email: user?.email || '',
+      created_at: user?.created_at || '',
+      last_login_at: user?.last_login_at || ''
+    };
+
+    const dataStr = JSON.stringify(profileData, null, 2);
+    const dataBlob = new Blob([dataStr], { type: 'application/json' });
+    const url = URL.createObjectURL(dataBlob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `profile-backup-${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
   };
 
   return (
@@ -212,32 +308,95 @@ export default function UpdateProfileForm({ onSuccess, onCancel }: UpdateProfile
           )}
         </div>
 
-        <div className="flex space-x-3 pt-4">
-          <Button
-            type="submit"
-            disabled={loading}
-            className="flex-1"
-          >
-            {loading ? 'Updating...' : 'Update Profile'}
-          </Button>
-          <Button
-            type="button"
-            variant="outline"
-            onClick={handleReset}
-            disabled={loading}
-          >
-            Reset
-          </Button>
-          {onCancel && (
+        <div className="space-y-4 pt-4">
+          {/* Primary Actions */}
+          <div className="flex space-x-3">
+            <Button
+              type="submit"
+              disabled={loading}
+              className="flex-1"
+            >
+              {loading ? 'Updating...' : 'Update Profile'}
+            </Button>
             <Button
               type="button"
-              variant="ghost"
-              onClick={onCancel}
+              variant="outline"
+              onClick={handleReset}
               disabled={loading}
             >
-              Cancel
+              Reset
             </Button>
-          )}
+            {onCancel && (
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={onCancel}
+                disabled={loading}
+              >
+                Cancel
+              </Button>
+            )}
+          </div>
+
+          {/* Advanced Actions */}
+          <div className="border-t pt-4">
+            <p className="text-sm font-medium text-gray-700 mb-3">Advanced Operations</p>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={handleBackupProfile}
+                disabled={loading}
+                className="flex items-center space-x-1"
+              >
+                <Upload className="h-3 w-3" />
+                <span>Backup</span>
+              </Button>
+              
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={handleRestoreProfile}
+                disabled={loading || !profileBackup}
+                className="flex items-center space-x-1"
+              >
+                <Download className="h-3 w-3" />
+                <span>Restore</span>
+              </Button>
+              
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={handleExportProfile}
+                disabled={loading}
+                className="flex items-center space-x-1"
+              >
+                <Eye className="h-3 w-3" />
+                <span>Export</span>
+              </Button>
+              
+              <Button
+                type="button"
+                variant="destructive"
+                size="sm"
+                onClick={handleClearProfile}
+                disabled={loading}
+                className="flex items-center space-x-1"
+              >
+                <Trash2 className="h-3 w-3" />
+                <span>Clear</span>
+              </Button>
+            </div>
+            
+            {profileBackup && (
+              <p className="text-xs text-green-600 mt-2">
+                Profile backup created. You can restore your previous settings.
+              </p>
+            )}
+          </div>
         </div>
       </form>
     </Card>

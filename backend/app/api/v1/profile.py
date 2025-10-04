@@ -47,7 +47,7 @@ def update_profile(
         }
         
         # Update profile fields
-        update_data = profile_in.dict(exclude_unset=True)
+        update_data = profile_in.model_dump(exclude_unset=True)
         for field, value in update_data.items():
             setattr(current_user, field, value)
         
@@ -56,6 +56,7 @@ def update_profile(
         db.refresh(current_user)
         
         # Log activity
+        from app.models.activity_log import EventCategory
         log_activity(
             db=db,
             user_id=current_user.id,
@@ -64,7 +65,8 @@ def update_profile(
             entity_id=current_user.id,
             entity_name=current_user.full_name or current_user.username,
             description=f"Updated profile information",
-            level=ActivityLevel.INFO
+            level=ActivityLevel.INFO,
+            category=EventCategory.USER_MANAGEMENT
         )
         
         # Log audit trail
@@ -142,7 +144,8 @@ def update_email(
             entity_id=current_user.id,
             entity_name=current_user.username,
             description=f"Changed email from {old_email} to {email_update.email}",
-            level=ActivityLevel.WARNING
+            level=ActivityLevel.WARNING,
+            category=EventCategory.USER_MANAGEMENT
         )
         
         return current_user
@@ -196,7 +199,8 @@ def change_password(
             entity_id=current_user.id,
             entity_name=current_user.username,
             description="Password changed successfully",
-            level=ActivityLevel.WARNING
+            level=ActivityLevel.WARNING,
+            category=EventCategory.SECURITY
         )
         
         return {"message": "Password changed successfully"}
@@ -249,7 +253,8 @@ def update_username(
             entity_id=current_user.id,
             entity_name=current_user.username,
             description=f"Changed username from {old_username} to {username_update.username}",
-            level=ActivityLevel.INFO
+            level=ActivityLevel.INFO,
+            category=EventCategory.USER_MANAGEMENT
         )
         
         return current_user
@@ -395,6 +400,7 @@ def deactivate_account(
             entity_name=current_user.username,
             description=f"Account deactivated. Reason: {deactivation.reason or 'Not specified'}",
             level=ActivityLevel.CRITICAL,
+            category=EventCategory.USER_MANAGEMENT,
             extra_data={
                 "reason": deactivation.reason,
                 "feedback": deactivation.feedback

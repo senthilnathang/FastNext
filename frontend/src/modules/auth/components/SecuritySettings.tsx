@@ -16,7 +16,13 @@ import {
   CheckCircle,
   Clock,
   Users,
-  Mail
+  Mail,
+  Download,
+  Upload,
+  RotateCcw,
+  Trash2,
+  Copy,
+  Settings
 } from 'lucide-react';
 import { API_CONFIG, getApiUrl } from '@/shared/services/api/config';
 
@@ -57,7 +63,8 @@ export default function SecuritySettings() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
-  const { register, handleSubmit, reset, watch } = useForm<SecuritySettingsData>();
+  const [settingsBackup, setSettingsBackup] = useState<SecuritySettingsData | null>(null);
+  const { register, handleSubmit, reset, watch, setValue } = useForm<SecuritySettingsData>();
 
   const allowConcurrentSessions = watch('allow_concurrent_sessions');
 
@@ -196,6 +203,140 @@ export default function SecuritySettings() {
     if (score >= 80) return 'bg-green-100 border-green-200';
     if (score >= 60) return 'bg-yellow-100 border-yellow-200';
     return 'bg-red-100 border-red-200';
+  };
+
+  const handleBackupSettings = () => {
+    if (settings) {
+      setSettingsBackup(settings);
+      setSuccess(true);
+      setTimeout(() => setSuccess(false), 2000);
+    }
+  };
+
+  const handleRestoreSettings = () => {
+    if (settingsBackup) {
+      Object.entries(settingsBackup).forEach(([key, value]) => {
+        setValue(key as keyof SecuritySettingsData, value);
+      });
+      setSuccess(true);
+      setTimeout(() => setSuccess(false), 2000);
+    }
+  };
+
+  const handleResetToDefaults = async () => {
+    if (!confirm('Are you sure you want to reset all security settings to defaults? This action cannot be undone.')) {
+      return;
+    }
+
+    const defaultSettings: SecuritySettingsData = {
+      two_factor_enabled: false,
+      require_password_change: false,
+      password_expiry_days: 90,
+      max_login_attempts: 5,
+      lockout_duration_minutes: 15,
+      max_session_duration_hours: 24,
+      allow_concurrent_sessions: true,
+      max_concurrent_sessions: 3,
+      email_on_login: true,
+      email_on_password_change: true,
+      email_on_security_change: true,
+      email_on_suspicious_activity: true,
+      activity_logging_enabled: true,
+      data_retention_days: 365,
+      api_access_enabled: true,
+      api_rate_limit: 1000
+    };
+
+    try {
+      setSaving(true);
+      const token = localStorage.getItem('access_token');
+      const response = await fetch(getApiUrl(API_CONFIG.ENDPOINTS.SECURITY.SETTINGS), {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify(defaultSettings),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.detail || 'Failed to reset security settings');
+      }
+
+      const updatedSettings = await response.json();
+      setSettings(updatedSettings);
+      reset(updatedSettings);
+      setSuccess(true);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to reset settings');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleExportSettings = () => {
+    if (settings && overview) {
+      const exportData = {
+        security_settings: settings,
+        security_overview: overview,
+        exported_at: new Date().toISOString(),
+        export_version: '1.0'
+      };
+
+      const dataStr = JSON.stringify(exportData, null, 2);
+      const dataBlob = new Blob([dataStr], { type: 'application/json' });
+      const url = URL.createObjectURL(dataBlob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `security-settings-${new Date().toISOString().split('T')[0]}.json`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    }
+  };
+
+  const handleImportSettings = () => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.json';
+    input.onchange = async (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (!file) return;
+
+      try {
+        const text = await file.text();
+        const importData = JSON.parse(text);
+        
+        if (importData.security_settings) {
+          if (confirm('Are you sure you want to import these security settings? This will overwrite your current settings.')) {
+            Object.entries(importData.security_settings).forEach(([key, value]) => {
+              setValue(key as keyof SecuritySettingsData, value);
+            });
+            setSuccess(true);
+            setTimeout(() => setSuccess(false), 2000);
+          }
+        } else {
+          throw new Error('Invalid import file format');
+        }
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to import settings');
+      }
+    };
+    input.click();
+  };
+
+  const copySettingsToClipboard = () => {
+    if (settings) {
+      const settingsText = JSON.stringify(settings, null, 2);
+      navigator.clipboard.writeText(settingsText).then(() => {
+        setSuccess(true);
+        setTimeout(() => setSuccess(false), 2000);
+      }).catch(() => {
+        setError('Failed to copy to clipboard');
+      });
+    }
   };
 
   if (loading) {
@@ -572,14 +713,111 @@ export default function SecuritySettings() {
         </Card>
 
         {/* Submit Button */}
-        <div className="flex justify-end">
-          <Button
-            type="submit"
-            disabled={saving}
-            className="min-w-[120px]"
-          >
-            {saving ? 'Saving...' : 'Save Settings'}
-          </Button>
+        <div className="space-y-4">
+          <div className="flex justify-end">
+            <Button
+              type="submit"
+              disabled={saving}
+              className="min-w-[120px]"
+            >
+              {saving ? 'Saving...' : 'Save Settings'}
+            </Button>
+          </div>
+
+          {/* Advanced Security Operations */}
+          <Card className="p-4">
+            <div className="flex items-center space-x-2 mb-4">
+              <Settings className="h-4 w-4 text-gray-600" />
+              <h4 className="text-sm font-semibold text-gray-900 dark:text-white">
+                Advanced Operations
+              </h4>
+            </div>
+            
+            <div className="grid grid-cols-2 md:grid-cols-6 gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={handleBackupSettings}
+                disabled={saving || !settings}
+                className="flex items-center space-x-1"
+              >
+                <Upload className="h-3 w-3" />
+                <span>Backup</span>
+              </Button>
+              
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={handleRestoreSettings}
+                disabled={saving || !settingsBackup}
+                className="flex items-center space-x-1"
+              >
+                <Download className="h-3 w-3" />
+                <span>Restore</span>
+              </Button>
+              
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={handleExportSettings}
+                disabled={saving}
+                className="flex items-center space-x-1"
+              >
+                <Download className="h-3 w-3" />
+                <span>Export</span>
+              </Button>
+              
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={handleImportSettings}
+                disabled={saving}
+                className="flex items-center space-x-1"
+              >
+                <Upload className="h-3 w-3" />
+                <span>Import</span>
+              </Button>
+              
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={copySettingsToClipboard}
+                disabled={saving || !settings}
+                className="flex items-center space-x-1"
+              >
+                <Copy className="h-3 w-3" />
+                <span>Copy</span>
+              </Button>
+              
+              <Button
+                type="button"
+                variant="destructive"
+                size="sm"
+                onClick={handleResetToDefaults}
+                disabled={saving}
+                className="flex items-center space-x-1"
+              >
+                <RotateCcw className="h-3 w-3" />
+                <span>Reset</span>
+              </Button>
+            </div>
+            
+            <div className="mt-3 space-y-1">
+              {settingsBackup && (
+                <p className="text-xs text-green-600">
+                  Settings backup created. You can restore your previous configuration.
+                </p>
+              )}
+              <p className="text-xs text-gray-500">
+                Use these tools to manage your security configuration. Export/Import allows you to transfer settings between devices.
+              </p>
+            </div>
+          </Card>
         </div>
       </form>
     </div>
