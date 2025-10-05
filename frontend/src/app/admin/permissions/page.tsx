@@ -1,158 +1,165 @@
 'use client'
 
 import * as React from 'react'
-import { ViewManager, ViewConfig, Column } from '@/shared/components/views'
-import { 
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  Input,
-  Label,
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-  Button
-} from '@/shared/components'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/components/ui/card'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/components/ui/tabs'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { CommonFormViewManager, createFormViewConfig } from '@/shared/components/views/CommonFormViewManager'
+import { FormField } from '@/shared/components/views/GenericFormView'
+import { Column } from '@/shared/components/views/ViewManager'
+import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card'
 import { Badge } from '@/shared/components/ui/badge'
-import { Key, Tag, Lock, Zap, Calendar, Shield, Plus, Loader2 } from 'lucide-react'
-import type { SortOption, GroupOption } from '@/shared/components/ui'
+import { Key, Tag, Lock, Zap, Calendar, Shield } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
+import { z } from 'zod'
 
 // Import React Query hooks
-import { usePermissions, useCreatePermission, useDeletePermission } from "@/modules/admin/hooks/usePermissions"
+import { usePermissions, useCreatePermission, useDeletePermission, useUpdatePermission } from "@/modules/admin/hooks/usePermissions"
 import { apiUtils } from "@/shared/services/api/client"
 import type { Permission } from "@/shared/services/api/permissions"
 
-// Categories and actions for permission management
-const categories = [
-  'project',
-  'page', 
-  'component',
-  'user',
-  'system',
-  'content',
-  'reports',
-  'api'
-]
+// Permission validation schema
+const permissionSchema = z.object({
+  name: z.string().min(1, 'Permission name is required').max(100),
+  codename: z.string().min(1, 'Codename is required').max(100),
+  description: z.string().optional(),
+  resource_type: z.string().min(1, 'Resource type is required'),
+  action: z.string().min(1, 'Action is required'),
+  is_active: z.boolean().default(true),
+})
 
-const permissionActions = [
-  'create',
-  'read', 
-  'update',
-  'delete',
-  'manage',
-  'publish',
-  'deploy',
-  'archive',
-  'export',
-  'moderate',
-  'write'
+// Form fields configuration
+const formFields: FormField<Permission>[] = [
+  {
+    name: 'name',
+    label: 'Permission Name',
+    type: 'text',
+    required: true,
+    placeholder: 'Enter permission name',
+    description: 'Human-readable name for this permission'
+  },
+  {
+    name: 'codename',
+    label: 'Codename',
+    type: 'text',
+    required: true,
+    placeholder: 'permission_codename',
+    description: 'Unique codename used in code (e.g., can_edit_users)'
+  },
+  {
+    name: 'description',
+    label: 'Description',
+    type: 'textarea',
+    placeholder: 'Describe what this permission allows',
+    description: 'Optional description of the permission'
+  },
+  {
+    name: 'resource_type',
+    label: 'Resource Type',
+    type: 'select',
+    required: true,
+    options: [
+      { value: 'user', label: 'User' },
+      { value: 'role', label: 'Role' },
+      { value: 'permission', label: 'Permission' },
+      { value: 'project', label: 'Project' },
+      { value: 'page', label: 'Page' },
+      { value: 'component', label: 'Component' },
+      { value: 'system', label: 'System' },
+      { value: 'admin', label: 'Admin' },
+      { value: 'custom', label: 'Custom' }
+    ],
+    description: 'Type of resource this permission applies to'
+  },
+  {
+    name: 'action',
+    label: 'Action',
+    type: 'select',
+    required: true,
+    options: [
+      { value: 'create', label: 'Create' },
+      { value: 'read', label: 'Read' },
+      { value: 'update', label: 'Update' },
+      { value: 'delete', label: 'Delete' },
+      { value: 'list', label: 'List' },
+      { value: 'execute', label: 'Execute' },
+      { value: 'manage', label: 'Manage' },
+      { value: 'admin', label: 'Admin' },
+      { value: 'all', label: 'All' }
+    ],
+    description: 'Action that this permission allows'
+  },
+  {
+    name: 'is_active',
+    label: 'Active',
+    type: 'checkbox',
+    defaultValue: true,
+    description: 'Whether this permission is currently active'
+  }
 ]
 
 export default function PermissionsPage() {
-  const [createDialogOpen, setCreateDialogOpen] = React.useState(false)
-  const [editDialogOpen, setEditDialogOpen] = React.useState(false)
-  const [selectedPermission, setSelectedPermission] = React.useState<Permission | null>(null)
-  const [activeView, setActiveView] = React.useState('permissions-list')
-  const [searchQuery, setSearchQuery] = React.useState('')
-  const [filters, setFilters] = React.useState<Record<string, any>>({})
-  const [sortBy, setSortBy] = React.useState<string>('created_at')
-  const [sortOrder, setSortOrder] = React.useState<'asc' | 'desc'>('desc')
-  const [groupBy, setGroupBy] = React.useState<string>('')
+  const router = useRouter()
+  const searchParams = useSearchParams()
   const [selectedItems, setSelectedItems] = React.useState<any[]>([])
   
-  const [formData, setFormData] = React.useState({
-    name: '',
-    description: '',
-    category: '',
-    action: '',
-    resource: '',
-  })
+  const { data: permissionsData, isLoading, error } = usePermissions()
+  const createPermission = useCreatePermission()
+  const updatePermission = useUpdatePermission()
+  const deletePermission = useDeletePermission()
 
-  // Queries
-  const { data: permissionsData, isLoading: permissionsLoading, error: permissionsError } = usePermissions()
+  // Determine current mode from URL
+  const mode = searchParams.get('mode') || 'list'
+  const itemId = searchParams.get('id')
 
-  // Mutations
-  const createPermissionMutation = useCreatePermission()
-  const deletePermissionMutation = useDeletePermission()
-
-  const permissions = permissionsData?.items || []
-
-  // Calculate statistics
-  const stats = React.useMemo(() => {
-    const totalPermissions = permissions.length
-    const systemPermissions = permissions.filter((p: any) => p.is_system_permission).length
-    const customPermissions = totalPermissions - systemPermissions
-    
-    // Group by category
-    const categoryStats = permissions.reduce((acc: any, permission: any) => {
-      acc[permission.category] = (acc[permission.category] || 0) + 1
-      return acc
-    }, {} as Record<string, number>)
-    
-    // Group by action
-    const actionStats = permissions.reduce((acc: any, permission: any) => {
-      acc[permission.action] = (acc[permission.action] || 0) + 1
-      return acc
-    }, {} as Record<string, number>)
-
-    const topCategory = Object.entries(categoryStats).sort(([,a], [,b]) => (b as number) - (a as number))[0]
-    const topAction = Object.entries(actionStats).sort(([,a], [,b]) => (b as number) - (a as number))[0]
-
-    return {
-      totalPermissions,
-      systemPermissions,
-      customPermissions,
-      categoriesCount: Object.keys(categoryStats).length,
-      actionsCount: Object.keys(actionStats).length,
-      topCategory: topCategory ? topCategory[0] : 'none',
-      topCategoryCount: topCategory ? topCategory[1] : 0,
-      topAction: topAction ? topAction[0] : 'none',
-      topActionCount: topAction ? topAction[1] : 0,
-      categoryStats,
-      actionStats
+  const handleModeChange = (newMode: string, newItemId?: string | number) => {
+    const params = new URLSearchParams()
+    if (newMode !== 'list') {
+      params.set('mode', newMode)
+      if (newItemId) {
+        params.set('id', String(newItemId))
+      }
     }
-  }, [permissions])
+    router.push(`/admin/permissions?${params.toString()}`)
+  }
 
   // Define columns for the ViewManager
   const columns: Column[] = React.useMemo(() => [
     {
       id: 'name',
       key: 'name',
-      label: 'Permission Name',
+      label: 'Permission',
       sortable: true,
       searchable: true,
       render: (value, permission) => (
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-orange-100">
-            <Key className="h-5 w-5 text-orange-600" />
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
+            <Key className="h-5 w-5 text-primary" />
           </div>
           <div>
             <div className="font-medium">{value as string}</div>
-            <div className="text-sm text-muted-foreground">
-              {permission.description || 'No description'}
-            </div>
+            <div className="text-sm text-muted-foreground font-mono">{permission.codename}</div>
           </div>
         </div>
       )
     },
     {
-      id: 'category',
-      key: 'category',
-      label: 'Category',
+      id: 'resource_type',
+      key: 'resource_type',
+      label: 'Resource',
       sortable: true,
       filterable: true,
       type: 'select',
-      filterOptions: categories.map(cat => ({ label: cat.charAt(0).toUpperCase() + cat.slice(1), value: cat })),
+      filterOptions: [
+        { label: 'User', value: 'user' },
+        { label: 'Role', value: 'role' },
+        { label: 'Permission', value: 'permission' },
+        { label: 'Project', value: 'project' },
+        { label: 'System', value: 'system' },
+        { label: 'Admin', value: 'admin' }
+      ],
       render: (value) => (
-        <Badge variant="outline" className="capitalize">
-          {value as string}
+        <Badge variant="outline" className="text-xs">
+          <Tag className="w-3 h-3 mr-1" />
+          {String(value).charAt(0).toUpperCase() + String(value).slice(1)}
         </Badge>
       )
     },
@@ -163,40 +170,46 @@ export default function PermissionsPage() {
       sortable: true,
       filterable: true,
       type: 'select',
-      filterOptions: permissionActions.map(action => ({ label: action.charAt(0).toUpperCase() + action.slice(1), value: action })),
+      filterOptions: [
+        { label: 'Create', value: 'create' },
+        { label: 'Read', value: 'read' },
+        { label: 'Update', value: 'update' },
+        { label: 'Delete', value: 'delete' },
+        { label: 'Manage', value: 'manage' },
+        { label: 'Admin', value: 'admin' }
+      ],
       render: (value) => (
-        <div className="flex items-center space-x-2">
-          <Tag className="h-4 w-4 text-muted-foreground" />
-          <span className="font-mono text-sm">{value as string}</span>
-        </div>
+        <Badge variant="secondary" className="text-xs">
+          <Zap className="w-3 h-3 mr-1" />
+          {String(value).charAt(0).toUpperCase() + String(value).slice(1)}
+        </Badge>
       )
     },
     {
-      id: 'resource',
-      key: 'resource',
-      label: 'Resource',
-      sortable: true,
+      id: 'description',
+      key: 'description',
+      label: 'Description',
       searchable: true,
       render: (value) => (
-        <span className="font-mono text-sm text-muted-foreground">
-          {(value as string) || '-'}
+        <span className="text-sm text-muted-foreground">
+          {value ? String(value).substring(0, 50) + (String(value).length > 50 ? '...' : '') : '-'}
         </span>
       )
     },
     {
-      id: 'is_system_permission',
-      key: 'is_system_permission',
-      label: 'Type',
+      id: 'is_active',
+      key: 'is_active',
+      label: 'Status',
       sortable: true,
       filterable: true,
       type: 'select',
       filterOptions: [
-        { label: 'System Permission', value: true },
-        { label: 'Custom Permission', value: false }
+        { label: 'Active', value: true },
+        { label: 'Inactive', value: false }
       ],
       render: (value) => (
-        <Badge variant={value ? "secondary" : "default"}>
-          {value ? "System" : "Custom"}
+        <Badge variant={value ? "default" : "destructive"}>
+          {value ? "Active" : "Inactive"}
         </Badge>
       )
     },
@@ -205,142 +218,68 @@ export default function PermissionsPage() {
       key: 'created_at',
       label: 'Created',
       sortable: true,
-      render: (value) => value ? (
+      render: (value) => (
         <div className="flex items-center space-x-2">
           <Calendar className="h-4 w-4 text-muted-foreground" />
           <span className="text-sm">
             {formatDistanceToNow(new Date(value as string), { addSuffix: true })}
           </span>
         </div>
-      ) : null
+      )
     }
   ], [])
 
-  // Define sort options
-  const sortOptions: SortOption[] = React.useMemo(() => [
-    {
-      key: 'name',
-      label: 'Permission Name',
-      defaultOrder: 'asc'
-    },
-    {
-      key: 'category',
-      label: 'Category',
-      defaultOrder: 'asc'
-    },
-    {
-      key: 'action',
-      label: 'Action',
-      defaultOrder: 'asc'
-    },
-    {
-      key: 'created_at',
-      label: 'Created Date',
-      defaultOrder: 'desc'
-    }
-  ], [])
+  const permissions = React.useMemo(() => permissionsData?.items || [], [permissionsData])
 
-  // Define group options
-  const groupOptions: GroupOption[] = React.useMemo(() => [
-    {
-      key: 'category',
-      label: 'Category',
-      icon: <Tag className="h-4 w-4" />
-    },
-    {
-      key: 'action',
-      label: 'Action',
-      icon: <Key className="h-4 w-4" />
-    },
-    {
-      key: 'is_system_permission',
-      label: 'Permission Type',
-      icon: <Shield className="h-4 w-4" />
-    }
-  ], [])
+  // Calculate statistics
+  const stats = React.useMemo(() => {
+    const totalPermissions = permissions.length
+    const activePermissions = permissions.filter(permission => permission.is_active).length
+    const inactivePermissions = totalPermissions - activePermissions
+    const resourceTypes = [...new Set(permissions.map(p => p.resource_type))].length
 
-  // Define available views
-  const views: ViewConfig[] = React.useMemo(() => [
-    {
-      id: 'permissions-card',
-      name: 'Card View',
-      type: 'card',
-      columns,
-      filters: {},
-      sortBy: 'created_at',
-      sortOrder: 'desc'
-    },
-    {
-      id: 'permissions-list',
-      name: 'List View',
-      type: 'list',
-      columns,
-      filters: {},
-      sortBy: 'created_at',
-      sortOrder: 'desc'
-    },
-    {
-      id: 'permissions-kanban',
-      name: 'Kanban Board',
-      type: 'kanban',
-      columns,
-      filters: {},
-      groupBy: 'category'
+    return {
+      totalPermissions,
+      activePermissions,
+      inactivePermissions,
+      resourceTypes
     }
-  ], [columns])
+  }, [permissions])
 
-  // Auto-generate permission name
-  React.useEffect(() => {
-    if (formData.action && formData.category) {
-      const generatedName = `${formData.action.charAt(0).toUpperCase() + formData.action.slice(1)} ${formData.category.charAt(0).toUpperCase() + formData.category.slice(1)}`
-      if (formData.name !== generatedName) {
-        setFormData(prev => ({ ...prev, name: generatedName }))
-      }
-    }
-  }, [formData.action, formData.category, formData.name])
+  // API functions
+  const fetchPermissions = async (): Promise<Permission[]> => {
+    return permissions
+  }
 
-  const handleCreatePermission = React.useCallback(() => {
-    if (!formData.name || !formData.category || !formData.action) {
-      alert('Please fill in all required fields')
-      return
-    }
+  const createPermissionApi = async (data: Permission): Promise<Permission> => {
+    return new Promise((resolve, reject) => {
+      createPermission.mutate(data, {
+        onSuccess: (result) => resolve(result),
+        onError: (error) => reject(new Error(apiUtils.getErrorMessage(error)))
+      })
+    })
+  }
 
-    createPermissionMutation.mutate({
-      name: formData.name,
-      description: formData.description,
-      category: formData.category,
-      action: formData.action,
-      resource: formData.resource,
-    }, {
-      onSuccess: () => {
-        setFormData({ name: '', description: '', category: '', action: '', resource: '' })
-        setCreateDialogOpen(false)
-      },
-      onError: (error) => {
-        alert(`Failed to create permission: ${apiUtils.getErrorMessage(error)}`)
+  const updatePermissionApi = async (id: string | number, data: Permission): Promise<Permission> => {
+    return new Promise((resolve, reject) => {
+      updatePermission.mutate({ id: Number(id), data }, {
+        onSuccess: (result) => resolve(result),
+        onError: (error) => reject(new Error(apiUtils.getErrorMessage(error)))
+      })
+    })
+  }
+
+  const deletePermissionApi = async (id: string | number): Promise<void> => {
+    return new Promise((resolve, reject) => {
+      if (confirm(`Are you sure you want to delete this permission?`)) {
+        deletePermission.mutate(Number(id), {
+          onSuccess: () => resolve(),
+          onError: (error) => reject(new Error(apiUtils.getErrorMessage(error)))
+        })
+      } else {
+        reject(new Error('Deletion cancelled'))
       }
     })
-  }, [formData, createPermissionMutation])
-
-  const handleEditPermission = (permission: any) => {
-    setSelectedPermission(permission)
-    setEditDialogOpen(true)
-  }
-
-  const handleDeletePermission = (permission: any) => {
-    if (permission.is_system_permission) {
-      alert('System permissions cannot be deleted')
-      return
-    }
-    
-    if (confirm(`Are you sure you want to delete permission "${permission.name}"?`)) {
-      deletePermissionMutation.mutate(permission.id)
-    }
-  }
-
-  const handleViewPermission = (permission: any) => {
-    console.log('View permission:', permission)
-    // TODO: Navigate to permission details page or show details modal
   }
 
   const handleExport = (format: string) => {
@@ -357,332 +296,150 @@ export default function PermissionsPage() {
     {
       label: 'Delete Selected',
       action: (items: any[]) => {
-        const customPermissions = items.filter(p => !p.is_system_permission)
-        if (customPermissions.length > 0 && confirm(`Delete ${customPermissions.length} permissions?`)) {
-          customPermissions.forEach(permission => deletePermissionMutation.mutate(permission.id))
+        if (confirm(`Delete ${items.length} permissions?`)) {
+          items.forEach(permission => deletePermission.mutate(permission.id))
         }
       },
       variant: 'destructive' as const
+    },
+    {
+      label: 'Activate Selected',
+      action: (items: any[]) => {
+        items.forEach(permission => {
+          if (!permission.is_active) {
+            updatePermission.mutate({ id: permission.id, data: { ...permission, is_active: true } })
+          }
+        })
+      }
     }
   ]
 
-  // Loading states
-  const isLoading = permissionsLoading
-  const isCreating = createPermissionMutation.isPending
-
-  // Handle errors
-  if (permissionsError) {
+  if (error) {
     return (
-      <div className="space-y-6">
-        <div className="text-center py-12">
-          <h2 className="text-xl font-semibold text-red-600 mb-2">Failed to load permissions</h2>
-          <p className="text-gray-600">{apiUtils.getErrorMessage(permissionsError)}</p>
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+            Failed to load permissions
+          </h3>
+          <p className="text-gray-600 dark:text-gray-400">
+            {error.message || 'An error occurred while loading permissions'}
+          </p>
         </div>
       </div>
     )
   }
 
+  // Create form view configuration
+  const config = createFormViewConfig<Permission>({
+    resourceName: 'permission',
+    baseUrl: '/admin/permissions',
+    apiEndpoint: '/api/v1/permissions',
+    title: 'Permissions Management',
+    subtitle: 'Define and manage system permissions and access controls',
+    formFields,
+    columns,
+    validationSchema: permissionSchema,
+    onFetch: fetchPermissions,
+    onCreate: createPermissionApi,
+    onUpdate: updatePermissionApi,
+    onDelete: deletePermissionApi,
+    views: [
+      {
+        id: 'permissions-card',
+        name: 'Card View',
+        type: 'card',
+        columns,
+        filters: {},
+        sortBy: 'created_at',
+        sortOrder: 'desc'
+      },
+      {
+        id: 'permissions-list',
+        name: 'List View',
+        type: 'list',
+        columns,
+        filters: {},
+        sortBy: 'created_at',
+        sortOrder: 'desc'
+      }
+    ],
+    defaultView: 'permissions-list'
+  })
+
   return (
     <div className="container mx-auto py-6 space-y-6">
+      {/* Statistics Cards - Only show in list mode */}
+      {mode === 'list' && (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Total Permissions</CardTitle>
+              <Key className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{stats.totalPermissions}</div>
+              <p className="text-xs text-muted-foreground">
+                {stats.activePermissions} active, {stats.inactivePermissions} inactive
+              </p>
+            </CardContent>
+          </Card>
 
-      {/* Statistics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Permissions</CardTitle>
-            <Key className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.totalPermissions}</div>
-            <p className="text-xs text-muted-foreground">
-              {stats.systemPermissions} system, {stats.customPermissions} custom
-            </p>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Categories</CardTitle>
-            <Tag className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.categoriesCount}</div>
-            <p className="text-xs text-muted-foreground">
-              Top: {stats.topCategory ? String(stats.topCategory) : 'N/A'} ({String(stats.topCategoryCount)})
-            </p>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Action Types</CardTitle>
-            <Zap className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.actionsCount}</div>
-            <p className="text-xs text-muted-foreground">
-              Top: {String(stats.topAction)} ({String(stats.topActionCount)})
-            </p>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">System Protected</CardTitle>
-            <Lock className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.systemPermissions}</div>
-            <p className="text-xs text-muted-foreground">
-              {stats.totalPermissions > 0 ? Math.round((stats.systemPermissions / stats.totalPermissions) * 100) : 0}% of total
-            </p>
-          </CardContent>
-        </Card>
-      </div>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Active Permissions</CardTitle>
+              <Shield className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{stats.activePermissions}</div>
+              <p className="text-xs text-muted-foreground">
+                Currently in use
+              </p>
+            </CardContent>
+          </Card>
 
-      {/* Enhanced Permissions Management with ViewManager */}
-      <ViewManager
-        title="Permissions Management"
-        subtitle="Comprehensive permission management with analytics, filtering, sorting, bulk operations, and export capabilities"
-        data={permissions as Permission[]}
-        columns={columns}
-        views={views}
-        activeView={activeView}
-        onViewChange={setActiveView}
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Resource Types</CardTitle>
+              <Tag className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{stats.resourceTypes}</div>
+              <p className="text-xs text-muted-foreground">
+                Different resource types
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Security Level</CardTitle>
+              <Lock className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-green-600">High</div>
+              <p className="text-xs text-muted-foreground">
+                Granular permissions
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      <CommonFormViewManager
+        config={config}
+        mode={mode as any}
+        itemId={itemId}
+        onModeChange={handleModeChange}
+        data={permissions}
         loading={isLoading}
-        error={null}
-        searchQuery={searchQuery}
-        onSearchChange={setSearchQuery}
-        filters={filters}
-        onFiltersChange={setFilters}
-        sortBy={sortBy}
-        sortOrder={sortOrder}
-        onSortChange={(field, order) => {
-          setSortBy(field)
-          setSortOrder(order)
-        }}
-        sortOptions={sortOptions}
-        groupBy={groupBy}
-        onGroupChange={setGroupBy}
-        groupOptions={groupOptions}
-        onExport={handleExport}
-        onImport={handleImport}
-        onCreateClick={() => setCreateDialogOpen(true)}
-        onEditClick={handleEditPermission}
-        onDeleteClick={handleDeletePermission}
-        onViewClick={handleViewPermission}
+        error={error ? (error as any)?.message || String(error) : null}
         selectable={true}
         selectedItems={selectedItems}
         onSelectionChange={setSelectedItems}
         bulkActions={bulkActions}
-        showToolbar={true}
-        showSearch={true}
-        showFilters={true}
-        showExport={true}
-        showImport={true}
+        onExport={handleExport}
+        onImport={handleImport}
       />
-
-      <Tabs defaultValue="analytics" className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="analytics">Analytics</TabsTrigger>
-          <TabsTrigger value="insights">Distribution Insights</TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="analytics" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Permission Analytics</CardTitle>
-              <CardDescription>
-                Detailed breakdown of permissions by category and action type
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              {/* Category Distribution */}
-              <div>
-                <h4 className="text-sm font-medium mb-3">Permissions by Category</h4>
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
-                  {Object.entries(stats.categoryStats).map(([category, count]) => (
-                    <div key={category} className="text-center p-3 border rounded-lg">
-                      <div className="text-lg font-bold">{String(count)}</div>
-                      <div className="text-sm text-muted-foreground capitalize">{category}</div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-              
-              {/* Action Distribution */}
-              <div>
-                <h4 className="text-sm font-medium mb-3">Permissions by Action Type</h4>
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                  {Object.entries(stats.actionStats).map(([action, count]) => (
-                    <div key={action} className="text-center p-3 border rounded-lg">
-                      <div className="text-lg font-bold">{String(count)}</div>
-                      <div className="text-sm text-muted-foreground capitalize">{action}</div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-              
-              {/* System vs Custom Distribution */}
-              <div>
-                <h4 className="text-sm font-medium mb-3">Permission Types</h4>
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="text-center p-4 border rounded-lg bg-red-50 dark:bg-red-950">
-                    <div className="text-2xl font-bold text-red-600">{stats.systemPermissions}</div>
-                    <div className="text-sm text-muted-foreground">System Protected</div>
-                  </div>
-                  <div className="text-center p-4 border rounded-lg bg-blue-50 dark:bg-blue-950">
-                    <div className="text-2xl font-bold text-blue-600">{stats.customPermissions}</div>
-                    <div className="text-sm text-muted-foreground">Custom Permissions</div>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        <TabsContent value="insights" className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Category Breakdown</CardTitle>
-                <CardDescription>Most common permission categories</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  {Object.entries(stats.categoryStats)
-                    .sort(([,a], [,b]) => (b as number) - (a as number))
-                    .map(([category, count]) => (
-                      <div key={category} className="flex justify-between items-center">
-                        <span className="capitalize text-sm">{category}</span>
-                        <Badge variant="outline">{String(count)}</Badge>
-                      </div>
-                    ))}
-                </div>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardHeader>
-                <CardTitle>Action Distribution</CardTitle>
-                <CardDescription>Most common permission actions</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  {Object.entries(stats.actionStats)
-                    .sort(([,a], [,b]) => (b as number) - (a as number))
-                    .map(([action, count]) => (
-                      <div key={action} className="flex justify-between items-center">
-                        <span className="capitalize text-sm">{action}</span>
-                        <Badge variant="outline">{String(count)}</Badge>
-                      </div>
-                    ))}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </TabsContent>
-      </Tabs>
-
-      {/* Create Permission Dialog */}
-      <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Create New Permission</DialogTitle>
-            <DialogDescription>
-              Define a new permission by specifying the resource and action it controls.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid gap-2">
-              <Label htmlFor="category">Category *</Label>
-              <Select 
-                value={formData.category} 
-                onValueChange={(value) => setFormData({ ...formData, category: value })}
-                disabled={isCreating}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select a category" />
-                </SelectTrigger>
-                <SelectContent>
-                  {categories.map((category) => (
-                    <SelectItem key={category} value={category}>
-                      <span className="capitalize">{category}</span>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            
-            <div className="grid grid-cols-2 gap-4">
-              <div className="grid gap-2">
-                <Label htmlFor="action">Action *</Label>
-                <Select 
-                  value={formData.action} 
-                  onValueChange={(value) => setFormData({ ...formData, action: value })}
-                  disabled={isCreating}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Action" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {permissionActions.map((action) => (
-                      <SelectItem key={action} value={action}>
-                        <span className="capitalize">{action}</span>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              <div className="grid gap-2">
-                <Label htmlFor="resource">Resource</Label>
-                <Input
-                  id="resource"
-                  placeholder="users"
-                  value={formData.resource}
-                  onChange={(e) => setFormData({ ...formData, resource: e.target.value })}
-                  disabled={isCreating}
-                />
-              </div>
-            </div>
-
-            <div className="grid gap-2">
-              <Label htmlFor="name">Permission Name *</Label>
-              <Input
-                id="name"
-                placeholder="Manage Users"
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                disabled={isCreating}
-              />
-            </div>
-
-            <div className="grid gap-2">
-              <Label htmlFor="description">Description</Label>
-              <Input
-                id="description"
-                placeholder="Allows managing user accounts and settings"
-                value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                disabled={isCreating}
-              />
-            </div>
-          </div>
-          <div className="flex justify-end space-x-2">
-            <Button variant="outline" onClick={() => setCreateDialogOpen(false)}>
-              Cancel
-            </Button>
-            <Button
-              onClick={handleCreatePermission}
-              disabled={!formData.name || !formData.category || !formData.action || isCreating}
-            >
-              {isCreating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {isCreating ? 'Creating...' : 'Create Permission'}
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
     </div>
   )
 }

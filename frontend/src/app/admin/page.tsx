@@ -16,7 +16,10 @@ import {
   Activity,
   FileText,
   Server,
-  Database
+  Database,
+  Lock,
+  UserCheck,
+  AlertTriangle
 } from 'lucide-react';
 
 const adminMenuItems = [
@@ -77,6 +80,34 @@ const adminMenuItems = [
     href: '/admin/data-export',
     icon: Download,
     description: 'Export data from database tables'
+  },
+  {
+    title: 'Row Level Security',
+    href: '/admin/rls',
+    icon: Lock,
+    description: 'Manage data access policies and security rules',
+    badge: 'Security'
+  },
+  {
+    title: 'RLS Policies',
+    href: '/admin/rls/policies',
+    icon: Shield,
+    description: 'Configure row-level security policies',
+    badge: 'Security'
+  },
+  {
+    title: 'RLS Assignments',
+    href: '/admin/rls/assignments',
+    icon: UserCheck,
+    description: 'Manage security rule assignments',
+    badge: 'Security'
+  },
+  {
+    title: 'RLS Audit Logs',
+    href: '/admin/rls/audit',
+    icon: AlertTriangle,
+    description: 'View security access logs and violations',
+    badge: 'Security'
   }
 ];
 

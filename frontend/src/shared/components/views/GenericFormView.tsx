@@ -187,10 +187,17 @@ export function GenericFormView<T = any>({
     mode: 'onChange'
   })
 
-  const { handleSubmit, control, watch, formState: { errors, isDirty, isSubmitting } } = form
+  const { handleSubmit, control, watch, reset, formState: { errors, isDirty, isSubmitting } } = form
 
   // Watch for form changes
   const watchedData = watch()
+
+  // Update form when initialData changes (important for edit mode)
+  useEffect(() => {
+    if (initialData && Object.keys(initialData).length > 0) {
+      reset(initialData as any)
+    }
+  }, [initialData, reset])
 
   useEffect(() => {
     if (showUnsavedChanges) {

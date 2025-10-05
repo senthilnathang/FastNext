@@ -1,51 +1,92 @@
-'use client';
+'use client'
 
-import React, { useState, useMemo } from 'react';
-import { ViewManager, ViewConfig, Column } from '@/shared/components/views';
-import { 
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  Input,
-  Label,
-  Textarea,
-  Checkbox,
-  Button
-} from '@/shared/components';
-import { Building2, Globe, Lock, Calendar, User, Clock, Trash2 } from 'lucide-react';
-import { useProjects, useCreateProject, useUpdateProject, useDeleteProject } from '@/modules/projects/hooks/useProjects';
-import { formatDistanceToNow } from 'date-fns';
-import type { Project, CreateProjectRequest, UpdateProjectRequest } from '@/shared/types';
-import { Badge } from '@/shared/components/ui/badge';
-import type { SortOption, GroupOption } from '@/shared/components/ui';
+import React, { useState, useMemo } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { CommonFormViewManager, createFormViewConfig } from '@/shared/components/views/CommonFormViewManager'
+import { FormField } from '@/shared/components/views/GenericFormView'
+import { Column, KanbanColumn } from '@/shared/components/views/ViewManager'
+import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card'
+import { Building2, Globe, Lock, Calendar, User, Clock, Trash2, FolderOpen, GitBranch, Target } from 'lucide-react'
+import { Badge } from '@/shared/components/ui/badge'
+import { formatDistanceToNow } from 'date-fns'
+import { z } from 'zod'
+
+import { useProjects, useCreateProject, useUpdateProject, useDeleteProject } from '@/modules/projects/hooks/useProjects'
+import type { Project, CreateProjectRequest, UpdateProjectRequest } from '@/shared/types'
+import type { SortOption, GroupOption } from '@/shared/components/ui'
+
+// Project validation schema
+const projectSchema = z.object({
+  name: z.string().min(1, 'Project name is required').max(100),
+  description: z.string().optional(),
+  is_public: z.boolean().default(false),
+  start_date: z.string().optional(),
+  end_date: z.string().optional(),
+  settings: z.record(z.any()).optional(),
+})
+
+// Form fields configuration
+const formFields: FormField<Project>[] = [
+  {
+    name: 'name',
+    label: 'Project Name',
+    type: 'text',
+    required: true,
+    placeholder: 'Enter project name',
+    description: 'A unique name for your project'
+  },
+  {
+    name: 'description',
+    label: 'Description',
+    type: 'textarea',
+    placeholder: 'Describe your project purpose and goals',
+    description: 'Optional description of the project'
+  },
+  {
+    name: 'start_date',
+    label: 'Start Date',
+    type: 'date',
+    description: 'When the project should begin'
+  },
+  {
+    name: 'end_date',
+    label: 'End Date',
+    type: 'date',
+    description: 'Expected project completion date'
+  },
+  {
+    name: 'is_public',
+    label: 'Public Project',
+    type: 'checkbox',
+    defaultValue: false,
+    description: 'Allow public access to this project'
+  }
+]
 
 export default function ProjectsPage() {
-  const [createDialogOpen, setCreateDialogOpen] = useState(false);
-  const [editDialogOpen, setEditDialogOpen] = useState(false);
-  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
-  const [activeView, setActiveView] = useState('projects-list');
-  const [searchQuery, setSearchQuery] = useState('');
-  const [filters, setFilters] = useState<Record<string, any>>({});
-  const [sortBy, setSortBy] = useState<string>('created_at');
-  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
-  const [groupBy, setGroupBy] = useState<string>('');
-  const [selectedItems, setSelectedItems] = useState<Project[]>([]);
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const [selectedItems, setSelectedItems] = useState<Project[]>([])
   
-  const { data: projectsData, isLoading, error } = useProjects();
-  const createProject = useCreateProject();
-  const updateProject = useUpdateProject();
-  const deleteProject = useDeleteProject();
+  const { data: projectsData, isLoading, error } = useProjects()
+  const createProject = useCreateProject()
+  const updateProject = useUpdateProject()
+  const deleteProject = useDeleteProject()
 
-  const [formData, setFormData] = useState<CreateProjectRequest>({
-    name: '',
-    description: '',
-    is_public: false,
-    settings: {},
-    start_date: '',
-    end_date: ''
-  });
+  // Determine current mode from URL
+  const mode = searchParams.get('mode') || 'list'
+  const itemId = searchParams.get('id')
+
+  const handleModeChange = (newMode: string, newItemId?: string | number) => {
+    const params = new URLSearchParams()
+    if (newMode !== 'list') {
+      params.set('mode', newMode)
+      if (newItemId) {
+        params.set('id', String(newItemId))
+      }
+    }
+    router.push(`/projects?${params.toString()}`)
+  }
 
   // Define columns for the ViewManager
   const columns: Column<Project>[] = useMemo(() => [
@@ -57,7 +98,9 @@ export default function ProjectsPage() {
       searchable: true,
       render: (value, project) => (
         <div className="flex items-center space-x-3">
-          <Building2 className="h-4 w-4 text-blue-600" />
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
+            <Building2 className="h-5 w-5 text-primary" />
+          </div>
           <div>
             <div className="font-medium">{value as string}</div>
             <div className="text-sm text-muted-foreground">
@@ -127,6 +170,18 @@ export default function ProjectsPage() {
       )
     },
     {
+      id: 'user_id',
+      key: 'user_id',
+      label: 'Owner',
+      sortable: true,
+      render: (value) => (
+        <div className="flex items-center space-x-2">
+          <User className="h-4 w-4 text-muted-foreground" />
+          <span className="text-sm">User {value}</span>
+        </div>
+      )
+    },
+    {
       id: 'created_at',
       key: 'created_at',
       label: 'Created',
@@ -145,13 +200,105 @@ export default function ProjectsPage() {
       key: 'id',
       label: 'Status',
       sortable: false,
-      render: () => (
-        <Badge variant="default" className="bg-green-100 text-green-800">
-          Active
-        </Badge>
-      )
+      render: (value, project) => {
+        const now = new Date()
+        const startDate = project.start_date ? new Date(project.start_date) : null
+        const endDate = project.end_date ? new Date(project.end_date) : null
+        
+        let status = 'Active'
+        let variant: 'default' | 'secondary' | 'destructive' = 'default'
+        
+        if (startDate && startDate > now) {
+          status = 'Planned'
+          variant = 'secondary'
+        } else if (endDate && endDate < now) {
+          status = 'Completed'
+          variant = 'destructive'
+        }
+        
+        return (
+          <Badge variant={variant} className={variant === 'default' ? 'bg-green-100 text-green-800' : ''}>
+            {status}
+          </Badge>
+        )
+      }
     }
-  ], []);
+  ], [])
+
+  const projects = projectsData?.items || []
+
+  // Calculate statistics
+  const stats = useMemo(() => {
+    const totalProjects = projects.length
+    const publicProjects = projects.filter(project => project.is_public).length
+    const privateProjects = totalProjects - publicProjects
+    const recentProjects = projects.filter(project => {
+      const created = new Date(project.created_at)
+      const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
+      return created > thirtyDaysAgo
+    }).length
+
+    const now = new Date()
+    const activeProjects = projects.filter(project => {
+      const startDate = project.start_date ? new Date(project.start_date) : null
+      const endDate = project.end_date ? new Date(project.end_date) : null
+      
+      return (!startDate || startDate <= now) && (!endDate || endDate >= now)
+    }).length
+
+    return {
+      totalProjects,
+      publicProjects,
+      privateProjects,
+      recentProjects,
+      activeProjects
+    }
+  }, [projects])
+
+  // Define kanban columns for project status
+  const kanbanColumns: KanbanColumn[] = useMemo(() => {
+    const now = new Date()
+    const planned = projects.filter(p => p.start_date && new Date(p.start_date) > now).length
+    const active = projects.filter(p => {
+      const startDate = p.start_date ? new Date(p.start_date) : null
+      const endDate = p.end_date ? new Date(p.end_date) : null
+      return (!startDate || startDate <= now) && (!endDate || endDate >= now)
+    }).length
+    const completed = projects.filter(p => p.end_date && new Date(p.end_date) < now).length
+
+    return [
+      { id: 'planned', title: 'Planned', color: '#f59e0b', count: planned },
+      { id: 'active', title: 'Active', color: '#10b981', count: active },
+      { id: 'completed', title: 'Completed', color: '#6b7280', count: completed }
+    ]
+  }, [projects])
+
+  // Define kanban card fields
+  const kanbanCardFields = useMemo(() => [
+    {
+      key: 'description',
+      label: 'Description',
+      type: 'text' as const
+    },
+    {
+      key: 'is_public',
+      label: 'Visibility',
+      type: 'badge' as const,
+      render: (value: unknown) => value ? 'Public' : 'Private'
+    },
+    {
+      key: 'start_date',
+      label: 'Start Date',
+      type: 'date' as const,
+      render: (value: unknown) => value ? new Date(String(value)).toLocaleDateString() : 'Not set'
+    },
+    {
+      key: 'end_date',
+      label: 'End Date',
+      type: 'date' as const,
+      render: (value: unknown) => value ? new Date(String(value)).toLocaleDateString() : 'Not set'
+    }
+  ], [])
 
   // Define sort options
   const sortOptions: SortOption[] = useMemo(() => [
@@ -185,7 +332,7 @@ export default function ProjectsPage() {
       label: 'Visibility',
       defaultOrder: 'desc'
     }
-  ], []);
+  ], [])
 
   // Define group options
   const groupOptions: GroupOption[] = useMemo(() => [
@@ -195,192 +342,151 @@ export default function ProjectsPage() {
       icon: <Globe className="h-4 w-4" />
     },
     {
-      key: 'owner',
+      key: 'user_id',
       label: 'Owner',
       icon: <User className="h-4 w-4" />
-    },
-    {
-      key: 'created_month',
-      label: 'Created Month',
-      icon: <Calendar className="h-4 w-4" />
     },
     {
       key: 'status',
       label: 'Status',
       icon: <Clock className="h-4 w-4" />
     }
-  ], []);
+  ], [])
 
-  // Define available views
-  const views: ViewConfig[] = useMemo(() => [
-    {
-      id: 'projects-card',
-      name: 'Card View',
-      type: 'card',
-      columns,
-      filters: {},
-      sortBy: 'created_at',
-      sortOrder: 'desc'
-    },
-    {
-      id: 'projects-list',
-      name: 'List View',
-      type: 'list',
-      columns,
-      filters: {},
-      sortBy: 'created_at',
-      sortOrder: 'desc'
-    },
-    {
-      id: 'projects-kanban',
-      name: 'Kanban Board',
-      type: 'kanban',
-      columns,
-      filters: {},
-      groupBy: 'status'
-    },
-    {
-      id: 'projects-gantt',
-      name: 'Timeline View',
-      type: 'gantt',
-      columns,
-      filters: {},
-      sortBy: 'created_at',
-      sortOrder: 'asc'
-    },
-    {
-      id: 'projects-calendar',
-      name: 'Calendar View',
-      type: 'calendar',
-      columns,
-      filters: {},
-      sortBy: 'created_at',
-      sortOrder: 'asc'
+  // API functions
+  const fetchProjects = async (): Promise<Project[]> => {
+    return projects
+  }
+
+  const createProjectApi = async (data: Project): Promise<Project> => {
+    // Clean up data for API
+    const cleanedData: CreateProjectRequest = {
+      name: data.name,
+      description: data.description || undefined,
+      is_public: data.is_public,
+      start_date: data.start_date || undefined,
+      end_date: data.end_date || undefined,
+      settings: data.settings || {}
     }
-  ], [columns]);
 
-  const projects = projectsData?.items || [];
+    return new Promise((resolve, reject) => {
+      createProject.mutate(cleanedData, {
+        onSuccess: (result) => resolve(result as Project),
+        onError: (error) => reject(error)
+      })
+    })
+  }
 
-  const handleCreateProject = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      // Clean up empty date strings to avoid backend issues
-      const cleanedData = {
-        ...formData,
-        start_date: formData.start_date || undefined,
-        end_date: formData.end_date || undefined
-      };
-      await createProject.mutateAsync(cleanedData);
-      setCreateDialogOpen(false);
-      setFormData({ name: '', description: '', is_public: false, settings: {}, start_date: '', end_date: '' });
-    } catch (error) {
-      console.error('Failed to create project:', error);
+  const updateProjectApi = async (id: string | number, data: Project): Promise<Project> => {
+    // Clean up data for API
+    const updateData: UpdateProjectRequest = {
+      name: data.name,
+      description: data.description || undefined,
+      is_public: data.is_public,
+      start_date: data.start_date || undefined,
+      end_date: data.end_date || undefined,
+      settings: data.settings || {}
     }
-  };
 
-  const handleUpdateProject = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!selectedProject) return;
-    
-    try {
-      const updateData: UpdateProjectRequest = {
-        name: formData.name,
-        description: formData.description,
-        is_public: formData.is_public,
-        settings: formData.settings,
-        start_date: formData.start_date || undefined,
-        end_date: formData.end_date || undefined
-      };
-      await updateProject.mutateAsync({ id: selectedProject.id, data: updateData });
-      setEditDialogOpen(false);
-      setSelectedProject(null);
-    } catch (error) {
-      console.error('Failed to update project:', error);
-    }
-  };
+    return new Promise((resolve, reject) => {
+      updateProject.mutate({ id: Number(id), data: updateData }, {
+        onSuccess: (result) => resolve(result as Project),
+        onError: (error) => reject(error)
+      })
+    })
+  }
 
-  const handleDeleteProject = async (item: { id: string | number }) => {
-    const project = projectsData?.items?.find(p => p.id === item.id);
-    if (project && confirm(`Are you sure you want to delete "${project.name}"?`)) {
-      try {
-        await deleteProject.mutateAsync(project.id);
-        // Remove deleted project from selection if it was selected
-        setSelectedItems(prev => prev.filter(item => item.id !== project.id));
-      } catch (error) {
-        console.error('Failed to delete project:', error);
+  const deleteProjectApi = async (id: string | number): Promise<void> => {
+    const project = projects.find(p => p.id === Number(id))
+    return new Promise((resolve, reject) => {
+      if (project && confirm(`Are you sure you want to delete "${project.name}"?`)) {
+        deleteProject.mutate(Number(id), {
+          onSuccess: () => resolve(),
+          onError: (error) => reject(error)
+        })
+      } else {
+        reject(new Error('Deletion cancelled'))
       }
-    }
-  };
-
-  const handleEditProject = (item: { id: string | number }) => {
-    const project = projectsData?.items?.find(p => p.id === item.id);
-    if (project) {
-      setSelectedProject(project);
-      setFormData({
-        name: project.name,
-        description: project.description || '',
-        is_public: project.is_public,
-        settings: project.settings,
-        start_date: project.start_date || '',
-        end_date: project.end_date || ''
-      });
-      setEditDialogOpen(true);
-    }
-  };
-
-  const handleViewProject = (item: { id: string | number }) => {
-    const project = projectsData?.items?.find(p => p.id === item.id);
-    if (project) {
-      // Navigate to project detail page or open view dialog
-      console.log('View project:', project);
-    }
-  };
+    })
+  }
 
   const handleExport = (format: 'csv' | 'json' | 'excel') => {
-    console.log('Export projects as:', format);
-    // Implement export functionality
-  };
+    console.log('Export projects as:', format)
+    // TODO: Implement export functionality
+  }
 
   const handleImport = (file: File) => {
-    console.log('Import projects from file:', file.name);
-    // Implement import functionality
-  };
+    console.log('Import projects from file:', file.name)
+    // TODO: Implement import functionality
+  }
 
-  const handleDateChange = (itemId: string | number, newDate: Date) => {
-    // In a real implementation, this would update the project's created date or relevant date field
-    console.log('Date change requested for project:', itemId, 'to:', newDate);
-    // For now, we'll just log it since projects typically don't change their creation date
-  };
+  const handleMoveCard = (cardId: string | number, sourceColumnId: string, targetColumnId: string) => {
+    // For projects, we could update dates based on status
+    console.log('Move project card:', cardId, 'from', sourceColumnId, 'to', targetColumnId)
+    // TODO: Implement project status updates
+  }
 
-  const handleCalendarQuickAdd = (date: Date, title: string) => {
+  const handleQuickAdd = (columnId: string, title: string) => {
+    const now = new Date()
     const newProject: CreateProjectRequest = {
       name: title,
-      description: `Project created on ${date.toLocaleDateString()}`,
+      description: `Project created on ${now.toLocaleDateString()}`,
       is_public: false,
       settings: {}
-    };
+    }
     
-    createProject.mutate(newProject);
-  };
+    // Set dates based on column
+    if (columnId === 'planned') {
+      const futureDate = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000) // 7 days from now
+      newProject.start_date = futureDate.toISOString().split('T')[0]
+    } else if (columnId === 'active') {
+      newProject.start_date = now.toISOString().split('T')[0]
+    }
+    
+    createProject.mutate(newProject)
+  }
 
   const bulkActions = [
     {
       label: 'Delete Selected',
       icon: <Trash2 className="h-4 w-4 mr-2" />,
-      action: (items: { id: string | number }[]) => {
-        const selectedProjects = items.map(item => 
-          projectsData?.items?.find(p => p.id === item.id)
-        ).filter(Boolean) as Project[];
-        if (confirm(`Delete ${selectedProjects.length} selected projects?`)) {
-          selectedProjects.forEach(project => {
-            deleteProject.mutate(project.id);
-          });
-          // Clear selection after deletion
-          setSelectedItems([]);
+      action: (items: Project[]) => {
+        if (confirm(`Delete ${items.length} selected projects?`)) {
+          items.forEach(project => {
+            deleteProject.mutate(project.id)
+          })
+          setSelectedItems([])
         }
+      },
+      variant: 'destructive' as const
+    },
+    {
+      label: 'Make Public',
+      action: (items: Project[]) => {
+        items.forEach(project => {
+          if (!project.is_public) {
+            updateProject.mutate({
+              id: project.id,
+              data: { ...project, is_public: true }
+            })
+          }
+        })
+      }
+    },
+    {
+      label: 'Make Private',
+      action: (items: Project[]) => {
+        items.forEach(project => {
+          if (project.is_public) {
+            updateProject.mutate({
+              id: project.id,
+              data: { ...project, is_public: false }
+            })
+          }
+        })
       }
     }
-  ];
+  ]
 
   if (error) {
     return (
@@ -394,66 +500,190 @@ export default function ProjectsPage() {
           </p>
         </div>
       </div>
-    );
+    )
   }
+
+  // Create form view configuration
+  const config = createFormViewConfig<Project>({
+    resourceName: 'project',
+    baseUrl: '/projects',
+    apiEndpoint: '/api/v1/projects',
+    title: 'Projects',
+    subtitle: 'Manage your projects and applications',
+    formFields,
+    columns,
+    validationSchema: projectSchema,
+    onFetch: fetchProjects,
+    onCreate: createProjectApi,
+    onUpdate: updateProjectApi,
+    onDelete: deleteProjectApi,
+    views: [
+      {
+        id: 'projects-card',
+        name: 'Card View',
+        type: 'card',
+        columns,
+        filters: {},
+        sortBy: 'created_at',
+        sortOrder: 'desc'
+      },
+      {
+        id: 'projects-list',
+        name: 'List View',
+        type: 'list',
+        columns,
+        filters: {},
+        sortBy: 'created_at',
+        sortOrder: 'desc'
+      },
+      {
+        id: 'projects-kanban',
+        name: 'Kanban Board',
+        type: 'kanban',
+        columns,
+        filters: {},
+        groupBy: 'status'
+      },
+      {
+        id: 'projects-gantt',
+        name: 'Timeline View',
+        type: 'gantt',
+        columns,
+        filters: {},
+        sortBy: 'start_date',
+        sortOrder: 'asc'
+      },
+      {
+        id: 'projects-calendar',
+        name: 'Calendar View',
+        type: 'calendar',
+        columns,
+        filters: {},
+        sortBy: 'created_at',
+        sortOrder: 'asc'
+      }
+    ],
+    defaultView: 'projects-list'
+  })
 
   return (
     <div className="container mx-auto px-4 py-6 max-w-7xl">
-      <ViewManager
-        title="Projects"
-        subtitle="Manage your projects and applications"
+      {/* Statistics Cards - Only show in list mode */}
+      {mode === 'list' && (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Total Projects</CardTitle>
+              <FolderOpen className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{stats.totalProjects}</div>
+              <p className="text-xs text-muted-foreground">
+                {stats.publicProjects} public, {stats.privateProjects} private
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Active Projects</CardTitle>
+              <Target className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{stats.activeProjects}</div>
+              <p className="text-xs text-muted-foreground">
+                Currently in progress
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Public Projects</CardTitle>
+              <Globe className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{stats.publicProjects}</div>
+              <p className="text-xs text-muted-foreground">
+                Publicly accessible
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Recent Projects</CardTitle>
+              <Clock className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{stats.recentProjects}</div>
+              <p className="text-xs text-muted-foreground">
+                Created last 30 days
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Development</CardTitle>
+              <GitBranch className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{stats.totalProjects}</div>
+              <p className="text-xs text-muted-foreground">
+                Total projects built
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      <CommonFormViewManager
+        config={config}
+        mode={mode as any}
+        itemId={itemId}
+        onModeChange={handleModeChange}
         data={projects}
-        columns={columns as any}
-        views={views}
-        activeView={activeView}
-        onViewChange={setActiveView}
         loading={isLoading}
         error={error ? (error as any)?.message || String(error) : null}
-        searchQuery={searchQuery}
-        onSearchChange={setSearchQuery}
-        filters={filters}
-        onFiltersChange={setFilters}
-        sortBy={sortBy}
-        sortOrder={sortOrder}
-        onSortChange={(field, order) => {
-          setSortBy(field);
-          setSortOrder(order);
-        }}
-        sortOptions={sortOptions}
-        groupBy={groupBy}
-        onGroupChange={setGroupBy}
-        groupOptions={groupOptions}
-        onExport={handleExport}
-        onImport={handleImport}
-        onCreateClick={() => setCreateDialogOpen(true)}
-        onEditClick={handleEditProject}
-        onDeleteClick={handleDeleteProject}
-        onViewClick={handleViewProject}
         selectable={true}
         selectedItems={selectedItems}
-        onSelectionChange={(items: { id: string | number }[]) => {
-          const fullProjects = items.map(item => 
-            projectsData?.items?.find(p => p.id === item.id)
-          ).filter(Boolean) as Project[];
-          setSelectedItems(fullProjects);
-        }}
+        onSelectionChange={setSelectedItems}
         bulkActions={bulkActions}
-        showToolbar={true}
-        showSearch={true}
-        showFilters={true}
-        showExport={true}
-        showImport={true}
-        showColumnSelector={true}
-        showViewSelector={true}
+        onExport={handleExport}
+        onImport={handleImport}
+        sortOptions={sortOptions}
+        groupOptions={groupOptions}
+        
+        // Kanban-specific props
+        kanbanColumns={kanbanColumns}
+        onMoveCard={handleMoveCard}
+        enableQuickAdd={true}
+        onQuickAdd={handleQuickAdd}
+        kanbanGroupByField="status"
+        kanbanCardTitleField="name"
+        kanbanCardDescriptionField="description"
+        kanbanCardFields={kanbanCardFields}
+        
+        // Calendar-specific props
         calendarIdField="id"
         calendarTitleField="name"
         calendarDateField="created_at"
         calendarDescriptionField="description"
-        onDateChange={handleDateChange}
         calendarEnableQuickAdd={true}
-        onCalendarQuickAdd={handleCalendarQuickAdd}
+        onCalendarQuickAdd={(date: Date, title: string) => {
+          const newProject: CreateProjectRequest = {
+            name: title,
+            description: `Project created on ${date.toLocaleDateString()}`,
+            is_public: false,
+            settings: {}
+          }
+          createProject.mutate(newProject)
+        }}
         calendarView="month"
         calendarShowToday={true}
+        
+        // Gantt-specific props
         ganttIdField="id"
         ganttTitleField="name"
         ganttStartDateField="start_date"
@@ -461,144 +691,6 @@ export default function ProjectsPage() {
         ganttStatusField="status"
         ganttProgressField="progress"
       />
-
-      {/* Create Project Dialog */}
-      <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Create New Project</DialogTitle>
-            <DialogDescription>
-              Create a new project to start building your application.
-            </DialogDescription>
-          </DialogHeader>
-          <form onSubmit={handleCreateProject} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="name">Project Name</Label>
-              <Input
-                id="name"
-                placeholder="Enter project name"
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="description">Description</Label>
-              <Textarea
-                id="description"
-                placeholder="Enter project description (optional)"
-                value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="start_date">Start Date</Label>
-                <Input
-                  id="start_date"
-                  type="date"
-                  value={formData.start_date}
-                  onChange={(e) => setFormData({ ...formData, start_date: e.target.value })}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="end_date">End Date</Label>
-                <Input
-                  id="end_date"
-                  type="date"
-                  value={formData.end_date}
-                  onChange={(e) => setFormData({ ...formData, end_date: e.target.value })}
-                />
-              </div>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id="is_public"
-                checked={formData.is_public}
-                onCheckedChange={(checked) => setFormData({ ...formData, is_public: !!checked })}
-              />
-              <Label htmlFor="is_public">Make this project public</Label>
-            </div>
-            <div className="flex justify-end space-x-2">
-              <Button type="button" variant="outline" onClick={() => setCreateDialogOpen(false)}>
-                Cancel
-              </Button>
-              <Button type="submit" disabled={createProject.isPending}>
-                {createProject.isPending ? 'Creating...' : 'Create Project'}
-              </Button>
-            </div>
-          </form>
-        </DialogContent>
-      </Dialog>
-
-      {/* Edit Project Dialog */}
-      <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Edit Project</DialogTitle>
-            <DialogDescription>
-              Update your project information.
-            </DialogDescription>
-          </DialogHeader>
-          <form onSubmit={handleUpdateProject} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="edit-name">Project Name</Label>
-              <Input
-                id="edit-name"
-                placeholder="Enter project name"
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="edit-description">Description</Label>
-              <Textarea
-                id="edit-description"
-                placeholder="Enter project description (optional)"
-                value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="edit-start_date">Start Date</Label>
-                <Input
-                  id="edit-start_date"
-                  type="date"
-                  value={formData.start_date}
-                  onChange={(e) => setFormData({ ...formData, start_date: e.target.value })}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="edit-end_date">End Date</Label>
-                <Input
-                  id="edit-end_date"
-                  type="date"
-                  value={formData.end_date}
-                  onChange={(e) => setFormData({ ...formData, end_date: e.target.value })}
-                />
-              </div>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id="edit-is_public"
-                checked={formData.is_public}
-                onCheckedChange={(checked) => setFormData({ ...formData, is_public: !!checked })}
-              />
-              <Label htmlFor="edit-is_public">Make this project public</Label>
-            </div>
-            <div className="flex justify-end space-x-2">
-              <Button type="button" variant="outline" onClick={() => setEditDialogOpen(false)}>
-                Cancel
-              </Button>
-              <Button type="submit" disabled={updateProject.isPending}>
-                {updateProject.isPending ? 'Updating...' : 'Update Project'}
-              </Button>
-            </div>
-          </form>
-        </DialogContent>
-      </Dialog>
     </div>
-  );
+  )
 }

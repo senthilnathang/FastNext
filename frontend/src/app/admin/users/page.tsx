@@ -1,43 +1,99 @@
 "use client"
 
 import * as React from "react"
-import { ViewManager, ViewConfig, Column, KanbanColumn } from '@/shared/components/views'
-import { 
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-  Input,
-  Label,
-  Button
-} from '@/shared/components'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/components/ui/card'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { CommonFormViewManager, createFormViewConfig } from '@/shared/components/views/CommonFormViewManager'
+import { FormField } from '@/shared/components/views/GenericFormView'
+import { Column, KanbanColumn } from '@/shared/components/views/ViewManager'
+import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card'
 import { User as UserIcon, Shield, UserCheck, Mail, Calendar, Clock, Users, Crown } from "lucide-react"
 import { Badge } from "@/shared/components/ui/badge"
 import type { SortOption, GroupOption } from '@/shared/components/ui'
 import { formatDistanceToNow } from 'date-fns'
+import { z } from 'zod'
 
 // Import React Query hooks
 import { useUsers, useDeleteUser, useToggleUserStatus, useCreateUser, useUpdateUser } from "@/modules/admin/hooks/useUsers"
 import { apiUtils } from "@/shared/services/api/client"
 import type { User } from "@/shared/services/api/users"
 
+// User validation schema
+const userSchema = z.object({
+  email: z.string().email('Invalid email address'),
+  username: z.string().min(3, 'Username must be at least 3 characters').max(50),
+  full_name: z.string().optional(),
+  password: z.string().min(8, 'Password must be at least 8 characters').optional(),
+  is_active: z.boolean().default(true),
+  is_verified: z.boolean().default(false),
+  is_superuser: z.boolean().default(false),
+})
+
+// Form fields configuration
+const formFields: FormField<User>[] = [
+  {
+    name: 'email',
+    label: 'Email Address',
+    type: 'email',
+    required: true,
+    placeholder: 'user@example.com',
+    description: 'User\'s email address for login and notifications'
+  },
+  {
+    name: 'username',
+    label: 'Username',
+    type: 'text',
+    required: true,
+    placeholder: 'username',
+    description: 'Unique username for login'
+  },
+  {
+    name: 'full_name',
+    label: 'Full Name',
+    type: 'text',
+    placeholder: 'John Doe',
+    description: 'User\'s display name'
+  },
+  {
+    name: 'password',
+    label: 'Password',
+    type: 'password',
+    placeholder: 'Enter password',
+    description: 'Leave empty to keep current password when editing',
+    condition: (formData) => {
+      // Show password field for create mode or when explicitly editing password
+      const urlParams = new URLSearchParams(window.location.search)
+      const mode = urlParams.get('mode')
+      return mode === 'create'
+    }
+  },
+  {
+    name: 'is_active',
+    label: 'Active',
+    type: 'checkbox',
+    defaultValue: true,
+    description: 'Whether the user account is active'
+  },
+  {
+    name: 'is_verified',
+    label: 'Verified',
+    type: 'checkbox',
+    defaultValue: false,
+    description: 'Whether the user\'s email has been verified'
+  },
+  {
+    name: 'is_superuser',
+    label: 'Administrator',
+    type: 'checkbox',
+    defaultValue: false,
+    description: 'Grant administrative privileges to this user'
+  }
+]
 
 type UsersPageProps = Record<string, never>
 
 const UsersPage: React.FC<UsersPageProps> = () => {
-  const [createDialogOpen, setCreateDialogOpen] = React.useState(false)
-  const [editDialogOpen, setEditDialogOpen] = React.useState(false)
-  const [selectedUser, setSelectedUser] = React.useState<User | null>(null)
-  const firstInputRef = React.useRef<HTMLInputElement>(null)
-  const [activeView, setActiveView] = React.useState('users-list')
-  const [searchQuery, setSearchQuery] = React.useState('')
-  const [filters, setFilters] = React.useState<Record<string, any>>({})
-  const [sortBy, setSortBy] = React.useState<string>('created_at')
-  const [sortOrder, setSortOrder] = React.useState<'asc' | 'desc'>('desc')
-  const [groupBy, setGroupBy] = React.useState<string>('')
+  const router = useRouter()
+  const searchParams = useSearchParams()
   const [selectedItems, setSelectedItems] = React.useState<any[]>([])
   
   const { data: usersData, isLoading, error } = useUsers()
@@ -46,22 +102,20 @@ const UsersPage: React.FC<UsersPageProps> = () => {
   const deleteUser = useDeleteUser()
   const toggleUserStatus = useToggleUserStatus()
 
-  const [formData, setFormData] = React.useState({
-    email: '',
-    username: '',
-    full_name: '',
-    password: ''
-  })
+  // Determine current mode from URL
+  const mode = searchParams.get('mode') || 'list'
+  const itemId = searchParams.get('id')
 
-  // Focus management for dialog
-  React.useEffect(() => {
-    if (createDialogOpen && firstInputRef.current) {
-      const timer = setTimeout(() => {
-        firstInputRef.current?.focus()
-      }, 100)
-      return () => clearTimeout(timer)
+  const handleModeChange = (newMode: string, newItemId?: string | number) => {
+    const params = new URLSearchParams()
+    if (newMode !== 'list') {
+      params.set('mode', newMode)
+      if (newItemId) {
+        params.set('id', String(newItemId))
+      }
     }
-  }, [createDialogOpen])
+    router.push(`/admin/users?${params.toString()}`)
+  }
 
   // Define columns for the ViewManager (memoized for performance)
   const columns: Column[] = React.useMemo(() => [
@@ -177,84 +231,6 @@ const UsersPage: React.FC<UsersPageProps> = () => {
     }
   ], [])
 
-  // Define sort options
-  const sortOptions: SortOption[] = React.useMemo(() => [
-    {
-      key: 'username',
-      label: 'Username',
-      defaultOrder: 'asc'
-    },
-    {
-      key: 'email',
-      label: 'Email',
-      defaultOrder: 'asc'
-    },
-    {
-      key: 'full_name',
-      label: 'Full Name',
-      defaultOrder: 'asc'
-    },
-    {
-      key: 'created_at',
-      label: 'Created Date',
-      defaultOrder: 'desc'
-    },
-    {
-      key: 'last_login_at',
-      label: 'Last Login',
-      defaultOrder: 'desc'
-    }
-  ], [])
-
-  // Define group options
-  const groupOptions: GroupOption[] = React.useMemo(() => [
-    {
-      key: 'is_active',
-      label: 'Status',
-      icon: <UserIcon className="h-4 w-4" />
-    },
-    {
-      key: 'is_verified',
-      label: 'Verification',
-      icon: <UserCheck className="h-4 w-4" />
-    },
-    {
-      key: 'is_superuser',
-      label: 'Admin Status',
-      icon: <Shield className="h-4 w-4" />
-    }
-  ], [])
-
-  // Define available views
-  const views: ViewConfig[] = React.useMemo(() => [
-    {
-      id: 'users-card',
-      name: 'Card View',
-      type: 'card',
-      columns,
-      filters: {},
-      sortBy: 'created_at',
-      sortOrder: 'desc'
-    },
-    {
-      id: 'users-list',
-      name: 'List View',
-      type: 'list',
-      columns,
-      filters: {},
-      sortBy: 'created_at',
-      sortOrder: 'desc'
-    },
-    {
-      id: 'users-kanban',
-      name: 'Kanban Board',
-      type: 'kanban',
-      columns,
-      filters: {},
-      groupBy: 'is_active'
-    }
-  ], [columns])
-
   const users = React.useMemo(() => usersData?.items || [], [usersData])
 
   // Calculate statistics
@@ -328,53 +304,41 @@ const UsersPage: React.FC<UsersPageProps> = () => {
     }
   ], [])
 
-  // Handle actions
-  const handleCreateUser = () => {
-    if (!formData.email || !formData.username || !formData.password) {
-      alert('Please fill in all required fields')
-      return
-    }
+  // API functions
+  const fetchUsers = async (): Promise<User[]> => {
+    const data = await usersData
+    return data?.items || []
+  }
 
-    createUser.mutate({
-      email: formData.email,
-      username: formData.username,
-      full_name: formData.full_name || undefined,
-      password: formData.password,
-    }, {
-      onSuccess: () => {
-        setFormData({ email: '', username: '', full_name: '', password: '' })
-        setCreateDialogOpen(false)
-      },
-      onError: (error) => {
-        alert(`Failed to create user: ${apiUtils.getErrorMessage(error)}`)
-      },
+  const createUserApi = async (data: User): Promise<User> => {
+    return new Promise((resolve, reject) => {
+      createUser.mutate(data, {
+        onSuccess: (result) => resolve(result),
+        onError: (error) => reject(new Error(apiUtils.getErrorMessage(error)))
+      })
     })
   }
 
-  const handleEditUser = (user: any) => {
-    setSelectedUser(user)
-    setEditDialogOpen(true)
+  const updateUserApi = async (id: string | number, data: User): Promise<User> => {
+    return new Promise((resolve, reject) => {
+      updateUser.mutate({ id: Number(id), data }, {
+        onSuccess: (result) => resolve(result),
+        onError: (error) => reject(new Error(apiUtils.getErrorMessage(error)))
+      })
+    })
   }
 
-  const handleDeleteUser = (user: any) => {
-    if (confirm(`Are you sure you want to delete user "${user.username}"?`)) {
-      deleteUser.mutate(user.id)
-    }
-  }
-
-  const handleViewUser = (user: any) => {
-    console.log('View user:', user)
-    // TODO: Navigate to user details page
-  }
-
-  const handleExport = (format: string) => {
-    console.log('Export users as', format)
-    // TODO: Implement export
-  }
-
-  const handleImport = () => {
-    console.log('Import users')
-    // TODO: Implement import
+  const deleteUserApi = async (id: string | number): Promise<void> => {
+    return new Promise((resolve, reject) => {
+      if (confirm(`Are you sure you want to delete this user?`)) {
+        deleteUser.mutate(Number(id), {
+          onSuccess: () => resolve(),
+          onError: (error) => reject(new Error(apiUtils.getErrorMessage(error)))
+        })
+      } else {
+        reject(new Error('Deletion cancelled'))
+      }
+    })
   }
 
   const handleMoveCard = (cardId: string | number, sourceColumnId: string, targetColumnId: string) => {
@@ -400,6 +364,16 @@ const UsersPage: React.FC<UsersPageProps> = () => {
       password: 'TempPassword123!', // Should prompt for password in real app
       is_active: columnId === 'true'
     })
+  }
+
+  const handleExport = (format: string) => {
+    console.log('Export users as', format)
+    // TODO: Implement export
+  }
+
+  const handleImport = () => {
+    console.log('Import users')
+    // TODO: Implement import
   }
 
   const bulkActions = [
@@ -439,102 +413,124 @@ const UsersPage: React.FC<UsersPageProps> = () => {
     )
   }
 
+  // Create form view configuration
+  const config = createFormViewConfig<User>({
+    resourceName: 'user',
+    baseUrl: '/admin/users',
+    apiEndpoint: '/api/v1/users',
+    title: 'Users Management',
+    subtitle: 'Comprehensive user management with analytics, filtering, sorting, bulk operations, and export capabilities',
+    formFields,
+    columns,
+    validationSchema: userSchema,
+    onFetch: fetchUsers,
+    onCreate: createUserApi,
+    onUpdate: updateUserApi,
+    onDelete: deleteUserApi,
+    views: [
+      {
+        id: 'users-card',
+        name: 'Card View',
+        type: 'card',
+        columns,
+        filters: {},
+        sortBy: 'created_at',
+        sortOrder: 'desc'
+      },
+      {
+        id: 'users-list',
+        name: 'List View',
+        type: 'list',
+        columns,
+        filters: {},
+        sortBy: 'created_at',
+        sortOrder: 'desc'
+      },
+      {
+        id: 'users-kanban',
+        name: 'Kanban Board',
+        type: 'kanban',
+        columns,
+        filters: {},
+        groupBy: 'is_active'
+      }
+    ],
+    defaultView: 'users-list'
+  })
+
   return (
     <div className="container mx-auto py-6 space-y-6">
-      {/* Statistics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Users</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.totalUsers}</div>
-            <p className="text-xs text-muted-foreground">
-              {stats.activeUsers} active, {stats.inactiveUsers} inactive
-            </p>
-          </CardContent>
-        </Card>
+      {/* Statistics Cards - Only show in list mode */}
+      {mode === 'list' && (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Total Users</CardTitle>
+              <Users className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{stats.totalUsers}</div>
+              <p className="text-xs text-muted-foreground">
+                {stats.activeUsers} active, {stats.inactiveUsers} inactive
+              </p>
+            </CardContent>
+          </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Verified Users</CardTitle>
-            <UserCheck className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.verifiedUsers}</div>
-            <p className="text-xs text-muted-foreground">
-              {stats.verificationRate}% verification rate
-            </p>
-          </CardContent>
-        </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Verified Users</CardTitle>
+              <UserCheck className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{stats.verifiedUsers}</div>
+              <p className="text-xs text-muted-foreground">
+                {stats.verificationRate}% verification rate
+              </p>
+            </CardContent>
+          </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Recent Activity</CardTitle>
-            <Clock className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.recentLogins}</div>
-            <p className="text-xs text-muted-foreground">
-              Logged in last 30 days ({stats.activityRate}%)
-            </p>
-          </CardContent>
-        </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Recent Activity</CardTitle>
+              <Clock className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{stats.recentLogins}</div>
+              <p className="text-xs text-muted-foreground">
+                Logged in last 30 days ({stats.activityRate}%)
+              </p>
+            </CardContent>
+          </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Administrators</CardTitle>
-            <Crown className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.superUsers}</div>
-            <p className="text-xs text-muted-foreground">
-              {stats.neverLoggedIn} never logged in
-            </p>
-          </CardContent>
-        </Card>
-      </div>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Administrators</CardTitle>
+              <Crown className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{stats.superUsers}</div>
+              <p className="text-xs text-muted-foreground">
+                {stats.neverLoggedIn} never logged in
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+      )}
 
-      <ViewManager
-        title="Users Management"
-        subtitle="Comprehensive user management with analytics, filtering, sorting, bulk operations, and export capabilities"
+      <CommonFormViewManager
+        config={config}
+        mode={mode as any}
+        itemId={itemId}
+        onModeChange={handleModeChange}
         data={users}
-        columns={columns}
-        views={views}
-        activeView={activeView}
-        onViewChange={setActiveView}
         loading={isLoading}
         error={error ? (error as any)?.message || String(error) : null}
-        searchQuery={searchQuery}
-        onSearchChange={setSearchQuery}
-        filters={filters}
-        onFiltersChange={setFilters}
-        sortBy={sortBy}
-        sortOrder={sortOrder}
-        onSortChange={(field, order) => {
-          setSortBy(field)
-          setSortOrder(order)
-        }}
-        sortOptions={sortOptions}
-        groupBy={groupBy}
-        onGroupChange={setGroupBy}
-        groupOptions={groupOptions}
-        onExport={handleExport}
-        onImport={handleImport}
-        onCreateClick={() => setCreateDialogOpen(true)}
-        onEditClick={handleEditUser}
-        onDeleteClick={handleDeleteUser}
-        onViewClick={handleViewUser}
         selectable={true}
         selectedItems={selectedItems}
         onSelectionChange={setSelectedItems}
         bulkActions={bulkActions}
-        showToolbar={true}
-        showSearch={true}
-        showFilters={true}
-        showExport={true}
-        showImport={true}
+        onExport={handleExport}
+        onImport={handleImport}
         
         // Kanban-specific props
         kanbanColumns={kanbanColumns}
@@ -546,79 +542,6 @@ const UsersPage: React.FC<UsersPageProps> = () => {
         kanbanCardDescriptionField="email"
         kanbanCardFields={kanbanCardFields}
       />
-
-      {/* Create User Dialog */}
-      <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Create New User</DialogTitle>
-            <DialogDescription>
-              Add a new user to the system. They will receive an email with login instructions.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid gap-2">
-              <Label htmlFor="email">Email *</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="user@example.com"
-                value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                ref={firstInputRef}
-                aria-required="true"
-                aria-describedby="email-error"
-              />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="username">Username *</Label>
-              <Input
-                id="username"
-                placeholder="username"
-                value={formData.username}
-                onChange={(e) => setFormData({ ...formData, username: e.target.value })}
-                aria-required="true"
-                aria-describedby="username-error"
-              />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="full_name">Full Name</Label>
-              <Input
-                id="full_name"
-                placeholder="John Doe"
-                value={formData.full_name}
-                onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
-              />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="password">Password *</Label>
-              <Input
-                id="password"
-                type="password"
-                placeholder="Password"
-                value={formData.password}
-                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                aria-required="true"
-                aria-describedby="password-error password-help"
-              />
-              <div id="password-help" className="text-xs text-muted-foreground">
-                Password must be at least 8 characters long
-              </div>
-            </div>
-          </div>
-          <div className="flex justify-end space-x-2">
-            <Button variant="outline" onClick={() => setCreateDialogOpen(false)}>
-              Cancel
-            </Button>
-            <Button
-              onClick={handleCreateUser}
-              disabled={createUser.isPending || !formData.email || !formData.username || !formData.password}
-            >
-              {createUser.isPending ? 'Creating...' : 'Create User'}
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
     </div>
   )
 }
