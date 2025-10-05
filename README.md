@@ -51,10 +51,11 @@ A comprehensive, production-ready full-stack web application framework built wit
 
 ## 🧩 Component Architecture
 
-### 🎯 **ViewManager - Universal Data Component**
+### 🎯 **ViewManager & CommonFormViewManager - Universal Data Components**
 
-The centerpiece of FastNext's frontend is the **ViewManager** component - a powerful, enterprise-grade data visualization system:
+The centerpiece of FastNext's frontend includes two powerful, enterprise-grade data management systems:
 
+**ViewManager** - Multi-view data visualization:
 ```typescript
 import { ViewManager } from '@/shared/components/views';
 
@@ -74,8 +75,26 @@ import { ViewManager } from '@/shared/components/views';
 />
 ```
 
+**CommonFormViewManager** - Form-based data management:
+```typescript
+import { CommonFormViewManager } from '@/shared/components/views';
+
+<CommonFormViewManager
+  resourceName="projects"
+  baseUrl="/projects"
+  apiEndpoint="/api/v1/projects"
+  formFields={projectFormFields}
+  columns={projectColumns}
+  validationSchema={projectSchema}
+  showStatistics={true}
+  enableSearch={true}
+  enableFilters={true}
+/>
+```
+
 **Key Features:**
-- **5 View Types**: List, Card, Kanban, Gantt, Cohort views
+- **5 View Types**: List, Card, Kanban, Gantt, Calendar views
+- **Form Management**: URL-based navigation, CRUD operations, validation
 - **Advanced Controls**: Search, filter, sort, group, and column management
 - **Data Operations**: Export/import, bulk actions, selection management
 - **Enterprise Ready**: Performance optimized, fully accessible, mobile responsive
@@ -85,22 +104,32 @@ import { ViewManager } from '@/shared/components/views';
 ```
 Frontend Architecture
 ├── 🎯 Views (Universal Data Display)
-│   ├── ViewManager           # Main universal component
-│   ├── SortControl          # Advanced sorting interface  
-│   ├── GroupControl         # Data grouping interface
-│   └── Column Management    # Drag-and-drop columns
+│   ├── ViewManager                # Multi-view data visualization
+│   ├── CommonFormViewManager     # Form-based data management
+│   ├── GenericFormView           # Dynamic form rendering
+│   ├── SortControl               # Advanced sorting interface  
+│   ├── GroupControl              # Data grouping interface
+│   └── Column Management         # Drag-and-drop columns
 ├── 📊 Data Visualization
-│   ├── Enhanced DataTable   # Advanced table with features
-│   ├── Kanban Board         # Project management boards
-│   └── Analytics Dashboard  # Charts and metrics
+│   ├── Enhanced DataTable        # Advanced table with features
+│   ├── Kanban Board              # Project management boards
+│   ├── Gantt Chart               # Timeline visualization
+│   ├── Calendar View             # Calendar-based layouts
+│   └── Analytics Dashboard       # Charts and metrics
 ├── 🎨 UI Components (shadcn/ui)
-│   ├── Form Controls        # Type-safe form components
-│   ├── Layout Components    # Responsive layouts
-│   └── Navigation          # Advanced navigation system
-└── 🔐 Security Components
-    ├── Auth Guards         # Route protection
-    ├── RBAC Controls       # Role-based access
-    └── XSS Protection      # Security middleware
+│   ├── Form Controls             # Type-safe form components
+│   ├── Layout Components         # Responsive layouts
+│   └── Navigation                # Advanced navigation system
+├── 🔐 Security Components
+│   ├── Auth Guards               # Route protection
+│   ├── RBAC Controls             # Role-based access
+│   ├── RLS Management            # Row Level Security
+│   └── XSS Protection            # Security middleware
+└── 🔧 Admin Components
+    ├── RLS Dashboard             # Row Level Security management
+    ├── User Management           # User administration
+    ├── Permissions Manager       # Permission control
+    └── Audit Logs               # Activity monitoring
 ```
 
 ## 🛠️ Technology Stack

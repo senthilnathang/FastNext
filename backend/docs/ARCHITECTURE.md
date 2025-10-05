@@ -2,7 +2,7 @@
 
 ## Overview
 
-The FastNext backend is built on **FastAPI** following a **clean architecture pattern** with clear separation of concerns, enterprise-grade features, and comprehensive scaffolding capabilities.
+The FastNext backend is built on **FastAPI 0.115+** following a **clean architecture pattern** with clear separation of concerns, enterprise-grade features, Row Level Security (RLS), and comprehensive scaffolding capabilities.
 
 ## Architecture Principles
 

@@ -226,9 +226,10 @@ npm run build-storybook
 
 ## ViewManager & Advanced Data Views
 
-### ViewManager
-Universal data visualization component supporting multiple view types with advanced features.
+### ViewManager & CommonFormViewManager
+Universal data visualization and form management components supporting multiple view types with advanced features.
 
+**ViewManager** - Multi-view data display:
 ```tsx
 import { ViewManager } from '@/shared/components/views'
 
@@ -252,6 +253,32 @@ function DataPage() {
       onCreateClick={() => console.log('Create')}
       onEditClick={(item) => console.log('Edit', item)}
       onDeleteClick={(item) => console.log('Delete', item)}
+    />
+  )
+}
+```
+
+**CommonFormViewManager** - Complete data management with forms:
+```tsx
+import { CommonFormViewManager } from '@/shared/components/views'
+
+function ProjectsPage() {
+  return (
+    <CommonFormViewManager
+      resourceName="projects"
+      baseUrl="/projects"
+      apiEndpoint="/api/v1/projects"
+      formFields={projectFormFields}
+      columns={projectColumns}
+      validationSchema={projectSchema}
+      showStatistics={true}
+      enableSearch={true}
+      enableFilters={true}
+      statisticsConfig={{
+        totalProjects: { label: 'Total Projects', color: 'blue' },
+        activeProjects: { label: 'Active', color: 'green' },
+        completedProjects: { label: 'Completed', color: 'purple' }
+      }}
     />
   )
 }
@@ -343,11 +370,13 @@ src/
 ├── shared/
 │   ├── components/          # Reusable UI components
 │   │   ├── views/          # Data visualization components
-│   │   │   ├── ViewManager.tsx      # Universal data manager
-│   │   │   ├── KanbanView.tsx       # Kanban board layout
-│   │   │   ├── GanttView.tsx        # Timeline visualization
-│   │   │   ├── CalendarView.tsx     # Calendar layout
-│   │   │   └── index.ts            # View exports
+│   │   │   ├── ViewManager.tsx            # Universal data manager
+│   │   │   ├── CommonFormViewManager.tsx  # Form-based data management
+│   │   │   ├── GenericFormView.tsx        # Dynamic form rendering
+│   │   │   ├── KanbanView.tsx             # Kanban board layout
+│   │   │   ├── GanttView.tsx              # Timeline visualization
+│   │   │   ├── CalendarView.tsx           # Calendar layout
+│   │   │   └── index.ts                   # View exports
 │   │   ├── MobileSidebar.tsx
 │   │   ├── MobileSearch.tsx
 │   │   ├── MobileTable.tsx
@@ -357,6 +386,15 @@ src/
 │   │   └── useSwipeGesture.ts
 │   └── utils/              # Utility functions
 ├── app/                    # Next.js App Router pages
+│   ├── admin/             # Admin interface with RLS management
+│   │   ├── rls/          # Row Level Security administration
+│   │   ├── users/        # User management
+│   │   └── permissions/  # Permission management
+│   └── projects/         # Projects with CommonFormViewManager
+├── modules/               # Feature modules
+│   ├── rls/              # Row Level Security components
+│   ├── admin/            # Admin management
+│   └── auth/             # Authentication
 ├── stories/               # Storybook stories
 └── __tests__/             # Jest test files
 ```
