@@ -55,18 +55,28 @@ export const useGenericPermissions = (
       setLoading(true)
       setError(null)
 
-      // Get user's permissions
-      const permissionsResponse = await apiClient.get('/api/v1/auth/me/permissions')
-      setPermissions(permissionsResponse.data)
+      // Get user's permissions from the /me endpoint
+      const userResponse = await apiClient.get('/api/v1/auth/me')
+      const userPermissions = userResponse.data.permissions || []
+      
+      // Convert permission strings to Permission objects
+      const permissionObjects: Permission[] = userPermissions.map((permName: string, index: number) => ({
+        id: index + 1,
+        name: permName,
+        description: `Permission: ${permName}`,
+        category: permName.includes('.') ? permName.split('.')[0] : 'system',
+        action: permName.includes('.') ? permName.split('.')[1] : permName,
+        is_system_permission: true
+      }))
+      
+      setPermissions(permissionObjects)
 
-      // Get allowed actions for specific resource if provided
+      // Extract allowed actions for specific resource from permissions
       if (resource) {
-        const queryParams = new URLSearchParams({
-          resource_type: resource,
-          ...(projectId && { project_id: projectId.toString() })
-        })
-        const actionsResponse = await apiClient.get(`/auth/me/allowed-actions?${queryParams}`)
-        setAllowedActions(actionsResponse.data)
+        const resourceActions = permissionObjects
+          .filter(perm => perm.category === resource)
+          .map(perm => perm.action)
+        setAllowedActions(resourceActions)
       }
     } catch (err: unknown) {
       const errorMessage = err && typeof err === 'object' && 'response' in err && err.response && typeof err.response === 'object' && 'data' in err.response && err.response.data && typeof err.response.data === 'object' && 'detail' in err.response.data ? String(err.response.data.detail) : 'Failed to fetch permissions'

@@ -20,8 +20,16 @@ const projectSchema = z.object({
   name: z.string().min(1, 'Project name is required').max(100),
   description: z.string().optional(),
   is_public: z.boolean().default(false),
-  start_date: z.string().optional(),
-  end_date: z.string().optional(),
+  start_date: z.union([z.string(), z.date()]).optional().transform((val) => {
+    if (!val) return undefined
+    if (val instanceof Date) return val.toISOString().split('T')[0]
+    return val
+  }),
+  end_date: z.union([z.string(), z.date()]).optional().transform((val) => {
+    if (!val) return undefined
+    if (val instanceof Date) return val.toISOString().split('T')[0]
+    return val
+  }),
   settings: z.record(z.any()).optional(),
 })
 
@@ -62,6 +70,22 @@ const formFields: FormField<Project>[] = [
     description: 'Allow public access to this project'
   }
 ]
+
+// Helper function to convert date values to API format
+const convertDateForApi = (date: any): string | undefined => {
+  if (!date) return undefined
+  if (date instanceof Date) {
+    return date.toISOString().split('T')[0]
+  }
+  if (typeof date === 'string') {
+    // Handle case where date is already a string
+    if (date.includes('T')) {
+      return date.split('T')[0]
+    }
+    return date
+  }
+  return undefined
+}
 
 export default function ProjectsPage() {
   const router = useRouter()
@@ -364,17 +388,14 @@ export default function ProjectsPage() {
       name: data.name,
       description: data.description || undefined,
       is_public: data.is_public,
-      start_date: data.start_date || undefined,
-      end_date: data.end_date || undefined,
+      start_date: convertDateForApi(data.start_date),
+      end_date: convertDateForApi(data.end_date),
       settings: data.settings || {}
     }
 
-    return new Promise((resolve, reject) => {
-      createProject.mutate(cleanedData, {
-        onSuccess: (result) => resolve(result as Project),
-        onError: (error) => reject(error)
-      })
-    })
+    // Use mutateAsync to preserve built-in cache invalidation
+    const result = await createProject.mutateAsync(cleanedData)
+    return result as Project
   }
 
   const updateProjectApi = async (id: string | number, data: Project): Promise<Project> => {
@@ -383,31 +404,24 @@ export default function ProjectsPage() {
       name: data.name,
       description: data.description || undefined,
       is_public: data.is_public,
-      start_date: data.start_date || undefined,
-      end_date: data.end_date || undefined,
+      start_date: convertDateForApi(data.start_date),
+      end_date: convertDateForApi(data.end_date),
       settings: data.settings || {}
     }
 
-    return new Promise((resolve, reject) => {
-      updateProject.mutate({ id: Number(id), data: updateData }, {
-        onSuccess: (result) => resolve(result as Project),
-        onError: (error) => reject(error)
-      })
-    })
+    // Use mutateAsync to preserve built-in cache invalidation
+    const result = await updateProject.mutateAsync({ id: Number(id), data: updateData })
+    return result as Project
   }
 
   const deleteProjectApi = async (id: string | number): Promise<void> => {
     const project = projects.find(p => p.id === Number(id))
-    return new Promise((resolve, reject) => {
-      if (project && confirm(`Are you sure you want to delete "${project.name}"?`)) {
-        deleteProject.mutate(Number(id), {
-          onSuccess: () => resolve(),
-          onError: (error) => reject(error)
-        })
-      } else {
-        reject(new Error('Deletion cancelled'))
-      }
-    })
+    if (project && confirm(`Are you sure you want to delete "${project.name}"?`)) {
+      // Use mutateAsync to preserve built-in cache invalidation
+      await deleteProject.mutateAsync(Number(id))
+    } else {
+      throw new Error('Deletion cancelled')
+    }
   }
 
   const handleExport = (format: 'csv' | 'json' | 'excel') => {

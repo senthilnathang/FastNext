@@ -372,15 +372,38 @@ export function GenericFormView<T = any>({
             <Controller
               name={field.name as any}
               control={control}
-              render={({ field: formField }) => (
-                <Input
-                  {...formField}
-                  {...fieldProps}
-                  type="date"
-                  value={formField.value ? new Date(formField.value).toISOString().split('T')[0] : ''}
-                  onChange={(e) => formField.onChange(e.target.value ? new Date(e.target.value) : null)}
-                />
-              )}
+              render={({ field: formField }) => {
+                // Helper function to safely convert value to date string for input
+                const formatDateForInput = (value: any): string => {
+                  if (!value) return ''
+                  
+                  try {
+                    // If it's already a proper date string (YYYY-MM-DD), return as is
+                    if (typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value)) {
+                      return value
+                    }
+                    
+                    // If it's a Date object or other date string, convert it
+                    const date = new Date(value)
+                    if (isNaN(date.getTime())) {
+                      return ''
+                    }
+                    return date.toISOString().split('T')[0]
+                  } catch {
+                    return ''
+                  }
+                }
+
+                return (
+                  <Input
+                    {...formField}
+                    {...fieldProps}
+                    type="date"
+                    value={formatDateForInput(formField.value)}
+                    onChange={(e) => formField.onChange(e.target.value ? new Date(e.target.value) : null)}
+                  />
+                )
+              }}
             />
           )
 
