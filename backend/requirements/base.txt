@@ -2,65 +2,65 @@
 # Core dependencies required for all environments
 
 # FastAPI and ASGI server
-fastapi==0.104.1
-uvicorn[standard]==0.24.0
+fastapi==0.115.5
+uvicorn[standard]==0.32.1
 
 # Database
-sqlalchemy[asyncio]==2.0.23
-asyncpg==0.29.0  # PostgreSQL async driver
-alembic==1.12.1  # Database migrations
+sqlalchemy[asyncio]==2.0.36
+asyncpg==0.30.0  # PostgreSQL async driver
+alembic==1.14.0  # Database migrations
 
 # Authentication & Security
 python-jose[cryptography]==3.3.0  # JWT tokens
 passlib[bcrypt]==1.7.4  # Password hashing
-python-multipart==0.0.6  # Form data parsing
-cryptography==41.0.7  # Advanced encryption
+python-multipart==0.0.18  # Form data parsing
+cryptography==44.0.0  # Advanced encryption
 
 # Validation & Serialization
-pydantic[email]==2.5.0  # Data validation
-pydantic-settings==2.1.0  # Settings management
+pydantic[email]==2.10.3  # Data validation
+pydantic-settings==2.7.0  # Settings management
 
 # HTTP client
-httpx==0.25.2  # Async HTTP client
+httpx==0.28.1  # Async HTTP client
 
 # Caching & Session Management
-redis>=5.0.0  # Redis client with async support
-hiredis==2.2.3  # Fast Redis parser
+redis>=5.2.0  # Redis client with async support
+hiredis==3.2.1  # Fast Redis parser
 
 # Background Tasks
-celery==5.3.4  # Task queue
-kombu==5.3.4  # Message transport
+celery==5.4.0  # Task queue
+kombu==5.4.2  # Message transport
 
 # Monitoring & Logging
-structlog>=23.0.0  # Structured logging
-python-json-logger>=2.0.0  # JSON logging formatter
-opentelemetry-api==1.21.0  # Observability
-opentelemetry-sdk==1.21.0
-opentelemetry-instrumentation-fastapi==0.42b0
-opentelemetry-instrumentation-sqlalchemy==0.42b0
+structlog>=24.5.0  # Structured logging
+python-json-logger>=3.2.1  # JSON logging formatter
+opentelemetry-api==1.28.2  # Observability
+opentelemetry-sdk==1.28.2
+opentelemetry-instrumentation-fastapi==0.49b2
+opentelemetry-instrumentation-sqlalchemy==0.49b2
 
 # Utilities
-python-dateutil==2.8.2  # Date utilities
+python-dateutil==2.9.0  # Date utilities
 click==8.1.7  # CLI framework
-rich==13.7.0  # Rich text and beautiful formatting
-typer==0.9.0  # CLI applications
+rich==13.9.4  # Rich text and beautiful formatting
+typer==0.15.1  # CLI applications
 
 # Email
 emails==0.6  # Email sending
 
 # File handling
 python-magic==0.4.27  # File type detection
-pillow==10.1.0  # Image processing
+pillow==11.0.0  # Image processing
 
 # Data Import/Export
-openpyxl==3.1.2  # Excel file handling
-xlsxwriter==3.1.9  # Excel file writing
-pandas==2.1.4  # Data manipulation and analysis
+openpyxl==3.1.5  # Excel file handling
+xlsxwriter==3.2.0  # Excel file writing
+pandas==2.2.3  # Data manipulation and analysis
 xlrd==2.0.1  # Excel file reading
-lxml==4.9.3  # XML processing
-PyYAML==6.0.1  # YAML processing
-aiofiles==23.2.0  # Async file operations
+lxml==5.3.0  # XML processing
+PyYAML==6.0.2  # YAML processing
+aiofiles==24.1.0  # Async file operations
 
 # Security
 python-owasp-zap-v2.4==0.0.21  # Security scanning
-bandit==1.7.5  # Security linter
+bandit==1.8.0  # Security linter

@@ -71,7 +71,9 @@
       "WebFetch(domain:api.github.com)",
       "Bash(wget:*)",
       "Bash(unzip:*)",
-      "Bash(ss:*)"
+      "Bash(ss:*)",
+      "Bash(./venv/bin/pip install:*)",
+      "Bash(venv/bin/pip install:*)"
     ],
     "deny": []
   }
