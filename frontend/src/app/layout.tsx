@@ -6,6 +6,7 @@ import { NuqsProvider, ConditionalAppLayout } from "@/shared/components";
 import { TRPCProvider } from "@/lib/trpc/provider";
 import { SecurityProvider } from "@/lib/security/SecurityProvider";
 import { SessionTimeoutWarning } from "@/shared/components/SessionTimeoutWarning";
+import { GraphQLProvider } from "@/lib/graphql";
 
 export const metadata: Metadata = {
   title: "FastNext Framework",
@@ -24,24 +25,26 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className="font-sans antialiased">
         <SecurityProvider>
-          <TRPCProvider>
-            <NuqsProvider>
-              <EnhancedThemeProvider 
-                attribute="class" 
-                defaultTheme="system" 
-                enableSystem
-                defaultColorScheme="default"
-                colorSchemeStorageKey="color-scheme"
-              >
-                <AuthProvider>
-                  <ConditionalAppLayout>
-                    {children}
-                  </ConditionalAppLayout>
-                  <SessionTimeoutWarning />
-                </AuthProvider>
-              </EnhancedThemeProvider>
-            </NuqsProvider>
-          </TRPCProvider>
+          <GraphQLProvider>
+            <TRPCProvider>
+              <NuqsProvider>
+                <EnhancedThemeProvider 
+                  attribute="class" 
+                  defaultTheme="system" 
+                  enableSystem
+                  defaultColorScheme="default"
+                  colorSchemeStorageKey="color-scheme"
+                >
+                  <AuthProvider>
+                    <ConditionalAppLayout>
+                      {children}
+                    </ConditionalAppLayout>
+                    <SessionTimeoutWarning />
+                  </AuthProvider>
+                </EnhancedThemeProvider>
+              </NuqsProvider>
+            </TRPCProvider>
+          </GraphQLProvider>
         </SecurityProvider>
       </body>
     </html>

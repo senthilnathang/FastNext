@@ -39,6 +39,10 @@ opentelemetry-sdk==1.28.2
 opentelemetry-instrumentation-fastapi==0.49b2
 opentelemetry-instrumentation-sqlalchemy==0.49b2
 
+# GraphQL
+strawberry-graphql[fastapi]==0.246.2  # GraphQL implementation
+strawberry-graphql[debug-server]==0.246.2  # GraphQL debug tools
+
 # Utilities
 python-dateutil==2.9.0  # Date utilities
 click==8.1.7  # CLI framework

@@ -1,9 +1,11 @@
-from typing import Generator
+from typing import Generator, Optional
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from jose import jwt
 from pydantic import ValidationError
 from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
 
 from app.core import security
 from app.core.config import settings
@@ -62,3 +64,42 @@ def get_current_active_user(
     if not current_user.is_active:
         raise HTTPException(status_code=400, detail="Inactive user")
     return current_user
+
+
+# Optional user dependency for GraphQL
+security_scheme_optional = HTTPBearer(
+    scheme_name="Bearer Token (Optional)",
+    description="Enter your JWT access token (optional)",
+    auto_error=False
+)
+
+
+async def get_current_user_optional(
+    db: AsyncSession = Depends(get_db), 
+    credentials: Optional[HTTPAuthorizationCredentials] = Depends(security_scheme_optional)
+) -> Optional[User]:
+    """
+    Get current authenticated user from JWT token (optional)
+    
+    Args:
+        db: Database session
+        credentials: Optional HTTPAuthorizationCredentials with Bearer token
+        
+    Returns:
+        Optional[User]: Current authenticated user or None if not authenticated
+    """
+    if not credentials:
+        return None
+        
+    token = credentials.credentials
+    try:
+        payload = jwt.decode(
+            token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM]
+        )
+        token_data = TokenPayload(**payload)
+    except (jwt.JWTError, ValidationError):
+        return None
+        
+    result = await db.execute(select(User).where(User.id == token_data.sub))
+    user = result.scalar_one_or_none()
+    return user

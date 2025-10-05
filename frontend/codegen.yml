@@ -1,0 +1,76 @@
+# GraphQL Code Generator Configuration
+# Generates TypeScript types from GraphQL schema and operations
+
+schema: "http://localhost:8000/api/v1/graphql"
+documents: 
+  - "src/**/*.{ts,tsx}"
+  - "src/lib/graphql/*.ts"
+generates:
+  src/lib/graphql/generated.ts:
+    plugins:
+      - "typescript"
+      - "typescript-operations"
+      - "typescript-react-apollo"
+    config:
+      withHooks: true
+      withComponent: false
+      withHOC: false
+      withMutationFn: false
+      apolloReactCommonImportFrom: "@apollo/client"
+      apolloReactHooksImportFrom: "@apollo/client"
+      # Generate hooks with proper naming
+      hooksSuffix: ""
+      # Use more specific types
+      scalars:
+        DateTime: string
+        JSON: any
+        Upload: File
+      # Avoid any types where possible
+      avoidOptionals: 
+        field: true
+        inputValue: false
+        object: false
+      # Generate more precise types
+      enumsAsTypes: true
+      constEnums: false
+      # Optimize imports
+      dedupeOperationSuffix: true
+      omitOperationSuffix: false
+      # Add useful metadata
+      addDocBlocks: true
+      # Export everything
+      exportFragmentSpreadSubTypes: true
+      # Better enum handling
+      futureProofEnums: true
+      # Use exact types
+      exactTypes: false
+      # Additional configuration for better TypeScript support
+      typesPrefix: ""
+      typesSuffix: ""
+      transformUnderscore: false
+      # Fragment handling
+      fragmentMatching: "name"
+      # Skip typename in fragments
+      skipTypename: false
+      # Array optimization
+      arrayInputCoercion: false
+  
+  # Generate schema introspection file for development
+  src/lib/graphql/introspection.json:
+    plugins:
+      - "introspection"
+    config:
+      minify: false
+
+# Hooks for automatic code generation
+hooks:
+  afterOneFileWrite:
+    - prettier --write
+
+# Configuration for development vs production
+config:
+  # Enable in development for better debugging
+  debug: false
+  verbose: false
+  # Skip documents validation during development
+  skipDocumentsValidation: false
