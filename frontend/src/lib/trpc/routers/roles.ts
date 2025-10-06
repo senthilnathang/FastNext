@@ -1,92 +1,119 @@
 import { z } from 'zod'
 import { router, protectedProcedure } from '../server'
-import { apiClient } from '@/shared/services/api/client'
-import { API_CONFIG } from '@/shared/services/api/config'
+import { roleOperations } from '../graphql-client'
 
 const roleSchema = z.object({
-  id: z.string(),
+  id: z.number(),
   name: z.string(),
   description: z.string().optional(),
-  is_active: z.boolean().optional(),
-  created_at: z.string().optional(),
-  updated_at: z.string().optional(),
+  permissions: z.array(z.string()).optional(),
+  createdAt: z.string().optional(),
+  updatedAt: z.string().optional(),
 })
 
 const createRoleSchema = z.object({
   name: z.string().min(1),
   description: z.string().optional(),
+  permissions: z.array(z.string()).optional(),
+})
+
+const updateRoleSchema = z.object({
+  name: z.string().optional(),
+  description: z.string().optional(),
+  permissions: z.array(z.string()).optional(),
 })
 
 export const rolesRouter = router({
   getAll: protectedProcedure
-    .input(
-      z.object({
-        page: z.number().min(1).default(1),
-        limit: z.number().min(1).max(100).default(10),
-        search: z.string().optional(),
-      })
-    )
-    .query(async ({ input }) => {
+    .query(async () => {
       try {
-        const response = await apiClient.get(API_CONFIG.ENDPOINTS.ROLES, {
-          params: {
-            page: input.page,
-            limit: input.limit,
-            search: input.search,
-          },
-        })
-        return response.data
-      } catch {
-        throw new Error('Failed to fetch roles')
+        const result = await roleOperations.getAll()
+        return {
+          data: result.roles,
+          total: result.roles.length,
+        }
+      } catch (error) {
+        throw new Error(`Failed to fetch roles: ${error instanceof Error ? error.message : 'Unknown error'}`)
       }
     }),
 
   getById: protectedProcedure
-    .input(z.string())
+    .input(z.number())
     .query(async ({ input: id }) => {
       try {
-        const response = await apiClient.get(`${API_CONFIG.ENDPOINTS.ROLES}/${id}`)
-        return response.data
-      } catch {
-        throw new Error('Failed to fetch role')
+        // For individual role fetching, we'll need to find from the list
+        // or add a getById operation to roleOperations
+        const result = await roleOperations.getAll()
+        const role = result.roles.find((role: any) => role.id === id)
+        if (!role) {
+          throw new Error('Role not found')
+        }
+        return role
+      } catch (error) {
+        throw new Error(`Failed to fetch role: ${error instanceof Error ? error.message : 'Unknown error'}`)
       }
     }),
 
+  // Note: Create, update, delete operations would need corresponding GraphQL mutations
+  // For now, keeping basic structure for TypeScript compatibility
   create: protectedProcedure
     .input(createRoleSchema)
     .mutation(async ({ input }) => {
       try {
-        const response = await apiClient.post(API_CONFIG.ENDPOINTS.ROLES, input)
-        return response.data
-      } catch {
-        throw new Error('Failed to create role')
+        // This would need a createRole mutation in GraphQL
+        throw new Error('Create role mutation not implemented in GraphQL')
+      } catch (error) {
+        throw new Error(`Failed to create role: ${error instanceof Error ? error.message : 'Unknown error'}`)
       }
     }),
 
   update: protectedProcedure
     .input(
       z.object({
-        id: z.string(),
-        data: roleSchema.partial().omit({ id: true }),
+        id: z.number(),
+        data: updateRoleSchema,
       })
     )
     .mutation(async ({ input }) => {
       try {
-        const response = await apiClient.put(`${API_CONFIG.ENDPOINTS.ROLES}/${input.id}`, input.data)
-        return response.data
-      } catch {
-        throw new Error('Failed to update role')
+        // This would need an updateRole mutation in GraphQL
+        throw new Error('Update role mutation not implemented in GraphQL')
+      } catch (error) {
+        throw new Error(`Failed to update role: ${error instanceof Error ? error.message : 'Unknown error'}`)
       }
     }),
 
   delete: protectedProcedure
-    .input(z.string())
+    .input(z.number())
     .mutation(async ({ input: id }) => {
       try {
-        await apiClient.delete(`${API_CONFIG.ENDPOINTS.ROLES}/${id}`)
-        return { success: true }
-      } catch {
-        throw new Error('Failed to delete role')
+        // This would need a deleteRole mutation in GraphQL
+        throw new Error('Delete role mutation not implemented in GraphQL')
+      } catch (error) {
+        throw new Error(`Failed to delete role: ${error instanceof Error ? error.message : 'Unknown error'}`)
+      }
+    }),
+
+  // Additional utility procedures
+  search: protectedProcedure
+    .input(
+      z.object({
+        query: z.string().min(1),
+      })
+    )
+    .query(async ({ input }) => {
+      try {
+        const result = await roleOperations.getAll()
+        const filteredRoles = result.roles.filter((role: any) =>
+          role.name.toLowerCase().includes(input.query.toLowerCase()) ||
+          (role.description && role.description.toLowerCase().includes(input.query.toLowerCase()))
+        )
+        return {
+          roles: filteredRoles,
+          totalCount: filteredRoles.length,
+        }
+      } catch (error) {
+        throw new Error(`Failed to search roles: ${error instanceof Error ? error.message : 'Unknown error'}`)
       }
     }),
 })

@@ -1,20 +1,30 @@
 import { z } from 'zod'
 import { router, protectedProcedure } from '../server'
-import { apiClient } from '@/shared/services/api/client'
-import { API_CONFIG } from '@/shared/services/api/config'
+import { projectOperations, pageOperations, componentOperations, projectMemberOperations } from '../graphql-client'
 
 const projectSchema = z.object({
-  id: z.string(),
+  id: z.number(),
   name: z.string(),
   description: z.string().optional(),
-  is_active: z.boolean().optional(),
-  created_at: z.string().optional(),
-  updated_at: z.string().optional(),
+  userId: z.number(),
+  isPublic: z.boolean().optional(),
+  settings: z.record(z.any()).optional(),
+  createdAt: z.string().optional(),
+  updatedAt: z.string().optional(),
 })
 
 const createProjectSchema = z.object({
   name: z.string().min(1),
   description: z.string().optional(),
+  isPublic: z.boolean().default(false),
+  settings: z.record(z.any()).optional(),
+})
+
+const updateProjectSchema = z.object({
+  name: z.string().optional(),
+  description: z.string().optional(),
+  isPublic: z.boolean().optional(),
+  settings: z.record(z.any()).optional(),
 })
 
 export const projectsRouter = router({
@@ -23,32 +33,45 @@ export const projectsRouter = router({
       z.object({
         page: z.number().min(1).default(1),
         limit: z.number().min(1).max(100).default(10),
-        search: z.string().optional(),
+        userId: z.number().optional(),
+        isPublic: z.boolean().optional(),
       })
     )
     .query(async ({ input }) => {
       try {
-        const response = await apiClient.get(API_CONFIG.ENDPOINTS.PROJECTS, {
-          params: {
-            page: input.page,
-            limit: input.limit,
-            search: input.search,
-          },
+        // Convert pagination to GraphQL format
+        const first = input.limit
+        const after = input.page > 1 ? btoa(`cursor:${(input.page - 1) * input.limit}`) : undefined
+        
+        const result = await projectOperations.getAll({
+          first,
+          after,
+          userId: input.userId,
+          isPublic: input.isPublic,
         })
-        return response.data
-      } catch {
-        throw new Error('Failed to fetch projects')
+        
+        // Convert GraphQL response to TRPC format for backward compatibility
+        return {
+          data: result.projects.edges,
+          total: result.projects.totalCount,
+          page: input.page,
+          limit: input.limit,
+          hasNext: result.projects.pageInfo.hasNextPage,
+          hasPrevious: result.projects.pageInfo.hasPreviousPage,
+        }
+      } catch (error) {
+        throw new Error(`Failed to fetch projects: ${error instanceof Error ? error.message : 'Unknown error'}`)
       }
     }),
 
   getById: protectedProcedure
-    .input(z.string())
+    .input(z.number())
     .query(async ({ input: id }) => {
       try {
-        const response = await apiClient.get(`${API_CONFIG.ENDPOINTS.PROJECTS}/${id}`)
-        return response.data
-      } catch {
-        throw new Error('Failed to fetch project')
+        const result = await projectOperations.getById(id)
+        return result.project
+      } catch (error) {
+        throw new Error(`Failed to fetch project: ${error instanceof Error ? error.message : 'Unknown error'}`)
       }
     }),
 
@@ -56,37 +79,154 @@ export const projectsRouter = router({
     .input(createProjectSchema)
     .mutation(async ({ input }) => {
       try {
-        const response = await apiClient.post(API_CONFIG.ENDPOINTS.PROJECTS, input)
-        return response.data
-      } catch {
-        throw new Error('Failed to create project')
+        const result = await projectOperations.create(input)
+        if (!result.createProject.success) {
+          throw new Error(result.createProject.message || 'Failed to create project')
+        }
+        return result.createProject.project
+      } catch (error) {
+        throw new Error(`Failed to create project: ${error instanceof Error ? error.message : 'Unknown error'}`)
       }
     }),
 
   update: protectedProcedure
     .input(
       z.object({
-        id: z.string(),
-        data: projectSchema.partial().omit({ id: true }),
+        id: z.number(),
+        data: updateProjectSchema,
       })
     )
     .mutation(async ({ input }) => {
       try {
-        const response = await apiClient.put(`${API_CONFIG.ENDPOINTS.PROJECTS}/${input.id}`, input.data)
-        return response.data
-      } catch {
-        throw new Error('Failed to update project')
+        const result = await projectOperations.update(input.id, input.data)
+        if (!result.updateProject.success) {
+          throw new Error(result.updateProject.message || 'Failed to update project')
+        }
+        return result.updateProject.project
+      } catch (error) {
+        throw new Error(`Failed to update project: ${error instanceof Error ? error.message : 'Unknown error'}`)
       }
     }),
 
   delete: protectedProcedure
-    .input(z.string())
+    .input(z.number())
     .mutation(async ({ input: id }) => {
       try {
-        await apiClient.delete(`${API_CONFIG.ENDPOINTS.PROJECTS}/${id}`)
-        return { success: true }
-      } catch {
-        throw new Error('Failed to delete project')
+        const result = await projectOperations.delete(id)
+        if (!result.deleteProject.success) {
+          throw new Error(result.deleteProject.message || 'Failed to delete project')
+        }
+        return { success: true, message: result.deleteProject.message }
+      } catch (error) {
+        throw new Error(`Failed to delete project: ${error instanceof Error ? error.message : 'Unknown error'}`)
+      }
+    }),
+
+  // Enhanced project-specific procedures
+  getPages: protectedProcedure
+    .input(
+      z.object({
+        projectId: z.number(),
+        page: z.number().min(1).default(1),
+        limit: z.number().min(1).max(100).default(10),
+      })
+    )
+    .query(async ({ input }) => {
+      try {
+        const first = input.limit
+        const after = input.page > 1 ? btoa(`cursor:${(input.page - 1) * input.limit}`) : undefined
+        
+        const result = await pageOperations.getAll({
+          first,
+          after,
+          projectId: input.projectId,
+        })
+        
+        return {
+          data: result.pages.edges,
+          total: result.pages.totalCount,
+          page: input.page,
+          limit: input.limit,
+          hasNext: result.pages.pageInfo.hasNextPage,
+          hasPrevious: result.pages.pageInfo.hasPreviousPage,
+        }
+      } catch (error) {
+        throw new Error(`Failed to fetch project pages: ${error instanceof Error ? error.message : 'Unknown error'}`)
+      }
+    }),
+
+  getComponents: protectedProcedure
+    .input(
+      z.object({
+        projectId: z.number(),
+        componentType: z.string().optional(),
+      })
+    )
+    .query(async ({ input }) => {
+      try {
+        const result = await componentOperations.getAll({
+          projectId: input.projectId,
+          componentType: input.componentType,
+        })
+        
+        return {
+          components: result.components,
+        }
+      } catch (error) {
+        throw new Error(`Failed to fetch project components: ${error instanceof Error ? error.message : 'Unknown error'}`)
+      }
+    }),
+
+  getMembers: protectedProcedure
+    .input(z.number())
+    .query(async ({ input: projectId }) => {
+      try {
+        const result = await projectMemberOperations.getAll(projectId)
+        return {
+          members: result.projectMembers,
+        }
+      } catch (error) {
+        throw new Error(`Failed to fetch project members: ${error instanceof Error ? error.message : 'Unknown error'}`)
+      }
+    }),
+
+  addMember: protectedProcedure
+    .input(
+      z.object({
+        projectId: z.number(),
+        userId: z.number(),
+        role: z.string(),
+        permissions: z.array(z.string()).optional(),
+      })
+    )
+    .mutation(async ({ input }) => {
+      try {
+        const result = await projectMemberOperations.add(input)
+        if (!result.addProjectMember.success) {
+          throw new Error(result.addProjectMember.message || 'Failed to add project member')
+        }
+        return { success: true, message: result.addProjectMember.message }
+      } catch (error) {
+        throw new Error(`Failed to add project member: ${error instanceof Error ? error.message : 'Unknown error'}`)
+      }
+    }),
+
+  removeMember: protectedProcedure
+    .input(
+      z.object({
+        projectId: z.number(),
+        userId: z.number(),
+      })
+    )
+    .mutation(async ({ input }) => {
+      try {
+        const result = await projectMemberOperations.remove(input.projectId, input.userId)
+        if (!result.removeProjectMember.success) {
+          throw new Error(result.removeProjectMember.message || 'Failed to remove project member')
+        }
+        return { success: true, message: result.removeProjectMember.message }
+      } catch (error) {
+        throw new Error(`Failed to remove project member: ${error instanceof Error ? error.message : 'Unknown error'}`)
       }
     }),
 })

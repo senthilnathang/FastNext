@@ -1,17 +1,15 @@
 import { z } from 'zod'
 import { router, protectedProcedure } from '../server'
-import { apiClient } from '@/shared/services/api/client'
-import { API_CONFIG } from '@/shared/services/api/config'
+import { permissionOperations } from '../graphql-client'
 
 const permissionSchema = z.object({
-  id: z.string(),
+  id: z.number(),
   name: z.string(),
   description: z.string().optional(),
   resource: z.string(),
   action: z.string(),
-  is_active: z.boolean().optional(),
-  created_at: z.string().optional(),
-  updated_at: z.string().optional(),
+  createdAt: z.string().optional(),
+  updatedAt: z.string().optional(),
 })
 
 const createPermissionSchema = z.object({
@@ -21,78 +19,136 @@ const createPermissionSchema = z.object({
   action: z.string().min(1),
 })
 
+const updatePermissionSchema = z.object({
+  name: z.string().optional(),
+  description: z.string().optional(),
+  resource: z.string().optional(),
+  action: z.string().optional(),
+})
+
 export const permissionsRouter = router({
   getAll: protectedProcedure
     .input(
       z.object({
-        page: z.number().min(1).default(1),
-        limit: z.number().min(1).max(100).default(10),
-        search: z.string().optional(),
         resource: z.string().optional(),
+        search: z.string().optional(),
       })
     )
     .query(async ({ input }) => {
       try {
-        const response = await apiClient.get(API_CONFIG.ENDPOINTS.PERMISSIONS, {
-          params: {
-            page: input.page,
-            limit: input.limit,
-            search: input.search,
-            resource: input.resource,
-          },
-        })
-        return response.data
-      } catch {
-        throw new Error('Failed to fetch permissions')
+        const result = await permissionOperations.getAll()
+        let filteredPermissions = result.permissions
+
+        // Apply client-side filtering for resource and search
+        if (input.resource) {
+          filteredPermissions = filteredPermissions.filter((permission: any) =>
+            permission.resource === input.resource
+          )
+        }
+
+        if (input.search) {
+          const searchTerm = input.search.toLowerCase()
+          filteredPermissions = filteredPermissions.filter((permission: any) =>
+            permission.name.toLowerCase().includes(searchTerm) ||
+            (permission.description && permission.description.toLowerCase().includes(searchTerm)) ||
+            permission.resource.toLowerCase().includes(searchTerm) ||
+            permission.action.toLowerCase().includes(searchTerm)
+          )
+        }
+
+        return {
+          data: filteredPermissions,
+          total: filteredPermissions.length,
+        }
+      } catch (error) {
+        throw new Error(`Failed to fetch permissions: ${error instanceof Error ? error.message : 'Unknown error'}`)
       }
     }),
 
   getById: protectedProcedure
-    .input(z.string())
+    .input(z.number())
     .query(async ({ input: id }) => {
       try {
-        const response = await apiClient.get(`${API_CONFIG.ENDPOINTS.PERMISSIONS}/${id}`)
-        return response.data
-      } catch {
-        throw new Error('Failed to fetch permission')
+        // For individual permission fetching, we'll need to find from the list
+        const result = await permissionOperations.getAll()
+        const permission = result.permissions.find((permission: any) => permission.id === id)
+        if (!permission) {
+          throw new Error('Permission not found')
+        }
+        return permission
+      } catch (error) {
+        throw new Error(`Failed to fetch permission: ${error instanceof Error ? error.message : 'Unknown error'}`)
       }
     }),
 
+  // Note: Create, update, delete operations would need corresponding GraphQL mutations
   create: protectedProcedure
     .input(createPermissionSchema)
     .mutation(async ({ input }) => {
       try {
-        const response = await apiClient.post(API_CONFIG.ENDPOINTS.PERMISSIONS, input)
-        return response.data
-      } catch {
-        throw new Error('Failed to create permission')
+        // This would need a createPermission mutation in GraphQL
+        throw new Error('Create permission mutation not implemented in GraphQL')
+      } catch (error) {
+        throw new Error(`Failed to create permission: ${error instanceof Error ? error.message : 'Unknown error'}`)
       }
     }),
 
   update: protectedProcedure
     .input(
       z.object({
-        id: z.string(),
-        data: permissionSchema.partial().omit({ id: true }),
+        id: z.number(),
+        data: updatePermissionSchema,
       })
     )
     .mutation(async ({ input }) => {
       try {
-        const response = await apiClient.put(`${API_CONFIG.ENDPOINTS.PERMISSIONS}/${input.id}`, input.data)
-        return response.data
-      } catch {
-        throw new Error('Failed to update permission')
+        // This would need an updatePermission mutation in GraphQL
+        throw new Error('Update permission mutation not implemented in GraphQL')
+      } catch (error) {
+        throw new Error(`Failed to update permission: ${error instanceof Error ? error.message : 'Unknown error'}`)
       }
     }),
 
   delete: protectedProcedure
-    .input(z.string())
+    .input(z.number())
     .mutation(async ({ input: id }) => {
       try {
-        await apiClient.delete(`${API_CONFIG.ENDPOINTS.PERMISSIONS}/${id}`)
-        return { success: true }
-      } catch {
-        throw new Error('Failed to delete permission')
+        // This would need a deletePermission mutation in GraphQL
+        throw new Error('Delete permission mutation not implemented in GraphQL')
+      } catch (error) {
+        throw new Error(`Failed to delete permission: ${error instanceof Error ? error.message : 'Unknown error'}`)
+      }
+    }),
+
+  // Additional utility procedures
+  getByResource: protectedProcedure
+    .input(z.string())
+    .query(async ({ input: resource }) => {
+      try {
+        const result = await permissionOperations.getAll()
+        const resourcePermissions = result.permissions.filter((permission: any) =>
+          permission.resource === resource
+        )
+        return {
+          permissions: resourcePermissions,
+          totalCount: resourcePermissions.length,
+        }
+      } catch (error) {
+        throw new Error(`Failed to fetch permissions by resource: ${error instanceof Error ? error.message : 'Unknown error'}`)
+      }
+    }),
+
+  getResources: protectedProcedure
+    .query(async () => {
+      try {
+        const result = await permissionOperations.getAll()
+        const resources = [...new Set(result.permissions.map((permission: any) => permission.resource))]
+        return {
+          resources,
+          totalCount: resources.length,
+        }
+      } catch (error) {
+        throw new Error(`Failed to fetch permission resources: ${error instanceof Error ? error.message : 'Unknown error'}`)
       }
     }),
 })
