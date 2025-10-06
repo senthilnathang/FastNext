@@ -1,6 +1,7 @@
 import { z } from 'zod'
 import { router, protectedProcedure } from '../server'
 import { permissionOperations } from '../graphql-client'
+import type { Permission } from '@/lib/graphql/types'
 
 const permissionSchema = z.object({
   id: z.number(),
@@ -41,14 +42,14 @@ export const permissionsRouter = router({
 
         // Apply client-side filtering for resource and search
         if (input.resource) {
-          filteredPermissions = filteredPermissions.filter((permission: any) =>
+          filteredPermissions = filteredPermissions.filter((permission: Permission) =>
             permission.resource === input.resource
           )
         }
 
         if (input.search) {
           const searchTerm = input.search.toLowerCase()
-          filteredPermissions = filteredPermissions.filter((permission: any) =>
+          filteredPermissions = filteredPermissions.filter((permission: Permission) =>
             permission.name.toLowerCase().includes(searchTerm) ||
             (permission.description && permission.description.toLowerCase().includes(searchTerm)) ||
             permission.resource.toLowerCase().includes(searchTerm) ||
@@ -71,7 +72,7 @@ export const permissionsRouter = router({
       try {
         // For individual permission fetching, we'll need to find from the list
         const result = await permissionOperations.getAll()
-        const permission = result.permissions.find((permission: any) => permission.id === id)
+        const permission = result.permissions.find((permission: Permission) => permission.id === id)
         if (!permission) {
           throw new Error('Permission not found')
         }
@@ -126,7 +127,7 @@ export const permissionsRouter = router({
     .query(async ({ input: resource }) => {
       try {
         const result = await permissionOperations.getAll()
-        const resourcePermissions = result.permissions.filter((permission: any) =>
+        const resourcePermissions = result.permissions.filter((permission: Permission) =>
           permission.resource === resource
         )
         return {
@@ -142,7 +143,7 @@ export const permissionsRouter = router({
     .query(async () => {
       try {
         const result = await permissionOperations.getAll()
-        const resources = [...new Set(result.permissions.map((permission: any) => permission.resource))]
+        const resources = [...new Set(result.permissions.map((permission: Permission) => permission.resource))]
         return {
           resources,
           totalCount: resources.length,

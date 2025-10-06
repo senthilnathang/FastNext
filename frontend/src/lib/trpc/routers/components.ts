@@ -1,12 +1,13 @@
 import { z } from 'zod'
 import { router, protectedProcedure } from '../server'
 import { componentOperations } from '../graphql-client'
+import type { Component } from '@/lib/graphql/types'
 
 const componentSchema = z.object({
   id: z.number(),
   name: z.string(),
   componentType: z.string(),
-  schema: z.any().optional(),
+  schema: z.record(z.unknown()).optional(),
   projectId: z.number(),
   createdAt: z.string().optional(),
   updatedAt: z.string().optional(),
@@ -15,14 +16,14 @@ const componentSchema = z.object({
 const createComponentSchema = z.object({
   name: z.string().min(1),
   componentType: z.string().min(1),
-  schema: z.any().optional(),
+  schema: z.record(z.unknown()).optional(),
   projectId: z.number(),
 })
 
 const updateComponentSchema = z.object({
   name: z.string().optional(),
   componentType: z.string().optional(),
-  schema: z.any().optional(),
+  schema: z.record(z.unknown()).optional(),
 })
 
 export const componentsRouter = router({
@@ -161,7 +162,7 @@ export const componentsRouter = router({
         })
         
         // Extract unique component types
-        const types = [...new Set(result.components.map((component: any) => component.componentType))]
+        const types = [...new Set(result.components.map((component: Component) => component.componentType))]
         
         return {
           types,
@@ -188,7 +189,7 @@ export const componentsRouter = router({
         })
         
         const searchTerm = input.query.toLowerCase()
-        const filteredComponents = result.components.filter((component: any) =>
+        const filteredComponents = result.components.filter((component: Component) =>
           component.name.toLowerCase().includes(searchTerm) ||
           component.componentType.toLowerCase().includes(searchTerm)
         )

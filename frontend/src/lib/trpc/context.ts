@@ -1,8 +1,9 @@
 import type { NextRequest } from 'next/server'
+import type { User } from '@/lib/graphql/types'
 
 interface CreateContextOptions {
   req?: NextRequest
-  user?: any // Replace with your user type
+  user?: User | null
 }
 
 export async function createTRPCContext(opts?: CreateContextOptions) {

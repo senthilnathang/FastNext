@@ -6,7 +6,7 @@
 
 // Scalar types
 export type DateTime = string;
-export type JSON = any;
+export type JSON = Record<string, unknown>;
 export type Upload = File;
 
 // Enum types

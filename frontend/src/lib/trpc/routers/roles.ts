@@ -1,6 +1,7 @@
 import { z } from 'zod'
 import { router, protectedProcedure } from '../server'
 import { roleOperations } from '../graphql-client'
+import type { Role } from '@/lib/graphql/types'
 
 const roleSchema = z.object({
   id: z.number(),
@@ -44,7 +45,7 @@ export const rolesRouter = router({
         // For individual role fetching, we'll need to find from the list
         // or add a getById operation to roleOperations
         const result = await roleOperations.getAll()
-        const role = result.roles.find((role: any) => role.id === id)
+        const role = result.roles.find((role: Role) => role.id === id)
         if (!role) {
           throw new Error('Role not found')
         }
@@ -104,7 +105,7 @@ export const rolesRouter = router({
     .query(async ({ input }) => {
       try {
         const result = await roleOperations.getAll()
-        const filteredRoles = result.roles.filter((role: any) =>
+        const filteredRoles = result.roles.filter((role: Role) =>
           role.name.toLowerCase().includes(input.query.toLowerCase()) ||
           (role.description && role.description.toLowerCase().includes(input.query.toLowerCase()))
         )

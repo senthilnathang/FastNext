@@ -36,6 +36,17 @@ import {
   REMOVE_PROJECT_MEMBER,
 } from '@/lib/graphql/mutations';
 import { ApolloError } from '@apollo/client';
+import type {
+  UserInput,
+  UserUpdateInput,
+  ProjectInput,
+  ProjectUpdateInput,
+  PageInput,
+  PageUpdateInput,
+  ComponentInput,
+  ComponentUpdateInput,
+  ProjectMemberInput
+} from '@/lib/graphql/types';
 
 // Helper function to handle GraphQL errors consistently
 function handleGraphQLError(error: unknown): never {
@@ -76,7 +87,7 @@ export const userOperations = {
     }
   },
 
-  async create(input: any) {
+  async create(input: UserInput) {
     try {
       const client = getApolloClient();
       const result = await client.mutate({
@@ -90,7 +101,7 @@ export const userOperations = {
     }
   },
 
-  async update(id: number, input: any) {
+  async update(id: number, input: UserUpdateInput) {
     try {
       const client = getApolloClient();
       const result = await client.mutate({
@@ -152,7 +163,7 @@ export const projectOperations = {
     }
   },
 
-  async create(input: any) {
+  async create(input: ProjectInput) {
     try {
       const client = getApolloClient();
       const result = await client.mutate({
@@ -166,7 +177,7 @@ export const projectOperations = {
     }
   },
 
-  async update(id: number, input: any) {
+  async update(id: number, input: ProjectUpdateInput) {
     try {
       const client = getApolloClient();
       const result = await client.mutate({
@@ -228,7 +239,7 @@ export const pageOperations = {
     }
   },
 
-  async create(input: any) {
+  async create(input: PageInput) {
     try {
       const client = getApolloClient();
       const result = await client.mutate({
@@ -242,7 +253,7 @@ export const pageOperations = {
     }
   },
 
-  async update(id: number, input: any) {
+  async update(id: number, input: PageUpdateInput) {
     try {
       const client = getApolloClient();
       const result = await client.mutate({
@@ -304,7 +315,7 @@ export const componentOperations = {
     }
   },
 
-  async create(input: any) {
+  async create(input: ComponentInput) {
     try {
       const client = getApolloClient();
       const result = await client.mutate({
@@ -318,7 +329,7 @@ export const componentOperations = {
     }
   },
 
-  async update(id: number, input: any) {
+  async update(id: number, input: ComponentUpdateInput) {
     try {
       const client = getApolloClient();
       const result = await client.mutate({
@@ -415,7 +426,7 @@ export const projectMemberOperations = {
     }
   },
 
-  async add(input: any) {
+  async add(input: ProjectMemberInput) {
     try {
       const client = getApolloClient();
       const result = await client.mutate({

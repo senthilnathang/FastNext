@@ -23,7 +23,7 @@ export const trpcClient = createTRPCClient<AppRouter>({
       transformer: superjson,
       headers() {
         const token = typeof window !== 'undefined' 
-          ? localStorage.getItem('authToken') 
+          ? localStorage.getItem('access_token') 
           : null
         return token ? { authorization: `Bearer ${token}` } : {}
       },

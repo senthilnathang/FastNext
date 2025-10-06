@@ -1,12 +1,13 @@
 import { z } from 'zod'
 import { router, protectedProcedure } from '../server'
 import { pageOperations } from '../graphql-client'
+import type { Page } from '@/lib/graphql/types'
 
 const pageSchema = z.object({
   id: z.number(),
   title: z.string(),
   path: z.string(),
-  content: z.any().optional(),
+  content: z.record(z.unknown()).optional(),
   projectId: z.number(),
   isPublic: z.boolean().optional(),
   createdAt: z.string().optional(),
@@ -16,7 +17,7 @@ const pageSchema = z.object({
 const createPageSchema = z.object({
   title: z.string().min(1),
   path: z.string().min(1),
-  content: z.any().optional(),
+  content: z.record(z.unknown()).optional(),
   projectId: z.number(),
   isPublic: z.boolean().default(false),
 })
@@ -24,7 +25,7 @@ const createPageSchema = z.object({
 const updatePageSchema = z.object({
   title: z.string().optional(),
   path: z.string().optional(),
-  content: z.any().optional(),
+  content: z.record(z.unknown()).optional(),
   isPublic: z.boolean().optional(),
 })
 
@@ -169,7 +170,7 @@ export const pagesRouter = router({
           projectId: input.projectId,
         })
         
-        const page = result.pages.edges.find((page: any) => page.path === input.path)
+        const page = result.pages.edges.find((page: Page) => page.path === input.path)
         if (!page) {
           throw new Error('Page not found')
         }
