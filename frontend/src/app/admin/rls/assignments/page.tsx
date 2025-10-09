@@ -125,7 +125,7 @@ const columns: Column<RLSRuleAssignment>[] = [
     key: 'entity_id',
     label: 'Entity ID',
     sortable: true,
-    render: (value) => value ? value : <span className="text-muted-foreground">All</span>
+    render: (value) => (value ? value : <span className="text-muted-foreground">All</span>)
   },
   {
     id: 'assigned_to',
