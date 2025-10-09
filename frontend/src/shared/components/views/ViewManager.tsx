@@ -69,7 +69,7 @@ export interface ViewManagerProps<T = any> {
   // Views
   views: ViewConfig[]
   activeView: string
-  onViewChange: (viewId: string) => void
+  onViewChange?: (viewId: string) => void
   onViewSave?: (view: ViewConfig) => void
   onViewDelete?: (viewId: string) => void
   
@@ -366,7 +366,7 @@ export const ViewManager = React.memo(function ViewManager<T extends { id: numbe
         {views.map(view => (
           <DropdownMenuItem
             key={view.id}
-            onClick={() => onViewChange(view.id)}
+            onClick={() => view.id && onViewChange?.(view.id)}
             className={activeView === view.id ? 'bg-accent' : ''}
           >
             {view.type === 'card' && <LayoutGrid className="h-4 w-4 mr-2" />}

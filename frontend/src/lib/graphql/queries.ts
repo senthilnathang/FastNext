@@ -10,17 +10,17 @@ export const USER_FRAGMENT = gql`
     id
     email
     username
-    fullName
-    isActive
-    isVerified
-    isSuperuser
-    avatarUrl
+    full_name
+    is_active
+    is_verified
+    is_superuser
+    avatar_url
     bio
     location
     website
-    createdAt
-    updatedAt
-    lastLoginAt
+    created_at
+    updated_at
+    last_login_at
   }
 `;
 
@@ -29,11 +29,11 @@ export const PROJECT_FRAGMENT = gql`
     id
     name
     description
-    userId
-    isPublic
+    user_id
+    is_public
     settings
-    createdAt
-    updatedAt
+    created_at
+    updated_at
     owner {
       ...UserFragment
     }
@@ -47,10 +47,10 @@ export const PAGE_FRAGMENT = gql`
     title
     path
     content
-    projectId
-    isPublic
-    createdAt
-    updatedAt
+    project_id
+    is_public
+    created_at
+    updated_at
     project {
       ...ProjectFragment
     }
@@ -62,11 +62,11 @@ export const COMPONENT_FRAGMENT = gql`
   fragment ComponentFragment on ComponentType {
     id
     name
-    componentType
+    component_type
     schema
-    projectId
-    createdAt
-    updatedAt
+    project_id
+    created_at
+    updated_at
     project {
       ...ProjectFragment
     }
@@ -77,14 +77,14 @@ export const COMPONENT_FRAGMENT = gql`
 export const ACTIVITY_LOG_FRAGMENT = gql`
   fragment ActivityLogFragment on ActivityLogType {
     id
-    userId
+    user_id
     action
-    resourceType
-    resourceId
+    resource_type
+    resource_id
     details
-    ipAddress
-    userAgent
-    createdAt
+    ip_address
+    user_agent
+    created_at
     user {
       ...UserFragment
     }
@@ -95,12 +95,12 @@ export const ACTIVITY_LOG_FRAGMENT = gql`
 export const PROJECT_MEMBER_FRAGMENT = gql`
   fragment ProjectMemberFragment on ProjectMemberType {
     id
-    projectId
-    userId
+    project_id
+    user_id
     role
     permissions
-    createdAt
-    updatedAt
+    created_at
+    updated_at
     project {
       ...ProjectFragment
     }
@@ -254,8 +254,8 @@ export const GET_ROLES = gql`
       name
       description
       permissions
-      createdAt
-      updatedAt
+      created_at
+      updated_at
     }
   }
 `;
@@ -268,8 +268,8 @@ export const GET_PERMISSIONS = gql`
       description
       resource
       action
-      createdAt
-      updatedAt
+      created_at
+      updated_at
     }
   }
 `;
@@ -279,13 +279,13 @@ export const GET_AUDIT_TRAILS = gql`
   query GetAuditTrails($resourceType: String, $resourceId: String, $limit: Int) {
     auditTrails(resourceType: $resourceType, resourceId: $resourceId, limit: $limit) {
       id
-      userId
-      resourceType
-      resourceId
+      user_id
+      resource_type
+      resource_id
       action
-      oldValues
-      newValues
-      createdAt
+      old_values
+      new_values
+      created_at
       user {
         ...UserFragment
       }
@@ -300,13 +300,13 @@ export const GET_ASSETS = gql`
     assets(projectId: $projectId) {
       id
       filename
-      originalFilename
-      filePath
-      fileSize
-      contentType
-      projectId
-      createdAt
-      updatedAt
+      original_filename
+      file_path
+      file_size
+      content_type
+      project_id
+      created_at
+      updated_at
       project {
         ...ProjectFragment
       }

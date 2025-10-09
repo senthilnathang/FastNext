@@ -91,7 +91,8 @@ export default function ProjectsPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [selectedItems, setSelectedItems] = useState<Project[]>([])
-  
+  const [activeView, setActiveView] = useState<string>('projects-list')
+
   const { data: projectsData, isLoading, error } = useProjects()
   const createProject = useCreateProject()
   const updateProject = useUpdateProject()
@@ -660,6 +661,8 @@ export default function ProjectsPage() {
         data={projects}
         loading={isLoading}
         error={error ? (error as any)?.message || String(error) : null}
+        activeView={activeView}
+        onViewChange={setActiveView}
         selectable={true}
         selectedItems={selectedItems}
         onSelectionChange={setSelectedItems}

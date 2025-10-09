@@ -28,17 +28,10 @@ async def get_context(
     return context
 
 
-@strawberry.type
-class Subscription:
-    """GraphQL Subscriptions (placeholder for future real-time features)"""
-    pass
-
-
 # Create the GraphQL schema
 schema = strawberry.Schema(
     query=Query,
     mutation=Mutation,
-    subscription=Subscription,
 )
 
 

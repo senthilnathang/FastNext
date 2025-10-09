@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useCallback, useMemo } from 'react'
+import React, { useState, useCallback, useMemo, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { ViewManager, ViewManagerProps, ViewConfig, Column } from './ViewManager'
 import { GenericFormView, FormField, FormSection, GenericFormViewProps } from './GenericFormView'
@@ -69,6 +69,16 @@ export function CommonFormViewManager<T extends { id: string | number }>({
   const [currentItem, setCurrentItem] = useState<T | null>(null)
   const [formLoading, setFormLoading] = useState(false)
   const [formError, setFormError] = useState<string | null>(null)
+  const [activeView, setActiveView] = useState<string>(
+    viewManagerProps.activeView || config.defaultView
+  )
+
+  // Sync activeView with prop changes
+  useEffect(() => {
+    if (viewManagerProps.activeView) {
+      setActiveView(viewManagerProps.activeView)
+    }
+  }, [viewManagerProps.activeView])
 
   // Find current item when in edit/view mode
   const selectedItem = useMemo(() => {
@@ -151,6 +161,13 @@ export function CommonFormViewManager<T extends { id: string | number }>({
     handleModeChange('list')
   }, [handleModeChange])
 
+  const handleViewChange = useCallback((viewId: string) => {
+    setActiveView(viewId)
+    if (viewManagerProps.onViewChange) {
+      viewManagerProps.onViewChange(viewId)
+    }
+  }, [viewManagerProps])
+
   // Enhanced ViewManager props
   const enhancedViewManagerProps: ViewManagerProps<T> = {
     ...viewManagerProps,
@@ -159,7 +176,8 @@ export function CommonFormViewManager<T extends { id: string | number }>({
     error,
     columns: config.columns,
     views: config.views,
-    activeView: viewManagerProps.activeView || config.defaultView,
+    activeView: activeView,
+    onViewChange: handleViewChange,
     title: config.title,
     subtitle: config.subtitle,
     onCreateClick: config.canCreate ? handleCreate : undefined,
