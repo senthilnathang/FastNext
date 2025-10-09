@@ -13,6 +13,7 @@ import { useRLSPolicies, useCreateRLSPolicy, useUpdateRLSPolicy, useDeleteRLSPol
 
 // Validation schema
 const rlsPolicySchema = z.object({
+  id: z.number().optional(),
   name: z.string().min(1, 'Policy name is required').max(255),
   description: z.string().optional(),
   entity_type: z.string().min(1, 'Entity type is required'),
@@ -27,6 +28,9 @@ const rlsPolicySchema = z.object({
   is_active: z.boolean().default(true),
   priority: z.number().min(1).max(999).default(100),
   organization_id: z.number().optional(),
+  created_by: z.number().optional(),
+  created_at: z.string().optional(),
+  updated_at: z.string().optional(),
 })
 
 // Form fields configuration
@@ -228,7 +232,7 @@ export default function RLSPoliciesPage() {
 
   // Determine current mode from URL
   const mode = searchParams.get('mode') || 'list'
-  const itemId = searchParams.get('id')
+  const itemId = searchParams.get('id') || undefined
 
   const handleModeChange = (newMode: string, newItemId?: string | number) => {
     const params = new URLSearchParams()

@@ -353,7 +353,7 @@ const columns: Column<RLSAuditLog>[] = [
     label: 'IP Address',
     searchable: true,
     render: (value) => (
-      <span className="text-xs font-mono">{value || '-'}</span>
+      <span className="text-xs font-mono">{value ? String(value) : '-'}</span>
     )
   }
 ]
@@ -367,7 +367,7 @@ export default function RLSAuditPage() {
 
   // Determine current mode from URL
   const mode = searchParams.get('mode') || 'list'
-  const itemId = searchParams.get('id')
+  const itemId = searchParams.get('id') || undefined
 
   const handleModeChange = (newMode: string, newItemId?: string | number) => {
     const params = new URLSearchParams()

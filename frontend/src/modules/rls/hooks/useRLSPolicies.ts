@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { apiClient } from '@/shared/services/api/client'
 
 export interface RLSPolicy {
-  id: number
+  id?: number
   name: string
   description?: string
   entity_type: string
@@ -17,8 +17,8 @@ export interface RLSPolicy {
   is_active: boolean
   priority: number
   organization_id?: number
-  created_by: number
-  created_at: string
+  created_by?: number
+  created_at?: string
   updated_at?: string
 }
 
