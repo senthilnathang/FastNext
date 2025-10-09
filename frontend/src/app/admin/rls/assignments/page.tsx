@@ -14,6 +14,7 @@ import { useRLSPolicies } from '@/modules/rls/hooks/useRLSPolicies'
 
 // Validation schema
 const rlsAssignmentSchema = z.object({
+  id: z.number().optional(),
   policy_id: z.number().min(1, 'Policy is required'),
   entity_type: z.string().min(1, 'Entity type is required'),
   entity_id: z.number().optional(),
@@ -21,6 +22,23 @@ const rlsAssignmentSchema = z.object({
   role_id: z.number().optional(),
   is_active: z.boolean().default(true),
   conditions: z.record(z.string(), z.any()).optional(),
+  created_by: z.number().optional(),
+  created_at: z.string().optional(),
+  // Relations (optional)
+  policy: z.object({
+    id: z.number(),
+    name: z.string(),
+    policy_type: z.string(),
+  }).optional(),
+  user: z.object({
+    id: z.number(),
+    email: z.string(),
+    name: z.string(),
+  }).optional(),
+  role: z.object({
+    id: z.number(),
+    name: z.string(),
+  }).optional(),
 }).refine(data => data.user_id || data.role_id, {
   message: "Either user or role must be specified",
   path: ["user_id"]
