@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { apiClient } from '@/shared/services/api/client'
 
 export interface RLSRuleAssignment {
-  id: number
+  id?: number
   policy_id: number
   entity_type: string
   entity_id?: number
@@ -10,8 +10,8 @@ export interface RLSRuleAssignment {
   role_id?: number
   is_active: boolean
   conditions?: Record<string, any>
-  created_by: number
-  created_at: string
+  created_by?: number
+  created_at?: string
   // Relations
   policy?: {
     id: number
