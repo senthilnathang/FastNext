@@ -206,7 +206,7 @@ export default function RLSAssignmentsPage() {
 
   // Determine current mode from URL
   const mode = searchParams.get('mode') || 'list'
-  const itemId = searchParams.get('id')
+  const itemId = searchParams.get('id') || undefined
 
   const handleModeChange = (newMode: string, newItemId?: string | number) => {
     const params = new URLSearchParams()
