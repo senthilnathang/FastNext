@@ -93,6 +93,9 @@ export default function AdvancedUserManagementPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [roleFilter, setRoleFilter] = useState<string>('all');
   const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [dateRangeFilter, setDateRangeFilter] = useState<string>('');
+  const [activityFilter, setActivityFilter] = useState<string>('');
+  const [permissionFilter, setPermissionFilter] = useState<string>('');
   const [selectedUser, setSelectedUser] = useState<any>(null);
   const [bulkSelectedUsers, setBulkSelectedUsers] = useState<number[]>([]);
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
@@ -218,7 +221,7 @@ export default function AdvancedUserManagementPage() {
     }
   };
 
-  const columns = [
+  const columns = useMemo(() => [
     {
       id: 'select',
       header: ({ table }: any) => (
@@ -366,7 +369,7 @@ export default function AdvancedUserManagementPage() {
       },
       enableSorting: false,
     },
-  ];
+  ], [setSelectedUser, handleUserAction]);
 
   return (
     <div className="container mx-auto p-6 space-y-6">
@@ -541,7 +544,7 @@ export default function AdvancedUserManagementPage() {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4 border-t">
                   <div>
                     <Label>Date Range</Label>
-                    <Select>
+                    <Select value={dateRangeFilter} onValueChange={setDateRangeFilter}>
                       <SelectTrigger>
                         <SelectValue placeholder="Select date range" />
                       </SelectTrigger>
@@ -553,10 +556,10 @@ export default function AdvancedUserManagementPage() {
                       </SelectContent>
                     </Select>
                   </div>
-                  
+
                   <div>
                     <Label>Login Activity</Label>
-                    <Select>
+                    <Select value={activityFilter} onValueChange={setActivityFilter}>
                       <SelectTrigger>
                         <SelectValue placeholder="Filter by activity" />
                       </SelectTrigger>
@@ -568,10 +571,10 @@ export default function AdvancedUserManagementPage() {
                       </SelectContent>
                     </Select>
                   </div>
-                  
+
                   <div>
                     <Label>Permission Level</Label>
-                    <Select>
+                    <Select value={permissionFilter} onValueChange={setPermissionFilter}>
                       <SelectTrigger>
                         <SelectValue placeholder="Permission level" />
                       </SelectTrigger>
