@@ -18,10 +18,13 @@ export interface Permission {
 
 export interface CreatePermissionRequest {
   name: string
+  codename?: string
   description?: string
-  category: string
+  category?: string
+  resource_type?: string
   action: string
   resource?: string
+  is_active?: boolean
 }
 
 export interface UpdatePermissionRequest {
