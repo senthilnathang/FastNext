@@ -18,12 +18,18 @@ import type { Permission } from "@/shared/services/api/permissions"
 
 // Permission validation schema
 const permissionSchema = z.object({
+  id: z.number().optional(),
   name: z.string().min(1, 'Permission name is required').max(100),
   codename: z.string().min(1, 'Codename is required').max(100),
   description: z.string().optional(),
+  category: z.string().optional(),
   resource_type: z.string().min(1, 'Resource type is required'),
   action: z.string().min(1, 'Action is required'),
+  resource: z.string().optional(),
   is_active: z.boolean().default(true),
+  is_system_permission: z.boolean().default(false),
+  created_at: z.string().optional(),
+  updated_at: z.string().optional(),
 })
 
 // Form fields configuration
