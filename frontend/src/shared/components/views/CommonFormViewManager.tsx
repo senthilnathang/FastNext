@@ -48,7 +48,7 @@ export interface FormViewConfig<T = any> {
   onDelete?: (id: string | number) => Promise<void>
 }
 
-export interface CommonFormViewManagerProps<T = any> extends Omit<ViewManagerProps<T>, 'onCreateClick' | 'onEditClick' | 'onViewClick' | 'onDeleteClick'> {
+export interface CommonFormViewManagerProps<T = any> extends Omit<ViewManagerProps<T>, 'onCreateClick' | 'onEditClick' | 'onViewClick' | 'onDeleteClick' | 'columns' | 'views' | 'activeView' | 'title' | 'subtitle'> {
   config: FormViewConfig<T>
   mode?: FormViewMode
   itemId?: string | number
