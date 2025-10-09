@@ -7,13 +7,16 @@ import {
   Building2,
   Book,
   Workflow,
-  Sparkles,
   Package,
   Cog,
   Database,
   Activity,
   Upload,
-  Download
+  Download,
+  Monitor,
+  UserCog,
+  FileText,
+  Lock
 } from 'lucide-react';
 
 export interface MenuItem {
@@ -85,9 +88,21 @@ export const menuItems: MenuItem[] = [
     module: 'administration',
     children: [
       {
+        title: 'System Monitoring',
+        href: '/admin/system-monitoring',
+        icon: Monitor,
+        requiredPermission: 'admin.monitoring',
+      },
+      {
         title: 'Users',
         href: '/admin/users',
         icon: Users,
+        requiredPermission: 'admin.users',
+      },
+      {
+        title: 'Advanced User Management',
+        href: '/admin/advanced-user-management',
+        icon: UserCog,
         requiredPermission: 'admin.users',
       },
       {
@@ -103,10 +118,28 @@ export const menuItems: MenuItem[] = [
         requiredPermission: 'admin.permissions',
       },
       {
+        title: 'Row Level Security',
+        href: '/admin/rls',
+        icon: Lock,
+        requiredPermission: 'admin.rls',
+      },
+      {
         title: 'Event Logs',
         href: '/admin/events',
         icon: Activity,
         requiredPermission: 'admin.events',
+      },
+      {
+        title: 'Audit Logs',
+        href: '/admin/audit-logs',
+        icon: FileText,
+        requiredPermission: 'admin.audit',
+      },
+      {
+        title: 'Configuration',
+        href: '/admin/configuration',
+        icon: Cog,
+        requiredPermission: 'admin.config',
       },
       {
         title: 'Data Import',
