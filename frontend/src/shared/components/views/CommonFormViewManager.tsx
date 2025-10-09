@@ -55,7 +55,7 @@ export interface CommonFormViewManagerProps<T = any> extends Omit<ViewManagerPro
   onModeChange?: (mode: FormViewMode, itemId?: string | number) => void
 }
 
-export function CommonFormViewManager<T extends { id: string | number }>({
+export function CommonFormViewManager<T extends { id?: string | number }>({
   config,
   mode = 'list',
   itemId,
@@ -116,17 +116,21 @@ export function CommonFormViewManager<T extends { id: string | number }>({
 
   const handleEdit = useCallback((item: T) => {
     setCurrentItem(item)
-    handleModeChange('edit', item.id)
+    if (item.id) {
+      handleModeChange('edit', item.id)
+    }
   }, [handleModeChange])
 
   const handleView = useCallback((item: T) => {
     setCurrentItem(item)
-    handleModeChange('view', item.id)
+    if (item.id) {
+      handleModeChange('view', item.id)
+    }
   }, [handleModeChange])
 
   const handleDelete = useCallback(async (item: T) => {
-    if (!config.onDelete) return
-    
+    if (!config.onDelete || !item.id) return
+
     try {
       setFormLoading(true)
       await config.onDelete(item.id)
@@ -145,7 +149,7 @@ export function CommonFormViewManager<T extends { id: string | number }>({
 
       if (mode === 'create' && config.onCreate) {
         await config.onCreate(formData)
-      } else if (mode === 'edit' && config.onUpdate && selectedItem) {
+      } else if (mode === 'edit' && config.onUpdate && selectedItem && selectedItem.id) {
         await config.onUpdate(selectedItem.id, formData)
       }
 
