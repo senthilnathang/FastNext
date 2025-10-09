@@ -76,9 +76,9 @@ interface FilterBuilderProps {
 }
 
 function FilterBuilder({ filter, onUpdate, onRemove }: FilterBuilderProps) {
-  const updateValue = (value: any) => {
+  const updateValue = React.useCallback((value: any) => {
     onUpdate({ ...filter, value })
-  }
+  }, [filter, onUpdate])
 
   const renderFilterInput = () => {
     switch (filter.type) {
