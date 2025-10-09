@@ -30,13 +30,6 @@ const adminMenuItems = [
     description: 'Manage user accounts and access'
   },
   {
-    title: 'Advanced User Management',
-    href: '/admin/advanced-user-management',
-    icon: Users,
-    description: 'Advanced user administration and analytics',
-    badge: 'Enhanced'
-  },
-  {
     title: 'Role Management',
     href: '/admin/roles',
     icon: Key,
