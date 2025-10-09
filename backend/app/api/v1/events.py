@@ -164,8 +164,8 @@ async def get_events(
             request=request,
             response_time_ms=response_time,
             status_code=200,
-            user_id=current_user.id,
-            username=current_user.username
+            user_id=current_user.id if current_user else None,
+            username=current_user.username if current_user else None
         )
         
         return EventListResponse(
@@ -187,8 +187,8 @@ async def get_events(
             request=request,
             response_time_ms=response_time,
             status_code=500,
-            user_id=current_user.id,
-            username=current_user.username
+            user_id=current_user.id if current_user else None,
+            username=current_user.username if current_user else None
         )
         
         raise HTTPException(
@@ -260,8 +260,8 @@ async def get_user_events(
             request=request,
             response_time_ms=response_time,
             status_code=200,
-            user_id=current_user.id,
-            username=current_user.username
+            user_id=current_user.id if current_user else None,
+            username=current_user.username if current_user else None
         )
         
         return UserEventResponse(
@@ -282,8 +282,8 @@ async def get_user_events(
             request=request,
             response_time_ms=response_time,
             status_code=500,
-            user_id=current_user.id,
-            username=current_user.username
+            user_id=current_user.id if current_user else None,
+            username=current_user.username if current_user else None
         )
         
         raise HTTPException(
@@ -351,8 +351,8 @@ async def get_event_stats(
             request=request,
             response_time_ms=response_time,
             status_code=200,
-            user_id=current_user.id,
-            username=current_user.username
+            user_id=current_user.id if current_user else None,
+            username=current_user.username if current_user else None
         )
         
         return UserEventStatistics(**result)
@@ -367,8 +367,8 @@ async def get_event_stats(
             request=request,
             response_time_ms=response_time,
             status_code=500,
-            user_id=current_user.id,
-            username=current_user.username
+            user_id=current_user.id if current_user else None,
+            username=current_user.username if current_user else None
         )
         
         raise HTTPException(
@@ -407,8 +407,8 @@ async def get_event_statistics(
             request=request,
             response_time_ms=response_time,
             status_code=200,
-            user_id=current_user.id,
-            username=current_user.username
+            user_id=current_user.id if current_user else None,
+            username=current_user.username if current_user else None
         )
         
         return EventStatistics(**result)
@@ -423,8 +423,8 @@ async def get_event_statistics(
             request=request,
             response_time_ms=response_time,
             status_code=500,
-            user_id=current_user.id,
-            username=current_user.username
+            user_id=current_user.id if current_user else None,
+            username=current_user.username if current_user else None
         )
         
         raise HTTPException(
@@ -463,8 +463,8 @@ async def get_event_by_id(
             request=request,
             response_time_ms=response_time,
             status_code=200,
-            user_id=current_user.id,
-            username=current_user.username
+            user_id=current_user.id if current_user else None,
+            username=current_user.username if current_user else None
         )
         
         return create_success_response(
@@ -482,8 +482,8 @@ async def get_event_by_id(
             request=request,
             response_time_ms=response_time,
             status_code=500,
-            user_id=current_user.id,
-            username=current_user.username
+            user_id=current_user.id if current_user else None,
+            username=current_user.username if current_user else None
         )
         
         raise HTTPException(
@@ -517,8 +517,8 @@ async def get_logs_from_file(
             request=request,
             response_time_ms=response_time,
             status_code=200 if result['success'] else 404,
-            user_id=current_user.id,
-            username=current_user.username
+            user_id=current_user.id if current_user else None,
+            username=current_user.username if current_user else None
         )
         
         return LogFileResponse(**result)
@@ -531,8 +531,8 @@ async def get_logs_from_file(
             request=request,
             response_time_ms=response_time,
             status_code=500,
-            user_id=current_user.id,
-            username=current_user.username
+            user_id=current_user.id if current_user else None,
+            username=current_user.username if current_user else None
         )
         
         raise HTTPException(
@@ -657,8 +657,8 @@ async def export_events(
             request=request,
             response_time_ms=response_time,
             status_code=500,
-            user_id=current_user.id,
-            username=current_user.username
+            user_id=current_user.id if current_user else None,
+            username=current_user.username if current_user else None
         )
         
         raise HTTPException(
@@ -712,8 +712,8 @@ async def cleanup_old_events(
             request=request,
             response_time_ms=response_time,
             status_code=200,
-            user_id=current_user.id,
-            username=current_user.username
+            user_id=current_user.id if current_user else None,
+            username=current_user.username if current_user else None
         )
         
         return create_success_response(
@@ -734,8 +734,8 @@ async def cleanup_old_events(
             request=request,
             response_time_ms=response_time,
             status_code=500,
-            user_id=current_user.id,
-            username=current_user.username
+            user_id=current_user.id if current_user else None,
+            username=current_user.username if current_user else None
         )
         
         raise HTTPException(
