@@ -211,7 +211,7 @@ export function UsersList() {
               {data.users.edges.length === 0 && searchTerm && (
                 <div className="text-center py-8 text-muted-foreground">
                   <User className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                  <p>No users found matching "{searchTerm}"</p>
+                  <p>No users found matching &quot;{searchTerm}&quot;</p>
                   <Button
                     variant="ghost"
                     onClick={() => {

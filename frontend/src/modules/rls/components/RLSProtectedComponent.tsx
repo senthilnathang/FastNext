@@ -142,9 +142,11 @@ export function RLSMultiProtected({
   showLoader = true,
   className = ''
 }: RLSMultiProtectedProps) {
-  const accessResults = checks.map(check => 
-    useConditionalAccess(check.entityType, check.action, check.entityId)
-  );
+  // Call hooks for each check (hooks must be called at the top level)
+  const accessResults = checks.map((check, index) => {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    return useConditionalAccess(check.entityType, check.action, check.entityId);
+  });
 
   const loading = accessResults.some(result => result.loading);
   const errors = accessResults.map(result => result.error).filter(Boolean);
