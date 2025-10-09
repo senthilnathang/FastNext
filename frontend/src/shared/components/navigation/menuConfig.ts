@@ -14,7 +14,6 @@ import {
   Upload,
   Download,
   Monitor,
-  UserCog,
   FileText,
   Lock
 } from 'lucide-react';
@@ -97,12 +96,6 @@ export const menuItems: MenuItem[] = [
         title: 'Users',
         href: '/admin/users',
         icon: Users,
-        requiredPermission: 'admin.users',
-      },
-      {
-        title: 'Advanced User Management',
-        href: '/admin/advanced-user-management',
-        icon: UserCog,
         requiredPermission: 'admin.users',
       },
       {
