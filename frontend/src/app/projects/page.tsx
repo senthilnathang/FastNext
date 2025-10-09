@@ -30,7 +30,7 @@ const projectSchema = z.object({
     if (val instanceof Date) return val.toISOString().split('T')[0]
     return val
   }),
-  settings: z.record(z.any()).optional(),
+  settings: z.record(z.string(), z.any()).optional(),
 })
 
 // Form fields configuration

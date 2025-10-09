@@ -20,7 +20,7 @@ const rlsAssignmentSchema = z.object({
   user_id: z.number().optional(),
   role_id: z.number().optional(),
   is_active: z.boolean().default(true),
-  conditions: z.record(z.any()).optional(),
+  conditions: z.record(z.string(), z.any()).optional(),
 }).refine(data => data.user_id || data.role_id, {
   message: "Either user or role must be specified",
   path: ["user_id"]
