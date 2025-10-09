@@ -30,8 +30,8 @@ export const GaugeChart: React.FC<GaugeChartProps> = ({
   unit = '',
   splitNumber = 10,
   color,
-  radius = '75%',
-  center = ['50%', '60%'],
+  radius = '70%',
+  center = ['50%', '55%'],
   ...baseProps
 }) => {
   const option: EChartsOption = useMemo(() => ({
@@ -89,8 +89,8 @@ export const GaugeChart: React.FC<GaugeChartProps> = ({
           valueAnimation: true,
           formatter: `{value}${unit}`,
           color: 'inherit',
-          fontSize: 20,
-          offsetCenter: [0, '70%']
+          fontSize: 18,
+          offsetCenter: [0, '65%']
         },
         data: [
           {

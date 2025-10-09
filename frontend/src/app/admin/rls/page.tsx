@@ -73,7 +73,7 @@ export default function RLSAdminPage() {
       <div className="mb-6">
         <p className="text-muted-foreground">
           Manage data access policies, security rules, and monitor access patterns across your application.
-          Row Level Security (RLS) ensures users can only access data they're authorized to see.
+          Row Level Security (RLS) ensures users can only access data they&apos;re authorized to see.
         </p>
       </div>
       
@@ -140,7 +140,7 @@ export default function RLSAdminPage() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">0</div>
-              <p className="text-xs text-muted-foreground">Today's access attempts</p>
+              <p className="text-xs text-muted-foreground">Today&apos;s access attempts</p>
             </CardContent>
           </Card>
           

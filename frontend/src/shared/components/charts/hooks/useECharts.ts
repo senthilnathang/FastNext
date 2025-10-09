@@ -6,6 +6,53 @@ import { useEffect, useRef, useCallback } from 'react'
 import * as echarts from 'echarts/core'
 import type { EChartsOption, ECharts } from 'echarts'
 
+// Import required ECharts components
+import {
+  LineChart,
+  BarChart,
+  PieChart,
+  GaugeChart,
+  ScatterChart,
+  RadarChart,
+  FunnelChart
+} from 'echarts/charts'
+
+import {
+  TitleComponent,
+  TooltipComponent,
+  GridComponent,
+  LegendComponent,
+  DataZoomComponent,
+  ToolboxComponent,
+  MarkLineComponent,
+  MarkPointComponent,
+  MarkAreaComponent
+} from 'echarts/components'
+
+import { CanvasRenderer, SVGRenderer } from 'echarts/renderers'
+
+// Register components
+echarts.use([
+  LineChart,
+  BarChart,
+  PieChart,
+  GaugeChart,
+  ScatterChart,
+  RadarChart,
+  FunnelChart,
+  TitleComponent,
+  TooltipComponent,
+  GridComponent,
+  LegendComponent,
+  DataZoomComponent,
+  ToolboxComponent,
+  MarkLineComponent,
+  MarkPointComponent,
+  MarkAreaComponent,
+  CanvasRenderer,
+  SVGRenderer
+])
+
 export interface UseEChartsOptions {
   theme?: string | object
   renderer?: 'canvas' | 'svg'

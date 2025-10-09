@@ -70,7 +70,7 @@ export const StatCard: React.FC<StatCardProps> = ({
           </div>
         )}
         {chartData && chartData.length > 0 && (
-          <div className="mt-4 h-[60px]">
+          <div className="mt-3 h-[50px] w-full">
             {chartType === 'area' ? (
               <AreaChart
                 data={[{
@@ -83,12 +83,13 @@ export const StatCard: React.FC<StatCardProps> = ({
                 legend={false}
                 tooltip={false}
                 grid={{
-                  top: 5,
-                  right: 0,
-                  bottom: 0,
-                  left: 0
+                  top: 2,
+                  right: 2,
+                  bottom: 2,
+                  left: 2,
+                  containLabel: false
                 }}
-                className="h-full"
+                className="h-full w-full"
               />
             ) : (
               <LineChart
@@ -102,12 +103,13 @@ export const StatCard: React.FC<StatCardProps> = ({
                 legend={false}
                 tooltip={false}
                 grid={{
-                  top: 5,
-                  right: 0,
-                  bottom: 0,
-                  left: 0
+                  top: 2,
+                  right: 2,
+                  bottom: 2,
+                  left: 2,
+                  containLabel: false
                 }}
-                className="h-full"
+                className="h-full w-full"
               />
             )}
           </div>

@@ -81,13 +81,31 @@ export const LineChart: React.FC<LineChartProps> = ({
     xAxis: {
       type: 'category',
       boundaryGap: false,
-      data: xAxisData
+      data: xAxisData,
+      axisLabel: {
+        show: true
+      },
+      axisLine: {
+        show: true
+      },
+      axisTick: {
+        show: true
+      }
     },
     yAxis: {
       type: 'value',
       name: yAxis?.name,
       min: yAxis?.min,
-      max: yAxis?.max
+      max: yAxis?.max,
+      axisLabel: {
+        show: true
+      },
+      axisLine: {
+        show: true
+      },
+      splitLine: {
+        show: true
+      }
     },
     dataZoom: zoom ? [
       {
