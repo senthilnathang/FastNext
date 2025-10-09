@@ -4,11 +4,16 @@ import { API_CONFIG } from './config'
 export interface Permission {
   id: number
   name: string
+  codename?: string
   description?: string
-  category: string
+  category?: string
+  resource_type?: string
   action: string
   resource?: string
+  is_active?: boolean
   is_system_permission: boolean
+  created_at?: string
+  updated_at?: string
 }
 
 export interface CreatePermissionRequest {
