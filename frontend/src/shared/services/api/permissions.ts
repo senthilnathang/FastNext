@@ -2,7 +2,7 @@ import { apiClient } from './client'
 import { API_CONFIG } from './config'
 
 export interface Permission {
-  id: number
+  id?: number
   name: string
   codename?: string
   description?: string
@@ -11,7 +11,7 @@ export interface Permission {
   action: string
   resource?: string
   is_active?: boolean
-  is_system_permission: boolean
+  is_system_permission?: boolean
   created_at?: string
   updated_at?: string
 }
