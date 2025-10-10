@@ -7,7 +7,7 @@ const componentSchema = z.object({
   id: z.number(),
   name: z.string(),
   componentType: z.string(),
-  schema: z.record(z.unknown()).optional(),
+  schema: z.record(z.string(), z.unknown()).optional(),
   projectId: z.number(),
   createdAt: z.string().optional(),
   updatedAt: z.string().optional(),
@@ -16,14 +16,14 @@ const componentSchema = z.object({
 const createComponentSchema = z.object({
   name: z.string().min(1),
   componentType: z.string().min(1),
-  schema: z.record(z.unknown()).optional(),
+  schema: z.record(z.string(), z.unknown()).optional(),
   projectId: z.number(),
 })
 
 const updateComponentSchema = z.object({
   name: z.string().optional(),
   componentType: z.string().optional(),
-  schema: z.record(z.unknown()).optional(),
+  schema: z.record(z.string(), z.unknown()).optional(),
 })
 
 export const componentsRouter = router({

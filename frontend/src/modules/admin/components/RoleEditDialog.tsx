@@ -29,7 +29,8 @@ import {
 
 import { useUpdateRole } from "@/modules/admin/hooks/useRoles"
 import { usePermissions } from "@/modules/admin/hooks/usePermissions"
-import type { Role, Permission } from "@/shared/services/api/roles"
+import type { Role } from "@/shared/services/api/roles"
+import type { Permission } from "@/shared/services/api/permissions"
 
 const roleEditSchema = z.object({
   name: z.string().min(2, "Role name must be at least 2 characters"),
@@ -73,7 +74,7 @@ export function RoleEditDialog({ role, open, onOpenChange }: RoleEditDialogProps
   }, [role, open, form])
 
   const onSubmit = async (data: RoleEditFormData) => {
-    if (!role) return
+    if (!role || !role.id) return
 
     try {
       await updateRoleMutation.mutateAsync({
@@ -97,10 +98,11 @@ export function RoleEditDialog({ role, open, onOpenChange }: RoleEditDialogProps
 
   // Group permissions by category
   const groupedPermissions = permissions.reduce((acc, permission) => {
-    if (!acc[permission.category]) {
-      acc[permission.category] = []
+    const category = permission.category || 'uncategorized'
+    if (!acc[category]) {
+      acc[category] = []
     }
-    acc[permission.category].push(permission)
+    acc[category].push(permission)
     return acc
   }, {} as Record<string, Permission[]>)
 
@@ -214,13 +216,13 @@ export function RoleEditDialog({ role, open, onOpenChange }: RoleEditDialogProps
                             {category}
                           </h4>
                           <div className="space-y-2 pl-4">
-                            {categoryPermissions.map((permission) => (
+                            {categoryPermissions.filter(p => p.id !== undefined).map((permission) => (
                               <div key={permission.id} className="flex items-start space-x-2">
                                 <Checkbox
                                   id={`edit-permission-${permission.id}`}
-                                  checked={field.value.includes(permission.id)}
-                                  onCheckedChange={(checked) => 
-                                    handlePermissionChange(permission.id, checked as boolean)
+                                  checked={field.value.includes(permission.id!)}
+                                  onCheckedChange={(checked) =>
+                                    handlePermissionChange(permission.id!, checked as boolean)
                                   }
                                   disabled={isSubmitting || role.is_system_role}
                                 />

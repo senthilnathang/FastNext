@@ -52,8 +52,8 @@ export const permissionsRouter = router({
           filteredPermissions = filteredPermissions.filter((permission: Permission) =>
             permission.name.toLowerCase().includes(searchTerm) ||
             (permission.description && permission.description.toLowerCase().includes(searchTerm)) ||
-            permission.resource.toLowerCase().includes(searchTerm) ||
-            permission.action.toLowerCase().includes(searchTerm)
+            (permission.resource && permission.resource.toLowerCase().includes(searchTerm)) ||
+            (permission.action && permission.action.toLowerCase().includes(searchTerm))
           )
         }
 

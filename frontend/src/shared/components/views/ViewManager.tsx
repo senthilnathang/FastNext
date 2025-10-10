@@ -68,7 +68,7 @@ export interface ViewManagerProps<T = any> {
   
   // Views
   views: ViewConfig[]
-  activeView: string
+  activeView?: string
   onViewChange?: (viewId: string) => void
   onViewSave?: (view: ViewConfig) => void
   onViewDelete?: (viewId: string) => void

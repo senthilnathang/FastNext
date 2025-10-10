@@ -48,7 +48,7 @@ export interface FormViewConfig<T = any> {
   onDelete?: (id: string | number) => Promise<void>
 }
 
-export interface CommonFormViewManagerProps<T = any> extends Omit<ViewManagerProps<T>, 'onCreateClick' | 'onEditClick' | 'onViewClick' | 'onDeleteClick' | 'columns' | 'views' | 'activeView' | 'title' | 'subtitle'> {
+export interface CommonFormViewManagerProps<T = any> extends Omit<ViewManagerProps<T>, 'onCreateClick' | 'onEditClick' | 'onViewClick' | 'onDeleteClick' | 'columns' | 'views' | 'title' | 'subtitle'> {
   config: FormViewConfig<T>
   mode?: FormViewMode
   itemId?: string | number
@@ -173,7 +173,7 @@ export function CommonFormViewManager<T extends { id?: string | number }>({
   }, [viewManagerProps])
 
   // Enhanced ViewManager props
-  const enhancedViewManagerProps: ViewManagerProps<T> = {
+  const enhancedViewManagerProps = {
     ...viewManagerProps,
     data,
     loading,
@@ -188,7 +188,7 @@ export function CommonFormViewManager<T extends { id?: string | number }>({
     onEditClick: config.canEdit ? handleEdit : undefined,
     onViewClick: config.canView ? handleView : undefined,
     onDeleteClick: config.canDelete ? handleDelete : undefined,
-  }
+  } as ViewManagerProps<T>
 
   const renderBreadcrumb = () => {
     const breadcrumbs = [
@@ -297,7 +297,7 @@ export function CommonFormViewManager<T extends { id?: string | number }>({
     return (
       <div className="space-y-6">
         {renderBreadcrumb()}
-        <ViewManager {...enhancedViewManagerProps} />
+        <ViewManager {...(enhancedViewManagerProps as any)} />
       </div>
     )
   }

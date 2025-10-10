@@ -166,8 +166,9 @@ test.describe('Protected Routes', () => {
     // Should redirect to login or show access denied
     await page.waitForTimeout(2000);
     const currentUrl = page.url();
-    
+    const loginElementCount = await page.locator('text=login').count();
+
     // Should be redirected to login or see some form of access restriction
-    expect(currentUrl.includes('/login') || currentUrl.includes('/') || page.locator('text=login').count() > 0).toBeTruthy();
+    expect(currentUrl.includes('/login') || currentUrl.includes('/') || loginElementCount > 0).toBeTruthy();
   });
 });

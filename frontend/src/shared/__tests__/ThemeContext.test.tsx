@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import { ThemeProvider, useTheme } from '../ThemeContext';
+import { ThemeProvider, useTheme } from '../services/ThemeContext';
 
 // Mock localStorage
 const localStorageMock = {

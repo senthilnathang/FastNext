@@ -9,7 +9,7 @@ const projectSchema = z.object({
   description: z.string().optional(),
   userId: z.number(),
   isPublic: z.boolean().optional(),
-  settings: z.record(z.unknown()).optional(),
+  settings: z.record(z.string(), z.unknown()).optional(),
   createdAt: z.string().optional(),
   updatedAt: z.string().optional(),
 })
@@ -18,14 +18,14 @@ const createProjectSchema = z.object({
   name: z.string().min(1),
   description: z.string().optional(),
   isPublic: z.boolean().default(false),
-  settings: z.record(z.unknown()).optional(),
+  settings: z.record(z.string(), z.unknown()).optional(),
 })
 
 const updateProjectSchema = z.object({
   name: z.string().optional(),
   description: z.string().optional(),
   isPublic: z.boolean().optional(),
-  settings: z.record(z.unknown()).optional(),
+  settings: z.record(z.string(), z.unknown()).optional(),
 })
 
 export const projectsRouter = router({
@@ -202,7 +202,14 @@ export const projectsRouter = router({
     )
     .mutation(async ({ input }) => {
       try {
-        const result = await projectMemberOperations.add(input)
+        // Convert permissions array to JSON format expected by GraphQL
+        const memberInput: import('@/lib/graphql/types').ProjectMemberInput = {
+          projectId: input.projectId,
+          userId: input.userId,
+          role: input.role,
+          permissions: input.permissions ? (input.permissions as any) : null,
+        }
+        const result = await projectMemberOperations.add(memberInput)
         if (!result.addProjectMember.success) {
           throw new Error(result.addProjectMember.message || 'Failed to add project member')
         }

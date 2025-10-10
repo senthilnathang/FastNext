@@ -286,13 +286,13 @@ export function useRLSButton(
   );
 
   return {
-    disabled: loading || error || hasAccess === false,
+    disabled: loading || Boolean(error) || hasAccess === false,
     loading,
     hasAccess,
     error,
-    title: hasAccess === false 
+    title: hasAccess === false
       ? `You don't have permission to ${action.toLowerCase()} ${entityType.toLowerCase()}`
-      : error 
+      : error
         ? `Permission check failed: ${error}`
         : undefined
   };
@@ -328,7 +328,7 @@ export function RLSButton({
     entityId
   );
 
-  const isDisabled = disabled || externalDisabled;
+  const isDisabled = disabled || Boolean(externalDisabled);
   const buttonTitle = title || externalTitle;
 
   return (

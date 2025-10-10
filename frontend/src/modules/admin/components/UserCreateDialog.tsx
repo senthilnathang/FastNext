@@ -217,9 +217,11 @@ export function UserCreateDialog({ open, onOpenChange }: UserCreateDialogProps) 
                     <SelectContent>
                       <SelectItem value="none">No role assigned</SelectItem>
                       {roles.map((role) => (
-                        <SelectItem key={role.id} value={role.id.toString()}>
-                          {role.name} - {role.description}
-                        </SelectItem>
+                        role.id && (
+                          <SelectItem key={role.id} value={role.id.toString()}>
+                            {role.name} - {role.description}
+                          </SelectItem>
+                        )
                       ))}
                     </SelectContent>
                   </Select>

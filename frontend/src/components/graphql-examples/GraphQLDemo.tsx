@@ -71,11 +71,11 @@ export function GraphQLDemo() {
             )}
           </div>
 
-          {currentUser && (
+          {currentUser?.me && (
             <div className="mt-4 p-4 bg-muted rounded-lg">
               <p className="text-sm">
-                <strong>Authenticated as:</strong> {currentUser.fullName || currentUser.username}
-                {currentUser.isSuperuser && (
+                <strong>Authenticated as:</strong> {currentUser.me.fullName || currentUser.me.username}
+                {currentUser.me.isSuperuser && (
                   <Badge variant="outline" className="ml-2">
                     Admin
                   </Badge>

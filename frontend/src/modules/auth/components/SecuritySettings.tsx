@@ -312,7 +312,7 @@ export default function SecuritySettings() {
         if (importData.security_settings) {
           if (confirm('Are you sure you want to import these security settings? This will overwrite your current settings.')) {
             Object.entries(importData.security_settings).forEach(([key, value]) => {
-              setValue(key as keyof SecuritySettingsData, value);
+              setValue(key as keyof SecuritySettingsData, value as number | boolean);
             });
             setSuccess(true);
             setTimeout(() => setSuccess(false), 2000);

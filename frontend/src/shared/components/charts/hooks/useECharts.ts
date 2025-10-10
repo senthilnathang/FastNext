@@ -4,7 +4,8 @@
  */
 import { useEffect, useRef, useCallback } from 'react'
 import * as echarts from 'echarts/core'
-import type { EChartsOption, ECharts } from 'echarts'
+import type { EChartsOption } from 'echarts'
+import type { EChartsType } from 'echarts/core'
 
 // Import required ECharts components
 import {
@@ -67,7 +68,7 @@ export function useECharts(
   options?: UseEChartsOptions
 ) {
   const chartRef = useRef<HTMLDivElement>(null)
-  const chartInstance = useRef<ECharts | null>(null)
+  const chartInstance = useRef<EChartsType | null>(null)
 
   // Initialize chart
   useEffect(() => {

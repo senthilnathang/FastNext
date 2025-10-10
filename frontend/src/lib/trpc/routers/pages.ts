@@ -7,7 +7,7 @@ const pageSchema = z.object({
   id: z.number(),
   title: z.string(),
   path: z.string(),
-  content: z.record(z.unknown()).optional(),
+  content: z.record(z.string(), z.unknown()).optional(),
   projectId: z.number(),
   isPublic: z.boolean().optional(),
   createdAt: z.string().optional(),
@@ -17,7 +17,7 @@ const pageSchema = z.object({
 const createPageSchema = z.object({
   title: z.string().min(1),
   path: z.string().min(1),
-  content: z.record(z.unknown()).optional(),
+  content: z.record(z.string(), z.unknown()).optional(),
   projectId: z.number(),
   isPublic: z.boolean().default(false),
 })
@@ -25,7 +25,7 @@ const createPageSchema = z.object({
 const updatePageSchema = z.object({
   title: z.string().optional(),
   path: z.string().optional(),
-  content: z.record(z.unknown()).optional(),
+  content: z.record(z.string(), z.unknown()).optional(),
   isPublic: z.boolean().optional(),
 })
 

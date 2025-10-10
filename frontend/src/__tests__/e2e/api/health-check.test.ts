@@ -46,11 +46,13 @@ test.describe('API Health Checks', () => {
   });
 
   test('should have CORS headers', async ({ request }) => {
-    const response = await request.options(`${apiBaseUrl}/health`);
-    
+    const response = await request.fetch(`${apiBaseUrl}/health`, {
+      method: 'OPTIONS'
+    });
+
     // CORS preflight should be handled
     expect(response.status()).toBe(200);
-    
+
     const headers = response.headers();
     expect(headers['access-control-allow-origin']).toBeTruthy();
     expect(headers['access-control-allow-methods']).toBeTruthy();

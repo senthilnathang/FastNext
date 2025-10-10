@@ -13,15 +13,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/shared/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/shared/components/ui/alert-dialog';
 import { DataTable } from '@/shared/components/ui/data-table';
-import { 
-  Settings, 
-  Search, 
-  Download, 
+import {
+  Settings,
+  Search,
+  Download,
   Upload,
   Save,
   RotateCcw,
   Eye,
-  Edit,
   Plus,
   History,
   AlertTriangle,
@@ -88,9 +87,7 @@ export default function ConfigurationPage() {
   const [typeFilter, setTypeFilter] = useState<string>('all');
   const [showSensitive, setShowSensitive] = useState(false);
   const [selectedConfig, setSelectedConfig] = useState<ConfigItem | null>(null);
-  const [editingConfig, setEditingConfig] = useState<ConfigItem | null>(null);
   const [activeTab, setActiveTab] = useState('configs');
-  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
   const [pendingChanges, setPendingChanges] = useState<Map<string, any>>(new Map());
 
   // Mock configuration data
@@ -454,19 +451,12 @@ export default function ConfigurationPage() {
         const config = row.original;
         return (
           <div className="flex items-center space-x-2">
-            <Button 
-              variant="ghost" 
+            <Button
+              variant="ghost"
               size="sm"
               onClick={() => setSelectedConfig(config)}
             >
               <Eye className="h-4 w-4" />
-            </Button>
-            <Button 
-              variant="ghost" 
-              size="sm"
-              onClick={() => setEditingConfig(config)}
-            >
-              <Edit className="h-4 w-4" />
             </Button>
           </div>
         );

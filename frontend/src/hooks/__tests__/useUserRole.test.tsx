@@ -1,6 +1,6 @@
 import { renderHook } from '@testing-library/react'
 import { AuthContext } from '@/modules/auth'
-import { useUserRole } from '../useUserRole'
+import { useUserRole } from '@/modules/admin/hooks/useUserRole'
 import React from 'react'
 
 // Mock user data

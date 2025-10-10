@@ -9,9 +9,10 @@ export const useUsers = (params?: { page?: number; limit?: number; search?: stri
   })
 }
 
-export const useUser = (id: string) => {
-  return api.users.getById.useQuery(id, {
-    enabled: !!id,
+export const useUser = (id: string | number) => {
+  const numericId = typeof id === 'string' ? parseInt(id, 10) : id
+  return api.users.getById.useQuery(numericId, {
+    enabled: !!id && !isNaN(numericId),
   })
 }
 
@@ -54,9 +55,10 @@ export const useProjects = (params?: { page?: number; limit?: number; search?: s
   })
 }
 
-export const useProject = (id: string) => {
-  return api.projects.getById.useQuery(id, {
-    enabled: !!id,
+export const useProject = (id: string | number) => {
+  const numericId = typeof id === 'string' ? parseInt(id, 10) : id
+  return api.projects.getById.useQuery(numericId, {
+    enabled: !!id && !isNaN(numericId),
   })
 }
 
@@ -70,23 +72,16 @@ export const useCreateProject = () => {
   })
 }
 
-export const useRoles = (params?: { page?: number; limit?: number; search?: string }) => {
-  return api.roles.getAll.useQuery({
-    page: 1,
-    limit: 10,
-    ...params,
-  })
+export const useRoles = () => {
+  return api.roles.getAll.useQuery()
 }
 
-export const usePermissions = (params?: { 
-  page?: number
-  limit?: number
+export const usePermissions = (params?: {
   search?: string
-  resource?: string 
+  resource?: string
 }) => {
   return api.permissions.getAll.useQuery({
-    page: 1,
-    limit: 10,
-    ...params,
+    search: params?.search,
+    resource: params?.resource,
   })
 }
