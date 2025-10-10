@@ -176,7 +176,9 @@ function createApolloClient(): ApolloClient<NormalizedCacheObject> {
       },
     },
     // Enable devtools in development
-    connectToDevTools: isBrowser && process.env.NODE_ENV === 'development',
+    devtools: {
+      enabled: isBrowser && process.env.NODE_ENV === 'development',
+    },
   });
 }
 
