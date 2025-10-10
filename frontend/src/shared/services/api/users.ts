@@ -1,17 +1,18 @@
 // User API types and interfaces
 export interface User {
-  id: number
+  id?: number
   email: string
   username: string
   full_name?: string
-  is_active: boolean
-  is_verified: boolean
+  password?: string
+  is_active?: boolean
+  is_verified?: boolean
   is_superuser?: boolean
   avatar_url?: string
   bio?: string
   location?: string
   website?: string
-  created_at: string
+  created_at?: string
   updated_at?: string
   last_login_at?: string
   roles?: string[]

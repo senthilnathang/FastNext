@@ -1037,3 +1037,6 @@ export const ViewManager = React.memo(function ViewManager<T extends { id: numbe
     </div>
   )
 })
+
+// Re-export KanbanColumn for use in pages
+export type { KanbanColumn } from './KanbanView'

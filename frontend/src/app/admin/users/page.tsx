@@ -19,6 +19,7 @@ import type { User } from "@/shared/services/api/users"
 
 // User validation schema
 const userSchema = z.object({
+  id: z.number().optional(),
   email: z.string().email('Invalid email address'),
   username: z.string().min(3, 'Username must be at least 3 characters').max(50),
   full_name: z.string().optional(),
@@ -26,6 +27,15 @@ const userSchema = z.object({
   is_active: z.boolean().default(true),
   is_verified: z.boolean().default(false),
   is_superuser: z.boolean().default(false),
+  created_at: z.string().optional(),
+  updated_at: z.string().optional(),
+  last_login_at: z.string().optional(),
+  roles: z.array(z.string()).optional(),
+  permissions: z.array(z.string()).optional(),
+  avatar_url: z.string().optional(),
+  bio: z.string().optional(),
+  location: z.string().optional(),
+  website: z.string().optional(),
 })
 
 // Form fields configuration
@@ -104,7 +114,7 @@ const UsersPage: React.FC<UsersPageProps> = () => {
 
   // Determine current mode from URL
   const mode = searchParams.get('mode') || 'list'
-  const itemId = searchParams.get('id')
+  const itemId = searchParams.get('id') || undefined
 
   const handleModeChange = (newMode: string, newItemId?: string | number) => {
     const params = new URLSearchParams()
@@ -312,7 +322,20 @@ const UsersPage: React.FC<UsersPageProps> = () => {
 
   const createUserApi = async (data: User): Promise<User> => {
     return new Promise((resolve, reject) => {
-      createUser.mutate(data, {
+      const createData = {
+        email: data.email,
+        username: data.username,
+        password: data.password || 'TempPassword123!', // Default password if not provided
+        full_name: data.full_name,
+        is_active: data.is_active,
+        is_verified: data.is_verified,
+        is_superuser: data.is_superuser,
+        bio: data.bio,
+        location: data.location,
+        website: data.website,
+        avatar_url: data.avatar_url,
+      }
+      createUser.mutate(createData, {
         onSuccess: (result) => resolve(result),
         onError: (error) => reject(new Error(apiUtils.getErrorMessage(error)))
       })
@@ -321,7 +344,19 @@ const UsersPage: React.FC<UsersPageProps> = () => {
 
   const updateUserApi = async (id: string | number, data: User): Promise<User> => {
     return new Promise((resolve, reject) => {
-      updateUser.mutate({ id: Number(id), data }, {
+      const updateData = {
+        email: data.email,
+        username: data.username,
+        full_name: data.full_name,
+        is_active: data.is_active,
+        is_verified: data.is_verified,
+        is_superuser: data.is_superuser,
+        bio: data.bio,
+        location: data.location,
+        website: data.website,
+        avatar_url: data.avatar_url,
+      }
+      updateUser.mutate({ id: Number(id), data: updateData }, {
         onSuccess: (result) => resolve(result),
         onError: (error) => reject(new Error(apiUtils.getErrorMessage(error)))
       })
