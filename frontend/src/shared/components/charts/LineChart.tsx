@@ -27,6 +27,7 @@ export interface LineChartProps extends Omit<BaseChartProps, 'option'> {
     right?: number | string
     bottom?: number | string
     left?: number | string
+    containLabel?: boolean
   }
   yAxis?: {
     name?: string
@@ -76,7 +77,7 @@ export const LineChart: React.FC<LineChartProps> = ({
       right: grid?.right || 20,
       bottom: grid?.bottom || (zoom ? 80 : 30),
       left: grid?.left || 50,
-      containLabel: true
+      containLabel: grid?.containLabel !== undefined ? grid.containLabel : true
     },
     xAxis: {
       type: 'category',
