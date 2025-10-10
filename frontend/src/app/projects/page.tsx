@@ -17,8 +17,10 @@ import type { SortOption, GroupOption } from '@/shared/components/ui'
 
 // Project validation schema
 const projectSchema = z.object({
+  id: z.number().optional(),
   name: z.string().min(1, 'Project name is required').max(100),
   description: z.string().optional(),
+  user_id: z.number().optional(),
   is_public: z.boolean().default(false),
   start_date: z.union([z.string(), z.date()]).optional().transform((val) => {
     if (!val) return undefined
@@ -31,6 +33,8 @@ const projectSchema = z.object({
     return val
   }),
   settings: z.record(z.string(), z.any()).optional(),
+  created_at: z.string().optional(),
+  updated_at: z.string().optional(),
 })
 
 // Form fields configuration
@@ -100,7 +104,7 @@ export default function ProjectsPage() {
 
   // Determine current mode from URL
   const mode = searchParams.get('mode') || 'list'
-  const itemId = searchParams.get('id')
+  const itemId = searchParams.get('id') || undefined
 
   const handleModeChange = (newMode: string, newItemId?: string | number) => {
     const params = new URLSearchParams()
@@ -202,7 +206,7 @@ export default function ProjectsPage() {
       render: (value) => (
         <div className="flex items-center space-x-2">
           <User className="h-4 w-4 text-muted-foreground" />
-          <span className="text-sm">User {value}</span>
+          <span className="text-sm">User {value ? String(value) : 'Unknown'}</span>
         </div>
       )
     },
@@ -258,6 +262,7 @@ export default function ProjectsPage() {
     const publicProjects = projects.filter(project => project.is_public).length
     const privateProjects = totalProjects - publicProjects
     const recentProjects = projects.filter(project => {
+      if (!project.created_at) return false
       const created = new Date(project.created_at)
       const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
       return created > thirtyDaysAgo
@@ -468,7 +473,9 @@ export default function ProjectsPage() {
       action: (items: Project[]) => {
         if (confirm(`Delete ${items.length} selected projects?`)) {
           items.forEach(project => {
-            deleteProject.mutate(project.id)
+            if (project.id) {
+              deleteProject.mutate(project.id)
+            }
           })
           setSelectedItems([])
         }
@@ -479,7 +486,7 @@ export default function ProjectsPage() {
       label: 'Make Public',
       action: (items: Project[]) => {
         items.forEach(project => {
-          if (!project.is_public) {
+          if (!project.is_public && project.id) {
             updateProject.mutate({
               id: project.id,
               data: { ...project, is_public: true }
@@ -492,7 +499,7 @@ export default function ProjectsPage() {
       label: 'Make Private',
       action: (items: Project[]) => {
         items.forEach(project => {
-          if (project.is_public) {
+          if (project.is_public && project.id) {
             updateProject.mutate({
               id: project.id,
               data: { ...project, is_public: false }
@@ -661,8 +668,6 @@ export default function ProjectsPage() {
         data={projects}
         loading={isLoading}
         error={error ? (error as any)?.message || String(error) : null}
-        activeView={activeView}
-        onViewChange={setActiveView}
         selectable={true}
         selectedItems={selectedItems}
         onSelectionChange={setSelectedItems}

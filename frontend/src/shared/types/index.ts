@@ -15,15 +15,15 @@ export interface User {
 }
 
 export interface Project {
-  id: number
+  id?: number
   name: string
   description?: string
-  user_id: number
-  is_public: boolean
-  settings: Record<string, unknown>
+  user_id?: number
+  is_public?: boolean
+  settings?: Record<string, unknown>
   start_date?: string
   end_date?: string
-  created_at: string
+  created_at?: string
   updated_at?: string
 }
 
