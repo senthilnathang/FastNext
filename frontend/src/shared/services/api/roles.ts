@@ -3,15 +3,16 @@ import { API_CONFIG } from './config'
 
 // Role types
 export interface Role {
-  id: number
+  id?: number
   name: string
   description?: string
-  is_system_role: boolean
-  is_active: boolean
-  created_at: string
+  is_system_role?: boolean
+  is_active?: boolean
+  created_at?: string
   updated_at?: string
   permissions?: Permission[]
   user_count?: number // Number of users with this role
+  permission_count?: number // Number of permissions assigned to this role
 }
 
 export interface Permission {

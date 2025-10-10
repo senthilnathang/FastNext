@@ -18,10 +18,16 @@ import type { Role } from "@/shared/services/api/roles"
 
 // Role validation schema
 const roleSchema = z.object({
+  id: z.number().optional(),
   name: z.string().min(1, 'Role name is required').max(100),
   description: z.string().optional(),
   is_active: z.boolean().default(true),
-  is_system: z.boolean().default(false),
+  is_system_role: z.boolean().default(false),
+  created_at: z.string().optional(),
+  updated_at: z.string().optional(),
+  permissions: z.array(z.any()).optional(),
+  user_count: z.number().optional(),
+  permission_count: z.number().optional(),
 })
 
 // Form fields configuration
@@ -49,7 +55,7 @@ const formFields: FormField<Role>[] = [
     description: 'Whether this role is currently active'
   },
   {
-    name: 'is_system',
+    name: 'is_system_role',
     label: 'System Role',
     type: 'checkbox',
     defaultValue: false,
@@ -69,7 +75,7 @@ export default function RolesPage() {
 
   // Determine current mode from URL
   const mode = searchParams.get('mode') || 'list'
-  const itemId = searchParams.get('id')
+  const itemId = searchParams.get('id') || undefined
 
   const handleModeChange = (newMode: string, newItemId?: string | number) => {
     const params = new URLSearchParams()
@@ -112,7 +118,7 @@ export default function RolesPage() {
       render: (value) => (
         <div className="flex items-center gap-2">
           <Users className="h-4 w-4 text-muted-foreground" />
-          <span>{value || 0} users</span>
+          <span>{value ? String(value) : '0'} users</span>
         </div>
       )
     },
@@ -124,7 +130,7 @@ export default function RolesPage() {
       render: (value) => (
         <div className="flex items-center gap-2">
           <Key className="h-4 w-4 text-muted-foreground" />
-          <span>{value || 0} permissions</span>
+          <span>{value ? String(value) : '0'} permissions</span>
         </div>
       )
     },
@@ -144,7 +150,7 @@ export default function RolesPage() {
           <Badge variant={role.is_active ? "default" : "destructive"}>
             {role.is_active ? "Active" : "Inactive"}
           </Badge>
-          {role.is_system && (
+          {role.is_system_role && (
             <Badge variant="outline" className="text-xs">
               <Crown className="w-3 h-3 mr-1" />
               System
@@ -176,7 +182,7 @@ export default function RolesPage() {
     const totalRoles = roles.length
     const activeRoles = roles.filter(role => role.is_active).length
     const inactiveRoles = totalRoles - activeRoles
-    const systemRoles = roles.filter(role => role.is_system).length
+    const systemRoles = roles.filter(role => role.is_system_role).length
 
     return {
       totalRoles,
@@ -193,7 +199,12 @@ export default function RolesPage() {
 
   const createRoleApi = async (data: Role): Promise<Role> => {
     return new Promise((resolve, reject) => {
-      createRole.mutate(data, {
+      const createData = {
+        name: data.name,
+        description: data.description,
+        permissions: data.permissions?.map(p => typeof p === 'object' ? p.id : p)
+      }
+      createRole.mutate(createData, {
         onSuccess: (result) => resolve(result),
         onError: (error) => reject(new Error(apiUtils.getErrorMessage(error)))
       })
@@ -202,7 +213,13 @@ export default function RolesPage() {
 
   const updateRoleApi = async (id: string | number, data: Role): Promise<Role> => {
     return new Promise((resolve, reject) => {
-      updateRole.mutate({ id: Number(id), data }, {
+      const updateData = {
+        name: data.name,
+        description: data.description,
+        is_active: data.is_active,
+        permissions: data.permissions?.map(p => typeof p === 'object' ? p.id : p)
+      }
+      updateRole.mutate({ id: Number(id), data: updateData }, {
         onSuccess: (result) => resolve(result),
         onError: (error) => reject(new Error(apiUtils.getErrorMessage(error)))
       })
