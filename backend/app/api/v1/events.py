@@ -156,18 +156,9 @@ async def get_events(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail=result['error']
             )
-        
-        # Log the API call
-        response_time = int((datetime.now() - start_time).total_seconds() * 1000)
-        log_api_call(
-            db=db,
-            request=request,
-            response_time_ms=response_time,
-            status_code=200,
-            user_id=current_user.id if current_user else None,
-            username=current_user.username if current_user else None
-        )
-        
+
+        # Don't log /events calls to prevent recursive logging
+
         return EventListResponse(
             success=True,
             data=result['data'],
@@ -180,17 +171,7 @@ async def get_events(
     except HTTPException:
         raise
     except Exception as e:
-        # Log error
-        response_time = int((datetime.now() - start_time).total_seconds() * 1000)
-        log_api_call(
-            db=db,
-            request=request,
-            response_time_ms=response_time,
-            status_code=500,
-            user_id=current_user.id if current_user else None,
-            username=current_user.username if current_user else None
-        )
-        
+        # Don't log errors for /events endpoint to prevent recursive logging
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to retrieve events: {str(e)}"
@@ -399,34 +380,15 @@ async def get_event_statistics(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail=result['error']
             )
-        
-        # Log the API call
-        response_time = int((datetime.now() - start_time).total_seconds() * 1000)
-        log_api_call(
-            db=db,
-            request=request,
-            response_time_ms=response_time,
-            status_code=200,
-            user_id=current_user.id if current_user else None,
-            username=current_user.username if current_user else None
-        )
-        
+
+        # Don't log /events/statistics calls to prevent recursive logging
+
         return EventStatistics(**result)
         
     except HTTPException:
         raise
     except Exception as e:
-        # Log error
-        response_time = int((datetime.now() - start_time).total_seconds() * 1000)
-        log_api_call(
-            db=db,
-            request=request,
-            response_time_ms=response_time,
-            status_code=500,
-            user_id=current_user.id if current_user else None,
-            username=current_user.username if current_user else None
-        )
-        
+        # Don't log errors for /events/statistics endpoint to prevent recursive logging
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to retrieve statistics: {str(e)}"

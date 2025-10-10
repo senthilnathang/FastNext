@@ -8,7 +8,7 @@ import json
 import uuid
 import logging
 import socket
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from typing import Optional, Dict, Any, List, Union
 from pathlib import Path
 
@@ -352,7 +352,7 @@ class EnhancedLogger:
         try:
             # Calculate time range
             end_time = datetime.now(timezone.utc)
-            start_time = end_time.replace(hour=end_time.hour - hours)
+            start_time = end_time - timedelta(hours=hours)
             
             # Base query for time range
             base_query = db.query(ActivityLog).filter(
