@@ -9,7 +9,8 @@ from typing import Dict, Any, List, Optional, Set
 from pydantic import BaseModel
 
 from app.db.session import get_db
-from app.core.auth import require_role
+from app.auth.deps import get_current_active_user
+from app.auth.permissions import require_admin
 from app.models.user import User
 from app.core.cache_optimization import (
     query_cache_manager,
@@ -45,7 +46,7 @@ class CacheKeyRequest(BaseModel):
 
 @router.get("/cache/stats")
 async def get_cache_stats(
-    current_user: User = Depends(require_role(["admin"]))
+    current_user: User = Depends(require_admin)
 ) -> Dict[str, Any]:
     """
     Get comprehensive cache statistics
@@ -82,7 +83,7 @@ async def get_cache_stats(
 
 @router.get("/cache/query-stats")
 async def get_query_cache_stats(
-    current_user: User = Depends(require_role(["admin"]))
+    current_user: User = Depends(require_admin)
 ) -> Dict[str, Any]:
     """
     Get detailed query cache statistics
@@ -114,7 +115,7 @@ async def get_query_cache_stats(
 @router.post("/cache/invalidate")
 async def invalidate_cache(
     request: InvalidateCacheRequest,
-    current_user: User = Depends(require_role(["admin"]))
+    current_user: User = Depends(require_admin)
 ) -> Dict[str, Any]:
     """
     Invalidate cache entries by tags, pattern, or table name
@@ -170,7 +171,7 @@ async def invalidate_cache(
 
 @router.post("/cache/clear-all")
 async def clear_all_cache(
-    current_user: User = Depends(require_role(["admin"]))
+    current_user: User = Depends(require_admin)
 ) -> Dict[str, Any]:
     """
     Clear ALL cache entries (use with caution!)
@@ -211,7 +212,7 @@ async def clear_all_cache(
 async def warm_cache(
     request: CacheWarmingRequest,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_role(["admin"]))
+    current_user: User = Depends(require_admin)
 ) -> Dict[str, Any]:
     """
     Proactively warm cache with critical queries
@@ -251,7 +252,7 @@ async def warm_cache(
 @router.get("/cache/key/{cache_key}")
 async def get_cache_entry(
     cache_key: str,
-    current_user: User = Depends(require_role(["admin"]))
+    current_user: User = Depends(require_admin)
 ) -> Dict[str, Any]:
     """
     Get a specific cache entry by key
@@ -295,7 +296,7 @@ async def get_cache_entry(
 @router.delete("/cache/key/{cache_key}")
 async def delete_cache_entry(
     cache_key: str,
-    current_user: User = Depends(require_role(["admin"]))
+    current_user: User = Depends(require_admin)
 ) -> Dict[str, Any]:
     """
     Delete a specific cache entry by key
@@ -326,7 +327,7 @@ async def delete_cache_entry(
 
 @router.get("/cache/tags")
 async def get_cache_tags(
-    current_user: User = Depends(require_role(["admin"]))
+    current_user: User = Depends(require_admin)
 ) -> Dict[str, Any]:
     """
     Get all registered cache invalidation tags
@@ -364,7 +365,7 @@ async def get_cache_tags(
 
 @router.get("/cache/performance-report")
 async def get_cache_performance_report(
-    current_user: User = Depends(require_role(["admin"]))
+    current_user: User = Depends(require_admin)
 ) -> Dict[str, Any]:
     """
     Generate comprehensive cache performance report

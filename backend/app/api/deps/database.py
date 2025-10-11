@@ -2,25 +2,24 @@
 Database Dependencies
 FastAPI dependencies for database sessions
 """
-from typing import AsyncGenerator
-from fastapi import Depends
-from sqlalchemy.ext.asyncio import AsyncSession
-from app.db.session import AsyncSessionLocal
+from typing import Generator
+from sqlalchemy.orm import Session
+from app.db.session import SessionLocal
 
 
-async def get_db() -> AsyncGenerator[AsyncSession, None]:
+def get_db() -> Generator[Session, None, None]:
     """
     Dependency to get database session
-    
+
     Yields:
-        AsyncSession: Database session
+        Session: Database session
     """
-    async with AsyncSessionLocal() as session:
-        try:
-            yield session
-        finally:
-            await session.close()
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
 
 
-# Alias for backward compatibility  
+# Alias for backward compatibility
 get_db_session = get_db

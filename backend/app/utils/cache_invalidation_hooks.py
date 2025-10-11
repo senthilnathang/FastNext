@@ -154,62 +154,45 @@ def setup_model_invalidation_hooks(Base: Any):
         setup_model_invalidation_hooks(Base)
     """
 
-    @event.listens_for(Session, 'after_insert')
-    async def after_insert(mapper: Mapper, connection, target):
-        """Invalidate cache after INSERT"""
-        model_name = target.__tablename__
-        await cache_invalidation_hooks.invalidate_for_model(
-            model_name=model_name,
-            operation='create',
-            instance=target
-        )
+    # Note: SQLAlchemy event handlers must be synchronous
+    # We queue invalidations and process them after commit
 
-    @event.listens_for(Session, 'after_update')
-    async def after_update(mapper: Mapper, connection, target):
-        """Invalidate cache after UPDATE"""
-        model_name = target.__tablename__
-        await cache_invalidation_hooks.invalidate_for_model(
-            model_name=model_name,
-            operation='update',
-            instance=target
-        )
+    @event.listens_for(Session, 'after_flush')
+    def after_flush(session, flush_context):
+        """Queue cache invalidations after flush (before commit)"""
+        # Collect all changes
+        for obj in session.new:
+            if hasattr(obj, '__tablename__'):
+                model_name = obj.__tablename__
+                if model_name in cache_invalidation_hooks.model_rules:
+                    cache_invalidation_hooks.pending_invalidations.add(f"table:{model_name}")
 
-    @event.listens_for(Session, 'after_delete')
-    async def after_delete(mapper: Mapper, connection, target):
-        """Invalidate cache after DELETE"""
-        model_name = target.__tablename__
-        await cache_invalidation_hooks.invalidate_for_model(
-            model_name=model_name,
-            operation='delete',
-            instance=target
-        )
+        for obj in session.dirty:
+            if hasattr(obj, '__tablename__'):
+                model_name = obj.__tablename__
+                if model_name in cache_invalidation_hooks.model_rules:
+                    cache_invalidation_hooks.pending_invalidations.add(f"table:{model_name}")
 
-    @event.listens_for(Session, 'after_bulk_insert')
-    async def after_bulk_insert(mapper: Mapper, connection, target):
-        """Invalidate cache after bulk INSERT"""
-        model_name = mapper.mapped_table.name
-        await cache_invalidation_hooks.invalidate_for_model(
-            model_name=model_name,
-            operation='create'
-        )
+        for obj in session.deleted:
+            if hasattr(obj, '__tablename__'):
+                model_name = obj.__tablename__
+                if model_name in cache_invalidation_hooks.model_rules:
+                    cache_invalidation_hooks.pending_invalidations.add(f"table:{model_name}")
 
-    @event.listens_for(Session, 'after_bulk_update')
-    async def after_bulk_update(mapper: Mapper, connection, target):
-        """Invalidate cache after bulk UPDATE"""
-        model_name = mapper.mapped_table.name
-        await cache_invalidation_hooks.invalidate_for_model(
-            model_name=model_name,
-            operation='update'
-        )
+    @event.listens_for(Session, 'after_commit')
+    def after_commit(session):
+        """Process pending cache invalidations after successful commit"""
+        if cache_invalidation_hooks.pending_invalidations:
+            # Note: We can't use async here, so we just log for now
+            # In production, you might want to use a background task queue
+            tags = cache_invalidation_hooks.pending_invalidations.copy()
+            cache_invalidation_hooks.pending_invalidations.clear()
+            logger.debug(f"Cache invalidation queued for tags: {tags}")
+            # TODO: Implement background task to process these invalidations
 
-    @event.listens_for(Session, 'after_bulk_delete')
-    async def after_bulk_delete(mapper: Mapper, connection, target):
-        """Invalidate cache after bulk DELETE"""
-        model_name = mapper.mapped_table.name
-        await cache_invalidation_hooks.invalidate_for_model(
-            model_name=model_name,
-            operation='delete'
-        )
+    # Note: SQLAlchemy 2.x doesn't have after_bulk_* events on Session
+    # Bulk operations don't trigger per-instance events, so we handle them differently
+    # Applications should manually invalidate cache after bulk operations
 
     logger.info("✅ Model cache invalidation hooks registered")
 

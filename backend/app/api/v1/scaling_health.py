@@ -14,7 +14,8 @@ import os
 from app.db.session import get_db
 from app.db.replication import db_router, replication_monitor
 from app.core.redis_config import redis_manager, cache
-from app.core.auth import require_role
+from app.auth.deps import get_current_active_user
+from app.auth.permissions import require_admin
 from app.models.user import User
 
 router = APIRouter()
@@ -130,7 +131,7 @@ async def startup_probe(db: Session = Depends(get_db)):
 @router.get("/health/deep")
 async def deep_health_check(
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_role(["admin"]))
+    current_user: User = Depends(require_admin)
 ) -> Dict[str, Any]:
     """
     Deep health check with detailed component status
@@ -274,7 +275,7 @@ async def prometheus_metrics(db: Session = Depends(get_db)):
 
 @router.get("/scaling/info")
 async def scaling_info(
-    current_user: User = Depends(require_role(["admin"]))
+    current_user: User = Depends(require_admin)
 ) -> Dict[str, Any]:
     """
     Get horizontal scaling configuration info
@@ -316,7 +317,7 @@ async def scaling_info(
 @router.get("/replication/status")
 async def replication_status(
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_role(["admin"]))
+    current_user: User = Depends(require_admin)
 ) -> Dict[str, Any]:
     """
     Get database replication status and lag information

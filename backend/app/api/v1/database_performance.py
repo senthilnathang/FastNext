@@ -11,7 +11,8 @@ from app.utils.db_monitoring import (
     generate_performance_report,
     get_system_metrics
 )
-from app.core.auth import get_current_active_user, require_role
+from app.auth.deps import get_current_active_user
+from app.auth.permissions import require_admin
 from app.models.user import User
 import logging
 
@@ -21,7 +22,7 @@ logger = logging.getLogger(__name__)
 
 @router.get("/performance/pool-stats")
 async def get_pool_stats(
-    current_user: User = Depends(require_role(["admin"]))
+    current_user: User = Depends(require_admin)
 ) -> Dict[str, Any]:
     """
     Get connection pool statistics
@@ -46,7 +47,7 @@ async def get_pool_stats(
 @router.get("/performance/database-stats")
 async def get_database_stats(
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_role(["admin"]))
+    current_user: User = Depends(require_admin)
 ) -> Dict[str, Any]:
     """
     Get database statistics including size, connections, and slow queries
@@ -71,7 +72,7 @@ async def get_database_stats(
 @router.get("/performance/index-usage")
 async def get_index_usage(
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_role(["admin"]))
+    current_user: User = Depends(require_admin)
 ) -> Dict[str, Any]:
     """
     Get index usage statistics
@@ -101,7 +102,7 @@ async def get_index_usage(
 @router.get("/performance/cache-stats")
 async def get_cache_stats(
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_role(["admin"]))
+    current_user: User = Depends(require_admin)
 ) -> Dict[str, Any]:
     """
     Get database cache hit ratio
@@ -141,7 +142,7 @@ async def get_cache_stats(
 @router.get("/performance/table-bloat")
 async def get_table_bloat(
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_role(["admin"]))
+    current_user: User = Depends(require_admin)
 ) -> Dict[str, Any]:
     """
     Get table bloat information
@@ -166,7 +167,7 @@ async def get_table_bloat(
 
 @router.get("/performance/system-metrics")
 async def get_system_metrics_endpoint(
-    current_user: User = Depends(require_role(["admin"]))
+    current_user: User = Depends(require_admin)
 ) -> Dict[str, Any]:
     """
     Get system-level metrics (CPU, memory, etc.)
@@ -190,7 +191,7 @@ async def get_system_metrics_endpoint(
 @router.get("/performance/full-report")
 async def get_full_performance_report(
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_role(["admin"]))
+    current_user: User = Depends(require_admin)
 ) -> Dict[str, Any]:
     """
     Generate comprehensive performance report

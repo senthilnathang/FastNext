@@ -34,6 +34,7 @@ kombu==5.4.2  # Message transport
 # Monitoring & Logging
 structlog>=24.5.0  # Structured logging
 python-json-logger>=3.2.1  # JSON logging formatter
+psutil==6.1.0  # System and process monitoring
 opentelemetry-api==1.28.2  # Observability
 opentelemetry-sdk==1.28.2
 opentelemetry-instrumentation-fastapi==0.49b2

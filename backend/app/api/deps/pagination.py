@@ -44,13 +44,13 @@ class SearchParams(BaseModel):
     """Search parameters model"""
     q: Optional[str] = Field(None, description="Search query")
     sort_by: Optional[str] = Field(None, description="Sort by field")
-    sort_order: Optional[str] = Field("asc", regex="^(asc|desc)$", description="Sort order")
+    sort_order: Optional[str] = Field("asc", pattern="^(asc|desc)$", description="Sort order")
 
 
 def get_search_params(
     q: Optional[str] = Query(None, description="Search query"),
     sort_by: Optional[str] = Query(None, description="Sort by field"),
-    sort_order: str = Query("asc", regex="^(asc|desc)$", description="Sort order")
+    sort_order: str = Query("asc", pattern="^(asc|desc)$", description="Sort order")
 ) -> SearchParams:
     """
     Get search parameters from query params
