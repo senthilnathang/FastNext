@@ -1,0 +1,483 @@
+# FastNext Framework - Horizontal Scaling Configuration
+# Docker Compose setup for production-scale deployment with Redis Cluster
+
+version: '3.8'
+
+services:
+  # ============================================================================
+  # PostgreSQL Primary (Write Master)
+  # ============================================================================
+  postgres-primary:
+    build:
+      context: ./docker/postgres
+      dockerfile: Dockerfile
+    container_name: fastnext-postgres-primary
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-fastnext}
+      POSTGRES_USER: ${POSTGRES_USER:-fastnext}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_REPLICATION_USER: ${POSTGRES_REPL_USER:-replicator}
+      POSTGRES_REPLICATION_PASSWORD: ${POSTGRES_REPL_PASSWORD}
+      POSTGRES_REPLICATION_MODE: master
+    volumes:
+      - postgres_primary_data:/var/lib/postgresql/data
+      - ./docker/postgres/primary-setup.sh:/docker-entrypoint-initdb.d/setup-replication.sh
+    networks:
+      - fastnext-network
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-fastnext}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: always
+    deploy:
+      resources:
+        limits:
+          memory: 4G
+          cpus: '2.0'
+
+  # ============================================================================
+  # PostgreSQL Replica 1 (Read Replica)
+  # ============================================================================
+  postgres-replica-1:
+    build:
+      context: ./docker/postgres
+      dockerfile: Dockerfile
+    container_name: fastnext-postgres-replica-1
+    environment:
+      POSTGRES_REPLICATION_MODE: slave
+      POSTGRES_MASTER_HOST: postgres-primary
+      POSTGRES_MASTER_PORT: 5432
+      POSTGRES_REPLICATION_USER: ${POSTGRES_REPL_USER:-replicator}
+      POSTGRES_REPLICATION_PASSWORD: ${POSTGRES_REPL_PASSWORD}
+    volumes:
+      - postgres_replica_1_data:/var/lib/postgresql/data
+    depends_on:
+      - postgres-primary
+    networks:
+      - fastnext-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: always
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+          cpus: '1.0'
+
+  # ============================================================================
+  # PostgreSQL Replica 2 (Read Replica)
+  # ============================================================================
+  postgres-replica-2:
+    build:
+      context: ./docker/postgres
+      dockerfile: Dockerfile
+    container_name: fastnext-postgres-replica-2
+    environment:
+      POSTGRES_REPLICATION_MODE: slave
+      POSTGRES_MASTER_HOST: postgres-primary
+      POSTGRES_MASTER_PORT: 5432
+      POSTGRES_REPLICATION_USER: ${POSTGRES_REPL_USER:-replicator}
+      POSTGRES_REPLICATION_PASSWORD: ${POSTGRES_REPL_PASSWORD}
+    volumes:
+      - postgres_replica_2_data:/var/lib/postgresql/data
+    depends_on:
+      - postgres-primary
+    networks:
+      - fastnext-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: always
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+          cpus: '1.0'
+
+  # ============================================================================
+  # Redis Cluster Nodes (6 nodes: 3 masters + 3 replicas)
+  # ============================================================================
+  redis-node-1:
+    image: redis:7-alpine
+    container_name: fastnext-redis-1
+    command: redis-server /usr/local/etc/redis/redis.conf
+    volumes:
+      - redis_1_data:/data
+      - ./docker/redis/redis-cluster.conf:/usr/local/etc/redis/redis.conf
+    networks:
+      fastnext-network:
+        ipv4_address: 172.20.0.11
+    ports:
+      - "6379:6379"
+      - "16379:16379"
+    restart: always
+
+  redis-node-2:
+    image: redis:7-alpine
+    container_name: fastnext-redis-2
+    command: redis-server /usr/local/etc/redis/redis.conf
+    volumes:
+      - redis_2_data:/data
+      - ./docker/redis/redis-cluster.conf:/usr/local/etc/redis/redis.conf
+    networks:
+      fastnext-network:
+        ipv4_address: 172.20.0.12
+    ports:
+      - "6380:6379"
+      - "16380:16379"
+    restart: always
+
+  redis-node-3:
+    image: redis:7-alpine
+    container_name: fastnext-redis-3
+    command: redis-server /usr/local/etc/redis/redis.conf
+    volumes:
+      - redis_3_data:/data
+      - ./docker/redis/redis-cluster.conf:/usr/local/etc/redis/redis.conf
+    networks:
+      fastnext-network:
+        ipv4_address: 172.20.0.13
+    ports:
+      - "6381:6379"
+      - "16381:16379"
+    restart: always
+
+  redis-node-4:
+    image: redis:7-alpine
+    container_name: fastnext-redis-4
+    command: redis-server /usr/local/etc/redis/redis.conf
+    volumes:
+      - redis_4_data:/data
+      - ./docker/redis/redis-cluster.conf:/usr/local/etc/redis/redis.conf
+    networks:
+      fastnext-network:
+        ipv4_address: 172.20.0.14
+    ports:
+      - "6382:6379"
+      - "16382:16379"
+    restart: always
+
+  redis-node-5:
+    image: redis:7-alpine
+    container_name: fastnext-redis-5
+    command: redis-server /usr/local/etc/redis/redis.conf
+    volumes:
+      - redis_5_data:/data
+      - ./docker/redis/redis-cluster.conf:/usr/local/etc/redis/redis.conf
+    networks:
+      fastnext-network:
+        ipv4_address: 172.20.0.15
+    ports:
+      - "6383:6379"
+      - "16383:16379"
+    restart: always
+
+  redis-node-6:
+    image: redis:7-alpine
+    container_name: fastnext-redis-6
+    command: redis-server /usr/local/etc/redis/redis.conf
+    volumes:
+      - redis_6_data:/data
+      - ./docker/redis/redis-cluster.conf:/usr/local/etc/redis/redis.conf
+    networks:
+      fastnext-network:
+        ipv4_address: 172.20.0.16
+    ports:
+      - "6384:6379"
+      - "16384:16379"
+    restart: always
+
+  # Redis Cluster Setup (runs once to create cluster)
+  redis-cluster-init:
+    image: redis:7-alpine
+    container_name: fastnext-redis-cluster-init
+    command: >
+      sh -c "sleep 10 && redis-cli --cluster create
+      172.20.0.11:6379 172.20.0.12:6379 172.20.0.13:6379
+      172.20.0.14:6379 172.20.0.15:6379 172.20.0.16:6379
+      --cluster-replicas 1 --cluster-yes"
+    depends_on:
+      - redis-node-1
+      - redis-node-2
+      - redis-node-3
+      - redis-node-4
+      - redis-node-5
+      - redis-node-6
+    networks:
+      - fastnext-network
+    restart: on-failure
+
+  # ============================================================================
+  # Backend API Servers (Horizontally scaled)
+  # ============================================================================
+  backend-1:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      target: production
+    container_name: fastnext-backend-1
+    environment:
+      POSTGRES_SERVER: postgres-primary
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: ${POSTGRES_DB:-fastnext}
+      POSTGRES_USER: ${POSTGRES_USER:-fastnext}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_READ_REPLICAS: postgres-replica-1:5432,postgres-replica-2:5432
+      REDIS_CLUSTER_NODES: 172.20.0.11:6379,172.20.0.12:6379,172.20.0.13:6379
+      SECRET_KEY: ${SECRET_KEY}
+      ENVIRONMENT: production
+      CACHE_ENABLED: true
+      WORKERS: 4
+    depends_on:
+      - postgres-primary
+      - redis-node-1
+    networks:
+      - fastnext-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: always
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '1.0'
+
+  backend-2:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      target: production
+    container_name: fastnext-backend-2
+    environment:
+      POSTGRES_SERVER: postgres-primary
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: ${POSTGRES_DB:-fastnext}
+      POSTGRES_USER: ${POSTGRES_USER:-fastnext}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_READ_REPLICAS: postgres-replica-1:5432,postgres-replica-2:5432
+      REDIS_CLUSTER_NODES: 172.20.0.11:6379,172.20.0.12:6379,172.20.0.13:6379
+      SECRET_KEY: ${SECRET_KEY}
+      ENVIRONMENT: production
+      CACHE_ENABLED: true
+      WORKERS: 4
+    depends_on:
+      - postgres-primary
+      - redis-node-1
+    networks:
+      - fastnext-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: always
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '1.0'
+
+  backend-3:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      target: production
+    container_name: fastnext-backend-3
+    environment:
+      POSTGRES_SERVER: postgres-primary
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: ${POSTGRES_DB:-fastnext}
+      POSTGRES_USER: ${POSTGRES_USER:-fastnext}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_READ_REPLICAS: postgres-replica-1:5432,postgres-replica-2:5432
+      REDIS_CLUSTER_NODES: 172.20.0.11:6379,172.20.0.12:6379,172.20.0.13:6379
+      SECRET_KEY: ${SECRET_KEY}
+      ENVIRONMENT: production
+      CACHE_ENABLED: true
+      WORKERS: 4
+    depends_on:
+      - postgres-primary
+      - redis-node-1
+    networks:
+      - fastnext-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: always
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '1.0'
+
+  # ============================================================================
+  # Frontend Servers (Horizontally scaled)
+  # ============================================================================
+  frontend-1:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      target: production
+    container_name: fastnext-frontend-1
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+    depends_on:
+      - backend-1
+    networks:
+      - fastnext-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: always
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.5'
+
+  frontend-2:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      target: production
+    container_name: fastnext-frontend-2
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+    depends_on:
+      - backend-1
+    networks:
+      - fastnext-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: always
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.5'
+
+  # ============================================================================
+  # Load Balancer (Nginx)
+  # ============================================================================
+  nginx:
+    image: nginx:alpine
+    container_name: fastnext-nginx-lb
+    ports:
+      - "80:80"
+      - "443:443"
+      - "9145:9145"  # Metrics
+    volumes:
+      - ./docker/nginx/load-balancer.conf:/etc/nginx/nginx.conf
+      - ./docker/nginx/ssl:/etc/nginx/ssl
+      - nginx_cache:/var/cache/nginx
+      - nginx_logs:/var/log/nginx
+    depends_on:
+      - backend-1
+      - backend-2
+      - backend-3
+      - frontend-1
+      - frontend-2
+    networks:
+      - fastnext-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    restart: always
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '1.0'
+
+  # ============================================================================
+  # Monitoring & Observability
+  # ============================================================================
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: fastnext-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./docker/monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention.time=30d'
+    networks:
+      - fastnext-network
+    restart: always
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: fastnext-grafana
+    ports:
+      - "3001:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./docker/monitoring/grafana:/etc/grafana/provisioning
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD:-admin}
+      GF_SERVER_ROOT_URL: http://localhost:3001
+    depends_on:
+      - prometheus
+    networks:
+      - fastnext-network
+    restart: always
+
+  # Node exporter for system metrics
+  node-exporter:
+    image: prom/node-exporter:latest
+    container_name: fastnext-node-exporter
+    command:
+      - '--path.rootfs=/host'
+    volumes:
+      - '/:/host:ro,rslave'
+    networks:
+      - fastnext-network
+    restart: always
+
+volumes:
+  postgres_primary_data:
+  postgres_replica_1_data:
+  postgres_replica_2_data:
+  redis_1_data:
+  redis_2_data:
+  redis_3_data:
+  redis_4_data:
+  redis_5_data:
+  redis_6_data:
+  nginx_cache:
+  nginx_logs:
+  prometheus_data:
+  grafana_data:
+
+networks:
+  fastnext-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
+          gateway: 172.20.0.1
