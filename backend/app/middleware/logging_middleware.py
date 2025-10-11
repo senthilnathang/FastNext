@@ -58,7 +58,8 @@ class RequestResponseLoggingMiddleware(BaseHTTPMiddleware):
         # Paths to exclude from logging
         self.exclude_paths = exclude_paths or {
             '/health', '/metrics', '/favicon.ico', '/static/', '/_next/',
-            '/docs', '/redoc', '/openapi.json'
+            '/docs', '/redoc', '/openapi.json',
+            '/events', '/events/', '/api/v1/events'  # Prevent recursive logging
         }
         
         # Performance tracking

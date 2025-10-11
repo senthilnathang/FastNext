@@ -40,7 +40,8 @@ class EnhancedEventLoggingMiddleware(BaseHTTPMiddleware):
         # Paths to exclude from enhanced logging
         self.exclude_paths = exclude_paths or {
             '/health', '/metrics', '/favicon.ico', '/static/', '/_next/',
-            '/docs', '/redoc', '/openapi.json', '/ping', '/version'
+            '/docs', '/redoc', '/openapi.json', '/ping', '/version',
+            '/events', '/events/', '/api/v1/events'  # Prevent recursive logging
         }
         
         # Sensitive endpoints that should always be logged
