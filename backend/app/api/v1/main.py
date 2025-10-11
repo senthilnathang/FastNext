@@ -6,11 +6,11 @@ from fastapi import APIRouter
 
 # Import v1 route modules
 from . import (
-    auth_routes, users, projects, pages, components, roles, permissions, 
-    project_members, profile, security, activity_logs, audit_trails, 
-    assets, user_roles, workflow_types, workflow_states, 
+    auth_routes, users, projects, pages, components, roles, permissions,
+    project_members, profile, security, activity_logs, audit_trails,
+    assets, user_roles, workflow_types, workflow_states,
     workflow_templates, workflow_instances, data_import_export, system_configuration,
-    events, rls, projects_rls
+    events, rls, projects_rls, database_performance, cache_management
 )
 
 # Import resource routes (move these to v1 structure later)
@@ -68,3 +68,7 @@ v1_router.include_router(rls.router, prefix="/rls", tags=["v1-rls"])
 
 # RLS-Enhanced Endpoints (Examples)
 v1_router.include_router(projects_rls.router, prefix="/projects-rls", tags=["v1-projects-rls"])
+
+# Performance & Caching
+v1_router.include_router(database_performance.router, prefix="/database", tags=["v1-performance"])
+v1_router.include_router(cache_management.router, prefix="/cache", tags=["v1-cache"])

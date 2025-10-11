@@ -49,8 +49,30 @@ async def lifespan(app: FastAPI):
         from app.core.redis_config import startup_redis
         await startup_redis()
         logger.info("✅ Redis initialized")
+
+        # Initialize cache system
+        from app.core.cache import initialize_caches
+        initialize_caches()
+        logger.info("✅ Cache system initialized")
+
+        # Setup query cache event listeners
+        from app.utils.query_cache_integration import setup_query_cache_events
+        from app.db.base import engine
+        setup_query_cache_events(engine)
+        logger.info("✅ Query cache events registered")
+
+        # Setup model invalidation hooks
+        from app.utils.cache_invalidation_hooks import (
+            setup_model_invalidation_hooks,
+            register_default_invalidation_rules
+        )
+        from app.db.base import Base
+        setup_model_invalidation_hooks(Base)
+        register_default_invalidation_rules()
+        logger.info("✅ Cache invalidation hooks registered")
+
     except Exception as e:
-        logger.error(f"⚠️ Redis initialization failed: {e}")
+        logger.error(f"⚠️ Redis/Cache initialization failed: {e}")
         logger.warning("Continuing without Redis caching...")
     
     yield
