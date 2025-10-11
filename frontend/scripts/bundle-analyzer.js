@@ -5,9 +5,9 @@
  * Analyzes webpack bundles for security issues and optimization opportunities
  */
 
-const fs = require('fs');
-const path = require('path');
-const { execSync } = require('child_process');
+import fs from 'fs';
+import path from 'path';
+import { execSync } from 'child_process';
 
 class BundleSecurityAnalyzer {
   constructor() {
@@ -53,7 +53,7 @@ class BundleSecurityAnalyzer {
       console.log('🔨 No build found, running build...');
       try {
         execSync('npm run build', { stdio: 'inherit' });
-      } catch (error) {
+      } catch {
         throw new Error('Build failed. Cannot analyze bundle.');
       }
     }
@@ -322,8 +322,8 @@ class BundleSecurityAnalyzer {
               });
             }
           });
-          
-        } catch (error) {
+
+        } catch {
           // Ignore files that can't be read
         }
       }
@@ -491,7 +491,7 @@ class BundleSecurityAnalyzer {
 }
 
 // Run the analyzer
-if (require.main === module) {
+if (import.meta.url === `file://${process.argv[1]}`) {
   const analyzer = new BundleSecurityAnalyzer();
   analyzer.analyze().catch(error => {
     console.error('Analysis failed:', error);
@@ -499,4 +499,4 @@ if (require.main === module) {
   });
 }
 
-module.exports = BundleSecurityAnalyzer;
+export default BundleSecurityAnalyzer;

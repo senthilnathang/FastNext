@@ -35,10 +35,7 @@ const nextConfig: NextConfig = {
   async headers() {
     const isDev = process.env.NODE_ENV === 'development';
     const isProd = process.env.NODE_ENV === 'production';
-    
-    // Generate nonce for CSP
-    const nonce = Buffer.from(require('crypto').randomBytes(16)).toString('base64');
-    
+
     // Content Security Policy with environment-specific rules
     const cspDirectives = [
       "default-src 'self'",

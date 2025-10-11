@@ -1,4 +1,4 @@
-const { ScaffoldGenerator } = require('./src/shared/utils/scaffold-generator.ts');
+import { ScaffoldGenerator } from './src/shared/utils/scaffold-generator.ts';
 
 // Define a sample Product model for testing
 const productModel = {

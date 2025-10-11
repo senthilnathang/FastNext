@@ -5,10 +5,9 @@
  * Analyzes dependencies for vulnerabilities and security issues
  */
 
-const fs = require('fs');
-const path = require('path');
-const { execSync } = require('child_process');
-const crypto = require('crypto');
+import fs from 'fs';
+import path from 'path';
+import { execSync } from 'child_process';
 
 class SecurityAuditor {
   constructor() {
@@ -92,7 +91,7 @@ class SecurityAuditor {
               });
             });
           }
-        } catch (parseError) {
+        } catch {
           this.warnings.push({
             type: 'audit-error',
             message: 'Failed to parse NPM audit results'
@@ -238,8 +237,8 @@ class SecurityAuditor {
           });
         }
       });
-      
-    } catch (error) {
+
+    } catch {
       this.warnings.push({
         type: 'license-check-error',
         message: 'License check failed - install license-checker'
@@ -281,7 +280,7 @@ class SecurityAuditor {
             count: Object.keys(outdated).length,
             message: 'Some packages have updates available'
           });
-        } catch (parseError) {
+        } catch {
           // Ignore parse errors
         }
       }
@@ -436,7 +435,7 @@ class SecurityAuditor {
 }
 
 // Run the audit
-if (require.main === module) {
+if (import.meta.url === `file://${process.argv[1]}`) {
   const auditor = new SecurityAuditor();
   auditor.runAudit().catch(error => {
     console.error('Audit failed:', error);
@@ -444,4 +443,4 @@ if (require.main === module) {
   });
 }
 
-module.exports = SecurityAuditor;
+export default SecurityAuditor;

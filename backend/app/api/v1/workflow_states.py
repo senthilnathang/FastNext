@@ -1,6 +1,7 @@
 from typing import Any, List
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
+import logging
 
 from app.auth.deps import get_current_active_user
 from app.services.permission_service import PermissionService
@@ -11,6 +12,7 @@ from app.schemas.workflow import WorkflowState as WorkflowStateSchema, WorkflowS
 from app.schemas.common import ListResponse
 
 router = APIRouter()
+logger = logging.getLogger(__name__)
 
 
 @router.get("", response_model=ListResponse[WorkflowStateSchema])
@@ -43,8 +45,11 @@ def read_workflow_states(
             limit=limit
         )
     except Exception as e:
-        print(f"Error fetching workflow states: {e}")
-        return ListResponse.paginate(items=[], total=0, skip=skip, limit=limit)
+        logger.error(f"Error fetching workflow states: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Error fetching workflow states"
+        )
 
 
 @router.post("", response_model=WorkflowStateSchema)

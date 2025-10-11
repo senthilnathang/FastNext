@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from datetime import datetime, timedelta
 import json
 import asyncio
+import logging
 from enum import Enum
 
 from app.models.workflow import (
@@ -10,6 +11,9 @@ from app.models.workflow import (
     InstanceStatus, WorkflowNodeType
 )
 from app.models.user import User
+
+# Setup logger
+logger = logging.getLogger(__name__)
 
 
 class WorkflowExecutionError(Exception):
@@ -323,10 +327,10 @@ class WorkflowEngine:
     
     async def _execute_service_task(self, instance: WorkflowInstance, service_name: str, config: Dict[str, Any]):
         """Execute a service task (e.g., send email, call API)"""
-        
+
         # This would integrate with external services
         # For now, just log the action
-        print(f"Executing service task '{service_name}' for instance {instance.id}")
+        logger.info(f"Executing service task '{service_name}' for workflow instance {instance.id}")
         
         # Example: Send notification
         if service_name == "send_notification":

@@ -1,0 +1,8 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# Check backend Python files for debug code
+python3 backend/scripts/check_debug_code.py || exit 1
+
+# Check frontend files with lint-staged
+cd frontend && npx lint-staged

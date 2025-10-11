@@ -44,12 +44,6 @@ class CacheMiddleware:
         }
     
     async def __call__(self, scope: dict, receive: Callable, send: Callable) -> None:
-        # Temporarily disable cache middleware to fix encoding issues
-        # Will re-enable after fixing header encoding problems
-        if True:  # Disable caching temporarily
-            await self.app(scope, receive, send)
-            return
-            
         if scope["type"] != "http":
             await self.app(scope, receive, send)
             return

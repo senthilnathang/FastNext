@@ -1,6 +1,7 @@
 from typing import Any, List
 from fastapi import APIRouter, Depends, HTTPException, status, BackgroundTasks
 from sqlalchemy.orm import Session
+import logging
 
 from app.auth.deps import get_current_active_user
 from app.services.permission_service import PermissionService
@@ -8,8 +9,8 @@ from app.db.session import get_db
 from app.models.user import User
 from app.models.workflow import WorkflowInstance, WorkflowTemplate
 from app.schemas.workflow import (
-    WorkflowInstance as WorkflowInstanceSchema, 
-    WorkflowInstanceCreate, 
+    WorkflowInstance as WorkflowInstanceSchema,
+    WorkflowInstanceCreate,
     WorkflowInstanceUpdate,
     WorkflowAction
 )
@@ -17,6 +18,7 @@ from app.schemas.common import ListResponse
 from app.services.workflow_engine import get_workflow_engine, WorkflowExecutionError
 
 router = APIRouter()
+logger = logging.getLogger(__name__)
 
 
 @router.get("", response_model=ListResponse[WorkflowInstanceSchema])
@@ -63,8 +65,11 @@ def read_workflow_instances(
             limit=limit
         )
     except Exception as e:
-        print(f"Error fetching workflow instances: {e}")
-        return ListResponse.paginate(items=[], total=0, skip=skip, limit=limit)
+        logger.error(f"Error fetching workflow instances: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to fetch workflow instances"
+        )
 
 
 @router.post("", response_model=WorkflowInstanceSchema)

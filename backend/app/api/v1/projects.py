@@ -2,6 +2,7 @@ from typing import Any, List
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from sqlalchemy import func
+import logging
 
 from app.auth.deps import get_current_active_user
 from app.services.permission_service import PermissionService
@@ -13,6 +14,7 @@ from app.schemas.common import ListResponse
 from typing import Dict
 
 router = APIRouter()
+logger = logging.getLogger(__name__)
 
 
 @router.get("", response_model=ListResponse[ProjectSchema])
@@ -50,9 +52,12 @@ def read_projects(
             limit=limit
         )
     except Exception as e:
-        # Log the error and return empty response
-        print(f"Error fetching projects: {e}")
-        return ListResponse.paginate(items=[], total=0, skip=skip, limit=limit)
+        # Log the error and raise proper exception
+        logger.error(f"Error fetching projects: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to fetch projects"
+        )
 
 
 @router.post("", response_model=ProjectSchema)

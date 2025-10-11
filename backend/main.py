@@ -305,43 +305,50 @@ def _setup_middleware(app: FastAPI):
         ]
     )
     
-    # Temporarily disable cache and rate limiting middleware to fix encoding issues
-    # TODO: Re-enable after fixing header encoding problems
-    
-    # Rate limiting middleware (disabled temporarily)
-    # if settings.CACHE_ENABLED:
-    #     app.add_middleware(
-    #         RateLimitMiddleware,
-    #         requests_per_minute=60,
-    #         requests_per_hour=1000
-    #     )
-    
-    # Cache middleware for HTTP responses (disabled temporarily)
-    # if settings.CACHE_ENABLED:
-    #     app.add_middleware(
-    #         CacheMiddleware,
-    #         default_ttl=settings.CACHE_DEFAULT_TTL
-    #     )
-    
-    # CORS middleware (simplified to fix encoding issues)
+    # Rate limiting middleware - Re-enabled with fixed header encoding
+    if settings.CACHE_ENABLED:
+        app.add_middleware(
+            RateLimitMiddleware,
+            requests_per_minute=60,
+            requests_per_hour=1000
+        )
+
+    # Cache middleware for HTTP responses - Re-enabled with fixed header encoding
+    if settings.CACHE_ENABLED:
+        app.add_middleware(
+            CacheMiddleware,
+            default_ttl=settings.CACHE_DEFAULT_TTL
+        )
+
+    # CORS middleware - Properly configured with security
+    allowed_origins = ["*"] if settings.ENVIRONMENT == "development" else settings.CORS_ORIGINS
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=["*"],  # Simplified for debugging
+        allow_origins=allowed_origins,
         allow_credentials=True,
-        allow_methods=["*"],
+        allow_methods=["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
         allow_headers=["*"],
-        expose_headers=[],  # Temporarily empty to avoid encoding issues
+        expose_headers=[
+            "X-Process-Time",
+            "X-Request-ID",
+            "X-Cache",
+            "X-Cache-Key",
+            "X-RateLimit-Limit-Minute",
+            "X-RateLimit-Remaining-Minute",
+            "X-RateLimit-Limit-Hour",
+            "X-RateLimit-Remaining-Hour"
+        ],
         max_age=3600,
     )
     
-    # Security middleware (disabled for debugging)
-    # app.add_middleware(SecurityMiddleware, enable_rate_limiting=True)
-    
-    # Auto-logout middleware (disabled temporarily to fix encoding issues)
-    # app.add_middleware(AutoLogoutMiddleware)
-    
-    # Session expiration middleware (disabled temporarily to fix encoding issues)
-    # app.add_middleware(SessionExpirationMiddleware, session_timeout_minutes=60)
+    # Security middleware - Provides additional security headers and protection
+    app.add_middleware(SecurityMiddleware, enable_rate_limiting=False)  # Rate limiting handled above
+
+    # Auto-logout middleware - Handles automatic user logout on inactivity
+    app.add_middleware(AutoLogoutMiddleware)
+
+    # Session expiration middleware - Enforces session timeout
+    app.add_middleware(SessionExpirationMiddleware, session_timeout_minutes=60)
     
     # Compression middleware
     app.add_middleware(GZipMiddleware, minimum_size=1000)
