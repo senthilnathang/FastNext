@@ -6,7 +6,7 @@
 
 # Production ASGI Server
 gunicorn==21.2.0  # WSGI server
-uvicorn[standard]==0.24.0  # ASGI server with performance extensions
+uvicorn[standard]==0.32.1  # ASGI server with performance extensions
 
 # Performance & Optimization
 orjson==3.9.10  # Fast JSON serialization
@@ -21,26 +21,26 @@ opentelemetry-exporter-prometheus==1.12.0rc1  # Prometheus metrics exporter
 opentelemetry-exporter-jaeger==1.21.0  # Distributed tracing
 
 # Caching & Performance
-redis[hiredis]>=5.0.0  # Redis with hiredis for better performance and async support
+redis[hiredis]>=5.2.0  # Redis with hiredis for better performance and async support
 python-memcached==1.62  # Memcached client
 
 # Production Database
 psycopg2-binary==2.9.9  # PostgreSQL adapter (compiled)
 
 # Health Checks & Monitoring
-psutil==5.9.6  # System and process utilities
+psutil==6.1.0  # System and process utilities
 py-cpuinfo==9.0.0  # CPU information
 
 # Security Enhancements
 python-jose[cryptography]==3.3.0  # Enhanced JWT with cryptography
-cryptography==41.0.7  # Latest cryptography library
+cryptography==44.0.0  # Latest cryptography library
 
 # Production Utilities
-python-json-logger>=2.0.0  # JSON logging for structured logs
+python-json-logger>=3.2.1  # JSON logging for structured logs
 coloredlogs==15.0.1  # Colored logging output
 
 # Background Task Processing
-celery[redis]==5.3.4  # Celery with Redis broker
+celery[redis]==5.4.0  # Celery with Redis broker
 flower==2.0.1  # Celery monitoring
 
 # File Storage & CDN

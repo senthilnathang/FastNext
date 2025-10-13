@@ -6,6 +6,7 @@
 
 # Development & Debugging
 python-dotenv==1.0.0  # Environment variables
+python-decouple==3.8  # Configuration management
 watchfiles==0.21.0  # File watching for hot reload
 debugpy==1.8.0  # Python debugger
 

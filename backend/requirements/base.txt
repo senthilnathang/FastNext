@@ -70,3 +70,8 @@ aiofiles==24.1.0  # Async file operations
 # Security
 python-owasp-zap-v2.4==0.0.21  # Security scanning
 bandit==1.8.0  # Security linter
+
+# Additional utilities
+pyotp==2.9.0  # TOTP authentication
+python-decouple==3.8  # Configuration management
+aiocache==0.12.2  # Async caching
