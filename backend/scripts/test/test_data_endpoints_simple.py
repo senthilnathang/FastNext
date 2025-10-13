@@ -5,7 +5,7 @@ Simple test to verify the data import/export endpoint functions work correctly
 
 import sys
 import os
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".."))
 
 from unittest.mock import Mock
 from app.api.v1.data_import_export import (

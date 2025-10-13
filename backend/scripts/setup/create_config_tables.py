@@ -5,7 +5,7 @@ Create system configuration tables manually
 
 import sys
 import os
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..'))
 
 def create_system_config_tables():
     """Create system configuration tables directly"""

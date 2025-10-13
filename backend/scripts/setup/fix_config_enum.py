@@ -5,7 +5,7 @@ Fix the configuration category enum issue
 
 import sys
 import os
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".."))
 
 def fix_enum_issue():
     """Fix the configuration category enum issue"""

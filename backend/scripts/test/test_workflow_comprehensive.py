@@ -6,7 +6,7 @@ Tests React Flow workflow templates, CRUD operations, and advanced features.
 
 import sys
 import os
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".."))
 
 import pytest
 import asyncio

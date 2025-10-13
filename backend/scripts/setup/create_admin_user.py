@@ -3,7 +3,8 @@
 Script to create an admin user for testing
 """
 import sys
-sys.path.append('.')
+import os
+sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..'))
 
 from app.db.session import SessionLocal
 from app.models.user import User

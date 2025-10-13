@@ -8,7 +8,7 @@ import os
 import tempfile
 import json
 import requests
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".."))
 
 def create_test_csv_file():
     """Create a test CSV file for upload"""

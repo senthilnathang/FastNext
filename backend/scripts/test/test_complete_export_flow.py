@@ -5,7 +5,7 @@ Test the complete export flow with authentication and file generation
 
 import sys
 import os
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".."))
 
 from unittest.mock import Mock
 from app.api.v1.data_import_export import _generate_export_file, _generate_csv_content, _generate_json_content

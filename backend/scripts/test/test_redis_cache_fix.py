@@ -5,7 +5,7 @@ Test Redis cache fix for bytes serialization
 
 import sys
 import os
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".."))
 
 def test_cache_bytes_handling():
     """Test caching of data containing bytes"""

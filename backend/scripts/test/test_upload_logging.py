@@ -7,7 +7,7 @@ import sys
 import os
 import io
 import tempfile
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".."))
 
 def test_file_parsing_with_logging():
     """Test file parsing with enhanced logging"""

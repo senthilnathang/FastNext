@@ -5,7 +5,7 @@ Add a simple debug endpoint to test basic functionality
 
 import sys
 import os
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".."))
 
 def add_debug_endpoint():
     """Add a simple debug endpoint to main.py"""

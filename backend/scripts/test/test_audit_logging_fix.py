@@ -4,7 +4,7 @@ Test script to verify the audit logging fix for data import uploads
 """
 import sys
 import os
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".."))
 
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker

@@ -8,7 +8,7 @@ import os
 import tempfile
 import base64
 
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".."))
 
 def test_import_validation_flow():
     """Test the complete flow that should fix the validation issue"""

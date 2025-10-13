@@ -11,7 +11,7 @@ from typing import Dict, List, Optional, Tuple
 from pathlib import Path
 
 # Add the backend directory to path
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".."))
 
 # Test configuration
 API_BASE_URL = "http://localhost:8000"
