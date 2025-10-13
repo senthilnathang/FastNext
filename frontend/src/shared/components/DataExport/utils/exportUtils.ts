@@ -217,7 +217,7 @@ export function exportToYAML(
 ): void {
   const exportColumns = columns.filter(col => selectedColumns.includes(col.key));
   
-  const yamlData = data.map((row, index) => {
+  const yamlData = data.map((row, _index) => {
     const exportRow: Record<string, any> = {};
     exportColumns.forEach(col => {
       const value = row[col.key];

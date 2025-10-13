@@ -2,18 +2,16 @@
 
 import React, { useState, useCallback, useMemo } from 'react'
 import { Button } from '@/shared/components/ui/button'
-import { Badge } from '@/shared/components/ui/badge'
 import { Input } from '@/shared/components/ui/input'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/shared/components/ui/dropdown-menu'
-import { 
-  Plus, 
-  MoreHorizontal, 
-  Edit, 
-  Trash2, 
+import {
+  Plus,
+  MoreHorizontal,
+  Edit,
+  Trash2,
   Eye,
   ChevronLeft,
-  ChevronRight,
-  Calendar as CalendarIcon
+  ChevronRight
 } from 'lucide-react'
 
 export interface CalendarItem<T = any> {
@@ -113,7 +111,6 @@ export function CalendarView<T extends Record<string, any>>({
   customActions = []
 }: CalendarViewProps<T>) {
   const [currentDate, setCurrentDate] = useState(new Date())
-  const [selectedDate, setSelectedDate] = useState<Date | null>(null)
   const [quickAddStates, setQuickAddStates] = useState<Record<string, boolean>>({})
   const [quickAddValues, setQuickAddValues] = useState<Record<string, string>>({})
   const [draggedItem, setDraggedItem] = useState<CalendarItem<T> | null>(null)
@@ -135,7 +132,6 @@ export function CalendarView<T extends Record<string, any>>({
   const calendarDays = useMemo(() => {
     const days = []
     const startOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1)
-    const endOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0)
     
     if (view === 'month') {
       // Get the first day of the week containing the first day of the month

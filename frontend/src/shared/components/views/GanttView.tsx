@@ -494,7 +494,7 @@ export function GanttView<T extends Record<string, any>>({
           
           {/* Sidebar Items */}
           <div>
-            {ganttItems.map((item, index) => (
+            {ganttItems.map((item, _index) => (
               <div
                 key={item.id}
                 style={{ height: ROW_HEIGHT }}

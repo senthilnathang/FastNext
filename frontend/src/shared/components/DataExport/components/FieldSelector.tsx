@@ -112,7 +112,6 @@ export function FieldSelector({
   const selectedCount = selectedColumns.length;
   const totalCount = columns.length;
   const isAllSelected = selectedCount === totalCount;
-  const isPartiallySelected = selectedCount > 0 && selectedCount < totalCount;
 
   const handleSelectAll = () => {
     if (isAllSelected) {

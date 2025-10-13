@@ -14,7 +14,6 @@ import type {
 } from '../types';
 
 interface UseDataImportProps {
-  tableName?: string;
   columns: ImportColumn[];
   onImport?: (data: Record<string, any>[], options: ImportOptions) => Promise<any>;
   onValidate?: (data: Record<string, any>[], mappings: ImportFieldMapping[]) => Promise<ImportValidationResult>;
@@ -65,7 +64,6 @@ interface UseDataImportReturn {
 }
 
 export function useDataImport({
-  tableName,
   columns,
   onImport,
   onValidate,
@@ -151,7 +149,7 @@ export function useDataImport({
     setIsGeneratingPreview(true);
     
     try {
-      const previewData = createPreview(selectedFile, parsedData, options);
+      const previewData = createPreview(selectedFile, parsedData);
       setPreview(previewData);
     } catch (error) {
       console.error('Preview generation failed:', error);
@@ -361,7 +359,7 @@ export function useDataImport({
     };
     
     await startImportAction(options);
-  }, [importJobs, parsedData, onImport, fieldMappings, startImportAction]);
+  }, [importJobs, parsedData, onImport, startImportAction]);
 
   const clearCompletedJobsAction = useCallback(() => {
     setImportJobs(prev => 

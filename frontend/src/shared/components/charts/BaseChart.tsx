@@ -6,7 +6,7 @@
  */
 import React, { useEffect } from 'react'
 import type { EChartsOption } from 'echarts'
-import { useECharts, UseEChartsOptions } from './hooks/useECharts'
+import { useECharts } from './hooks/useECharts'
 import { cn } from '@/shared/lib/utils'
 
 export interface BaseChartProps {
@@ -28,7 +28,7 @@ export const BaseChart: React.FC<BaseChartProps> = ({
   renderer = 'canvas',
   onChartReady
 }) => {
-  const { chartRef, chartInstance, resize } = useECharts(option, {
+  const { chartRef, chartInstance } = useECharts(option, {
     theme,
     renderer
   })

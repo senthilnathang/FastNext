@@ -14,15 +14,6 @@ import type {
 } from '../types';
 
 // Example user data structure
-interface User {
-  id: number;
-  name: string;
-  email: string;
-  role: 'admin' | 'manager' | 'user' | 'viewer';
-  department: string;
-  active: boolean;
-  createdAt: string;
-}
 
 // Example columns for user import
 const UserImportColumns: ImportColumn[] = [
@@ -218,14 +209,6 @@ export function BasicImportExample() {
 
 // Example 2: DataTable Integration
 export function DataTableImportExample() {
-  const tableColumns = [
-    { id: 'name', label: 'Name', type: 'string' as const, required: true },
-    { id: 'email', label: 'Email', type: 'email' as const, required: true, unique: true },
-    { id: 'role', label: 'Role', type: 'string' as const, required: true },
-    { id: 'department', label: 'Department', type: 'string' as const },
-    { id: 'active', label: 'Active', type: 'boolean' as const }
-  ];
-
   const adminPermissions: ImportPermission = {
     canImport: true,
     canValidate: true,
@@ -263,12 +246,6 @@ export function DataTableImportExample() {
 
 // Example 3: Simple Import Buttons
 export function SimpleImportExample() {
-  const tableColumns = [
-    { id: 'name', label: 'Name', type: 'string' as const, required: true },
-    { id: 'email', label: 'Email', type: 'email' as const, required: true },
-    { id: 'role', label: 'Role', type: 'string' as const }
-  ];
-
   const handleImport = async (data: any[]) => {
     console.log('Simple import:', data);
     return { status: 'success', importedRows: data.length };
@@ -380,7 +357,6 @@ export function ImportHookExample() {
     parsedData,
     parseError,
     fieldMappings,
-    setFieldMappings,
     validationResults,
     isImporting,
     parseFile,
@@ -388,7 +364,6 @@ export function ImportHookExample() {
     startImport,
     clearState
   } = useDataImport({
-    tableName: 'Users',
     columns: UserImportColumns,
     maxFileSize: 10 * 1024 * 1024,
     maxRows: 5000

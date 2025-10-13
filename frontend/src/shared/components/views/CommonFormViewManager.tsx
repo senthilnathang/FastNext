@@ -140,7 +140,7 @@ export function CommonFormViewManager<T extends { id?: string | number }>({
     } finally {
       setFormLoading(false)
     }
-  }, [config.onDelete, handleModeChange])
+  }, [config, handleModeChange])
 
   const handleFormSubmit = useCallback(async (formData: T) => {
     try {
@@ -159,7 +159,7 @@ export function CommonFormViewManager<T extends { id?: string | number }>({
     } finally {
       setFormLoading(false)
     }
-  }, [mode, config.onCreate, config.onUpdate, selectedItem, handleModeChange])
+  }, [mode, config, selectedItem, handleModeChange])
 
   const handleFormCancel = useCallback(() => {
     handleModeChange('list')

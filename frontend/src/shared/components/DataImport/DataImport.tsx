@@ -43,12 +43,10 @@ export function DataImport({
   columns,
   onImport,
   onValidate,
-  onPreview,
   maxFileSize = 10 * 1024 * 1024, // 10MB
   maxRows = 10000,
   allowedFormats = ['csv', 'json', 'excel', 'xml'],
   defaultFormat = 'csv',
-  showPreview = true,
   requireValidation = true,
   permissions,
   embedded = false,
@@ -80,7 +78,6 @@ export function DataImport({
     retryImport,
     clearCompletedJobs
   } = useDataImport({
-    tableName,
     columns,
     onImport,
     onValidate,
@@ -92,7 +89,6 @@ export function DataImport({
   // Check permissions
   const canImport = permissions?.canImport ?? true;
   const canValidate = permissions?.canValidate ?? true;
-  const canPreview = permissions?.canPreview ?? true;
   const needsApproval = permissions?.requireApproval ?? false;
 
   const stepStatus = useMemo(() => {
@@ -381,7 +377,7 @@ export function DataImport({
                 { key: 'map', label: 'Map Fields', icon: Settings },
                 { key: 'validate', label: 'Validate', icon: FileCheck },
                 { key: 'import', label: 'Import', icon: CheckCircle }
-              ].map(({ key, label, icon: Icon }, index) => (
+              ].map(({ key, label }, index) => (
                 <div key={key} className="flex items-center">
                   <div className="flex items-center space-x-2">
                     {getStepIcon(key, stepStatus[key as keyof typeof stepStatus])}

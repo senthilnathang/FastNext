@@ -28,7 +28,7 @@ export function ResponsiveLayout({
   const [isMobile, setIsMobile] = useState(false)
   const [notificationCount, setNotificationCount] = useState(0)
   
-  const { isOnline, queuedRequests, isUpdateAvailable, skipWaiting } = useServiceWorker()
+  const { isOnline, isUpdateAvailable, skipWaiting } = useServiceWorker()
   const { queuedRequests: offlineRequests, forceSync, isProcessing } = useOfflineQueue()
 
   // Detect mobile viewport

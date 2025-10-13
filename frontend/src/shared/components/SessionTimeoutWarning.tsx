@@ -22,7 +22,6 @@ export function SessionTimeoutWarning({
   userRole 
 }: SessionTimeoutWarningProps) {
   const {
-    sessionState,
     extendSession,
     forceTimeout,
     timeRemaining,

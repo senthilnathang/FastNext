@@ -4,7 +4,6 @@ import { useState, useCallback, useRef } from 'react';
 import { ExportOptions, ExportJob, ExportResponse, ExportPreview } from '../types';
 
 interface UseDataExportProps {
-  tableName?: string;
   onExport?: (options: ExportOptions) => Promise<ExportResponse>;
   onPreview?: (options: Partial<ExportOptions>) => Promise<ExportPreview>;
   pollingInterval?: number;
@@ -24,7 +23,6 @@ interface UseDataExportReturn {
 }
 
 export function useDataExport({
-  tableName,
   onExport,
   onPreview,
   pollingInterval = 2000
@@ -37,6 +35,40 @@ export function useDataExport({
   
   const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const activeJobIds = useRef<Set<string>>(new Set());
+
+  const downloadExport = useCallback(async (jobId: string) => {
+    try {
+      const job = exportJobs.find(j => j.id === jobId);
+      if (!job) throw new Error('Job not found');
+
+      if (job.downloadUrl) {
+        const link = document.createElement('a');
+        link.href = job.downloadUrl;
+        link.download = `export_${jobId}`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      } else {
+        // Fetch download URL
+        const response = await fetch(`/api/v1/export/download/${jobId}`);
+        if (!response.ok) throw new Error('Failed to download export');
+
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `export_${jobId}`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+      }
+
+    } catch (error) {
+      console.error('Failed to download export:', error);
+      throw error;
+    }
+  }, [exportJobs]);
 
   const pollJobStatus = useCallback(async (jobId: string) => {
     try {
@@ -76,12 +108,12 @@ export function useDataExport({
       console.error('Failed to poll job status:', error);
       activeJobIds.current.delete(jobId);
       
-      if (currentJob?.id === jobId) {
-        setIsExporting(false);
-        setExportError('Failed to track export progress');
-      }
-    }
-  }, [currentJob]);
+       if (currentJob?.id === jobId) {
+         setIsExporting(false);
+         setExportError('Failed to track export progress');
+       }
+     }
+   }, [currentJob, downloadExport]);
 
   const startPolling = useCallback((jobId: string) => {
     activeJobIds.current.add(jobId);
@@ -173,40 +205,6 @@ export function useDataExport({
     }
   }, [currentJob]);
 
-  const downloadExport = useCallback(async (jobId: string) => {
-    try {
-      const job = exportJobs.find(j => j.id === jobId);
-      if (!job) throw new Error('Job not found');
-      
-      if (job.downloadUrl) {
-        const link = document.createElement('a');
-        link.href = job.downloadUrl;
-        link.download = `export_${jobId}`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-      } else {
-        // Fetch download URL
-        const response = await fetch(`/api/v1/export/download/${jobId}`);
-        if (!response.ok) throw new Error('Failed to download export');
-        
-        const blob = await response.blob();
-        const url = window.URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = `export_${jobId}`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        window.URL.revokeObjectURL(url);
-      }
-      
-    } catch (error) {
-      console.error('Failed to download export:', error);
-      throw error;
-    }
-  }, [exportJobs]);
-
   const clearCompletedJobs = useCallback(() => {
     setExportJobs(prev => 
       prev.filter(job => !['completed', 'failed', 'cancelled'].includes(job.status))
@@ -225,13 +223,6 @@ export function useDataExport({
   }, [onPreview]);
 
   // Cleanup polling on unmount
-  const cleanup = useCallback(() => {
-    if (pollingIntervalRef.current) {
-      clearTimeout(pollingIntervalRef.current);
-    }
-    activeJobIds.current.clear();
-  }, []);
-
   return {
     isExporting,
     exportJobs,

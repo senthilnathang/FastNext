@@ -86,7 +86,6 @@ export function DataExport({
     getExportPreview,
     exportError
   } = useDataExport({
-    tableName,
     onExport,
     onPreview
   });

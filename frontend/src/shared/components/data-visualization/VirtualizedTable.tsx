@@ -18,13 +18,13 @@ interface VirtualizedTableProps<TData, TValue> {
   className?: string
 }
 
-interface VirtualizedRowProps<TData> {
+interface VirtualizedRowProps {
   row: any
   index: number
   style: React.CSSProperties
 }
 
-const VirtualizedRow = React.memo(function VirtualizedRow<TData>({ row, index, style }: VirtualizedRowProps<TData>) {
+const VirtualizedRow = React.memo(function VirtualizedRow({ row, index, style }: VirtualizedRowProps) {
   const cells = React.useMemo(() => row.getVisibleCells(), [row]);
   
   return (
@@ -53,7 +53,7 @@ const VirtualizedRow = React.memo(function VirtualizedRow<TData>({ row, index, s
   )
 })
 
-const TableHeader = React.memo(function TableHeader<TData>({ table }: { table: any }) {
+const TableHeader = React.memo(function TableHeader({ table }: { table: any }) {
   const headerGroups = React.useMemo(() => table.getHeaderGroups(), [table]);
 
   return (

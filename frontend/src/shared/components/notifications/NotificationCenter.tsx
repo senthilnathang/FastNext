@@ -235,7 +235,7 @@ export function NotificationCenter({ trigger, className, open: externalOpen, onO
       fetchNotifications();
       fetchUnreadCount();
     }
-  }, [user]);
+  }, [user, fetchNotifications, fetchUnreadCount]);
 
   // Poll for new notifications every 30 seconds
   useEffect(() => {
@@ -246,9 +246,7 @@ export function NotificationCenter({ trigger, className, open: externalOpen, onO
     }, 30000);
 
     return () => clearInterval(interval);
-  }, [user]);
-
-  const unreadNotifications = notifications.filter(n => !n.is_read);
+  }, [user, fetchUnreadCount]);
 
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>

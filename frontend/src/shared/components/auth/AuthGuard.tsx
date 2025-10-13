@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui
 import { Button } from '@/shared/components/ui/button';
 import { Skeleton } from '@/shared/components/ui/skeleton';
 import { Alert, AlertDescription } from '@/shared/components/ui/alert';
-import { Shield, Lock, LogIn, AlertTriangle, ArrowRight } from 'lucide-react';
+import { Shield, Lock, LogIn, AlertTriangle } from 'lucide-react';
 
 interface AuthGuardProps {
   children: React.ReactNode;
@@ -216,7 +216,7 @@ export default function AuthGuard({
   allowedRoles = [],
   requiredPermissions = []
 }: AuthGuardProps) {
-  const { user, isLoading, isAuthenticated, login } = useAuth();
+  const { user, isLoading, isAuthenticated } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
   const [hasCheckedAuth, setHasCheckedAuth] = useState(false);

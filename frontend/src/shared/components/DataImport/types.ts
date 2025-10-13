@@ -139,7 +139,6 @@ export interface ImportComponentProps {
   columns: ImportColumn[];
   onImport?: (data: Record<string, any>[], options: ImportOptions) => Promise<ImportResponse>;
   onValidate?: (data: Record<string, any>[], mappings: ImportFieldMapping[]) => Promise<ImportValidationResult>;
-  onPreview?: (file: File, options: Partial<ImportOptions>) => Promise<ImportPreview>;
   maxFileSize?: number;
   maxRows?: number;
   allowedFormats?: ImportFormat[];

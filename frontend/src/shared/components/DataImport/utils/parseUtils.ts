@@ -508,8 +508,7 @@ function parseValue(value: any): any {
 
 export function createPreview(
   file: File,
-  parsedData: ParsedData,
-  options: Partial<ImportOptions> = {}
+  parsedData: ParsedData
 ): ImportPreview {
   const sampleSize = 5;
   const sampleData = parsedData.rows.slice(0, sampleSize);

@@ -28,7 +28,7 @@ import {
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd'
 import { KanbanView, KanbanColumn } from './KanbanView'
 import { GanttView } from './GanttView'
-import { CalendarView, CalendarItem } from './CalendarView'
+import { CalendarView } from './CalendarView'
 
 export type ViewType = 'card' | 'list' | 'kanban' | 'gantt' | 'calendar' | 'cohort'
 
@@ -70,8 +70,6 @@ export interface ViewManagerProps<T = any> {
   views: ViewConfig[]
   activeView?: string
   onViewChange?: (viewId: string) => void
-  onViewSave?: (view: ViewConfig) => void
-  onViewDelete?: (viewId: string) => void
   
   // Search & Filtering
   searchQuery?: string
@@ -179,8 +177,6 @@ export const ViewManager = React.memo(function ViewManager<T extends { id: numbe
   views,
   activeView,
   onViewChange,
-  onViewSave,
-  onViewDelete,
   searchQuery = '',
   onSearchChange,
   filters = {},
@@ -941,7 +937,7 @@ export const ViewManager = React.memo(function ViewManager<T extends { id: numbe
         descriptionField={calendarDescriptionField}
         statusField={calendarStatusField}
         priorityField={calendarPriorityField}
-        onCreateClick={onCreateClick ? (date?: Date) => onCreateClick() : undefined}
+        onCreateClick={onCreateClick ? (_date?: Date) => onCreateClick() : undefined}
         onEditClick={onEditClick}
         onDeleteClick={onDeleteClick}
         onViewClick={onViewClick}
