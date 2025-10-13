@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Button } from '@/shared/components/ui/button';
 import { Input } from '@/shared/components/ui/input';
 import { Label } from '@/shared/components/ui/label';
@@ -67,11 +67,7 @@ export default function RLSAuditViewer() {
   const [totalPages, setTotalPages] = useState(1);
   const [pageSize] = useState(50);
 
-  useEffect(() => {
-    fetchAuditLogs();
-  }, [currentPage, filters, fetchAuditLogs]);
-
-  const fetchAuditLogs = async () => {
+  const fetchAuditLogs = useCallback(async () => {
     try {
       setLoading(true);
       const token = localStorage.getItem('access_token');
@@ -128,7 +124,11 @@ export default function RLSAuditViewer() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [currentPage, pageSize, filters, setLoading, setAuditLogs, setTotalPages, setError]);
+
+  useEffect(() => {
+    fetchAuditLogs();
+  }, [fetchAuditLogs]);
 
   const handleFilterChange = (key: keyof FilterOptions, value: any) => {
     setFilters(prev => ({

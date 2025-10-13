@@ -47,7 +47,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Authenticate user (this would call your backend service)
-    const authResult = await authenticateUser(email, password, clientIP);
+    const authResult = await authenticateUser(email, password);
     
     if (!authResult.success) {
       logSecurityEvent('authentication_failure', {

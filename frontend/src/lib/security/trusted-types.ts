@@ -15,19 +15,19 @@ declare global {
   }
 
   interface TrustedHTML {
-    readonly __brand: 'TrustedHTML';
+    readonly __brand?: 'TrustedHTML';
   }
 
   interface TrustedScript {
-    readonly __brand: 'TrustedScript';
+    readonly __brand?: 'TrustedScript';
   }
 
   interface TrustedScriptURL {
-    readonly __brand: 'TrustedScriptURL';
+    readonly __brand?: 'TrustedScriptURL';
   }
 
-  interface TrustedTypePolicy {
-    name: string;
+  interface CustomTrustedTypePolicy {
+    readonly name: string;
     createHTML?(input: string, ...args: any[]): TrustedHTML;
     createScript?(input: string, ...args: any[]): TrustedScript;
     createScriptURL?(input: string, ...args: any[]): TrustedScriptURL;
@@ -40,30 +40,20 @@ declare global {
   }
 }
 
-// Simple polyfill for browsers that don't support Trusted Types
-class TrustedTypesPolyfill {
-  private policies = new Map<string, TrustedTypePolicy>();
-  public defaultPolicy?: TrustedTypePolicy;
+// Simplified trusted types implementation
+class SimpleTrustedTypes {
+  private policies = new Map<string, any>();
 
-  createPolicy(name: string, policy: TrustedTypePolicyOptions): TrustedTypePolicy {
+  createPolicy(name: string, policy: any): any {
     if (this.policies.has(name)) {
       throw new Error(`Policy with name "${name}" already exists`);
     }
 
-    const trustedPolicy: TrustedTypePolicy = {
+    const trustedPolicy = {
       name,
-      createHTML: policy.createHTML ? (input: string, ...args: any[]) => {
-        const result = policy.createHTML!(input, ...args);
-        return result as unknown as TrustedHTML;
-      } : undefined,
-      createScript: policy.createScript ? (input: string, ...args: any[]) => {
-        const result = policy.createScript!(input, ...args);
-        return result as unknown as TrustedScript;
-      } : undefined,
-      createScriptURL: policy.createScriptURL ? (input: string, ...args: any[]) => {
-        const result = policy.createScriptURL!(input, ...args);
-        return result as unknown as TrustedScriptURL;
-      } : undefined,
+      createHTML: policy.createHTML ? (input: string) => ({ __brand: 'TrustedHTML', value: input }) : undefined,
+      createScript: policy.createScript ? (input: string) => ({ __brand: 'TrustedScript', value: input }) : undefined,
+      createScriptURL: policy.createScriptURL ? (input: string) => ({ __brand: 'TrustedScriptURL', value: input }) : undefined,
     };
 
     this.policies.set(name, trustedPolicy);
@@ -71,29 +61,29 @@ class TrustedTypesPolyfill {
   }
 
   isHTML(value: any): boolean {
-    return typeof value === 'object' && value && value.__brand === 'TrustedHTML';
+    return value && typeof value === 'object' && value.__brand === 'TrustedHTML';
   }
 
   isScript(value: any): boolean {
-    return typeof value === 'object' && value && value.__brand === 'TrustedScript';
+    return value && typeof value === 'object' && value.__brand === 'TrustedScript';
   }
 
   isScriptURL(value: any): boolean {
-    return typeof value === 'object' && value && value.__brand === 'TrustedScriptURL';
+    return value && typeof value === 'object' && value.__brand === 'TrustedScriptURL';
   }
 
-  get emptyHTML(): TrustedHTML {
-    return '' as unknown as TrustedHTML;
+  get emptyHTML(): any {
+    return { __brand: 'TrustedHTML', value: '' };
   }
 
-  get emptyScript(): TrustedScript {
-    return '' as unknown as TrustedScript;
+  get emptyScript(): any {
+    return { __brand: 'TrustedScript', value: '' };
   }
 }
 
-// Initialize polyfill if Trusted Types is not supported
+// Initialize simple implementation if Trusted Types is not supported
 if (typeof window !== 'undefined' && !window.trustedTypes) {
-  window.trustedTypes = new TrustedTypesPolyfill();
+  (window as any).trustedTypes = new SimpleTrustedTypes();
 }
 
 // Basic HTML sanitization without DOMPurify

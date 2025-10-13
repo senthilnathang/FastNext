@@ -384,7 +384,7 @@ export default function ProjectsPage() {
 
   // API functions
   const fetchProjects = async (): Promise<Project[]> => {
-    return projects
+    return projectsData?.items || []
   }
 
   const createProjectApi = async (data: Project): Promise<Project> => {
@@ -420,7 +420,7 @@ export default function ProjectsPage() {
   }
 
   const deleteProjectApi = async (id: string | number): Promise<void> => {
-    const project = projects.find(p => p.id === Number(id))
+    const project = (projectsData?.items || []).find(p => p.id === Number(id))
     if (project && confirm(`Are you sure you want to delete "${project.name}"?`)) {
       // Use mutateAsync to preserve built-in cache invalidation
       await deleteProject.mutateAsync(Number(id))
@@ -664,7 +664,7 @@ export default function ProjectsPage() {
         mode={mode as any}
         itemId={itemId}
         onModeChange={handleModeChange}
-        data={projects}
+        data={projectsData?.items || []}
         loading={isLoading}
         error={error ? (error as any)?.message || String(error) : null}
         selectable={true}

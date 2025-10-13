@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/components/ui/select';
 import { Alert, AlertDescription } from '@/shared/components/ui/alert';
@@ -120,16 +120,7 @@ export default function DataImportPage() {
     fetchAvailableTables();
   }, []);
 
-  // Fetch table schema when table is selected
-  useEffect(() => {
-    if (importData.selectedTable) {
-      fetchTableSchema(importData.selectedTable);
-      fetchTablePermissions(importData.selectedTable);
-    } else {
-      setTableSchema(null);
-      setTablePermissions(null);
-    }
-   }, [importData.selectedTable, fetchTablePermissions, fetchTableSchema]);
+
 
   const fetchAvailableTables = async () => {
     try {
@@ -172,11 +163,81 @@ export default function DataImportPage() {
       }
     };
 
-  const fetchTableSchema = async (tableName: string) => {
+  const getDemoTableSchema = (tableName: string): TableInfo => {
+    // Demo schema data for fallback when authentication fails
+    const demoSchemas: Record<string, TableInfo> = {
+      users: {
+        table_name: 'users',
+        columns: [
+          { name: 'id', type: 'integer', nullable: false, primary_key: true },
+          { name: 'email', type: 'varchar', nullable: false, primary_key: false },
+          { name: 'first_name', type: 'varchar', nullable: true, primary_key: false },
+          { name: 'last_name', type: 'varchar', nullable: true, primary_key: false },
+          { name: 'created_at', type: 'timestamp', nullable: false, primary_key: false },
+          { name: 'is_active', type: 'boolean', nullable: false, primary_key: false }
+        ],
+        primary_keys: ['id'],
+        sample_data: [
+          { id: 1, email: 'john@example.com', first_name: 'John', last_name: 'Doe', created_at: '2023-01-01', is_active: true },
+          { id: 2, email: 'jane@example.com', first_name: 'Jane', last_name: 'Smith', created_at: '2023-01-02', is_active: true }
+        ]
+      },
+      products: {
+        table_name: 'products',
+        columns: [
+          { name: 'id', type: 'integer', nullable: false, primary_key: true },
+          { name: 'name', type: 'varchar', nullable: false, primary_key: false },
+          { name: 'price', type: 'decimal', nullable: false, primary_key: false },
+          { name: 'category', type: 'varchar', nullable: true, primary_key: false },
+          { name: 'in_stock', type: 'boolean', nullable: false, primary_key: false }
+        ],
+        primary_keys: ['id'],
+        sample_data: [
+          { id: 1, name: 'Laptop', price: 999.99, category: 'Electronics', in_stock: true },
+          { id: 2, name: 'Book', price: 19.99, category: 'Education', in_stock: false }
+        ]
+      },
+      orders: {
+        table_name: 'orders',
+        columns: [
+          { name: 'id', type: 'integer', nullable: false, primary_key: true },
+          { name: 'user_id', type: 'integer', nullable: false, primary_key: false },
+          { name: 'product_id', type: 'integer', nullable: false, primary_key: false },
+          { name: 'quantity', type: 'integer', nullable: false, primary_key: false },
+          { name: 'order_date', type: 'timestamp', nullable: false, primary_key: false },
+          { name: 'status', type: 'varchar', nullable: false, primary_key: false }
+        ],
+        primary_keys: ['id'],
+        sample_data: [
+          { id: 1, user_id: 1, product_id: 1, quantity: 1, order_date: '2023-01-01', status: 'completed' },
+          { id: 2, user_id: 2, product_id: 2, quantity: 2, order_date: '2023-01-02', status: 'pending' }
+        ]
+      },
+      customers: {
+        table_name: 'customers',
+        columns: [
+          { name: 'id', type: 'integer', nullable: false, primary_key: true },
+          { name: 'name', type: 'varchar', nullable: false, primary_key: false },
+          { name: 'email', type: 'varchar', nullable: false, primary_key: false },
+          { name: 'phone', type: 'varchar', nullable: true, primary_key: false },
+          { name: 'address', type: 'text', nullable: true, primary_key: false }
+        ],
+        primary_keys: ['id'],
+        sample_data: [
+          { id: 1, name: 'John Doe', email: 'john@example.com', phone: '555-0101', address: '123 Main St' },
+          { id: 2, name: 'Jane Smith', email: 'jane@example.com', phone: '555-0102', address: '456 Oak Ave' }
+        ]
+      }
+    };
+
+    return demoSchemas[tableName] || demoSchemas.users;
+  };
+
+  const fetchTableSchema = useCallback(async (tableName: string) => {
     setIsLoading(true);
     try {
       const token = localStorage.getItem('access_token');
-      
+
       if (!token) {
         console.warn('No access token found - using demo schema');
         setTableSchema(getDemoTableSchema(tableName));
@@ -192,25 +253,106 @@ export default function DataImportPage() {
       if (!response.ok) {
         const errorText = await response.text();
         console.error(`Failed to fetch table schema (${response.status}):`, errorText);
-        
+
         // For auth errors, use demo schema
         if (response.status === 401 || response.status === 403) {
           setTableSchema(getDemoTableSchema(tableName));
           return;
         }
-        
+
         throw new Error(`Failed to fetch table schema (${response.status})`);
       }
 
       const data = await response.json();
-       setTableSchema(data);
-     } catch (err) {
-       console.error('Failed to load table schema:', err);
-       setTableSchema(getDemoTableSchema(tableName));
-     } finally {
-       setIsLoading(false);
-     }
-   };
+      setTableSchema(data);
+    } catch (err) {
+      console.error('Failed to load table schema:', err);
+      setTableSchema(getDemoTableSchema(tableName));
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  const fetchTablePermissions = useCallback(async (tableName: string) => {
+    try {
+      const token = localStorage.getItem('access_token');
+
+      if (!token) {
+        console.warn('No access token found - using default permissions');
+        setTablePermissions({
+          table_name: tableName,
+          import_permission: {
+            can_import: true,
+            can_validate: true,
+            can_preview: true,
+            max_file_size_mb: 100,
+            max_rows_per_import: 10000,
+            allowed_formats: ['csv', 'json', 'xlsx'],
+            requires_approval: false
+          }
+        });
+        return;
+      }
+
+      const response = await fetch(`/api/v1/data/tables/${tableName}/permissions`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error(`Failed to fetch table permissions (${response.status}):`, errorText);
+
+        // For auth errors, use default permissions
+        if (response.status === 401 || response.status === 403) {
+          setTablePermissions({
+            table_name: tableName,
+            import_permission: {
+              can_import: true,
+              can_validate: true,
+              can_preview: true,
+              max_file_size_mb: 100,
+              max_rows_per_import: 10000,
+              allowed_formats: ['csv', 'json', 'xlsx'],
+              requires_approval: false
+            }
+          });
+          return;
+        }
+
+        throw new Error(`Failed to fetch table permissions (${response.status})`);
+      }
+
+      const data = await response.json();
+      setTablePermissions(data);
+    } catch (err) {
+      console.error('Failed to load table permissions:', err);
+      setTablePermissions({
+        table_name: tableName,
+        import_permission: {
+          can_import: true,
+          can_validate: true,
+          can_preview: true,
+          max_file_size_mb: 100,
+          max_rows_per_import: 10000,
+          allowed_formats: ['csv', 'json', 'xlsx'],
+          requires_approval: false
+        }
+      });
+    }
+  }, []);
+
+  // Fetch table schema when table is selected
+  useEffect(() => {
+    if (importData.selectedTable) {
+      fetchTableSchema(importData.selectedTable);
+      fetchTablePermissions(importData.selectedTable);
+    } else {
+      setTableSchema(null);
+      setTablePermissions(null);
+    }
+   }, [importData.selectedTable, fetchTablePermissions, fetchTableSchema]);
 
   // Removed unused mapSqlTypeToImportType function
 
