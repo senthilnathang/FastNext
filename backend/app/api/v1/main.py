@@ -10,7 +10,8 @@ from . import (
     project_members, profile, security, activity_logs, audit_trails,
     assets, user_roles, workflow_types, workflow_states,
     workflow_templates, workflow_instances, data_import_export, system_configuration,
-    events, rls, projects_rls, database_performance, cache_management, scaling_health
+    events, rls, projects_rls, database_performance, cache_management, scaling_health,
+    notifications
 )
 
 # Import resource routes (move these to v1 structure later)

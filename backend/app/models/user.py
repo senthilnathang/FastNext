@@ -39,7 +39,8 @@ class User(Base):
     projects = relationship("Project", back_populates="owner")
     user_roles = relationship("UserRole", foreign_keys="UserRole.user_id", back_populates="user")
     project_memberships = relationship("ProjectMember", foreign_keys="ProjectMember.user_id", back_populates="user")
-    
+    notifications = relationship("Notification", back_populates="user")
+
     # Workflow relationships (commented out to avoid import issues)
     # created_workflow_types = relationship("WorkflowType", foreign_keys="WorkflowType.created_by", back_populates="creator")
     # created_workflow_templates = relationship("WorkflowTemplate", foreign_keys="WorkflowTemplate.created_by", back_populates="creator")
