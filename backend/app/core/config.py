@@ -1,4 +1,6 @@
 from typing import Any, Dict, List, Optional, Union
+import os
+from typing import Optional, List, Union
 from pydantic import AnyHttpUrl, PostgresDsn, field_validator
 from pydantic_settings import BaseSettings
 from decouple import config
@@ -54,7 +56,15 @@ class Settings(BaseSettings):
                 self.REDIS_URL = f"redis://:{self.REDIS_PASSWORD}@{self.REDIS_HOST}:{self.REDIS_PORT}/{self.REDIS_DB}"
             else:
                 self.REDIS_URL = f"redis://{self.REDIS_HOST}:{self.REDIS_PORT}/{self.REDIS_DB}"
-    
+
+    # OAuth2 Social Authentication
+    GOOGLE_CLIENT_ID: Optional[str] = config("GOOGLE_CLIENT_ID", default=None)
+    GOOGLE_CLIENT_SECRET: Optional[str] = config("GOOGLE_CLIENT_SECRET", default=None)
+    GITHUB_CLIENT_ID: Optional[str] = config("GITHUB_CLIENT_ID", default=None)
+    GITHUB_CLIENT_SECRET: Optional[str] = config("GITHUB_CLIENT_SECRET", default=None)
+    MICROSOFT_CLIENT_ID: Optional[str] = config("MICROSOFT_CLIENT_ID", default=None)
+    MICROSOFT_CLIENT_SECRET: Optional[str] = config("MICROSOFT_CLIENT_SECRET", default=None)
+
     # CORS origins - can be overridden by environment variable
     BACKEND_CORS_ORIGINS: List[str] = "http://localhost:3000,http://127.0.0.1:3000,http://localhost:3001,http://127.0.0.1:3001,http://localhost:8080,http://127.0.0.1:8080,https://localhost:3000,https://127.0.0.1:3000"
     

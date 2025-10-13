@@ -23,6 +23,14 @@ class SecuritySetting(Base):
     password_expiry_days = Column(Integer, default=90, nullable=True)
     max_login_attempts = Column(Integer, default=5, nullable=False)
     lockout_duration_minutes = Column(Integer, default=30, nullable=False)
+
+    # Password Policies
+    min_password_length = Column(Integer, default=8, nullable=False)
+    require_uppercase = Column(Boolean, default=True, nullable=False)
+    require_lowercase = Column(Boolean, default=True, nullable=False)
+    require_numbers = Column(Boolean, default=True, nullable=False)
+    require_special_chars = Column(Boolean, default=False, nullable=False)
+    password_history_count = Column(Integer, default=5, nullable=False)  # Number of previous passwords to remember
     
     # Session Security
     max_session_duration_hours = Column(Integer, default=24, nullable=False)
@@ -69,8 +77,14 @@ class SecuritySetting(Base):
             'email_on_suspicious_activity': self.email_on_suspicious_activity,
             'activity_logging_enabled': self.activity_logging_enabled,
             'data_retention_days': self.data_retention_days,
-            'api_access_enabled': self.api_access_enabled,
-            'api_rate_limit': self.api_rate_limit,
-            'created_at': self.created_at.isoformat() if self.created_at else None,
-            'updated_at': self.updated_at.isoformat() if self.updated_at else None
+             'api_access_enabled': self.api_access_enabled,
+             'api_rate_limit': self.api_rate_limit,
+             'min_password_length': self.min_password_length,
+             'require_uppercase': self.require_uppercase,
+             'require_lowercase': self.require_lowercase,
+             'require_numbers': self.require_numbers,
+             'require_special_chars': self.require_special_chars,
+             'password_history_count': self.password_history_count,
+             'created_at': self.created_at.isoformat() if self.created_at else None,
+             'updated_at': self.updated_at.isoformat() if self.updated_at else None
         }

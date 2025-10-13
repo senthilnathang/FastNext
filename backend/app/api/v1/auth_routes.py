@@ -23,9 +23,12 @@ from app.core.logging import log_security_event, get_client_ip, get_logger
 from app.models.user import User
 from app.models.role import Role
 from app.models.user_role import UserRole, RolePermission
+from app.models.security_setting import SecuritySetting
 from app.schemas.user import UserCreate, UserResponse, UserUpdate
 from app.schemas.token import Token
 from app.services.user_service import UserService
+from app.services.password_service import PasswordService, PasswordValidationError
+from app.services.social_auth_service import SocialAuthService
 
 logger = get_logger(__name__)
 
@@ -41,6 +44,9 @@ class TokenData(BaseModel):
     user_id: Optional[int] = None
     username: Optional[str] = None
     roles: List[str] = []
+
+class MFAVerifyRequest(BaseModel):
+    token: str  # TOTP code or backup code
 
 class RefreshTokenModel(BaseModel):
     id: int
@@ -307,7 +313,27 @@ async def register_user(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Username already registered"
         )
-    
+
+    # Validate password against security policies
+    # For new users, we create a temporary user object for validation
+    temp_user = User(
+        email=user.email,
+        username=user.username,
+        full_name=user.full_name,
+        hashed_password="",  # Not needed for validation
+        is_active=True,
+        is_verified=False
+    )
+
+    password_service = PasswordService(db)
+    try:
+        password_service.validate_password_policy(user.password, temp_user)
+    except PasswordValidationError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e)
+        )
+
     # Create new user
     hashed_password = get_password_hash(user.password)
     db_user = User(
@@ -323,11 +349,14 @@ async def register_user(
     db.add(db_user)
     db.commit()
     db.refresh(db_user)
-    
+
+    # Add initial password to history
+    password_service.update_password_history(db_user.id, hashed_password)
+
     # Log registration event
     client_ip = get_client_ip(request)
     logger.info(f"User registered: {user.username} from IP {client_ip}")
-    
+
     return UserResponse(
         id=db_user.id,
         email=db_user.email,
@@ -438,14 +467,83 @@ async def login_for_access_token(
                     "reason": "invalid_credentials"
                 }
             )
-            
+
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Incorrect username or password",
                 headers={"WWW-Authenticate": "Bearer"},
             )
-        
-        # Create token pair
+
+        # Check password expiry
+        password_service = PasswordService(db)
+        is_expired, days_until_expiry = password_service.check_password_expiry(user)
+
+        if is_expired:
+            # Password has expired, require password change
+            password_service.require_password_change(user.id, "Password expired")
+
+            log_security_event(
+                "PASSWORD_EXPIRED",
+                user.id,
+                request,
+                severity="MEDIUM",
+                details={
+                    "username": user.username,
+                    "reason": "password_expired"
+                }
+            )
+
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Your password has expired. Please change your password.",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+
+        # Check if password change is required
+        security_settings = db.query(SecuritySetting).filter(
+            SecuritySetting.user_id == user.id
+        ).first()
+
+        if security_settings and security_settings.require_password_change:
+            log_security_event(
+                "PASSWORD_CHANGE_REQUIRED",
+                user.id,
+                request,
+                severity="MEDIUM",
+                details={
+                    "username": user.username,
+                    "reason": "password_change_required"
+                }
+            )
+
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Password change is required. Please update your password.",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+
+        # Check if MFA is enabled
+        if security_settings and security_settings.two_factor_enabled:
+            # MFA is enabled, return temporary token requiring MFA verification
+            temp_token_expires = timedelta(minutes=5)  # Short-lived temp token
+            temp_token_data = {
+                "sub": str(user.id),
+                "mfa_required": True,
+                "temp": True
+            }
+            temp_token = create_access_token(
+                data=temp_token_data,
+                expires_delta=temp_token_expires
+            )
+
+            return Token(
+                access_token=temp_token,
+                token_type="bearer",
+                expires_in=int(temp_token_expires.total_seconds()),
+                message="MFA verification required. Use /auth/verify-mfa endpoint with this token."
+            )
+
+        # Create token pair (no MFA required)
         token_data = create_token_pair(user, db)
         
         # Log successful login
@@ -502,6 +600,118 @@ async def login_for_access_token(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="An unexpected error occurred during authentication"
+        )
+
+@router.post("/verify-mfa", response_model=Token)
+async def verify_mfa(
+    verify_data: MFAVerifyRequest,
+    request: Request,
+    db: Session = Depends(get_db)
+) -> Token:
+    """
+    Verify MFA code and complete authentication
+
+    This endpoint should be called with the temporary token received from login
+    when MFA is required, along with the TOTP code or backup code.
+    """
+    # Extract temp token from request headers
+    auth_header = request.headers.get("authorization", "")
+    if not auth_header.startswith("Bearer "):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Missing or invalid authorization header"
+        )
+
+    temp_token = auth_header[7:]  # Remove "Bearer " prefix
+
+    try:
+        # Verify the temp token
+        payload = jwt.decode(temp_token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
+
+        if not payload.get("mfa_required") or not payload.get("temp"):
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid token for MFA verification"
+            )
+
+        user_id = payload.get("sub")
+        if not user_id:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid token"
+            )
+
+        # Get user and security settings
+        user = db.query(User).filter(User.id == int(user_id)).first()
+        if not user:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="User not found"
+            )
+
+        security_settings = db.query(SecuritySetting).filter(
+            SecuritySetting.user_id == user.id
+        ).first()
+
+        if not security_settings or not security_settings.two_factor_enabled:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="MFA not enabled for this user"
+            )
+
+        # Verify the MFA code
+        import pyotp
+        import json
+
+        totp = pyotp.TOTP(security_settings.two_factor_secret)
+
+        # Check if it's a backup code
+        backup_codes = json.loads(security_settings.backup_codes or "[]")
+        is_valid = (
+            totp.verify(verify_data.token, valid_window=2) or
+            verify_data.token in backup_codes
+        )
+
+        if not is_valid:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid MFA code"
+            )
+
+        # Remove used backup code
+        if verify_data.token in backup_codes:
+            backup_codes.remove(verify_data.token)
+            security_settings.backup_codes = json.dumps(backup_codes)
+            db.commit()
+
+        # Update last login
+        user.last_login_at = datetime.utcnow()
+        db.commit()
+
+        # Log successful MFA verification
+        log_security_event(
+            "MFA_VERIFIED",
+            user.id,
+            request,
+            severity="LOW",
+            details={"method": "backup_code" if verify_data.token in backup_codes else "totp"}
+        )
+
+        # Create full access tokens
+        token_data = create_token_pair(user, db)
+
+        return Token(**token_data)
+
+    except jwt.JWTError:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid or expired token"
+        )
+    except Exception as e:
+        logger.error(f"MFA verification error: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="MFA verification failed"
         )
 
 @router.post("/refresh", response_model=Token)
@@ -691,3 +901,116 @@ __all__ = [
     "get_current_active_user",
     "require_roles"
 ]
+
+
+# OAuth2 Social Authentication Endpoints
+
+@router.get("/oauth/{provider}/login")
+async def oauth_login(
+    provider: str,
+    db: Session = Depends(get_db),
+) -> Any:
+    """
+    Initiate OAuth2 login flow for the specified provider.
+
+    Args:
+        provider: OAuth provider ('google', 'github', 'microsoft')
+
+    Returns:
+        Redirect URL for OAuth authorization
+    """
+    if provider not in ['google', 'github', 'microsoft']:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Unsupported OAuth provider: {provider}"
+        )
+
+    social_auth = SocialAuthService(db)
+    try:
+        authorization_url, state = social_auth.get_authorization_url(provider)
+        return {"authorization_url": authorization_url, "state": state}
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e)
+        )
+
+
+@router.get("/oauth/{provider}/callback")
+async def oauth_callback(
+    provider: str,
+    code: str,
+    state: str,
+    db: Session = Depends(get_db),
+    request: Request = None,
+) -> Token:
+    """
+    Handle OAuth2 callback and complete authentication.
+
+    Args:
+        provider: OAuth provider
+        code: Authorization code from provider
+        state: State parameter for CSRF protection
+
+    Returns:
+        JWT tokens for authenticated user
+    """
+    if provider not in ['google', 'github', 'microsoft']:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Unsupported OAuth provider: {provider}"
+        )
+
+    social_auth = SocialAuthService(db)
+
+    try:
+        # Exchange code for token
+        token = await social_auth.exchange_code_for_token(provider, code, state)
+
+        # Get user info from provider
+        user_info = await social_auth.get_user_info(provider, token)
+
+        # Find or create user
+        user = social_auth.find_or_create_user(provider, user_info.get('id') or user_info.get('sub'), user_info)
+
+        # Create token pair
+        token_data = create_token_pair(user, db)
+
+        # Log successful OAuth login
+        client_ip = get_client_ip(request) if request else "unknown"
+        log_security_event(
+            "OAUTH_LOGIN_SUCCESS",
+            user.id,
+            request,
+            severity="LOW",
+            details={
+                "provider": provider,
+                "username": user.username,
+                "login_time": datetime.utcnow().isoformat()
+            }
+        )
+
+        logger.info(f"Successful OAuth login: {user.username} via {provider} from IP: {client_ip}")
+
+        return Token(**token_data)
+
+    except Exception as e:
+        logger.error(f"OAuth callback failed for {provider}: {e}")
+
+        # Log failed OAuth attempt
+        log_security_event(
+            "OAUTH_LOGIN_FAILED",
+            None,
+            request,
+            severity="MEDIUM",
+            details={
+                "provider": provider,
+                "reason": str(e)
+            }
+        )
+
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=f"OAuth authentication failed: {str(e)}",
+            headers={"WWW-Authenticate": "Bearer"},
+        )

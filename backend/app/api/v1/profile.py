@@ -12,6 +12,7 @@ from app.schemas.profile import (
     UsernameUpdate, AccountDeactivation, ProfileStats, QuickAction
 )
 from app.services.user_service import UserService
+from app.services.password_service import PasswordService, PasswordValidationError
 from app.utils.activity_logger import log_activity
 from app.utils.audit_logger import log_audit_trail
 import json
@@ -172,24 +173,43 @@ def change_password(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Incorrect current password"
         )
-    
+
     # Check if new password is different from current
     if security.verify_password(password_change.new_password, current_user.hashed_password):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="New password must be different from current password"
         )
-    
+
+    # Validate new password against security policies
+    password_service = PasswordService(db)
     try:
+        password_service.validate_password_policy(password_change.new_password, current_user)
+    except PasswordValidationError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e)
+        )
+
+    try:
+        # Hash the new password
+        hashed_password = security.get_password_hash(password_change.new_password)
+
         # Update password
-        current_user.hashed_password = security.get_password_hash(password_change.new_password)
+        current_user.hashed_password = hashed_password
         current_user.password_changed_at = datetime.utcnow()
         current_user.failed_login_attempts = 0  # Reset failed attempts
         current_user.locked_until = None  # Unlock account if locked
-        
+
         db.add(current_user)
         db.commit()
-        
+
+        # Update password history
+        password_service.update_password_history(current_user.id, hashed_password)
+
+        # Clear password change requirement if it was set
+        password_service.clear_password_change_requirement(current_user.id)
+
         # Log activity
         log_activity(
             db=db,
@@ -202,9 +222,9 @@ def change_password(
             level=ActivityLevel.WARNING,
             category=EventCategory.SECURITY
         )
-        
+
         return {"message": "Password changed successfully"}
-        
+
     except Exception as e:
         db.rollback()
         raise HTTPException(
