@@ -12,21 +12,13 @@ import {
   CardTitle,
 } from '@/shared/components/ui/card';
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from '@/shared/components/ui/dialog';
-import {
   CheckCircle,
   XCircle,
   Clock,
   Download,
   X,
   AlertTriangle,
-  Loader2,
-  FileText
+  Loader2
 } from 'lucide-react';
 import { ExportJob } from '../types';
 

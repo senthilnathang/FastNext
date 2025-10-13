@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { API_CONFIG, getApiUrl } from '@/shared/services/api/config';
+import { getApiUrl } from '@/shared/services/api/config';
 
 // Types
 export interface RLSContext {

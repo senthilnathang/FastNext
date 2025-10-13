@@ -260,7 +260,6 @@ class SecurityMonitor {
 
   private createAlert(eventType: SecurityEventType, events: SecurityEvent[]): void {
     const alertId = `alert_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    const now = new Date().toISOString();
     
     const alert: SecurityAlert = {
       id: alertId,

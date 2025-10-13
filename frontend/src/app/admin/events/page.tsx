@@ -54,9 +54,7 @@ const EventsPage: React.FC<EventsPageProps> = () => {
     refetch: refetchEvents 
   } = useEvents()
   
-  const { data: statisticsData } = useEventStatistics()
-
-  const { mutate: exportEvents } = useExportEvents()
+   const { mutate: exportEvents } = useExportEvents()
 
   // Level configuration
   const getLevelConfig = (level: string) => {

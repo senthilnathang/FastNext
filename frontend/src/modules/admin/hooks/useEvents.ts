@@ -1,10 +1,9 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
-import type { 
-  EventListResponse, 
-  EventStatistics, 
-  EventFilter, 
-  EventExportRequest 
+import type {
+  EventListResponse,
+  EventStatistics,
+  EventExportRequest
 } from '../types/events'
 
 // API base URL - adjust based on your backend configuration

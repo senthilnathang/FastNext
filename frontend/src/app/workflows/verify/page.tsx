@@ -23,7 +23,7 @@ import {
   useDeleteWorkflowType,
   useDeleteWorkflowTemplate
 } from '@/modules/workflow/hooks/useWorkflow';
-import { CheckCircle, XCircle, Loader2, Play, Trash2 } from 'lucide-react';
+import { CheckCircle, XCircle, Loader2, Play } from 'lucide-react';
 
 export default function WorkflowVerifyPage() {
   const [testResults, setTestResults] = useState<Record<string, 'pending' | 'success' | 'error' | 'running'>>({});

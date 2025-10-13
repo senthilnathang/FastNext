@@ -3,15 +3,7 @@ import { router, protectedProcedure } from '../server'
 import { componentOperations } from '../graphql-client'
 import type { Component } from '@/lib/graphql/types'
 
-const componentSchema = z.object({
-  id: z.number(),
-  name: z.string(),
-  componentType: z.string(),
-  schema: z.record(z.string(), z.unknown()).optional(),
-  projectId: z.number(),
-  createdAt: z.string().optional(),
-  updatedAt: z.string().optional(),
-})
+
 
 const createComponentSchema = z.object({
   name: z.string().min(1),

@@ -7,6 +7,7 @@ import { TRPCProvider } from "@/lib/trpc/provider";
 import { SecurityProvider } from "@/lib/security/SecurityProvider";
 import { SessionTimeoutWarning } from "@/shared/components/SessionTimeoutWarning";
 import { GraphQLProvider } from "@/lib/graphql";
+import { Toaster } from "sonner";
 import { ServiceWorkerRegistration } from "@/shared/components/ServiceWorkerRegistration";
 
 export const metadata: Metadata = {
@@ -37,12 +38,13 @@ export default function RootLayout({
                   defaultColorScheme="default"
                   colorSchemeStorageKey="color-scheme"
                 >
-                  <AuthProvider>
-                    <ConditionalAppLayout>
-                      {children}
-                    </ConditionalAppLayout>
-                    <SessionTimeoutWarning />
-                  </AuthProvider>
+                   <AuthProvider>
+                     <ConditionalAppLayout>
+                       {children}
+                     </ConditionalAppLayout>
+                     <SessionTimeoutWarning />
+                     <Toaster />
+                   </AuthProvider>
                 </EnhancedThemeProvider>
               </NuqsProvider>
             </TRPCProvider>

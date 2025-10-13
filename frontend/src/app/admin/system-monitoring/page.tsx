@@ -24,18 +24,12 @@ import {
   HardDrive,
   MemoryStick,
   Network,
-  Database,
   AlertTriangle,
   CheckCircle,
   XCircle,
   RefreshCw,
   TrendingUp,
   TrendingDown,
-  Zap,
-  Download,
-  Eye,
-  Shield,
-  Users,
   AlertCircle,
   Info
 } from 'lucide-react'
@@ -306,7 +300,7 @@ export default function SystemMonitoringPageECharts() {
     setPerformance(mockPerformance)
     setLastUpdated(new Date())
     setIsLoading(false)
-  }, [generateMockMetrics])
+  }, [generateMockMetrics, mockServices, mockAlerts, mockPerformance])
 
   useEffect(() => {
     updateMetrics()

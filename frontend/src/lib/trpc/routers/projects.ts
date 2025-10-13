@@ -1,18 +1,7 @@
 import { z } from 'zod'
 import { router, protectedProcedure } from '../server'
 import { projectOperations, pageOperations, componentOperations, projectMemberOperations } from '../graphql-client'
-import type { Project } from '@/lib/graphql/types'
 
-const projectSchema = z.object({
-  id: z.number(),
-  name: z.string(),
-  description: z.string().optional(),
-  userId: z.number(),
-  isPublic: z.boolean().optional(),
-  settings: z.record(z.string(), z.unknown()).optional(),
-  createdAt: z.string().optional(),
-  updatedAt: z.string().optional(),
-})
 
 const createProjectSchema = z.object({
   name: z.string().min(1),

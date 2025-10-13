@@ -129,7 +129,7 @@ export default function DataImportPage() {
       setTableSchema(null);
       setTablePermissions(null);
     }
-  }, [importData.selectedTable]);
+   }, [importData.selectedTable, fetchTablePermissions, fetchTableSchema]);
 
   const fetchAvailableTables = async () => {
     try {
@@ -164,13 +164,13 @@ export default function DataImportPage() {
       setAvailableTables(data.tables || []);
     } catch (err) {
       console.error('Failed to load tables:', err);
-      setError(`Failed to load tables: ${err instanceof Error ? err.message : 'Unknown error'}`);
-      // Set fallback tables for demo
-      setAvailableTables(['users', 'products', 'orders', 'customers']);
-    } finally {
-      setIsLoadingTables(false);
-    }
-  };
+       setError(`Failed to load tables: ${err instanceof Error ? err.message : 'Unknown error'}`);
+        // Set fallback tables for demo
+        setAvailableTables(['users', 'products', 'orders', 'customers']);
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
   const fetchTableSchema = async (tableName: string) => {
     setIsLoading(true);
@@ -203,139 +203,14 @@ export default function DataImportPage() {
       }
 
       const data = await response.json();
-      setTableSchema(data);
-    } catch (err) {
-      console.error('Failed to load table schema:', err);
-      setTableSchema(getDemoTableSchema(tableName));
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const getDemoTableSchema = (tableName: string) => {
-    const baseSchema = {
-      table_name: tableName,
-      primary_keys: ['id'],
-      sample_data: [
-        { id: 1, name: 'Demo Item 1', status: 'active' },
-        { id: 2, name: 'Demo Item 2', status: 'inactive' },
-        { id: 3, name: 'Demo Item 3', status: 'active' }
-      ]
-    };
-
-    switch (tableName) {
-      case 'users':
-        return {
-          ...baseSchema,
-          columns: [
-            { name: 'id', type: 'integer', nullable: false, primary_key: true },
-            { name: 'name', type: 'varchar', nullable: false, primary_key: false },
-            { name: 'email', type: 'varchar', nullable: false, primary_key: false },
-            { name: 'status', type: 'varchar', nullable: true, primary_key: false }
-          ],
-          sample_data: [
-            { id: 1, name: 'John Doe', email: 'john@example.com', status: 'active' },
-            { id: 2, name: 'Jane Smith', email: 'jane@example.com', status: 'active' }
-          ]
-        };
-      case 'products':
-        return {
-          ...baseSchema,
-          columns: [
-            { name: 'id', type: 'integer', nullable: false, primary_key: true },
-            { name: 'name', type: 'varchar', nullable: false, primary_key: false },
-            { name: 'price', type: 'decimal', nullable: false, primary_key: false },
-            { name: 'category', type: 'varchar', nullable: true, primary_key: false }
-          ],
-          sample_data: [
-            { id: 1, name: 'Laptop', price: 999.99, category: 'Electronics' },
-            { id: 2, name: 'Mouse', price: 29.99, category: 'Electronics' }
-          ]
-        };
-      default:
-        return {
-          ...baseSchema,
-          columns: [
-            { name: 'id', type: 'integer', nullable: false, primary_key: true },
-            { name: 'name', type: 'varchar', nullable: false, primary_key: false },
-            { name: 'status', type: 'varchar', nullable: true, primary_key: false }
-          ]
-        };
-    }
-  };
-
-  const fetchTablePermissions = async (tableName: string) => {
-    try {
-      const token = localStorage.getItem('access_token');
-      
-      if (!token) {
-        console.warn('No access token found - user may not be logged in');
-        // Set default permissions for unauthenticated users
-        setTablePermissions({
-          table_name: tableName,
-          import_permission: {
-            can_import: false,
-            can_validate: false,
-            can_preview: false,
-            max_file_size_mb: importConfig.max_file_size_mb,
-            max_rows_per_import: 1000,
-            allowed_formats: ['csv'],
-            requires_approval: true
-          }
-        });
-        return;
-      }
-
-      const response = await fetch(`/api/v1/data/tables/${tableName}/permissions`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error(`Failed to fetch table permissions (${response.status}):`, errorText);
-        
-        // For 401/403 errors, set no-permission state
-        if (response.status === 401 || response.status === 403) {
-          setTablePermissions({
-            table_name: tableName,
-            import_permission: {
-              can_import: false,
-              can_validate: false,
-              can_preview: false,
-              max_file_size_mb: importConfig.max_file_size_mb,
-              max_rows_per_import: 1000,
-              allowed_formats: ['csv'],
-              requires_approval: true
-            }
-          });
-          return;
-        }
-        
-        throw new Error(`Failed to fetch table permissions (${response.status}): ${errorText}`);
-      }
-
-      const data = await response.json();
-      setTablePermissions(data);
-    } catch (err) {
-      console.error('Failed to load permissions:', err);
-      
-      // Set default permissions as fallback
-      setTablePermissions({
-        table_name: tableName,
-        import_permission: {
-          can_import: true, // Allow import with defaults for demo
-          can_validate: true,
-          can_preview: true,
-          max_file_size_mb: importConfig.max_file_size_mb,
-          max_rows_per_import: 10000,
-          allowed_formats: importConfig.allowed_formats,
-          requires_approval: importConfig.require_approval
-        }
-      });
-    }
-  };
+       setTableSchema(data);
+     } catch (err) {
+       console.error('Failed to load table schema:', err);
+       setTableSchema(getDemoTableSchema(tableName));
+     } finally {
+       setIsLoading(false);
+     }
+   };
 
   // Removed unused mapSqlTypeToImportType function
 
@@ -716,11 +591,11 @@ export default function DataImportPage() {
           setCurrentStep(3); // Skip validation step and go to execution
         } catch (err) {
           setError(`Failed to parse file: ${err}`);
-        } finally {
-          setIsLoading(false);
-        }
-      };
-      reader.readAsText(importData.file);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+       reader.readAsText(importData.file);
     } catch (error) {
       setError(`Failed to skip validation: ${error instanceof Error ? error.message : 'Unknown error'}`);
       setIsLoading(false);

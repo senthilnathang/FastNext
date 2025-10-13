@@ -2,24 +2,20 @@
 
 import React, { useState } from 'react';
 import { useAuth } from '@/modules/auth';
-import { 
-  Card, 
-  CardContent, 
-  CardDescription, 
-  CardHeader, 
+import {
+  Card,
+  CardContent,
+  CardHeader,
   CardTitle,
   Button,
   Input,
   Label,
   Switch,
-  Badge,
-  Textarea
+  Badge
 } from '@/shared/components';
 import {
-  Shield,
   Users,
   Key,
-  Lock,
   Eye,
   Edit,
   Trash,

@@ -128,9 +128,8 @@ export async function POST(request: NextRequest) {
 }
 
 async function authenticateUser(
-  email: string, 
-  password: string, 
-  _clientIP: string
+  email: string,
+  password: string
 ): Promise<{
   success: boolean;
   user?: {

@@ -405,13 +405,7 @@ function createSecurityResponse(
   );
 }
 
-function isProtectedRoute(pathname: string): boolean {
-  return ROUTE_CONFIG.protected.some(route => pathname.startsWith(route));
-}
 
-function isPublicRoute(pathname: string): boolean {
-  return ROUTE_CONFIG.public.some(route => pathname.startsWith(route));
-}
 
 async function checkAuthentication(request: NextRequest): Promise<{
   isAuthenticated: boolean;
@@ -458,7 +452,7 @@ async function checkAuthentication(request: NextRequest): Promise<{
       isAdmin: payload.is_superuser || payload.roles?.includes('admin'),
       permissions: payload.permissions || []
     };
-  } catch (error) {
+  } catch (_error) {
     return { isAuthenticated: false };
   }
 }
@@ -480,7 +474,6 @@ function generateRequestId(): string {
 }
 
 function getSecurityHeaders(request: NextRequest): Record<string, string> {
-  const isDev = process.env.NODE_ENV === 'development';
   const isHTTPS = request.nextUrl.protocol === 'https:';
   
   return {

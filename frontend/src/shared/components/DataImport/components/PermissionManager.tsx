@@ -29,7 +29,6 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from '@/shared/components/ui/dialog';
 import {
   Select,
@@ -41,14 +40,10 @@ import {
 import {
   Shield,
   User,
-  Users,
   Edit,
   Trash2,
   Plus,
   Search,
-  CheckCircle,
-  XCircle,
-  AlertTriangle,
   Crown,
   Eye,
   Upload,

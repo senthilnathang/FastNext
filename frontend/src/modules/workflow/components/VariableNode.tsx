@@ -14,7 +14,7 @@ interface VariableNodeData extends WorkflowNodeData {
   scope: 'local' | 'global' | 'instance';
 }
 
-function VariableNode({ data, selected, id }: NodeProps<VariableNodeData>) {
+function VariableNode({ data, selected, id: _id }: NodeProps<VariableNodeData>) {
   const getOperationIcon = () => {
     switch (data.operationType) {
       case 'set':

@@ -1,16 +1,12 @@
 "use client"
 
 import { useState, useMemo } from 'react'
-import { 
-  BarChart3, 
-  TrendingUp, 
-  Clock, 
-  CheckCircle, 
-  XCircle, 
-  AlertTriangle,
-  Filter,
+import {
+  TrendingUp,
+  Clock,
+  CheckCircle,
+  XCircle,
   Download,
-  Calendar,
   Users,
   Zap
 } from 'lucide-react'

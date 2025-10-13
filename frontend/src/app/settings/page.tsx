@@ -2,17 +2,19 @@
 
 import React, { Suspense } from 'react';
 import { useAuth } from '@/modules/auth';
-import { 
-  Card, 
-  CardContent, 
-  CardDescription, 
-  CardHeader, 
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
   CardTitle,
   Button,
   Tabs,
   TabsContent,
   TabsList,
-  TabsTrigger
+  TabsTrigger,
+  Switch,
+  Label
 } from '@/shared/components';
 import { UpdateProfileForm, ChangePasswordForm, SecuritySettings } from '@/modules/auth';
 import ActivityLogViewer from '@/modules/admin/components/ActivityLogViewer';
@@ -22,10 +24,11 @@ import {
   Lock,
   Shield,
   Activity,
-  Settings as SettingsIcon,
   Bell,
   AlertTriangle,
-  Clock
+  Clock,
+  Mail,
+  Smartphone
 } from 'lucide-react';
 
 // Password Expiry Warning Component
@@ -108,7 +111,7 @@ function SettingsContent() {
   
   // Use nuqs for tab state management
   const [activeTab, setActiveTab] = useTabState(
-    ['profile', 'security', 'password', 'activity'] as const,
+    ['profile', 'security', 'password', 'notifications', 'activity'] as const,
     'profile'
   );
 
@@ -125,7 +128,7 @@ function SettingsContent() {
 
       {/* Settings Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="profile" className="flex items-center space-x-2">
             <User className="h-4 w-4" />
             <span>Profile</span>
@@ -137,6 +140,10 @@ function SettingsContent() {
           <TabsTrigger value="password" className="flex items-center space-x-2">
             <Lock className="h-4 w-4" />
             <span>Password</span>
+          </TabsTrigger>
+          <TabsTrigger value="notifications" className="flex items-center space-x-2">
+            <Bell className="h-4 w-4" />
+            <span>Notifications</span>
           </TabsTrigger>
           <TabsTrigger value="activity" className="flex items-center space-x-2">
             <Activity className="h-4 w-4" />
@@ -263,6 +270,117 @@ function SettingsContent() {
         <TabsContent value="password">
           <div className="max-w-2xl">
             <ChangePasswordForm />
+          </div>
+        </TabsContent>
+
+        {/* Notifications Tab */}
+        <TabsContent value="notifications">
+          <div className="space-y-6 max-w-2xl">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2">
+                  <Bell className="h-5 w-5" />
+                  <span>Notification Preferences</span>
+                </CardTitle>
+                <CardDescription>
+                  Choose how you want to be notified about important updates and activities.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {/* Email Notifications */}
+                <div className="space-y-4">
+                  <h4 className="text-sm font-medium flex items-center space-x-2">
+                    <Mail className="h-4 w-4" />
+                    <span>Email Notifications</span>
+                  </h4>
+                  <div className="space-y-3 pl-6">
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-0.5">
+                        <Label htmlFor="email-security">Security alerts</Label>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                          Login attempts, password changes, and security events
+                        </p>
+                      </div>
+                      <Switch id="email-security" defaultChecked />
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-0.5">
+                        <Label htmlFor="email-system">System notifications</Label>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                          Important system updates and maintenance
+                        </p>
+                      </div>
+                      <Switch id="email-system" defaultChecked />
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-0.5">
+                        <Label htmlFor="email-marketing">Marketing & updates</Label>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                          Product updates, tips, and promotional content
+                        </p>
+                      </div>
+                      <Switch id="email-marketing" />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Push Notifications */}
+                <div className="space-y-4">
+                  <h4 className="text-sm font-medium flex items-center space-x-2">
+                    <Smartphone className="h-4 w-4" />
+                    <span>Push Notifications</span>
+                  </h4>
+                  <div className="space-y-3 pl-6">
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-0.5">
+                        <Label htmlFor="push-security">Security alerts</Label>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                          Real-time security notifications
+                        </p>
+                      </div>
+                      <Switch id="push-security" defaultChecked />
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-0.5">
+                        <Label htmlFor="push-system">System notifications</Label>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                          Important system alerts
+                        </p>
+                      </div>
+                      <Switch id="push-system" defaultChecked />
+                    </div>
+                  </div>
+                </div>
+
+                {/* In-App Notifications */}
+                <div className="space-y-4">
+                  <h4 className="text-sm font-medium flex items-center space-x-2">
+                    <Bell className="h-4 w-4" />
+                    <span>In-App Notifications</span>
+                  </h4>
+                  <div className="space-y-3 pl-6">
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-0.5">
+                        <Label htmlFor="inapp-all">All notifications</Label>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                          Show all notifications in the app
+                        </p>
+                      </div>
+                      <Switch id="inapp-all" defaultChecked />
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-0.5">
+                        <Label htmlFor="inapp-sound">Sound notifications</Label>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                          Play sound for new notifications
+                        </p>
+                      </div>
+                      <Switch id="inapp-sound" />
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </div>
         </TabsContent>
 

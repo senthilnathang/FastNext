@@ -18,6 +18,7 @@ import {
 import { Badge } from "../ui/badge"
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip"
 import { ThemeSwitcher } from "../ui/ThemeSwitcher"
+import { NotificationCenter } from "../notifications"
 
 import { useAuth } from "@/modules/auth"
 import type { User as UserType } from "@/shared/services/api/users"
@@ -65,7 +66,17 @@ function UserAvatar({ user, size = "default" }: { user: UserType; size?: "sm" | 
   )
 }
 
-function CompactUserMenu({ user, onLogout }: { user: UserType; onLogout: () => void }) {
+function CompactUserMenu({
+  user,
+  onLogout,
+  showNotifications,
+  setShowNotifications
+}: {
+  user: UserType;
+  onLogout: () => void;
+  showNotifications: boolean;
+  setShowNotifications: (show: boolean) => void;
+}) {
   const router = useRouter()
   const [mounted, setMounted] = React.useState(false)
 
@@ -125,7 +136,10 @@ function CompactUserMenu({ user, onLogout }: { user: UserType; onLogout: () => v
         </DropdownMenuItem>
 
         {/* Notifications */}
-        <DropdownMenuItem className="cursor-pointer">
+        <DropdownMenuItem
+          className="cursor-pointer"
+          onClick={() => setShowNotifications(true)}
+        >
           <Bell className="h-4 w-4 mr-3" />
           <span>Notifications</span>
           <Badge variant="secondary" className="ml-auto text-xs">
@@ -161,7 +175,17 @@ function CompactUserMenu({ user, onLogout }: { user: UserType; onLogout: () => v
   )
 }
 
-function ExpandedUserMenu({ user, onLogout }: { user: UserType; onLogout: () => void }) {
+function ExpandedUserMenu({
+  user,
+  onLogout,
+  showNotifications,
+  setShowNotifications
+}: {
+  user: UserType;
+  onLogout: () => void;
+  showNotifications: boolean;
+  setShowNotifications: (show: boolean) => void;
+}) {
   const router = useRouter()
   const [mounted, setMounted] = React.useState(false)
 
@@ -242,11 +266,14 @@ function ExpandedUserMenu({ user, onLogout }: { user: UserType; onLogout: () => 
             <span className="text-xs text-gray-500 dark:text-gray-400">Settings & preferences</span>
           </DropdownMenuItem>
           
-          <DropdownMenuItem className="cursor-pointer p-3 h-auto flex-col items-start">
-            <Bell className="h-5 w-5 mb-1 text-orange-600 dark:text-orange-400" />
-            <span className="font-medium">Notifications</span>
-            <span className="text-xs text-gray-500 dark:text-gray-400">2 new messages</span>
-          </DropdownMenuItem>
+           <DropdownMenuItem
+             className="cursor-pointer p-3 h-auto flex-col items-start"
+             onClick={() => setShowNotifications(true)}
+           >
+             <Bell className="h-5 w-5 mb-1 text-orange-600 dark:text-orange-400" />
+             <span className="font-medium">Notifications</span>
+             <span className="text-xs text-gray-500 dark:text-gray-400">2 new messages</span>
+           </DropdownMenuItem>
         </div>
 
         <DropdownMenuSeparator />
@@ -281,11 +308,27 @@ function ExpandedUserMenu({ user, onLogout }: { user: UserType; onLogout: () => 
       </DropdownMenuContent>
     </DropdownMenu>
   )
+
+  return (
+    <>
+      {/* Existing ExpandedUserMenu content */}
+      <DropdownMenu>
+        {/* ... existing content ... */}
+      </DropdownMenu>
+
+      {/* Notification Center */}
+      <NotificationCenter
+        open={showNotifications}
+        onOpenChange={setShowNotifications}
+      />
+    </>
+  )
 }
 
 export function UserMenu({ isCollapsed = false, className }: UserMenuProps) {
   const { user, logout } = useAuth()
-  
+  const [showNotifications, setShowNotifications] = React.useState(false)
+
   if (!user) {
     return null
   }
@@ -300,25 +343,51 @@ export function UserMenu({ isCollapsed = false, className }: UserMenuProps) {
 
   if (isCollapsed) {
     return (
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <div className={cn("flex justify-center", className)}>
-            <CompactUserMenu user={user} onLogout={handleLogout} />
-          </div>
-        </TooltipTrigger>
-        <TooltipContent side="right" sideOffset={8}>
-          <div className="text-center">
-            <p className="font-medium">{user.full_name || user.username}</p>
-            <p className="text-xs text-gray-500">{user.email}</p>
-          </div>
-        </TooltipContent>
-      </Tooltip>
+      <>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <div className={cn("flex justify-center", className)}>
+              <CompactUserMenu
+                user={user}
+                onLogout={handleLogout}
+                showNotifications={showNotifications}
+                setShowNotifications={setShowNotifications}
+              />
+            </div>
+          </TooltipTrigger>
+          <TooltipContent side="right" sideOffset={8}>
+            <div className="text-center">
+              <p className="font-medium">{user.full_name || user.username}</p>
+              <p className="text-xs text-gray-500">{user.email}</p>
+            </div>
+          </TooltipContent>
+        </Tooltip>
+
+        {/* Notification Center */}
+        <NotificationCenter
+          open={showNotifications}
+          onOpenChange={setShowNotifications}
+        />
+      </>
     )
   }
 
   return (
-    <div className={className}>
-      <ExpandedUserMenu user={user} onLogout={handleLogout} />
-    </div>
+    <>
+      <div className={className}>
+        <ExpandedUserMenu
+          user={user}
+          onLogout={handleLogout}
+          showNotifications={showNotifications}
+          setShowNotifications={setShowNotifications}
+        />
+      </div>
+
+      {/* Notification Center */}
+      <NotificationCenter
+        open={showNotifications}
+        onOpenChange={setShowNotifications}
+      />
+    </>
   )
 }

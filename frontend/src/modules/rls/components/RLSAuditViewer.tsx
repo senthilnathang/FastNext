@@ -5,7 +5,7 @@ import { Button } from '@/shared/components/ui/button';
 import { Input } from '@/shared/components/ui/input';
 import { Label } from '@/shared/components/ui/label';
 import { Card } from '@/shared/components/ui/card';
-import { Checkbox } from '@/shared/components/ui/checkbox';
+
 import { 
   Shield, 
   Search, 
@@ -16,15 +16,12 @@ import {
   Clock,
   User,
   Database,
-  Eye,
   Lock,
-  Unlock,
-  Calendar,
   ChevronLeft,
   ChevronRight,
   RefreshCw
 } from 'lucide-react';
-import { API_CONFIG, getApiUrl } from '@/shared/services/api/config';
+import { getApiUrl } from '@/shared/services/api/config';
 
 // Types
 interface RLSAuditLog {
@@ -72,7 +69,7 @@ export default function RLSAuditViewer() {
 
   useEffect(() => {
     fetchAuditLogs();
-  }, [currentPage, filters]);
+  }, [currentPage, filters, fetchAuditLogs]);
 
   const fetchAuditLogs = async () => {
     try {

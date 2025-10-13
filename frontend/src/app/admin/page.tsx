@@ -5,18 +5,16 @@ import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/components/ui/card';
 import { Button } from '@/shared/components/ui/button';
 import { Badge } from '@/shared/components/ui/badge';
-import { 
-  Shield, 
-  Users, 
-  Key, 
-  Upload, 
-  Download, 
+import {
+  Shield,
+  Users,
+  Key,
+  Upload,
+  Download,
   Settings,
   ArrowRight,
-  Activity,
   FileText,
   Server,
-  Database,
   Lock,
   UserCheck,
   AlertTriangle

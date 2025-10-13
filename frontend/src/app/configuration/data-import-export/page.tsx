@@ -2,11 +2,11 @@
 
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/modules/auth';
-import { 
-  Card, 
-  CardContent, 
-  CardDescription, 
-  CardHeader, 
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
   CardTitle,
   Button,
   Input,
@@ -16,16 +16,12 @@ import {
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
-  Textarea
+  SelectValue
 } from '@/shared/components';
 import {
-  Database,
   Upload,
   Download,
-  Settings,
   FileText,
-  Clock,
   Shield,
   AlertCircle
 } from 'lucide-react';

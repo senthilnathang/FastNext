@@ -1,15 +1,11 @@
 "use client"
 
-import { useState, useEffect } from 'react'
-import { 
-  Calendar, 
-  Clock, 
-  Play, 
-  Pause, 
-  Square, 
-  RotateCcw,
+import { useState } from 'react'
+import {
+  Calendar,
+  Play,
+  Square,
   Timer,
-  Settings,
   AlertCircle,
   CheckCircle,
   XCircle
@@ -50,7 +46,6 @@ interface WorkflowExecution {
 }
 
 interface AdvancedWorkflowSchedulerProps {
-  workflowId: string
   schedules: ScheduleRule[]
   executions: WorkflowExecution[]
   onScheduleCreate: (schedule: Omit<ScheduleRule, 'id'>) => void
@@ -61,7 +56,6 @@ interface AdvancedWorkflowSchedulerProps {
 }
 
 export function AdvancedWorkflowScheduler({
-  workflowId,
   schedules,
   executions,
   onScheduleCreate,

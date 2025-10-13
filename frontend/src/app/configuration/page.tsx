@@ -11,16 +11,8 @@ import {
   CardTitle 
 } from '@/shared/components';
 import {
-  Settings,
   Database,
-  Shield,
-  Users,
-  FileText,
-  Bell,
-  Globe,
-  Lock,
-  Palette,
-  Mail
+  Shield
 } from 'lucide-react';
 
 interface ConfigurationItem {

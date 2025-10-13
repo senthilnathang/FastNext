@@ -6,28 +6,23 @@ import { Button } from '@/shared/components/ui/button';
 import { Input } from '@/shared/components/ui/input';
 import { Label } from '@/shared/components/ui/label';
 import { Card } from '@/shared/components/ui/card';
-import { Select } from '@/shared/components/ui/select';
 import { Textarea } from '@/shared/components/ui/textarea';
 import { Checkbox } from '@/shared/components/ui/checkbox';
-import { 
-  Shield, 
-  Plus, 
-  Edit, 
-  Trash2, 
-  Eye, 
+import {
+  Shield,
+  Plus,
+  Edit,
+  Trash2,
+  Eye,
   AlertTriangle,
   CheckCircle,
-  Clock,
   Users,
   Lock,
   Settings,
-  Filter,
   Search,
-  Download,
-  Upload,
   RotateCcw
 } from 'lucide-react';
-import { API_CONFIG, getApiUrl } from '@/shared/services/api/config';
+import { getApiUrl } from '@/shared/services/api/config';
 
 // Types
 interface RLSPolicy {

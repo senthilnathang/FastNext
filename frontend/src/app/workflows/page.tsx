@@ -36,7 +36,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle
 } from '@/shared/components';
-import { GitBranch, Plus, Edit, Eye, Settings, Trash2, MoreHorizontal } from 'lucide-react';
+import { GitBranch, Plus, Edit, Eye, Trash2, MoreHorizontal } from 'lucide-react';
 import { useWorkflowTypes, useWorkflowTemplates, useCreateWorkflowType, useCreateWorkflowTemplate, useUpdateWorkflowTemplate, useUpdateWorkflowType, useDeleteWorkflowType, useDeleteWorkflowTemplate } from '@/modules/workflow/hooks/useWorkflow';
 import dynamic from 'next/dynamic';
 

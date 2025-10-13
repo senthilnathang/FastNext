@@ -95,7 +95,6 @@ export default function ProjectsPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [selectedItems, setSelectedItems] = useState<Project[]>([])
-  const [activeView, setActiveView] = useState<string>('projects-list')
 
   const { data: projectsData, isLoading, error } = useProjects()
   const createProject = useCreateProject()
@@ -254,10 +253,9 @@ export default function ProjectsPage() {
     }
   ], [])
 
-  const projects = projectsData?.items || []
-
   // Calculate statistics
   const stats = useMemo(() => {
+    const projects = projectsData?.items || []
     const totalProjects = projects.length
     const publicProjects = projects.filter(project => project.is_public).length
     const privateProjects = totalProjects - publicProjects
@@ -283,10 +281,11 @@ export default function ProjectsPage() {
       recentProjects,
       activeProjects
     }
-  }, [projects])
+  }, [projectsData?.items])
 
   // Define kanban columns for project status
   const kanbanColumns: KanbanColumn[] = useMemo(() => {
+    const projects = projectsData?.items || []
     const now = new Date()
     const planned = projects.filter(p => p.start_date && new Date(p.start_date) > now).length
     const active = projects.filter(p => {
@@ -301,7 +300,7 @@ export default function ProjectsPage() {
       { id: 'active', title: 'Active', color: '#10b981', count: active },
       { id: 'completed', title: 'Completed', color: '#6b7280', count: completed }
     ]
-  }, [projects])
+  }, [projectsData?.items])
 
   // Define kanban card fields
   const kanbanCardFields = useMemo(() => [

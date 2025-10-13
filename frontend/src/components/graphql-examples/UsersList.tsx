@@ -17,7 +17,7 @@ import { Search, User, Mail, Calendar, ExternalLink } from 'lucide-react';
 
 export function UsersList() {
   const [searchTerm, setSearchTerm] = useState('');
-  const { variables, loadMore, reset } = usePagination();
+  const { variables, reset } = usePagination();
   
   const { data, loading, error, fetchMore } = useUsers({
     ...variables,

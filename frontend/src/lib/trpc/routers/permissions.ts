@@ -3,15 +3,7 @@ import { router, protectedProcedure } from '../server'
 import { permissionOperations } from '../graphql-client'
 import type { Permission } from '@/lib/graphql/types'
 
-const permissionSchema = z.object({
-  id: z.number(),
-  name: z.string(),
-  description: z.string().optional(),
-  resource: z.string(),
-  action: z.string(),
-  createdAt: z.string().optional(),
-  updatedAt: z.string().optional(),
-})
+
 
 const createPermissionSchema = z.object({
   name: z.string().min(1),
@@ -85,7 +77,7 @@ export const permissionsRouter = router({
   // Note: Create, update, delete operations would need corresponding GraphQL mutations
   create: protectedProcedure
     .input(createPermissionSchema)
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input: _input }) => {
       try {
         // This would need a createPermission mutation in GraphQL
         throw new Error('Create permission mutation not implemented in GraphQL')
@@ -101,7 +93,7 @@ export const permissionsRouter = router({
         data: updatePermissionSchema,
       })
     )
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input: _input }) => {
       try {
         // This would need an updatePermission mutation in GraphQL
         throw new Error('Update permission mutation not implemented in GraphQL')
@@ -112,7 +104,7 @@ export const permissionsRouter = router({
 
   delete: protectedProcedure
     .input(z.number())
-    .mutation(async ({ input: id }) => {
+    .mutation(async ({ input: _id }) => {
       try {
         // This would need a deletePermission mutation in GraphQL
         throw new Error('Delete permission mutation not implemented in GraphQL')

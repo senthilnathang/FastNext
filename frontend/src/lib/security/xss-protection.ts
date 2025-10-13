@@ -120,7 +120,6 @@ export async function detectXSSAttempts(request: NextRequest): Promise<XSSDetect
   // Check URL and query parameters
   const url = request.nextUrl;
   const urlString = url.toString();
-  const queryString = url.search;
 
   // Analyze URL
   const urlResults = analyzeText(urlString, 'url');
@@ -293,9 +292,9 @@ async function analyzeRequestBody(request: NextRequest): Promise<XSSDetectionRes
         maxSeverity = getMaxSeverity(maxSeverity, results.severity);
       }
     }
-  } catch (error) {
+  } catch (_error) {
     // If we can't read the body, it's not necessarily an XSS attempt
-    console.warn('Failed to analyze request body for XSS:', error);
+    console.warn('Failed to analyze request body for XSS:', _error);
   }
 
   return {
@@ -335,7 +334,7 @@ function performHeuristicAnalysis(text: string): XSSDetectionResult {
         detectedPatterns.push('heuristic:base64_encoded_script');
         severity = 'high';
       }
-    } catch (e) {
+    } catch (_e) {
       // Invalid base64, ignore
     }
   }
@@ -412,7 +411,7 @@ export class ClientXSSProtection {
       }
 
       return urlObj.toString();
-    } catch (e) {
+    } catch (_e) {
       return 'about:blank';
     }
   }

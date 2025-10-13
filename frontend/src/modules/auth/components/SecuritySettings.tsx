@@ -20,7 +20,6 @@ import {
   Download,
   Upload,
   RotateCcw,
-  Trash2,
   Copy,
   Settings
 } from 'lucide-react';

@@ -6,7 +6,7 @@ import { CommonFormViewManager, createFormViewConfig } from '@/shared/components
 import { FormField } from '@/shared/components/views/GenericFormView'
 import { Column } from '@/shared/components/views/ViewManager'
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card'
-import { Shield, Users, Key, Calendar, Clock, Crown } from "lucide-react"
+import { Shield, Users, Key, Calendar, Crown } from "lucide-react"
 import { Badge } from "@/shared/components/ui/badge"
 import { formatDistanceToNow } from 'date-fns'
 import { z } from 'zod'

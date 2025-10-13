@@ -108,7 +108,7 @@ async function validateRefreshToken(token: string): Promise<{
       userId: payload.sub || payload.user_id
     };
 
-  } catch (error) {
+  } catch (_error) {
     return { isValid: false, reason: 'decode_error' };
   }
 }

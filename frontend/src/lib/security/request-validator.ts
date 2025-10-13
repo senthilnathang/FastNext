@@ -74,7 +74,6 @@ export function validateRequest(request: NextRequest): ValidationResult {
 
   const url = request.nextUrl;
   const userAgent = request.headers.get('user-agent') || '';
-  const referer = request.headers.get('referer') || '';
   
   // Check for suspicious user agents
   for (const pattern of SUSPICIOUS_USER_AGENTS) {
@@ -341,7 +340,7 @@ export async function validateRequestBody(request: NextRequest): Promise<Validat
       const formData = await request.formData();
       return validateFormData(formData);
     }
-  } catch (error) {
+  } catch (_error) {
     return {
       isValid: false,
       reason: 'Invalid request body format',

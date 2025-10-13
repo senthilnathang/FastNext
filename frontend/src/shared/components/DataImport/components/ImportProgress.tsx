@@ -12,14 +12,6 @@ import {
   CardTitle,
 } from '@/shared/components/ui/card';
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/shared/components/ui/table';
-import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
@@ -31,10 +23,8 @@ import {
   AlertTriangle,
   X,
   Loader2,
-  FileText,
   ChevronDown,
   ChevronRight,
-  Download,
   Eye
 } from 'lucide-react';
 

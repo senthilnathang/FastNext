@@ -44,7 +44,7 @@ const authLink = setContext((_, { headers }) => {
 });
 
 // Error link for handling GraphQL and network errors
-const errorLink = onError(({ graphQLErrors, networkError, operation, forward }) => {
+const errorLink = onError(({ graphQLErrors, networkError, operation: _operation, forward: _forward }) => {
   if (graphQLErrors) {
     graphQLErrors.forEach(({ message, locations, path }) => {
       console.error(

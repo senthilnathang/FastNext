@@ -4,7 +4,7 @@
  */
 'use client';
 
-import { useQuery, useMutation, useSubscription, ApolloError } from '@apollo/client';
+import { useQuery, useMutation, ApolloError } from '@apollo/client';
 import { useState, useCallback } from 'react';
 import {
   GET_ME,
@@ -30,14 +30,6 @@ import {
   CREATE_PROJECT,
   UPDATE_PROJECT,
   DELETE_PROJECT,
-  CREATE_PAGE,
-  UPDATE_PAGE,
-  DELETE_PAGE,
-  CREATE_COMPONENT,
-  UPDATE_COMPONENT,
-  DELETE_COMPONENT,
-  ADD_PROJECT_MEMBER,
-  REMOVE_PROJECT_MEMBER,
 } from './mutations';
 
 // Types for GraphQL responses
@@ -107,13 +99,7 @@ interface ProjectResponse extends MutationResponse {
   project?: Project;
 }
 
-interface PageResponse extends MutationResponse {
-  page?: Page;
-}
 
-interface ComponentResponse extends MutationResponse {
-  component?: Component;
-}
 
 // Query variables types
 interface PaginationVariables {

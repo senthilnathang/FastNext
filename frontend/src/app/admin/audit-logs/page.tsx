@@ -65,6 +65,8 @@ interface AuditLog {
   riskScore?: number;
 }
 
+type AuditLogChanges = Record<string, { old: any; new: any }>;
+
 interface AuditStats {
   totalLogs: number;
   categoryCounts: Record<string, number>;
@@ -101,7 +103,7 @@ export default function AuditLogsPage() {
       userId: 'user_123',
       userName: 'john.doe@example.com',
       targetResource: 'auth_service',
-      changes: {},
+      changes: undefined,
       metadata: {
         ipAddress: '192.168.1.100',
         userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
@@ -128,7 +130,7 @@ export default function AuditLogsPage() {
           old: ['read', 'write'],
           new: ['read', 'write', 'admin']
         }
-      },
+      } as AuditLogChanges,
       metadata: {
         ipAddress: '10.0.0.50',
         userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)',
@@ -148,7 +150,7 @@ export default function AuditLogsPage() {
       severity: 'error',
       userId: 'unknown',
       targetResource: 'auth_service',
-      changes: {},
+      changes: undefined,
       metadata: {
         ipAddress: '203.0.113.45',
         userAgent: 'curl/7.68.0',
@@ -170,7 +172,7 @@ export default function AuditLogsPage() {
       userName: 'jane.smith@example.com',
       targetResource: 'user_data',
       targetId: 'export_batch_001',
-      changes: {},
+      changes: undefined,
       metadata: {
         ipAddress: '172.16.0.100',
         userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X)',
@@ -201,7 +203,7 @@ export default function AuditLogsPage() {
           old: 3600,
           new: 1800
         }
-      },
+      } as AuditLogChanges,
       metadata: {
         ipAddress: '10.0.0.50',
         userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)',

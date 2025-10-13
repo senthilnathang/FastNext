@@ -3,16 +3,7 @@ import { router, protectedProcedure } from '../server'
 import { pageOperations } from '../graphql-client'
 import type { Page } from '@/lib/graphql/types'
 
-const pageSchema = z.object({
-  id: z.number(),
-  title: z.string(),
-  path: z.string(),
-  content: z.record(z.string(), z.unknown()).optional(),
-  projectId: z.number(),
-  isPublic: z.boolean().optional(),
-  createdAt: z.string().optional(),
-  updatedAt: z.string().optional(),
-})
+
 
 const createPageSchema = z.object({
   title: z.string().min(1),

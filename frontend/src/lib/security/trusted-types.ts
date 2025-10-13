@@ -96,22 +96,6 @@ if (typeof window !== 'undefined' && !window.trustedTypes) {
   window.trustedTypes = new TrustedTypesPolyfill();
 }
 
-// DOMPurify integration for HTML sanitization
-let DOMPurify: any = null;
-
-// Dynamically import DOMPurify only when needed
-async function getDOMPurify() {
-  if (!DOMPurify && typeof window !== 'undefined') {
-    try {
-      const domPurifyModule = await import('dompurify');
-      DOMPurify = domPurifyModule.default;
-    } catch (error) {
-      console.warn('DOMPurify not available, using basic sanitization');
-    }
-  }
-  return DOMPurify;
-}
-
 // Basic HTML sanitization without DOMPurify
 function basicHTMLSanitize(html: string): string {
   return html
@@ -128,27 +112,7 @@ function basicHTMLSanitize(html: string): string {
     .replace(/data:text\/html/gi, '');
 }
 
-// Advanced HTML sanitization with DOMPurify
-async function advancedHTMLSanitize(html: string): Promise<string> {
-  const purify = await getDOMPurify();
-  
-  if (purify) {
-    return purify.sanitize(html, {
-      ALLOWED_TAGS: [
-        'p', 'br', 'strong', 'em', 'u', 'i', 'b', 'a', 'ul', 'ol', 'li',
-        'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'blockquote', 'code', 'pre',
-        'div', 'span', 'img', 'table', 'thead', 'tbody', 'tr', 'td', 'th'
-      ],
-      ALLOWED_ATTR: [
-        'href', 'title', 'alt', 'src', 'width', 'height', 'class', 'id',
-        'target', 'rel', 'style'
-      ],
-      ALLOWED_URI_REGEXP: /^(?:(?:https?|ftp|mailto):|[^a-z]|[a-z+.-]+(?:[^a-z+.-:]|$))/i,
-    });
-  }
-  
-  return basicHTMLSanitize(html);
-}
+
 
 // URL validation and sanitization
 function sanitizeURL(url: string): string {
@@ -167,7 +131,7 @@ function sanitizeURL(url: string): string {
     }
 
     return urlObj.toString();
-  } catch (e) {
+  } catch (_e) {
     return 'about:blank';
   }
 }
@@ -397,8 +361,8 @@ export function initializeTrustedTypes(): void {
     createStrictPolicy();
 
     console.log('Trusted Types initialized successfully');
-  } catch (error) {
-    console.error('Failed to initialize Trusted Types:', error);
+  } catch (_error) {
+    console.error('Failed to initialize Trusted Types:', _error);
   }
 }
 

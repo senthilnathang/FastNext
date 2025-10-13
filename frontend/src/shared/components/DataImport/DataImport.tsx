@@ -5,7 +5,6 @@ import { Button } from '@/shared/components/ui/button';
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from '@/shared/components/ui/card';
@@ -18,12 +17,6 @@ import {
   DialogTrigger,
 } from '@/shared/components/ui/dialog';
 import { Badge } from '@/shared/components/ui/badge';
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from '@/shared/components/ui/tabs';
 import {
   Upload,
   Settings,

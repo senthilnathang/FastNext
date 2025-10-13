@@ -28,8 +28,7 @@ export default function UpdateProfileForm({ onSuccess, onCancel }: UpdateProfile
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
-  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const [showProfileData, setShowProfileData] = useState(false);
+
   const [profileBackup, setProfileBackup] = useState<ProfileFormData | null>(null);
 
   const {

@@ -1,13 +1,12 @@
 "use client"
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { 
   Plus, 
   Settings, 
   Check, 
   X, 
-  AlertCircle, 
-  ExternalLink,
+  AlertCircle,
   Zap,
   Database,
   Mail,
@@ -29,7 +28,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/components/ui
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/shared/components/ui/dialog'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/components/ui/select'
 import { Alert, AlertDescription } from '@/shared/components/ui/alert'
-import { Progress } from '@/shared/components/ui/progress'
 
 interface Integration {
   id: string

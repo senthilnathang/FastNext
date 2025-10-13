@@ -5,26 +5,20 @@ import { Card } from '@/shared/components/ui/card';
 import { Button } from '@/shared/components/ui/button';
 import { Input } from '@/shared/components/ui/input';
 import { Label } from '@/shared/components/ui/label';
-import { Select } from '@/shared/components/ui/select';
-import { 
-  Shield, 
-  Users, 
+import {
+  Shield,
+  Users,
   AlertTriangle,
   CheckCircle,
-  Clock,
   Activity,
   Database,
   TrendingUp,
-  TrendingDown,
-  Eye,
   Lock,
-  Unlock,
   Settings,
   BarChart3,
-  PieChart,
   RefreshCw
 } from 'lucide-react';
-import { API_CONFIG, getApiUrl } from '@/shared/services/api/config';
+import { getApiUrl } from '@/shared/services/api/config';
 
 // Types
 interface RLSStatistics {

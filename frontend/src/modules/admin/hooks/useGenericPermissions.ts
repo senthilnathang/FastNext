@@ -86,7 +86,7 @@ export const useGenericPermissions = (
     } finally {
       setLoading(false)
     }
-  }, [isAuthenticated, user, resource, projectId])
+  }, [isAuthenticated, user, resource])
 
   const hasPermission = (check: PermissionCheck): boolean => {
     if (!isAuthenticated || !user) return false

@@ -15,12 +15,7 @@ import {
   StatCard
 } from '@/shared/components/charts'
 import {
-  ArrowDown,
-  ArrowUp,
-  DollarSign,
-  Users,
-  TrendingUp,
-  Eye
+  TrendingUp
 } from 'lucide-react'
 import { cn } from '@/shared/lib/utils'
 

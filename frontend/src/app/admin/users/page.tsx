@@ -6,9 +6,8 @@ import { CommonFormViewManager, createFormViewConfig } from '@/shared/components
 import { FormField } from '@/shared/components/views/GenericFormView'
 import { Column, KanbanColumn } from '@/shared/components/views/ViewManager'
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card'
-import { User as UserIcon, Shield, UserCheck, Mail, Calendar, Clock, Users, Crown } from "lucide-react"
+import { Shield, UserCheck, Calendar, Clock, Users, Crown } from "lucide-react"
 import { Badge } from "@/shared/components/ui/badge"
-import type { SortOption, GroupOption } from '@/shared/components/ui'
 import { formatDistanceToNow } from 'date-fns'
 import { z } from 'zod'
 
@@ -69,7 +68,7 @@ const formFields: FormField<User>[] = [
     type: 'password',
     placeholder: 'Enter password',
     description: 'Leave empty to keep current password when editing',
-    condition: (formData) => {
+     condition: (_formData) => {
       // Show password field for create mode or when explicitly editing password
       const urlParams = new URLSearchParams(window.location.search)
       const mode = urlParams.get('mode')

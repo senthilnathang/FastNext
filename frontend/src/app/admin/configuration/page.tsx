@@ -313,15 +313,6 @@ export default function ConfigurationPage() {
     return config.value;
   };
 
-  const handleConfigSave = useCallback((configId: string, newValue: any) => {
-    console.log('Saving config:', configId, newValue);
-    setPendingChanges(prev => {
-      const updated = new Map(prev);
-      updated.set(configId, newValue);
-      return updated;
-    });
-  }, []);
-
   const handleBatchSave = useCallback(() => {
     console.log('Saving batch changes:', Array.from(pendingChanges.entries()));
     // Implement batch save logic

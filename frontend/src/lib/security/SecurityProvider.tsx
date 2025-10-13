@@ -309,8 +309,7 @@ export function useSecureOperation() {
 export function useSecureHTML() {
   const security = useSecurity();
 
-  const renderHTML = (html: string, options?: { strict?: boolean }) => {
-    const { strict = false } = options || {};
+  const renderHTML = (html: string, _options?: { strict?: boolean }) => {
 
     if (!security.trustedTypesEnabled) {
       console.warn('Trusted Types not available, using basic sanitization');

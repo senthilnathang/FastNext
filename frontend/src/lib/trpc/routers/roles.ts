@@ -3,14 +3,7 @@ import { router, protectedProcedure } from '../server'
 import { roleOperations } from '../graphql-client'
 import type { Role } from '@/lib/graphql/types'
 
-const roleSchema = z.object({
-  id: z.number(),
-  name: z.string(),
-  description: z.string().optional(),
-  permissions: z.array(z.string()).optional(),
-  createdAt: z.string().optional(),
-  updatedAt: z.string().optional(),
-})
+
 
 const createRoleSchema = z.object({
   name: z.string().min(1),
@@ -59,7 +52,7 @@ export const rolesRouter = router({
   // For now, keeping basic structure for TypeScript compatibility
   create: protectedProcedure
     .input(createRoleSchema)
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input: _input }) => {
       try {
         // This would need a createRole mutation in GraphQL
         throw new Error('Create role mutation not implemented in GraphQL')
@@ -75,7 +68,7 @@ export const rolesRouter = router({
         data: updateRoleSchema,
       })
     )
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input: _input }) => {
       try {
         // This would need an updateRole mutation in GraphQL
         throw new Error('Update role mutation not implemented in GraphQL')
@@ -86,7 +79,7 @@ export const rolesRouter = router({
 
   delete: protectedProcedure
     .input(z.number())
-    .mutation(async ({ input: id }) => {
+    .mutation(async ({ input: _id }) => {
       try {
         // This would need a deleteRole mutation in GraphQL
         throw new Error('Delete role mutation not implemented in GraphQL')

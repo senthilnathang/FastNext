@@ -16,7 +16,7 @@ const nextConfig: NextConfig = {
   compress: true,
 
   // Bundle analysis and optimization
-  webpack: (config, { buildId, dev, isServer, defaultLoaders, webpack }) => {
+  webpack: (config, { buildId: _buildId, dev, isServer, defaultLoaders: _defaultLoaders, webpack: _webpack }) => {
     // Optimize bundle splitting
     if (!dev && !isServer) {
       config.optimization.splitChunks.chunks = 'all';

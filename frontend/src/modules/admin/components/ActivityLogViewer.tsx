@@ -186,7 +186,7 @@ export default function ActivityLogViewer({ showUserActivitiesOnly = false }: Ac
     } finally {
       setLoading(false);
     }
-  }, [currentPage, pageSize, search, action, entityType, level, startDate, endDate, days, showUserActivitiesOnly]);
+  }, [currentPage, pageSize, search, action, entityType, level, startDate, endDate, days]);
 
   const fetchStats = React.useCallback(async () => {
     try {
