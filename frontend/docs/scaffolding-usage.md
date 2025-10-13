@@ -208,7 +208,7 @@ The scaffolding system generates the following files:
 - Loading and error states
 
 ### 3. DataTable Component
-**Location**: `src/shared/components/data-table/examples/{Models}DataTable.tsx`
+**Location**: `src/shared/components/data-table/{Models}DataTable.tsx`
 - Advanced data table with sorting, filtering, pagination
 - Custom column renderers based on field types
 - Bulk operations support

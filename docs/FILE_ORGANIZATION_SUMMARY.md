@@ -130,10 +130,6 @@ FastNext/
 #### **Configuration Directory Created** (`/frontend/config/`)
 - **Source**: `/sales-interactive.json` → **Destination**: `/frontend/config/sales-interactive.json`
   - **Description**: Sales model configuration for scaffolding
-- **Source**: `/examples/blog-post-config.json` → **Destination**: `/frontend/config/blog-post-config.json`
-  - **Description**: Blog post scaffolding configuration
-- **Source**: `/examples/product-config.json` → **Destination**: `/frontend/config/product-config.json`
-  - **Description**: Product scaffolding configuration
 
 #### **Frontend Scripts Organization** (`/frontend/scripts/`)
 - **Source**: `/frontend/test-scaffold.js` → **Destination**: `/frontend/scripts/test-scaffold.js`

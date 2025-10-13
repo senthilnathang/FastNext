@@ -60,8 +60,7 @@ Frontend Structure:
 │   └── resource-factory.tsx        # Resource component factory
 │
 └── components/
-    └── examples/
-        └── ResourceExamples.tsx     # Usage examples
+
 ```
 
 ## 🔐 Permission System

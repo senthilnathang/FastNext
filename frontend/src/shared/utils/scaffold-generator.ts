@@ -272,7 +272,7 @@ export const ${this.lowercaseFirst(this.model.pluralName!)}Api = {
       console.log('\nGenerated files:')
       console.log(`📁 API: src/shared/services/api/${this.model.name.toLowerCase()}.ts`)
       console.log(`📁 Hooks: src/modules/${this.model.name.toLowerCase()}/hooks/use${this.model.pluralName}.ts`)
-      console.log(`📁 DataTable: src/shared/components/data-table/examples/${this.model.pluralName}DataTable.tsx`)
+      console.log(`📁 DataTable: src/shared/components/data-table/${this.model.pluralName}DataTable.tsx`)
       console.log(`📁 Form: src/modules/${this.model.name.toLowerCase()}/components/${this.model.name}Form.tsx`)
       console.log(`📁 Pages: src/app/${this.model.name.toLowerCase()}/(list|create|edit)/page.tsx`)
       console.log(`📁 Navigation: Updated menuConfig.ts`)
@@ -617,7 +617,7 @@ export function ${pluralName}DataTableExample() {
 }
 `
 
-    const dir = join(this.basePath, 'shared/components/data-table/examples')
+    const dir = join(this.basePath, 'shared/components/data-table')
     const filePath = join(dir, `${pluralName}DataTable.tsx`)
     
     if (!existsSync(dir)) {
@@ -911,7 +911,7 @@ import {
   type SearchFilter
 } from '@/shared/components'
 import { useAdvancedSearch } from '@/shared/hooks/useAdvancedSearch'
-// import { ${pluralName}DataTable } from '@/shared/components/data-table/examples/${pluralName}DataTable'
+// import { ${pluralName}DataTable } from '@/shared/components/data-table/${pluralName}DataTable'
 // TODO: Update scaffold generator to use ViewManager instead of DataTable
 
 import { 

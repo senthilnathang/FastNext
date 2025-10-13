@@ -250,7 +250,6 @@ frontend/src/
 │       └── provider.tsx
 ├── contexts/      # React contexts
 ├── hooks/         # Legacy hooks (being migrated)
-├── examples/      # Usage examples
 ├── types/         # Global type definitions
 ├── __tests__/     # Test organization
 │   ├── unit/     # Unit tests

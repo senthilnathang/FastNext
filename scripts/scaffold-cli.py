@@ -74,7 +74,7 @@ Examples:
   python scaffold-cli.py generate --name BlogPost --type frontend
   
   # Generate from configuration file
-  python scaffold-cli.py generate --config examples/product-config.json
+  python scaffold-cli.py generate --config frontend/config/product-config.json
   
   # List available field types
   python scaffold-cli.py field-types
@@ -616,7 +616,7 @@ Examples:
             print(f"  • src/shared/services/api/{model_name.lower()}.ts")
             print(f"  • src/modules/{model_name.lower()}/hooks/use{model_name}s.ts")
             print(f"  • src/modules/{model_name.lower()}/components/{model_name}Form.tsx")
-            print(f"  • src/shared/components/data-table/examples/{model_name}sDataTable.tsx")
+            print(f"  • src/shared/components/data-table/{model_name}sDataTable.tsx")
             print(f"  • src/app/{model_name.lower()}s/page.tsx (+ create, edit, view pages)")
             print(f"  • Updated src/shared/components/navigation/menuConfig.ts")
         
