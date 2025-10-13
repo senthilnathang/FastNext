@@ -23,8 +23,85 @@ import {
   Shield,
   Activity,
   Settings as SettingsIcon,
-  Bell
+  Bell,
+  AlertTriangle,
+  Clock
 } from 'lucide-react';
+
+// Password Expiry Warning Component
+function PasswordExpiryWarning({ user }: { user: any }) {
+  const getPasswordExpiryStatus = () => {
+    const passwordChangedAt = (user as any).password_changed_at;
+    if (!passwordChangedAt) {
+      return {
+        status: 'warning',
+        message: 'Password has never been changed. Consider updating it for better security.',
+        icon: AlertTriangle,
+        color: 'yellow'
+      };
+    }
+
+    const lastChanged = new Date(passwordChangedAt);
+    const now = new Date();
+    const daysSinceChange = Math.floor((now.getTime() - lastChanged.getTime()) / (1000 * 60 * 60 * 24));
+
+    if (daysSinceChange > 90) {
+      return {
+        status: 'warning',
+        message: `Password was last changed ${daysSinceChange} days ago. Consider updating it regularly.`,
+        icon: AlertTriangle,
+        color: 'yellow'
+      };
+    }
+
+    if (daysSinceChange > 60) {
+      return {
+        status: 'info',
+        message: `Password was last changed ${daysSinceChange} days ago.`,
+        icon: Clock,
+        color: 'blue'
+      };
+    }
+
+    return null;
+  };
+
+  const expiryStatus = getPasswordExpiryStatus();
+
+  if (!expiryStatus) return null;
+
+  const Icon = expiryStatus.icon;
+  const colorClasses = {
+    yellow: 'bg-yellow-50 border-yellow-200 text-yellow-800',
+    blue: 'bg-blue-50 border-blue-200 text-blue-800',
+    red: 'bg-red-50 border-red-200 text-red-800'
+  };
+
+  return (
+    <Card className={`${colorClasses[expiryStatus.color as keyof typeof colorClasses]} border`}>
+      <CardContent className="pt-6">
+        <div className="flex items-center space-x-3">
+          <Icon className="h-5 w-5 flex-shrink-0" />
+          <div className="flex-1">
+            <p className="text-sm font-medium">{expiryStatus.message}</p>
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              // Scroll to password tab
+              const passwordTab = document.querySelector('[value="password"]') as HTMLElement;
+              if (passwordTab) passwordTab.click();
+            }}
+            className="flex-shrink-0"
+          >
+            Update Password
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
 
 function SettingsContent() {
   const { user } = useAuth();
@@ -69,15 +146,25 @@ function SettingsContent() {
 
         {/* Profile Tab */}
         <TabsContent value="profile" className="space-y-6">
+          {/* Password Expiry Warning - Show at top on mobile */}
+          <div className="block lg:hidden">
+            <PasswordExpiryWarning user={user} />
+          </div>
+
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Profile Form */}
             <div className="lg:col-span-2">
               <UpdateProfileForm />
             </div>
-            
-            {/* User Info Card */}
-            <div className="space-y-6">
-              <Card>
+
+             {/* Password Expiry Warning - Hidden on mobile, shown in sidebar on lg+ */}
+             <div className="hidden lg:block">
+               <PasswordExpiryWarning user={user} />
+             </div>
+
+             {/* User Info Card */}
+             <div className="space-y-6">
+               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center space-x-2">
                     <User className="h-5 w-5" />
@@ -112,12 +199,18 @@ function SettingsContent() {
                       {new Date(user.created_at).toLocaleDateString()}
                     </p>
                   </div>
-                  <div>
-                    <p className="text-sm font-medium text-gray-500">Last Login</p>
-                    <p className="text-sm text-gray-900 dark:text-white">
-                      {user.last_login_at ? new Date(user.last_login_at).toLocaleDateString() : 'Never'}
-                    </p>
-                  </div>
+                   <div>
+                     <p className="text-sm font-medium text-gray-500">Last Login</p>
+                     <p className="text-sm text-gray-900 dark:text-white">
+                       {user.last_login_at ? new Date(user.last_login_at).toLocaleDateString() : 'Never'}
+                     </p>
+                   </div>
+                    <div>
+                      <p className="text-sm font-medium text-gray-500">Password Changed</p>
+                      <p className="text-sm text-gray-900 dark:text-white">
+                        {(user as any).password_changed_at ? new Date((user as any).password_changed_at).toLocaleDateString() : 'Never'}
+                      </p>
+                    </div>
                 </CardContent>
               </Card>
 

@@ -32,6 +32,7 @@ export default function ChangePasswordForm({ onSuccess, onCancel }: ChangePasswo
   const [passwordHistory, setPasswordHistory] = useState<any[]>([]);
   const [showPasswordHistory, setShowPasswordHistory] = useState(false);
   const [generatedPassword, setGeneratedPassword] = useState('');
+  const [historyLoading, setHistoryLoading] = useState(false);
 
   const {
     register,
@@ -63,6 +64,10 @@ export default function ChangePasswordForm({ onSuccess, onCancel }: ChangePasswo
 
       if (!response.ok) {
         const errorData = await response.json();
+        // Handle detailed password validation errors
+        if (errorData.detail && typeof errorData.detail === 'string') {
+          throw new Error(errorData.detail);
+        }
         throw new Error(errorData.detail || 'Failed to change password');
       }
 
@@ -73,7 +78,8 @@ export default function ChangePasswordForm({ onSuccess, onCancel }: ChangePasswo
         setTimeout(onSuccess, 2000);
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
+      const errorMessage = err instanceof Error ? err.message : 'An error occurred';
+      setError(parseBackendError(errorMessage));
     } finally {
       setLoading(false);
     }
@@ -99,6 +105,32 @@ export default function ChangePasswordForm({ onSuccess, onCancel }: ChangePasswo
       ...check,
       passed: check.test.test(password)
     }));
+  };
+
+  // Enhanced error message parsing for backend validation errors
+  const parseBackendError = (errorMessage: string) => {
+    if (errorMessage.includes('Password must be at least')) {
+      return 'Password must be at least 8 characters long';
+    }
+    if (errorMessage.includes('uppercase letter')) {
+      return 'Password must contain at least one uppercase letter';
+    }
+    if (errorMessage.includes('lowercase letter')) {
+      return 'Password must contain at least one lowercase letter';
+    }
+    if (errorMessage.includes('number')) {
+      return 'Password must contain at least one number';
+    }
+    if (errorMessage.includes('special character')) {
+      return 'Password must contain at least one special character';
+    }
+    if (errorMessage.includes('last')) {
+      return 'Password cannot be one of your last passwords';
+    }
+    if (errorMessage.includes('breached')) {
+      return 'This password has been found in known data breaches. Please choose a different password.';
+    }
+    return errorMessage;
   };
 
   const passwordStrengthChecks = newPassword ? validatePassword(newPassword) : [];
@@ -135,6 +167,7 @@ export default function ChangePasswordForm({ onSuccess, onCancel }: ChangePasswo
   };
 
   const fetchPasswordHistory = async () => {
+    setHistoryLoading(true);
     try {
       const token = localStorage.getItem('access_token');
       const response = await fetch(getApiUrl('/api/v1/profile/password-history'), {
@@ -147,9 +180,14 @@ export default function ChangePasswordForm({ onSuccess, onCancel }: ChangePasswo
       if (response.ok) {
         const data = await response.json();
         setPasswordHistory(data);
+      } else {
+        setError('Failed to load password history. Please try again.');
       }
     } catch (err) {
       console.error('Failed to fetch password history:', err);
+      setError('Failed to load password history. Please check your connection.');
+    } finally {
+      setHistoryLoading(false);
     }
   };
 
@@ -267,23 +305,66 @@ export default function ChangePasswordForm({ onSuccess, onCancel }: ChangePasswo
             <p className="text-sm text-red-600 mt-1">{errors.new_password.message}</p>
           )}
           
-          {newPassword && (
-            <div className="mt-3 p-3 bg-gray-50 dark:bg-gray-700 rounded-md">
-              <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Password Requirements:
-              </p>
-              <ul className="space-y-1">
-                {passwordStrengthChecks.map((check, index) => (
-                  <li key={index} className="flex items-center space-x-2 text-sm">
-                    <div className={`w-2 h-2 rounded-full ${check.passed ? 'bg-green-500' : 'bg-gray-300'}`} />
-                    <span className={check.passed ? 'text-green-600 dark:text-green-400' : 'text-gray-500 dark:text-gray-400'}>
-                      {check.label}
+            {newPassword && (
+              <div className="mt-3 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg border" role="region" aria-labelledby="password-strength-heading">
+                <div className="flex items-center justify-between mb-3">
+                  <p id="password-strength-heading" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                    Password Strength
+                  </p>
+                  <div className="flex items-center space-x-2">
+                    <div
+                      className={`w-2 h-2 rounded-full ${allChecksPassed ? 'bg-green-500' : passwordStrengthChecks.filter(c => c.passed).length >= 3 ? 'bg-yellow-500' : 'bg-red-500'}`}
+                      aria-hidden="true"
+                    />
+                    <span
+                      className={`text-xs font-medium ${
+                        allChecksPassed ? 'text-green-600' :
+                        passwordStrengthChecks.filter(c => c.passed).length >= 3 ? 'text-yellow-600' : 'text-red-600'
+                      }`}
+                      aria-live="polite"
+                    >
+                      {allChecksPassed ? 'Strong' :
+                       passwordStrengthChecks.filter(c => c.passed).length >= 3 ? 'Good' : 'Weak'}
                     </span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
+                  </div>
+                </div>
+
+                {/* Progress Bar */}
+                <div className="w-full bg-gray-200 rounded-full h-2 mb-3" role="progressbar" aria-valuenow={passwordStrengthChecks.filter(c => c.passed).length} aria-valuemin={0} aria-valuemax={5} aria-label="Password strength progress">
+                  <div
+                    className={`h-2 rounded-full transition-all duration-300 ${
+                      allChecksPassed ? 'bg-green-500 w-full' :
+                      passwordStrengthChecks.filter(c => c.passed).length >= 3 ? 'bg-yellow-500 w-3/4' :
+                      passwordStrengthChecks.filter(c => c.passed).length >= 2 ? 'bg-orange-500 w-1/2' : 'bg-red-500 w-1/4'
+                    }`}
+                  />
+                </div>
+
+               <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                 Requirements:
+               </p>
+                <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2 gap-2">
+                 {passwordStrengthChecks.map((check, index) => (
+                   <li key={index} className="flex items-center space-x-2 text-sm">
+                     <div className={`w-4 h-4 rounded-full flex items-center justify-center ${
+                       check.passed ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-400'
+                     }`}>
+                       {check.passed ? (
+                         <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                           <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                         </svg>
+                       ) : (
+                         <div className="w-1.5 h-1.5 bg-current rounded-full" />
+                       )}
+                     </div>
+                     <span className={check.passed ? 'text-green-700 dark:text-green-400' : 'text-gray-600 dark:text-gray-400'}>
+                       {check.label}
+                     </span>
+                   </li>
+                 ))}
+               </ul>
+             </div>
+           )}
         </div>
 
         <div>
@@ -369,20 +450,26 @@ export default function ChangePasswordForm({ onSuccess, onCancel }: ChangePasswo
                 <span>Generate</span>
               </Button>
               
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  fetchPasswordHistory();
-                  setShowPasswordHistory(!showPasswordHistory);
-                }}
-                disabled={loading}
-                className="flex items-center space-x-1"
-              >
-                <History className="h-3 w-3" />
-                <span>History</span>
-              </Button>
+               <Button
+                 type="button"
+                 variant="outline"
+                 size="sm"
+                 onClick={() => {
+                   if (!showPasswordHistory) {
+                     fetchPasswordHistory();
+                   }
+                   setShowPasswordHistory(!showPasswordHistory);
+                 }}
+                 disabled={loading || historyLoading}
+                 className="flex items-center space-x-1"
+               >
+                 {historyLoading ? (
+                   <RefreshCw className="h-3 w-3 animate-spin" />
+                 ) : (
+                   <History className="h-3 w-3" />
+                 )}
+                 <span>{historyLoading ? 'Loading...' : 'History'}</span>
+               </Button>
               
               <Button
                 type="button"
