@@ -14,6 +14,61 @@ const nextConfig: NextConfig = {
   // Performance optimizations
   poweredByHeader: false,
   compress: true,
+
+  // Bundle analysis and optimization
+  webpack: (config, { buildId, dev, isServer, defaultLoaders, webpack }) => {
+    // Optimize bundle splitting
+    if (!dev && !isServer) {
+      config.optimization.splitChunks.chunks = 'all';
+      config.optimization.splitChunks.cacheGroups = {
+        ...config.optimization.splitChunks.cacheGroups,
+        // Separate vendor chunks for better caching
+        vendor: {
+          test: /[\\/]node_modules[\\/]/,
+          name: 'vendors',
+          chunks: 'all',
+          priority: 10,
+        },
+        // Separate large libraries
+        'react-vendor': {
+          test: /[\\/]node_modules[\\/](react|react-dom|next)[\\/]/,
+          name: 'react-vendor',
+          chunks: 'all',
+          priority: 20,
+        },
+        'ui-vendor': {
+          test: /[\\/]node_modules[\\/](@radix-ui|@tanstack|lucide-react)[\\/]/,
+          name: 'ui-vendor',
+          chunks: 'all',
+          priority: 15,
+        },
+      };
+    }
+
+    // Add performance monitoring
+    if (!dev) {
+      config.plugins.push(
+        new webpack.DefinePlugin({
+          __PERFORMANCE_MONITORING__: JSON.stringify(true),
+        })
+      );
+    }
+
+    return config;
+  },
+
+  // Experimental features for better performance
+  experimental: {
+    optimizePackageImports: ['@radix-ui/react-icons', 'lucide-react'],
+    turbo: {
+      rules: {
+        '*.svg': {
+          loaders: ['@svgr/webpack'],
+          as: '*.js',
+        },
+      },
+    },
+  },
   
   // Image optimization
   images: {

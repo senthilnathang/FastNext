@@ -91,7 +91,7 @@ export default function AuditLogsPage() {
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
 
   // Mock audit logs data - in real app, this would come from API
-  const mockAuditLogs: AuditLog[] = [
+  const mockAuditLogs: AuditLog[] = useMemo(() => [
     {
       id: '1',
       timestamp: subMinutes(new Date(), 5).toISOString(),
@@ -213,7 +213,7 @@ export default function AuditLogsPage() {
       details: 'Updated security configuration settings',
       riskScore: 6
     }
-  ];
+  ], []);
 
   const mockStats: AuditStats = {
     totalLogs: mockAuditLogs.length,

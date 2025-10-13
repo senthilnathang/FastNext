@@ -91,7 +91,7 @@ export default function ConfigurationPage() {
   const [pendingChanges, setPendingChanges] = useState<Map<string, any>>(new Map());
 
   // Mock configuration data
-  const mockConfigs: ConfigItem[] = [
+  const mockConfigs: ConfigItem[] = useMemo(() => [
     {
       id: '1',
       key: 'JWT_SECRET',
@@ -201,7 +201,7 @@ export default function ConfigurationPage() {
       defaultValue: '{"requests": 1000, "window": "15m"}',
       restartRequired: false
     }
-  ];
+  ], []);
 
   const mockTemplates: ConfigTemplate[] = [
     {

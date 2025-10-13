@@ -38,8 +38,18 @@ import {
 } from '@/shared/components';
 import { GitBranch, Plus, Edit, Eye, Settings, Trash2, MoreHorizontal } from 'lucide-react';
 import { useWorkflowTypes, useWorkflowTemplates, useCreateWorkflowType, useCreateWorkflowTemplate, useUpdateWorkflowTemplate, useUpdateWorkflowType, useDeleteWorkflowType, useDeleteWorkflowTemplate } from '@/modules/workflow/hooks/useWorkflow';
-import { WorkflowBuilder } from '@/modules/workflow';
-import AdvancedWorkflowBuilder from '@/modules/workflow/components/AdvancedWorkflowBuilder';
+import dynamic from 'next/dynamic';
+
+// Lazy load heavy workflow components
+const WorkflowBuilder = dynamic(() => import('@/modules/workflow').then(mod => ({ default: mod.WorkflowBuilder })), {
+  loading: () => <div className="flex items-center justify-center p-8">Loading Workflow Builder...</div>,
+  ssr: false
+});
+
+const AdvancedWorkflowBuilder = dynamic(() => import('@/modules/workflow/components/AdvancedWorkflowBuilder'), {
+  loading: () => <div className="flex items-center justify-center p-8">Loading Advanced Workflow Builder...</div>,
+  ssr: false
+});
 import { formatDistanceToNow } from 'date-fns';
 
 export default function WorkflowsPage() {

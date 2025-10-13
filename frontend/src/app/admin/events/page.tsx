@@ -2,19 +2,15 @@
 
 import * as React from "react"
 import { ViewManager, ViewConfig, Column } from '@/shared/components/views'
-import { AlertTriangle, Eye, RefreshCw, Calendar, Clock, AlertCircle, Info } from "lucide-react"
+import { AlertTriangle, RefreshCw, Calendar, Clock, AlertCircle, Info } from "lucide-react"
 
-import { 
+import {
   Button,
   Badge,
   Card,
   CardContent,
   CardHeader,
   CardTitle,
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
   Select,
   SelectContent,
   SelectItem,
@@ -24,11 +20,10 @@ import {
   AlertDescription
 } from "@/shared/components"
 import type { SortOption, GroupOption } from '@/shared/components/ui'
-import { formatDistanceToNow } from 'date-fns'
 
 // Import event hooks and types
 import { useEvents, useEventStatistics, useExportEvents } from "@/modules/admin/hooks/useEvents"
-import type { EventResponse, EventStatistics as EventStatsType } from "@/modules/admin/types/events"
+import type { EventResponse } from "@/modules/admin/types/events"
 
 // Import dialogs
 import { EventDetailDialog } from "@/modules/admin/components/EventDetailDialog"
@@ -59,10 +54,7 @@ const EventsPage: React.FC<EventsPageProps> = () => {
     refetch: refetchEvents 
   } = useEvents()
   
-  const { 
-    data: statisticsData, 
-    isLoading: statisticsLoading 
-  } = useEventStatistics()
+  const { data: statisticsData } = useEventStatistics()
 
   const { mutate: exportEvents } = useExportEvents()
 

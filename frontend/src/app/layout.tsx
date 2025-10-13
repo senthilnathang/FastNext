@@ -7,6 +7,7 @@ import { TRPCProvider } from "@/lib/trpc/provider";
 import { SecurityProvider } from "@/lib/security/SecurityProvider";
 import { SessionTimeoutWarning } from "@/shared/components/SessionTimeoutWarning";
 import { GraphQLProvider } from "@/lib/graphql";
+import { ServiceWorkerRegistration } from "@/shared/components/ServiceWorkerRegistration";
 
 export const metadata: Metadata = {
   title: "FastNext Framework",
@@ -24,6 +25,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className="font-sans antialiased">
+        <ServiceWorkerRegistration />
         <SecurityProvider>
           <GraphQLProvider>
             <TRPCProvider>
