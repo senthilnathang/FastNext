@@ -400,7 +400,7 @@ const UsersPage: React.FC<UsersPageProps> = () => {
     })
   }
 
-  const handleExport = (format: string) => {
+  const handleExport = (_format: string) => {
     // TODO: Implement export
   }
 

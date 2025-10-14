@@ -53,7 +53,7 @@ export function useOptimizedCallback<T extends (...args: any[]) => any>(
   const debounceTimer = useRef<NodeJS.Timeout | undefined>(undefined);
 
   // Deep comparison utility
-  const deepEqual = (a: any, b: any): boolean => {
+  const deepEqual = useCallback((a: any, b: any): boolean => {
     if (a === b) return true;
     if (a == null || b == null) return false;
     if (typeof a !== typeof b) return false;
@@ -68,7 +68,7 @@ export function useOptimizedCallback<T extends (...args: any[]) => any>(
     }
 
     return false;
-  };
+  }, []);
 
   // Check if dependencies changed
   const previousDeps = useRef<React.DependencyList>(deps);
@@ -84,7 +84,7 @@ export function useOptimizedCallback<T extends (...args: any[]) => any>(
     return deps.some(
       (dep, index) => !Object.is(dep, previousDeps.current[index]),
     );
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, [deps, deepCompare, deepEqual]);
 
   // Update callback if dependencies changed
@@ -119,7 +119,7 @@ export function useOptimizedCallback<T extends (...args: any[]) => any>(
       lastCallTime.current = now;
       return callbackRef.current(...args);
     }) as T,
-    [],
+    [debounce, throttle],
   );
 }
 

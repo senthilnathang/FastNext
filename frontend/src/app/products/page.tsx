@@ -235,17 +235,17 @@ const ProductsPage: React.FC<ProductsPageProps> = () => {
     }
   }, [deleteProductMutation])
 
-  const handleProductView = useCallback((product: Product) => {
+  const handleProductView = useCallback((_product: Product) => {
   }, [])
 
   const handleCreateProduct = useCallback(() => {
     setIsCreateDialogOpen(true)
   }, [])
 
-  const handleExport = useCallback((format: 'csv' | 'json' | 'excel') => {
+  const handleExport = useCallback((_format: 'csv' | 'json' | 'excel') => {
   }, [])
 
-  const handleImport = useCallback((file: File) => {
+  const handleImport = useCallback((_file: File) => {
   }, [])
 
   const products = useMemo(() => productsData?.items || [], [productsData])

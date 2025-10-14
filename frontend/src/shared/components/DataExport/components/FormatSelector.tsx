@@ -173,6 +173,195 @@ export function FormatSelector({
     );
   };
 
+  const renderAdvancedOptions = () => {
+    return (
+      <div className="space-y-4">
+        {/* Common Options */}
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <Label htmlFor={`${id}-headers`} className="text-sm font-medium">
+              Include Headers
+            </Label>
+            <Switch
+              id={`${id}-headers`}
+              checked={options.includeHeaders ?? true}
+              onCheckedChange={(checked) =>
+                updateOptions({ includeHeaders: checked })
+              }
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor={`${id}-filename`} className="text-sm font-medium">
+              File Name (optional)
+            </Label>
+            <Input
+              id={`${id}-filename`}
+              placeholder={`export.${formatConfig[selectedFormat].extension.slice(1)}`}
+              value={options.fileName || ""}
+              onChange={(e) => updateOptions({ fileName: e.target.value })}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor={`${id}-encoding`} className="text-sm font-medium">
+              Text Encoding
+            </Label>
+            <Select
+              value={options.encoding || "utf-8"}
+              onValueChange={(value) => updateOptions({ encoding: value })}
+            >
+              <SelectTrigger id={`${id}-encoding`}>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="utf-8">UTF-8 (Recommended)</SelectItem>
+                <SelectItem value="utf-16">UTF-16</SelectItem>
+                <SelectItem value="ascii">ASCII</SelectItem>
+                <SelectItem value="iso-8859-1">ISO-8859-1</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+
+        <Separator />
+
+        {/* Format-specific options */}
+        {selectedFormat === "csv" && (
+          <div className="space-y-3">
+            <h4 className="text-sm font-medium">CSV Options</h4>
+            <div className="space-y-2">
+              <Label htmlFor={`${id}-delimiter`} className="text-sm font-medium">
+                Delimiter
+              </Label>
+              <Select
+                value={options.delimiter || ","}
+                onValueChange={(value) => updateOptions({ delimiter: value })}
+              >
+                <SelectTrigger id={`${id}-delimiter`}>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value=",">Comma (,)</SelectItem>
+                  <SelectItem value=";">Semicolon (;)</SelectItem>
+                  <SelectItem value="\t">Tab</SelectItem>
+                  <SelectItem value="|">Pipe (|)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        )}
+
+        {selectedFormat === "json" && (
+          <div className="space-y-3">
+            <h4 className="text-sm font-medium">JSON Options</h4>
+            <div className="flex items-center justify-between">
+              <Label htmlFor={`${id}-pretty`} className="text-sm font-medium">
+                Pretty Print
+              </Label>
+              <Switch
+                id={`${id}-pretty`}
+                checked={options.prettyPrint ?? false}
+                onCheckedChange={(checked) =>
+                  updateOptions({ prettyPrint: checked })
+                }
+              />
+            </div>
+          </div>
+        )}
+
+        {selectedFormat === "excel" && (
+          <div className="space-y-3">
+            <h4 className="text-sm font-medium">Excel Options</h4>
+            <div className="space-y-2">
+              <Label htmlFor={`${id}-sheetname`} className="text-sm font-medium">
+                Sheet Name
+              </Label>
+              <Input
+                id={`${id}-sheetname`}
+                placeholder="Sheet1"
+                value={options.sheetName || ""}
+                onChange={(e) => updateOptions({ sheetName: e.target.value })}
+              />
+            </div>
+            <div className="flex items-center justify-between">
+              <Label htmlFor={`${id}-autofit`} className="text-sm font-medium">
+                Auto-fit Columns
+              </Label>
+              <Switch
+                id={`${id}-autofit`}
+                checked={options.autoFitColumns ?? true}
+                onCheckedChange={(checked) =>
+                  updateOptions({ autoFitColumns: checked })
+                }
+              />
+            </div>
+            <div className="flex items-center justify-between">
+              <Label htmlFor={`${id}-freeze`} className="text-sm font-medium">
+                Freeze Headers
+              </Label>
+              <Switch
+                id={`${id}-freeze`}
+                checked={options.freezeHeaders ?? false}
+                onCheckedChange={(checked) =>
+                  updateOptions({ freezeHeaders: checked })
+                }
+              />
+            </div>
+          </div>
+        )}
+
+        {/* Date Format Options */}
+        <div className="space-y-3">
+          <h4 className="text-sm font-medium">Date Formatting</h4>
+          <div className="space-y-2">
+            <Label htmlFor={`${id}-dateformat`} className="text-sm font-medium">
+              Date Format
+            </Label>
+            <Select
+              value={options.dateFormat || "YYYY-MM-DD"}
+              onValueChange={(value) => updateOptions({ dateFormat: value })}
+            >
+              <SelectTrigger id={`${id}-dateformat`}>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="YYYY-MM-DD">ISO Date (YYYY-MM-DD)</SelectItem>
+                <SelectItem value="MM/DD/YYYY">US Format (MM/DD/YYYY)</SelectItem>
+                <SelectItem value="DD/MM/YYYY">European (DD/MM/YYYY)</SelectItem>
+                <SelectItem value="YYYY-MM-DD HH:mm:ss">
+                  ISO DateTime (YYYY-MM-DD HH:mm:ss)
+                </SelectItem>
+                <SelectItem value="MM/DD/YYYY HH:mm:ss">
+                  US DateTime (MM/DD/YYYY HH:mm:ss)
+                </SelectItem>
+                <SelectItem value="DD/MM/YYYY HH:mm:ss">
+                  European DateTime (DD/MM/YYYY HH:mm:ss)
+                </SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor={`${id}-customdate`} className="text-sm font-medium">
+              Custom Date Format (optional)
+            </Label>
+            <Input
+              id={`${id}-customdate`}
+              placeholder="e.g., DD MMM YYYY"
+              value={options.customDateFormat || ""}
+              onChange={(e) =>
+                updateOptions({ customDateFormat: e.target.value })
+              }
+            />
+            <p className="text-xs text-gray-500">
+              Use moment.js format tokens (e.g., DD MMM YYYY, YYYY-MM-DD HH:mm)
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <Card className={className}>
       <CardHeader>

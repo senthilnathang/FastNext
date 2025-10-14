@@ -242,7 +242,7 @@ export function KanbanView<T extends { id: string | number }>({
     }
   }, []);
 
-  const renderPriorityBadge = (priority: string) => {
+  const renderPriorityBadge = useCallback((priority: string) => {
     const colors = {
       low: "bg-green-100 text-green-800",
       medium: "bg-yellow-100 text-yellow-800",
@@ -257,7 +257,7 @@ export function KanbanView<T extends { id: string | number }>({
         {priority}
       </Badge>
     );
-  };
+  }, []);
 
   const renderDefaultCard = useCallback(
     (item: T, provided: any) => {

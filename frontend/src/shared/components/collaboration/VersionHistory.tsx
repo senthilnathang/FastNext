@@ -5,7 +5,7 @@
 import { formatDistanceToNow } from "date-fns";
 import { Eye, History, RotateCcw } from "lucide-react";
 import type React from "react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
 import { Card } from "../ui/card";
@@ -36,11 +36,7 @@ export const VersionHistory: React.FC<VersionHistoryProps> = ({
   const [loading, setLoading] = useState(true);
   const [selectedVersion, setSelectedVersion] = useState<string | null>(null);
 
-  useEffect(() => {
-    fetchVersions();
-  }, [fetchVersions]);
-
-  const fetchVersions = async () => {
+  const fetchVersions = useCallback(async () => {
     try {
       const response = await fetch(
         `/api/v1/collaboration/documents/${documentId}/versions`,
@@ -54,7 +50,11 @@ export const VersionHistory: React.FC<VersionHistoryProps> = ({
     } finally {
       setLoading(false);
     }
-  };
+  }, [documentId]);
+
+  useEffect(() => {
+    fetchVersions();
+  }, [fetchVersions]);
 
   const handleVersionSelect = async (versionId: string) => {
     setSelectedVersion(versionId);

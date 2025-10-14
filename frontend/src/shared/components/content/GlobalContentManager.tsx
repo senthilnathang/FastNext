@@ -56,7 +56,7 @@ export const GlobalContentManager: React.FC<GlobalContentManagerProps> = ({
   onContentChange,
   className = "",
 }) => {
-  const { t, locale: currentLocale } = useTranslation();
+  const { t: _t, locale: currentLocale } = useTranslation();
 
   const [contentItems, setContentItems] = useState<ContentItem[]>([]);
   const [selectedItem, setSelectedItem] = useState<ContentItem | null>(null);

@@ -4,7 +4,7 @@
 
 import { AnimatePresence, motion } from "framer-motion";
 import type React from "react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 interface CursorPosition {
   x: number;
@@ -33,7 +33,7 @@ export const CursorOverlay: React.FC<CursorOverlayProps> = ({
   );
 
   // Generate consistent colors for users
-  const getUserColor = (userId: string): string => {
+  const getUserColor = useCallback((userId: string): string => {
     const colors = [
       "#FF6B6B",
       "#4ECDC4",
@@ -51,7 +51,7 @@ export const CursorOverlay: React.FC<CursorOverlayProps> = ({
       return a & a;
     }, 0);
     return colors[Math.abs(hash) % colors.length];
-  };
+  }, []);
 
   // Clean up old cursors (inactive for more than 30 seconds)
   useEffect(() => {
@@ -122,9 +122,6 @@ export const CursorOverlay: React.FC<CursorOverlayProps> = ({
       const y = e.clientY - rect.top;
 
       // Send cursor position to server
-      const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-      const _wsUrl = `${protocol}//${window.location.host}/api/v1/collaboration/documents/${documentId}`;
-
       // For now, we'll use a simple approach - in production you'd maintain a persistent connection
       fetch(`/api/v1/collaboration/documents/${documentId}/cursor`, {
         method: "POST",

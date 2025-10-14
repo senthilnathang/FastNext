@@ -107,7 +107,7 @@ const UsersPerformancePage: React.FC = () => {
     updateSearchState
   } = useAdvancedSearch({
     initialPageSize: 50,
-    onSearch: (state: SearchState) => {
+    onSearch: (_state: SearchState) => {
     }
   })
 
@@ -180,7 +180,7 @@ const UsersPerformancePage: React.FC = () => {
     return filtered
   }, [allUsers, searchState])
 
-  const handleRowAction = (user: User, action: string) => {
+  const handleRowAction = (_user: User, _action: string) => {
     // Implement actions here
   }
 

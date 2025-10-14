@@ -178,7 +178,7 @@ export default function WorkflowVerifyPage() {
 
     try {
       // Test Create Instance
-      const newInstance = await createInstanceMutation.mutateAsync({
+      const _newInstance = await createInstanceMutation.mutateAsync({
         template_id: newTemplate.id,
         entity_id: `test-entity-${Date.now()}`,
         entity_type: 'test',

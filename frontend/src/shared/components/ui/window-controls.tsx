@@ -29,7 +29,7 @@ export function WindowControls({
   const [isMaximized, setIsMaximized] = useState(false);
 
   // Check if browser supports fullscreen API
-  const supportsFullscreen = document?.documentElement.requestFullscreen;
+  const supportsFullscreen = typeof document?.documentElement.requestFullscreen === 'function';
 
   const handleMinimize = () => {
     if (typeof window !== "undefined") {

@@ -2,7 +2,6 @@
 
 import { Slot } from "@radix-ui/react-slot";
 import { cva, type VariantProps } from "class-variance-authority";
-import { usePathname } from "next/navigation";
 import * as React from "react";
 
 import { cn } from "@/shared/utils";
@@ -361,7 +360,6 @@ function EnhancedSidebar({
   children,
   ...props
 }: SidebarProps): React.JSX.Element {
-  const _pathname = usePathname();
   const { isMobile, state, openMobile, setOpenMobile, isDraggingRail } =
     useEnhancedSidebar();
 

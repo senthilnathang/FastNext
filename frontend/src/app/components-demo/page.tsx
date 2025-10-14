@@ -296,13 +296,13 @@ export default function ComponentsDemoPage() {
             <KanbanBoard
               columns={kanbanData}
               onColumnsChange={setKanbanData}
-              onAddItem={(columnId) => {
+              onAddItem={(_columnId) => {
               }}
-              onEditItem={(item) => {
+              onEditItem={(_item) => {
               }}
-              onDeleteItem={(item) => {
+              onDeleteItem={(_item) => {
               }}
-              onMoveItem={(itemId, fromColumn, toColumn) => {
+              onMoveItem={(_itemId, _fromColumn, _toColumn) => {
               }}
             />
           </CardContent>

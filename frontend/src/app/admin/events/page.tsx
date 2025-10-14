@@ -301,7 +301,7 @@ const EventsPage: React.FC<EventsPageProps> = () => {
   const bulkActions = [
     {
       label: 'Mark as Reviewed',
-      action: (items: EventResponse[]) => {
+      action: (_items: EventResponse[]) => {
         // TODO: Implement bulk review
       },
       variant: 'default' as const

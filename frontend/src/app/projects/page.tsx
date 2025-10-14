@@ -429,15 +429,15 @@ export default function ProjectsPage() {
     }
   }
 
-  const handleExport = (format: 'csv' | 'json' | 'excel') => {
+  const handleExport = (_format: 'csv' | 'json' | 'excel') => {
     // TODO: Implement export functionality
   }
 
-  const handleImport = (file: File) => {
+  const handleImport = (_file: File) => {
     // TODO: Implement import functionality
   }
 
-  const handleMoveCard = (cardId: string | number, sourceColumnId: string, targetColumnId: string) => {
+  const handleMoveCard = (_cardId: string | number, _sourceColumnId: string, _targetColumnId: string) => {
     // For projects, we could update dates based on status
     // TODO: Implement project status updates
   }

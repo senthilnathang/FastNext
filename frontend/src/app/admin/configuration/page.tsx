@@ -316,7 +316,7 @@ export default function ConfigurationPage() {
   const handleBatchSave = useCallback(() => {
     // Implement batch save logic
     setPendingChanges(new Map());
-  }, [pendingChanges]);
+  }, []);
 
   const exportConfigs = useCallback(() => {
     const exportData = {

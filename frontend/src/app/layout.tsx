@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { AuthProvider } from "@/modules/auth";
 import { EnhancedThemeProvider } from "@/shared/providers/EnhancedThemeProvider";
@@ -17,6 +17,9 @@ export const metadata: Metadata = {
     icon: '/favicon.ico',
   },
   manifest: '/manifest.json',
+};
+
+export const viewport: Viewport = {
   themeColor: '#007bff',
 };
 

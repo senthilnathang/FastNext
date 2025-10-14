@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 interface DataImportExportConfig {
   max_file_size_mb: number;
@@ -39,11 +39,7 @@ export function useDataImportExportConfig() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    loadConfiguration();
-  }, [loadConfiguration]);
-
-  const loadConfiguration = async () => {
+  const loadConfiguration = useCallback(async () => {
     setLoading(true);
     setError(null);
 
@@ -91,7 +87,11 @@ export function useDataImportExportConfig() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    loadConfiguration();
+  }, [loadConfiguration]);
 
   const refreshConfig = () => {
     loadConfiguration();

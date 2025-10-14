@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import type React from "react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { API_CONFIG, getApiUrl } from "@/shared/services/api/config";
 import { Button } from "./button";
 import { Card } from "./card";
@@ -79,13 +79,7 @@ export default function QuickActionsMenu({
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
-  useEffect(() => {
-    if (isOpen) {
-      fetchQuickActions();
-    }
-  }, [isOpen, fetchQuickActions]);
-
-  const fetchQuickActions = async () => {
+  const fetchQuickActions = useCallback(async () => {
     try {
       setLoading(true);
       const token = localStorage.getItem("access_token");
@@ -112,7 +106,13 @@ export default function QuickActionsMenu({
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    if (isOpen) {
+      fetchQuickActions();
+    }
+  }, [isOpen, fetchQuickActions]);
 
   const handleActionClick = async (action: QuickAction) => {
     if (action.requires_confirmation) {

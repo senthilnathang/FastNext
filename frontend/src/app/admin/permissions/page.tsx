@@ -288,7 +288,7 @@ export default function PermissionsPage() {
     })
   }
 
-  const handleExport = (format: string) => {
+  const handleExport = (_format: string) => {
     // TODO: Implement export
   }
 

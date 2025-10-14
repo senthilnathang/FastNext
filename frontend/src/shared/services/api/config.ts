@@ -53,9 +53,25 @@ export const API_CONFIG = {
     BLOG_POSTS: "/api/v1/blog-posts",
     CATEGORIES: "/api/v1/categories",
     AUTHORS: "/api/v1/authors",
-    SALES: "/api/v1/sales",
-  },
-};
+     SALES: "/api/v1/sales",
+      ADMIN: {
+        CONFIG: {
+          LIST: "/api/admin/config",
+          GET: "/api/admin/config/{key}",
+          CREATE: "/api/admin/config",
+          UPDATE: "/api/admin/config/{key}",
+          DELETE: "/api/admin/config/{key}",
+          VALIDATE: "/api/admin/config/validate",
+          AUDIT: "/api/admin/config/{key}/audit",
+          RESET: "/api/admin/config/reset/{key}",
+          DATA_IMPORT_EXPORT: {
+            CURRENT: "/api/admin/config/data-import-export/current",
+            UPDATE: "/api/admin/config/data-import-export/current",
+          },
+        },
+      },
+   },
+ };
 
 export const getApiUrl = (endpoint: string): string => {
   const baseUrl = API_CONFIG.API_BASE_URL.replace(/\/$/, "");
