@@ -10,7 +10,7 @@ jest.mock('next/navigation', () => ({
 }))
 
 // Mock user role hook
-jest.mock('@/hooks/useUserRole', () => ({
+jest.mock('@/modules/admin/hooks/useUserRole', () => ({
   useUserRole: () => ({
     user: {
       id: 1,

@@ -2,7 +2,7 @@ import { render, screen, fireEvent } from '@testing-library/react'
 import QuickActionButton from '../../ui/QuickActionButton'
 
 // Mock the QuickActionsMenu component
-jest.mock('../QuickActionsMenu', () => {
+jest.mock('../../ui/QuickActionsMenu', () => {
   return function MockQuickActionsMenu({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
     return isOpen ? (
       <div data-testid="quick-actions-menu">

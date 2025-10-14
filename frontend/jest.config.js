@@ -10,6 +10,10 @@ const customJestConfig = {
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
   },
+  // Exclude E2E tests from Jest (they should be run with Playwright)
+  testPathIgnorePatterns: [
+    '<rootDir>/src/__tests__/e2e/',
+  ],
 }
 
 module.exports = createJestConfig(customJestConfig)

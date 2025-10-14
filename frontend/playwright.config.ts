@@ -13,7 +13,7 @@ import { defineConfig, devices } from '@playwright/test';
 
 export default defineConfig({
   // Test directory
-  testDir: './tests/e2e',
+  testDir: './src/__tests__/e2e',
   
   // Test file patterns
   testMatch: [
@@ -57,8 +57,8 @@ export default defineConfig({
       ],
 
   // Global setup/teardown
-  globalSetup: require.resolve('./tests/e2e/global-setup.ts'),
-  globalTeardown: require.resolve('./tests/e2e/global-teardown.ts'),
+  globalSetup: require.resolve('./src/__tests__/e2e/global-setup.ts'),
+  globalTeardown: require.resolve('./src/__tests__/e2e/global-teardown.ts'),
 
   // Shared settings for all the projects below
   use: {
@@ -97,10 +97,10 @@ export default defineConfig({
     // Desktop Chrome
     {
       name: 'chromium',
-      use: { 
+      use: {
         ...devices['Desktop Chrome'],
         // Use prepared auth state
-        storageState: 'tests/e2e/.auth/user.json',
+        storageState: 'src/__tests__/e2e/.auth/user.json',
       },
       dependencies: ['setup'],
     },
@@ -108,9 +108,9 @@ export default defineConfig({
     // Desktop Firefox
     {
       name: 'firefox',
-      use: { 
+      use: {
         ...devices['Desktop Firefox'],
-        storageState: 'tests/e2e/.auth/user.json',
+        storageState: 'src/__tests__/e2e/.auth/user.json',
       },
       dependencies: ['setup'],
     },
@@ -118,9 +118,9 @@ export default defineConfig({
     // Desktop Safari
     {
       name: 'webkit',
-      use: { 
+      use: {
         ...devices['Desktop Safari'],
-        storageState: 'tests/e2e/.auth/user.json',
+        storageState: 'src/__tests__/e2e/.auth/user.json',
       },
       dependencies: ['setup'],
     },
@@ -128,9 +128,9 @@ export default defineConfig({
     // Mobile Chrome
     {
       name: 'Mobile Chrome',
-      use: { 
+      use: {
         ...devices['Pixel 5'],
-        storageState: 'tests/e2e/.auth/user.json',
+        storageState: 'src/__tests__/e2e/.auth/user.json',
       },
       dependencies: ['setup'],
     },
@@ -138,9 +138,9 @@ export default defineConfig({
     // Mobile Safari
     {
       name: 'Mobile Safari',
-      use: { 
+      use: {
         ...devices['iPhone 12'],
-        storageState: 'tests/e2e/.auth/user.json',
+        storageState: 'src/__tests__/e2e/.auth/user.json',
       },
       dependencies: ['setup'],
     },
@@ -148,9 +148,9 @@ export default defineConfig({
     // Admin user tests
     {
       name: 'admin-chromium',
-      use: { 
+      use: {
         ...devices['Desktop Chrome'],
-        storageState: 'tests/e2e/.auth/admin.json',
+        storageState: 'src/__tests__/e2e/.auth/admin.json',
       },
       dependencies: ['setup'],
       testMatch: '**/admin/**/*.{test,spec}.{js,ts}',

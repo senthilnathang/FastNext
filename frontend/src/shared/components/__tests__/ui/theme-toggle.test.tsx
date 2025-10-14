@@ -100,7 +100,7 @@ describe('ThemeToggle', () => {
     });
 
     await waitFor(() => {
-      expect(localStorageMock.setItem).toHaveBeenCalledWith('theme', 'light');
+      expect(mockSetTheme).toHaveBeenCalledWith('light');
       expect(document.documentElement.classList.contains('light')).toBe(true);
     });
   });
@@ -117,7 +117,7 @@ describe('ThemeToggle', () => {
     });
 
     await waitFor(() => {
-      expect(localStorageMock.setItem).toHaveBeenCalledWith('theme', 'dark');
+      expect(mockSetTheme).toHaveBeenCalledWith('dark');
       expect(document.documentElement.classList.contains('dark')).toBe(true);
     });
   });
@@ -134,7 +134,7 @@ describe('ThemeToggle', () => {
     });
 
     await waitFor(() => {
-      expect(localStorageMock.setItem).toHaveBeenCalledWith('theme', 'system');
+      expect(mockSetTheme).toHaveBeenCalledWith('system');
     });
   });
 

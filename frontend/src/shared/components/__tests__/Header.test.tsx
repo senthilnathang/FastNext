@@ -16,7 +16,7 @@ jest.mock('next/navigation', () => ({
 }))
 
 // Mock Breadcrumb component
-jest.mock('../Breadcrumb', () => {
+jest.mock('../navigation/Breadcrumb', () => {
   return function MockBreadcrumb() {
     return <div data-testid="breadcrumb">Home / Dashboard / Projects</div>
   }
