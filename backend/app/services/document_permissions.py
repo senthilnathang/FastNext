@@ -9,7 +9,7 @@ from sqlalchemy import and_
 
 from app.models.user import User
 from app.core.config import settings
-from app.api.v1.collaboration import document_locks
+from app.services.collaboration_state import document_locks
 
 
 class PermissionLevel(Enum):

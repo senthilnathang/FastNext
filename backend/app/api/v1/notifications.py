@@ -9,10 +9,7 @@ from app.schemas.notification import (
     NotificationResponse,
     NotificationUpdate,
 )
-from app.services.notification_service import (
-    NotificationService,
-    get_notification_service,
-)
+from app.services.notification_service import NotificationService
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
@@ -24,12 +21,12 @@ router = APIRouter()
 def get_notifications(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
-    notification_service: NotificationService = Depends(get_notification_service),
     skip: int = Query(0, ge=0),
     limit: int = Query(50, ge=1, le=100),
     include_read: bool = Query(True),
-):
+) -> NotificationList:
     """Get user's notifications"""
+    notification_service = NotificationService(db)
     notifications = notification_service.get_user_notifications(
         user_id=cast(int, current_user.id),
         skip=skip,
@@ -50,9 +47,9 @@ def get_notifications(
 def get_unread_count(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
-    notification_service: NotificationService = Depends(get_notification_service),
 ):
     """Get count of unread notifications"""
+    notification_service = NotificationService(db)
     count = notification_service.get_unread_count(cast(int, current_user.id))
     return {"unread_count": count}
 
@@ -62,9 +59,9 @@ def mark_as_read(
     notification_id: int,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
-    notification_service: NotificationService = Depends(get_notification_service),
 ):
     """Mark a notification as read"""
+    notification_service = NotificationService(db)
     success = notification_service.mark_as_read(
         notification_id, cast(int, current_user.id)
     )
@@ -78,9 +75,9 @@ def mark_as_read(
 def mark_all_as_read(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
-    notification_service: NotificationService = Depends(get_notification_service),
 ):
     """Mark all notifications as read"""
+    notification_service = NotificationService(db)
     count = notification_service.mark_all_as_read(cast(int, current_user.id))
     return {"message": f"Marked {count} notifications as read"}
 
@@ -90,9 +87,9 @@ def delete_notification(
     notification_id: int,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
-    notification_service: NotificationService = Depends(get_notification_service),
 ):
     """Delete a notification"""
+    notification_service = NotificationService(db)
     success = notification_service.delete_notification(
         notification_id, cast(int, current_user.id)
     )
@@ -108,12 +105,12 @@ def create_notification(
     notification: NotificationCreate,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
-    notification_service: NotificationService = Depends(get_notification_service),
 ):
     """Create a notification (admin only)"""
     # TODO: Add admin permission check
     # For now, allow any authenticated user to create notifications
 
+    notification_service = NotificationService(db)
     created_notification = notification_service.create_notification(
         user_id=notification.user_id,
         title=notification.title,
@@ -136,11 +133,11 @@ def create_system_notification(
     channels: Optional[List[str]] = None,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
-    notification_service: NotificationService = Depends(get_notification_service),
 ):
     """Create system notifications for multiple users (admin only)"""
     # TODO: Add admin permission check
 
+    notification_service = NotificationService(db)
     notifications = notification_service.create_system_notification(
         user_ids=user_ids,
         title=title,

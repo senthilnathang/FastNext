@@ -4,7 +4,8 @@ Central router for all v1 API endpoints
 """
 
 # Import resource routes (move these to v1 structure later)
-from app.api import authors, blog_posts, categorys, products, saless
+from app.api import saless
+from . import authors, blog_posts, categorys, products
 from fastapi import APIRouter
 
 # Import v1 route modules

@@ -15,12 +15,12 @@ from app.core.config import settings
 from app.services.operational_transform import OperationalTransform, Operation
 from app.services.document_permissions import DocumentPermissions, PermissionLevel
 from app.services.document_versioning import DocumentVersioning
+from app.services.collaboration_state import document_locks
 
 router = APIRouter()
 
 # In-memory storage for active connections (in production, use Redis)
 active_connections: Dict[str, Dict[str, WebSocket]] = {}
-document_locks: Dict[str, str] = {}  # document_id -> user_id
 user_presence: Dict[str, Dict[str, dict]] = {}  # document_id -> {user_id: user_info}
 
 
