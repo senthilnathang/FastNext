@@ -295,14 +295,16 @@ const EventsPage: React.FC<EventsPageProps> = () => {
   }
 
   const handleImport = () => {
-    // TODO: Implement import
+    console.log('Importing events');
+    // TODO: Integrate with backend import API
   }
 
   const bulkActions = [
     {
       label: 'Mark as Reviewed',
-      action: (_items: EventResponse[]) => {
-        // TODO: Implement bulk review
+      action: (items: EventResponse[]) => {
+        console.log(`Marking ${items.length} events as reviewed`);
+        // TODO: Integrate with backend API to mark as reviewed
       },
       variant: 'default' as const
     }

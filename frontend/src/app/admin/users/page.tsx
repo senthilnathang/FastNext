@@ -400,12 +400,14 @@ const UsersPage: React.FC<UsersPageProps> = () => {
     })
   }
 
-  const handleExport = (_format: string) => {
-    // TODO: Implement export
+  const handleExport = (format: string) => {
+    console.log(`Exporting users in ${format} format`);
+    // TODO: Integrate with backend export API
   }
 
   const handleImport = () => {
-    // TODO: Implement import
+    console.log('Importing users');
+    // TODO: Integrate with backend import API
   }
 
   const bulkActions = [

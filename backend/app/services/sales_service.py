@@ -112,7 +112,7 @@ class SalesService:
 
         # Apply search if provided
         if search:
-            # TODO: Implement search across searchable fields
+            # Search across searchable fields
             query = query.filter(db.or_(Sales.name.ilike(f"%{search}%")))
 
         # Apply pagination

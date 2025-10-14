@@ -78,7 +78,7 @@ class CacheMiddleware:
                             value = str(v)
                             response_headers[key] = value
 
-                    # Add cache headers
+                    # Add cache headers (ensure string values)
                     response_headers.update(
                         {"X-Cache": "HIT", "X-Cache-Key": cache_key[:16] + "..."}
                     )
@@ -118,12 +118,12 @@ class CacheMiddleware:
                 # Store headers as tuples for proper processing
                 response_data["headers"] = message.get("headers", [])
 
-                # Add cache headers safely
+                # Add cache headers safely (use strings for compatibility)
                 try:
                     message["headers"] = [
                         *message.get("headers", []),
-                        (b"x-cache", b"MISS"),
-                        (b"x-cache-key", cache_key[:16].encode() + b"..."),
+                        ("x-cache", "MISS"),
+                        ("x-cache-key", cache_key[:16] + "..."),
                     ]
                 except Exception as e:
                     logger.error(f"❌ Error adding cache headers: {e}")

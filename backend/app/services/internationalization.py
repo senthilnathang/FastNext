@@ -7,11 +7,14 @@ from datetime import datetime
 from dataclasses import dataclass
 import json
 import os
+import logging
 from pathlib import Path
 
 from babel import Locale, dates, numbers, plural
 from babel.support import Translations
 import pytz
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -77,7 +80,7 @@ class Internationalization:
                 )
                 Internationalization._locale_info[locale_code] = info
             except Exception as e:
-                print(f"Error initializing locale {locale_code}: {e}")
+                logger.error(f"Error initializing locale {locale_code}: {e}")
 
     @staticmethod
     def _get_plural_rules(locale: Locale) -> Dict[str, Any]:

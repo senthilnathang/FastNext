@@ -5,9 +5,12 @@ Test the GraphQL implementation with the backend
 
 import asyncio
 import json
+import logging
 from typing import Any, Dict
 
 import httpx
+
+logger = logging.getLogger(__name__)
 
 
 class GraphQLTester:
@@ -80,7 +83,7 @@ class GraphQLTester:
         }
 
         for query_name, query in queries.items():
-            print(f"Testing {query_name} query...")
+            logger.info(f"Testing {query_name} query...")
             result = await self.test_graphql_query(query)
             test_results[query_name] = result
 
@@ -114,7 +117,7 @@ class GraphQLTester:
         }
 
         for mutation_name, mutation_data in mutations.items():
-            print(f"Testing {mutation_name} mutation...")
+            logger.info(f"Testing {mutation_name} mutation...")
             result = await self.test_graphql_query(
                 mutation_data["query"], mutation_data["variables"]
             )
@@ -159,78 +162,78 @@ class GraphQLTester:
     async def run_comprehensive_test(self) -> Dict[str, Any]:
         """Run comprehensive GraphQL integration test"""
 
-        print("🚀 Starting GraphQL Integration Tests...")
+        logger.info("🚀 Starting GraphQL Integration Tests...")
 
         results = {"timestamp": asyncio.get_event_loop().time(), "tests": {}}
 
         # Test 1: Endpoint accessibility
-        print("\n📡 Testing GraphQL endpoint accessibility...")
+        logger.info("\n📡 Testing GraphQL endpoint accessibility...")
         results["tests"]["endpoint"] = await self.test_graphql_endpoint()
 
         # Test 2: Basic queries
-        print("\n🔍 Testing basic GraphQL queries...")
+        logger.info("\n🔍 Testing basic GraphQL queries...")
         results["tests"]["queries"] = await self.test_basic_queries()
 
         # Test 3: Mutations
-        print("\n✏️ Testing GraphQL mutations...")
+        logger.info("\n✏️ Testing GraphQL mutations...")
         results["tests"]["mutations"] = await self.test_mutations()
 
         # Test 4: Authentication (without token)
-        print("\n🔒 Testing authentication (no token)...")
+        logger.info("\n🔒 Testing authentication (no token)...")
         results["tests"]["auth_no_token"] = await self.test_authentication()
 
         # Test 5: Authentication (with mock token)
-        print("\n🔐 Testing authentication (with token)...")
+        logger.info("\n🔐 Testing authentication (with token)...")
         results["tests"]["auth_with_token"] = await self.test_authentication(
             "mock_token"
         )
 
-        print("\n✅ GraphQL Integration Tests Complete!")
+        logger.info("\n✅ GraphQL Integration Tests Complete!")
 
         return results
 
     def print_test_summary(self, results: Dict[str, Any]):
         """Print a summary of test results"""
 
-        print("\n" + "=" * 60)
-        print("📊 GRAPHQL INTEGRATION TEST SUMMARY")
-        print("=" * 60)
+        logger.info("\n" + "=" * 60)
+        logger.info("📊 GRAPHQL INTEGRATION TEST SUMMARY")
+        logger.info("=" * 60)
 
         # Endpoint test
         endpoint_result = results["tests"]["endpoint"]
         status = "✅ PASS" if endpoint_result.get("endpoint_accessible") else "❌ FAIL"
-        print(f"GraphQL Endpoint: {status}")
+        logger.info(f"GraphQL Endpoint: {status}")
         if endpoint_result.get("has_graphiql"):
-            print("  • GraphiQL Interface: ✅ Available")
+            logger.info("  • GraphiQL Interface: ✅ Available")
 
         # Query tests
-        print(f"\nQuery Tests:")
+        logger.info(f"\nQuery Tests:")
         for query_name, query_result in results["tests"]["queries"].items():
             status = "✅ PASS" if query_result.get("success") else "❌ FAIL"
-            print(f"  • {query_name}: {status}")
+            logger.info(f"  • {query_name}: {status}")
 
         # Mutation tests
-        print(f"\nMutation Tests:")
+        logger.info(f"\nMutation Tests:")
         for mutation_name, mutation_result in results["tests"]["mutations"].items():
             status = "✅ PASS" if mutation_result.get("success") else "❌ FAIL"
-            print(f"  • {mutation_name}: {status}")
+            logger.info(f"  • {mutation_name}: {status}")
 
         # Authentication tests
-        print(f"\nAuthentication Tests:")
+        logger.info(f"\nAuthentication Tests:")
         auth_no_token = results["tests"]["auth_no_token"]
         auth_with_token = results["tests"]["auth_with_token"]
 
-        print(
+        logger.info(
             f"  • Without token: {'✅ PASS' if not auth_no_token.get('success') else '❌ FAIL'}"
         )
-        print(
+        logger.info(
             f"  • With token: {'✅ PASS' if auth_with_token.get('success') else '❌ FAIL'}"
         )
 
-        print("\n" + "=" * 60)
-        print("🔗 GraphQL Endpoint: http://localhost:8000/api/v1/graphql")
-        print("📖 Documentation: Available in GraphiQL interface")
-        print("=" * 60)
+        logger.info("\n" + "=" * 60)
+        logger.info("🔗 GraphQL Endpoint: http://localhost:8000/api/v1/graphql")
+        logger.info("📖 Documentation: Available in GraphiQL interface")
+        logger.info("=" * 60)
 
 
 async def main():
@@ -244,7 +247,7 @@ async def main():
     with open("graphql_test_results.json", "w") as f:
         json.dump(results, f, indent=2)
 
-    print("\n💾 Detailed results saved to: graphql_test_results.json")
+    logger.info("\n💾 Detailed results saved to: graphql_test_results.json")
 
 
 if __name__ == "__main__":

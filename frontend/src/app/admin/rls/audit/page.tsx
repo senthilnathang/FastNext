@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { CommonFormViewManager, createFormViewConfig } from '@/shared/components/views/CommonFormViewManager'
 import { FormField } from '@/shared/components/views/GenericFormView'
@@ -381,7 +381,7 @@ export default function RLSAuditPage() {
   }
 
   // API functions
-  const fetchAuditLogs = async (): Promise<RLSAuditLog[]> => {
+  const fetchAuditLogs = useCallback(async (): Promise<RLSAuditLog[]> => {
     setLoading(true)
     try {
       const response = await fetch('/api/v1/rls/audit-logs')
@@ -396,12 +396,12 @@ export default function RLSAuditPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [])
 
   // Load data on mount
   useEffect(() => {
     fetchAuditLogs()
-  }, [])
+  }, [fetchAuditLogs])
 
   // Create form view configuration (audit logs are read-only)
   const config = createFormViewConfig<RLSAuditLog>({

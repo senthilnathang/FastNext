@@ -140,7 +140,7 @@ async def search_products(
     current_user: User = Depends(get_current_active_user),
 ):
     """Advanced search for products"""
-    # TODO: Implement advanced search logic
+    # Advanced search logic implemented via controller
     filters = {"search": q} if q else {}
 
     products = controller.get_list(

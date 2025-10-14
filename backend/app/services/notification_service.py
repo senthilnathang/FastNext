@@ -1,6 +1,7 @@
 import json
 from datetime import datetime
 from typing import Any, Dict, List, Optional
+import logging
 
 from app.core.config import settings
 from app.models.notification import Notification, NotificationChannel, NotificationType
@@ -9,6 +10,8 @@ from sqlalchemy import and_, desc
 from sqlalchemy.orm import Session
 import emails
 from emails.template import JinjaTemplate
+
+logger = logging.getLogger(__name__)
 
 
 class NotificationService:
@@ -160,7 +163,7 @@ class NotificationService:
 
         except Exception as e:
             # Log error but don't fail - notification will be retried
-            print(f"Email sending failed: {e}")
+            logger.error(f"Email sending failed: {e}")
             return False
 
     def _render_email_template(self, notification: Notification) -> str:

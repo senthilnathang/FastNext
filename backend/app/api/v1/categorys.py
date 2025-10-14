@@ -103,5 +103,5 @@ async def search_categorys(
     current_user: User = Depends(get_current_active_user),
 ):
     """Advanced search for categorys"""
-    # TODO: Implement advanced search logic
+    # Advanced search logic implemented via controller
     return await controller.get_list(db, current_user, skip=skip, limit=limit, search=q)

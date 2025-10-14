@@ -121,10 +121,53 @@ export default function DataExportPage() {
     }
   ];
 
+  const fetchAvailableTables = useCallback(async () => {
+    setIsLoadingTables(true);
+    try {
+      const token = localStorage.getItem('access_token');
+
+      if (!token) {
+        console.warn('No access token found - showing demo tables');
+        setAvailableTables(['users', 'products', 'orders', 'customers']);
+        setIsLoadingTables(false);
+        return;
+      }
+
+      const response = await fetch('/api/v1/data/tables/available', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error(`Failed to fetch available tables (${response.status}):`, errorText);
+
+        // For auth errors, show demo tables
+        if (response.status === 401 || response.status === 403) {
+          setAvailableTables(['users', 'products', 'orders', 'customers']);
+          return;
+        }
+
+        throw new Error(`Failed to fetch available tables (${response.status})`);
+      }
+
+      const data = await response.json();
+      setAvailableTables(data.tables || []);
+    } catch (err) {
+      console.error('Failed to load tables:', err);
+      setError(`Failed to load tables: ${err instanceof Error ? err.message : 'Unknown error'}`);
+       // Set fallback tables for demo
+       setAvailableTables(['users', 'products', 'orders', 'customers']);
+      } finally {
+        setIsLoadingTables(false);
+      }
+    }, []);
+
   // Fetch available tables on component mount
   useEffect(() => {
     fetchAvailableTables();
-  }, []);
+  }, [fetchAvailableTables]);
 
 
 
@@ -310,48 +353,7 @@ export default function DataExportPage() {
     }
   }, []);
 
-  const fetchAvailableTables = async () => {
-    setIsLoadingTables(true);
-    try {
-      const token = localStorage.getItem('access_token');
 
-      if (!token) {
-        console.warn('No access token found - showing demo tables');
-        setAvailableTables(['users', 'products', 'orders', 'customers']);
-        setIsLoadingTables(false);
-        return;
-      }
-
-      const response = await fetch('/api/v1/data/tables/available', {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error(`Failed to fetch available tables (${response.status}):`, errorText);
-
-        // For auth errors, show demo tables
-        if (response.status === 401 || response.status === 403) {
-          setAvailableTables(['users', 'products', 'orders', 'customers']);
-          return;
-        }
-
-        throw new Error(`Failed to fetch available tables (${response.status})`);
-      }
-
-      const data = await response.json();
-      setAvailableTables(data.tables || []);
-    } catch (err) {
-      console.error('Failed to load tables:', err);
-      setError(`Failed to load tables: ${err instanceof Error ? err.message : 'Unknown error'}`);
-       // Set fallback tables for demo
-       setAvailableTables(['users', 'products', 'orders', 'customers']);
-      } finally {
-        setIsLoadingTables(false);
-      }
-    };
 
   const fetchTableData = useCallback(async (tableName: string, limit: number = 1000) => {
     setIsLoading(true);

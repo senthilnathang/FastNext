@@ -116,7 +116,7 @@ class CategoryService:
 
         # Apply search if provided
         if search:
-            # TODO: Implement search across searchable fields
+            # Search across searchable fields
             query = query.filter(
                 db.or_(
                     Category.name.ilike(f"%{search}%"),

@@ -288,12 +288,14 @@ export default function PermissionsPage() {
     })
   }
 
-  const handleExport = (_format: string) => {
-    // TODO: Implement export
+  const handleExport = (format: string) => {
+    console.log(`Exporting permissions in ${format} format`);
+    // TODO: Integrate with backend export API
   }
 
   const handleImport = () => {
-    // TODO: Implement import
+    console.log('Importing permissions');
+    // TODO: Integrate with backend import API
   }
 
   const bulkActions = [

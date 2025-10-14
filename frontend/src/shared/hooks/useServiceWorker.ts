@@ -2,6 +2,9 @@
 
 import { useCallback, useEffect, useState } from "react";
 
+// Note: In a real app, you might want to use a proper logging library
+// For now, we'll keep console.error for service worker errors
+
 interface ServiceWorkerState {
   isSupported: boolean;
   isRegistered: boolean;

@@ -117,7 +117,7 @@ class ProductService:
 
         # Apply search if provided
         if search:
-            # TODO: Implement search across searchable fields
+            # Search across searchable fields
             query = query.filter(
                 db.or_(
                     Product.name.ilike(f"%{search}%"),

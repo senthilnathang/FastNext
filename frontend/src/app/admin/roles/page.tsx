@@ -239,12 +239,14 @@ export default function RolesPage() {
     })
   }
 
-  const handleExport = (_format: string) => {
-    // TODO: Implement export
+  const handleExport = (format: string) => {
+    console.log(`Exporting roles in ${format} format`);
+    // TODO: Integrate with backend export API
   }
 
   const handleImport = () => {
-    // TODO: Implement import
+    console.log('Importing roles');
+    // TODO: Integrate with backend import API
   }
 
   const bulkActions = [

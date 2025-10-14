@@ -115,14 +115,7 @@ export default function DataImportPage() {
     }
   ];
 
-  // Fetch available tables on component mount
-  useEffect(() => {
-    fetchAvailableTables();
-  }, []);
-
-
-
-  const fetchAvailableTables = async () => {
+  const fetchAvailableTables = useCallback(async () => {
     setIsLoadingTables(true);
     try {
       const token = localStorage.getItem('access_token');
@@ -164,7 +157,16 @@ export default function DataImportPage() {
       } finally {
         setIsLoadingTables(false);
       }
-    };
+    }, []);
+
+  // Fetch available tables on component mount
+  useEffect(() => {
+    fetchAvailableTables();
+  }, [fetchAvailableTables]);
+
+
+
+
 
   const getDemoTableSchema = (tableName: string): TableInfo => {
     // Demo schema data for fallback when authentication fails

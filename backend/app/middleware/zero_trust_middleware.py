@@ -8,9 +8,12 @@ from fastapi.responses import JSONResponse
 from starlette.middleware.base import BaseHTTPMiddleware
 import time
 import json
+import logging
 
 from app.services.zero_trust_security import ZeroTrustSecurity, SecurityContext, TrustLevel
 from app.core.config import settings
+
+logger = logging.getLogger(__name__)
 
 
 class ZeroTrustMiddleware(BaseHTTPMiddleware):
@@ -219,8 +222,8 @@ class ZeroTrustMiddleware(BaseHTTPMiddleware):
         }
 
         # In production, send to security monitoring system
-        # For now, just print for debugging
-        print(f"Security Event: {json.dumps(event, default=str)}")
+        # For now, log for debugging
+        logger.warning(f"Security Event: {json.dumps(event, default=str)}")
 
     async def _log_security_error(self, request: Request, error: str):
         """
@@ -237,4 +240,4 @@ class ZeroTrustMiddleware(BaseHTTPMiddleware):
         }
 
         # In production, send to security monitoring system
-        print(f"Security Error: {json.dumps(event, default=str)}")
+        logger.error(f"Security Error: {json.dumps(event, default=str)}")
