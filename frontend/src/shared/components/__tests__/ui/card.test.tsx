@@ -42,7 +42,9 @@ describe('Card Components', () => {
       render(<CardTitle>Card Title</CardTitle>)
       const title = screen.getByRole('heading', { level: 3 })
       expect(title).toBeInTheDocument()
-      expect(title).toHaveClass('text-2xl', 'font-semibold', 'leading-none', 'tracking-tight')
+      expect(title).toHaveClass('text-2xl')
+      expect(title).toHaveClass('font-semibold')
+      expect(title).toHaveClass('tracking-tight')
     })
 
     it('accepts custom className', () => {

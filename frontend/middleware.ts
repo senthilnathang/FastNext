@@ -452,7 +452,7 @@ async function checkAuthentication(request: NextRequest): Promise<{
       isAdmin: payload.is_superuser || payload.roles?.includes('admin'),
       permissions: payload.permissions || []
     };
-  } catch (_error) {
+  } catch {
     return { isAuthenticated: false };
   }
 }

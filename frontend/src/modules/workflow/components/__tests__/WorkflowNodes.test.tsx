@@ -105,14 +105,16 @@ describe('WorkflowStateNode', () => {
     expect(screen.getByText('End')).toBeInTheDocument();
   });
 
-  test('applies selected styling when selected', () => {
-    const selectedProps = { ...mockNodeProps, selected: true };
-    
-    render(<WorkflowStateNode {...selectedProps} />);
-    
-    const nodeContainer = screen.getByText('Test State').closest('div');
-    expect(nodeContainer).toHaveClass('border-blue-500');
-  });
+   test('applies selected styling when selected', () => {
+     const selectedProps = { ...mockNodeProps, selected: true };
+
+     render(<WorkflowStateNode {...selectedProps} />);
+
+     // Find the main node container by looking for the element with the border styling
+     const nodeContainer = document.querySelector('[style*="border-color"]');
+     expect(nodeContainer).toHaveAttribute('style');
+     expect(nodeContainer?.getAttribute('style')).toContain('border-color: rgb(59, 130, 246)');
+   });
 
   test('handles missing description gracefully', () => {
     const noDescriptionProps = {
@@ -349,13 +351,16 @@ describe('UserTaskNode', () => {
     expect(screen.getByText('Task')).toBeInTheDocument();
   });
 
-  test('renders icons for different task properties', () => {
-    render(<UserTaskNode {...mockUserTaskProps} />);
-    
-    expect(screen.getByTestId('user-icon')).toBeInTheDocument();
-    expect(screen.getByTestId('users-icon')).toBeInTheDocument();
-    expect(screen.getByTestId('checksquare-icon')).toBeInTheDocument();
-  });
+   test('renders icons for different task properties', () => {
+     render(<UserTaskNode {...mockUserTaskProps} />);
+
+     // Check that multiple user icons are rendered (header + assignee)
+     const userIcons = screen.getAllByTestId('user-icon');
+     expect(userIcons).toHaveLength(2);
+
+     expect(screen.getByTestId('users-icon')).toBeInTheDocument();
+     expect(screen.getByTestId('checksquare-icon')).toBeInTheDocument();
+   });
 
   test('renders input and output handles', () => {
     render(<UserTaskNode {...mockUserTaskProps} />);

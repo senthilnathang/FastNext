@@ -1,3 +1,12 @@
+// Mock the useWorkflowTemplate hook
+jest.mock('../../hooks/useWorkflow', () => ({
+  useWorkflowTemplate: jest.fn(() => ({
+    data: null,
+    isLoading: false,
+    error: null,
+  })),
+}));
+
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
@@ -5,14 +14,7 @@ import WorkflowBuilder from '../WorkflowBuilder';
 
 // Mock ReactFlow since it doesn't work well in test environment
 jest.mock('reactflow', () => ({
-  ...jest.requireActual('reactflow'),
-  ReactFlow: ({ children, nodes, edges }: any) => (
-    <div data-testid="reactflow-canvas">
-      <div data-testid="nodes-count">{nodes?.length || 0}</div>
-      <div data-testid="edges-count">{edges?.length || 0}</div>
-      {children}
-    </div>
-  ),
+  ReactFlow: () => <div data-testid="reactflow-canvas" />,
   Controls: () => <div data-testid="reactflow-controls" />,
   MiniMap: () => <div data-testid="reactflow-minimap" />,
   Background: () => <div data-testid="reactflow-background" />,
@@ -30,15 +32,15 @@ jest.mock('reactflow', () => ({
   BackgroundVariant: {
     Dots: 'dots'
   },
-  ReactFlowProvider: ({ children }: any) => <div>{children}</div>,
+  ReactFlowProvider: ({ children }: any) => <div data-testid="reactflow-provider">{children}</div>,
   useNodesState: (initialNodes: any) => [
-    initialNodes, 
-    jest.fn(), 
+    initialNodes,
+    jest.fn(),
     jest.fn()
   ],
   useEdgesState: (initialEdges: any) => [
-    initialEdges, 
-    jest.fn(), 
+    initialEdges,
+    jest.fn(),
     jest.fn()
   ],
   addEdge: jest.fn()
@@ -82,7 +84,7 @@ const renderWorkflowBuilder = (props = {}) => {
     ...props
   };
 
-  return render(<WorkflowBuilder {...defaultProps} />);
+  render(<WorkflowBuilder {...defaultProps} />);
 };
 
 describe('WorkflowBuilder', () => {

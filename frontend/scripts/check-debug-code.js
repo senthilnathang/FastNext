@@ -70,7 +70,7 @@ function main() {
         const content = execSync(`git show :${file}`, { encoding: 'utf8' });
         const issues = checkFile(file, content);
         allIssues = allIssues.concat(issues);
-      } catch (_error) {
+      } catch {
         // File might be deleted or binary, skip
       }
     });

@@ -14,9 +14,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 
 function WorkflowStateNode({ data, selected, id }: NodeProps<WorkflowNodeData>) {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [editData, setEditData] = useState(data);
-  
-  const IconComponent = data.icon ? (Icons as any)[data.icon] || Icons.Circle : Icons.Circle;
+  const [editData, setEditData] = useState(data || {});
+
+  const IconComponent = data?.icon ? (Icons as any)[data.icon] || Icons.Circle : Icons.Circle;
 
   const handleSave = useCallback(() => {
     // Update the node data
@@ -43,9 +43,9 @@ function WorkflowStateNode({ data, selected, id }: NodeProps<WorkflowNodeData>) 
           ${selected ? 'border-blue-500' : 'border-gray-300'}
           transition-all duration-200 hover:shadow-lg
         `}
-        style={{ 
-          backgroundColor: data.bgColor || '#ffffff',
-          borderColor: selected ? '#3B82F6' : (data.color || '#D1D5DB')
+        style={{
+          backgroundColor: data?.bgColor || '#ffffff',
+          borderColor: selected ? '#3B82F6' : (data?.color || '#D1D5DB')
         }}
         onDoubleClick={() => setIsEditDialogOpen(true)}
       >
@@ -59,19 +59,19 @@ function WorkflowStateNode({ data, selected, id }: NodeProps<WorkflowNodeData>) 
         
         {/* Node content */}
         <div className="flex items-center space-x-2">
-          <IconComponent 
-            size={16} 
-            style={{ color: data.color || '#6B7280' }}
+          <IconComponent
+            size={16}
+            style={{ color: data?.color || '#6B7280' }}
             className="flex-shrink-0"
           />
           <div className="flex-1 min-w-0">
-            <div 
+            <div
               className="font-medium text-sm truncate"
-              style={{ color: data.color || '#374151' }}
+              style={{ color: data?.color || '#374151' }}
             >
-              {data.label}
+              {data?.label || 'State'}
             </div>
-            {data.description && (
+            {data?.description && (
               <div className="text-xs text-gray-500 mt-1 line-clamp-2">
                 {data.description}
               </div>
@@ -92,12 +92,12 @@ function WorkflowStateNode({ data, selected, id }: NodeProps<WorkflowNodeData>) 
 
         {/* Badges */}
         <div className="flex flex-wrap gap-1 mt-2">
-          {data.isInitial && (
+          {data?.isInitial && (
             <span className="px-1.5 py-0.5 text-xs bg-green-100 text-green-700 rounded">
               Start
             </span>
           )}
-          {data.isFinal && (
+          {data?.isFinal && (
             <span className="px-1.5 py-0.5 text-xs bg-gray-100 text-gray-700 rounded">
               End
             </span>
