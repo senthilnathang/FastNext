@@ -42,6 +42,7 @@ export interface GenericListViewProps<T = any> {
   createButtonText?: string
   emptyStateTitle?: string
   emptyStateDescription?: string
+  className?: string
   
   // Search and filtering
   searchable?: boolean
@@ -96,6 +97,7 @@ export function GenericListView<T extends { id: number }>({
   createButtonText = 'Create New',
   emptyStateTitle = 'No items found',
   emptyStateDescription = 'Get started by creating your first item',
+  className,
   searchable = true,
   searchPlaceholder = 'Search...',
   onSearch,
@@ -201,7 +203,7 @@ export function GenericListView<T extends { id: number }>({
   }
 
   return (
-    <div className="space-y-4">
+    <div className={`space-y-4${className ? ` ${className}` : ''}`}>
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
