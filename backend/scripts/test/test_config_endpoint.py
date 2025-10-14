@@ -16,7 +16,7 @@ def test_endpoint_function():
         import asyncio
         from unittest.mock import Mock
 
-        from app.api.v1.system_configuration import get_data_import_export_config
+        from app.api.admin.system_configuration import get_data_import_export_config
         from app.core.config import settings
         from app.db.session import get_db
         from app.models.system_configuration import (

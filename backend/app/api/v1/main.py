@@ -31,7 +31,6 @@ from . import (
     roles,
     scaling_health,
     security,
-    system_configuration,
     user_roles,
     users,
     workflow_instances,
@@ -109,10 +108,7 @@ v1_router.include_router(
     data_import_export.router, prefix="/data", tags=["v1-data-import-export"]
 )
 
-# System Configuration
-v1_router.include_router(
-    system_configuration.router, prefix="/config", tags=["v1-configuration"]
-)
+
 
 # Row Level Security
 v1_router.include_router(rls.router, prefix="/rls", tags=["v1-rls"])

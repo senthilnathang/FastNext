@@ -3,6 +3,7 @@ Main API Router
 Aggregates all API versions and routes
 """
 
+from app.api.admin.main import admin_router
 from app.api.v1.main import v1_router
 from fastapi import APIRouter
 
@@ -11,6 +12,9 @@ api_router = APIRouter()
 
 # Include versioned routers
 api_router.include_router(v1_router, tags=["v1"])
+
+# Include admin router
+api_router.include_router(admin_router, prefix="/admin", tags=["admin"])
 
 # Include GraphQL router (mock implementation)
 try:
