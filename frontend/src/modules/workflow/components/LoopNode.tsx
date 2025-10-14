@@ -1,9 +1,15 @@
 'use client';
 
-import React, { memo } from 'react';
+import React, { memo, useState, useCallback } from 'react';
 import { Handle, Position, NodeProps } from 'reactflow';
 import { WorkflowNodeData } from '../types/reactflow';
 import { RotateCw, Settings, Hash } from 'lucide-react';
+import { Button } from '@/shared/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/shared/components/ui/dialog';
+import { Input } from '@/shared/components/ui/input';
+import { Label } from '@/shared/components/ui/label';
+import { Textarea } from '@/shared/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/components/ui/select';
 
 interface LoopNodeData extends WorkflowNodeData {
   loopType: 'for' | 'while' | 'forEach';
@@ -13,7 +19,20 @@ interface LoopNodeData extends WorkflowNodeData {
   collection?: string;
 }
 
-function LoopNode({ data, selected }: NodeProps<LoopNodeData>) {
+function LoopNode({ data, selected, id }: NodeProps<LoopNodeData>) {
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [editData, setEditData] = useState(data);
+
+  const handleSave = useCallback(() => {
+    if (typeof window !== 'undefined') {
+      const event = new CustomEvent('updateNodeData', {
+        detail: { nodeId: id, newData: editData }
+      });
+      window.dispatchEvent(event);
+    }
+    setIsEditDialogOpen(false);
+  }, [id, editData]);
+
   const getLoopTypeIcon = () => {
     switch (data.loopType) {
       case 'for':
@@ -67,7 +86,17 @@ function LoopNode({ data, selected }: NodeProps<LoopNodeData>) {
             {data.description || getLoopDescription()}
           </div>
         </div>
-        <Settings size={12} className="text-purple-500" />
+        <Button
+          variant="ghost"
+          size="sm"
+          className="p-1 h-auto opacity-0 group-hover:opacity-100 transition-opacity"
+          onClick={(e) => {
+            e.stopPropagation();
+            setIsEditDialogOpen(true);
+          }}
+        >
+          <Settings size={12} className="text-purple-500" />
+        </Button>
       </div>
 
       {/* Loop type indicator */}
@@ -125,6 +154,110 @@ function LoopNode({ data, selected }: NodeProps<LoopNodeData>) {
         className="w-3 h-3 !bg-blue-400 border-2 border-white"
         style={{ left: -6, top: '30%' }}
       />
+
+      {/* Edit Dialog */}
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Edit Loop Node</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="label">Loop Name</Label>
+              <Input
+                id="label"
+                value={editData.label || ''}
+                onChange={(e) => setEditData({ ...editData, label: e.target.value })}
+                placeholder="Enter loop name"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="description">Description</Label>
+              <Textarea
+                id="description"
+                value={editData.description || ''}
+                onChange={(e) => setEditData({ ...editData, description: e.target.value })}
+                placeholder="Enter loop description"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="loopType">Loop Type</Label>
+              <Select
+                value={editData.loopType || 'for'}
+                onValueChange={(value) => setEditData({ ...editData, loopType: value as any })}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="for">For Loop</SelectItem>
+                  <SelectItem value="while">While Loop</SelectItem>
+                  <SelectItem value="forEach">For Each Loop</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {editData.loopType === 'for' && (
+              <div className="space-y-2">
+                <Label htmlFor="maxIterations">Maximum Iterations</Label>
+                <Input
+                  id="maxIterations"
+                  type="number"
+                  value={editData.maxIterations || ''}
+                  onChange={(e) => setEditData({ ...editData, maxIterations: parseInt(e.target.value) || undefined })}
+                  placeholder="Enter max iterations"
+                />
+              </div>
+            )}
+
+            {editData.loopType === 'while' && (
+              <div className="space-y-2">
+                <Label htmlFor="condition">Condition</Label>
+                <Input
+                  id="condition"
+                  value={editData.condition || ''}
+                  onChange={(e) => setEditData({ ...editData, condition: e.target.value })}
+                  placeholder="e.g., counter < 10"
+                />
+              </div>
+            )}
+
+            {editData.loopType === 'forEach' && (
+              <>
+                <div className="space-y-2">
+                  <Label htmlFor="collection">Collection Variable</Label>
+                  <Input
+                    id="collection"
+                    value={editData.collection || ''}
+                    onChange={(e) => setEditData({ ...editData, collection: e.target.value })}
+                    placeholder="e.g., items"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="iteratorVariable">Iterator Variable</Label>
+                  <Input
+                    id="iteratorVariable"
+                    value={editData.iteratorVariable || ''}
+                    onChange={(e) => setEditData({ ...editData, iteratorVariable: e.target.value })}
+                    placeholder="e.g., item"
+                  />
+                </div>
+              </>
+            )}
+
+            <div className="flex justify-end space-x-2">
+              <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleSave}>
+                Save Changes
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

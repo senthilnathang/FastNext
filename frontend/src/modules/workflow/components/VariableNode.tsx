@@ -1,9 +1,15 @@
 'use client';
 
-import React, { memo } from 'react';
+import React, { memo, useState, useCallback } from 'react';
 import { Handle, Position, NodeProps } from 'reactflow';
 import { WorkflowNodeData } from '../types/reactflow';
 import { Variable, Settings, Calculator, Type, Hash } from 'lucide-react';
+import { Button } from '@/shared/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/shared/components/ui/dialog';
+import { Input } from '@/shared/components/ui/input';
+import { Label } from '@/shared/components/ui/label';
+import { Textarea } from '@/shared/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/components/ui/select';
 
 interface VariableNodeData extends WorkflowNodeData {
   operationType: 'set' | 'get' | 'calculate' | 'transform';
@@ -14,7 +20,20 @@ interface VariableNodeData extends WorkflowNodeData {
   scope: 'local' | 'global' | 'instance';
 }
 
-function VariableNode({ data, selected }: NodeProps<VariableNodeData>) {
+function VariableNode({ data, selected, id }: NodeProps<VariableNodeData>) {
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [editData, setEditData] = useState(data);
+
+  const handleSave = useCallback(() => {
+    if (typeof window !== 'undefined') {
+      const event = new CustomEvent('updateNodeData', {
+        detail: { nodeId: id, newData: editData }
+      });
+      window.dispatchEvent(event);
+    }
+    setIsEditDialogOpen(false);
+  }, [id, editData]);
+
   const getOperationIcon = () => {
     switch (data.operationType) {
       case 'set':
@@ -89,7 +108,17 @@ function VariableNode({ data, selected }: NodeProps<VariableNodeData>) {
             {data.variableName || 'variable_name'}
           </div>
         </div>
-        <Settings size={12} className="text-teal-500" />
+        <Button
+          variant="ghost"
+          size="sm"
+          className="p-1 h-auto opacity-0 group-hover:opacity-100 transition-opacity"
+          onClick={(e) => {
+            e.stopPropagation();
+            setIsEditDialogOpen(true);
+          }}
+        >
+          <Settings size={12} className="text-teal-500" />
+        </Button>
       </div>
 
       {/* Variable details */}
@@ -140,6 +169,133 @@ function VariableNode({ data, selected }: NodeProps<VariableNodeData>) {
           style={{ right: -6, top: '50%' }}
         />
       )}
+
+      {/* Edit Dialog */}
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Edit Variable Node</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="label">Label</Label>
+              <Input
+                id="label"
+                value={editData.label || ''}
+                onChange={(e) => setEditData({ ...editData, label: e.target.value })}
+                placeholder="Enter variable label"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="description">Description</Label>
+              <Textarea
+                id="description"
+                value={editData.description || ''}
+                onChange={(e) => setEditData({ ...editData, description: e.target.value })}
+                placeholder="Enter variable description"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="operationType">Operation Type</Label>
+              <Select
+                value={editData.operationType || 'set'}
+                onValueChange={(value) => setEditData({ ...editData, operationType: value as any })}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="set">Set Variable</SelectItem>
+                  <SelectItem value="get">Get Variable</SelectItem>
+                  <SelectItem value="calculate">Calculate</SelectItem>
+                  <SelectItem value="transform">Transform</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="variableName">Variable Name</Label>
+              <Input
+                id="variableName"
+                value={editData.variableName || ''}
+                onChange={(e) => setEditData({ ...editData, variableName: e.target.value })}
+                placeholder="Enter variable name"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="variableType">Variable Type</Label>
+              <Select
+                value={editData.variableType || 'string'}
+                onValueChange={(value) => setEditData({ ...editData, variableType: value as any })}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="string">String</SelectItem>
+                  <SelectItem value="number">Number</SelectItem>
+                  <SelectItem value="boolean">Boolean</SelectItem>
+                  <SelectItem value="object">Object</SelectItem>
+                  <SelectItem value="array">Array</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="scope">Scope</Label>
+              <Select
+                value={editData.scope || 'local'}
+                onValueChange={(value) => setEditData({ ...editData, scope: value as any })}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="local">Local</SelectItem>
+                  <SelectItem value="instance">Instance</SelectItem>
+                  <SelectItem value="global">Global</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {(editData.operationType === 'set' || editData.operationType === 'transform') && (
+              <div className="space-y-2">
+                <Label htmlFor="value">Value</Label>
+                <Input
+                  id="value"
+                  value={editData.value || ''}
+                  onChange={(e) => setEditData({ ...editData, value: e.target.value })}
+                  placeholder="Enter value"
+                />
+              </div>
+            )}
+
+            {editData.operationType === 'calculate' && (
+              <div className="space-y-2">
+                <Label htmlFor="expression">Expression</Label>
+                <Input
+                  id="expression"
+                  value={editData.expression || ''}
+                  onChange={(e) => setEditData({ ...editData, expression: e.target.value })}
+                  placeholder="e.g., a + b"
+                />
+              </div>
+            )}
+
+            <div className="flex justify-end space-x-2">
+              <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleSave}>
+                Save Changes
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

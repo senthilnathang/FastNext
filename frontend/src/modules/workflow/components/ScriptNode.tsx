@@ -1,9 +1,15 @@
 'use client';
 
-import React, { memo } from 'react';
+import React, { memo, useState, useCallback } from 'react';
 import { Handle, Position, NodeProps } from 'reactflow';
 import { WorkflowNodeData } from '../types/reactflow';
 import { Code, Settings, Terminal, FileText, Zap } from 'lucide-react';
+import { Button } from '@/shared/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/shared/components/ui/dialog';
+import { Input } from '@/shared/components/ui/input';
+import { Label } from '@/shared/components/ui/label';
+import { Textarea } from '@/shared/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/components/ui/select';
 
 interface ScriptNodeData extends WorkflowNodeData {
   language: 'javascript' | 'python' | 'sql' | 'shell' | 'jq';
@@ -16,7 +22,20 @@ interface ScriptNodeData extends WorkflowNodeData {
   dependencies?: string[];
 }
 
-function ScriptNode({ data, selected }: NodeProps<ScriptNodeData>) {
+function ScriptNode({ data, selected, id }: NodeProps<ScriptNodeData>) {
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [editData, setEditData] = useState(data);
+
+  const handleSave = useCallback(() => {
+    if (typeof window !== 'undefined') {
+      const event = new CustomEvent('updateNodeData', {
+        detail: { nodeId: id, newData: editData }
+      });
+      window.dispatchEvent(event);
+    }
+    setIsEditDialogOpen(false);
+  }, [id, editData]);
+
   const getLanguageIcon = () => {
     switch (data.language) {
       case 'javascript':
@@ -101,7 +120,17 @@ function ScriptNode({ data, selected }: NodeProps<ScriptNodeData>) {
             {data.description || getScriptPreview()}
           </div>
         </div>
-        <Settings size={12} className="text-gray-500" />
+        <Button
+          variant="ghost"
+          size="sm"
+          className="p-1 h-auto opacity-0 group-hover:opacity-100 transition-opacity"
+          onClick={(e) => {
+            e.stopPropagation();
+            setIsEditDialogOpen(true);
+          }}
+        >
+          <Settings size={12} className="text-gray-500" />
+        </Button>
       </div>
 
       {/* Language badge */}
@@ -181,6 +210,139 @@ function ScriptNode({ data, selected }: NodeProps<ScriptNodeData>) {
         className="w-3 h-3 !bg-blue-400 border-2 border-white"
         style={{ right: -6, top: '60%' }}
       />
+
+      {/* Edit Dialog */}
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>Edit Script Node</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="label">Label</Label>
+              <Input
+                id="label"
+                value={editData.label || ''}
+                onChange={(e) => setEditData({ ...editData, label: e.target.value })}
+                placeholder="Enter script label"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="description">Description</Label>
+              <Textarea
+                id="description"
+                value={editData.description || ''}
+                onChange={(e) => setEditData({ ...editData, description: e.target.value })}
+                placeholder="Enter script description"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="language">Language</Label>
+              <Select
+                value={editData.language || 'javascript'}
+                onValueChange={(value) => setEditData({ ...editData, language: value as any })}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="javascript">JavaScript</SelectItem>
+                  <SelectItem value="python">Python</SelectItem>
+                  <SelectItem value="sql">SQL</SelectItem>
+                  <SelectItem value="shell">Shell</SelectItem>
+                  <SelectItem value="jq">JQ</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="script">Script</Label>
+              <Textarea
+                id="script"
+                value={editData.script || ''}
+                onChange={(e) => setEditData({ ...editData, script: e.target.value })}
+                placeholder="Enter your script code"
+                rows={6}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="environment">Environment</Label>
+              <Select
+                value={editData.environment || 'sandbox'}
+                onValueChange={(value) => setEditData({ ...editData, environment: value as any })}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="sandbox">Sandbox</SelectItem>
+                  <SelectItem value="container">Container</SelectItem>
+                  <SelectItem value="local">Local</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="inputVariables">Input Variables</Label>
+              <Input
+                id="inputVariables"
+                value={editData.inputVariables?.join(', ') || ''}
+                onChange={(e) => setEditData({
+                  ...editData,
+                  inputVariables: e.target.value.split(',').map(v => v.trim()).filter(Boolean)
+                })}
+                placeholder="var1, var2, var3"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="outputVariables">Output Variables</Label>
+              <Input
+                id="outputVariables"
+                value={editData.outputVariables?.join(', ') || ''}
+                onChange={(e) => setEditData({
+                  ...editData,
+                  outputVariables: e.target.value.split(',').map(v => v.trim()).filter(Boolean)
+                })}
+                placeholder="result1, result2"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="timeout">Timeout (seconds)</Label>
+              <Input
+                id="timeout"
+                type="number"
+                value={editData.timeout || ''}
+                onChange={(e) => setEditData({ ...editData, timeout: parseInt(e.target.value) || undefined })}
+                placeholder="Enter timeout in seconds"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="runAsUser">Run As User</Label>
+              <Input
+                id="runAsUser"
+                value={editData.runAsUser || ''}
+                onChange={(e) => setEditData({ ...editData, runAsUser: e.target.value })}
+                placeholder="Enter user to run as"
+              />
+            </div>
+
+            <div className="flex justify-end space-x-2">
+              <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleSave}>
+                Save Changes
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

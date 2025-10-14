@@ -1,9 +1,15 @@
 'use client';
 
-import React, { memo } from 'react';
+import React, { memo, useState, useCallback } from 'react';
 import { Handle, Position, NodeProps } from 'reactflow';
 import { WorkflowNodeData } from '../types/reactflow';
 import { Workflow, Settings, ExternalLink, Play } from 'lucide-react';
+import { Button } from '@/shared/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/shared/components/ui/dialog';
+import { Input } from '@/shared/components/ui/input';
+import { Label } from '@/shared/components/ui/label';
+import { Textarea } from '@/shared/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/components/ui/select';
 
 interface SubWorkflowNodeData extends WorkflowNodeData {
   subWorkflowId: number;
@@ -16,7 +22,20 @@ interface SubWorkflowNodeData extends WorkflowNodeData {
   retryCount?: number;
 }
 
-function SubWorkflowNode({ data, selected }: NodeProps<SubWorkflowNodeData>) {
+function SubWorkflowNode({ data, selected, id }: NodeProps<SubWorkflowNodeData>) {
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [editData, setEditData] = useState(data);
+
+  const handleSave = useCallback(() => {
+    if (typeof window !== 'undefined') {
+      const event = new CustomEvent('updateNodeData', {
+        detail: { nodeId: id, newData: editData }
+      });
+      window.dispatchEvent(event);
+    }
+    setIsEditDialogOpen(false);
+  }, [id, editData]);
+
   const getModeColor = () => {
     return data.executionMode === 'synchronous'
       ? 'bg-blue-100 text-blue-700'
@@ -65,7 +84,17 @@ function SubWorkflowNode({ data, selected }: NodeProps<SubWorkflowNodeData>) {
         </div>
         <div className="flex items-center space-x-1">
           <ExternalLink size={10} className="text-indigo-500" />
-          <Settings size={12} className="text-indigo-500" />
+          <Button
+            variant="ghost"
+            size="sm"
+            className="p-1 h-auto opacity-0 group-hover:opacity-100 transition-opacity"
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsEditDialogOpen(true);
+            }}
+          >
+            <Settings size={12} className="text-indigo-500" />
+          </Button>
         </div>
       </div>
 
@@ -145,6 +174,123 @@ function SubWorkflowNode({ data, selected }: NodeProps<SubWorkflowNodeData>) {
       <div className="absolute -top-1 -right-1">
         <Play size={8} className="text-indigo-500" />
       </div>
+
+      {/* Edit Dialog */}
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>Edit Sub Workflow Node</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="label">Label</Label>
+              <Input
+                id="label"
+                value={editData.label || ''}
+                onChange={(e) => setEditData({ ...editData, label: e.target.value })}
+                placeholder="Enter sub workflow label"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="description">Description</Label>
+              <Textarea
+                id="description"
+                value={editData.description || ''}
+                onChange={(e) => setEditData({ ...editData, description: e.target.value })}
+                placeholder="Enter sub workflow description"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="subWorkflowId">Sub Workflow ID</Label>
+              <Input
+                id="subWorkflowId"
+                type="number"
+                value={editData.subWorkflowId || ''}
+                onChange={(e) => setEditData({ ...editData, subWorkflowId: parseInt(e.target.value) || 0 })}
+                placeholder="Enter sub workflow ID"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="subWorkflowName">Sub Workflow Name</Label>
+              <Input
+                id="subWorkflowName"
+                value={editData.subWorkflowName || ''}
+                onChange={(e) => setEditData({ ...editData, subWorkflowName: e.target.value })}
+                placeholder="Enter sub workflow name"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="executionMode">Execution Mode</Label>
+              <Select
+                value={editData.executionMode || 'synchronous'}
+                onValueChange={(value) => setEditData({ ...editData, executionMode: value as any })}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="synchronous">Synchronous</SelectItem>
+                  <SelectItem value="asynchronous">Asynchronous</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="onError">Error Handling</Label>
+              <Select
+                value={editData.onError || 'fail'}
+                onValueChange={(value) => setEditData({ ...editData, onError: value as any })}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="fail">Fail</SelectItem>
+                  <SelectItem value="continue">Continue</SelectItem>
+                  <SelectItem value="retry">Retry</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {editData.onError === 'retry' && (
+              <div className="space-y-2">
+                <Label htmlFor="retryCount">Retry Count</Label>
+                <Input
+                  id="retryCount"
+                  type="number"
+                  value={editData.retryCount || ''}
+                  onChange={(e) => setEditData({ ...editData, retryCount: parseInt(e.target.value) || undefined })}
+                  placeholder="Enter retry count"
+                />
+              </div>
+            )}
+
+            <div className="space-y-2">
+              <Label htmlFor="timeout">Timeout (seconds)</Label>
+              <Input
+                id="timeout"
+                type="number"
+                value={editData.timeout || ''}
+                onChange={(e) => setEditData({ ...editData, timeout: parseInt(e.target.value) || undefined })}
+                placeholder="Enter timeout in seconds"
+              />
+            </div>
+
+            <div className="flex justify-end space-x-2">
+              <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleSave}>
+                Save Changes
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
