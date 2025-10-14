@@ -103,23 +103,23 @@ class RLSEntityType(Enum):
 ```python
 class RLSService:
     """Main service for RLS operations"""
-    
+
     def create_context(self, user: User, session_id: str, **kwargs) -> RLSContext:
         """Create RLS context for user session"""
-    
-    def check_access(self, user_id: int, entity_type: RLSEntityType, 
+
+    def check_access(self, user_id: int, entity_type: RLSEntityType,
                     action: RLSAction, **kwargs) -> tuple[bool, str]:
         """Check if user has access to perform action"""
-    
-    def apply_rls_filter(self, query: Query, user_id: int, 
+
+    def apply_rls_filter(self, query: Query, user_id: int,
                         entity_type: RLSEntityType, action: RLSAction) -> Query:
         """Apply RLS filters to database query"""
-    
-    def get_applicable_policies(self, entity_type: RLSEntityType, 
+
+    def get_applicable_policies(self, entity_type: RLSEntityType,
                                action: RLSAction, user_id: int) -> List[RowLevelSecurityPolicy]:
         """Get policies applicable to user for specific action"""
-    
-    def create_policy(self, name: str, entity_type: RLSEntityType, 
+
+    def create_policy(self, name: str, entity_type: RLSEntityType,
                      policy_type: RLSPolicy, **kwargs) -> RowLevelSecurityPolicy:
         """Create new RLS policy"""
 ```
@@ -187,10 +187,10 @@ async def get_project(
         action=RLSAction.SELECT,
         entity_id=project_id
     )
-    
+
     if not access_granted:
         raise HTTPException(status_code=403, detail=reason)
-    
+
     # Apply RLS filter to query
     query = db.query(Project).filter(Project.id == project_id)
     filtered_query = rls_service.apply_rls_filter(
@@ -199,11 +199,11 @@ async def get_project(
         entity_type=RLSEntityType.PROJECT,
         action=RLSAction.SELECT
     )
-    
+
     project = filtered_query.first()
     if not project:
         raise HTTPException(status_code=404, detail="Project not found")
-    
+
     return project
 ```
 
@@ -217,7 +217,7 @@ async def login(
 ):
     # Authenticate user
     user = authenticate_user(credentials.email, credentials.password)
-    
+
     # Create RLS context
     session_id = generate_session_id()
     context = rls_service.create_context(
@@ -225,12 +225,12 @@ async def login(
         session_id=session_id,
         organization_id=user.default_organization_id
     )
-    
+
     # Generate JWT with session ID
     token = create_access_token(
         data={"user_id": user.id, "session_id": session_id}
     )
-    
+
     return {"access_token": token, "token_type": "bearer"}
 ```
 
@@ -272,7 +272,7 @@ function RLSManagement() {
   const { policies, createPolicy, updatePolicy, deletePolicy } = useRLSPolicies()
   const { assignments, createAssignment } = useRLSAssignments()
   const { auditLogs, filters, setFilters } = useRLSAuditLogs()
-  
+
   // Component implementation
 }
 ```

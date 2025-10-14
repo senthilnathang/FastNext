@@ -69,19 +69,19 @@ async function discoverAndSetupTable(tableName: string) {
     // Step 1: Get available tables
     const tablesResponse = await fetch('/api/v1/data/tables/available');
     const { tables } = await tablesResponse.json();
-    
+
     if (!tables.includes(tableName)) {
       throw new Error(`Table ${tableName} not available`);
     }
-    
+
     // Step 2: Get table schema
     const schemaResponse = await fetch(`/api/v1/data/tables/${tableName}/schema`);
     const schema = await schemaResponse.json();
-    
+
     // Step 3: Get permissions
     const permissionsResponse = await fetch(`/api/v1/data/tables/${tableName}/permissions`);
     const permissions = await permissionsResponse.json();
-    
+
     // Step 4: Configure components
     const importColumns = schema.columns.map(col => ({
       key: col.name,
@@ -89,7 +89,7 @@ async function discoverAndSetupTable(tableName: string) {
       type: mapSqlType(col.type),
       required: !col.nullable || col.primary_key
     }));
-    
+
     return {
       schema,
       permissions,
@@ -97,7 +97,7 @@ async function discoverAndSetupTable(tableName: string) {
       canImport: permissions.import_permission.can_import,
       canExport: permissions.export_permission.can_export
     };
-    
+
   } catch (error) {
     console.error('Failed to setup table:', error);
     throw error;
@@ -117,11 +117,11 @@ async function dynamicImport(tableName: string, file: File) {
   try {
     // Step 1: Get table configuration
     const config = await discoverAndSetupTable(tableName);
-    
+
     if (!config.canImport) {
       throw new Error('Import not permitted for this table');
     }
-    
+
     // Step 2: Create form data
     const formData = new FormData();
     formData.append('file', file);
@@ -133,7 +133,7 @@ async function dynamicImport(tableName: string, file: File) {
     }));
     formData.append('field_mappings', JSON.stringify([]));
     formData.append('requires_approval', String(config.permissions.import_permission.requires_approval));
-    
+
     // Step 3: Upload and create import job
     const uploadResponse = await fetch('/api/v1/data/import/upload', {
       method: 'POST',
@@ -142,13 +142,13 @@ async function dynamicImport(tableName: string, file: File) {
       },
       body: formData
     });
-    
+
     if (!uploadResponse.ok) {
       throw new Error('Upload failed');
     }
-    
+
     const importJob = await uploadResponse.json();
-    
+
     // Step 4: Validate data
     const validateResponse = await fetch(`/api/v1/data/import/${importJob.job_id}/validate`, {
       method: 'POST',
@@ -156,14 +156,14 @@ async function dynamicImport(tableName: string, file: File) {
         'Authorization': `Bearer ${getAuthToken()}`
       }
     });
-    
+
     const validationResult = await validateResponse.json();
-    
+
     if (!validationResult.isValid) {
       console.warn('Validation errors:', validationResult.errors);
       return { success: false, errors: validationResult.errors };
     }
-    
+
     // Step 5: Start import
     const startResponse = await fetch(`/api/v1/data/import/${importJob.job_id}/start`, {
       method: 'POST',
@@ -171,14 +171,14 @@ async function dynamicImport(tableName: string, file: File) {
         'Authorization': `Bearer ${getAuthToken()}`
       }
     });
-    
+
     const startResult = await startResponse.json();
-    
+
     // Step 6: Monitor progress
     const finalResult = await monitorImportProgress(importJob.job_id);
-    
+
     return { success: true, result: finalResult };
-    
+
   } catch (error) {
     console.error('Import failed:', error);
     return { success: false, error: error.message };
@@ -192,7 +192,7 @@ async function monitorImportProgress(jobId: string) {
       try {
         const response = await fetch(`/api/v1/data/import/${jobId}/status`);
         const status = await response.json();
-        
+
         if (status.status === 'COMPLETED') {
           resolve(status);
         } else if (status.status === 'FAILED') {
@@ -205,7 +205,7 @@ async function monitorImportProgress(jobId: string) {
         reject(error);
       }
     };
-    
+
     checkProgress();
   });
 }
@@ -219,30 +219,30 @@ async function dynamicExport(tableName: string, exportOptions: ExportOptions) {
   try {
     // Step 1: Get table configuration
     const config = await discoverAndSetupTable(tableName);
-    
+
     if (!config.canExport) {
       throw new Error('Export not permitted for this table');
     }
-    
+
     // Step 2: Validate export options against permissions
     const maxRows = config.permissions.export_permission.max_rows_per_export;
     if (exportOptions.estimatedRows > maxRows) {
       throw new Error(`Export exceeds maximum allowed rows (${maxRows})`);
     }
-    
+
     const allowedFormats = config.permissions.export_permission.allowed_formats;
     if (!allowedFormats.includes(exportOptions.format)) {
       throw new Error(`Format ${exportOptions.format} not allowed`);
     }
-    
+
     // Step 3: Filter columns by permissions
     const allowedColumns = config.permissions.export_permission.allowed_columns;
     if (allowedColumns.length > 0) {
-      exportOptions.selected_columns = exportOptions.selected_columns.filter(col => 
+      exportOptions.selected_columns = exportOptions.selected_columns.filter(col =>
         allowedColumns.includes(col)
       );
     }
-    
+
     // Step 4: Create export job
     const exportRequest = {
       table_name: tableName,
@@ -256,7 +256,7 @@ async function dynamicExport(tableName: string, exportOptions: ExportOptions) {
         encoding: exportOptions.encoding ?? 'utf-8'
       }
     };
-    
+
     const createResponse = await fetch('/api/v1/data/export/create', {
       method: 'POST',
       headers: {
@@ -265,34 +265,34 @@ async function dynamicExport(tableName: string, exportOptions: ExportOptions) {
       },
       body: JSON.stringify(exportRequest)
     });
-    
+
     if (!createResponse.ok) {
       throw new Error('Export creation failed');
     }
-    
+
     const exportJob = await createResponse.json();
-    
+
     // Step 5: Monitor export progress
     const finalResult = await monitorExportProgress(exportJob.job_id);
-    
+
     // Step 6: Get download URL
     const downloadResponse = await fetch(`/api/v1/data/export/${exportJob.job_id}/download`, {
       headers: {
         'Authorization': `Bearer ${getAuthToken()}`
       }
     });
-    
+
     if (!downloadResponse.ok) {
       throw new Error('Download failed');
     }
-    
+
     return {
       success: true,
       downloadUrl: downloadResponse.url,
       filename: finalResult.filename,
       fileSize: finalResult.file_size
     };
-    
+
   } catch (error) {
     console.error('Export failed:', error);
     return { success: false, error: error.message };
@@ -348,11 +348,11 @@ export function TableSelector({ onTableSelect, allowedTables, showSchema = true 
       const response = await fetch('/api/v1/data/tables/available');
       const data = await response.json();
       let availableTables = data.tables;
-      
+
       if (allowedTables) {
         availableTables = availableTables.filter(table => allowedTables.includes(table));
       }
-      
+
       setTables(availableTables);
     } catch (error) {
       console.error('Failed to fetch tables:', error);
@@ -511,7 +511,7 @@ export function PermissionAwareImport({ tableName, onImportComplete }: Permissio
       <Alert>
         <Info className="h-4 w-4" />
         <AlertDescription>
-          Import Limits: {permissions.max_file_size_mb}MB max file size, 
+          Import Limits: {permissions.max_file_size_mb}MB max file size,
           {permissions.max_rows_per_import.toLocaleString()} max rows
         </AlertDescription>
       </Alert>
@@ -547,13 +547,13 @@ async function bulkTableOperation(
   options: any
 ) {
   const results = [];
-  
+
   for (const tableName of tables) {
     try {
       console.log(`Processing ${operation} for table: ${tableName}`);
-      
+
       const config = await discoverAndSetupTable(tableName);
-      
+
       if (operation === 'import' && config.canImport) {
         const result = await dynamicImport(tableName, options.file);
         results.push({ table: tableName, success: true, result });
@@ -561,21 +561,21 @@ async function bulkTableOperation(
         const result = await dynamicExport(tableName, options);
         results.push({ table: tableName, success: true, result });
       } else {
-        results.push({ 
-          table: tableName, 
-          success: false, 
-          error: `${operation} not permitted` 
+        results.push({
+          table: tableName,
+          success: false,
+          error: `${operation} not permitted`
         });
       }
     } catch (error) {
-      results.push({ 
-        table: tableName, 
-        success: false, 
-        error: error.message 
+      results.push({
+        table: tableName,
+        success: false,
+        error: error.message
       });
     }
   }
-  
+
   return results;
 }
 
@@ -595,7 +595,7 @@ console.log('Bulk operation results:', bulkResults);
 // Intelligent field mapping based on column names and types
 function smartFieldMapping(sourceHeaders: string[], targetColumns: TableColumn[]): FieldMapping[] {
   const mappings: FieldMapping[] = [];
-  
+
   for (const header of sourceHeaders) {
     const bestMatch = findBestColumnMatch(header, targetColumns);
     if (bestMatch) {
@@ -607,24 +607,24 @@ function smartFieldMapping(sourceHeaders: string[], targetColumns: TableColumn[]
       });
     }
   }
-  
+
   return mappings.sort((a, b) => b.confidence - a.confidence);
 }
 
 function findBestColumnMatch(header: string, columns: TableColumn[]): TableColumn | null {
   const headerLower = header.toLowerCase();
-  
+
   // Exact match
   const exactMatch = columns.find(col => col.name.toLowerCase() === headerLower);
   if (exactMatch) return exactMatch;
-  
+
   // Partial match
-  const partialMatch = columns.find(col => 
-    col.name.toLowerCase().includes(headerLower) || 
+  const partialMatch = columns.find(col =>
+    col.name.toLowerCase().includes(headerLower) ||
     headerLower.includes(col.name.toLowerCase())
   );
   if (partialMatch) return partialMatch;
-  
+
   // Semantic match
   const semanticMatches = {
     'email': ['email', 'email_address', 'mail'],
@@ -632,47 +632,47 @@ function findBestColumnMatch(header: string, columns: TableColumn[]): TableColum
     'name': ['name', 'title', 'label', 'first_name', 'last_name'],
     'id': ['id', 'identifier', 'key']
   };
-  
+
   for (const [key, variations] of Object.entries(semanticMatches)) {
     if (variations.some(v => headerLower.includes(v) || v.includes(headerLower))) {
       const match = columns.find(col => col.name.toLowerCase().includes(key));
       if (match) return match;
     }
   }
-  
+
   return null;
 }
 
 function determineTransform(header: string, column: TableColumn): string {
   const headerLower = header.toLowerCase();
   const columnType = column.type.toLowerCase();
-  
+
   if (columnType.includes('int') && !headerLower.includes('id')) {
     return 'number';
   }
-  
+
   if (headerLower.includes('email')) {
     return 'lower';
   }
-  
+
   if (headerLower.includes('date') || headerLower.includes('time')) {
     return 'date';
   }
-  
+
   if (headerLower.includes('name') || headerLower.includes('title')) {
     return 'trim';
   }
-  
+
   return 'none';
 }
 
 function calculateMatchConfidence(header: string, column: TableColumn): number {
   const headerLower = header.toLowerCase();
   const columnLower = column.name.toLowerCase();
-  
+
   if (headerLower === columnLower) return 1.0;
   if (headerLower.includes(columnLower) || columnLower.includes(headerLower)) return 0.8;
-  
+
   // Add more sophisticated matching logic here
   return 0.5;
 }
@@ -688,7 +688,7 @@ class ImportProgressTracker {
 
   connect() {
     this.socket = new WebSocket(`ws://localhost:8000/api/v1/data/progress`);
-    
+
     this.socket.onmessage = (event) => {
       const update: ProgressUpdate = JSON.parse(event.data);
       const callback = this.callbacks.get(update.job_id);
@@ -721,7 +721,7 @@ tracker.connect();
 tracker.trackJob('import-job-123', (progress) => {
   console.log(`Import progress: ${progress.percentage}%`);
   console.log(`Processed: ${progress.processed_rows}/${progress.total_rows}`);
-  
+
   if (progress.status === 'completed') {
     console.log('Import completed successfully!');
     tracker.stopTracking('import-job-123');
@@ -739,7 +739,7 @@ async function debugPermissions(tableName: string) {
   try {
     const response = await fetch(`/api/v1/data/tables/${tableName}/permissions`);
     const permissions = await response.json();
-    
+
     console.log('Permission Debug:', {
       table: tableName,
       canImport: permissions.import_permission.can_import,
@@ -749,20 +749,20 @@ async function debugPermissions(tableName: string) {
       allowedFormats: permissions.import_permission.allowed_formats,
       requiresApproval: permissions.import_permission.requires_approval
     });
-    
+
     // Check for common issues
     if (!permissions.import_permission.can_import) {
       console.warn('❌ Import not permitted - contact administrator');
     }
-    
+
     if (permissions.import_permission.max_file_size_mb < 10) {
       console.warn('⚠️ Low file size limit - consider requesting increase');
     }
-    
+
     if (permissions.import_permission.requires_approval) {
       console.info('ℹ️ Imports require approval - factor in approval time');
     }
-    
+
     return permissions;
   } catch (error) {
     console.error('Permission check failed:', error);
@@ -778,26 +778,26 @@ async function debugPermissions(tableName: string) {
 async function debugSchemaValidation(tableName: string, sampleData: any[]) {
   try {
     const schema = await fetch(`/api/v1/data/tables/${tableName}/schema`).then(r => r.json());
-    
+
     console.log('Schema Debug:', {
       table: tableName,
       columns: schema.columns.length,
       primaryKeys: schema.primary_keys,
       requiredFields: schema.columns.filter(col => !col.nullable).map(col => col.name)
     });
-    
+
     // Validate sample data against schema
     const issues = [];
-    
+
     for (const row of sampleData.slice(0, 3)) {
       for (const column of schema.columns) {
         const value = row[column.name];
-        
+
         // Check required fields
         if (!column.nullable && (value === null || value === undefined || value === '')) {
           issues.push(`Missing required field: ${column.name}`);
         }
-        
+
         // Check data types
         if (value !== null && value !== undefined && value !== '') {
           const typeIssue = validateDataType(value, column.type);
@@ -807,13 +807,13 @@ async function debugSchemaValidation(tableName: string, sampleData: any[]) {
         }
       }
     }
-    
+
     if (issues.length > 0) {
       console.warn('Schema validation issues:', issues);
     } else {
       console.log('✅ Schema validation passed');
     }
-    
+
     return { schema, issues };
   } catch (error) {
     console.error('Schema validation failed:', error);
@@ -823,19 +823,19 @@ async function debugSchemaValidation(tableName: string, sampleData: any[]) {
 
 function validateDataType(value: any, sqlType: string): string | null {
   const type = sqlType.toLowerCase();
-  
+
   if (type.includes('int') && isNaN(Number(value))) {
     return `Expected integer, got: ${typeof value}`;
   }
-  
+
   if (type.includes('bool') && typeof value !== 'boolean' && !['true', 'false', '1', '0'].includes(String(value).toLowerCase())) {
     return `Expected boolean, got: ${typeof value}`;
   }
-  
+
   if (type.includes('date') && isNaN(Date.parse(value))) {
     return `Expected date, got invalid date: ${value}`;
   }
-  
+
   return null;
 }
 ```
@@ -850,15 +850,15 @@ async function debugApiConnectivity() {
     '/api/v1/data/health',
     '/api/health'
   ];
-  
+
   const results = [];
-  
+
   for (const endpoint of endpoints) {
     try {
       const start = Date.now();
       const response = await fetch(endpoint);
       const duration = Date.now() - start;
-      
+
       results.push({
         endpoint,
         status: response.status,
@@ -866,7 +866,7 @@ async function debugApiConnectivity() {
         duration: `${duration}ms`,
         contentType: response.headers.get('content-type')
       });
-      
+
       if (response.ok) {
         console.log(`✅ ${endpoint} - ${response.status} (${duration}ms)`);
       } else {
@@ -881,7 +881,7 @@ async function debugApiConnectivity() {
       console.error(`❌ ${endpoint} - ${error.message}`);
     }
   }
-  
+
   return results;
 }
 

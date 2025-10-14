@@ -10,7 +10,7 @@ export const RoleStatusSchema = z.enum([
 // Permission categories
 export const PermissionCategorySchema = z.enum([
   'user_management',
-  'role_management', 
+  'role_management',
   'workflow_management',
   'data_management',
   'system_settings',

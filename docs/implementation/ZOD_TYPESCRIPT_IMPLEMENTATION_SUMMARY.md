@@ -260,7 +260,7 @@ const validateImport = async (file: File, mappings: FieldMapping[]) => {
     field_mappings: mappings,
     sample_size: 100
   })
-  
+
   return await api.import.validate(request)
 }
 ```

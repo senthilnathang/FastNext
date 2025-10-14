@@ -6,28 +6,26 @@ Includes database setup, authentication helpers, and common test utilities.
 """
 
 import asyncio
-import pytest
-import tempfile
 import os
-from typing import Generator, Dict, Any
+import tempfile
+from typing import Any, Dict, Generator
 from unittest.mock import patch
 
+import pytest
+from app.core.config import settings
+from app.core.security import create_access_token, get_password_hash
+from app.db.base import Base
+from app.db.session import get_db
+from app.models.permission import Permission
+from app.models.role import Role
+from app.models.user import User
+from app.models.workflow import WorkflowState, WorkflowType
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
-from sqlalchemy import create_engine, StaticPool
-from sqlalchemy.orm import sessionmaker, Session
 from httpx import AsyncClient
-
-from app.main import create_app
-from app.core.config import settings
-from app.db.session import get_db
-from app.db.base import Base
-from app.models.user import User
-from app.models.role import Role
-from app.models.permission import Permission
-from app.models.workflow import WorkflowType, WorkflowState
-from app.core.security import get_password_hash, create_access_token
-
+from main import create_app
+from sqlalchemy import StaticPool, create_engine
+from sqlalchemy.orm import Session, sessionmaker
 
 # Test Database Setup
 SQLALCHEMY_DATABASE_URL = "sqlite:///./test.db"
@@ -53,10 +51,10 @@ def db() -> Generator[Session, None, None]:
     """Create a fresh database for each test."""
     # Create all tables
     Base.metadata.create_all(bind=engine)
-    
+
     # Create session
     session = TestingSessionLocal()
-    
+
     try:
         yield session
     finally:
@@ -68,18 +66,19 @@ def db() -> Generator[Session, None, None]:
 @pytest.fixture(scope="function")
 def app(db: Session) -> FastAPI:
     """Create FastAPI app with test database."""
+
     def get_test_db():
         try:
             yield db
         finally:
             pass
-    
+
     # Create app
     test_app = create_app()
-    
+
     # Override database dependency
     test_app.dependency_overrides[get_db] = get_test_db
-    
+
     return test_app
 
 
@@ -106,7 +105,7 @@ def admin_user(db: Session) -> User:
         hashed_password=get_password_hash("testpassword"),
         is_active=True,
         is_superuser=True,
-        is_verified=True
+        is_verified=True,
     )
     db.add(user)
     db.commit()
@@ -124,7 +123,7 @@ def regular_user(db: Session) -> User:
         hashed_password=get_password_hash("testpassword"),
         is_active=True,
         is_superuser=False,
-        is_verified=True
+        is_verified=True,
     )
     db.add(user)
     db.commit()
@@ -142,7 +141,7 @@ def inactive_user(db: Session) -> User:
         hashed_password=get_password_hash("testpassword"),
         is_active=False,
         is_superuser=False,
-        is_verified=False
+        is_verified=False,
     )
     db.add(user)
     db.commit()
@@ -178,10 +177,7 @@ def user_headers(user_token: str) -> Dict[str, str]:
 def sample_role(db: Session) -> Role:
     """Create sample role for testing."""
     role = Role(
-        name="test_role",
-        description="Test Role",
-        is_active=True,
-        is_system_role=False
+        name="test_role", description="Test Role", is_active=True, is_system_role=False
     )
     db.add(role)
     db.commit()
@@ -198,7 +194,7 @@ def sample_permission(db: Session) -> Permission:
         action="read",
         resource="test",
         category="test",
-        is_system_permission=False
+        is_system_permission=False,
     )
     db.add(permission)
     db.commit()
@@ -215,7 +211,7 @@ def sample_workflow_type(db: Session, admin_user: User) -> WorkflowType:
         icon="TestIcon",
         color="#FF0000",
         is_active=True,
-        created_by=admin_user.id
+        created_by=admin_user.id,
     )
     db.add(workflow_type)
     db.commit()
@@ -234,7 +230,7 @@ def sample_workflow_state(db: Session) -> WorkflowState:
         bg_color="#CCFFCC",
         icon="TestIcon",
         is_initial=True,
-        is_final=False
+        is_final=False,
     )
     db.add(state)
     db.commit()
@@ -256,16 +252,16 @@ def mock_settings():
     test_settings = {
         "SECRET_KEY": "test-secret-key",
         "ACCESS_TOKEN_EXPIRE_MINUTES": 30,
-        "SQLALCHEMY_DATABASE_URL": "sqlite:///./test.db"
+        "SQLALCHEMY_DATABASE_URL": "sqlite:///./test.db",
     }
-    
-    with patch.object(settings, '__dict__', test_settings):
+
+    with patch.object(settings, "__dict__", test_settings):
         yield test_settings
 
 
 class TestDataFactory:
     """Factory for creating test data."""
-    
+
     @staticmethod
     def create_user_data(**kwargs) -> Dict[str, Any]:
         """Create user data for testing."""
@@ -274,22 +270,22 @@ class TestDataFactory:
             "username": "testuser",
             "full_name": "Test User",
             "password": "testpassword123",
-            "is_active": True
+            "is_active": True,
         }
         default_data.update(kwargs)
         return default_data
-    
+
     @staticmethod
     def create_role_data(**kwargs) -> Dict[str, Any]:
         """Create role data for testing."""
         default_data = {
             "name": "test_role",
             "description": "Test Role Description",
-            "is_active": True
+            "is_active": True,
         }
         default_data.update(kwargs)
         return default_data
-    
+
     @staticmethod
     def create_permission_data(**kwargs) -> Dict[str, Any]:
         """Create permission data for testing."""
@@ -298,11 +294,11 @@ class TestDataFactory:
             "description": "Test Permission Description",
             "action": "read",
             "resource": "test_resource",
-            "category": "test"
+            "category": "test",
         }
         default_data.update(kwargs)
         return default_data
-    
+
     @staticmethod
     def create_workflow_type_data(**kwargs) -> Dict[str, Any]:
         """Create workflow type data for testing."""
@@ -310,7 +306,7 @@ class TestDataFactory:
             "name": "Test Workflow Type",
             "description": "Test workflow type description",
             "icon": "TestIcon",
-            "color": "#3B82F6"
+            "color": "#3B82F6",
         }
         default_data.update(kwargs)
         return default_data
@@ -325,13 +321,13 @@ def test_data_factory():
 # Test utilities
 class TestUtils:
     """Utility functions for testing."""
-    
+
     @staticmethod
     def assert_response_success(response, expected_status=200):
         """Assert response is successful."""
         assert response.status_code == expected_status
         assert response.headers["content-type"] == "application/json"
-    
+
     @staticmethod
     def assert_response_error(response, expected_status=400):
         """Assert response is an error."""
@@ -340,7 +336,7 @@ class TestUtils:
         assert "success" in data
         assert data["success"] is False
         assert "error" in data
-    
+
     @staticmethod
     def assert_pagination_response(response, expected_total=None):
         """Assert response has pagination structure."""
@@ -351,7 +347,7 @@ class TestUtils:
         assert "page" in data
         assert "pages" in data
         assert "size" in data
-        
+
         if expected_total is not None:
             assert data["total"] == expected_total
 

@@ -1,7 +1,13 @@
-from typing import Optional
-from sqlalchemy.orm import Session
-from app.models.activity_log import ActivityLog, ActivityAction, ActivityLevel, EventCategory
 import json
+from typing import Optional
+
+from app.models.activity_log import (
+    ActivityAction,
+    ActivityLevel,
+    ActivityLog,
+    EventCategory,
+)
+from sqlalchemy.orm import Session
 
 
 def log_activity(
@@ -19,10 +25,10 @@ def log_activity(
     request_method: Optional[str] = None,
     request_path: Optional[str] = None,
     status_code: Optional[int] = None,
-    extra_data: Optional[dict] = None
+    extra_data: Optional[dict] = None,
 ) -> ActivityLog:
     """Log an activity to the activity log table"""
-    
+
     activity_log = ActivityLog(
         user_id=user_id,
         category=category,
@@ -37,9 +43,9 @@ def log_activity(
         request_method=request_method,
         request_path=request_path,
         status_code=status_code,
-        event_metadata=extra_data
+        event_metadata=extra_data,
     )
-    
+
     try:
         db.add(activity_log)
         db.commit()
@@ -56,14 +62,18 @@ def log_user_login(
     username: str,
     ip_address: Optional[str] = None,
     user_agent: Optional[str] = None,
-    success: bool = True
+    success: bool = True,
 ) -> ActivityLog:
     """Log user login activity"""
-    
+
     action = ActivityAction.LOGIN
     level = ActivityLevel.INFO if success else ActivityLevel.WARNING
-    description = f"User {username} logged in successfully" if success else f"Failed login attempt for user {username}"
-    
+    description = (
+        f"User {username} logged in successfully"
+        if success
+        else f"Failed login attempt for user {username}"
+    )
+
     return log_activity(
         db=db,
         user_id=user_id if success else None,
@@ -75,7 +85,7 @@ def log_user_login(
         level=level,
         ip_address=ip_address,
         user_agent=user_agent,
-        extra_data={"success": success}
+        extra_data={"success": success},
     )
 
 
@@ -84,10 +94,10 @@ def log_user_logout(
     user_id: int,
     username: str,
     ip_address: Optional[str] = None,
-    user_agent: Optional[str] = None
+    user_agent: Optional[str] = None,
 ) -> ActivityLog:
     """Log user logout activity"""
-    
+
     return log_activity(
         db=db,
         user_id=user_id,
@@ -98,7 +108,7 @@ def log_user_logout(
         description=f"User {username} logged out",
         level=ActivityLevel.INFO,
         ip_address=ip_address,
-        user_agent=user_agent
+        user_agent=user_agent,
     )
 
 
@@ -108,10 +118,10 @@ def log_permission_change(
     target_user_id: int,
     target_username: str,
     permission_details: str,
-    ip_address: Optional[str] = None
+    ip_address: Optional[str] = None,
 ) -> ActivityLog:
     """Log permission change activity"""
-    
+
     return log_activity(
         db=db,
         user_id=user_id,
@@ -122,7 +132,7 @@ def log_permission_change(
         description=f"Permission changed: {permission_details}",
         level=ActivityLevel.WARNING,
         ip_address=ip_address,
-        extra_data={"permission_details": permission_details}
+        extra_data={"permission_details": permission_details},
     )
 
 
@@ -131,10 +141,10 @@ def log_data_export(
     user_id: int,
     export_type: str,
     entity_count: int,
-    ip_address: Optional[str] = None
+    ip_address: Optional[str] = None,
 ) -> ActivityLog:
     """Log data export activity"""
-    
+
     return log_activity(
         db=db,
         user_id=user_id,
@@ -145,10 +155,7 @@ def log_data_export(
         description=f"Exported {entity_count} {export_type} records",
         level=ActivityLevel.INFO,
         ip_address=ip_address,
-        extra_data={
-            "export_type": export_type,
-            "entity_count": entity_count
-        }
+        extra_data={"export_type": export_type, "entity_count": entity_count},
     )
 
 
@@ -159,10 +166,10 @@ def log_security_event(
     description: str,
     level: ActivityLevel = ActivityLevel.WARNING,
     ip_address: Optional[str] = None,
-    extra_data: Optional[dict] = None
+    extra_data: Optional[dict] = None,
 ) -> ActivityLog:
     """Log security-related events"""
-    
+
     return log_activity(
         db=db,
         user_id=user_id,
@@ -173,5 +180,5 @@ def log_security_event(
         description=description,
         level=level,
         ip_address=ip_address,
-        extra_data=extra_data
+        extra_data=extra_data,
     )

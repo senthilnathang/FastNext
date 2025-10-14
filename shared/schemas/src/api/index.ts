@@ -274,7 +274,7 @@ export const SettingsImportRequestSchema = z.object({
 })
 
 // API Response wrappers
-export const createApiResponseSchema = <T>(dataSchema: z.ZodType<T>) => 
+export const createApiResponseSchema = <T>(dataSchema: z.ZodType<T>) =>
   z.union([
     z.object({
       success: z.literal(true),

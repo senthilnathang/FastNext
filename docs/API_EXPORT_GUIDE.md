@@ -182,7 +182,7 @@ filtered_schema = {
     "openapi": openapi_schema["openapi"],
     "info": openapi_schema["info"],
     "paths": {
-        path: details 
+        path: details
         for path, details in openapi_schema["paths"].items()
         if path.startswith("/api/v1/users")  # Only user endpoints
     }
@@ -259,7 +259,7 @@ Add API documentation export to your CI/CD pipeline:
   run: |
     cd backend
     ./export-api-docs.sh
-    
+
 - name: Upload API Docs
   uses: actions/upload-artifact@v3
   with:

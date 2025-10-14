@@ -59,10 +59,10 @@ import { LoadingSpinner, ErrorMessage } from '@/shared/components'
 
 function UsersPage() {
   const { data, isLoading, error } = useUsers()
-  
+
   if (isLoading) return <LoadingSpinner />
   if (error) return <ErrorMessage error={error} />
-  
+
   return <UsersList users={data?.items || []} />
 }
 ```
@@ -77,7 +77,7 @@ import { apiUtils } from '@/shared/services'
 
 function CreateUserForm() {
   const createUser = useCreateUser()
-  
+
   const handleSubmit = (userData) => {
     createUser.mutate(userData, {
       onSuccess: () => {
@@ -89,7 +89,7 @@ function CreateUserForm() {
       }
     })
   }
-  
+
   return (
     <form onSubmit={handleSubmit}>
       {/* form fields */}
@@ -109,11 +109,11 @@ function AdminDashboard() {
   const { data: users, isLoading: usersLoading } = useUsers()
   const { data: roles, isLoading: rolesLoading } = useRoles()
   const { data: permissions, isLoading: permissionsLoading } = usePermissions()
-  
+
   const isLoading = usersLoading || rolesLoading || permissionsLoading
-  
+
   if (isLoading) return <LoadingSpinner />
-  
+
   return <DashboardContent users={users} roles={roles} permissions={permissions} />
 }
 ```
@@ -125,7 +125,7 @@ function UserDetails({ userId }: { userId: number }) {
   const { data: userRoles } = useUserRoles(userId, {
     enabled: !!user // Only fetch roles after user is loaded
   })
-  
+
   return <UserDetailsView user={user} roles={userRoles} />
 }
 ```
@@ -134,15 +134,15 @@ function UserDetails({ userId }: { userId: number }) {
 ```typescript
 function UsersList() {
   const [page, setPage] = useState(1)
-  const { data, isLoading } = useUsers({ 
-    skip: (page - 1) * 10, 
-    limit: 10 
+  const { data, isLoading } = useUsers({
+    skip: (page - 1) * 10,
+    limit: 10
   })
-  
+
   return (
     <div>
       <DataTable data={data?.items || []} />
-      <Pagination 
+      <Pagination
         currentPage={page}
         totalPages={data?.pages || 0}
         onPageChange={setPage}
@@ -166,7 +166,7 @@ import { apiUtils } from '@/lib/api/client'
 
 function MyComponent() {
   const { data, error } = useUsers()
-  
+
   if (error) {
     return (
       <div className="error-state">
@@ -176,7 +176,7 @@ function MyComponent() {
       </div>
     )
   }
-  
+
   return <div>{/* success state */}</div>
 }
 ```
@@ -199,11 +199,11 @@ export const userKeys = {
 ```typescript
 function DataComponent() {
   const { data, isLoading, error } = useData()
-  
+
   // Show loading skeleton instead of spinner when possible
   if (isLoading) return <DataSkeleton />
   if (error) return <ErrorFallback error={error} />
-  
+
   return <DataDisplay data={data} />
 }
 ```
@@ -272,7 +272,7 @@ function UsersList() {
   const [users, setUsers] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
-  
+
   useEffect(() => {
     fetch('/api/users')
       .then(res => res.json())
@@ -280,7 +280,7 @@ function UsersList() {
       .catch(setError)
       .finally(() => setLoading(false))
   }, [])
-  
+
   // Manual error handling, no caching, no background updates
 }
 ```
@@ -289,11 +289,11 @@ function UsersList() {
 ```typescript
 function UsersList() {
   const { data: users, isLoading, error } = useUsers()
-  
+
   // Automatic caching, background updates, error handling
   if (isLoading) return <LoadingSpinner />
   if (error) return <ErrorMessage error={error} />
-  
+
   return <UsersTable users={users?.items || []} />
 }
 ```

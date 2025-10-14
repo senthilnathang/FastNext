@@ -47,14 +47,14 @@ GRANT ALL ON SCHEMA app TO fastnext;
 
 -- Performance monitoring views
 CREATE OR REPLACE VIEW pg_stat_activity_readable AS
-SELECT 
+SELECT
     pid,
     usename,
     datname,
     state,
     query_start,
     state_change,
-    CASE 
+    CASE
         WHEN state = 'active' THEN now() - query_start
         ELSE null
     END as query_duration,
@@ -68,7 +68,7 @@ GRANT SELECT ON pg_stat_activity_readable TO fastnext;
 GRANT SELECT ON pg_stat_statements TO fastnext;
 
 -- Create maintenance functions
-CREATE OR REPLACE FUNCTION maintenance_info() 
+CREATE OR REPLACE FUNCTION maintenance_info()
 RETURNS TABLE(
     table_name text,
     size_pretty text,
@@ -79,7 +79,7 @@ RETURNS TABLE(
 ) AS $$
 BEGIN
     RETURN QUERY
-    SELECT 
+    SELECT
         schemaname||'.'||tablename as table_name,
         pg_size_pretty(pg_total_relation_size(schemaname||'.'||tablename)) as size_pretty,
         n_tup_ins + n_tup_upd as tuple_count,

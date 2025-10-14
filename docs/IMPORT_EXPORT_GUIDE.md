@@ -25,7 +25,7 @@ The FastNext Import/Export system provides comprehensive data management capabil
 
 ### 🎯 Dynamic Table Management (NEW!)
 - **Auto-Discovery**: Automatically discover all database tables for import/export
-- **Schema Detection**: Real-time table schema analysis with column types and constraints  
+- **Schema Detection**: Real-time table schema analysis with column types and constraints
 - **Smart Field Mapping**: Automatic field mapping based on actual table structure
 - **Permission Integration**: Table-specific permissions with real-time validation
 - **Settings Integration**: Dedicated settings pages for managing any table dynamically
@@ -132,7 +132,7 @@ The system automatically maps source columns to target fields based on:
 // Automatic type mapping
 const typeMapping = {
   'INTEGER': 'number',
-  'VARCHAR': 'string', 
+  'VARCHAR': 'string',
   'TEXT': 'string',
   'BOOLEAN': 'boolean',
   'TIMESTAMP': 'date',
@@ -173,7 +173,7 @@ FastNext includes dedicated settings pages for dynamic import/export management.
 ### Data Export Page (`/settings/data-export`)
 
 **Features:**
-- **Table Selection Dropdown**: Choose any database table  
+- **Table Selection Dropdown**: Choose any database table
 - **Schema Information**: Complete table structure
 - **Data Preview**: Sample data with search and filtering
 - **Permission Controls**: Respects column restrictions
@@ -215,21 +215,21 @@ graph TB
     API --> Validator[Data Validator]
     API --> Processor[File Processor]
     API --> Permissions[Permission Manager]
-    
+
     Processor --> Parser[Format Parser]
     Parser --> CSV[CSV Parser]
     Parser --> JSON[JSON Parser]
     Parser --> Excel[Excel Parser]
     Parser --> XML[XML Parser]
     Parser --> YAML[YAML Parser]
-    
+
     Validator --> Schema[Schema Validator]
     Validator --> Rules[Business Rules]
-    
+
     API --> Jobs[Job Manager]
     Jobs --> Progress[Progress Tracker]
     Jobs --> Background[Background Tasks]
-    
+
     API --> DB[(Database)]
     API --> Files[(File Storage)]
     API --> Audit[(Audit Logs)]
@@ -443,7 +443,7 @@ const fieldMappings = [
     transform: "trim"
   },
   {
-    sourceColumn: "email_address", 
+    sourceColumn: "email_address",
     targetColumn: "email",
     transform: "lower"
   },
@@ -498,7 +498,7 @@ Errors are reported at multiple levels:
     {
       "row": 10,
       "column": "age",
-      "field": "age", 
+      "field": "age",
       "message": "Age seems unusually high",
       "value": 150
     }
@@ -898,17 +898,17 @@ async def import_data(
     session: AsyncSession
 ):
     importer = DataImporter(session)
-    
+
     # Parse file
     parsed_data = await importer.parse_file(file, options)
-    
+
     # Validate data
     validation_result = await importer.validate_data(
         parsed_data["rows"],
         field_mappings,
         table_name
     )
-    
+
     if validation_result.is_valid:
         # Import data
         import_result = await importer.import_data(
@@ -936,7 +936,7 @@ async def export_data(
     session: AsyncSession
 ):
     exporter = DataExporter(session)
-    
+
     return await exporter.export_table(
         table_name=table_name,
         format=format,
@@ -975,11 +975,11 @@ class Settings(BaseSettings):
     IMPORT_MAX_ROWS: int = 1000000
     EXPORT_MAX_ROWS: int = 1000000
     EXPORT_FILE_RETENTION_HOURS: int = 24
-    
+
     # Directories
     IMPORT_TEMP_DIR: str = "/tmp/imports"
     EXPORT_TEMP_DIR: str = "/tmp/exports"
-    
+
     # Security
     IMPORT_ALLOWED_EXTENSIONS: List[str] = ["csv", "json", "xlsx", "xml", "yaml"]
     EXPORT_ALLOWED_FORMATS: List[str] = ["csv", "json", "xlsx", "xml", "yaml"]
@@ -997,7 +997,7 @@ GET /api/v1/data/health
 Response:
 {
   "import_service_status": "healthy",
-  "export_service_status": "healthy", 
+  "export_service_status": "healthy",
   "active_import_jobs": 2,
   "active_export_jobs": 1,
   "queue_size": 0,
@@ -1045,7 +1045,7 @@ All operations are logged:
 #### Import Fails with "Permission Denied"
 **Solution**: Check import permissions for the user and table:
 ```sql
-SELECT * FROM import_permissions 
+SELECT * FROM import_permissions
 WHERE user_id = ? AND table_name = ?;
 ```
 

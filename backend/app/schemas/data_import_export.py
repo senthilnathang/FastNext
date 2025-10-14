@@ -1,16 +1,17 @@
-from pydantic import BaseModel, Field, validator
-from typing import Optional, List, Dict, Any, Union
 from datetime import datetime
 from enum import Enum
+from typing import Any, Dict, List, Optional, Union
 
 # Re-export enums from models
-from app.models.data_import_export import ImportStatus, ExportStatus, DataFormat
-
+from app.models.data_import_export import DataFormat, ExportStatus, ImportStatus
+from pydantic import BaseModel, Field, validator
 
 # Request/Response schemas for Import
 
+
 class ImportOptionsSchema(BaseModel):
     """Import options configuration"""
+
     format: DataFormat
     has_headers: bool = True
     delimiter: Optional[str] = ","
@@ -22,13 +23,14 @@ class ImportOptionsSchema(BaseModel):
     on_duplicate: str = "skip"  # skip, update, error
     validate_only: bool = False
     batch_size: int = 1000
-    
+
     class Config:
         extra = "allow"  # Allow additional fields for flexibility
 
 
 class FieldMappingSchema(BaseModel):
     """Field mapping configuration"""
+
     source_column: str
     target_column: str
     transform: Optional[str] = None
@@ -37,6 +39,7 @@ class FieldMappingSchema(BaseModel):
 
 class ValidationErrorSchema(BaseModel):
     """Validation error details"""
+
     row: int
     column: Optional[str] = None
     field: Optional[str] = None
@@ -47,6 +50,7 @@ class ValidationErrorSchema(BaseModel):
 
 class ValidationResultSchema(BaseModel):
     """Import validation results"""
+
     is_valid: bool
     total_rows: int
     valid_rows: int
@@ -57,6 +61,7 @@ class ValidationResultSchema(BaseModel):
 
 class ImportJobCreate(BaseModel):
     """Create import job request"""
+
     table_name: str
     original_filename: str
     file_format: DataFormat
@@ -67,6 +72,7 @@ class ImportJobCreate(BaseModel):
 
 class ImportJobResponse(BaseModel):
     """Import job response"""
+
     id: int
     job_id: str
     table_name: str
@@ -94,6 +100,7 @@ class ImportJobResponse(BaseModel):
 
 class ImportJobUpdate(BaseModel):
     """Update import job"""
+
     status: Optional[ImportStatus] = None
     progress_percent: Optional[float] = None
     processed_rows: Optional[int] = None
@@ -105,12 +112,14 @@ class ImportJobUpdate(BaseModel):
 
 class ImportPreviewRequest(BaseModel):
     """Import preview request"""
+
     file_format: DataFormat
     import_options: ImportOptionsSchema
 
 
 class ImportPreviewResponse(BaseModel):
     """Import preview response"""
+
     headers: List[str]
     sample_data: List[Dict[str, Any]]
     total_rows: int
@@ -120,8 +129,10 @@ class ImportPreviewResponse(BaseModel):
 
 # Request/Response schemas for Export
 
+
 class ExportFilterSchema(BaseModel):
     """Export filter configuration"""
+
     column: str
     operator: str  # equals, contains, greater_than, etc.
     value: Any
@@ -130,6 +141,7 @@ class ExportFilterSchema(BaseModel):
 
 class ExportOptionsSchema(BaseModel):
     """Export options configuration"""
+
     format: DataFormat
     include_headers: bool = True
     filename: Optional[str] = None
@@ -143,13 +155,14 @@ class ExportOptionsSchema(BaseModel):
     # Additional filtering and limiting options
     row_limit: Optional[int] = None
     search_term: Optional[str] = None
-    
+
     class Config:
         extra = "allow"  # Allow additional fields for flexibility
 
 
 class ExportJobCreate(BaseModel):
     """Create export job request"""
+
     table_name: str
     export_format: DataFormat
     selected_columns: List[str] = []
@@ -159,6 +172,7 @@ class ExportJobCreate(BaseModel):
 
 class ExportJobResponse(BaseModel):
     """Export job response"""
+
     id: int
     job_id: str
     table_name: str
@@ -184,6 +198,7 @@ class ExportJobResponse(BaseModel):
 
 class ExportJobUpdate(BaseModel):
     """Update export job"""
+
     status: Optional[ExportStatus] = None
     progress_percent: Optional[float] = None
     processed_rows: Optional[int] = None
@@ -195,6 +210,7 @@ class ExportJobUpdate(BaseModel):
 
 class ExportPreviewRequest(BaseModel):
     """Export preview request"""
+
     table_name: str
     selected_columns: List[str] = []
     filters: List[ExportFilterSchema] = []
@@ -203,6 +219,7 @@ class ExportPreviewRequest(BaseModel):
 
 class ExportPreviewResponse(BaseModel):
     """Export preview response"""
+
     columns: List[Dict[str, str]]  # {key, label, type}
     sample_data: List[Dict[str, Any]]
     total_rows: int
@@ -211,8 +228,10 @@ class ExportPreviewResponse(BaseModel):
 
 # Template schemas
 
+
 class ImportTemplateCreate(BaseModel):
     """Create import template"""
+
     name: str
     description: Optional[str] = None
     table_name: str
@@ -224,6 +243,7 @@ class ImportTemplateCreate(BaseModel):
 
 class ImportTemplateResponse(BaseModel):
     """Import template response"""
+
     id: int
     name: str
     description: Optional[str] = None
@@ -244,6 +264,7 @@ class ImportTemplateResponse(BaseModel):
 
 class ExportTemplateCreate(BaseModel):
     """Create export template"""
+
     name: str
     description: Optional[str] = None
     table_name: str
@@ -255,6 +276,7 @@ class ExportTemplateCreate(BaseModel):
 
 class ExportTemplateResponse(BaseModel):
     """Export template response"""
+
     id: int
     name: str
     description: Optional[str] = None
@@ -275,8 +297,10 @@ class ExportTemplateResponse(BaseModel):
 
 # Permission schemas
 
+
 class ImportPermissionCreate(BaseModel):
     """Create import permission"""
+
     user_id: int
     table_name: str
     can_import: bool = True
@@ -284,7 +308,11 @@ class ImportPermissionCreate(BaseModel):
     can_preview: bool = True
     max_file_size_mb: int = 10
     max_rows_per_import: int = 10000
-    allowed_formats: List[DataFormat] = [DataFormat.CSV, DataFormat.JSON, DataFormat.EXCEL]
+    allowed_formats: List[DataFormat] = [
+        DataFormat.CSV,
+        DataFormat.JSON,
+        DataFormat.EXCEL,
+    ]
     requires_approval: bool = False
     approver_user_ids: List[int] = []
     max_imports_per_hour: int = 5
@@ -293,6 +321,7 @@ class ImportPermissionCreate(BaseModel):
 
 class ImportPermissionResponse(BaseModel):
     """Import permission response"""
+
     id: int
     user_id: int
     table_name: str
@@ -315,12 +344,17 @@ class ImportPermissionResponse(BaseModel):
 
 class ExportPermissionCreate(BaseModel):
     """Create export permission"""
+
     user_id: int
     table_name: str
     can_export: bool = True
     can_preview: bool = True
     max_rows_per_export: int = 100000
-    allowed_formats: List[DataFormat] = [DataFormat.CSV, DataFormat.JSON, DataFormat.EXCEL]
+    allowed_formats: List[DataFormat] = [
+        DataFormat.CSV,
+        DataFormat.JSON,
+        DataFormat.EXCEL,
+    ]
     allowed_columns: List[str] = []  # Empty means all columns allowed
     max_exports_per_hour: int = 10
     max_exports_per_day: int = 50
@@ -329,6 +363,7 @@ class ExportPermissionCreate(BaseModel):
 
 class ExportPermissionResponse(BaseModel):
     """Export permission response"""
+
     id: int
     user_id: int
     table_name: str
@@ -349,18 +384,22 @@ class ExportPermissionResponse(BaseModel):
 
 # Bulk operation schemas
 
+
 class BulkImportRequest(BaseModel):
     """Bulk import request"""
+
     jobs: List[ImportJobCreate]
 
 
 class BulkExportRequest(BaseModel):
     """Bulk export request"""
+
     jobs: List[ExportJobCreate]
 
 
 class BulkOperationResponse(BaseModel):
     """Bulk operation response"""
+
     success_count: int
     error_count: int
     job_ids: List[str]
@@ -369,8 +408,10 @@ class BulkOperationResponse(BaseModel):
 
 # Statistics and monitoring schemas
 
+
 class ImportStatistics(BaseModel):
     """Import statistics"""
+
     total_jobs: int
     completed_jobs: int
     failed_jobs: int
@@ -382,6 +423,7 @@ class ImportStatistics(BaseModel):
 
 class ExportStatistics(BaseModel):
     """Export statistics"""
+
     total_jobs: int
     completed_jobs: int
     failed_jobs: int
@@ -394,8 +436,10 @@ class ExportStatistics(BaseModel):
 
 # Health check schemas
 
+
 class ImportExportHealth(BaseModel):
     """Import/Export system health"""
+
     import_service_status: str
     export_service_status: str
     active_import_jobs: int

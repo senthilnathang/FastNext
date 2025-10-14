@@ -1,13 +1,14 @@
 from typing import Any, List
-from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File
-from sqlalchemy.orm import Session
 
 from app.auth.deps import get_current_active_user
-from app.services.permission_service import PermissionService
 from app.db.session import get_db
-from app.models.user import User
 from app.models.asset import Asset
-from app.schemas.asset import Asset as AssetSchema, AssetCreate, AssetUpdate
+from app.models.user import User
+from app.schemas.asset import Asset as AssetSchema
+from app.schemas.asset import AssetCreate, AssetUpdate
+from app.services.permission_service import PermissionService
+from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
+from sqlalchemy.orm import Session
 
 router = APIRouter()
 
@@ -22,27 +23,32 @@ def read_assets(
     current_user: User = Depends(get_current_active_user),
 ) -> Any:
     """Get assets with permission check"""
-    if not PermissionService.check_resource_permission(db, current_user.id, "read", "asset"):
+    if not PermissionService.check_resource_permission(
+        db, current_user.id, "read", "asset"
+    ):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Insufficient permissions to read assets"
+            detail="Insufficient permissions to read assets",
         )
-    
+
     query = db.query(Asset)
-    
+
     if project_id:
         # Check project access
-        if not PermissionService.check_project_permission(db, current_user.id, project_id, "read"):
+        if not PermissionService.check_project_permission(
+            db, current_user.id, project_id, "read"
+        ):
             raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="Project access denied"
+                status_code=status.HTTP_403_FORBIDDEN, detail="Project access denied"
             )
         query = query.filter(Asset.project_id == project_id)
-    
+
     # Users can only see their own assets unless they have manage permission
-    if not PermissionService.check_resource_permission(db, current_user.id, "manage", "asset"):
+    if not PermissionService.check_resource_permission(
+        db, current_user.id, "manage", "asset"
+    ):
         query = query.filter(Asset.user_id == current_user.id)
-    
+
     assets = query.offset(skip).limit(limit).all()
     return assets
 
@@ -56,24 +62,24 @@ def create_asset(
     current_user: User = Depends(get_current_active_user),
 ) -> Any:
     """Create new asset"""
-    if not PermissionService.check_resource_permission(db, current_user.id, "create", "asset"):
+    if not PermissionService.check_resource_permission(
+        db, current_user.id, "create", "asset"
+    ):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Insufficient permissions to create assets"
+            detail="Insufficient permissions to create assets",
         )
-    
+
     if asset_in.project_id:
         # Check project access
-        if not PermissionService.check_project_permission(db, current_user.id, asset_in.project_id, "create"):
+        if not PermissionService.check_project_permission(
+            db, current_user.id, asset_in.project_id, "create"
+        ):
             raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="Project access denied"
+                status_code=status.HTTP_403_FORBIDDEN, detail="Project access denied"
             )
-    
-    asset = Asset(
-        **asset_in.dict(),
-        user_id=current_user.id
-    )
+
+    asset = Asset(**asset_in.dict(), user_id=current_user.id)
     db.add(asset)
     db.commit()
     db.refresh(asset)
@@ -91,16 +97,17 @@ def read_asset(
     asset = db.query(Asset).filter(Asset.id == asset_id).first()
     if not asset:
         raise HTTPException(status_code=404, detail="Asset not found")
-    
+
     # Check permission
-    if not PermissionService.check_resource_permission(db, current_user.id, "read", "asset"):
+    if not PermissionService.check_resource_permission(
+        db, current_user.id, "read", "asset"
+    ):
         # Allow users to read their own assets
         if asset.user_id != current_user.id:
             raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="Asset access denied"
+                status_code=status.HTTP_403_FORBIDDEN, detail="Asset access denied"
             )
-    
+
     return asset
 
 
@@ -116,20 +123,22 @@ def update_asset(
     asset = db.query(Asset).filter(Asset.id == asset_id).first()
     if not asset:
         raise HTTPException(status_code=404, detail="Asset not found")
-    
+
     # Check permission
-    if not PermissionService.check_resource_permission(db, current_user.id, "update", "asset"):
+    if not PermissionService.check_resource_permission(
+        db, current_user.id, "update", "asset"
+    ):
         # Allow users to update their own assets
         if asset.user_id != current_user.id:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
-                detail="Asset update access denied"
+                detail="Asset update access denied",
             )
-    
+
     asset_data = asset_in.dict(exclude_unset=True)
     for field, value in asset_data.items():
         setattr(asset, field, value)
-    
+
     db.add(asset)
     db.commit()
     db.refresh(asset)
@@ -147,16 +156,18 @@ def delete_asset(
     asset = db.query(Asset).filter(Asset.id == asset_id).first()
     if not asset:
         raise HTTPException(status_code=404, detail="Asset not found")
-    
+
     # Check permission
-    if not PermissionService.check_resource_permission(db, current_user.id, "delete", "asset"):
+    if not PermissionService.check_resource_permission(
+        db, current_user.id, "delete", "asset"
+    ):
         # Allow users to delete their own assets
         if asset.user_id != current_user.id:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
-                detail="Asset delete access denied"
+                detail="Asset delete access denied",
             )
-    
+
     db.delete(asset)
     db.commit()
     return {"message": "Asset deleted successfully"}

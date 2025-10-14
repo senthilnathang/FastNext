@@ -20,14 +20,14 @@ class AuthService:
         self.secret_key = settings.SECRET_KEY
         self.algorithm = "HS256"
         self.access_token_expire_minutes = settings.ACCESS_TOKEN_EXPIRE_MINUTES
-    
+
     def create_access_token(self, data: dict) -> str:
         to_encode = data.copy()
         expire = datetime.utcnow() + timedelta(minutes=self.access_token_expire_minutes)
         to_encode.update({"exp": expire, "type": "access"})
         encoded_jwt = jwt.encode(to_encode, self.secret_key, algorithm=self.algorithm)
         return encoded_jwt
-    
+
     def verify_token(self, token: str) -> dict:
         try:
             payload = jwt.decode(token, self.secret_key, algorithms=[self.algorithm])
@@ -65,18 +65,18 @@ class PasswordService:
     @staticmethod
     def hash_password(password: str) -> str:
         return pwd_context.hash(password)
-    
+
     @staticmethod
     def verify_password(plain_password: str, hashed_password: str) -> bool:
         return pwd_context.verify(plain_password, hashed_password)
-    
+
     @staticmethod
     def validate_password_strength(password: str) -> bool:
         """
         Password requirements:
         - Minimum 8 characters
         - At least one uppercase letter
-        - At least one lowercase letter  
+        - At least one lowercase letter
         - At least one digit
         - At least one special character
         """
@@ -113,32 +113,32 @@ class Permission:
         self.resource = resource
         self.action = action
         self.scope = scope
-    
+
     def __str__(self):
         return f"{self.resource}.{self.action}"
 
 class RBACService:
     def __init__(self):
         self.user_permissions: Dict[int, Set[str]] = {}
-    
+
     async def get_user_permissions(self, user_id: int) -> Set[str]:
         """Get all permissions for a user including role-based permissions"""
         if user_id not in self.user_permissions:
             user = await self.get_user_with_roles(user_id)
             permissions = set()
-            
+
             for role in user.roles:
                 for permission in role.permissions:
                     permissions.add(str(permission))
-            
+
             self.user_permissions[user_id] = permissions
-        
+
         return self.user_permissions[user_id]
-    
+
     async def has_permission(self, user_id: int, required_permission: str) -> bool:
         user_permissions = await self.get_user_permissions(user_id)
         return required_permission in user_permissions
-    
+
     async def require_permission(self, user_id: int, permission: str):
         if not await self.has_permission(user_id, permission):
             raise HTTPException(
@@ -163,12 +163,12 @@ def require_permissions(*permissions: str):
                     status_code=status.HTTP_401_UNAUTHORIZED,
                     detail="Authentication required"
                 )
-            
+
             # Check permissions
             rbac = RBACService()
             for permission in permissions:
                 await rbac.require_permission(current_user.id, permission)
-            
+
             return await func(*args, **kwargs)
         return wrapper
     return decorator
@@ -193,25 +193,25 @@ class MFAService:
     @staticmethod
     def generate_secret() -> str:
         return pyotp.random_base32()
-    
+
     @staticmethod
     def generate_qr_code(email: str, secret: str) -> str:
         totp_uri = pyotp.totp.TOTP(secret).provisioning_uri(
             name=email,
             issuer_name="FastNext"
         )
-        
+
         qr = qrcode.QRCode(version=1, box_size=10, border=5)
         qr.add_data(totp_uri)
         qr.make(fit=True)
-        
+
         img = qr.make_image(fill_color="black", back_color="white")
         buffer = BytesIO()
         img.save(buffer, format='PNG')
         buffer.seek(0)
-        
+
         return base64.b64encode(buffer.getvalue()).decode()
-    
+
     @staticmethod
     def verify_totp(secret: str, token: str) -> bool:
         totp = pyotp.TOTP(secret)
@@ -228,17 +228,17 @@ class BackupCodeService:
     def generate_backup_codes(count: int = 10) -> List[str]:
         codes = []
         for _ in range(count):
-            code = ''.join(secrets.choice(string.ascii_uppercase + string.digits) 
+            code = ''.join(secrets.choice(string.ascii_uppercase + string.digits)
                           for _ in range(8))
             # Format as XXXX-XXXX
             formatted_code = f"{code[:4]}-{code[4:]}"
             codes.append(formatted_code)
         return codes
-    
+
     @staticmethod
     def hash_backup_codes(codes: List[str]) -> List[str]:
         return [pwd_context.hash(code) for code in codes]
-    
+
     @staticmethod
     def verify_backup_code(code: str, hashed_codes: List[str]) -> bool:
         for hashed_code in hashed_codes:
@@ -261,14 +261,14 @@ class UserCreateRequest(BaseModel):
     email: str = Field(..., min_length=5, max_length=255)
     full_name: str = Field(..., min_length=2, max_length=100)
     password: str = Field(..., min_length=8, max_length=128)
-    
+
     @validator('email')
     def validate_email(cls, v):
         email_regex = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
         if not re.match(email_regex, v):
             raise ValueError('Invalid email format')
         return v.lower()
-    
+
     @validator('full_name')
     def validate_full_name(cls, v):
         # Remove any HTML tags and special characters
@@ -277,7 +277,7 @@ class UserCreateRequest(BaseModel):
         if not re.match(r'^[a-zA-Z\s\-\.\']+$', clean_name):
             raise ValueError('Name contains invalid characters')
         return clean_name
-    
+
     @validator('password')
     def validate_password(cls, v):
         if not PasswordService.validate_password_strength(v):
@@ -326,25 +326,25 @@ class EncryptionService:
         )
         key = base64.urlsafe_b64encode(kdf.derive(password.encode()))
         self.cipher_suite = Fernet(key)
-    
+
     def encrypt(self, plaintext: str) -> str:
         return self.cipher_suite.encrypt(plaintext.encode()).decode()
-    
+
     def decrypt(self, ciphertext: str) -> str:
         return self.cipher_suite.decrypt(ciphertext.encode()).decode()
 
 # Usage in models
 class SensitiveData(Base):
     __tablename__ = "sensitive_data"
-    
+
     id: Mapped[int] = mapped_column(primary_key=True)
     encrypted_ssn: Mapped[Optional[str]] = mapped_column(Text)
     encrypted_credit_card: Mapped[Optional[str]] = mapped_column(Text)
-    
+
     def set_ssn(self, ssn: str):
         encryption_service = EncryptionService(settings.ENCRYPTION_KEY)
         self.encrypted_ssn = encryption_service.encrypt(ssn)
-    
+
     def get_ssn(self) -> str:
         if self.encrypted_ssn:
             encryption_service = EncryptionService(settings.ENCRYPTION_KEY)
@@ -380,11 +380,11 @@ class Settings(BaseSettings):
     database_password: SecretStr
     jwt_secret: SecretStr
     encryption_key: SecretStr
-    
+
     class Config:
         env_file = ".env"
         case_sensitive = False
-    
+
     def get_secret_value(self, secret_name: str) -> str:
         secret = getattr(self, secret_name, None)
         if isinstance(secret, SecretStr):
@@ -408,14 +408,14 @@ class AWSSecretsManager:
             service_name='secretsmanager',
             region_name=region_name
         )
-    
+
     def get_secret(self, secret_name: str) -> dict:
         try:
             response = self.client.get_secret_value(SecretId=secret_name)
             return json.loads(response['SecretString'])
         except ClientError as e:
             raise Exception(f"Failed to retrieve secret {secret_name}: {e}")
-    
+
     def create_secret(self, secret_name: str, secret_value: dict):
         try:
             self.client.create_secret(
@@ -437,19 +437,19 @@ from starlette.middleware.base import BaseHTTPMiddleware
 class SecurityHeadersMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
         response: Response = await call_next(request)
-        
+
         # Prevent XSS attacks
         response.headers["X-XSS-Protection"] = "1; mode=block"
-        
+
         # Prevent content type sniffing
         response.headers["X-Content-Type-Options"] = "nosniff"
-        
+
         # Prevent clickjacking
         response.headers["X-Frame-Options"] = "DENY"
-        
+
         # Force HTTPS
         response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
-        
+
         # Content Security Policy
         response.headers["Content-Security-Policy"] = (
             "default-src 'self'; "
@@ -460,10 +460,10 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
             "connect-src 'self'; "
             "frame-ancestors 'none'"
         )
-        
+
         # Referrer policy
         response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
-        
+
         # Feature policy
         response.headers["Permissions-Policy"] = (
             "geolocation=(), "
@@ -472,7 +472,7 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
             "payment=(), "
             "usb=()"
         )
-        
+
         return response
 ```
 
@@ -489,29 +489,29 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         self.calls = calls
         self.period = period
         self.clients = defaultdict(list)
-    
+
     async def dispatch(self, request: Request, call_next):
         client_ip = self.get_client_ip(request)
         now = time.time()
-        
+
         # Clean old entries
         self.clients[client_ip] = [
             timestamp for timestamp in self.clients[client_ip]
             if now - timestamp < self.period
         ]
-        
+
         # Check rate limit
         if len(self.clients[client_ip]) >= self.calls:
             raise HTTPException(
                 status_code=status.HTTP_429_TOO_MANY_REQUESTS,
                 detail="Rate limit exceeded"
             )
-        
+
         # Record request
         self.clients[client_ip].append(now)
-        
+
         response = await call_next(request)
-        
+
         # Add rate limit headers
         response.headers["X-RateLimit-Limit"] = str(self.calls)
         response.headers["X-RateLimit-Remaining"] = str(
@@ -520,9 +520,9 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         response.headers["X-RateLimit-Reset"] = str(
             int(now + self.period)
         )
-        
+
         return response
-    
+
     def get_client_ip(self, request: Request) -> str:
         forwarded = request.headers.get("X-Forwarded-For")
         if forwarded:
@@ -543,10 +543,10 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
         request_id = str(uuid4())
         start_time = time.time()
-        
+
         # Add request ID to request state
         request.state.request_id = request_id
-        
+
         # Log request
         logger.info(
             "Request started",
@@ -558,11 +558,11 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
                 "user_agent": request.headers.get("User-Agent", ""),
             }
         )
-        
+
         try:
             response = await call_next(request)
             duration = time.time() - start_time
-            
+
             # Log response
             logger.info(
                 "Request completed",
@@ -572,13 +572,13 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
                     "duration": duration,
                 }
             )
-            
+
             response.headers["X-Request-ID"] = request_id
             return response
-            
+
         except Exception as e:
             duration = time.time() - start_time
-            
+
             # Log error
             logger.error(
                 "Request failed",
@@ -602,7 +602,7 @@ from sqlalchemy.dialects.postgresql import JSONB
 
 class AuditLog(Base):
     __tablename__ = "audit_logs"
-    
+
     id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[Optional[int]] = mapped_column(ForeignKey("users.id"))
     action: Mapped[str] = mapped_column(String(100))
@@ -657,21 +657,21 @@ class SecurityEventDetector:
     def __init__(self):
         self.failed_login_attempts = defaultdict(list)
         self.suspicious_ips = set()
-    
+
     async def detect_brute_force(self, ip_address: str, user_email: str) -> bool:
         """Detect brute force login attempts"""
         now = datetime.utcnow()
         key = f"{ip_address}:{user_email}"
-        
+
         # Clean old attempts (last 15 minutes)
         self.failed_login_attempts[key] = [
             attempt for attempt in self.failed_login_attempts[key]
             if now - attempt < timedelta(minutes=15)
         ]
-        
+
         # Add current attempt
         self.failed_login_attempts[key].append(now)
-        
+
         # Check if threshold exceeded (5 attempts in 15 minutes)
         if len(self.failed_login_attempts[key]) >= 5:
             await self.alert_security_team("brute_force", {
@@ -680,18 +680,18 @@ class SecurityEventDetector:
                 "attempts": len(self.failed_login_attempts[key])
             })
             return True
-        
+
         return False
-    
+
     async def detect_unusual_login_location(self, user_id: int, ip_address: str) -> bool:
         """Detect logins from unusual locations"""
         # Get user's login history
         recent_logins = await self.get_recent_logins(user_id, days=30)
         known_locations = {login.country for login in recent_logins}
-        
+
         # Get current location
         current_location = await self.get_ip_location(ip_address)
-        
+
         if current_location not in known_locations:
             await self.alert_security_team("unusual_location", {
                 "user_id": user_id,
@@ -700,13 +700,13 @@ class SecurityEventDetector:
                 "known_locations": list(known_locations)
             })
             return True
-        
+
         return False
-    
+
     async def detect_privilege_escalation(self, user_id: int, requested_permission: str) -> bool:
         """Detect potential privilege escalation attempts"""
         user_permissions = await self.get_user_permissions(user_id)
-        
+
         # Check if user is requesting permissions they don't have
         if requested_permission not in user_permissions:
             # Check if it's a significant privilege escalation
@@ -718,9 +718,9 @@ class SecurityEventDetector:
                     "current_permissions": list(user_permissions)
                 })
                 return True
-        
+
         return False
-    
+
     async def alert_security_team(self, event_type: str, details: dict):
         """Send alert to security team"""
         alert = {
@@ -729,10 +729,10 @@ class SecurityEventDetector:
             "severity": "HIGH",
             "details": details
         }
-        
+
         # Send to monitoring system (e.g., Sentry, Slack, email)
         logger.critical("Security Alert", extra=alert)
-        
+
         # Store in database for investigation
         await self.store_security_alert(alert)
 ```
@@ -754,7 +754,7 @@ class IntrusionDetectionSystem:
             r"(--|\#|\/\*)",
             r"(\bexec\b|\bexecute\b)"
         ]
-        
+
         self.xss_patterns = [
             r"<script[^>]*>.*?</script>",
             r"javascript:",
@@ -763,13 +763,13 @@ class IntrusionDetectionSystem:
             r"<object[^>]*>",
             r"<embed[^>]*>"
         ]
-        
+
         self.command_injection_patterns = [
             r"(;|\||&|\$\(|\`)",
             r"(bash|sh|cmd|powershell)",
             r"(wget|curl|nc|netcat)"
         ]
-    
+
     def detect_sql_injection(self, input_data: str) -> bool:
         """Detect potential SQL injection attempts"""
         input_lower = input_data.lower()
@@ -777,37 +777,37 @@ class IntrusionDetectionSystem:
             if re.search(pattern, input_lower, re.IGNORECASE):
                 return True
         return False
-    
+
     def detect_xss(self, input_data: str) -> bool:
         """Detect potential XSS attempts"""
         for pattern in self.xss_patterns:
             if re.search(pattern, input_data, re.IGNORECASE):
                 return True
         return False
-    
+
     def detect_command_injection(self, input_data: str) -> bool:
         """Detect potential command injection attempts"""
         for pattern in self.command_injection_patterns:
             if re.search(pattern, input_data, re.IGNORECASE):
                 return True
         return False
-    
+
     async def analyze_request(self, request_data: dict) -> List[str]:
         """Analyze request for security threats"""
         threats = []
-        
+
         # Check all string values in the request
         for key, value in request_data.items():
             if isinstance(value, str):
                 if self.detect_sql_injection(value):
                     threats.append(f"SQL injection detected in {key}")
-                
+
                 if self.detect_xss(value):
                     threats.append(f"XSS attempt detected in {key}")
-                
+
                 if self.detect_command_injection(value):
                     threats.append(f"Command injection detected in {key}")
-        
+
         return threats
 ```
 
@@ -821,14 +821,14 @@ class GDPRCompliance:
     async def export_user_data(user_id: int) -> dict:
         """Export all user data for GDPR compliance"""
         db = get_db()
-        
+
         # Get user data
         user = await db.get(User, user_id)
         profile = await db.get(UserProfile, user_id)
         activities = await db.execute(
             select(ActivityLog).where(ActivityLog.user_id == user_id)
         )
-        
+
         return {
             "user_info": {
                 "email": user.email,
@@ -850,12 +850,12 @@ class GDPRCompliance:
                 for activity in activities.scalars()
             ]
         }
-    
+
     @staticmethod
     async def anonymize_user_data(user_id: int):
         """Anonymize user data while preserving analytics"""
         db = get_db()
-        
+
         # Anonymize user record
         await db.execute(
             update(User)
@@ -866,26 +866,26 @@ class GDPRCompliance:
                 is_active=False
             )
         )
-        
+
         # Anonymize activity logs
         await db.execute(
             update(ActivityLog)
             .where(ActivityLog.user_id == user_id)
             .values(ip_address="0.0.0.0", user_agent="[Anonymized]")
         )
-        
+
         await db.commit()
-    
+
     @staticmethod
     async def delete_user_data(user_id: int):
         """Complete data deletion for right to be forgotten"""
         db = get_db()
-        
+
         # Delete related data
         await db.execute(delete(ActivityLog).where(ActivityLog.user_id == user_id))
         await db.execute(delete(UserProfile).where(UserProfile.user_id == user_id))
         await db.execute(delete(UserRole).where(UserRole.user_id == user_id))
-        
+
         # Delete user
         await db.execute(delete(User).where(User.id == user_id))
         await db.commit()
@@ -904,7 +904,7 @@ class SOXCompliance:
     ):
         """Create immutable financial record for SOX compliance"""
         db = get_db()
-        
+
         # Create hash of record for integrity
         record_data = {
             "user_id": user_id,
@@ -913,11 +913,11 @@ class SOXCompliance:
             "details": details,
             "timestamp": datetime.utcnow().isoformat()
         }
-        
+
         record_hash = hashlib.sha256(
             json.dumps(record_data, sort_keys=True).encode()
         ).hexdigest()
-        
+
         financial_record = FinancialRecord(
             user_id=user_id,
             transaction_type=transaction_type,
@@ -925,18 +925,18 @@ class SOXCompliance:
             details=details,
             record_hash=record_hash
         )
-        
+
         db.add(financial_record)
         await db.commit()
-        
+
         return financial_record
-    
+
     @staticmethod
     async def verify_record_integrity(record_id: int) -> bool:
         """Verify financial record hasn't been tampered with"""
         db = get_db()
         record = await db.get(FinancialRecord, record_id)
-        
+
         # Recreate hash
         record_data = {
             "user_id": record.user_id,
@@ -945,11 +945,11 @@ class SOXCompliance:
             "details": record.details,
             "timestamp": record.created_at.isoformat()
         }
-        
+
         expected_hash = hashlib.sha256(
             json.dumps(record_data, sort_keys=True).encode()
         ).hexdigest()
-        
+
         return record.record_hash == expected_hash
 ```
 
@@ -969,14 +969,14 @@ class TestSecurity:
             "1; DROP TABLE users; --",
             "' UNION SELECT * FROM users --"
         ]
-        
+
         for malicious_input in malicious_inputs:
             response = client.get(f"/users/?search={malicious_input}")
             # Should not return sensitive data or error
             assert response.status_code in [200, 400, 422]
             if response.status_code == 200:
                 assert "DROP" not in response.text.upper()
-    
+
     def test_xss_protection(self, client: TestClient):
         """Test XSS protection"""
         xss_payloads = [
@@ -984,7 +984,7 @@ class TestSecurity:
             "javascript:alert('xss')",
             "<img src=x onerror=alert('xss')>"
         ]
-        
+
         for payload in xss_payloads:
             response = client.post("/users/", json={
                 "email": "test@example.com",
@@ -993,7 +993,7 @@ class TestSecurity:
             })
             # Should reject or sanitize
             assert response.status_code in [400, 422]
-    
+
     def test_rate_limiting(self, client: TestClient):
         """Test rate limiting"""
         # Make rapid requests
@@ -1001,16 +1001,16 @@ class TestSecurity:
             response = client.get("/")
             if response.status_code == 429:
                 break
-        
+
         # Should be rate limited
         assert response.status_code == 429
         assert "rate limit" in response.json()["detail"].lower()
-    
+
     def test_authentication_required(self, client: TestClient):
         """Test authentication is required for protected endpoints"""
         response = client.get("/users/me")
         assert response.status_code == 401
-    
+
     def test_authorization_enforcement(self, client: TestClient, regular_user_token):
         """Test authorization is enforced"""
         headers = {"Authorization": f"Bearer {regular_user_token}"}
@@ -1045,33 +1045,33 @@ class SecurityIncidentResponse:
         """Handle data breach incident"""
         # 1. Immediate containment
         await SecurityIncidentResponse.contain_breach()
-        
+
         # 2. Assessment
         impact = await SecurityIncidentResponse.assess_impact(incident_details)
-        
+
         # 3. Notification
         if impact["severity"] == "HIGH":
             await SecurityIncidentResponse.notify_authorities()
             await SecurityIncidentResponse.notify_affected_users(impact["affected_users"])
-        
+
         # 4. Documentation
         await SecurityIncidentResponse.document_incident(incident_details, impact)
-        
+
         # 5. Recovery
         await SecurityIncidentResponse.initiate_recovery_plan()
-    
+
     @staticmethod
     async def contain_breach():
         """Immediate breach containment actions"""
         # Revoke all active sessions
         await SessionManager.revoke_all_sessions()
-        
+
         # Enable maintenance mode
         await MaintenanceMode.enable()
-        
+
         # Alert security team
         await SecurityTeam.alert_immediate()
-    
+
     @staticmethod
     async def assess_impact(incident_details: dict) -> dict:
         """Assess the impact of security incident"""

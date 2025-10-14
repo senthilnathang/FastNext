@@ -33,7 +33,7 @@ export const ColorSchema = z.string().regex(/^#[0-9A-Fa-f]{6}$/, 'Color must be 
 export const PasswordSchema = z.string()
   .min(8, 'Password must be at least 8 characters')
   .max(128, 'Password must be less than 128 characters')
-  .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/, 
+  .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/,
     'Password must contain at least one lowercase letter, one uppercase letter, one number, and one special character')
 
 // Date validation helpers

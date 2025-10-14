@@ -38,10 +38,10 @@
    ```bash
    # Create database
    createdb fastnext_dev
-   
+
    # Run migrations
    alembic upgrade head
-   
+
    # Create admin user
    python scripts/create_admin.py
    ```
@@ -393,7 +393,7 @@ from app.domain.events import UserCreated
 async def handle_user_created(event: UserCreated):
     # Send welcome email
     await email_service.send_welcome_email(event.email)
-    
+
     # Track analytics
     await analytics_service.track_user_signup(event.user_id)
 ```

@@ -1,8 +1,11 @@
-from sqlalchemy import Boolean, Column, Integer, String, Text, DateTime, ForeignKey, JSON, Enum as SQLEnum
-from sqlalchemy.sql import func
-from sqlalchemy.orm import relationship
-from app.db.base import Base
 import enum
+
+from app.db.base import Base
+from sqlalchemy import JSON, Boolean, Column, DateTime
+from sqlalchemy import Enum as SQLEnum
+from sqlalchemy import ForeignKey, Integer, String, Text
+from sqlalchemy.orm import relationship
+from sqlalchemy.sql import func
 
 
 class WorkflowNodeType(str, enum.Enum):
@@ -48,8 +51,12 @@ class WorkflowType(Base):
 
     # Relationships
     creator = relationship("User", foreign_keys=[created_by])
-    templates = relationship("WorkflowTemplate", back_populates="workflow_type", cascade="all, delete-orphan")
-    instances = relationship("WorkflowInstance", back_populates="workflow_type", cascade="all, delete-orphan")
+    templates = relationship(
+        "WorkflowTemplate", back_populates="workflow_type", cascade="all, delete-orphan"
+    )
+    instances = relationship(
+        "WorkflowInstance", back_populates="workflow_type", cascade="all, delete-orphan"
+    )
 
 
 class WorkflowState(Base):
@@ -63,7 +70,7 @@ class WorkflowState(Base):
     bg_color = Column(String, nullable=False, default="#F9FAFB")  # Background color
     icon = Column(String, default="circle")  # Icon name
     is_initial = Column(Boolean, default=False)  # Can be starting state
-    is_final = Column(Boolean, default=False)    # Is ending state
+    is_final = Column(Boolean, default=False)  # Is ending state
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
 
@@ -92,7 +99,9 @@ class WorkflowTemplate(Base):
     workflow_type = relationship("WorkflowType", back_populates="templates")
     default_state = relationship("WorkflowState", foreign_keys=[default_state_id])
     creator = relationship("User", foreign_keys=[created_by])
-    instances = relationship("WorkflowInstance", back_populates="template", cascade="all, delete-orphan")
+    instances = relationship(
+        "WorkflowInstance", back_populates="template", cascade="all, delete-orphan"
+    )
 
 
 class WorkflowInstance(Base):
@@ -103,13 +112,17 @@ class WorkflowInstance(Base):
     workflow_type_id = Column(Integer, ForeignKey("workflow_types.id"), nullable=False)
     current_state_id = Column(Integer, ForeignKey("workflow_states.id"), nullable=False)
     status = Column(SQLEnum(InstanceStatus), default=InstanceStatus.PENDING)
-    entity_id = Column(String, nullable=False)  # ID of the related entity (order, invoice, etc.)
+    entity_id = Column(
+        String, nullable=False
+    )  # ID of the related entity (order, invoice, etc.)
     entity_type = Column(String, nullable=False)  # Type of entity
     title = Column(String)  # Human readable title
     description = Column(Text)
     data = Column(JSON, default={})  # Additional data
     context = Column(JSON, default={})  # Runtime context variables
-    active_nodes = Column(JSON, default=[])  # Currently active nodes (for parallel processing)
+    active_nodes = Column(
+        JSON, default=[]
+    )  # Currently active nodes (for parallel processing)
     deadline = Column(DateTime(timezone=True))  # SLA deadline
     priority = Column(Integer, default=0)  # Priority level
     assigned_to = Column(Integer, ForeignKey("users.id"))  # Currently assigned user
@@ -125,7 +138,9 @@ class WorkflowInstance(Base):
     current_state = relationship("WorkflowState", foreign_keys=[current_state_id])
     creator = relationship("User", foreign_keys=[created_by])
     assigned_user = relationship("User", foreign_keys=[assigned_to])
-    history = relationship("WorkflowHistory", back_populates="instance", cascade="all, delete-orphan")
+    history = relationship(
+        "WorkflowHistory", back_populates="instance", cascade="all, delete-orphan"
+    )
 
 
 class WorkflowHistory(Base):
@@ -156,7 +171,7 @@ class WorkflowTransition(Base):
     from_state_id = Column(Integer, ForeignKey("workflow_states.id"), nullable=False)
     to_state_id = Column(Integer, ForeignKey("workflow_states.id"), nullable=False)
     action = Column(String, nullable=False)  # Action name
-    label = Column(String, nullable=False)   # Display label
+    label = Column(String, nullable=False)  # Display label
     condition = Column(Text)  # Optional condition (JSON or expression)
     requires_approval = Column(Boolean, default=False)
     allowed_roles = Column(JSON, default=[])  # List of role names

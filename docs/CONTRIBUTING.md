@@ -94,15 +94,15 @@ async def create_user(
 ) -> UserResponse:
     """
     Create a new user with validation and security checks.
-    
+
     Args:
         user_data: User creation data
         db: Database session
         user_service: User service instance
-        
+
     Returns:
         Created user information
-        
+
     Raises:
         HTTPException: If user creation fails
     """
@@ -304,13 +304,13 @@ describe('UserForm', () => {
   test('submits form with valid data', async () => {
     const mockSubmit = jest.fn();
     render(<UserForm onSubmit={mockSubmit} />);
-    
+
     fireEvent.change(screen.getByPlaceholderText('Enter username'), {
       target: { value: 'testuser' }
     });
-    
+
     fireEvent.click(screen.getByText('Create User'));
-    
+
     expect(mockSubmit).toHaveBeenCalledWith({
       username: 'testuser'
     });

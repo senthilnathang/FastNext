@@ -1,15 +1,26 @@
-from sqlalchemy import Column, Integer, String, Boolean, DateTime, Text, Float, ForeignKey, JSON
-from sqlalchemy.orm import relationship, Mapped, mapped_column
-from sqlalchemy.sql import func
-from typing import Optional, List
+from typing import List, Optional
 
-from app.models.base import TimestampMixin
-from app.models.base import Base
+from app.models.base import Base, TimestampMixin
+from sqlalchemy import (
+    JSON,
+    Boolean,
+    Column,
+    DateTime,
+    Float,
+    ForeignKey,
+    Integer,
+    String,
+    Text,
+)
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.sql import func
+
 
 class Category(Base, TimestampMixin):
     """
     Category model
     """
+
     __tablename__ = "categorys"
 
     # Primary key

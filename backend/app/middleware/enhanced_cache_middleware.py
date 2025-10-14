@@ -5,19 +5,19 @@ Implements browser, CDN, and Redis caching with intelligent invalidation
 
 import hashlib
 import json
-import time
-from typing import Callable, Dict, Any, Optional
-from fastapi import Request, Response
-from fastapi.responses import JSONResponse
 import logging
+import time
+from typing import Any, Callable, Dict, Optional
 
 from app.core.cache_optimization import (
-    CachePolicy,
     CacheLevel,
-    get_cache_control_headers
+    CachePolicy,
+    get_cache_control_headers,
 )
-from app.core.redis_config import cache
 from app.core.config import settings
+from app.core.redis_config import cache
+from fastapi import Request, Response
+from fastapi.responses import JSONResponse
 
 logger = logging.getLogger(__name__)
 
@@ -30,11 +30,7 @@ class EnhancedCacheMiddleware:
     - Redis caching (server-side)
     """
 
-    def __init__(
-        self,
-        app: Callable,
-        default_policy: Optional[CachePolicy] = None
-    ):
+    def __init__(self, app: Callable, default_policy: Optional[CachePolicy] = None):
         self.app = app
         self.default_policy = default_policy or CachePolicy.redis_cache(ttl=300)
 
@@ -43,32 +39,18 @@ class EnhancedCacheMiddleware:
             # Static assets - CDN + Browser
             "/static": CachePolicy.cdn_cache(ttl=86400 * 7),  # 1 week
             "/assets": CachePolicy.cdn_cache(ttl=86400 * 7),
-
             # API responses - Redis + Browser
-            "/api/v1/users": CachePolicy.redis_cache(
-                ttl=600,
-                tags={'table:users'}
-            ),
+            "/api/v1/users": CachePolicy.redis_cache(ttl=600, tags={"table:users"}),
             "/api/v1/projects": CachePolicy.redis_cache(
-                ttl=300,
-                tags={'table:projects'}
+                ttl=300, tags={"table:projects"}
             ),
             "/api/v1/activity-logs": CachePolicy.redis_cache(
-                ttl=60,
-                tags={'table:activity_logs'}
+                ttl=60, tags={"table:activity_logs"}
             ),
-
             # Dashboard data - Full cache
-            "/api/v1/dashboard": CachePolicy.full_cache(
-                ttl=300,
-                tags={'dashboard'}
-            ),
-
+            "/api/v1/dashboard": CachePolicy.full_cache(ttl=300, tags={"dashboard"}),
             # Reports - CDN + Redis
-            "/api/v1/reports": CachePolicy.full_cache(
-                ttl=1800,
-                tags={'reports'}
-            ),
+            "/api/v1/reports": CachePolicy.full_cache(ttl=1800, tags={"reports"}),
         }
 
         # Non-cacheable paths
@@ -85,7 +67,7 @@ class EnhancedCacheMiddleware:
             "/upload",
             "/download",
             "/api/v1/cache",  # Cache management endpoints
-            "/api/v1/database/performance"  # Performance monitoring endpoints
+            "/api/v1/database/performance",  # Performance monitoring endpoints
         }
 
         # Cacheable HTTP methods
@@ -116,9 +98,7 @@ class EnhancedCacheMiddleware:
                 if cached_response:
                     logger.debug(f"🎯 Redis cache hit: {request.url.path}")
                     await self._send_cached_response(
-                        scope, receive, send,
-                        cached_response, policy,
-                        cache_hit=True
+                        scope, receive, send, cached_response, policy, cache_hit=True
                     )
                     return
             except Exception as e:
@@ -135,7 +115,9 @@ class EnhancedCacheMiddleware:
 
         # Skip non-cacheable paths
         path = request.url.path
-        if any(path.startswith(non_cacheable) for non_cacheable in self.non_cacheable_paths):
+        if any(
+            path.startswith(non_cacheable) for non_cacheable in self.non_cacheable_paths
+        ):
             return False
 
         # Skip if client says no-cache
@@ -168,11 +150,11 @@ class EnhancedCacheMiddleware:
         ]
 
         # Add vary factors
-        if 'user' in policy.vary_by:
+        if "user" in policy.vary_by:
             auth = request.headers.get("authorization", "")
             key_components.append(auth[:30] if auth else "anon")
 
-        if 'role' in policy.vary_by:
+        if "role" in policy.vary_by:
             role = request.headers.get("x-user-role", "")
             key_components.append(role)
 
@@ -193,7 +175,7 @@ class EnhancedCacheMiddleware:
         send: Callable,
         cached_data: dict,
         policy: CachePolicy,
-        cache_hit: bool = True
+        cache_hit: bool = True,
     ):
         """Send a cached response with appropriate headers"""
         # Reconstruct content
@@ -208,26 +190,27 @@ class EnhancedCacheMiddleware:
         response_headers = {**cached_headers, **cache_headers}
 
         # Add cache status headers
-        response_headers.update({
-            "X-Cache": "HIT" if cache_hit else "MISS",
-            "X-Cache-Level": "REDIS" if cache_hit else "NONE",
-            "Age": str(int(time.time() - cached_data.get("cached_at", time.time())))
-        })
+        response_headers.update(
+            {
+                "X-Cache": "HIT" if cache_hit else "MISS",
+                "X-Cache-Level": "REDIS" if cache_hit else "NONE",
+                "Age": str(
+                    int(time.time() - cached_data.get("cached_at", time.time()))
+                ),
+            }
+        )
 
         # Handle binary content
         if isinstance(content, dict) and content.get("_binary_content"):
             import base64
+
             binary_data = base64.b64decode(content["_data"])
             response = Response(
-                content=binary_data,
-                status_code=status_code,
-                headers=response_headers
+                content=binary_data, status_code=status_code, headers=response_headers
             )
         else:
             response = JSONResponse(
-                content=content,
-                status_code=status_code,
-                headers=response_headers
+                content=content, status_code=status_code, headers=response_headers
             )
 
         await response(scope, receive, send)
@@ -238,7 +221,7 @@ class EnhancedCacheMiddleware:
         receive: Callable,
         send: Callable,
         cache_key: str,
-        policy: CachePolicy
+        policy: CachePolicy,
     ):
         """Execute request and cache the response"""
         response_data = {}
@@ -256,15 +239,14 @@ class EnhancedCacheMiddleware:
 
                 # Add cache headers
                 cache_header_list = [
-                    (k.lower().encode(), v.encode())
-                    for k, v in cache_headers.items()
+                    (k.lower().encode(), v.encode()) for k, v in cache_headers.items()
                 ]
 
                 message["headers"] = [
                     *message.get("headers", []),
                     *cache_header_list,
                     (b"x-cache", b"MISS"),
-                    (b"x-cache-level", b"NONE")
+                    (b"x-cache-level", b"NONE"),
                 ]
 
             elif message["type"] == "http.response.body":
@@ -281,10 +263,7 @@ class EnhancedCacheMiddleware:
         await self.app(scope, receive, send_wrapper)
 
     async def _cache_response(
-        self,
-        cache_key: str,
-        response_data: dict,
-        policy: CachePolicy
+        self, cache_key: str, response_data: dict, policy: CachePolicy
     ):
         """Cache the response if appropriate"""
         try:
@@ -312,9 +291,10 @@ class EnhancedCacheMiddleware:
                     parsed_content = content.decode() if content else ""
                 except UnicodeDecodeError:
                     import base64
+
                     parsed_content = {
                         "_binary_content": True,
-                        "_data": base64.b64encode(content).decode('utf-8')
+                        "_data": base64.b64encode(content).decode("utf-8"),
                     }
 
             # Convert headers
@@ -325,8 +305,8 @@ class EnhancedCacheMiddleware:
                 for header_tuple in headers_list:
                     if len(header_tuple) == 2:
                         k, v = header_tuple
-                        key = k.decode('utf-8') if isinstance(k, bytes) else str(k)
-                        value = v.decode('utf-8') if isinstance(v, bytes) else str(v)
+                        key = k.decode("utf-8") if isinstance(k, bytes) else str(k)
+                        value = v.decode("utf-8") if isinstance(v, bytes) else str(v)
 
                         # Skip cache-specific headers
                         if not key.lower().startswith(("x-cache", "age")):
@@ -341,8 +321,8 @@ class EnhancedCacheMiddleware:
                 "cache_policy": {
                     "ttl": policy.ttl,
                     "levels": [level.value for level in policy.cache_levels],
-                    "tags": list(policy.invalidation_tags)
-                }
+                    "tags": list(policy.invalidation_tags),
+                },
             }
 
             # Cache with TTL
@@ -351,9 +331,9 @@ class EnhancedCacheMiddleware:
             # Register for tag-based invalidation
             if policy.invalidation_tags:
                 from app.core.cache_optimization import invalidation_strategy
+
                 await invalidation_strategy.register_cache_entry(
-                    cache_key,
-                    policy.invalidation_tags
+                    cache_key, policy.invalidation_tags
                 )
 
             logger.debug(
@@ -375,8 +355,10 @@ def cache_policy_decorator(policy: CachePolicy):
         async def get_users():
             ...
     """
+
     def decorator(func):
         # Store policy as function attribute
         func.__cache_policy__ = policy
         return func
+
     return decorator

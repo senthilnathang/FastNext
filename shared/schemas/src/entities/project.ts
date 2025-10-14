@@ -215,7 +215,7 @@ export const ProjectSearchSchema = z.object({
   page: z.number().int().positive().default(1),
   limit: z.number().int().min(1).max(100).default(10),
   sort_by: z.enum([
-    'created_at', 'updated_at', 'name', 'status', 'priority', 
+    'created_at', 'updated_at', 'name', 'status', 'priority',
     'start_date', 'end_date', 'member_count'
   ]).default('updated_at'),
   sort_order: z.enum(['asc', 'desc']).default('desc')

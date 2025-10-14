@@ -90,28 +90,28 @@ services:
       POSTGRES_DB: ${POSTGRES_DB:-fastnext}
       POSTGRES_USER: ${POSTGRES_USER:-fastnext}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      
+
       # Redis
       REDIS_HOST: redis
       REDIS_PORT: 6379
       REDIS_PASSWORD: ${REDIS_PASSWORD}
       REDIS_DB: 0
-      
+
       # Application
       SECRET_KEY: ${SECRET_KEY}
       ENVIRONMENT: production
       DEBUG: false
       PORT: 8000
-      
+
       # Cache
       CACHE_ENABLED: true
       CACHE_DEFAULT_TTL: 300
-      
+
       # Performance
       WORKERS: ${BACKEND_WORKERS:-4}
       MAX_CONNECTIONS: 1000
       MAX_CONCURRENT_CONNECTIONS: 100
-      
+
       # Security
       CORS_ORIGINS: ${CORS_ORIGINS:-https://yourdomain.com}
     volumes:

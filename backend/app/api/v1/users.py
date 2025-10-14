@@ -1,15 +1,17 @@
 from typing import Any, List
-from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.orm import Session
-from sqlalchemy import func
 
 from app.auth.deps import get_current_active_user
 from app.auth.permissions import require_admin
 from app.core import security
 from app.db.session import get_db
 from app.models.user import User
-from app.schemas.user import User as UserSchema, UserCreate, AdminUserCreate, UserUpdate, UserResponse
 from app.schemas.common import ListResponse
+from app.schemas.user import AdminUserCreate
+from app.schemas.user import User as UserSchema
+from app.schemas.user import UserCreate, UserResponse, UserUpdate
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy import func
+from sqlalchemy.orm import Session
 
 router = APIRouter()
 
@@ -26,31 +28,26 @@ def read_users(
 ) -> Any:
     """Get all users with pagination (admin only)"""
     query = db.query(User)
-    
+
     # Apply filters
     if search:
         search_term = f"%{search}%"
         query = query.filter(
-            (User.username.ilike(search_term)) |
-            (User.email.ilike(search_term)) |
-            (User.full_name.ilike(search_term))
+            (User.username.ilike(search_term))
+            | (User.email.ilike(search_term))
+            | (User.full_name.ilike(search_term))
         )
-    
+
     if is_active is not None:
         query = query.filter(User.is_active == is_active)
-    
+
     # Get total count
     total = query.count()
-    
+
     # Get paginated results
     users = query.offset(skip).limit(limit).all()
-    
-    return ListResponse.paginate(
-        items=users,
-        total=total,
-        skip=skip,
-        limit=limit
-    )
+
+    return ListResponse.paginate(items=users, total=total, skip=skip, limit=limit)
 
 
 @router.post("", response_model=UserResponse)
@@ -74,8 +71,8 @@ def create_user(
             status_code=400,
             detail="The user with this username already exists in the system.",
         )
-    
-    user_data = user_in.dict(exclude={'password', 'send_invitation'})
+
+    user_data = user_in.dict(exclude={"password", "send_invitation"})
     user = User(
         **user_data,
         hashed_password=security.get_password_hash(user_in.password),
@@ -83,12 +80,12 @@ def create_user(
     db.add(user)
     db.commit()
     db.refresh(user)
-    
+
     # TODO: Implement invitation email sending if send_invitation is True
     if user_in.send_invitation:
         # Send invitation email logic here
         pass
-    
+
     return user
 
 
@@ -110,13 +107,13 @@ def update_user_me(
 ) -> Any:
     """Update current user profile"""
     current_user_data = user_in.dict(exclude_unset=True)
-    if 'password' in current_user_data:
-        hashed_password = security.get_password_hash(current_user_data.pop('password'))
+    if "password" in current_user_data:
+        hashed_password = security.get_password_hash(current_user_data.pop("password"))
         current_user_data["hashed_password"] = hashed_password
-    
+
     for field, value in current_user_data.items():
         setattr(current_user, field, value)
-    
+
     db.add(current_user)
     db.commit()
     db.refresh(current_user)
@@ -149,15 +146,15 @@ def update_user(
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
-    
+
     user_data = user_in.dict(exclude_unset=True)
-    if 'password' in user_data:
-        hashed_password = security.get_password_hash(user_data.pop('password'))
+    if "password" in user_data:
+        hashed_password = security.get_password_hash(user_data.pop("password"))
         user_data["hashed_password"] = hashed_password
-    
+
     for field, value in user_data.items():
         setattr(user, field, value)
-    
+
     db.add(user)
     db.commit()
     db.refresh(user)
@@ -175,13 +172,10 @@ def delete_user(
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
-    
+
     if user.is_superuser:
-        raise HTTPException(
-            status_code=400,
-            detail="Cannot delete superuser"
-        )
-    
+        raise HTTPException(status_code=400, detail="Cannot delete superuser")
+
     user.is_active = False
     db.add(user)
     db.commit()
@@ -199,13 +193,10 @@ def toggle_user_status(
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
-    
+
     if user.is_superuser:
-        raise HTTPException(
-            status_code=400,
-            detail="Cannot modify superuser status"
-        )
-    
+        raise HTTPException(status_code=400, detail="Cannot modify superuser status")
+
     user.is_active = not user.is_active
     db.add(user)
     db.commit()

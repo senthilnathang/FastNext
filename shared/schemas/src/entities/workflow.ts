@@ -78,7 +78,7 @@ export const WorkflowDefinitionSchema = z.object({
 }).refine((data) => {
   // Validate that all edge sources and targets reference existing nodes
   const nodeIds = new Set(data.nodes.map(node => node.id))
-  return data.edges.every(edge => 
+  return data.edges.every(edge =>
     nodeIds.has(edge.source) && nodeIds.has(edge.target)
   )
 }, {
@@ -158,7 +158,7 @@ export const WorkflowScheduleSchema = z.object({
   name: z.string().min(1, 'Schedule name is required').max(100),
   description: z.string().max(500).optional(),
   cron_expression: z.string()
-    .regex(/^(\*|([0-9]|1[0-9]|2[0-9]|3[0-9]|4[0-9]|5[0-9])|\*\/([0-9]|1[0-9]|2[0-9]|3[0-9]|4[0-9]|5[0-9])) (\*|([0-9]|1[0-9]|2[0-3])|\*\/([0-9]|1[0-9]|2[0-3])) (\*|([1-9]|1[0-9]|2[0-9]|3[0-1])|\*\/([1-9]|1[0-9]|2[0-9]|3[0-1])) (\*|([1-9]|1[0-2])|\*\/([1-9]|1[0-2])) (\*|([0-6])|\*\/([0-6]))$/, 
+    .regex(/^(\*|([0-9]|1[0-9]|2[0-9]|3[0-9]|4[0-9]|5[0-9])|\*\/([0-9]|1[0-9]|2[0-9]|3[0-9]|4[0-9]|5[0-9])) (\*|([0-9]|1[0-9]|2[0-3])|\*\/([0-9]|1[0-9]|2[0-3])) (\*|([1-9]|1[0-9]|2[0-9]|3[0-1])|\*\/([1-9]|1[0-9]|2[0-9]|3[0-1])) (\*|([1-9]|1[0-2])|\*\/([1-9]|1[0-2])) (\*|([0-6])|\*\/([0-6]))$/,
       'Invalid cron expression'),
   timezone: z.string().default('UTC'),
   is_active: z.boolean().default(true),

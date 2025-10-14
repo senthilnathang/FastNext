@@ -169,7 +169,7 @@ from app.db.base import Base
 
 class MyModel(Base):
     __tablename__ = "my_table"
-    
+
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, index=True)
 ```
@@ -184,7 +184,7 @@ class MyModelCreate(BaseModel):
 class MyModelResponse(BaseModel):
     id: int
     name: str
-    
+
     class Config:
         from_attributes = True
 ```

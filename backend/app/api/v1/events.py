@@ -3,24 +3,28 @@ Event log API endpoints inspired by VerifyWise implementation
 Provides comprehensive event monitoring and logging endpoints
 """
 
-from typing import Optional, List, Dict, Any
 from datetime import datetime, timedelta
-from fastapi import APIRouter, Depends, HTTPException, Query, status, Request
-from sqlalchemy.orm import Session
-from pydantic import BaseModel, Field
+from typing import Any, Dict, List, Optional
 
-from app.db.session import get_db
 from app.auth.deps import get_current_user
 from app.auth.optional_deps import get_current_user_dev_friendly
-from app.models.user import User
-from app.models.activity_log import ActivityLog, ActivityLevel, ActivityAction, EventCategory
-from app.utils.enhanced_logger import enhanced_logger, log_api_call
+from app.db.session import get_db
 from app.middleware.validation_middleware import (
-    validate_pagination_params_enhanced,
     create_success_response,
-    create_validation_error_response
+    create_validation_error_response,
+    validate_pagination_params_enhanced,
 )
-
+from app.models.activity_log import (
+    ActivityAction,
+    ActivityLevel,
+    ActivityLog,
+    EventCategory,
+)
+from app.models.user import User
+from app.utils.enhanced_logger import enhanced_logger, log_api_call
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
+from pydantic import BaseModel, Field
+from sqlalchemy.orm import Session
 
 router = APIRouter()
 
@@ -53,7 +57,7 @@ class EventResponse(BaseModel):
     riskScore: Optional[int]
     affectedUsersCount: Optional[int]
     system: Optional[Dict[str, Any]]
-    
+
     class Config:
         from_attributes = True
 
@@ -115,28 +119,28 @@ async def get_events(
     user_id: Optional[int] = Query(None, description="Filter by user ID"),
     start_date: Optional[datetime] = Query(None, description="Start date (ISO format)"),
     end_date: Optional[datetime] = Query(None, description="End date (ISO format)"),
-    search_query: Optional[str] = Query(None, description="Search in description, entity name, username"),
+    search_query: Optional[str] = Query(
+        None, description="Search in description, entity name, username"
+    ),
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user_dev_friendly)
+    current_user: User = Depends(get_current_user_dev_friendly),
 ):
     """
     Get filtered list of events with pagination
     Inspired by VerifyWise getAllEvents implementation
     """
-    
+
     start_time = datetime.now()
-    
+
     try:
         # Validate pagination
         pagination = validate_pagination_params_enhanced(
-            page=page,
-            limit=limit,
-            max_limit=500
+            page=page, limit=limit, max_limit=500
         )
-        
+
         # Calculate offset
         offset = (page - 1) * limit
-        
+
         # Get events from database
         result = enhanced_logger.get_events_from_db(
             db=db,
@@ -148,33 +152,33 @@ async def get_events(
             user_id=user_id,
             start_date=start_date,
             end_date=end_date,
-            search_query=search_query
+            search_query=search_query,
         )
-        
-        if not result['success']:
+
+        if not result["success"]:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=result['error']
+                detail=result["error"],
             )
 
         # Don't log /events calls to prevent recursive logging
 
         return EventListResponse(
             success=True,
-            data=result['data'],
-            total=result['total'],
-            page=result['page'],
-            pages=result['pages'],
-            message="Events retrieved successfully"
+            data=result["data"],
+            total=result["total"],
+            page=result["page"],
+            pages=result["pages"],
+            message="Events retrieved successfully",
         )
-        
+
     except HTTPException:
         raise
     except Exception as e:
         # Don't log errors for /events endpoint to prevent recursive logging
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to retrieve events: {str(e)}"
+            detail=f"Failed to retrieve events: {str(e)}",
         )
 
 
@@ -188,32 +192,34 @@ async def get_user_events(
     action: Optional[ActivityAction] = Query(None, description="Filter by action"),
     start_date: Optional[datetime] = Query(None, description="Start date (ISO format)"),
     end_date: Optional[datetime] = Query(None, description="End date (ISO format)"),
-    search_query: Optional[str] = Query(None, description="Search in description, entity name"),
-    days: Optional[int] = Query(None, ge=1, le=365, description="Number of days to look back"),
+    search_query: Optional[str] = Query(
+        None, description="Search in description, entity name"
+    ),
+    days: Optional[int] = Query(
+        None, ge=1, le=365, description="Number of days to look back"
+    ),
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_user),
 ):
     """
     Get events for the current user only
     """
-    
+
     start_time = datetime.now()
-    
+
     try:
         # Validate pagination
         pagination = validate_pagination_params_enhanced(
-            page=page,
-            limit=limit,
-            max_limit=500
+            page=page, limit=limit, max_limit=500
         )
-        
+
         # Calculate offset
         offset = (page - 1) * limit
-        
+
         # If days parameter is provided, calculate start_date
         if days and not start_date:
             start_date = datetime.now() - timedelta(days=days)
-        
+
         # Get events from database for current user only
         result = enhanced_logger.get_events_from_db(
             db=db,
@@ -225,15 +231,15 @@ async def get_user_events(
             user_id=current_user.id,  # Filter by current user
             start_date=start_date,
             end_date=end_date,
-            search_query=search_query
+            search_query=search_query,
         )
-        
-        if not result['success']:
+
+        if not result["success"]:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=result['error']
+                detail=result["error"],
             )
-        
+
         # Log the API call
         response_time = int((datetime.now() - start_time).total_seconds() * 1000)
         log_api_call(
@@ -242,17 +248,17 @@ async def get_user_events(
             response_time_ms=response_time,
             status_code=200,
             user_id=current_user.id if current_user else None,
-            username=current_user.username if current_user else None
+            username=current_user.username if current_user else None,
         )
-        
+
         return UserEventResponse(
-            items=result['data'],
-            total=result['total'],
-            page=result['page'],
+            items=result["data"],
+            total=result["total"],
+            page=result["page"],
             per_page=limit,
-            pages=result['pages']
+            pages=result["pages"],
         )
-        
+
     except HTTPException:
         raise
     except Exception as e:
@@ -264,12 +270,12 @@ async def get_user_events(
             response_time_ms=response_time,
             status_code=500,
             user_id=current_user.id if current_user else None,
-            username=current_user.username if current_user else None
+            username=current_user.username if current_user else None,
         )
-        
+
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to retrieve user events: {str(e)}"
+            detail=f"Failed to retrieve user events: {str(e)}",
         )
 
 
@@ -278,53 +284,52 @@ async def get_event_stats(
     request: Request,
     days: int = Query(30, ge=1, le=365, description="Days to look back"),
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_user),
 ):
     """
     Get event statistics for current user
     """
-    
+
     start_time = datetime.now()
-    
+
     try:
         # Convert days to hours for the existing function
         hours = days * 24
-        
+
         # Get basic statistics for current user
         # For now, return simple statistics - can be enhanced later
         start_date = datetime.now() - timedelta(days=days)
-        
+
         user_events = db.query(ActivityLog).filter(
-            ActivityLog.user_id == current_user.id,
-            ActivityLog.created_at >= start_date
+            ActivityLog.user_id == current_user.id, ActivityLog.created_at >= start_date
         )
-        
+
         total_events = user_events.count()
         events_by_category = {}
         events_by_action = {}
-        
+
         # Count by category
         for event in user_events.all():
-            category = event.category.value if event.category else 'unknown'
-            action = event.action.value if event.action else 'unknown'
-            
+            category = event.category.value if event.category else "unknown"
+            action = event.action.value if event.action else "unknown"
+
             events_by_category[category] = events_by_category.get(category, 0) + 1
             events_by_action[action] = events_by_action.get(action, 0) + 1
-        
+
         result = {
-            'success': True,
-            'total_events': total_events,
-            'events_by_category': events_by_category,
-            'events_by_action': events_by_action,
-            'events_by_day': {},
-            'unique_sessions': 0,
-            'unique_devices': 0,
-            'most_active_hours': {},
-            'recent_activity_count': total_events
+            "success": True,
+            "total_events": total_events,
+            "events_by_category": events_by_category,
+            "events_by_action": events_by_action,
+            "events_by_day": {},
+            "unique_sessions": 0,
+            "unique_devices": 0,
+            "most_active_hours": {},
+            "recent_activity_count": total_events,
         }
-        
+
         # Result is always successful in our simple implementation
-        
+
         # Log the API call
         response_time = int((datetime.now() - start_time).total_seconds() * 1000)
         log_api_call(
@@ -333,11 +338,11 @@ async def get_event_stats(
             response_time_ms=response_time,
             status_code=200,
             user_id=current_user.id if current_user else None,
-            username=current_user.username if current_user else None
+            username=current_user.username if current_user else None,
         )
-        
+
         return UserEventStatistics(**result)
-        
+
     except HTTPException:
         raise
     except Exception as e:
@@ -349,12 +354,12 @@ async def get_event_stats(
             response_time_ms=response_time,
             status_code=500,
             user_id=current_user.id if current_user else None,
-            username=current_user.username if current_user else None
+            username=current_user.username if current_user else None,
         )
-        
+
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to retrieve user statistics: {str(e)}"
+            detail=f"Failed to retrieve user statistics: {str(e)}",
         )
 
 
@@ -363,35 +368,35 @@ async def get_event_statistics(
     request: Request,
     hours: int = Query(24, ge=1, le=168, description="Hours to look back (max 1 week)"),
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user_dev_friendly)
+    current_user: User = Depends(get_current_user_dev_friendly),
 ):
     """
     Get event statistics for dashboard
     """
-    
+
     start_time = datetime.now()
-    
+
     try:
         # Get statistics
         result = enhanced_logger.get_event_statistics(db=db, hours=hours)
-        
-        if not result['success']:
+
+        if not result["success"]:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=result['error']
+                detail=result["error"],
             )
 
         # Don't log /events/statistics calls to prevent recursive logging
 
         return EventStatistics(**result)
-        
+
     except HTTPException:
         raise
     except Exception as e:
         # Don't log errors for /events/statistics endpoint to prevent recursive logging
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to retrieve statistics: {str(e)}"
+            detail=f"Failed to retrieve statistics: {str(e)}",
         )
 
 
@@ -400,24 +405,24 @@ async def get_event_by_id(
     event_id: str,
     request: Request,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user_dev_friendly)
+    current_user: User = Depends(get_current_user_dev_friendly),
 ):
     """
     Get specific event by ID
     """
-    
+
     start_time = datetime.now()
-    
+
     try:
         # Find event by event_id
         event = db.query(ActivityLog).filter(ActivityLog.event_id == event_id).first()
-        
+
         if not event:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Event with ID {event_id} not found"
+                detail=f"Event with ID {event_id} not found",
             )
-        
+
         # Log the API call
         response_time = int((datetime.now() - start_time).total_seconds() * 1000)
         log_api_call(
@@ -426,14 +431,13 @@ async def get_event_by_id(
             response_time_ms=response_time,
             status_code=200,
             user_id=current_user.id if current_user else None,
-            username=current_user.username if current_user else None
+            username=current_user.username if current_user else None,
         )
-        
+
         return create_success_response(
-            data=event.to_event_dict(),
-            message="Event retrieved successfully"
+            data=event.to_event_dict(), message="Event retrieved successfully"
         )
-        
+
     except HTTPException:
         raise
     except Exception as e:
@@ -445,46 +449,50 @@ async def get_event_by_id(
             response_time_ms=response_time,
             status_code=500,
             user_id=current_user.id if current_user else None,
-            username=current_user.username if current_user else None
+            username=current_user.username if current_user else None,
         )
-        
+
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to retrieve event: {str(e)}"
+            detail=f"Failed to retrieve event: {str(e)}",
         )
 
 
 @router.get("/logs", response_model=LogFileResponse)
 async def get_logs_from_file(
     request: Request,
-    date: Optional[str] = Query(None, description="Date in YYYY-MM-DD format (default: today)"),
-    lines: int = Query(500, ge=1, le=5000, description="Number of recent lines to retrieve"),
+    date: Optional[str] = Query(
+        None, description="Date in YYYY-MM-DD format (default: today)"
+    ),
+    lines: int = Query(
+        500, ge=1, le=5000, description="Number of recent lines to retrieve"
+    ),
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user_dev_friendly)
+    current_user: User = Depends(get_current_user_dev_friendly),
 ):
     """
     Get logs from file (inspired by VerifyWise getLogsQuery)
     """
-    
+
     start_time = datetime.now()
-    
+
     try:
         # Get logs from file
         result = enhanced_logger.get_logs_from_file(date=date, lines=lines)
-        
+
         # Log the API call
         response_time = int((datetime.now() - start_time).total_seconds() * 1000)
         log_api_call(
             db=db,
             request=request,
             response_time_ms=response_time,
-            status_code=200 if result['success'] else 404,
+            status_code=200 if result["success"] else 404,
             user_id=current_user.id if current_user else None,
-            username=current_user.username if current_user else None
+            username=current_user.username if current_user else None,
         )
-        
+
         return LogFileResponse(**result)
-        
+
     except Exception as e:
         # Log error
         response_time = int((datetime.now() - start_time).total_seconds() * 1000)
@@ -494,12 +502,12 @@ async def get_logs_from_file(
             response_time_ms=response_time,
             status_code=500,
             user_id=current_user.id if current_user else None,
-            username=current_user.username if current_user else None
+            username=current_user.username if current_user else None,
         )
-        
+
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to retrieve logs: {str(e)}"
+            detail=f"Failed to retrieve logs: {str(e)}",
         )
 
 
@@ -513,14 +521,14 @@ async def export_events(
     end_date: Optional[datetime] = Query(None, description="End date"),
     limit: int = Query(10000, ge=1, le=50000, description="Maximum events to export"),
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user_dev_friendly)
+    current_user: User = Depends(get_current_user_dev_friendly),
 ):
     """
     Export events in specified format
     """
-    
+
     start_time = datetime.now()
-    
+
     try:
         # Get events for export
         result = enhanced_logger.get_events_from_db(
@@ -530,24 +538,26 @@ async def export_events(
             level=level,
             category=category,
             start_date=start_date,
-            end_date=end_date
+            end_date=end_date,
         )
-        
-        if not result['success']:
+
+        if not result["success"]:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=result['error']
+                detail=result["error"],
             )
-        
-        events_data = result['data']
-        
+
+        events_data = result["data"]
+
         if format == "csv":
             # Convert to CSV format
             import csv
             import io
-            
+
             output = io.StringIO()
-            writer = csv.DictWriter(output, fieldnames=events_data[0].keys() if events_data else [])
+            writer = csv.DictWriter(
+                output, fieldnames=events_data[0].keys() if events_data else []
+            )
             writer.writeheader()
             for event in events_data:
                 # Flatten nested objects for CSV
@@ -560,12 +570,12 @@ async def export_events(
                     else:
                         flat_event[key] = value
                 writer.writerow(flat_event)
-            
+
             csv_content = output.getvalue()
             output.close()
-            
+
             from fastapi.responses import Response
-            
+
             # Log the API call
             response_time = int((datetime.now() - start_time).total_seconds() * 1000)
             log_api_call(
@@ -574,20 +584,20 @@ async def export_events(
                 response_time_ms=response_time,
                 status_code=200,
                 user_id=current_user.id,
-                username=current_user.username
+                username=current_user.username,
             )
-            
+
             return Response(
                 content=csv_content,
                 media_type="text/csv",
                 headers={
                     "Content-Disposition": f"attachment; filename=events-{datetime.now().strftime('%Y%m%d')}.csv"
-                }
+                },
             )
-        
+
         else:  # JSON format
             import json
-            
+
             # Log the API call
             response_time = int((datetime.now() - start_time).total_seconds() * 1000)
             log_api_call(
@@ -596,19 +606,19 @@ async def export_events(
                 response_time_ms=response_time,
                 status_code=200,
                 user_id=current_user.id,
-                username=current_user.username
+                username=current_user.username,
             )
-            
+
             from fastapi.responses import Response
-            
+
             return Response(
                 content=json.dumps(events_data, indent=2, default=str),
                 media_type="application/json",
                 headers={
                     "Content-Disposition": f"attachment; filename=events-{datetime.now().strftime('%Y%m%d')}.json"
-                }
+                },
             )
-        
+
     except HTTPException:
         raise
     except Exception as e:
@@ -620,12 +630,12 @@ async def export_events(
             response_time_ms=response_time,
             status_code=500,
             user_id=current_user.id if current_user else None,
-            username=current_user.username if current_user else None
+            username=current_user.username if current_user else None,
         )
-        
+
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to export events: {str(e)}"
+            detail=f"Failed to export events: {str(e)}",
         )
 
 
@@ -633,40 +643,44 @@ async def export_events(
 async def cleanup_old_events(
     request: Request,
     days: int = Query(90, ge=7, le=365, description="Delete events older than N days"),
-    dry_run: bool = Query(True, description="Preview deletion without actually deleting"),
+    dry_run: bool = Query(
+        True, description="Preview deletion without actually deleting"
+    ),
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user_dev_friendly)
+    current_user: User = Depends(get_current_user_dev_friendly),
 ):
     """
     Cleanup old events (admin only)
     """
-    
+
     start_time = datetime.now()
-    
+
     try:
         # Check if user has admin permissions (implement your permission check)
         # For now, we'll assume current_user has necessary permissions
-        
+
         # Calculate cutoff date
         cutoff_date = datetime.now() - timedelta(days=days)
-        
+
         # Count events to be deleted
-        events_to_delete = db.query(ActivityLog).filter(
-            ActivityLog.created_at < cutoff_date
-        ).count()
-        
+        events_to_delete = (
+            db.query(ActivityLog).filter(ActivityLog.created_at < cutoff_date).count()
+        )
+
         if not dry_run:
             # Actually delete the events
-            deleted_count = db.query(ActivityLog).filter(
-                ActivityLog.created_at < cutoff_date
-            ).delete()
+            deleted_count = (
+                db.query(ActivityLog)
+                .filter(ActivityLog.created_at < cutoff_date)
+                .delete()
+            )
             db.commit()
-            
+
             message = f"Deleted {deleted_count} events older than {days} days"
         else:
             deleted_count = events_to_delete
             message = f"Would delete {events_to_delete} events older than {days} days (dry run)"
-        
+
         # Log the API call
         response_time = int((datetime.now() - start_time).total_seconds() * 1000)
         log_api_call(
@@ -675,19 +689,19 @@ async def cleanup_old_events(
             response_time_ms=response_time,
             status_code=200,
             user_id=current_user.id if current_user else None,
-            username=current_user.username if current_user else None
+            username=current_user.username if current_user else None,
         )
-        
+
         return create_success_response(
             data={
-                'cutoff_date': cutoff_date.isoformat(),
-                'events_count': events_to_delete,
-                'deleted_count': deleted_count if not dry_run else 0,
-                'dry_run': dry_run
+                "cutoff_date": cutoff_date.isoformat(),
+                "events_count": events_to_delete,
+                "deleted_count": deleted_count if not dry_run else 0,
+                "dry_run": dry_run,
             },
-            message=message
+            message=message,
         )
-        
+
     except Exception as e:
         # Log error
         response_time = int((datetime.now() - start_time).total_seconds() * 1000)
@@ -697,12 +711,12 @@ async def cleanup_old_events(
             response_time_ms=response_time,
             status_code=500,
             user_id=current_user.id if current_user else None,
-            username=current_user.username if current_user else None
+            username=current_user.username if current_user else None,
         )
-        
+
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to cleanup events: {str(e)}"
+            detail=f"Failed to cleanup events: {str(e)}",
         )
 
 
@@ -712,7 +726,7 @@ async def get_available_levels():
     """Get all available event levels"""
     return create_success_response(
         data=[level.value for level in ActivityLevel],
-        message="Available event levels retrieved"
+        message="Available event levels retrieved",
     )
 
 
@@ -721,7 +735,7 @@ async def get_available_categories():
     """Get all available event categories"""
     return create_success_response(
         data=[category.value for category in EventCategory],
-        message="Available event categories retrieved"
+        message="Available event categories retrieved",
     )
 
 
@@ -730,5 +744,5 @@ async def get_available_actions():
     """Get all available event actions"""
     return create_success_response(
         data=[action.value for action in ActivityAction],
-        message="Available event actions retrieved"
+        message="Available event actions retrieved",
     )

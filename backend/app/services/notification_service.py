@@ -1,12 +1,12 @@
-from typing import List, Optional, Dict, Any
-from sqlalchemy.orm import Session
-from sqlalchemy import and_, desc
 import json
 from datetime import datetime
+from typing import Any, Dict, List, Optional
 
-from app.models.notification import Notification, NotificationType, NotificationChannel
-from app.models.user import User
 from app.core.config import settings
+from app.models.notification import Notification, NotificationChannel, NotificationType
+from app.models.user import User
+from sqlalchemy import and_, desc
+from sqlalchemy.orm import Session
 
 
 class NotificationService:
@@ -21,7 +21,7 @@ class NotificationService:
         notification_type: NotificationType = NotificationType.INFO,
         channels: List[str] = None,
         action_url: Optional[str] = None,
-        data: Optional[Dict[str, Any]] = None
+        data: Optional[Dict[str, Any]] = None,
     ) -> Notification:
         """Create a new notification"""
         if channels is None:
@@ -37,7 +37,7 @@ class NotificationService:
             type=notification_type,
             channels=channels_str,
             action_url=action_url,
-            data=data_str
+            data=data_str,
         )
 
         self.db.add(notification)
@@ -47,11 +47,7 @@ class NotificationService:
         return notification
 
     def get_user_notifications(
-        self,
-        user_id: int,
-        skip: int = 0,
-        limit: int = 50,
-        include_read: bool = True
+        self, user_id: int, skip: int = 0, limit: int = 50, include_read: bool = True
     ) -> List[Notification]:
         """Get notifications for a user"""
         query = self.db.query(Notification).filter(Notification.user_id == user_id)
@@ -59,25 +55,34 @@ class NotificationService:
         if not include_read:
             query = query.filter(Notification.is_read == False)
 
-        return query.order_by(desc(Notification.created_at)).offset(skip).limit(limit).all()
+        return (
+            query.order_by(desc(Notification.created_at))
+            .offset(skip)
+            .limit(limit)
+            .all()
+        )
 
     def get_unread_count(self, user_id: int) -> int:
         """Get count of unread notifications for a user"""
-        return self.db.query(Notification).filter(
-            and_(
-                Notification.user_id == user_id,
-                Notification.is_read == False
+        return (
+            self.db.query(Notification)
+            .filter(
+                and_(Notification.user_id == user_id, Notification.is_read == False)
             )
-        ).count()
+            .count()
+        )
 
     def mark_as_read(self, notification_id: int, user_id: int) -> bool:
         """Mark a notification as read"""
-        notification = self.db.query(Notification).filter(
-            and_(
-                Notification.id == notification_id,
-                Notification.user_id == user_id
+        notification = (
+            self.db.query(Notification)
+            .filter(
+                and_(
+                    Notification.id == notification_id, Notification.user_id == user_id
+                )
             )
-        ).first()
+            .first()
+        )
 
         if notification:
             notification.is_read = True
@@ -89,24 +94,28 @@ class NotificationService:
 
     def mark_all_as_read(self, user_id: int) -> int:
         """Mark all notifications as read for a user"""
-        count = self.db.query(Notification).filter(
-            and_(
-                Notification.user_id == user_id,
-                Notification.is_read == False
+        count = (
+            self.db.query(Notification)
+            .filter(
+                and_(Notification.user_id == user_id, Notification.is_read == False)
             )
-        ).update({"is_read": True, "updated_at": datetime.utcnow()})
+            .update({"is_read": True, "updated_at": datetime.utcnow()})
+        )
 
         self.db.commit()
         return count
 
     def delete_notification(self, notification_id: int, user_id: int) -> bool:
         """Delete a notification"""
-        result = self.db.query(Notification).filter(
-            and_(
-                Notification.id == notification_id,
-                Notification.user_id == user_id
+        result = (
+            self.db.query(Notification)
+            .filter(
+                and_(
+                    Notification.id == notification_id, Notification.user_id == user_id
+                )
             )
-        ).delete()
+            .delete()
+        )
 
         self.db.commit()
         return result > 0
@@ -132,9 +141,9 @@ class NotificationService:
     def process_pending_notifications(self):
         """Process notifications that need to be sent via email/push"""
         # Get notifications that haven't been sent yet
-        pending_notifications = self.db.query(Notification).filter(
-            Notification.is_sent == False
-        ).all()
+        pending_notifications = (
+            self.db.query(Notification).filter(Notification.is_sent == False).all()
+        )
 
         for notification in pending_notifications:
             channels = json.loads(notification.channels)
@@ -151,7 +160,7 @@ class NotificationService:
         title: str,
         message: str,
         notification_type: NotificationType = NotificationType.SYSTEM,
-        channels: List[str] = None
+        channels: List[str] = None,
     ) -> List[Notification]:
         """Create system notifications for multiple users"""
         notifications = []
@@ -161,7 +170,7 @@ class NotificationService:
                 title=title,
                 message=message,
                 notification_type=notification_type,
-                channels=channels
+                channels=channels,
             )
             notifications.append(notification)
 

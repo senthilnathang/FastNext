@@ -148,9 +148,9 @@ from fastapi import status
 def test_create_user_success(client, admin_headers, test_data_factory):
     """Test successful user creation."""
     user_data = test_data_factory.create_user_data()
-    
+
     response = client.post("/api/v1/users", headers=admin_headers, json=user_data)
-    
+
     assert response.status_code == status.HTTP_200_OK
     data = response.json()
     assert data["email"] == user_data["email"]
@@ -163,7 +163,7 @@ def test_login_invalid_credentials(client):
         "username": "invalid@test.com",
         "password": "wrongpassword"
     })
-    
+
     assert response.status_code == status.HTTP_401_UNAUTHORIZED
 ```
 
@@ -258,18 +258,18 @@ import { test, expect } from '@playwright/test';
 test.describe('User Management', () => {
   test('should create new user', async ({ page }) => {
     await page.goto('/admin/users');
-    
+
     // Open create dialog
     await page.click('button:has-text("Create User")');
-    
+
     // Fill form
     await page.fill('input[name="email"]', 'test@example.com');
     await page.fill('input[name="username"]', 'testuser');
     await page.fill('input[name="password"]', 'password123');
-    
+
     // Submit form
     await page.click('button[type="submit"]');
-    
+
     // Verify success
     await expect(page.locator('text=User created successfully')).toBeVisible();
   });

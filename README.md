@@ -117,7 +117,7 @@ Frontend Architecture
 │   ├── ViewManager                # Multi-view data visualization
 │   ├── CommonFormViewManager     # Form-based data management
 │   ├── GenericFormView           # Dynamic form rendering
-│   ├── SortControl               # Advanced sorting interface  
+│   ├── SortControl               # Advanced sorting interface
 │   ├── GroupControl              # Data grouping interface
 │   └── Column Management         # Drag-and-drop columns
 ├── 📊 Data Visualization
@@ -739,7 +739,7 @@ npm run dev
 # 5. Validate and import
 
 # Export Test:
-# 1. Go to Settings → Data Export  
+# 1. Go to Settings → Data Export
 # 2. Select any table with data
 # 3. Choose columns and format
 # 4. Preview and export
@@ -966,7 +966,7 @@ server {
     listen 443 ssl http2;
     ssl_certificate /path/to/cert.pem;
     ssl_certificate_key /path/to/key.pem;
-    
+
     # Security headers
     add_header Strict-Transport-Security "max-age=31536000; includeSubDomains; preload";
     add_header X-Frame-Options DENY;
@@ -1030,7 +1030,7 @@ jobs:
         run: |
           cd frontend && npm run security:full
           cd backend && python -m safety check
-  
+
   deploy:
     needs: security-scan
     runs-on: ubuntu-latest

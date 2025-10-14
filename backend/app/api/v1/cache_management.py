@@ -3,24 +3,24 @@ Cache Management and Monitoring API Endpoints
 Provides admin endpoints for cache control and performance monitoring
 """
 
-from fastapi import APIRouter, Depends, HTTPException, status, Body
-from sqlalchemy.orm import Session
-from typing import Dict, Any, List, Optional, Set
-from pydantic import BaseModel
+import logging
+from typing import Any, Dict, List, Optional, Set
 
-from app.db.session import get_db
 from app.auth.deps import get_current_active_user
 from app.auth.permissions import require_admin
-from app.models.user import User
 from app.core.cache_optimization import (
-    query_cache_manager,
-    invalidation_strategy,
+    CachePolicy,
     cache_warming_service,
     get_cache_statistics,
-    CachePolicy
+    invalidation_strategy,
+    query_cache_manager,
 )
 from app.core.redis_config import cache
-import logging
+from app.db.session import get_db
+from app.models.user import User
+from fastapi import APIRouter, Body, Depends, HTTPException, status
+from pydantic import BaseModel
+from sqlalchemy.orm import Session
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -29,6 +29,7 @@ logger = logging.getLogger(__name__)
 # Request/Response Models
 class InvalidateCacheRequest(BaseModel):
     """Request model for cache invalidation"""
+
     tags: Optional[Set[str]] = None
     pattern: Optional[str] = None
     table_name: Optional[str] = None
@@ -36,17 +37,19 @@ class InvalidateCacheRequest(BaseModel):
 
 class CacheWarmingRequest(BaseModel):
     """Request model for cache warming"""
+
     critical_queries: bool = True
 
 
 class CacheKeyRequest(BaseModel):
     """Request model for single cache key operations"""
+
     key: str
 
 
 @router.get("/cache/stats")
 async def get_cache_stats(
-    current_user: User = Depends(require_admin)
+    current_user: User = Depends(require_admin),
 ) -> Dict[str, Any]:
     """
     Get comprehensive cache statistics
@@ -66,24 +69,24 @@ async def get_cache_stats(
             "success": True,
             "data": stats,
             "summary": {
-                "redis_hit_ratio": stats['redis'].get('hit_ratio', 0),
-                "cached_queries": stats['query_cache']['total_cached_queries'],
-                "query_cache_hits": stats['query_cache']['total_cache_hits'],
-                "tracked_tags": stats['invalidation']['registered_tags']
-            }
+                "redis_hit_ratio": stats["redis"].get("hit_ratio", 0),
+                "cached_queries": stats["query_cache"]["total_cached_queries"],
+                "query_cache_hits": stats["query_cache"]["total_cache_hits"],
+                "tracked_tags": stats["invalidation"]["registered_tags"],
+            },
         }
 
     except Exception as e:
         logger.error(f"Error getting cache stats: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to retrieve cache statistics"
+            detail="Failed to retrieve cache statistics",
         )
 
 
 @router.get("/cache/query-stats")
 async def get_query_cache_stats(
-    current_user: User = Depends(require_admin)
+    current_user: User = Depends(require_admin),
 ) -> Dict[str, Any]:
     """
     Get detailed query cache statistics
@@ -99,23 +102,19 @@ async def get_query_cache_stats(
     try:
         stats = query_cache_manager.get_stats()
 
-        return {
-            "success": True,
-            "data": stats
-        }
+        return {"success": True, "data": stats}
 
     except Exception as e:
         logger.error(f"Error getting query cache stats: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to retrieve query cache statistics"
+            detail="Failed to retrieve query cache statistics",
         )
 
 
 @router.post("/cache/invalidate")
 async def invalidate_cache(
-    request: InvalidateCacheRequest,
-    current_user: User = Depends(require_admin)
+    request: InvalidateCacheRequest, current_user: User = Depends(require_admin)
 ) -> Dict[str, Any]:
     """
     Invalidate cache entries by tags, pattern, or table name
@@ -137,26 +136,36 @@ async def invalidate_cache(
             invalidated = await invalidation_strategy.invalidate_by_tags(request.tags)
 
         elif request.pattern:
-            invalidated = await invalidation_strategy.invalidate_by_pattern(request.pattern)
+            invalidated = await invalidation_strategy.invalidate_by_pattern(
+                request.pattern
+            )
 
         elif request.table_name:
-            invalidated = await invalidation_strategy.invalidate_table_related(request.table_name)
+            invalidated = await invalidation_strategy.invalidate_table_related(
+                request.table_name
+            )
 
         else:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Must provide tags, pattern, or table_name"
+                detail="Must provide tags, pattern, or table_name",
             )
 
-        logger.info(f"Admin {current_user.username} invalidated {invalidated} cache entries")
+        logger.info(
+            f"Admin {current_user.username} invalidated {invalidated} cache entries"
+        )
 
         return {
             "success": True,
             "data": {
                 "invalidated_count": invalidated,
-                "invalidated_by": "tags" if request.tags else "pattern" if request.pattern else "table"
+                "invalidated_by": (
+                    "tags"
+                    if request.tags
+                    else "pattern" if request.pattern else "table"
+                ),
             },
-            "message": f"Successfully invalidated {invalidated} cache entries"
+            "message": f"Successfully invalidated {invalidated} cache entries",
         }
 
     except HTTPException:
@@ -165,13 +174,13 @@ async def invalidate_cache(
         logger.error(f"Error invalidating cache: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to invalidate cache"
+            detail="Failed to invalidate cache",
         )
 
 
 @router.post("/cache/clear-all")
 async def clear_all_cache(
-    current_user: User = Depends(require_admin)
+    current_user: User = Depends(require_admin),
 ) -> Dict[str, Any]:
     """
     Clear ALL cache entries (use with caution!)
@@ -197,14 +206,14 @@ async def clear_all_cache(
         return {
             "success": True,
             "message": "All cache cleared successfully",
-            "warning": "Cache will be rebuilt as requests come in"
+            "warning": "Cache will be rebuilt as requests come in",
         }
 
     except Exception as e:
         logger.error(f"Error clearing cache: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to clear cache"
+            detail="Failed to clear cache",
         )
 
 
@@ -212,7 +221,7 @@ async def clear_all_cache(
 async def warm_cache(
     request: CacheWarmingRequest,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_admin)
+    current_user: User = Depends(require_admin),
 ) -> Dict[str, Any]:
     """
     Proactively warm cache with critical queries
@@ -235,24 +244,21 @@ async def warm_cache(
 
         return {
             "success": True,
-            "data": {
-                "warmed_count": warmed
-            },
-            "message": f"Successfully warmed {warmed} cache entries"
+            "data": {"warmed_count": warmed},
+            "message": f"Successfully warmed {warmed} cache entries",
         }
 
     except Exception as e:
         logger.error(f"Error warming cache: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to warm cache"
+            detail="Failed to warm cache",
         )
 
 
 @router.get("/cache/key/{cache_key}")
 async def get_cache_entry(
-    cache_key: str,
-    current_user: User = Depends(require_admin)
+    cache_key: str, current_user: User = Depends(require_admin)
 ) -> Dict[str, Any]:
     """
     Get a specific cache entry by key
@@ -267,36 +273,27 @@ async def get_cache_entry(
         value = await cache.get(cache_key)
 
         if value is None:
-            return {
-                "success": True,
-                "data": None,
-                "message": "Cache key not found"
-            }
+            return {"success": True, "data": None, "message": "Cache key not found"}
 
         # Get tags if available
         tags = await cache.get(f"cache_tags:{cache_key}")
 
         return {
             "success": True,
-            "data": {
-                "key": cache_key,
-                "value": value,
-                "tags": tags or []
-            }
+            "data": {"key": cache_key, "value": value, "tags": tags or []},
         }
 
     except Exception as e:
         logger.error(f"Error getting cache entry: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to retrieve cache entry"
+            detail="Failed to retrieve cache entry",
         )
 
 
 @router.delete("/cache/key/{cache_key}")
 async def delete_cache_entry(
-    cache_key: str,
-    current_user: User = Depends(require_admin)
+    cache_key: str, current_user: User = Depends(require_admin)
 ) -> Dict[str, Any]:
     """
     Delete a specific cache entry by key
@@ -311,24 +308,20 @@ async def delete_cache_entry(
 
         return {
             "success": True,
-            "data": {
-                "deleted": deleted
-            },
-            "message": f"Cache key {'deleted' if deleted else 'not found'}"
+            "data": {"deleted": deleted},
+            "message": f"Cache key {'deleted' if deleted else 'not found'}",
         }
 
     except Exception as e:
         logger.error(f"Error deleting cache entry: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to delete cache entry"
+            detail="Failed to delete cache entry",
         )
 
 
 @router.get("/cache/tags")
-async def get_cache_tags(
-    current_user: User = Depends(require_admin)
-) -> Dict[str, Any]:
+async def get_cache_tags(current_user: User = Depends(require_admin)) -> Dict[str, Any]:
     """
     Get all registered cache invalidation tags
 
@@ -344,28 +337,25 @@ async def get_cache_tags(
         for tag, keys in invalidation_strategy.dependency_graph.items():
             tags_data[tag] = {
                 "dependent_keys_count": len(keys),
-                "dependent_keys": list(keys)[:10]  # Limit to first 10
+                "dependent_keys": list(keys)[:10],  # Limit to first 10
             }
 
         return {
             "success": True,
-            "data": {
-                "total_tags": len(tags_data),
-                "tags": tags_data
-            }
+            "data": {"total_tags": len(tags_data), "tags": tags_data},
         }
 
     except Exception as e:
         logger.error(f"Error getting cache tags: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to retrieve cache tags"
+            detail="Failed to retrieve cache tags",
         )
 
 
 @router.get("/cache/performance-report")
 async def get_cache_performance_report(
-    current_user: User = Depends(require_admin)
+    current_user: User = Depends(require_admin),
 ) -> Dict[str, Any]:
     """
     Generate comprehensive cache performance report
@@ -382,57 +372,63 @@ async def get_cache_performance_report(
         stats = await get_cache_statistics()
 
         # Calculate performance metrics
-        redis_hit_ratio = stats['redis'].get('hit_ratio', 0)
-        query_cache_hits = stats['query_cache']['total_cache_hits']
-        query_cache_total = stats['query_cache']['total_cached_queries']
+        redis_hit_ratio = stats["redis"].get("hit_ratio", 0)
+        query_cache_hits = stats["query_cache"]["total_cache_hits"]
+        query_cache_total = stats["query_cache"]["total_cached_queries"]
 
         # Generate recommendations
         recommendations = []
 
         if redis_hit_ratio < 70:
-            recommendations.append({
-                "category": "redis",
-                "severity": "warning",
-                "message": f"Redis cache hit ratio is low ({redis_hit_ratio:.1f}%). Target: >80%",
-                "action": "Consider increasing cache TTLs or warming critical queries"
-            })
+            recommendations.append(
+                {
+                    "category": "redis",
+                    "severity": "warning",
+                    "message": f"Redis cache hit ratio is low ({redis_hit_ratio:.1f}%). Target: >80%",
+                    "action": "Consider increasing cache TTLs or warming critical queries",
+                }
+            )
 
         if query_cache_total < 10:
-            recommendations.append({
-                "category": "query_cache",
-                "severity": "info",
-                "message": f"Only {query_cache_total} queries cached",
-                "action": "Use @cached_query decorator on frequently-accessed queries"
-            })
+            recommendations.append(
+                {
+                    "category": "query_cache",
+                    "severity": "info",
+                    "message": f"Only {query_cache_total} queries cached",
+                    "action": "Use @cached_query decorator on frequently-accessed queries",
+                }
+            )
 
         if not recommendations:
-            recommendations.append({
-                "category": "general",
-                "severity": "success",
-                "message": "Cache performance is optimal",
-                "action": "Continue monitoring"
-            })
+            recommendations.append(
+                {
+                    "category": "general",
+                    "severity": "success",
+                    "message": "Cache performance is optimal",
+                    "action": "Continue monitoring",
+                }
+            )
 
         return {
             "success": True,
             "data": {
-                "timestamp": __import__('time').time(),
+                "timestamp": __import__("time").time(),
                 "performance_metrics": {
                     "redis_hit_ratio_percent": redis_hit_ratio,
                     "query_cache_hits": query_cache_hits,
                     "cached_queries": query_cache_total,
-                    "avg_hits_per_query": stats['query_cache']['avg_hits_per_query']
+                    "avg_hits_per_query": stats["query_cache"]["avg_hits_per_query"],
                 },
-                "redis_stats": stats['redis'],
-                "query_cache_stats": stats['query_cache'],
-                "invalidation_stats": stats['invalidation']
+                "redis_stats": stats["redis"],
+                "query_cache_stats": stats["query_cache"],
+                "invalidation_stats": stats["invalidation"],
             },
-            "recommendations": recommendations
+            "recommendations": recommendations,
         }
 
     except Exception as e:
         logger.error(f"Error generating cache performance report: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to generate performance report"
+            detail="Failed to generate performance report",
         )

@@ -1034,8 +1034,8 @@ class FastNextWorkflowAPI:
             'Authorization': f'Bearer {access_token}',
             'Content-Type': 'application/json'
         }
-    
-    def create_workflow_instance(self, template_id: int, entity_id: str, 
+
+    def create_workflow_instance(self, template_id: int, entity_id: str,
                                 entity_type: str, **kwargs) -> Dict:
         """Create a new workflow instance"""
         data = {
@@ -1044,7 +1044,7 @@ class FastNextWorkflowAPI:
             'entity_type': entity_type,
             **kwargs
         }
-        
+
         response = requests.post(
             f'{self.base_url}/api/v1/workflow-instances',
             json=data,
@@ -1052,8 +1052,8 @@ class FastNextWorkflowAPI:
         )
         response.raise_for_status()
         return response.json()
-    
-    def execute_transition(self, instance_id: int, action: str, 
+
+    def execute_transition(self, instance_id: int, action: str,
                           comment: Optional[str] = None, **kwargs) -> Dict:
         """Execute a workflow state transition"""
         data = {
@@ -1061,7 +1061,7 @@ class FastNextWorkflowAPI:
             'comment': comment,
             **kwargs
         }
-        
+
         response = requests.post(
             f'{self.base_url}/api/v1/workflow-instances/{instance_id}/transition',
             json=data,
@@ -1069,7 +1069,7 @@ class FastNextWorkflowAPI:
         )
         response.raise_for_status()
         return response.json()
-    
+
     def get_workflow_metrics(self, time_range: str = '24h') -> Dict:
         """Get workflow analytics metrics"""
         response = requests.get(
@@ -1267,7 +1267,7 @@ For API support and questions:
 
 ---
 
-**API Version:** 1.0.0  
-**Last Updated:** 2024-09-26  
-**Rate Limit:** Yes  
+**API Version:** 1.0.0
+**Last Updated:** 2024-09-26
+**Rate Limit:** Yes
 **Authentication:** JWT Bearer Token Required

@@ -21,7 +21,7 @@ The frontend has been successfully updated to align with the backend's new `/api
 ENDPOINTS: {
   AUTH: {
     LOGIN: '/api/v1/auth/login',
-    REGISTER: '/api/v1/auth/register', 
+    REGISTER: '/api/v1/auth/register',
     // ... more auth endpoints
   },
   USERS: '/api/v1/users',
@@ -43,7 +43,7 @@ ENDPOINTS: {
 **Migrated all service files to use centralized configuration:**
 
 - ✅ `src/shared/services/api/users.ts` - Uses `API_CONFIG.ENDPOINTS.USERS`
-- ✅ `src/shared/services/api/roles.ts` - Uses `API_CONFIG.ENDPOINTS.ROLES` 
+- ✅ `src/shared/services/api/roles.ts` - Uses `API_CONFIG.ENDPOINTS.ROLES`
 - ✅ `src/shared/services/permissions.ts` - Updated to use `API_CONFIG.ENDPOINTS.PERMISSIONS`
 - ✅ `src/shared/services/projects.ts` - Updated to use `API_CONFIG.ENDPOINTS.PROJECTS`
 - ✅ `src/shared/services/components.ts` - Updated to use `API_CONFIG.ENDPOINTS.COMPONENTS`
@@ -107,7 +107,7 @@ await apiClient.post(API_CONFIG.ENDPOINTS.PERMISSIONS, data)
 - `src/shared/services/api/client.ts` - No changes needed (already proper)
 
 ### **Service Files Updated:**
-- `src/shared/services/permissions.ts` 
+- `src/shared/services/permissions.ts`
 - `src/shared/services/projects.ts`
 - `src/shared/services/components.ts`
 - `src/shared/services/pages.ts`
@@ -115,7 +115,7 @@ await apiClient.post(API_CONFIG.ENDPOINTS.PERMISSIONS, data)
 
 ### **tRPC Files Updated:**
 - `src/lib/trpc/routers/users.ts`
-- `src/lib/trpc/routers/roles.ts` 
+- `src/lib/trpc/routers/roles.ts`
 - `src/lib/trpc/routers/permissions.ts`
 - `src/lib/trpc/routers/projects.ts`
 

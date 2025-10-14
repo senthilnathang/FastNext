@@ -231,7 +231,7 @@ import { useGraphQLError } from '@/lib/graphql';
 
 function MyComponent() {
   const { error, handleError, clearError } = useGraphQLError();
-  
+
   // Handle errors automatically
   const { data, error: queryError } = useQuery(GET_USERS, {
     onError: handleError

@@ -136,7 +136,7 @@ const approvalWorkflow = {
     {
       id: 'review',
       type: 'userTask',
-      data: { 
+      data: {
         label: 'Manager Review',
         requiredRoles: ['manager'],
         approval: true
@@ -203,14 +203,14 @@ const validationScript = {
         const errors = [];
         if (!order.customer_id) errors.push('Customer ID required');
         if (order.total <= 0) errors.push('Total must be positive');
-        
+
         return {
           valid: errors.length === 0,
           errors: errors,
           total_items: order.items?.length || 0
         };
       }
-      
+
       return validateOrder(order);
     `,
     inputVariables: ['order'],

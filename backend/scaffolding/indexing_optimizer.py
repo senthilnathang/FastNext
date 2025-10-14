@@ -4,18 +4,20 @@ Database Indexing Optimization for Backend Scaffolding
 Generates optimized database indexes including:
 - Primary and foreign key indexes
 - Composite indexes for common query patterns
-- Unique constraints and partial indexes  
+- Unique constraints and partial indexes
 - Full-text search indexes
 - Performance monitoring and analysis tools
 """
 
-from typing import Dict, List, Optional, Any, Tuple
 from pathlib import Path
-from .backend_generator import ModelDefinition, FieldDefinition, FieldType
+from typing import Any, Dict, List, Optional, Tuple
+
+from .backend_generator import FieldDefinition, FieldType, ModelDefinition
 
 
 class IndexType:
     """Database index types"""
+
     BTREE = "btree"
     HASH = "hash"
     GIN = "gin"  # For JSON, arrays
@@ -28,35 +30,35 @@ class IndexType:
 
 class IndexingOptimizer:
     """Generate optimized database indexes and performance tools"""
-    
+
     def __init__(self, model_def: ModelDefinition, base_path: str = "."):
         self.model_def = model_def
         self.base_path = Path(base_path)
         self.model_name = model_def.name
         self.snake_name = model_def.name.lower()
         self.table_name = model_def.table_name
-        
+
     def generate_all_optimizations(self):
         """Generate complete indexing optimization suite"""
         print(f"⚡ Generating database optimizations for {self.model_name}...")
-        
+
         # Generate index analysis
         self.generate_index_analysis()
-        
+
         # Generate index migration
         self.generate_index_migration()
-        
+
         # Generate performance monitoring
         self.generate_performance_monitoring()
-        
+
         # Generate query optimization guides
         self.generate_query_optimization()
-        
+
         # Generate index maintenance tools
         self.generate_index_maintenance()
-        
+
         print(f"✅ Database optimizations generated for {self.model_name}")
-    
+
     def generate_index_analysis(self):
         """Analyze model and generate optimal index recommendations"""
         content = f'''"""
@@ -74,15 +76,15 @@ from app.db.session import SessionLocal
 
 class {self.model_name}IndexAnalysis:
     """Analysis and recommendations for {self.model_name} indexes"""
-    
+
     def __init__(self):
         self.table_name = "{self.table_name}"
         self.model = {self.model_name}
-    
+
     def get_recommended_indexes(self) -> List[Dict[str, Any]]:
         """Get recommended indexes based on field analysis"""
         recommendations = []
-        
+
         # Primary key index (usually automatic)
         recommendations.append({{
             "name": f"idx_{{{self.table_name}}}_pkey",
@@ -91,17 +93,17 @@ class {self.model_name}IndexAnalysis:
             "reason": "Primary key for unique row identification",
             "priority": "critical"
         }})
-        
+
 '''
-        
+
         # Analyze each field for indexing opportunities
         for field in self.model_def.fields:
-            if field.name in ['id', 'created_at', 'updated_at']:
+            if field.name in ["id", "created_at", "updated_at"]:
                 continue
-                
+
             # Foreign key indexes
             if field.type == FieldType.FOREIGN_KEY:
-                content += f'''        # Foreign key index for {field.name}
+                content += f"""        # Foreign key index for {field.name}
         recommendations.append({{
             "name": f"idx_{{{self.table_name}}}_{field.name}",
             "type": "btree",
@@ -110,12 +112,12 @@ class {self.model_name}IndexAnalysis:
             "priority": "high",
             "estimated_selectivity": 0.1
         }})
-        
-'''
-            
+
+"""
+
             # Unique field indexes
             if field.unique:
-                content += f'''        # Unique constraint index for {field.name}
+                content += f"""        # Unique constraint index for {field.name}
         recommendations.append({{
             "name": f"idx_{{{self.table_name}}}_{field.name}_unique",
             "type": "unique",
@@ -124,12 +126,15 @@ class {self.model_name}IndexAnalysis:
             "priority": "high",
             "estimated_selectivity": 1.0
         }})
-        
-'''
-            
+
+"""
+
             # Search-optimized indexes
-            if field.type in [FieldType.STRING, FieldType.TEXT] and self.model_def.enable_search:
-                content += f'''        # Search optimization for {field.name}
+            if (
+                field.type in [FieldType.STRING, FieldType.TEXT]
+                and self.model_def.enable_search
+            ):
+                content += f"""        # Search optimization for {field.name}
         recommendations.append({{
             "name": f"idx_{{{self.table_name}}}_{field.name}_search",
             "type": "gin",
@@ -139,7 +144,7 @@ class {self.model_name}IndexAnalysis:
             "postgresql_only": True,
             "expression": f"to_tsvector('english', {field.name})"
         }})
-        
+
         # Case-insensitive search index for {field.name}
         recommendations.append({{
             "name": f"idx_{{{self.table_name}}}_{field.name}_ilike",
@@ -149,12 +154,12 @@ class {self.model_name}IndexAnalysis:
             "priority": "low",
             "expression": f"lower({field.name})"
         }})
-        
-'''
-            
+
+"""
+
             # Filtering indexes for common filter fields
             if field.type in [FieldType.BOOLEAN, FieldType.ENUM]:
-                content += f'''        # Filter index for {field.name}
+                content += f"""        # Filter index for {field.name}
         recommendations.append({{
             "name": f"idx_{{{self.table_name}}}_{field.name}_filter",
             "type": "btree",
@@ -163,12 +168,12 @@ class {self.model_name}IndexAnalysis:
             "priority": "medium",
             "estimated_selectivity": 0.5
         }})
-        
-'''
-            
+
+"""
+
             # Date/datetime indexes for temporal queries
             if field.type in [FieldType.DATE, FieldType.DATETIME]:
-                content += f'''        # Temporal range index for {field.name}
+                content += f"""        # Temporal range index for {field.name}
         recommendations.append({{
             "name": f"idx_{{{self.table_name}}}_{field.name}_range",
             "type": "btree",
@@ -177,12 +182,12 @@ class {self.model_name}IndexAnalysis:
             "priority": "medium",
             "estimated_selectivity": 0.3
         }})
-        
-'''
-            
+
+"""
+
             # JSON field indexes
             if field.type == FieldType.JSON:
-                content += f'''        # JSON field index for {field.name}
+                content += f"""        # JSON field index for {field.name}
         recommendations.append({{
             "name": f"idx_{{{self.table_name}}}_{field.name}_gin",
             "type": "gin",
@@ -191,12 +196,12 @@ class {self.model_name}IndexAnalysis:
             "priority": "medium",
             "postgresql_only": True
         }})
-        
-'''
-        
+
+"""
+
         # Add composite indexes for common query patterns
-        content += f'''        # Common composite indexes
-        
+        content += f"""        # Common composite indexes
+
         # Sorting and filtering composite
         recommendations.append({{
             "name": f"idx_{{{self.table_name}}}_sort_filter",
@@ -206,12 +211,12 @@ class {self.model_name}IndexAnalysis:
             "priority": "high",
             "estimated_selectivity": 0.01
         }})
-        
-'''
-        
+
+"""
+
         # Add project-scoped indexes if applicable
         if self.model_def.project_scoped:
-            content += f'''        # Project-scoped access pattern
+            content += f"""        # Project-scoped access pattern
         recommendations.append({{
             "name": f"idx_{{{self.table_name}}}_project_scope",
             "type": "composite",
@@ -220,26 +225,26 @@ class {self.model_name}IndexAnalysis:
             "priority": "high",
             "estimated_selectivity": 0.05
         }})
-        
-'''
-        
+
+"""
+
         # Add ownership indexes if applicable
         if self.model_def.owner_field:
-            content += f'''        # Owner-based access pattern
+            content += f"""        # Owner-based access pattern
         recommendations.append({{
             "name": f"idx_{{{self.table_name}}}_owner_access",
-            "type": "composite", 
+            "type": "composite",
             "columns": ["{self.model_def.owner_field}", "created_at"],
             "reason": "Owner-based queries with temporal sorting",
             "priority": "high",
             "estimated_selectivity": 0.1
         }})
-        
-'''
-        
+
+"""
+
         # Add soft delete index if applicable
-        if any(f.name == 'is_deleted' for f in self.model_def.fields):
-            content += f'''        # Soft delete optimization
+        if any(f.name == "is_deleted" for f in self.model_def.fields):
+            content += f"""        # Soft delete optimization
         recommendations.append({{
             "name": f"idx_{{{self.table_name}}}_active_records",
             "type": "partial",
@@ -249,27 +254,33 @@ class {self.model_name}IndexAnalysis:
             "priority": "high",
             "estimated_selectivity": 0.9
         }})
-        
-'''
-        
+
+"""
+
         content += f'''        return recommendations
-    
+
     def get_composite_index_recommendations(self) -> List[Dict[str, Any]]:
         """Get composite indexes for complex query patterns"""
         composites = []
-        
+
 '''
-        
+
         # Generate composite indexes based on likely query patterns
-        search_fields = [f for f in self.model_def.fields 
-                        if f.type in [FieldType.STRING, FieldType.TEXT]]
-        filter_fields = [f for f in self.model_def.fields 
-                        if f.type in [FieldType.BOOLEAN, FieldType.ENUM]]
-        
+        search_fields = [
+            f
+            for f in self.model_def.fields
+            if f.type in [FieldType.STRING, FieldType.TEXT]
+        ]
+        filter_fields = [
+            f
+            for f in self.model_def.fields
+            if f.type in [FieldType.BOOLEAN, FieldType.ENUM]
+        ]
+
         if search_fields and filter_fields:
             search_field = search_fields[0].name
             filter_field = filter_fields[0].name
-            content += f'''        # Search with filtering
+            content += f"""        # Search with filtering
         composites.append({{
             "name": f"idx_{{{self.table_name}}}_search_filter",
             "type": "composite",
@@ -277,11 +288,11 @@ class {self.model_name}IndexAnalysis:
             "reason": "Combined search and filtering queries",
             "priority": "medium"
         }})
-        
-'''
-        
+
+"""
+
         content += f'''        return composites
-    
+
     def analyze_query_patterns(self, db: Session) -> Dict[str, Any]:
         """Analyze actual query patterns from database statistics"""
         analysis = {{
@@ -290,37 +301,37 @@ class {self.model_name}IndexAnalysis:
             "slow_queries": [],
             "missing_indexes": []
         }}
-        
+
         try:
             # Get table statistics
             table_stats = db.execute(text("""
-                SELECT 
+                SELECT
                     schemaname,
                     tablename,
                     attname,
                     n_distinct,
                     correlation
-                FROM pg_stats 
+                FROM pg_stats
                 WHERE tablename = :table_name
             """), {{"table_name": self.table_name}}).fetchall()
-            
+
             analysis["table_stats"] = [{{
                 "column": row.attname,
                 "n_distinct": row.n_distinct,
                 "correlation": row.correlation
             }} for row in table_stats]
-            
+
             # Get index usage statistics
             index_stats = db.execute(text("""
-                SELECT 
+                SELECT
                     indexrelname,
                     idx_tup_read,
                     idx_tup_fetch,
                     idx_scan
-                FROM pg_stat_user_indexes 
+                FROM pg_stat_user_indexes
                 WHERE relname = :table_name
             """), {{"table_name": self.table_name}}).fetchall()
-            
+
             analysis["index_usage"] = [{{
                 "index_name": row.indexrelname,
                 "tuples_read": row.idx_tup_read,
@@ -328,16 +339,16 @@ class {self.model_name}IndexAnalysis:
                 "scans": row.idx_scan,
                 "efficiency": row.idx_tup_fetch / max(row.idx_tup_read, 1) if row.idx_tup_read else 0
             }} for row in index_stats]
-            
+
         except Exception as e:
             analysis["error"] = f"Could not analyze query patterns: {{str(e)}}"
-            
+
         return analysis
-    
+
     def estimate_index_sizes(self) -> Dict[str, int]:
         """Estimate storage requirements for recommended indexes"""
         estimates = {{}}
-        
+
         # Base estimates in KB per 1000 rows
         base_estimates = {{
             "btree": 50,      # B-tree index
@@ -347,20 +358,20 @@ class {self.model_name}IndexAnalysis:
             "unique": 50,     # Unique B-tree
             "composite": 70   # Composite index (varies by column count)
         }}
-        
+
         recommendations = self.get_recommended_indexes()
-        
+
         for rec in recommendations:
             index_type = rec["type"]
             column_count = len(rec["columns"])
-            
+
             # Base size estimate
             base_size = base_estimates.get(index_type, 50)
-            
+
             # Adjust for composite indexes
             if index_type == "composite":
                 base_size *= (column_count * 0.8)  # Diminishing returns
-            
+
             # Adjust for data types
             for col_name in rec["columns"]:
                 field = next((f for f in self.model_def.fields if f.name == col_name), None)
@@ -369,11 +380,11 @@ class {self.model_name}IndexAnalysis:
                         base_size *= 1.5
                     elif field.type in [FieldType.STRING] and field.max_length and field.max_length > 255:
                         base_size *= 1.3
-            
+
             estimates[rec["name"]] = int(base_size)
-        
+
         return estimates
-    
+
     def get_maintenance_recommendations(self) -> List[Dict[str, str]]:
         """Get index maintenance recommendations"""
         return [
@@ -384,26 +395,28 @@ class {self.model_name}IndexAnalysis:
                 "command": f"VACUUM ANALYZE {{{self.table_name}}};"
             }},
             {{
-                "task": "Index bloat monitoring", 
+                "task": "Index bloat monitoring",
                 "frequency": "Monthly",
                 "reason": "Detect and address index bloat",
                 "command": "SELECT * FROM pg_stat_user_indexes WHERE schemaname = 'public';"
             }},
             {{
                 "task": "Query performance review",
-                "frequency": "Quarterly", 
+                "frequency": "Quarterly",
                 "reason": "Identify slow queries and missing indexes",
                 "command": "SELECT query, mean_time, calls FROM pg_stat_statements ORDER BY mean_time DESC LIMIT 10;"
             }}
         ]
 '''
-        
-        self._write_file(f"app/db/analysis/{self.snake_name}_index_analysis.py", content)
-    
+
+        self._write_file(
+            f"app/db/analysis/{self.snake_name}_index_analysis.py", content
+        )
+
     def generate_index_migration(self):
         """Generate database migration with optimized indexes"""
         timestamp = "1758730000"  # Use consistent timestamp for generated migration
-        
+
         content = f'''"""
 Optimized indexes migration for {self.model_name}
 
@@ -431,29 +444,29 @@ depends_on = None
 
 def upgrade():
     """Create optimized indexes for {self.model_name}"""
-    
+
 '''
-        
+
         # Generate index creation commands
         for field in self.model_def.fields:
-            if field.name in ['id']:  # Skip primary key (automatic)
+            if field.name in ["id"]:  # Skip primary key (automatic)
                 continue
-                
+
             # Foreign key indexes
             if field.type == FieldType.FOREIGN_KEY:
-                content += f'''    # Foreign key index for {field.name}
+                content += f"""    # Foreign key index for {field.name}
     op.create_index(
         'idx_{self.table_name}_{field.name}',
         '{self.table_name}',
         ['{field.name}'],
         postgresql_using='btree'
     )
-    
-'''
-            
+
+"""
+
             # Unique indexes
             if field.unique:
-                content += f'''    # Unique index for {field.name}
+                content += f"""    # Unique index for {field.name}
     op.create_index(
         'idx_{self.table_name}_{field.name}_unique',
         '{self.table_name}',
@@ -461,19 +474,22 @@ def upgrade():
         unique=True,
         postgresql_using='btree'
     )
-    
-'''
-            
+
+"""
+
             # Search indexes for text fields
-            if field.type in [FieldType.STRING, FieldType.TEXT] and self.model_def.enable_search:
-                content += f'''    # Full-text search index for {field.name}
+            if (
+                field.type in [FieldType.STRING, FieldType.TEXT]
+                and self.model_def.enable_search
+            ):
+                content += f"""    # Full-text search index for {field.name}
     op.create_index(
         'idx_{self.table_name}_{field.name}_fts',
         '{self.table_name}',
         [sa.text("to_tsvector('english', {field.name})")],
         postgresql_using='gin'
     )
-    
+
     # Case-insensitive search index for {field.name}
     op.create_index(
         'idx_{self.table_name}_{field.name}_lower',
@@ -481,48 +497,48 @@ def upgrade():
         [sa.text("lower({field.name})")],
         postgresql_using='btree'
     )
-    
-'''
-            
+
+"""
+
             # Filter indexes for enums and booleans
             if field.type in [FieldType.BOOLEAN, FieldType.ENUM]:
-                content += f'''    # Filter index for {field.name}
+                content += f"""    # Filter index for {field.name}
     op.create_index(
         'idx_{self.table_name}_{field.name}',
         '{self.table_name}',
         ['{field.name}'],
         postgresql_using='btree'
     )
-    
-'''
-            
+
+"""
+
             # Date/time indexes
             if field.type in [FieldType.DATE, FieldType.DATETIME]:
-                content += f'''    # Temporal index for {field.name}
+                content += f"""    # Temporal index for {field.name}
     op.create_index(
         'idx_{self.table_name}_{field.name}',
         '{self.table_name}',
         ['{field.name}'],
         postgresql_using='btree'
     )
-    
-'''
-            
+
+"""
+
             # JSON indexes
             if field.type == FieldType.JSON:
-                content += f'''    # JSON index for {field.name}
+                content += f"""    # JSON index for {field.name}
     op.create_index(
         'idx_{self.table_name}_{field.name}_gin',
         '{self.table_name}',
         ['{field.name}'],
         postgresql_using='gin'
     )
-    
-'''
-        
+
+"""
+
         # Composite indexes for common patterns
-        content += f'''    # Composite indexes for common query patterns
-    
+        content += f"""    # Composite indexes for common query patterns
+
     # Sort optimization (created_at + id for stable sort)
     op.create_index(
         'idx_{self.table_name}_created_at_id',
@@ -530,36 +546,36 @@ def upgrade():
         ['created_at', 'id'],
         postgresql_using='btree'
     )
-    
-'''
-        
+
+"""
+
         # Project-scoped composite index
         if self.model_def.project_scoped:
-            content += f'''    # Project-scoped access pattern
+            content += f"""    # Project-scoped access pattern
     op.create_index(
         'idx_{self.table_name}_project_created',
         '{self.table_name}',
         ['project_id', 'created_at'],
         postgresql_using='btree'
     )
-    
-'''
-        
+
+"""
+
         # Owner-based composite index
         if self.model_def.owner_field:
-            content += f'''    # Owner-based access pattern  
+            content += f"""    # Owner-based access pattern
     op.create_index(
         'idx_{self.table_name}_owner_created',
         '{self.table_name}',
         ['{self.model_def.owner_field}', 'created_at'],
         postgresql_using='btree'
     )
-    
-'''
-        
+
+"""
+
         # Soft delete partial index
-        if any(f.name == 'is_deleted' for f in self.model_def.fields):
-            content += f'''    # Partial index for active (non-deleted) records
+        if any(f.name == "is_deleted" for f in self.model_def.fields):
+            content += f"""    # Partial index for active (non-deleted) records
     op.create_index(
         'idx_{self.table_name}_active',
         '{self.table_name}',
@@ -567,12 +583,12 @@ def upgrade():
         postgresql_where=sa.text('is_deleted = FALSE'),
         postgresql_using='btree'
     )
-    
-'''
-        
+
+"""
+
         # Add index on updated_at for timestamp mixin
-        if any(f.name == 'updated_at' for f in self.model_def.fields):
-            content += f'''    # Updated timestamp index for change tracking
+        if any(f.name == "updated_at" for f in self.model_def.fields):
+            content += f"""    # Updated timestamp index for change tracking
     op.create_index(
         'idx_{self.table_name}_updated_at',
         '{self.table_name}',
@@ -580,65 +596,76 @@ def upgrade():
         postgresql_where=sa.text('updated_at IS NOT NULL'),
         postgresql_using='btree'
     )
-    
-'''
-        
+
+"""
+
         # Generate downgrade function
         content += f'''
 
 def downgrade():
     """Remove optimized indexes for {self.model_name}"""
-    
+
 '''
-        
+
         # Generate drop index commands (reverse order)
         indexes_to_drop = []
-        
+
         for field in self.model_def.fields:
-            if field.name in ['id']:
+            if field.name in ["id"]:
                 continue
-                
+
             if field.type == FieldType.FOREIGN_KEY:
-                indexes_to_drop.append(f'idx_{self.table_name}_{field.name}')
-            
+                indexes_to_drop.append(f"idx_{self.table_name}_{field.name}")
+
             if field.unique:
-                indexes_to_drop.append(f'idx_{self.table_name}_{field.name}_unique')
-            
-            if field.type in [FieldType.STRING, FieldType.TEXT] and self.model_def.enable_search:
-                indexes_to_drop.extend([
-                    f'idx_{self.table_name}_{field.name}_fts',
-                    f'idx_{self.table_name}_{field.name}_lower'
-                ])
-            
-            if field.type in [FieldType.BOOLEAN, FieldType.ENUM, FieldType.DATE, FieldType.DATETIME]:
-                indexes_to_drop.append(f'idx_{self.table_name}_{field.name}')
-            
+                indexes_to_drop.append(f"idx_{self.table_name}_{field.name}_unique")
+
+            if (
+                field.type in [FieldType.STRING, FieldType.TEXT]
+                and self.model_def.enable_search
+            ):
+                indexes_to_drop.extend(
+                    [
+                        f"idx_{self.table_name}_{field.name}_fts",
+                        f"idx_{self.table_name}_{field.name}_lower",
+                    ]
+                )
+
+            if field.type in [
+                FieldType.BOOLEAN,
+                FieldType.ENUM,
+                FieldType.DATE,
+                FieldType.DATETIME,
+            ]:
+                indexes_to_drop.append(f"idx_{self.table_name}_{field.name}")
+
             if field.type == FieldType.JSON:
-                indexes_to_drop.append(f'idx_{self.table_name}_{field.name}_gin')
-        
+                indexes_to_drop.append(f"idx_{self.table_name}_{field.name}_gin")
+
         # Add composite and special indexes
-        indexes_to_drop.extend([
-            f'idx_{self.table_name}_created_at_id'
-        ])
-        
+        indexes_to_drop.extend([f"idx_{self.table_name}_created_at_id"])
+
         if self.model_def.project_scoped:
-            indexes_to_drop.append(f'idx_{self.table_name}_project_created')
-        
+            indexes_to_drop.append(f"idx_{self.table_name}_project_created")
+
         if self.model_def.owner_field:
-            indexes_to_drop.append(f'idx_{self.table_name}_owner_created')
-        
-        if any(f.name == 'is_deleted' for f in self.model_def.fields):
-            indexes_to_drop.append(f'idx_{self.table_name}_active')
-        
-        if any(f.name == 'updated_at' for f in self.model_def.fields):
-            indexes_to_drop.append(f'idx_{self.table_name}_updated_at')
-        
+            indexes_to_drop.append(f"idx_{self.table_name}_owner_created")
+
+        if any(f.name == "is_deleted" for f in self.model_def.fields):
+            indexes_to_drop.append(f"idx_{self.table_name}_active")
+
+        if any(f.name == "updated_at" for f in self.model_def.fields):
+            indexes_to_drop.append(f"idx_{self.table_name}_updated_at")
+
         for index_name in reversed(indexes_to_drop):
-            content += f'''    op.drop_index('{index_name}', table_name='{self.table_name}')
-'''
-        
-        self._write_file(f"migrations/versions/{timestamp}_optimize_{self.table_name}_indexes.py", content)
-    
+            content += f"""    op.drop_index('{index_name}', table_name='{self.table_name}')
+"""
+
+        self._write_file(
+            f"migrations/versions/{timestamp}_optimize_{self.table_name}_indexes.py",
+            content,
+        )
+
     def generate_performance_monitoring(self):
         """Generate performance monitoring tools"""
         content = f'''"""
@@ -685,19 +712,19 @@ class IndexStats:
 
 class {self.model_name}PerformanceMonitor:
     """Performance monitoring for {self.model_name} operations"""
-    
+
     def __init__(self, db: Session = None):
         self.db = db or SessionLocal()
         self.table_name = "{self.table_name}"
-    
-    def get_slow_queries(self, 
+
+    def get_slow_queries(self,
                         min_calls: int = 10,
                         min_mean_time: float = 100.0) -> List[QueryStats]:
         """Get slow queries related to {self.model_name} table"""
         try:
             # Requires pg_stat_statements extension
             result = self.db.execute(text("""
-                SELECT 
+                SELECT
                     queryid::text as query_hash,
                     query,
                     calls,
@@ -706,7 +733,7 @@ class {self.model_name}PerformanceMonitor:
                     min_time,
                     max_time,
                     rows
-                FROM pg_stat_statements 
+                FROM pg_stat_statements
                 WHERE query LIKE :table_pattern
                     AND calls >= :min_calls
                     AND mean_time >= :min_mean_time
@@ -717,7 +744,7 @@ class {self.model_name}PerformanceMonitor:
                 "min_calls": min_calls,
                 "min_mean_time": min_mean_time
             }})
-            
+
             return [
                 QueryStats(
                     query_hash=row.query_hash,
@@ -733,12 +760,12 @@ class {self.model_name}PerformanceMonitor:
         except Exception as e:
             print(f"Could not get slow queries: {{e}}")
             return []
-    
+
     def get_index_usage(self) -> List[IndexStats]:
         """Get index usage statistics for {self.model_name}"""
         try:
             result = self.db.execute(text("""
-                SELECT 
+                SELECT
                     i.indexrelname as index_name,
                     i.relname as table_name,
                     i.idx_scan as scans,
@@ -750,13 +777,13 @@ class {self.model_name}PerformanceMonitor:
                 WHERE i.relname = :table_name
                 ORDER BY i.idx_scan DESC
             """), {{"table_name": self.table_name}})
-            
+
             stats = []
             for row in result:
                 efficiency = 0.0
                 if row.tuples_read > 0:
                     efficiency = row.tuples_fetched / row.tuples_read
-                
+
                 stats.append(IndexStats(
                     index_name=row.index_name,
                     table_name=row.table_name,
@@ -766,19 +793,19 @@ class {self.model_name}PerformanceMonitor:
                     efficiency=efficiency,
                     size_mb=row.size_mb
                 ))
-            
+
             return stats
-            
+
         except Exception as e:
             print(f"Could not get index usage: {{e}}")
             return []
-    
+
     def get_table_stats(self) -> Dict[str, Any]:
         """Get table statistics for {self.model_name}"""
         try:
             # Get basic table info
             table_info = self.db.execute(text("""
-                SELECT 
+                SELECT
                     n_tup_ins as inserts,
                     n_tup_upd as updates,
                     n_tup_del as deletes,
@@ -795,19 +822,19 @@ class {self.model_name}PerformanceMonitor:
                 FROM pg_stat_user_tables
                 WHERE relname = :table_name
             """), {{"table_name": self.table_name}}).fetchone()
-            
+
             if not table_info:
                 return {{"error": "Table statistics not found"}}
-            
+
             # Get table size
             size_info = self.db.execute(text("""
-                SELECT 
+                SELECT
                     pg_size_pretty(pg_total_relation_size(:table_name)) as total_size,
                     pg_size_pretty(pg_relation_size(:table_name)) as table_size,
                     pg_total_relation_size(:table_name) / 1024.0 / 1024.0 as total_mb,
                     pg_relation_size(:table_name) / 1024.0 / 1024.0 as table_mb
             """), {{"table_name": self.table_name}}).fetchone()
-            
+
             return {{
                 "operations": {{
                     "inserts": table_info.inserts,
@@ -839,21 +866,21 @@ class {self.model_name}PerformanceMonitor:
                     "table_mb": size_info.table_mb
                 }}
             }}
-            
+
         except Exception as e:
             return {{"error": f"Could not get table stats: {{e}}"}}
-    
-    def analyze_query_performance(self, 
+
+    def analyze_query_performance(self,
                                 query: str,
                                 params: Dict = None) -> Dict[str, Any]:
         """Analyze performance of a specific query"""
         try:
             # Get query plan
             explain_query = f"EXPLAIN (ANALYZE, BUFFERS, FORMAT JSON) {{query}}"
-            
+
             result = self.db.execute(text(explain_query), params or {{}})
             plan = result.fetchone()[0]
-            
+
             return {{
                 "query": query,
                 "execution_time_ms": plan[0]["Execution Time"],
@@ -863,17 +890,17 @@ class {self.model_name}PerformanceMonitor:
                 "plan": plan[0]["Plan"],
                 "analysis": self._analyze_plan(plan[0]["Plan"])
             }}
-            
+
         except Exception as e:
             return {{"error": f"Could not analyze query: {{e}}"}}
-    
+
     def _analyze_plan(self, plan: Dict) -> Dict[str, Any]:
         """Analyze query execution plan"""
         analysis = {{
             "issues": [],
             "recommendations": []
         }}
-        
+
         def analyze_node(node):
             # Check for sequential scans
             if node.get("Node Type") == "Seq Scan":
@@ -886,7 +913,7 @@ class {self.model_name}PerformanceMonitor:
                 analysis["recommendations"].append(
                     f"Consider adding index for table {{node.get('Relation Name')}}"
                 )
-            
+
             # Check for high cost operations
             if node.get("Total Cost", 0) > 1000:
                 analysis["issues"].append({{
@@ -894,9 +921,9 @@ class {self.model_name}PerformanceMonitor:
                     "operation": node.get("Node Type"),
                     "cost": node.get("Total Cost")
                 }})
-            
+
             # Check nested loops with high row counts
-            if (node.get("Node Type") == "Nested Loop" and 
+            if (node.get("Node Type") == "Nested Loop" and
                 node.get("Actual Rows", 0) > 10000):
                 analysis["issues"].append({{
                     "type": "expensive_nested_loop",
@@ -906,22 +933,22 @@ class {self.model_name}PerformanceMonitor:
                 analysis["recommendations"].append(
                     "Consider adding indexes to enable hash or merge joins"
                 )
-            
+
             # Recursively analyze child plans
             for child in node.get("Plans", []):
                 analyze_node(child)
-        
+
         analyze_node(plan)
         return analysis
-    
+
     def get_missing_indexes(self) -> List[Dict[str, str]]:
         """Identify potentially missing indexes"""
         recommendations = []
-        
+
         # Check for tables accessed via sequential scan
         try:
             result = self.db.execute(text("""
-                SELECT 
+                SELECT
                     schemaname,
                     tablename,
                     seq_scan,
@@ -933,7 +960,7 @@ class {self.model_name}PerformanceMonitor:
                     AND seq_scan > idx_scan
                     AND n_live_tup > 1000
             """), {{"table_name": self.table_name}})
-            
+
             for row in result:
                 recommendations.append({{
                     "table": row.tablename,
@@ -941,12 +968,12 @@ class {self.model_name}PerformanceMonitor:
                     "details": f"{{row.seq_scan}} seq scans vs {{row.idx_scan}} index scans",
                     "recommendation": "Review query patterns and add appropriate indexes"
                 }})
-                
+
         except Exception as e:
             print(f"Could not analyze missing indexes: {{e}}")
-        
+
         return recommendations
-    
+
     def generate_performance_report(self) -> Dict[str, Any]:
         """Generate comprehensive performance report"""
         return {{
@@ -958,36 +985,36 @@ class {self.model_name}PerformanceMonitor:
             "missing_indexes": self.get_missing_indexes(),
             "recommendations": self._get_performance_recommendations()
         }}
-    
+
     def _get_performance_recommendations(self) -> List[str]:
         """Get general performance recommendations"""
         recommendations = []
-        
+
         stats = self.get_table_stats()
         if isinstance(stats, dict) and "access_patterns" in stats:
             access = stats["access_patterns"]
-            
+
             if access["index_ratio"] < 0.95:
                 recommendations.append(
                     f"Index usage ratio is {{access['index_ratio']:.2%}}. "
                     "Consider adding indexes for frequent query patterns."
                 )
-            
+
             if stats["rows"]["dead"] > stats["rows"]["live"] * 0.1:
                 recommendations.append(
                     "High dead tuple ratio detected. Consider running VACUUM."
                 )
-        
+
         # Check index usage
         index_stats = self.get_index_usage()
         unused_indexes = [idx for idx in index_stats if idx.scans == 0]
-        
+
         if unused_indexes:
             recommendations.append(
                 f"Found {{len(unused_indexes)}} unused indexes consuming storage. "
                 "Consider dropping if not needed for constraints."
             )
-        
+
         return recommendations
 
 
@@ -995,39 +1022,39 @@ class {self.model_name}PerformanceMonitor:
 def monitor_{self.snake_name}_performance():
     """Quick performance check for {self.model_name}"""
     monitor = {self.model_name}PerformanceMonitor()
-    
+
     print(f"=== {self.model_name} Performance Report ===")
-    
+
     # Table stats
     stats = monitor.get_table_stats()
     if "error" not in stats:
         print(f"Rows: {{stats['rows']['live']:,}} live, {{stats['rows']['dead']:,}} dead")
         print(f"Storage: {{stats['storage']['total_size']}}")
         print(f"Index ratio: {{stats['access_patterns']['index_ratio']:.2%}}")
-    
+
     # Slow queries
     slow_queries = monitor.get_slow_queries()
     if slow_queries:
         print(f"\\nTop {{len(slow_queries)}} slow queries:")
         for query in slow_queries[:5]:
-            print(f"  Mean time: {{query.mean_time:.2f}ms, Calls: {{query.calls}}")
-    
+            print(f"  Mean time: {query.mean_time:.2f}ms, Calls: {query.calls}")
+
     # Index usage
     indexes = monitor.get_index_usage()
     print(f"\\nIndex usage ({{len(indexes)}} indexes):")
     for idx in indexes[:10]:
-        print(f"  {{idx.index_name}}: {{idx.scans}} scans, {{idx.size_mb:.2f}MB")
+        print(f"  {idx.index_name}: {idx.scans} scans, {idx.size_mb:.2f}MB")
 
 
 if __name__ == "__main__":
     monitor_{self.snake_name}_performance()
 '''
-        
+
         self._write_file(f"app/db/monitoring/{self.snake_name}_performance.py", content)
-    
+
     def generate_query_optimization(self):
         """Generate query optimization guidelines"""
-        content = f'''# {self.model_name} Query Optimization Guide
+        content = f"""# {self.model_name} Query Optimization Guide
 
 This guide provides optimized query patterns and best practices for {self.model_name} operations.
 
@@ -1037,53 +1064,66 @@ This guide provides optimized query patterns and best practices for {self.model_
 
 The following indexes are created automatically for {self.model_name}:
 
-'''
-        
+"""
+
         # Document all indexes
         index_count = 0
         for field in self.model_def.fields:
             if field.type == FieldType.FOREIGN_KEY:
                 index_count += 1
                 content += f"- **`idx_{self.table_name}_{field.name}`** (B-tree): Foreign key index for joins\n"
-            
+
             if field.unique:
                 index_count += 1
                 content += f"- **`idx_{self.table_name}_{field.name}_unique`** (B-tree, Unique): Unique constraint enforcement\n"
-            
-            if field.type in [FieldType.STRING, FieldType.TEXT] and self.model_def.enable_search:
+
+            if (
+                field.type in [FieldType.STRING, FieldType.TEXT]
+                and self.model_def.enable_search
+            ):
                 index_count += 2
                 content += f"- **`idx_{self.table_name}_{field.name}_fts`** (GIN): Full-text search\n"
                 content += f"- **`idx_{self.table_name}_{field.name}_lower`** (B-tree): Case-insensitive searches\n"
-            
-            if field.type in [FieldType.BOOLEAN, FieldType.ENUM, FieldType.DATE, FieldType.DATETIME]:
+
+            if field.type in [
+                FieldType.BOOLEAN,
+                FieldType.ENUM,
+                FieldType.DATE,
+                FieldType.DATETIME,
+            ]:
                 index_count += 1
                 content += f"- **`idx_{self.table_name}_{field.name}`** (B-tree): Filtering and sorting\n"
-            
+
             if field.type == FieldType.JSON:
                 index_count += 1
                 content += f"- **`idx_{self.table_name}_{field.name}_gin`** (GIN): JSON key/value searches\n"
-        
+
         # Composite indexes
-        content += f"- **`idx_{self.table_name}_created_at_id`** (B-tree): Optimized sorting\n"
+        content += (
+            f"- **`idx_{self.table_name}_created_at_id`** (B-tree): Optimized sorting\n"
+        )
         index_count += 1
-        
+
         if self.model_def.project_scoped:
             content += f"- **`idx_{self.table_name}_project_created`** (B-tree): Project-scoped queries\n"
             index_count += 1
-        
+
         if self.model_def.owner_field:
             content += f"- **`idx_{self.table_name}_owner_created`** (B-tree): Owner-based queries\n"
             index_count += 1
-        
+
         content += f"\n**Total indexes**: {index_count}\n\n"
-        
-        content += '''## Optimized Query Patterns
+
+        content += (
+            """## Optimized Query Patterns
 
 ### 1. List Operations
 
 #### ✅ Optimized: Pagination with stable sorting
 ```sql
-SELECT * FROM ''' + self.table_name + '''
+SELECT * FROM """
+            + self.table_name
+            + """
 ORDER BY created_at DESC, id DESC
 LIMIT 50 OFFSET 0;
 ```
@@ -1091,14 +1131,18 @@ LIMIT 50 OFFSET 0;
 #### ❌ Avoid: Large offsets
 ```sql
 -- Slow for large offsets
-SELECT * FROM ''' + self.table_name + '''
+SELECT * FROM """
+            + self.table_name
+            + """
 ORDER BY created_at DESC
 LIMIT 50 OFFSET 10000;
 ```
 
 #### ✅ Better: Cursor-based pagination
 ```sql
-SELECT * FROM ''' + self.table_name + '''
+SELECT * FROM """
+            + self.table_name
+            + """
 WHERE (created_at, id) < (?, ?)
 ORDER BY created_at DESC, id DESC
 LIMIT 50;
@@ -1106,15 +1150,19 @@ LIMIT 50;
 
 ### 2. Search Operations
 
-'''
-        
+"""
+        )
+
         # Add search examples for text fields
-        text_fields = [f for f in self.model_def.fields 
-                      if f.type in [FieldType.STRING, FieldType.TEXT]]
-        
+        text_fields = [
+            f
+            for f in self.model_def.fields
+            if f.type in [FieldType.STRING, FieldType.TEXT]
+        ]
+
         if text_fields and self.model_def.enable_search:
             sample_field = text_fields[0].name
-            content += f'''#### ✅ Optimized: Full-text search
+            content += f"""#### ✅ Optimized: Full-text search
 ```sql
 SELECT * FROM {self.table_name}
 WHERE to_tsvector('english', {sample_field}) @@ to_tsquery('english', 'search & terms');
@@ -1133,19 +1181,22 @@ SELECT * FROM {self.table_name}
 WHERE {sample_field} LIKE '%pattern%';
 ```
 
-'''
-        
-        content += '''### 3. Filtering Operations
+"""
 
-'''
-        
+        content += """### 3. Filtering Operations
+
+"""
+
         # Add filtering examples
-        filter_fields = [f for f in self.model_def.fields 
-                        if f.type in [FieldType.BOOLEAN, FieldType.ENUM]]
-        
+        filter_fields = [
+            f
+            for f in self.model_def.fields
+            if f.type in [FieldType.BOOLEAN, FieldType.ENUM]
+        ]
+
         if filter_fields:
             sample_filter = filter_fields[0].name
-            content += f'''#### ✅ Optimized: Indexed filtering
+            content += f"""#### ✅ Optimized: Indexed filtering
 ```sql
 SELECT * FROM {self.table_name}
 WHERE {sample_filter} = 'active'
@@ -1160,11 +1211,11 @@ WHERE {sample_filter} = 'active'
 ORDER BY created_at DESC, id DESC;
 ```
 
-'''
-        
+"""
+
         # Add project-scoped examples
         if self.model_def.project_scoped:
-            content += f'''### 4. Project-Scoped Queries
+            content += f"""### 4. Project-Scoped Queries
 
 #### ✅ Optimized: Project filtering with sorting
 ```sql
@@ -1176,7 +1227,7 @@ LIMIT 50;
 
 #### ✅ Optimized: Project stats aggregation
 ```sql
-SELECT 
+SELECT
     project_id,
     COUNT(*) as total_count,
     COUNT(*) FILTER (WHERE created_at >= CURRENT_DATE - INTERVAL '7 days') as recent_count
@@ -1185,11 +1236,11 @@ WHERE project_id IN (?, ?, ?)
 GROUP BY project_id;
 ```
 
-'''
-        
+"""
+
         # Add owner-based examples
         if self.model_def.owner_field:
-            content += f'''### 5. Owner-Based Queries
+            content += f"""### 5. Owner-Based Queries
 
 #### ✅ Optimized: User's items with sorting
 ```sql
@@ -1201,7 +1252,7 @@ LIMIT 50;
 
 #### ✅ Optimized: Owner statistics
 ```sql
-SELECT 
+SELECT
     {self.model_def.owner_field},
     COUNT(*) as item_count,
     MAX(created_at) as latest_item
@@ -1210,15 +1261,18 @@ WHERE {self.model_def.owner_field} IN (?, ?, ?)
 GROUP BY {self.model_def.owner_field};
 ```
 
-'''
-        
+"""
+
         # Add date/time examples
-        datetime_fields = [f for f in self.model_def.fields 
-                          if f.type in [FieldType.DATE, FieldType.DATETIME]]
-        
+        datetime_fields = [
+            f
+            for f in self.model_def.fields
+            if f.type in [FieldType.DATE, FieldType.DATETIME]
+        ]
+
         if datetime_fields:
             sample_date_field = datetime_fields[0].name
-            content += f'''### 6. Temporal Queries
+            content += f"""### 6. Temporal Queries
 
 #### ✅ Optimized: Date range filtering
 ```sql
@@ -1236,13 +1290,13 @@ ORDER BY {sample_date_field} DESC
 LIMIT 100;
 ```
 
-'''
-        
+"""
+
         # Add JSON field examples
         json_fields = [f for f in self.model_def.fields if f.type == FieldType.JSON]
         if json_fields:
             sample_json_field = json_fields[0].name
-            content += f'''### 7. JSON Queries
+            content += f"""### 7. JSON Queries
 
 #### ✅ Optimized: JSON containment
 ```sql
@@ -1262,14 +1316,14 @@ SELECT * FROM {self.table_name}
 WHERE {sample_json_field} #>> '{{path,to,value}}' = 'target_value';
 ```
 
-'''
-        
-        content += f'''## Query Performance Tips
+"""
+
+        content += f"""## Query Performance Tips
 
 ### 1. Use EXPLAIN ANALYZE
 Always analyze query performance:
 ```sql
-EXPLAIN (ANALYZE, BUFFERS) 
+EXPLAIN (ANALYZE, BUFFERS)
 SELECT * FROM {self.table_name}
 WHERE condition = ?
 ORDER BY created_at DESC;
@@ -1295,7 +1349,7 @@ For bulk operations, use batch processing:
 ```sql
 -- ✅ Good: Batch insert
 INSERT INTO {self.table_name} (column1, column2, column3)
-VALUES 
+VALUES
     (?, ?, ?),
     (?, ?, ?),
     (?, ?, ?);
@@ -1307,15 +1361,21 @@ INSERT INTO {self.table_name} (column1, column2, column3) VALUES (?, ?, ?);
 
 ### 5. Optimize JOIN Operations
 
-'''
-        
+"""
+
         # Add JOIN examples for foreign keys
-        fk_fields = [f for f in self.model_def.fields if f.type == FieldType.FOREIGN_KEY]
+        fk_fields = [
+            f for f in self.model_def.fields if f.type == FieldType.FOREIGN_KEY
+        ]
         if fk_fields:
             sample_fk = fk_fields[0]
-            target_table = sample_fk.relationship.target_model.lower() + 's' if sample_fk.relationship else 'related_table'
-            
-            content += f'''#### ✅ Optimized: Use indexed foreign keys
+            target_table = (
+                sample_fk.relationship.target_model.lower() + "s"
+                if sample_fk.relationship
+                else "related_table"
+            )
+
+            content += f"""#### ✅ Optimized: Use indexed foreign keys
 ```sql
 SELECT p.*, r.name as related_name
 FROM {self.table_name} p
@@ -1324,9 +1384,10 @@ WHERE p.created_at >= ?
 ORDER BY p.created_at DESC;
 ```
 
-'''
-        
-        content += '''## Common Anti-Patterns to Avoid
+"""
+
+        content += (
+            """## Common Anti-Patterns to Avoid
 
 ### 1. ❌ Inefficient LIKE patterns
 ```sql
@@ -1355,7 +1416,9 @@ WHERE id IN (1, 2, 3, ..., 1000)
 ```sql
 -- Wasteful sorting
 SELECT COUNT(*) FROM (
-    SELECT * FROM ''' + self.table_name + ''' ORDER BY created_at  -- Unnecessary
+    SELECT * FROM """
+            + self.table_name
+            + """ ORDER BY created_at  -- Unnecessary
 ) subquery;
 ```
 
@@ -1367,39 +1430,45 @@ SELECT COUNT(*) FROM (
 -- log_min_duration_statement = 100
 
 -- Or use pg_stat_statements
-SELECT 
+SELECT
     query,
     calls,
     total_time,
     mean_time,
     rows
-FROM pg_stat_statements 
-WHERE query LIKE '%''' + self.table_name + '''%'
+FROM pg_stat_statements
+WHERE query LIKE '%"""
+            + self.table_name
+            + """%'
 ORDER BY mean_time DESC
 LIMIT 10;
 ```
 
 ### Monitor Index Usage
 ```sql
-SELECT 
+SELECT
     indexrelname,
     idx_scan,
     idx_tup_read,
     idx_tup_fetch
-FROM pg_stat_user_indexes 
-WHERE relname = '''' + self.table_name + ''''
+FROM pg_stat_user_indexes
+WHERE relname = """
+            " + self.table_name + "
+            """
 ORDER BY idx_scan DESC;
 ```
 
 ### Check Table Statistics
 ```sql
-SELECT 
+SELECT
     n_live_tup,
     n_dead_tup,
     last_autovacuum,
     last_autoanalyze
-FROM pg_stat_user_tables 
-WHERE relname = '''' + self.table_name + '''';
+FROM pg_stat_user_tables
+WHERE relname = """
+            " + self.table_name + "
+            """;
 ```
 
 ## Application-Level Optimizations
@@ -1420,11 +1489,15 @@ WHERE relname = '''' + self.table_name + '''';
 ### 4. Batch Database Operations
 ```python
 # ✅ Good: Batch operations
-session.bulk_insert_mappings(''' + self.model_name + ''', data_list)
+session.bulk_insert_mappings("""
+            + self.model_name
+            + """, data_list)
 
 # ❌ Avoid: Individual operations in loops
 for item in data_list:
-    session.add(''' + self.model_name + '''(**item))
+    session.add("""
+            + self.model_name
+            + """(**item))
     session.commit()  # Don't commit inside loops
 ```
 
@@ -1432,39 +1505,48 @@ for item in data_list:
 
 ### 1. Update Statistics
 ```sql
-ANALYZE ''' + self.table_name + ''';
+ANALYZE """
+            + self.table_name
+            + """;
 ```
 
 ### 2. Vacuum When Needed
 ```sql
-VACUUM ANALYZE ''' + self.table_name + ''';
+VACUUM ANALYZE """
+            + self.table_name
+            + """;
 ```
 
 ### 3. Monitor Index Bloat
 ```sql
-SELECT 
+SELECT
     schemaname,
     tablename,
     attname,
     n_distinct,
     correlation
-FROM pg_stats 
-WHERE tablename = '''' + self.table_name + '''';
+FROM pg_stats
+WHERE tablename = """
+            " + self.table_name + "
+            """;
 ```
 
 ### 4. Review Unused Indexes
 ```sql
-SELECT 
+SELECT
     indexrelname,
     idx_scan
-FROM pg_stat_user_indexes 
-WHERE relname = '''' + self.table_name + ''''
+FROM pg_stat_user_indexes
+WHERE relname = """
+            " + self.table_name + "
+            """
     AND idx_scan = 0;
 ```
-'''
-        
+"""
+        )
+
         self._write_file(f"docs/{self.snake_name}-query-optimization.md", content)
-    
+
     def generate_index_maintenance(self):
         """Generate index maintenance tools and scripts"""
         content = f'''"""
@@ -1487,33 +1569,33 @@ logger = logging.getLogger(__name__)
 
 class {self.model_name}IndexMaintenance:
     """Index maintenance operations for {self.model_name}"""
-    
+
     def __init__(self, db: Session = None):
         self.db = db or SessionLocal()
         self.table_name = "{self.table_name}"
         self.monitor = {self.model_name}PerformanceMonitor(self.db)
-    
+
     def analyze_table(self) -> Dict[str, Any]:
         """Run ANALYZE on {self.model_name} table"""
         try:
             start_time = datetime.utcnow()
-            
+
             # Run ANALYZE
             self.db.execute(text(f"ANALYZE {{self.table_name}}"))
             self.db.commit()
-            
+
             end_time = datetime.utcnow()
             duration = (end_time - start_time).total_seconds()
-            
+
             logger.info(f"ANALYZE completed for {{self.table_name}} in {{duration:.2f}} seconds")
-            
+
             return {{
                 "success": True,
                 "duration_seconds": duration,
                 "timestamp": end_time.isoformat(),
                 "operation": "ANALYZE"
             }}
-            
+
         except Exception as e:
             logger.error(f"ANALYZE failed for {{self.table_name}}: {{e}}")
             return {{
@@ -1521,12 +1603,12 @@ class {self.model_name}IndexMaintenance:
                 "error": str(e),
                 "timestamp": datetime.utcnow().isoformat()
             }}
-    
+
     def vacuum_table(self, full: bool = False, analyze: bool = True) -> Dict[str, Any]:
         """Run VACUUM on {self.model_name} table"""
         try:
             start_time = datetime.utcnow()
-            
+
             # Build VACUUM command
             vacuum_cmd = "VACUUM"
             if full:
@@ -1534,16 +1616,16 @@ class {self.model_name}IndexMaintenance:
             if analyze:
                 vacuum_cmd += " ANALYZE"
             vacuum_cmd += f" {{self.table_name}}"
-            
+
             # Run VACUUM
             self.db.execute(text(vacuum_cmd))
             self.db.commit()
-            
+
             end_time = datetime.utcnow()
             duration = (end_time - start_time).total_seconds()
-            
+
             logger.info(f"{{vacuum_cmd}} completed in {{duration:.2f}} seconds")
-            
+
             return {{
                 "success": True,
                 "duration_seconds": duration,
@@ -1551,7 +1633,7 @@ class {self.model_name}IndexMaintenance:
                 "operation": vacuum_cmd,
                 "full_vacuum": full
             }}
-            
+
         except Exception as e:
             logger.error(f"VACUUM failed for {{self.table_name}}: {{e}}")
             return {{
@@ -1559,48 +1641,48 @@ class {self.model_name}IndexMaintenance:
                 "error": str(e),
                 "timestamp": datetime.utcnow().isoformat()
             }}
-    
+
     def reindex_table(self, concurrent: bool = True) -> Dict[str, Any]:
         """Rebuild all indexes for {self.model_name} table"""
         try:
             start_time = datetime.utcnow()
-            
+
             # Get list of indexes
             indexes = self.db.execute(text("""
-                SELECT indexname 
-                FROM pg_indexes 
-                WHERE tablename = :table_name 
+                SELECT indexname
+                FROM pg_indexes
+                WHERE tablename = :table_name
                     AND schemaname = 'public'
             """), {{"table_name": self.table_name}}).fetchall()
-            
+
             results = []
-            
+
             for index_row in indexes:
                 index_name = index_row.indexname
-                
+
                 try:
                     # Skip primary key (cannot be reindexed concurrently)
                     if "pkey" in index_name and concurrent:
                         continue
-                    
+
                     reindex_cmd = f"REINDEX INDEX"
                     if concurrent:
                         reindex_cmd += " CONCURRENTLY"
                     reindex_cmd += f" {{index_name}}"
-                    
+
                     index_start = datetime.utcnow()
                     self.db.execute(text(reindex_cmd))
                     self.db.commit()
                     index_duration = (datetime.utcnow() - index_start).total_seconds()
-                    
+
                     results.append({{
                         "index": index_name,
                         "success": True,
                         "duration_seconds": index_duration
                     }})
-                    
+
                     logger.info(f"Reindexed {{index_name}} in {{index_duration:.2f}} seconds")
-                    
+
                 except Exception as e:
                     results.append({{
                         "index": index_name,
@@ -1608,10 +1690,10 @@ class {self.model_name}IndexMaintenance:
                         "error": str(e)
                     }})
                     logger.error(f"Failed to reindex {{index_name}}: {{e}}")
-            
+
             end_time = datetime.utcnow()
             total_duration = (end_time - start_time).total_seconds()
-            
+
             return {{
                 "success": True,
                 "total_duration_seconds": total_duration,
@@ -1620,7 +1702,7 @@ class {self.model_name}IndexMaintenance:
                 "indexes_processed": len(results),
                 "results": results
             }}
-            
+
         except Exception as e:
             logger.error(f"REINDEX failed for {{self.table_name}}: {{e}}")
             return {{
@@ -1628,30 +1710,30 @@ class {self.model_name}IndexMaintenance:
                 "error": str(e),
                 "timestamp": datetime.utcnow().isoformat()
             }}
-    
+
     def check_index_bloat(self) -> List[Dict[str, Any]]:
         """Check for bloated indexes"""
         try:
             result = self.db.execute(text("""
-                SELECT 
+                SELECT
                     indexrelname as index_name,
                     pg_size_pretty(pg_relation_size(indexrelid)) as size,
                     pg_relation_size(indexrelid) as size_bytes,
                     idx_scan,
                     idx_tup_read,
                     idx_tup_fetch,
-                    CASE 
-                        WHEN idx_tup_read > 0 
+                    CASE
+                        WHEN idx_tup_read > 0
                         THEN round((idx_tup_fetch::numeric / idx_tup_read::numeric) * 100, 2)
-                        ELSE 0 
+                        ELSE 0
                     END as efficiency_percent
-                FROM pg_stat_user_indexes 
+                FROM pg_stat_user_indexes
                 WHERE relname = :table_name
                 ORDER BY pg_relation_size(indexrelid) DESC
             """), {{"table_name": self.table_name}})
-            
+
             bloat_info = []
-            
+
             for row in result:
                 # Simple heuristic for potential bloat
                 bloat_risk = "low"
@@ -1659,7 +1741,7 @@ class {self.model_name}IndexMaintenance:
                     bloat_risk = "medium"
                 if row.efficiency_percent < 25 and row.idx_scan > 1000:
                     bloat_risk = "high"
-                
+
                 bloat_info.append({{
                     "index_name": row.index_name,
                     "size": row.size,
@@ -1669,13 +1751,13 @@ class {self.model_name}IndexMaintenance:
                     "bloat_risk": bloat_risk,
                     "recommendation": self._get_bloat_recommendation(row, bloat_risk)
                 }})
-            
+
             return bloat_info
-            
+
         except Exception as e:
             logger.error(f"Failed to check index bloat: {{e}}")
             return []
-    
+
     def _get_bloat_recommendation(self, row, bloat_risk: str) -> str:
         """Get recommendation for index bloat"""
         if bloat_risk == "high":
@@ -1686,42 +1768,42 @@ class {self.model_name}IndexMaintenance:
             return f"Consider dropping {{row.index_name}} - unused index consuming space"
         else:
             return "Index appears healthy"
-    
+
     def get_maintenance_schedule(self) -> Dict[str, Any]:
         """Generate maintenance schedule recommendations"""
         stats = self.monitor.get_table_stats()
-        
+
         if "error" in stats:
             return {{"error": "Could not generate schedule - table stats unavailable"}}
-        
+
         schedule = {{
             "daily": [],
             "weekly": [],
             "monthly": [],
             "quarterly": []
         }}
-        
+
         # Daily tasks
         if stats["access_patterns"]["index_ratio"] < 0.9:
             schedule["daily"].append("Monitor slow queries and index usage")
-        
+
         # Weekly tasks
         dead_ratio = stats["rows"]["dead"] / max(stats["rows"]["live"], 1)
         if dead_ratio > 0.1:
             schedule["weekly"].append("Run VACUUM ANALYZE due to high dead tuple ratio")
         else:
             schedule["weekly"].append("Run ANALYZE to update statistics")
-        
+
         # Monthly tasks
         schedule["monthly"].extend([
             "Check index bloat and efficiency",
             "Review slow query log",
             "Monitor table and index sizes"
         ])
-        
+
         if stats["storage"]["total_mb"] > 1000:  # Large table
             schedule["monthly"].append("Consider partitioning for large table")
-        
+
         # Quarterly tasks
         schedule["quarterly"].extend([
             "Full performance review",
@@ -1729,7 +1811,7 @@ class {self.model_name}IndexMaintenance:
             "Consider new indexes based on query patterns",
             "Review and clean up unused indexes"
         ])
-        
+
         return {{
             "table": self.table_name,
             "table_size_mb": stats["storage"]["total_mb"],
@@ -1738,26 +1820,26 @@ class {self.model_name}IndexMaintenance:
             "schedule": schedule,
             "next_actions": self._get_immediate_actions(stats, dead_ratio)
         }}
-    
+
     def _get_immediate_actions(self, stats: Dict, dead_ratio: float) -> List[str]:
         """Get immediate maintenance actions needed"""
         actions = []
-        
+
         if dead_ratio > 0.2:
             actions.append("URGENT: Run VACUUM ANALYZE - high dead tuple ratio")
-        
+
         if stats["access_patterns"]["index_ratio"] < 0.5:
             actions.append("URGENT: Review query patterns - low index usage")
-        
+
         if not stats["maintenance"]["last_analyze"]:
             actions.append("Run ANALYZE - no recent statistics update")
-        
+
         if not actions:
             actions.append("No immediate actions required")
-        
+
         return actions
-    
-    def run_maintenance_routine(self, 
+
+    def run_maintenance_routine(self,
                                analyze: bool = True,
                                vacuum: bool = False,
                                reindex: bool = False) -> Dict[str, Any]:
@@ -1767,49 +1849,49 @@ class {self.model_name}IndexMaintenance:
             "table": self.table_name,
             "operations": []
         }}
-        
+
         try:
             if analyze:
                 analyze_result = self.analyze_table()
                 results["operations"].append({{"analyze": analyze_result}})
-            
+
             if vacuum:
                 vacuum_result = self.vacuum_table()
                 results["operations"].append({{"vacuum": vacuum_result}})
-            
+
             if reindex:
                 reindex_result = self.reindex_table()
                 results["operations"].append({{"reindex": reindex_result}})
-            
+
             # Get updated statistics
             results["final_stats"] = self.monitor.get_table_stats()
-            
+
             logger.info(f"Maintenance routine completed for {{self.table_name}}")
-            
+
         except Exception as e:
             results["error"] = str(e)
             logger.error(f"Maintenance routine failed: {{e}}")
-        
+
         return results
 
 
 def run_{self.snake_name}_maintenance():
     """Run maintenance routine for {self.model_name}"""
     maintenance = {self.model_name}IndexMaintenance()
-    
+
     print(f"=== {self.model_name} Maintenance Report ===")
-    
+
     # Check current status
     schedule = maintenance.get_maintenance_schedule()
-    
+
     print(f"Table size: {{schedule.get('table_size_mb', 'unknown')}} MB")
     print(f"Dead tuple ratio: {{schedule.get('dead_tuple_ratio', 'unknown'):.2%}}")
     print(f"Index usage ratio: {{schedule.get('index_ratio', 'unknown'):.2%}}")
-    
+
     print("\\nImmediate actions:")
     for action in schedule.get('next_actions', []):
         print(f"  - {{action}}")
-    
+
     # Check index bloat
     bloat_info = maintenance.check_index_bloat()
     if bloat_info:
@@ -1818,7 +1900,7 @@ def run_{self.snake_name}_maintenance():
             print(f"  {{idx['index_name']}}: {{idx['size']}}, {{idx['efficiency_percent']}}% efficient")
             if idx['bloat_risk'] != 'low':
                 print(f"    ⚠️  {{idx['recommendation']}}")
-    
+
     # Run basic maintenance
     print("\\nRunning ANALYZE...")
     result = maintenance.analyze_table()
@@ -1831,9 +1913,11 @@ def run_{self.snake_name}_maintenance():
 if __name__ == "__main__":
     run_{self.snake_name}_maintenance()
 '''
-        
-        self._write_file(f"app/db/maintenance/{self.snake_name}_maintenance.py", content)
-    
+
+        self._write_file(
+            f"app/db/maintenance/{self.snake_name}_maintenance.py", content
+        )
+
     def _write_file(self, relative_path: str, content: str):
         """Write content to file, creating directories as needed"""
         file_path = self.base_path / relative_path

@@ -136,7 +136,7 @@ The system uses mixins for common functionality:
 
 ```python
 # TimestampMixin - adds created_at, updated_at
-# SoftDeleteMixin - adds is_deleted, deleted_at  
+# SoftDeleteMixin - adds is_deleted, deleted_at
 # AuditMixin - adds created_by, updated_by
 # MetadataMixin - adds metadata_json, tags, version
 
@@ -355,7 +355,7 @@ function TaskManagement({ projectId }: { projectId: number }) {
     data: task
   }))
 
-  return viewMode === 'list' 
+  return viewMode === 'list'
     ? TaskFactory.createListView({ data: tasks, projectId })
     : TaskFactory.createKanbanView({ items: kanbanItems, projectId })
 }
@@ -400,7 +400,7 @@ const DocumentFactory = createResourceFactory(DocumentConfig)
    ```python
    from app.services.permission_service import PermissionService
    from app.db.session import SessionLocal
-   
+
    db = SessionLocal()
    PermissionService.create_generic_permissions(db)
    db.close()
@@ -472,7 +472,7 @@ test('renders list view with data', () => {
       resourceName="user"
     />
   )
-  
+
   expect(screen.getByText('Users')).toBeInTheDocument()
   expect(screen.getByText('Create User')).toBeInTheDocument()
 })
@@ -488,7 +488,7 @@ DATABASE_URL=postgresql://user:pass@localhost/fastnext
 SECRET_KEY=your-secret-key
 ALGORITHM=HS256
 
-# Frontend  
+# Frontend
 NEXT_PUBLIC_API_URL=http://localhost:8000/api
 ```
 

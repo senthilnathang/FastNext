@@ -66,23 +66,23 @@ services:
       POSTGRES_DB: fastnext
       POSTGRES_USER: fastnext
       POSTGRES_PASSWORD: fastnext_password
-      
+
       # Redis
       REDIS_HOST: redis
       REDIS_PORT: 6379
       REDIS_PASSWORD: redis_password
       REDIS_DB: 0
-      
+
       # Application
       SECRET_KEY: dev-secret-key-change-in-production
       ENVIRONMENT: development
-      DEBUG: true
+      DEBUG: "true"
       PORT: 8000
-      
+
       # Cache
       CACHE_ENABLED: true
       CACHE_DEFAULT_TTL: 300
-      
+
       # Performance
       WORKERS: 1
       RELOAD: true

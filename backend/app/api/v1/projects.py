@@ -1,17 +1,17 @@
-from typing import Any, List
-from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.orm import Session
-from sqlalchemy import func
 import logging
+from typing import Any, Dict, List
 
 from app.auth.deps import get_current_active_user
-from app.services.permission_service import PermissionService
 from app.db.session import get_db
-from app.models.user import User
 from app.models.project import Project
-from app.schemas.project import Project as ProjectSchema, ProjectCreate, ProjectUpdate
+from app.models.user import User
 from app.schemas.common import ListResponse
-from typing import Dict
+from app.schemas.project import Project as ProjectSchema
+from app.schemas.project import ProjectCreate, ProjectUpdate
+from app.services.permission_service import PermissionService
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy import func
+from sqlalchemy.orm import Session
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -30,33 +30,30 @@ def read_projects(
     try:
         # Build query
         query = db.query(Project).filter(Project.user_id == current_user.id)
-        
+
         # Apply search filter
         if search:
             search_term = f"%{search}%"
             query = query.filter(
-                (Project.name.ilike(search_term)) |
-                (Project.description.ilike(search_term))
+                (Project.name.ilike(search_term))
+                | (Project.description.ilike(search_term))
             )
-        
+
         # Get total count
         total = query.count()
-        
+
         # Get paginated projects
         user_projects = query.offset(skip).limit(limit).all()
-        
+
         return ListResponse.paginate(
-            items=user_projects,
-            total=total,
-            skip=skip,
-            limit=limit
+            items=user_projects, total=total, skip=skip, limit=limit
         )
     except Exception as e:
         # Log the error and raise proper exception
         logger.error(f"Error fetching projects: {e}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to fetch projects"
+            detail="Failed to fetch projects",
         )
 
 
@@ -72,13 +69,10 @@ def create_project(
     if not PermissionService.check_permission(db, current_user.id, "create", "project"):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Insufficient permissions to create projects"
+            detail="Insufficient permissions to create projects",
         )
-    
-    project = Project(
-        **project_in.dict(),
-        user_id=current_user.id
-    )
+
+    project = Project(**project_in.dict(), user_id=current_user.id)
     db.add(project)
     db.commit()
     db.refresh(project)
@@ -93,12 +87,13 @@ def read_project(
     current_user: User = Depends(get_current_active_user),
 ) -> Any:
     # Check if user has access to project
-    if not PermissionService.check_project_permission(db, current_user.id, project_id, "read"):
+    if not PermissionService.check_project_permission(
+        db, current_user.id, project_id, "read"
+    ):
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Project access denied"
+            status_code=status.HTTP_403_FORBIDDEN, detail="Project access denied"
         )
-    
+
     project = db.query(Project).filter(Project.id == project_id).first()
     if not project:
         raise HTTPException(status_code=404, detail="Project not found")
@@ -114,20 +109,21 @@ def update_project(
     current_user: User = Depends(get_current_active_user),
 ) -> Any:
     # Check if user has permission to update project
-    if not PermissionService.check_project_permission(db, current_user.id, project_id, "update"):
+    if not PermissionService.check_project_permission(
+        db, current_user.id, project_id, "update"
+    ):
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Project update access denied"
+            status_code=status.HTTP_403_FORBIDDEN, detail="Project update access denied"
         )
-    
+
     project = db.query(Project).filter(Project.id == project_id).first()
     if not project:
         raise HTTPException(status_code=404, detail="Project not found")
-    
+
     project_data = project_in.dict(exclude_unset=True)
     for field, value in project_data.items():
         setattr(project, field, value)
-    
+
     db.add(project)
     db.commit()
     db.refresh(project)
@@ -142,16 +138,17 @@ def delete_project(
     current_user: User = Depends(get_current_active_user),
 ) -> Any:
     # Check if user has permission to delete project
-    if not PermissionService.check_project_permission(db, current_user.id, project_id, "delete"):
+    if not PermissionService.check_project_permission(
+        db, current_user.id, project_id, "delete"
+    ):
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Project delete access denied"
+            status_code=status.HTTP_403_FORBIDDEN, detail="Project delete access denied"
         )
-    
+
     project = db.query(Project).filter(Project.id == project_id).first()
     if not project:
         raise HTTPException(status_code=404, detail="Project not found")
-    
+
     db.delete(project)
     db.commit()
     return {"message": "Project deleted successfully"}

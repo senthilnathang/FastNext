@@ -1,17 +1,36 @@
-from sqlalchemy import Column, Integer, String, Boolean, DateTime, Text, Float, ForeignKey, JSON, Enum, Date
-from sqlalchemy.orm import relationship, Mapped, mapped_column
-from sqlalchemy.sql import func
-from typing import Optional, List, Dict, Any
 from datetime import date
+from typing import Any, Dict, List, Optional
 
-from app.models.base import TimestampMixin, AuditMixin, SoftDeleteMixin, MetadataMixin
-from app.models.base import Base
+from app.models.base import (
+    AuditMixin,
+    Base,
+    MetadataMixin,
+    SoftDeleteMixin,
+    TimestampMixin,
+)
 from app.models.enums import ProductCategory
+from sqlalchemy import (
+    JSON,
+    Boolean,
+    Column,
+    Date,
+    DateTime,
+    Enum,
+    Float,
+    ForeignKey,
+    Integer,
+    String,
+    Text,
+)
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.sql import func
+
 
 class Product(Base, TimestampMixin, AuditMixin, SoftDeleteMixin, MetadataMixin):
     """
     Product inventory management model
     """
+
     __tablename__ = "products"
 
     # Primary key
@@ -30,17 +49,23 @@ class Product(Base, TimestampMixin, AuditMixin, SoftDeleteMixin, MetadataMixin):
     # Current stock quantity
     stock_quantity: Mapped[int] = mapped_column(Integer, default=0)
     # Whether this product is featured
-    is_featured: Mapped[Optional[bool]] = mapped_column(Boolean, nullable=False, default=False)
+    is_featured: Mapped[Optional[bool]] = mapped_column(
+        Boolean, nullable=False, default=False
+    )
     # Product launch date
     launch_date: Mapped[Optional[date]] = mapped_column(Date, nullable=False)
     # Product specifications as JSON
-    specifications: Mapped[Optional[Dict[str, Any]]] = mapped_column(JSON, nullable=False)
+    specifications: Mapped[Optional[Dict[str, Any]]] = mapped_column(
+        JSON, nullable=False
+    )
     # Product website URL
     website_url: Mapped[Optional[str]] = mapped_column(String(500), nullable=False)
     # Product support email
     support_email: Mapped[Optional[str]] = mapped_column(String(255), nullable=False)
     # Category foreign key
-    category_id: Mapped[Optional[int]] = mapped_column(Integer, ForeignKey("categorys.id"), nullable=False)
+    category_id: Mapped[Optional[int]] = mapped_column(
+        Integer, ForeignKey("categorys.id"), nullable=False
+    )
     # Product owner (user)
     owner_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"))
 

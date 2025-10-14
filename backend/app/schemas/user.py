@@ -1,7 +1,8 @@
-from typing import Optional, List
-from pydantic import BaseModel, EmailStr, Field, validator
-from datetime import datetime
 import re
+from datetime import datetime
+from typing import List, Optional
+
+from pydantic import BaseModel, EmailStr, Field, validator
 
 
 class UserBase(BaseModel):
@@ -9,30 +10,33 @@ class UserBase(BaseModel):
     username: str = Field(..., min_length=3, max_length=50, description="Username")
     full_name: Optional[str] = Field(None, max_length=255, description="Full name")
     is_active: Optional[bool] = True
-    
-    @validator('username')
+
+    @validator("username")
     def validate_username(cls, v):
-        if not re.match(r'^[a-zA-Z0-9_-]+$', v):
-            raise ValueError('Username can only contain letters, numbers, underscores, and hyphens')
+        if not re.match(r"^[a-zA-Z0-9_-]+$", v):
+            raise ValueError(
+                "Username can only contain letters, numbers, underscores, and hyphens"
+            )
         return v
 
 
 class UserCreate(UserBase):
     password: str = Field(..., min_length=8, max_length=128, description="Password")
-    
-    @validator('password')
+
+    @validator("password")
     def validate_password_strength(cls, v):
-        if not re.search(r'[A-Z]', v):
-            raise ValueError('Password must contain at least one uppercase letter')
-        if not re.search(r'[a-z]', v):
-            raise ValueError('Password must contain at least one lowercase letter')
-        if not re.search(r'\d', v):
-            raise ValueError('Password must contain at least one digit')
+        if not re.search(r"[A-Z]", v):
+            raise ValueError("Password must contain at least one uppercase letter")
+        if not re.search(r"[a-z]", v):
+            raise ValueError("Password must contain at least one lowercase letter")
+        if not re.search(r"\d", v):
+            raise ValueError("Password must contain at least one digit")
         return v
 
 
 class AdminUserCreate(UserCreate):
     """Admin-only user creation with additional privileges"""
+
     is_verified: Optional[bool] = False
     is_superuser: Optional[bool] = False
     bio: Optional[str] = Field(None, max_length=1000)
@@ -53,22 +57,24 @@ class UserUpdate(BaseModel):
     location: Optional[str] = Field(None, max_length=255)
     website: Optional[str] = Field(None, max_length=500)
     avatar_url: Optional[str] = Field(None, max_length=500)
-    
-    @validator('username')
+
+    @validator("username")
     def validate_username(cls, v):
-        if v and not re.match(r'^[a-zA-Z0-9_-]+$', v):
-            raise ValueError('Username can only contain letters, numbers, underscores, and hyphens')
+        if v and not re.match(r"^[a-zA-Z0-9_-]+$", v):
+            raise ValueError(
+                "Username can only contain letters, numbers, underscores, and hyphens"
+            )
         return v
-    
-    @validator('password')
+
+    @validator("password")
     def validate_password_strength(cls, v):
         if v:
-            if not re.search(r'[A-Z]', v):
-                raise ValueError('Password must contain at least one uppercase letter')
-            if not re.search(r'[a-z]', v):
-                raise ValueError('Password must contain at least one lowercase letter')
-            if not re.search(r'\d', v):
-                raise ValueError('Password must contain at least one digit')
+            if not re.search(r"[A-Z]", v):
+                raise ValueError("Password must contain at least one uppercase letter")
+            if not re.search(r"[a-z]", v):
+                raise ValueError("Password must contain at least one lowercase letter")
+            if not re.search(r"\d", v):
+                raise ValueError("Password must contain at least one digit")
         return v
 
 
@@ -86,7 +92,7 @@ class UserResponse(UserBase):
     avatar_url: Optional[str] = None
     roles: Optional[List[str]] = []
     permissions: Optional[List[str]] = []
-    
+
     class Config:
         from_attributes = True
 
@@ -124,21 +130,23 @@ class UserLogin(BaseModel):
 
 class UserPasswordChange(BaseModel):
     current_password: str = Field(..., description="Current password")
-    new_password: str = Field(..., min_length=8, max_length=128, description="New password")
+    new_password: str = Field(
+        ..., min_length=8, max_length=128, description="New password"
+    )
     confirm_password: str = Field(..., description="Confirm new password")
-    
-    @validator('new_password')
+
+    @validator("new_password")
     def validate_password_strength(cls, v):
-        if not re.search(r'[A-Z]', v):
-            raise ValueError('Password must contain at least one uppercase letter')
-        if not re.search(r'[a-z]', v):
-            raise ValueError('Password must contain at least one lowercase letter')
-        if not re.search(r'\d', v):
-            raise ValueError('Password must contain at least one digit')
+        if not re.search(r"[A-Z]", v):
+            raise ValueError("Password must contain at least one uppercase letter")
+        if not re.search(r"[a-z]", v):
+            raise ValueError("Password must contain at least one lowercase letter")
+        if not re.search(r"\d", v):
+            raise ValueError("Password must contain at least one digit")
         return v
-    
-    @validator('confirm_password')
+
+    @validator("confirm_password")
     def passwords_match(cls, v, values):
-        if 'new_password' in values and v != values['new_password']:
-            raise ValueError('Passwords do not match')
+        if "new_password" in values and v != values["new_password"]:
+            raise ValueError("Passwords do not match")
         return v

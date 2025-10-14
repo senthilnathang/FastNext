@@ -407,7 +407,7 @@ export function useProjects() {
 
 export function useCreateProject() {
   const queryClient = useQueryClient()
-  
+
   return useMutation({
     mutationFn: projectsApi.create,
     onSuccess: () => {
@@ -438,7 +438,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const root = window.document.documentElement
     root.classList.remove('light', 'dark')
-    
+
     if (theme === 'system') {
       const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
       root.classList.add(systemTheme)
@@ -483,7 +483,7 @@ describe('Button', () => {
   it('calls onClick when clicked', () => {
     const handleClick = jest.fn()
     render(<Button onClick={handleClick}>Click me</Button>)
-    
+
     fireEvent.click(screen.getByRole('button'))
     expect(handleClick).toHaveBeenCalledTimes(1)
   })

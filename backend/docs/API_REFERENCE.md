@@ -392,7 +392,7 @@ class FastNextClient:
         self.base_url = base_url
         self.token = token
         self.client = httpx.AsyncClient()
-    
+
     async def login(self, email: str, password: str):
         response = await self.client.post(
             f"{self.base_url}/api/v1/auth/login/access-token",
@@ -401,7 +401,7 @@ class FastNextClient:
         data = response.json()
         self.token = data["access_token"]
         return data
-    
+
     async def get_users(self, page: int = 1, size: int = 20):
         headers = {"Authorization": f"Bearer {self.token}"}
         response = await self.client.get(
@@ -417,12 +417,12 @@ class FastNextClient:
 class FastNextAPI {
   private baseUrl: string;
   private token?: string;
-  
+
   constructor(baseUrl: string, token?: string) {
     this.baseUrl = baseUrl;
     this.token = token;
   }
-  
+
   async login(email: string, password: string) {
     const response = await fetch(`${this.baseUrl}/api/v1/auth/login/access-token`, {
       method: 'POST',
@@ -433,7 +433,7 @@ class FastNextAPI {
     this.token = data.access_token;
     return data;
   }
-  
+
   async getUsers(page = 1, size = 20) {
     const response = await fetch(
       `${this.baseUrl}/api/v1/users/?page=${page}&size=${size}`,

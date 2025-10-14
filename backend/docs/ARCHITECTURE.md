@@ -239,7 +239,7 @@ class UserRepository(ABC):
     @abstractmethod
     async def get_by_id(self, user_id: int) -> Optional[User]:
         pass
-    
+
     @abstractmethod
     async def create(self, user: User) -> User:
         pass
@@ -257,7 +257,7 @@ class SQLAlchemyUserRepository(UserRepository):
 class CreateUserUseCase:
     def __init__(self, user_repo: UserRepository):
         self.user_repo = user_repo
-    
+
     async def execute(self, command: CreateUserCommand) -> User:
         # Business logic
         pass
@@ -339,11 +339,11 @@ Client Request → JWT Token → Token Validation → User Context → Route Han
 # Modern declarative mapping
 class User(Base):
     __tablename__ = "users"
-    
+
     id: Mapped[int] = mapped_column(primary_key=True)
     email: Mapped[str] = mapped_column(String(255), unique=True)
     created_at: Mapped[datetime] = mapped_column(default=func.now())
-    
+
     # Relationships with proper typing
     roles: Mapped[List["Role"]] = relationship(back_populates="users")
 ```

@@ -11,7 +11,7 @@ src/app/settings/
 ├── data-import/
 │   └── page.tsx           # Dynamic import page
 ├── data-export/
-│   └── page.tsx           # Dynamic export page  
+│   └── page.tsx           # Dynamic export page
 └── layout.tsx             # Updated settings navigation
 ```
 
@@ -27,7 +27,7 @@ src/app/settings/
 
 #### Key Components
 - **Table Selection Dropdown**: Choose from all available database tables
-- **Schema Visualization**: Display table structure, columns, and data types  
+- **Schema Visualization**: Display table structure, columns, and data types
 - **Permission Display**: Show user's import permissions and limits
 - **Integrated DataImport Component**: Full import functionality with field mapping
 - **Real-time Validation**: Column mapping based on actual table schema
@@ -68,7 +68,7 @@ const fetchTablePermissions = async (tableName: string) => {
 ```typescript
 const importColumns = useMemo(() => {
   if (!tableSchema) return [];
-  
+
   return tableSchema.columns.map(col => ({
     key: col.name,
     label: col.name,
@@ -106,17 +106,17 @@ const [rowLimit, setRowLimit] = useState<number>(1000);
 
 const filteredData = useMemo(() => {
   if (!tableData) return [];
-  
+
   let filtered = tableData.rows;
-  
+
   if (searchTerm) {
-    filtered = filtered.filter(row => 
-      Object.values(row).some(value => 
+    filtered = filtered.filter(row =>
+      Object.values(row).some(value =>
         String(value).toLowerCase().includes(searchTerm.toLowerCase())
       )
     );
   }
-  
+
   return filtered.slice(0, rowLimit);
 }, [tableData, searchTerm, rowLimit]);
 ```
@@ -125,7 +125,7 @@ const filteredData = useMemo(() => {
 ```typescript
 const exportColumns = useMemo(() => {
   if (!tableSchema) return [];
-  
+
   const allColumns = tableSchema.columns.map(col => ({
     key: col.name,
     label: col.name,
@@ -136,7 +136,7 @@ const exportColumns = useMemo(() => {
 
   // Filter by allowed columns if permissions specify them
   if (tablePermissions?.export_permission.allowed_columns?.length) {
-    return allColumns.filter(col => 
+    return allColumns.filter(col =>
       tablePermissions.export_permission.allowed_columns.includes(col.key)
     );
   }
@@ -224,7 +224,7 @@ const settingsNav = [
   <Alert>
     <AlertCircle className="h-4 w-4" />
     <AlertDescription>
-      You don't have permission to import data into the "{selectedTable}" table. 
+      You don't have permission to import data into the "{selectedTable}" table.
       Please contact your administrator to request import permissions.
     </AlertDescription>
   </Alert>

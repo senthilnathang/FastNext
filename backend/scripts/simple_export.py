@@ -8,9 +8,10 @@ import json
 import os
 from pathlib import Path
 
+
 def create_basic_openapi_spec():
     """Create a basic OpenAPI specification for FastNext Framework"""
-    
+
     return {
         "openapi": "3.0.2",
         "info": {
@@ -19,22 +20,16 @@ def create_basic_openapi_spec():
             "version": "1.0.0",
             "contact": {
                 "name": "FastNext Framework",
-                "url": "https://github.com/your-username/FastNext"
+                "url": "https://github.com/your-username/FastNext",
             },
             "license": {
                 "name": "MIT License",
-                "url": "https://opensource.org/licenses/MIT"
-            }
+                "url": "https://opensource.org/licenses/MIT",
+            },
         },
         "servers": [
-            {
-                "url": "http://localhost:8000",
-                "description": "Development server"
-            },
-            {
-                "url": "https://api.yourdomain.com",
-                "description": "Production server"
-            }
+            {"url": "http://localhost:8000", "description": "Development server"},
+            {"url": "https://api.yourdomain.com", "description": "Production server"},
         ],
         "components": {
             "securitySchemes": {
@@ -42,7 +37,7 @@ def create_basic_openapi_spec():
                     "type": "http",
                     "scheme": "bearer",
                     "bearerFormat": "JWT",
-                    "description": "JWT access token obtained from /auth/login endpoint"
+                    "description": "JWT access token obtained from /auth/login endpoint",
                 }
             },
             "schemas": {
@@ -51,57 +46,71 @@ def create_basic_openapi_spec():
                     "properties": {
                         "id": {"type": "integer", "example": 1},
                         "username": {"type": "string", "example": "johndoe"},
-                        "email": {"type": "string", "format": "email", "example": "john@example.com"},
+                        "email": {
+                            "type": "string",
+                            "format": "email",
+                            "example": "john@example.com",
+                        },
                         "full_name": {"type": "string", "example": "John Doe"},
                         "is_active": {"type": "boolean", "example": True},
                         "created_at": {"type": "string", "format": "date-time"},
-                        "updated_at": {"type": "string", "format": "date-time"}
-                    }
+                        "updated_at": {"type": "string", "format": "date-time"},
+                    },
                 },
                 "UserCreate": {
                     "type": "object",
                     "required": ["username", "email", "password"],
                     "properties": {
                         "username": {"type": "string", "example": "johndoe"},
-                        "email": {"type": "string", "format": "email", "example": "john@example.com"},
+                        "email": {
+                            "type": "string",
+                            "format": "email",
+                            "example": "john@example.com",
+                        },
                         "password": {"type": "string", "example": "SecurePassword123!"},
-                        "full_name": {"type": "string", "example": "John Doe"}
-                    }
+                        "full_name": {"type": "string", "example": "John Doe"},
+                    },
                 },
                 "LoginRequest": {
                     "type": "object",
                     "required": ["username", "password"],
                     "properties": {
                         "username": {"type": "string", "example": "johndoe"},
-                        "password": {"type": "string", "example": "SecurePassword123!"}
-                    }
+                        "password": {"type": "string", "example": "SecurePassword123!"},
+                    },
                 },
                 "Token": {
                     "type": "object",
                     "properties": {
-                        "access_token": {"type": "string", "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."},
+                        "access_token": {
+                            "type": "string",
+                            "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+                        },
                         "token_type": {"type": "string", "example": "bearer"},
-                        "expires_in": {"type": "integer", "example": 3600}
-                    }
+                        "expires_in": {"type": "integer", "example": 3600},
+                    },
                 },
                 "Project": {
                     "type": "object",
                     "properties": {
                         "id": {"type": "integer", "example": 1},
                         "name": {"type": "string", "example": "My Project"},
-                        "description": {"type": "string", "example": "Project description"},
+                        "description": {
+                            "type": "string",
+                            "example": "Project description",
+                        },
                         "owner_id": {"type": "integer", "example": 1},
                         "created_at": {"type": "string", "format": "date-time"},
-                        "updated_at": {"type": "string", "format": "date-time"}
-                    }
+                        "updated_at": {"type": "string", "format": "date-time"},
+                    },
                 },
                 "Error": {
                     "type": "object",
                     "properties": {
                         "detail": {"type": "string", "example": "Error message"}
-                    }
-                }
-            }
+                    },
+                },
+            },
         },
         "security": [{"BearerAuth": []}],
         "paths": {
@@ -117,7 +126,7 @@ def create_basic_openapi_spec():
                             "application/json": {
                                 "schema": {"$ref": "#/components/schemas/LoginRequest"}
                             }
-                        }
+                        },
                     },
                     "responses": {
                         "200": {
@@ -126,7 +135,7 @@ def create_basic_openapi_spec():
                                 "application/json": {
                                     "schema": {"$ref": "#/components/schemas/Token"}
                                 }
-                            }
+                            },
                         },
                         "401": {
                             "description": "Invalid credentials",
@@ -134,9 +143,9 @@ def create_basic_openapi_spec():
                                 "application/json": {
                                     "schema": {"$ref": "#/components/schemas/Error"}
                                 }
-                            }
-                        }
-                    }
+                            },
+                        },
+                    },
                 }
             },
             "/api/v1/auth/register": {
@@ -151,7 +160,7 @@ def create_basic_openapi_spec():
                             "application/json": {
                                 "schema": {"$ref": "#/components/schemas/UserCreate"}
                             }
-                        }
+                        },
                     },
                     "responses": {
                         "201": {
@@ -160,7 +169,7 @@ def create_basic_openapi_spec():
                                 "application/json": {
                                     "schema": {"$ref": "#/components/schemas/User"}
                                 }
-                            }
+                            },
                         },
                         "400": {
                             "description": "Validation error",
@@ -168,9 +177,9 @@ def create_basic_openapi_spec():
                                 "application/json": {
                                     "schema": {"$ref": "#/components/schemas/Error"}
                                 }
-                            }
-                        }
-                    }
+                            },
+                        },
+                    },
                 }
             },
             "/api/v1/auth/me": {
@@ -185,7 +194,7 @@ def create_basic_openapi_spec():
                                 "application/json": {
                                     "schema": {"$ref": "#/components/schemas/User"}
                                 }
-                            }
+                            },
                         },
                         "401": {
                             "description": "Not authenticated",
@@ -193,9 +202,9 @@ def create_basic_openapi_spec():
                                 "application/json": {
                                     "schema": {"$ref": "#/components/schemas/Error"}
                                 }
-                            }
-                        }
-                    }
+                            },
+                        },
+                    },
                 }
             },
             "/api/v1/users": {
@@ -208,14 +217,14 @@ def create_basic_openapi_spec():
                             "name": "skip",
                             "in": "query",
                             "description": "Number of users to skip",
-                            "schema": {"type": "integer", "default": 0}
+                            "schema": {"type": "integer", "default": 0},
                         },
                         {
                             "name": "limit",
-                            "in": "query", 
+                            "in": "query",
                             "description": "Maximum number of users to return",
-                            "schema": {"type": "integer", "default": 100}
-                        }
+                            "schema": {"type": "integer", "default": 100},
+                        },
                     ],
                     "responses": {
                         "200": {
@@ -224,12 +233,12 @@ def create_basic_openapi_spec():
                                 "application/json": {
                                     "schema": {
                                         "type": "array",
-                                        "items": {"$ref": "#/components/schemas/User"}
+                                        "items": {"$ref": "#/components/schemas/User"},
                                     }
                                 }
-                            }
+                            },
                         }
-                    }
+                    },
                 },
                 "post": {
                     "tags": ["Users"],
@@ -241,7 +250,7 @@ def create_basic_openapi_spec():
                             "application/json": {
                                 "schema": {"$ref": "#/components/schemas/UserCreate"}
                             }
-                        }
+                        },
                     },
                     "responses": {
                         "201": {
@@ -250,10 +259,10 @@ def create_basic_openapi_spec():
                                 "application/json": {
                                     "schema": {"$ref": "#/components/schemas/User"}
                                 }
-                            }
+                            },
                         }
-                    }
-                }
+                    },
+                },
             },
             "/api/v1/users/{user_id}": {
                 "get": {
@@ -266,7 +275,7 @@ def create_basic_openapi_spec():
                             "in": "path",
                             "required": True,
                             "description": "User ID",
-                            "schema": {"type": "integer"}
+                            "schema": {"type": "integer"},
                         }
                     ],
                     "responses": {
@@ -276,12 +285,10 @@ def create_basic_openapi_spec():
                                 "application/json": {
                                     "schema": {"$ref": "#/components/schemas/User"}
                                 }
-                            }
+                            },
                         },
-                        "404": {
-                            "description": "User not found"
-                        }
-                    }
+                        "404": {"description": "User not found"},
+                    },
                 },
                 "put": {
                     "tags": ["Users"],
@@ -293,7 +300,7 @@ def create_basic_openapi_spec():
                             "in": "path",
                             "required": True,
                             "description": "User ID",
-                            "schema": {"type": "integer"}
+                            "schema": {"type": "integer"},
                         }
                     ],
                     "requestBody": {
@@ -302,7 +309,7 @@ def create_basic_openapi_spec():
                             "application/json": {
                                 "schema": {"$ref": "#/components/schemas/UserCreate"}
                             }
-                        }
+                        },
                     },
                     "responses": {
                         "200": {
@@ -311,9 +318,9 @@ def create_basic_openapi_spec():
                                 "application/json": {
                                     "schema": {"$ref": "#/components/schemas/User"}
                                 }
-                            }
+                            },
                         }
-                    }
+                    },
                 },
                 "delete": {
                     "tags": ["Users"],
@@ -325,18 +332,14 @@ def create_basic_openapi_spec():
                             "in": "path",
                             "required": True,
                             "description": "User ID",
-                            "schema": {"type": "integer"}
+                            "schema": {"type": "integer"},
                         }
                     ],
                     "responses": {
-                        "204": {
-                            "description": "User deleted successfully"
-                        },
-                        "404": {
-                            "description": "User not found"
-                        }
-                    }
-                }
+                        "204": {"description": "User deleted successfully"},
+                        "404": {"description": "User not found"},
+                    },
+                },
             },
             "/api/v1/projects": {
                 "get": {
@@ -350,12 +353,14 @@ def create_basic_openapi_spec():
                                 "application/json": {
                                     "schema": {
                                         "type": "array",
-                                        "items": {"$ref": "#/components/schemas/Project"}
+                                        "items": {
+                                            "$ref": "#/components/schemas/Project"
+                                        },
                                     }
                                 }
-                            }
+                            },
                         }
-                    }
+                    },
                 },
                 "post": {
                     "tags": ["Projects"],
@@ -369,12 +374,18 @@ def create_basic_openapi_spec():
                                     "type": "object",
                                     "required": ["name"],
                                     "properties": {
-                                        "name": {"type": "string", "example": "My Project"},
-                                        "description": {"type": "string", "example": "Project description"}
-                                    }
+                                        "name": {
+                                            "type": "string",
+                                            "example": "My Project",
+                                        },
+                                        "description": {
+                                            "type": "string",
+                                            "example": "Project description",
+                                        },
+                                    },
                                 }
                             }
-                        }
+                        },
                     },
                     "responses": {
                         "201": {
@@ -383,10 +394,10 @@ def create_basic_openapi_spec():
                                 "application/json": {
                                     "schema": {"$ref": "#/components/schemas/Project"}
                                 }
-                            }
+                            },
                         }
-                    }
-                }
+                    },
+                },
             },
             "/health": {
                 "get": {
@@ -402,33 +413,42 @@ def create_basic_openapi_spec():
                                     "schema": {
                                         "type": "object",
                                         "properties": {
-                                            "status": {"type": "string", "example": "healthy"},
-                                            "timestamp": {"type": "string", "format": "date-time"}
-                                        }
+                                            "status": {
+                                                "type": "string",
+                                                "example": "healthy",
+                                            },
+                                            "timestamp": {
+                                                "type": "string",
+                                                "format": "date-time",
+                                            },
+                                        },
                                     }
                                 }
-                            }
+                            },
                         }
-                    }
+                    },
                 }
-            }
+            },
         },
         "tags": [
-            {"name": "Authentication", "description": "🔐 User authentication and session management"},
+            {
+                "name": "Authentication",
+                "description": "🔐 User authentication and session management",
+            },
             {"name": "Users", "description": "👥 User management operations"},
             {"name": "Projects", "description": "📂 Project management"},
-            {"name": "Health", "description": "🏥 System health checks"}
-        ]
+            {"name": "Health", "description": "🏥 System health checks"},
+        ],
     }
 
 
 def export_yaml(data, output_file):
     """Export data to YAML format using basic string formatting"""
-    
+
     def dict_to_yaml(obj, indent=0):
         yaml_str = ""
         spaces = "  " * indent
-        
+
         if isinstance(obj, dict):
             for key, value in obj.items():
                 if isinstance(value, (dict, list)):
@@ -441,7 +461,7 @@ def export_yaml(data, output_file):
                         for line in value.split("\n"):
                             yaml_str += f"{spaces}  {line}\n"
                     else:
-                        yaml_str += f"{spaces}{key}: \"{value}\"\n"
+                        yaml_str += f'{spaces}{key}: "{value}"\n'
                 elif isinstance(value, bool):
                     yaml_str += f"{spaces}{key}: {str(value).lower()}\n"
                 else:
@@ -453,145 +473,140 @@ def export_yaml(data, output_file):
                     yaml_str += dict_to_yaml(item, indent + 1)
                 else:
                     yaml_str += f"{spaces}- {item}\n"
-        
+
         return yaml_str
-    
+
     yaml_content = dict_to_yaml(data)
-    
-    with open(output_file, 'w', encoding='utf-8') as f:
+
+    with open(output_file, "w", encoding="utf-8") as f:
         f.write(yaml_content)
 
 
 def create_postman_collection(openapi_spec):
     """Create a Postman collection from OpenAPI spec"""
-    
+
     collection = {
         "info": {
             "name": f"{openapi_spec['info']['title']} API",
-            "description": openapi_spec['info']['description'],
-            "version": openapi_spec['info']['version'],
-            "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+            "description": openapi_spec["info"]["description"],
+            "version": openapi_spec["info"]["version"],
+            "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
         },
         "auth": {
             "type": "bearer",
-            "bearer": [
-                {
-                    "key": "token",
-                    "value": "{{access_token}}",
-                    "type": "string"
-                }
-            ]
+            "bearer": [{"key": "token", "value": "{{access_token}}", "type": "string"}],
         },
         "variable": [
-            {
-                "key": "base_url",
-                "value": "http://localhost:8000",
-                "type": "string"
-            },
-            {
-                "key": "access_token",
-                "value": "",
-                "type": "string"
-            }
+            {"key": "base_url", "value": "http://localhost:8000", "type": "string"},
+            {"key": "access_token", "value": "", "type": "string"},
         ],
-        "item": []
+        "item": [],
     }
-    
+
     # Group endpoints by tags
     tag_groups = {}
-    
-    for path, methods in openapi_spec.get('paths', {}).items():
+
+    for path, methods in openapi_spec.get("paths", {}).items():
         for method, details in methods.items():
-            if method.lower() in ['get', 'post', 'put', 'delete', 'patch']:
-                tags = details.get('tags', ['Other'])
-                tag = tags[0] if tags else 'Other'
-                
+            if method.lower() in ["get", "post", "put", "delete", "patch"]:
+                tags = details.get("tags", ["Other"])
+                tag = tags[0] if tags else "Other"
+
                 if tag not in tag_groups:
-                    tag_groups[tag] = {
-                        "name": tag,
-                        "item": []
-                    }
-                
+                    tag_groups[tag] = {"name": tag, "item": []}
+
                 # Create request
                 request = {
-                    "name": details.get('summary', f"{method.upper()} {path}"),
+                    "name": details.get("summary", f"{method.upper()} {path}"),
                     "request": {
                         "method": method.upper(),
                         "header": [
                             {
                                 "key": "Content-Type",
                                 "value": "application/json",
-                                "type": "text"
+                                "type": "text",
                             }
                         ],
                         "url": {
                             "raw": "{{base_url}}" + path,
                             "host": ["{{base_url}}"],
-                            "path": path.strip('/').split('/') if path.strip('/') else []
+                            "path": (
+                                path.strip("/").split("/") if path.strip("/") else []
+                            ),
                         },
-                        "description": details.get('description', '')
-                    }
+                        "description": details.get("description", ""),
+                    },
                 }
-                
+
                 # Add auth if needed (skip for login/register)
-                if 'security' not in details and path not in ['/api/v1/auth/login', '/api/v1/auth/register', '/health']:
-                    request['request']['auth'] = {
+                if "security" not in details and path not in [
+                    "/api/v1/auth/login",
+                    "/api/v1/auth/register",
+                    "/health",
+                ]:
+                    request["request"]["auth"] = {
                         "type": "bearer",
                         "bearer": [
                             {
                                 "key": "token",
                                 "value": "{{access_token}}",
-                                "type": "string"
+                                "type": "string",
                             }
-                        ]
+                        ],
                     }
-                
+
                 # Add request body for POST/PUT/PATCH
-                if method.lower() in ['post', 'put', 'patch'] and 'requestBody' in details:
-                    content = details['requestBody'].get('content', {})
-                    if 'application/json' in content:
-                        schema_ref = content['application/json'].get('schema', {})
-                        if '$ref' in schema_ref:
-                            schema_name = schema_ref['$ref'].split('/')[-1]
-                            if schema_name == 'LoginRequest':
-                                example = {"username": "your_username", "password": "your_password"}
-                            elif schema_name == 'UserCreate':
+                if (
+                    method.lower() in ["post", "put", "patch"]
+                    and "requestBody" in details
+                ):
+                    content = details["requestBody"].get("content", {})
+                    if "application/json" in content:
+                        schema_ref = content["application/json"].get("schema", {})
+                        if "$ref" in schema_ref:
+                            schema_name = schema_ref["$ref"].split("/")[-1]
+                            if schema_name == "LoginRequest":
+                                example = {
+                                    "username": "your_username",
+                                    "password": "your_password",
+                                }
+                            elif schema_name == "UserCreate":
                                 example = {
                                     "username": "johndoe",
                                     "email": "john@example.com",
                                     "password": "SecurePassword123!",
-                                    "full_name": "John Doe"
+                                    "full_name": "John Doe",
                                 }
                             else:
                                 example = {"key": "value"}
                         else:
                             example = {"key": "value"}
-                        
-                        request['request']['body'] = {
+
+                        request["request"]["body"] = {
                             "mode": "raw",
-                            "raw": json.dumps(example, indent=2)
+                            "raw": json.dumps(example, indent=2),
                         }
-                
+
                 # Add query parameters
-                parameters = details.get('parameters', [])
-                query_params = [p for p in parameters if p.get('in') == 'query']
+                parameters = details.get("parameters", [])
+                query_params = [p for p in parameters if p.get("in") == "query"]
                 if query_params:
-                    request['request']['url']['query'] = [
+                    request["request"]["url"]["query"] = [
                         {
-                            "key": param['name'],
-                            "value": param.get('schema', {}).get('default', ''),
-                            "description": param.get('description', ''),
-                            "disabled": not param.get('required', False)
+                            "key": param["name"],
+                            "value": param.get("schema", {}).get("default", ""),
+                            "description": param.get("description", ""),
+                            "disabled": not param.get("required", False),
                         }
                         for param in query_params
                     ]
-                
-                tag_groups[tag]['item'].append(request)
-    
-    collection['item'] = list(tag_groups.values())
-    
+
+                tag_groups[tag]["item"].append(request)
+
+    collection["item"] = list(tag_groups.values())
+
     # Add pre-request script for auto-token handling
-    collection['event'] = [
+    collection["event"] = [
         {
             "listen": "test",
             "script": {
@@ -604,44 +619,44 @@ def create_postman_collection(openapi_spec):
                     "        pm.collectionVariables.set('access_token', responseJson.access_token);",
                     "        console.log('✅ Access token saved automatically');",
                     "    }",
-                    "}"
-                ]
-            }
+                    "}",
+                ],
+            },
         }
     ]
-    
+
     return collection
 
 
 def main():
     """Main export function"""
     print("🚀 Exporting FastNext Framework API Documentation...")
-    
+
     # Create exports directory
     exports_dir = Path("exports")
     exports_dir.mkdir(exist_ok=True)
-    
+
     # Generate OpenAPI spec
     openapi_spec = create_basic_openapi_spec()
-    
+
     # Export JSON
     json_file = exports_dir / "openapi.json"
-    with open(json_file, 'w', encoding='utf-8') as f:
+    with open(json_file, "w", encoding="utf-8") as f:
         json.dump(openapi_spec, f, indent=2, ensure_ascii=False)
     print(f"✅ OpenAPI JSON exported to: {json_file}")
-    
+
     # Export YAML
     yaml_file = exports_dir / "openapi.yaml"
     export_yaml(openapi_spec, yaml_file)
     print(f"✅ OpenAPI YAML exported to: {yaml_file}")
-    
+
     # Create Postman collection
     postman_collection = create_postman_collection(openapi_spec)
     postman_file = exports_dir / "fastnext-postman-collection.json"
-    with open(postman_file, 'w', encoding='utf-8') as f:
+    with open(postman_file, "w", encoding="utf-8") as f:
         json.dump(postman_collection, f, indent=2, ensure_ascii=False)
     print(f"✅ Postman collection exported to: {postman_file}")
-    
+
     print("\n✅ Export completed successfully!")
     print(f"📁 Files available in: {exports_dir.absolute()}")
     print("\n📋 Next steps:")

@@ -1,7 +1,16 @@
-from sqlalchemy import Column, Integer, String, Text, DateTime, ForeignKey, JSON, Boolean
-from sqlalchemy.sql import func
-from sqlalchemy.orm import relationship
 from app.db.base import Base
+from sqlalchemy import (
+    JSON,
+    Boolean,
+    Column,
+    DateTime,
+    ForeignKey,
+    Integer,
+    String,
+    Text,
+)
+from sqlalchemy.orm import relationship
+from sqlalchemy.sql import func
 
 
 class Page(Base):
@@ -19,4 +28,6 @@ class Page(Base):
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
     project = relationship("Project", back_populates="pages")
-    components = relationship("ComponentInstance", back_populates="page", cascade="all, delete-orphan")
+    components = relationship(
+        "ComponentInstance", back_populates="page", cascade="all, delete-orphan"
+    )

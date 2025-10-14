@@ -50,21 +50,21 @@ export const EmailEnvSchema = z.object({
   EMAIL_PROVIDER: z.enum(['sendgrid', 'smtp', 'mailgun', 'ses']).default('smtp'),
   EMAIL_FROM: z.string().email('Invalid email address'),
   EMAIL_FROM_NAME: z.string().default('FastNext'),
-  
+
   // SMTP settings
   SMTP_HOST: z.string().optional(),
   SMTP_PORT: z.string().regex(/^\d+$/).transform(Number).pipe(z.number().int().positive()).optional(),
   SMTP_SECURE: z.string().transform(val => val === 'true').pipe(z.boolean()).optional(),
   SMTP_USER: z.string().optional(),
   SMTP_PASSWORD: z.string().optional(),
-  
+
   // SendGrid settings
   SENDGRID_API_KEY: z.string().optional(),
-  
+
   // Mailgun settings
   MAILGUN_API_KEY: z.string().optional(),
   MAILGUN_DOMAIN: z.string().optional(),
-  
+
   // AWS SES settings
   AWS_SES_REGION: z.string().optional(),
   AWS_SES_ACCESS_KEY_ID: z.string().optional(),
@@ -75,24 +75,24 @@ export const EmailEnvSchema = z.object({
 export const StorageEnvSchema = z.object({
   STORAGE_PROVIDER: z.enum(['local', 's3', 'gcs', 'azure']).default('local'),
   STORAGE_BASE_PATH: z.string().default('./uploads'),
-  
+
   // S3 settings
   AWS_S3_BUCKET: z.string().optional(),
   AWS_S3_REGION: z.string().optional(),
   AWS_S3_ACCESS_KEY_ID: z.string().optional(),
   AWS_S3_SECRET_ACCESS_KEY: z.string().optional(),
   AWS_S3_ENDPOINT: z.string().url().optional(),
-  
+
   // Google Cloud Storage settings
   GCS_BUCKET: z.string().optional(),
   GCS_PROJECT_ID: z.string().optional(),
   GCS_KEY_FILE: z.string().optional(),
-  
+
   // Azure Blob Storage settings
   AZURE_STORAGE_ACCOUNT: z.string().optional(),
   AZURE_STORAGE_KEY: z.string().optional(),
   AZURE_STORAGE_CONTAINER: z.string().optional(),
-  
+
   // File upload limits
   MAX_FILE_SIZE: z.string().regex(/^\d+$/).transform(Number).pipe(z.number().int().positive()).default('10485760'), // 10MB
   ALLOWED_FILE_TYPES: z.string().default('image/*,application/pdf,.doc,.docx,.xls,.xlsx,.csv')
@@ -105,20 +105,20 @@ export const IntegrationsEnvSchema = z.object({
   SLACK_SIGNING_SECRET: z.string().optional(),
   SLACK_CLIENT_ID: z.string().optional(),
   SLACK_CLIENT_SECRET: z.string().optional(),
-  
+
   // GitHub integration
   GITHUB_CLIENT_ID: z.string().optional(),
   GITHUB_CLIENT_SECRET: z.string().optional(),
   GITHUB_WEBHOOK_SECRET: z.string().optional(),
-  
+
   // Google OAuth
   GOOGLE_CLIENT_ID: z.string().optional(),
   GOOGLE_CLIENT_SECRET: z.string().optional(),
-  
+
   // Microsoft OAuth
   MICROSOFT_CLIENT_ID: z.string().optional(),
   MICROSOFT_CLIENT_SECRET: z.string().optional(),
-  
+
   // Discord integration
   DISCORD_CLIENT_ID: z.string().optional(),
   DISCORD_CLIENT_SECRET: z.string().optional(),
@@ -131,16 +131,16 @@ export const SecurityEnvSchema = z.object({
   RATE_LIMIT_WINDOW_MS: z.string().regex(/^\d+$/).transform(Number).pipe(z.number().int().positive()).default('900000'), // 15 minutes
   RATE_LIMIT_MAX_REQUESTS: z.string().regex(/^\d+$/).transform(Number).pipe(z.number().int().positive()).default('100'),
   RATE_LIMIT_SKIP_SUCCESSFUL: z.string().transform(val => val === 'true').pipe(z.boolean()).default('false'),
-  
+
   // HTTPS settings
   HTTPS_ENABLED: z.string().transform(val => val === 'true').pipe(z.boolean()).default('false'),
   SSL_CERT_PATH: z.string().optional(),
   SSL_KEY_PATH: z.string().optional(),
-  
+
   // Security headers
   HELMET_ENABLED: z.string().transform(val => val === 'true').pipe(z.boolean()).default('true'),
   CSP_ENABLED: z.string().transform(val => val === 'true').pipe(z.boolean()).default('true'),
-  
+
   // API keys and secrets
   API_KEY_LENGTH: z.string().regex(/^\d+$/).transform(Number).pipe(z.number().int().min(32).max(128)).default('64'),
   WEBHOOK_SECRET_LENGTH: z.string().regex(/^\d+$/).transform(Number).pipe(z.number().int().min(32).max(128)).default('64')
@@ -152,15 +152,15 @@ export const MonitoringEnvSchema = z.object({
   SENTRY_DSN: z.string().url().optional(),
   SENTRY_ENVIRONMENT: z.string().optional(),
   SENTRY_RELEASE: z.string().optional(),
-  
+
   // Metrics collection
   METRICS_ENABLED: z.string().transform(val => val === 'true').pipe(z.boolean()).default('false'),
   METRICS_PORT: z.string().regex(/^\d+$/).transform(Number).pipe(z.number().int().positive()).optional(),
-  
+
   // Health check settings
   HEALTH_CHECK_INTERVAL_MS: z.string().regex(/^\d+$/).transform(Number).pipe(z.number().int().positive()).default('30000'),
   HEALTH_CHECK_TIMEOUT_MS: z.string().regex(/^\d+$/).transform(Number).pipe(z.number().int().positive()).default('5000'),
-  
+
   // Logging
   LOG_FORMAT: z.enum(['json', 'text']).default('json'),
   LOG_FILE_PATH: z.string().optional(),

@@ -4,14 +4,13 @@ Automatically invalidates cache when models are created, updated, or deleted
 """
 
 import logging
-from typing import Any, Set, Optional, Dict, List
 from datetime import datetime
+from typing import Any, Dict, List, Optional, Set
 
+from app.core.cache_optimization import invalidation_strategy
 from sqlalchemy import event
 from sqlalchemy.orm import Session
 from sqlalchemy.orm.mapper import Mapper
-
-from app.core.cache_optimization import invalidation_strategy
 
 logger = logging.getLogger(__name__)
 
@@ -39,7 +38,7 @@ class CacheInvalidationHooks:
         on_create: bool = True,
         on_update: bool = True,
         on_delete: bool = True,
-        related_tables: Optional[List[str]] = None
+        related_tables: Optional[List[str]] = None,
     ):
         """
         Register cache invalidation rule for a model
@@ -55,12 +54,12 @@ class CacheInvalidationHooks:
         model_name = model_class.__tablename__
 
         self.model_rules[model_name] = {
-            'model_class': model_class,
-            'tags': tags,
-            'on_create': on_create,
-            'on_update': on_update,
-            'on_delete': on_delete,
-            'related_tables': related_tables or []
+            "model_class": model_class,
+            "tags": tags,
+            "on_create": on_create,
+            "on_update": on_update,
+            "on_delete": on_delete,
+            "related_tables": related_tables or [],
         }
 
         logger.info(f"Registered cache invalidation rule for model: {model_name}")
@@ -69,7 +68,7 @@ class CacheInvalidationHooks:
         self,
         model_name: str,
         operation: str,  # 'create', 'update', 'delete'
-        instance: Optional[Any] = None
+        instance: Optional[Any] = None,
     ):
         """Invalidate cache for a specific model operation"""
         if model_name not in self.model_rules:
@@ -79,26 +78,26 @@ class CacheInvalidationHooks:
 
         # Check if invalidation is enabled for this operation
         should_invalidate = (
-            (operation == 'create' and rule['on_create']) or
-            (operation == 'update' and rule['on_update']) or
-            (operation == 'delete' and rule['on_delete'])
+            (operation == "create" and rule["on_create"])
+            or (operation == "update" and rule["on_update"])
+            or (operation == "delete" and rule["on_delete"])
         )
 
         if not should_invalidate:
             return
 
         # Collect tags to invalidate
-        tags_to_invalidate = rule['tags'].copy()
+        tags_to_invalidate = rule["tags"].copy()
 
         # Add table tag
         tags_to_invalidate.add(f"table:{model_name}")
 
         # Add related table tags
-        for related_table in rule['related_tables']:
+        for related_table in rule["related_tables"]:
             tags_to_invalidate.add(f"table:{related_table}")
 
         # Instance-specific tags (e.g., user:123)
-        if instance and hasattr(instance, 'id'):
+        if instance and hasattr(instance, "id"):
             tags_to_invalidate.add(f"{model_name}:{instance.id}")
 
         # Batch mode: collect invalidations
@@ -157,29 +156,35 @@ def setup_model_invalidation_hooks(Base: Any):
     # Note: SQLAlchemy event handlers must be synchronous
     # We queue invalidations and process them after commit
 
-    @event.listens_for(Session, 'after_flush')
+    @event.listens_for(Session, "after_flush")
     def after_flush(session, flush_context):
         """Queue cache invalidations after flush (before commit)"""
         # Collect all changes
         for obj in session.new:
-            if hasattr(obj, '__tablename__'):
+            if hasattr(obj, "__tablename__"):
                 model_name = obj.__tablename__
                 if model_name in cache_invalidation_hooks.model_rules:
-                    cache_invalidation_hooks.pending_invalidations.add(f"table:{model_name}")
+                    cache_invalidation_hooks.pending_invalidations.add(
+                        f"table:{model_name}"
+                    )
 
         for obj in session.dirty:
-            if hasattr(obj, '__tablename__'):
+            if hasattr(obj, "__tablename__"):
                 model_name = obj.__tablename__
                 if model_name in cache_invalidation_hooks.model_rules:
-                    cache_invalidation_hooks.pending_invalidations.add(f"table:{model_name}")
+                    cache_invalidation_hooks.pending_invalidations.add(
+                        f"table:{model_name}"
+                    )
 
         for obj in session.deleted:
-            if hasattr(obj, '__tablename__'):
+            if hasattr(obj, "__tablename__"):
                 model_name = obj.__tablename__
                 if model_name in cache_invalidation_hooks.model_rules:
-                    cache_invalidation_hooks.pending_invalidations.add(f"table:{model_name}")
+                    cache_invalidation_hooks.pending_invalidations.add(
+                        f"table:{model_name}"
+                    )
 
-    @event.listens_for(Session, 'after_commit')
+    @event.listens_for(Session, "after_commit")
     def after_commit(session):
         """Process pending cache invalidations after successful commit"""
         if cache_invalidation_hooks.pending_invalidations:
@@ -204,27 +209,27 @@ def register_default_invalidation_rules():
     Should be called during application startup after models are imported
     """
     try:
-        from app.models.user import User
         from app.models.activity_log import ActivityLog
+        from app.models.user import User
 
         # User model invalidation
         cache_invalidation_hooks.register_model_invalidation_rule(
             model_class=User,
-            tags={'users', 'authentication'},
+            tags={"users", "authentication"},
             on_create=True,
             on_update=True,
             on_delete=True,
-            related_tables=['user_roles', 'sessions']
+            related_tables=["user_roles", "sessions"],
         )
 
         # Activity log invalidation
         cache_invalidation_hooks.register_model_invalidation_rule(
             model_class=ActivityLog,
-            tags={'activity_logs', 'audit'},
+            tags={"activity_logs", "audit"},
             on_create=True,
             on_update=False,  # Activity logs typically don't update
             on_delete=True,
-            related_tables=[]
+            related_tables=[],
         )
 
         logger.info("✅ Default cache invalidation rules registered")
@@ -234,6 +239,7 @@ def register_default_invalidation_rules():
 
 
 # Decorators for manual cache invalidation
+
 
 def invalidate_cache(*tags: str):
     """
@@ -245,6 +251,7 @@ def invalidate_cache(*tags: str):
             # ... create user
             return user
     """
+
     def decorator(func):
         async def async_wrapper(*args, **kwargs):
             result = await func(*args, **kwargs)
@@ -269,6 +276,7 @@ def invalidate_cache(*tags: str):
             return result
 
         import asyncio
+
         if asyncio.iscoroutinefunction(func):
             return async_wrapper
         else:
@@ -291,6 +299,7 @@ def batch_invalidation(func):
                 # invalidations are batched
             # all invalidations flushed at end
     """
+
     async def async_wrapper(*args, **kwargs):
         cache_invalidation_hooks.start_batch_mode()
 
@@ -307,6 +316,7 @@ def batch_invalidation(func):
         return func(*args, **kwargs)
 
     import asyncio
+
     if asyncio.iscoroutinefunction(func):
         return async_wrapper
     else:

@@ -1,17 +1,29 @@
-from sqlalchemy import Column, Integer, String, Boolean, DateTime, Text, Float, ForeignKey, JSON, Enum
-from sqlalchemy.orm import relationship, Mapped, mapped_column
-from sqlalchemy.sql import func
-from typing import Optional, List, Dict, Any
 from datetime import datetime
+from typing import Any, Dict, List, Optional
 
-from app.models.base import TimestampMixin, AuditMixin
-from app.models.base import Base
+from app.models.base import AuditMixin, Base, TimestampMixin
 from app.models.enums import PostStatus
+from sqlalchemy import (
+    JSON,
+    Boolean,
+    Column,
+    DateTime,
+    Enum,
+    Float,
+    ForeignKey,
+    Integer,
+    String,
+    Text,
+)
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.sql import func
+
 
 class BlogPost(Base, TimestampMixin, AuditMixin):
     """
     Blog post content management model
     """
+
     __tablename__ = "blog_posts"
 
     # Primary key
@@ -26,11 +38,15 @@ class BlogPost(Base, TimestampMixin, AuditMixin):
     # Full blog post content
     content: Mapped[str] = mapped_column(Text)
     # Post publication status
-    status: Mapped[PostStatus] = mapped_column(Enum(PostStatus), default='draft')
+    status: Mapped[PostStatus] = mapped_column(Enum(PostStatus), default="draft")
     # Publication date and time
-    published_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=False)
+    published_at: Mapped[Optional[datetime]] = mapped_column(
+        DateTime(timezone=True), nullable=False
+    )
     # Number of views
-    view_count: Mapped[Optional[int]] = mapped_column(Integer, nullable=False, default=0)
+    view_count: Mapped[Optional[int]] = mapped_column(
+        Integer, nullable=False, default=0
+    )
     # Post tags as JSON array
     tags: Mapped[Optional[Dict[str, Any]]] = mapped_column(JSON, nullable=False)
     # Post author

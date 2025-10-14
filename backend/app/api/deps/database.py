@@ -2,9 +2,11 @@
 Database Dependencies
 FastAPI dependencies for database sessions
 """
+
 from typing import Generator
-from sqlalchemy.orm import Session
+
 from app.db.session import SessionLocal
+from sqlalchemy.orm import Session
 
 
 def get_db() -> Generator[Session, None, None]:

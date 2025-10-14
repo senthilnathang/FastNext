@@ -176,7 +176,7 @@ from app.core.async_optimization import task_manager, async_cached
 async def process_bulk_data(items: List[Any]):
     tasks = [process_item(item) for item in items]
     results = await task_manager.execute_concurrent(
-        tasks, 
+        tasks,
         max_concurrent=20
     )
     return results
@@ -231,19 +231,19 @@ class UserService:
     def __init__(self):
         self.l1_cache = MemoryCache(max_size=100)  # Fast, small
         self.l2_cache = RedisCache()               # Distributed, larger
-    
+
     async def get_user(self, user_id: int) -> User:
         # Try L1 cache first
         user = await self.l1_cache.get(f"user:{user_id}")
         if user:
             return user
-        
+
         # Try L2 cache
         user = await self.l2_cache.get(f"user:{user_id}")
         if user:
             await self.l1_cache.set(f"user:{user_id}", user)
             return user
-        
+
         # Fetch from database
         user = await self.fetch_user_from_db(user_id)
         await self.l1_cache.set(f"user:{user_id}", user)
@@ -258,12 +258,12 @@ class UserService:
 class UserService:
     async def update_user(self, user_id: int, data: dict) -> User:
         user = await self.db_update_user(user_id, data)
-        
+
         # Invalidate related caches
         await self.cache.delete(f"user:{user_id}")
         await self.cache.delete(f"user_permissions:{user_id}")
         await self.cache.delete_pattern(f"user_search:*")
-        
+
         return user
 ```
 
@@ -290,7 +290,7 @@ class UserResponse(BaseModel):
     email: str
     full_name: str
     created_at: datetime
-    
+
     class Config:
         # Optimize serialization
         validate_assignment = True
@@ -337,7 +337,7 @@ class CreateUserRequest(BaseModel):
     email: EmailStr
     password: str = Field(..., min_length=8, max_length=128)
     full_name: str = Field(..., min_length=1, max_length=100)
-    
+
     @validator('password')
     def validate_password(cls, v):
         if not re.search(r'[A-Z]', v):
@@ -372,19 +372,19 @@ from app.core.performance_monitoring import performance_collector
 @router.post("/process-data")
 async def process_data(request: ProcessRequest):
     start_time = time.time()
-    
+
     try:
         result = await data_processor.process(request.data)
-        
+
         # Record metrics
         performance_collector.add_metric(
             MetricType.RESPONSE_TIME,
             time.time() - start_time,
             labels={"endpoint": "process_data", "status": "success"}
         )
-        
+
         return result
-    
+
     except Exception as e:
         performance_collector.add_metric(
             MetricType.ERROR_RATE,
@@ -409,7 +409,7 @@ async def process_user_action(user_id: int, action: str):
         action=action,
         timestamp=datetime.utcnow().isoformat()
     )
-    
+
     try:
         result = await perform_action(user_id, action)
         logger.info(
@@ -419,7 +419,7 @@ async def process_user_action(user_id: int, action: str):
             duration=time.time() - start_time
         )
         return result
-    
+
     except Exception as e:
         logger.error(
             "User action failed",
@@ -445,28 +445,28 @@ class TestUserService:
     async def test_get_user_performance(self):
         """Test that user retrieval meets performance requirements"""
         user_service = UserService()
-        
+
         start_time = time.time()
         user = await user_service.get_user(1)
         execution_time = time.time() - start_time
-        
+
         assert user is not None
         assert execution_time < 0.1  # Should complete within 100ms
-    
+
     @pytest.mark.asyncio
     async def test_concurrent_user_requests(self):
         """Test system under concurrent load"""
         user_service = UserService()
-        
+
         tasks = [
-            user_service.get_user(i) 
+            user_service.get_user(i)
             for i in range(1, 101)  # 100 concurrent requests
         ]
-        
+
         start_time = time.time()
         results = await asyncio.gather(*tasks, return_exceptions=True)
         total_time = time.time() - start_time
-        
+
         # Verify all requests completed successfully
         assert all(not isinstance(r, Exception) for r in results)
         # Verify reasonable total time
@@ -481,13 +481,13 @@ class TestCaching:
     async def test_cache_hit_rate(self):
         """Test cache effectiveness"""
         cache = MemoryCache(CacheConfig(max_size=100))
-        
+
         # First call - cache miss
         result1 = await expensive_operation(cache, "test_key")
-        
+
         # Second call - cache hit
         result2 = await expensive_operation(cache, "test_key")
-        
+
         assert result1 == result2
         # Verify cache statistics
         stats = await cache.get_stats()
@@ -535,11 +535,11 @@ async def health_check():
             "external_apis": await check_external_services()
         }
     }
-    
+
     # Determine overall health
     if any(dep["status"] != "healthy" for dep in health_status["dependencies"].values()):
         health_status["status"] = "degraded"
-    
+
     return health_status
 ```
 
@@ -552,15 +552,15 @@ class Settings(BaseSettings):
     CACHE_BACKEND: CacheBackend = CacheBackend.HYBRID
     DB_POOL_SIZE: int = 20
     MAX_CONCURRENT_REQUESTS: int = 100
-    
+
     # Monitoring settings
     ENABLE_PERFORMANCE_MONITORING: bool = True
     PERFORMANCE_METRICS_INTERVAL: int = 10
-    
+
     # Optimization settings
     ENABLE_RESPONSE_COMPRESSION: bool = True
     ENABLE_QUERY_OPTIMIZATION: bool = True
-    
+
     class Config:
         env_file = ".env"
         case_sensitive = True

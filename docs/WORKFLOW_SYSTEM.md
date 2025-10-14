@@ -1107,12 +1107,12 @@ alerts:
     condition: "error_rate > 5%"
     severity: "critical"
     channels: ["email", "slack"]
-    
+
   - name: "SLA Violation"
     condition: "avg_completion_time > sla_limit"
     severity: "warning"
     channels: ["email"]
-    
+
   - name: "Queue Backlog"
     condition: "pending_instances > 100"
     severity: "info"
@@ -1138,9 +1138,9 @@ alerts:
 **Solutions:**
 ```sql
 -- Find stuck instances
-SELECT id, title, current_state_id, status, updated_at 
-FROM workflow_instances 
-WHERE status = 'running' 
+SELECT id, title, current_state_id, status, updated_at
+FROM workflow_instances
+WHERE status = 'running'
 AND updated_at < NOW() - INTERVAL '1 hour';
 
 -- Check for pending user tasks
@@ -1163,25 +1163,25 @@ WHERE wi.status = 'running' AND ut.status = 'pending';
 // Validation function
 function validateWorkflow(nodes: Node[], edges: Edge[]) {
   const issues: string[] = [];
-  
+
   // Check for start node
   const startNodes = nodes.filter(n => n.data.isInitial);
   if (startNodes.length === 0) {
     issues.push('No start node defined');
   }
-  
+
   // Check for orphaned nodes
   const connectedNodes = new Set();
   edges.forEach(e => {
     connectedNodes.add(e.source);
     connectedNodes.add(e.target);
   });
-  
+
   const orphaned = nodes.filter(n => !connectedNodes.has(n.id));
   if (orphaned.length > 0) {
     issues.push(`Orphaned nodes: ${orphaned.map(n => n.id).join(', ')}`);
   }
-  
+
   return issues;
 }
 ```
@@ -1305,6 +1305,6 @@ Contact support@fastnext.com for:
 
 ---
 
-**Last Updated:** 2024-09-26  
-**Version:** 1.0.0  
+**Last Updated:** 2024-09-26
+**Version:** 1.0.0
 **Author:** FastNext Development Team

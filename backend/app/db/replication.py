@@ -3,15 +3,15 @@ Database Replication and Read/Write Splitting
 Automatically routes read queries to replicas and write queries to primary
 """
 
-import random
 import logging
-from typing import Optional, List
+import random
 from contextlib import contextmanager
+from typing import List, Optional
+
+from app.core.config import settings
 from sqlalchemy import create_engine, event
 from sqlalchemy.orm import Session, sessionmaker
 from sqlalchemy.pool import QueuePool
-
-from app.core.config import settings
 
 logger = logging.getLogger(__name__)
 
@@ -33,32 +33,32 @@ class DatabaseRouter:
         # Create engines
         self.primary_engine = self._create_engine(self.primary_uri, pool_size=20)
         self.replica_engines = [
-            self._create_engine(uri, pool_size=10)
-            for uri in self.replica_uris
+            self._create_engine(uri, pool_size=10) for uri in self.replica_uris
         ]
 
         # Session makers
         self.PrimarySession = sessionmaker(bind=self.primary_engine)
         self.ReplicaSessions = [
-            sessionmaker(bind=engine)
-            for engine in self.replica_engines
+            sessionmaker(bind=engine) for engine in self.replica_engines
         ]
 
         # Track replica health
         self.replica_health = [True] * len(self.replica_engines)
 
-        logger.info(f"Database router initialized: 1 primary, {len(self.replica_engines)} replicas")
+        logger.info(
+            f"Database router initialized: 1 primary, {len(self.replica_engines)} replicas"
+        )
 
     def _parse_replica_uris(self) -> List[str]:
         """Parse replica connection strings from environment"""
-        replica_str = getattr(settings, 'POSTGRES_READ_REPLICAS', '')
+        replica_str = getattr(settings, "POSTGRES_READ_REPLICAS", "")
 
         if not replica_str:
             logger.warning("No read replicas configured")
             return []
 
         replicas = []
-        for replica_host in replica_str.split(','):
+        for replica_host in replica_str.split(","):
             replica_host = replica_host.strip()
             if replica_host:
                 # Build replica URI
@@ -78,9 +78,7 @@ class DatabaseRouter:
             pool_recycle=3600,
             poolclass=QueuePool,
             echo=False,
-            execution_options={
-                "isolation_level": "READ COMMITTED"
-            }
+            execution_options={"isolation_level": "READ COMMITTED"},
         )
 
     def get_primary_session(self) -> Session:
@@ -149,7 +147,7 @@ class RoutedSession(Session):
     """
 
     def __init__(self, *args, **kwargs):
-        self._force_primary = kwargs.pop('force_primary', False)
+        self._force_primary = kwargs.pop("force_primary", False)
         self._in_transaction = False
         super().__init__(*args, **kwargs)
 
@@ -166,7 +164,9 @@ class RoutedSession(Session):
                     replica_session = db_router.get_replica_session()
                     return replica_session.execute(*args, **kwargs)
                 except Exception as e:
-                    logger.warning(f"Replica query failed, falling back to primary: {e}")
+                    logger.warning(
+                        f"Replica query failed, falling back to primary: {e}"
+                    )
 
         # Use primary for writes or fallback
         return super().execute(*args, **kwargs)
@@ -179,9 +179,9 @@ class RoutedSession(Session):
         statement_str = str(statement).strip().upper()
 
         # Check if it's a SELECT query
-        if statement_str.startswith('SELECT'):
+        if statement_str.startswith("SELECT"):
             # Avoid routing SELECT FOR UPDATE to replicas
-            if 'FOR UPDATE' in statement_str or 'FOR SHARE' in statement_str:
+            if "FOR UPDATE" in statement_str or "FOR SHARE" in statement_str:
                 return False
             return True
 
@@ -210,7 +210,7 @@ RoutedSessionLocal = sessionmaker(
     class_=RoutedSession,
     bind=db_router.primary_engine,
     autocommit=False,
-    autoflush=False
+    autoflush=False,
 )
 
 
@@ -260,31 +260,30 @@ class ReplicationMonitor:
 
                     if is_replica:
                         # Get replication lag
-                        result = conn.execute("""
+                        result = conn.execute(
+                            """
                             SELECT
                                 EXTRACT(EPOCH FROM (now() - pg_last_xact_replay_timestamp()))::INTEGER as lag_seconds,
                                 pg_last_xact_replay_timestamp() as last_replay
-                        """)
+                        """
+                        )
                         row = result.fetchone()
 
                         lag_info[f"replica_{idx}"] = {
                             "healthy": True,
                             "lag_seconds": row[0] if row[0] else 0,
                             "last_replay": str(row[1]) if row[1] else None,
-                            "status": "OK" if (row[0] or 0) < 5 else "LAGGING"
+                            "status": "OK" if (row[0] or 0) < 5 else "LAGGING",
                         }
                     else:
                         lag_info[f"replica_{idx}"] = {
                             "healthy": True,
-                            "status": "NOT_REPLICA"
+                            "status": "NOT_REPLICA",
                         }
 
             except Exception as e:
                 logger.error(f"Failed to check lag on replica {idx}: {e}")
-                lag_info[f"replica_{idx}"] = {
-                    "healthy": False,
-                    "error": str(e)
-                }
+                lag_info[f"replica_{idx}"] = {"healthy": False, "error": str(e)}
 
         return lag_info
 
@@ -293,7 +292,7 @@ class ReplicationMonitor:
         """Get comprehensive replication statistics"""
         stats = {
             "primary": {},
-            "replicas": await ReplicationMonitor.check_replication_lag(db)
+            "replicas": await ReplicationMonitor.check_replication_lag(db),
         }
 
         # Get primary stats
@@ -309,7 +308,8 @@ class ReplicationMonitor:
                     wal_lsn = result.scalar()
 
                     # Get replication connections
-                    result = conn.execute("""
+                    result = conn.execute(
+                        """
                         SELECT
                             client_addr,
                             state,
@@ -317,7 +317,8 @@ class ReplicationMonitor:
                             replay_lsn,
                             write_lsn
                         FROM pg_stat_replication
-                    """)
+                    """
+                    )
 
                     replication_connections = [
                         {
@@ -325,7 +326,7 @@ class ReplicationMonitor:
                             "state": row[1],
                             "sync_state": row[2],
                             "replay_lsn": row[3],
-                            "write_lsn": row[4]
+                            "write_lsn": row[4],
                         }
                         for row in result.fetchall()
                     ]
@@ -334,12 +335,12 @@ class ReplicationMonitor:
                         "is_primary": True,
                         "wal_lsn": str(wal_lsn),
                         "connected_replicas": len(replication_connections),
-                        "replication_connections": replication_connections
+                        "replication_connections": replication_connections,
                     }
                 else:
                     stats["primary"] = {
                         "is_primary": False,
-                        "warning": "Primary is in recovery mode!"
+                        "warning": "Primary is in recovery mode!",
                     }
 
         except Exception as e:

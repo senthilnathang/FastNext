@@ -1,7 +1,7 @@
-from sqlalchemy import Column, Integer, String, DateTime, ForeignKey
-from sqlalchemy.sql import func
-from sqlalchemy.orm import relationship
 from app.db.base import Base
+from sqlalchemy import Column, DateTime, ForeignKey, Integer, String
+from sqlalchemy.orm import relationship
+from sqlalchemy.sql import func
 
 
 class PasswordHistory(Base):
@@ -16,10 +16,14 @@ class PasswordHistory(Base):
     hashed_password = Column(String(255), nullable=False)
 
     # When this password was set
-    created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+    created_at = Column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
 
     # Relationships
     user = relationship("User", foreign_keys=[user_id])
 
     def __repr__(self):
-        return f"<PasswordHistory(user_id={self.user_id}, created_at={self.created_at})>"
+        return (
+            f"<PasswordHistory(user_id={self.user_id}, created_at={self.created_at})>"
+        )

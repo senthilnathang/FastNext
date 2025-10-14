@@ -1,7 +1,9 @@
-from typing import List, Optional, Dict, Any
-from pydantic import BaseModel, Field
+import json
 from datetime import datetime
+from typing import Any, Dict, List, Optional
+
 from app.models.notification import NotificationType
+from pydantic import BaseModel, Field, field_validator
 
 
 class NotificationBase(BaseModel):
@@ -32,6 +34,20 @@ class NotificationResponse(NotificationBase):
 
     class Config:
         from_attributes = True
+
+    @field_validator("channels", mode="before")
+    @classmethod
+    def parse_channels(cls, v):
+        if isinstance(v, str):
+            return json.loads(v)
+        return v
+
+    @field_validator("data", mode="before")
+    @classmethod
+    def parse_data(cls, v):
+        if isinstance(v, str):
+            return json.loads(v) if v else None
+        return v
 
 
 class NotificationList(BaseModel):

@@ -3,20 +3,20 @@ Horizontal Scaling Health Checks and Monitoring
 Advanced health checks for load balancers and orchestration platforms
 """
 
-from fastapi import APIRouter, Depends, Response, status
-from sqlalchemy.orm import Session
-from typing import Dict, Any
 import asyncio
-import time
-import psutil
 import os
+import time
+from typing import Any, Dict
 
-from app.db.session import get_db
-from app.db.replication import db_router, replication_monitor
-from app.core.redis_config import redis_manager, cache
+import psutil
 from app.auth.deps import get_current_active_user
 from app.auth.permissions import require_admin
+from app.core.redis_config import cache, redis_manager
+from app.db.replication import db_router, replication_monitor
+from app.db.session import get_db
 from app.models.user import User
+from fastapi import APIRouter, Depends, Response, status
+from sqlalchemy.orm import Session
 
 router = APIRouter()
 
@@ -29,10 +29,7 @@ async def liveness_probe():
 
     Used by K8s to determine if container should be restarted
     """
-    return {
-        "status": "alive",
-        "timestamp": time.time()
-    }
+    return {"status": "alive", "timestamp": time.time()}
 
 
 @router.get("/health/readiness")
@@ -46,11 +43,7 @@ async def readiness_probe(db: Session = Depends(get_db)):
     - Redis connectivity
     - Critical dependencies
     """
-    checks = {
-        "database": False,
-        "redis": False,
-        "overall": False
-    }
+    checks = {"database": False, "redis": False, "overall": False}
 
     # Check database
     try:
@@ -70,12 +63,12 @@ async def readiness_probe(db: Session = Depends(get_db)):
     # Overall readiness
     checks["overall"] = checks["database"] and checks["redis"]
 
-    status_code = status.HTTP_200_OK if checks["overall"] else status.HTTP_503_SERVICE_UNAVAILABLE
+    status_code = (
+        status.HTTP_200_OK if checks["overall"] else status.HTTP_503_SERVICE_UNAVAILABLE
+    )
 
     return Response(
-        content=str(checks),
-        status_code=status_code,
-        media_type="application/json"
+        content=str(checks), status_code=status_code, media_type="application/json"
     )
 
 
@@ -91,15 +84,17 @@ async def startup_probe(db: Session = Depends(get_db)):
         "database_migrated": False,
         "cache_initialized": False,
         "models_loaded": False,
-        "ready": False
+        "ready": False,
     }
 
     try:
         # Check if database has tables (migrations run)
-        result = db.execute("""
+        result = db.execute(
+            """
             SELECT COUNT(*) FROM information_schema.tables
             WHERE table_schema = 'public'
-        """)
+        """
+        )
         table_count = result.scalar()
         startup_checks["database_migrated"] = table_count > 0
         startup_checks["table_count"] = table_count
@@ -108,40 +103,39 @@ async def startup_probe(db: Session = Depends(get_db)):
         startup_checks["cache_initialized"] = redis_manager.is_connected
 
         # Check if models are loaded
-        from app.models import user, activity_log
+        from app.models import activity_log, user
+
         startup_checks["models_loaded"] = True
 
-        startup_checks["ready"] = all([
-            startup_checks["database_migrated"],
-            startup_checks["cache_initialized"],
-            startup_checks["models_loaded"]
-        ])
+        startup_checks["ready"] = all(
+            [
+                startup_checks["database_migrated"],
+                startup_checks["cache_initialized"],
+                startup_checks["models_loaded"],
+            ]
+        )
 
     except Exception as e:
         startup_checks["error"] = str(e)
 
-    status_code = status.HTTP_200_OK if startup_checks.get("ready") else status.HTTP_503_SERVICE_UNAVAILABLE
-
-    return Response(
-        content=str(startup_checks),
-        status_code=status_code
+    status_code = (
+        status.HTTP_200_OK
+        if startup_checks.get("ready")
+        else status.HTTP_503_SERVICE_UNAVAILABLE
     )
+
+    return Response(content=str(startup_checks), status_code=status_code)
 
 
 @router.get("/health/deep")
 async def deep_health_check(
-    db: Session = Depends(get_db),
-    current_user: User = Depends(require_admin)
+    db: Session = Depends(get_db), current_user: User = Depends(require_admin)
 ) -> Dict[str, Any]:
     """
     Deep health check with detailed component status
     Requires admin authentication
     """
-    health = {
-        "status": "healthy",
-        "timestamp": time.time(),
-        "components": {}
-    }
+    health = {"status": "healthy", "timestamp": time.time(), "components": {}}
 
     # Database health
     try:
@@ -153,13 +147,10 @@ async def deep_health_check(
             "status": "healthy",
             "latency_ms": round(db_latency, 2),
             "pool_size": db_router.primary_engine.pool.size(),
-            "checked_out": db_router.primary_engine.pool.checkedout()
+            "checked_out": db_router.primary_engine.pool.checkedout(),
         }
     except Exception as e:
-        health["components"]["database"] = {
-            "status": "unhealthy",
-            "error": str(e)
-        }
+        health["components"]["database"] = {"status": "unhealthy", "error": str(e)}
         health["status"] = "degraded"
 
     # Redis health
@@ -176,13 +167,10 @@ async def deep_health_check(
             "latency_ms": round(redis_latency, 2),
             "connected": redis_manager.is_connected,
             "hit_ratio": redis_stats.get("hit_ratio", 0),
-            "memory": redis_stats.get("used_memory", "unknown")
+            "memory": redis_stats.get("used_memory", "unknown"),
         }
     except Exception as e:
-        health["components"]["redis"] = {
-            "status": "unhealthy",
-            "error": str(e)
-        }
+        health["components"]["redis"] = {"status": "unhealthy", "error": str(e)}
         health["status"] = "degraded"
 
     # Replication health (if configured)
@@ -191,20 +179,17 @@ async def deep_health_check(
             repl_stats = await replication_monitor.check_replication_lag(db)
             health["components"]["replication"] = {
                 "status": "configured",
-                "replicas": repl_stats
+                "replicas": repl_stats,
             }
         except Exception as e:
-            health["components"]["replication"] = {
-                "status": "error",
-                "error": str(e)
-            }
+            health["components"]["replication"] = {"status": "error", "error": str(e)}
 
     # System resources
     health["components"]["system"] = {
         "cpu_percent": psutil.cpu_percent(interval=1),
         "memory_percent": psutil.virtual_memory().percent,
-        "disk_percent": psutil.disk_usage('/').percent,
-        "load_average": os.getloadavg() if hasattr(os, 'getloadavg') else None
+        "disk_percent": psutil.disk_usage("/").percent,
+        "load_average": os.getloadavg() if hasattr(os, "getloadavg") else None,
     }
 
     return health
@@ -226,11 +211,15 @@ async def prometheus_metrics(db: Session = Depends(get_db)):
         metrics.append(f"# TYPE fastnext_db_pool_size gauge")
         metrics.append(f"fastnext_db_pool_size {pool.size()}")
 
-        metrics.append(f"# HELP fastnext_db_pool_checked_out Checked out database connections")
+        metrics.append(
+            f"# HELP fastnext_db_pool_checked_out Checked out database connections"
+        )
         metrics.append(f"# TYPE fastnext_db_pool_checked_out gauge")
         metrics.append(f"fastnext_db_pool_checked_out {pool.checkedout()}")
 
-        metrics.append(f"# HELP fastnext_db_pool_overflow Overflow database connections")
+        metrics.append(
+            f"# HELP fastnext_db_pool_overflow Overflow database connections"
+        )
         metrics.append(f"# TYPE fastnext_db_pool_overflow gauge")
         metrics.append(f"fastnext_db_pool_overflow {pool.overflow()}")
     except:
@@ -243,15 +232,23 @@ async def prometheus_metrics(db: Session = Depends(get_db)):
 
             metrics.append(f"# HELP fastnext_redis_hit_ratio Redis cache hit ratio")
             metrics.append(f"# TYPE fastnext_redis_hit_ratio gauge")
-            metrics.append(f"fastnext_redis_hit_ratio {redis_stats.get('hit_ratio', 0)}")
+            metrics.append(
+                f"fastnext_redis_hit_ratio {redis_stats.get('hit_ratio', 0)}"
+            )
 
             metrics.append(f"# HELP fastnext_redis_keyspace_hits Redis keyspace hits")
             metrics.append(f"# TYPE fastnext_redis_keyspace_hits counter")
-            metrics.append(f"fastnext_redis_keyspace_hits {redis_stats.get('keyspace_hits', 0)}")
+            metrics.append(
+                f"fastnext_redis_keyspace_hits {redis_stats.get('keyspace_hits', 0)}"
+            )
 
-            metrics.append(f"# HELP fastnext_redis_keyspace_misses Redis keyspace misses")
+            metrics.append(
+                f"# HELP fastnext_redis_keyspace_misses Redis keyspace misses"
+            )
             metrics.append(f"# TYPE fastnext_redis_keyspace_misses counter")
-            metrics.append(f"fastnext_redis_keyspace_misses {redis_stats.get('keyspace_misses', 0)}")
+            metrics.append(
+                f"fastnext_redis_keyspace_misses {redis_stats.get('keyspace_misses', 0)}"
+            )
     except:
         pass
 
@@ -267,16 +264,11 @@ async def prometheus_metrics(db: Session = Depends(get_db)):
     except:
         pass
 
-    return Response(
-        content="\n".join(metrics),
-        media_type="text/plain; version=0.0.4"
-    )
+    return Response(content="\n".join(metrics), media_type="text/plain; version=0.0.4")
 
 
 @router.get("/scaling/info")
-async def scaling_info(
-    current_user: User = Depends(require_admin)
-) -> Dict[str, Any]:
+async def scaling_info(current_user: User = Depends(require_admin)) -> Dict[str, Any]:
     """
     Get horizontal scaling configuration info
     """
@@ -284,31 +276,35 @@ async def scaling_info(
         "load_balancing": {
             "enabled": True,
             "algorithm": "least_conn",
-            "health_check_interval": "30s"
+            "health_check_interval": "30s",
         },
         "database": {
             "replication_enabled": len(db_router.replica_engines) > 0,
             "primary_connections": db_router.primary_engine.pool.size(),
             "replica_count": len(db_router.replica_engines),
-            "read_write_splitting": True
+            "read_write_splitting": True,
         },
         "cache": {
-            "type": "redis_cluster" if len(db_router.replica_engines) > 0 else "redis_single",
+            "type": (
+                "redis_cluster"
+                if len(db_router.replica_engines) > 0
+                else "redis_single"
+            ),
             "distributed": True,
-            "nodes": 6 if len(db_router.replica_engines) > 0 else 1
+            "nodes": 6 if len(db_router.replica_engines) > 0 else 1,
         },
         "auto_scaling": {
             "enabled": os.getenv("ENABLE_AUTO_SCALING", "false") == "true",
             "min_replicas": int(os.getenv("MIN_REPLICAS", 3)),
             "max_replicas": int(os.getenv("MAX_REPLICAS", 20)),
             "target_cpu": int(os.getenv("TARGET_CPU_PERCENT", 70)),
-            "target_memory": int(os.getenv("TARGET_MEMORY_PERCENT", 80))
+            "target_memory": int(os.getenv("TARGET_MEMORY_PERCENT", 80)),
         },
         "deployment": {
             "platform": os.getenv("DEPLOYMENT_PLATFORM", "docker-compose"),
             "environment": os.getenv("ENVIRONMENT", "development"),
-            "instance_id": os.getenv("HOSTNAME", "unknown")
-        }
+            "instance_id": os.getenv("HOSTNAME", "unknown"),
+        },
     }
 
     return info
@@ -316,21 +312,14 @@ async def scaling_info(
 
 @router.get("/replication/status")
 async def replication_status(
-    db: Session = Depends(get_db),
-    current_user: User = Depends(require_admin)
+    db: Session = Depends(get_db), current_user: User = Depends(require_admin)
 ) -> Dict[str, Any]:
     """
     Get database replication status and lag information
     """
     if not db_router.replica_engines:
-        return {
-            "replication_enabled": False,
-            "message": "No read replicas configured"
-        }
+        return {"replication_enabled": False, "message": "No read replicas configured"}
 
     stats = await replication_monitor.get_replication_stats(db)
 
-    return {
-        "replication_enabled": True,
-        **stats
-    }
+    return {"replication_enabled": True, **stats}

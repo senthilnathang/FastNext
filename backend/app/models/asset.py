@@ -1,7 +1,15 @@
-from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Boolean, BigInteger
-from sqlalchemy.sql import func
-from sqlalchemy.orm import relationship
 from app.db.base import Base
+from sqlalchemy import (
+    BigInteger,
+    Boolean,
+    Column,
+    DateTime,
+    ForeignKey,
+    Integer,
+    String,
+)
+from sqlalchemy.orm import relationship
+from sqlalchemy.sql import func
 
 
 class Asset(Base):

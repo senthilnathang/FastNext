@@ -1,8 +1,19 @@
-from sqlalchemy import Column, Integer, String, Text, DateTime, ForeignKey, JSON, Boolean, Enum
-from sqlalchemy.sql import func
-from sqlalchemy.orm import relationship
-from app.db.base import Base
 import enum
+
+from app.db.base import Base
+from sqlalchemy import (
+    JSON,
+    Boolean,
+    Column,
+    DateTime,
+    Enum,
+    ForeignKey,
+    Integer,
+    String,
+    Text,
+)
+from sqlalchemy.orm import relationship
+from sqlalchemy.sql import func
 
 
 class ComponentType(str, enum.Enum):
@@ -23,7 +34,9 @@ class Component(Base):
     type = Column(Enum(ComponentType), nullable=False)
     category = Column(String, default="general")
     description = Column(Text)
-    project_id = Column(Integer, ForeignKey("projects.id"), nullable=True)  # null for global components
+    project_id = Column(
+        Integer, ForeignKey("projects.id"), nullable=True
+    )  # null for global components
     component_schema = Column(JSON, default={})  # Component property schema
     default_props = Column(JSON, default={})
     template = Column(Text)  # React/HTML template
@@ -35,7 +48,9 @@ class Component(Base):
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
     project = relationship("Project", back_populates="components")
-    instances = relationship("ComponentInstance", back_populates="component", cascade="all, delete-orphan")
+    instances = relationship(
+        "ComponentInstance", back_populates="component", cascade="all, delete-orphan"
+    )
 
 
 class ComponentInstance(Base):

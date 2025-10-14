@@ -1,19 +1,16 @@
 from typing import Any, List
-from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.orm import Session
-from sqlalchemy import func
 
 from app.auth.deps import get_current_active_user
 from app.auth.permissions import require_admin
 from app.db.session import get_db
-from app.models.user import User
 from app.models.permission import Permission
-from app.schemas.permission import (
-    Permission as PermissionSchema, 
-    PermissionCreate, 
-    PermissionUpdate
-)
+from app.models.user import User
 from app.schemas.common import ListResponse
+from app.schemas.permission import Permission as PermissionSchema
+from app.schemas.permission import PermissionCreate, PermissionUpdate
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy import func
+from sqlalchemy.orm import Session
 
 router = APIRouter()
 
@@ -30,31 +27,26 @@ def read_permissions(
 ) -> Any:
     """Get all permissions with pagination (admin only)"""
     query = db.query(Permission)
-    
+
     # Apply filters
     if category:
         query = query.filter(Permission.category == category)
-    
+
     if search:
         search_term = f"%{search}%"
         query = query.filter(
-            (Permission.name.ilike(search_term)) |
-            (Permission.description.ilike(search_term)) |
-            (Permission.action.ilike(search_term))
+            (Permission.name.ilike(search_term))
+            | (Permission.description.ilike(search_term))
+            | (Permission.action.ilike(search_term))
         )
-    
+
     # Get total count
     total = query.count()
-    
+
     # Get paginated results
     permissions = query.offset(skip).limit(limit).all()
-    
-    return ListResponse.paginate(
-        items=permissions,
-        total=total,
-        skip=skip,
-        limit=limit
-    )
+
+    return ListResponse.paginate(items=permissions, total=total, skip=skip, limit=limit)
 
 
 @router.post("", response_model=PermissionSchema)
@@ -67,15 +59,14 @@ def create_permission(
 ) -> Any:
     """Create new permission (admin only)"""
     # Check if permission already exists
-    existing_permission = db.query(Permission).filter(
-        Permission.name == permission_in.name
-    ).first()
+    existing_permission = (
+        db.query(Permission).filter(Permission.name == permission_in.name).first()
+    )
     if existing_permission:
         raise HTTPException(
-            status_code=400,
-            detail="Permission with this name already exists"
+            status_code=400, detail="Permission with this name already exists"
         )
-    
+
     permission = Permission(**permission_in.dict())
     db.add(permission)
     db.commit()
@@ -109,17 +100,14 @@ def update_permission(
     permission = db.query(Permission).filter(Permission.id == permission_id).first()
     if not permission:
         raise HTTPException(status_code=404, detail="Permission not found")
-    
+
     if permission.is_system_permission:
-        raise HTTPException(
-            status_code=400,
-            detail="Cannot modify system permissions"
-        )
-    
+        raise HTTPException(status_code=400, detail="Cannot modify system permissions")
+
     permission_data = permission_in.dict(exclude_unset=True)
     for field, value in permission_data.items():
         setattr(permission, field, value)
-    
+
     db.add(permission)
     db.commit()
     db.refresh(permission)
@@ -137,13 +125,10 @@ def delete_permission(
     permission = db.query(Permission).filter(Permission.id == permission_id).first()
     if not permission:
         raise HTTPException(status_code=404, detail="Permission not found")
-    
+
     if permission.is_system_permission:
-        raise HTTPException(
-            status_code=400,
-            detail="Cannot delete system permissions"
-        )
-    
+        raise HTTPException(status_code=400, detail="Cannot delete system permissions")
+
     db.delete(permission)
     db.commit()
     return {"message": "Permission deleted successfully"}

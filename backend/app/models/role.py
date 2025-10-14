@@ -1,8 +1,9 @@
-from sqlalchemy import Column, Integer, String, Text, DateTime, Boolean
-from sqlalchemy.sql import func
-from sqlalchemy.orm import relationship
-from app.db.base import Base
 import enum
+
+from app.db.base import Base
+from sqlalchemy import Boolean, Column, DateTime, Integer, String, Text
+from sqlalchemy.orm import relationship
+from sqlalchemy.sql import func
 
 
 class SystemRole(str, enum.Enum):

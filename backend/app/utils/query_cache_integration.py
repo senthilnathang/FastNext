@@ -6,19 +6,18 @@ Automatic caching for SQLAlchemy queries with smart invalidation
 import hashlib
 import json
 import logging
-from typing import Any, Optional, List, Set
 from functools import wraps
-
-from sqlalchemy import event
-from sqlalchemy.orm import Session
-from sqlalchemy.engine import Engine
-from sqlalchemy.sql import Select
+from typing import Any, List, Optional, Set
 
 from app.core.cache_optimization import (
-    query_cache_manager,
+    CacheStrategy,
     invalidation_strategy,
-    CacheStrategy
+    query_cache_manager,
 )
+from sqlalchemy import event
+from sqlalchemy.engine import Engine
+from sqlalchemy.orm import Session
+from sqlalchemy.sql import Select
 
 logger = logging.getLogger(__name__)
 
@@ -38,10 +37,10 @@ class QueryCacheIntegration:
         self.enabled = True
         self.default_ttl = CacheStrategy.DATABASE_QUERY_TTL
         self.cache_stats = {
-            'queries_cached': 0,
-            'cache_hits': 0,
-            'cache_misses': 0,
-            'invalidations': 0
+            "queries_cached": 0,
+            "cache_hits": 0,
+            "cache_misses": 0,
+            "invalidations": 0,
         }
 
     def enable(self):
@@ -56,7 +55,7 @@ class QueryCacheIntegration:
 
     def generate_query_hash(self, query_str: str, params: Optional[dict] = None) -> str:
         """Generate unique hash for a query"""
-        query_normalized = ' '.join(query_str.lower().split())
+        query_normalized = " ".join(query_str.lower().split())
         params_str = json.dumps(params or {}, sort_keys=True, default=str)
 
         hash_input = f"{query_normalized}|{params_str}"
@@ -68,7 +67,7 @@ class QueryCacheIntegration:
         result: Any,
         params: Optional[dict] = None,
         ttl: Optional[int] = None,
-        tags: Optional[Set[str]] = None
+        tags: Optional[Set[str]] = None,
     ):
         """Cache a query result"""
         if not self.enabled:
@@ -77,40 +76,33 @@ class QueryCacheIntegration:
         ttl = ttl or self.default_ttl
 
         await query_cache_manager.cache_query_result(
-            query=query_str,
-            result=result,
-            params=params,
-            ttl=ttl,
-            tags=tags
+            query=query_str, result=result, params=params, ttl=ttl, tags=tags
         )
 
-        self.cache_stats['queries_cached'] += 1
+        self.cache_stats["queries_cached"] += 1
 
     async def get_cached_query_result(
-        self,
-        query_str: str,
-        params: Optional[dict] = None
+        self, query_str: str, params: Optional[dict] = None
     ) -> Optional[Any]:
         """Get cached query result"""
         if not self.enabled:
             return None
 
         result = await query_cache_manager.get_cached_query_result(
-            query=query_str,
-            params=params
+            query=query_str, params=params
         )
 
         if result is not None:
-            self.cache_stats['cache_hits'] += 1
+            self.cache_stats["cache_hits"] += 1
         else:
-            self.cache_stats['cache_misses'] += 1
+            self.cache_stats["cache_misses"] += 1
 
         return result
 
     async def invalidate_table_cache(self, table_name: str):
         """Invalidate all cached queries for a table"""
         invalidated = await invalidation_strategy.invalidate_table_related(table_name)
-        self.cache_stats['invalidations'] += invalidated
+        self.cache_stats["invalidations"] += invalidated
         return invalidated
 
 
@@ -127,13 +119,17 @@ def setup_query_cache_events(engine: Engine):
     """
 
     @event.listens_for(engine, "before_cursor_execute")
-    def before_cursor_execute(conn, cursor, statement, parameters, context, executemany):
+    def before_cursor_execute(
+        conn, cursor, statement, parameters, context, executemany
+    ):
         """Log SQL queries for debugging"""
         if query_cache_integration.enabled:
             logger.debug(f"Executing query: {statement[:100]}...")
 
     @event.listens_for(engine, "after_cursor_execute")
-    async def after_cursor_execute(conn, cursor, statement, parameters, context, executemany):
+    async def after_cursor_execute(
+        conn, cursor, statement, parameters, context, executemany
+    ):
         """Invalidate cache after data modification queries"""
         if not query_cache_integration.enabled:
             return
@@ -141,7 +137,9 @@ def setup_query_cache_events(engine: Engine):
         statement_lower = statement.lower().strip()
 
         # Check if it's a data modification query
-        if any(statement_lower.startswith(cmd) for cmd in ['insert', 'update', 'delete']):
+        if any(
+            statement_lower.startswith(cmd) for cmd in ["insert", "update", "delete"]
+        ):
             # Extract table name (basic implementation)
             tables = query_cache_manager.extract_tables_from_query(statement)
 
@@ -169,7 +167,7 @@ class CachedQuery:
         db: Session,
         ttl: int = CacheStrategy.DATABASE_QUERY_TTL,
         tags: Optional[Set[str]] = None,
-        bypass_cache: bool = False
+        bypass_cache: bool = False,
     ):
         self.db = db
         self.ttl = ttl
@@ -189,7 +187,9 @@ class CachedQuery:
 
         # Generate query string and hash
         try:
-            query_str = str(query.statement.compile(compile_kwargs={"literal_binds": True}))
+            query_str = str(
+                query.statement.compile(compile_kwargs={"literal_binds": True})
+            )
         except Exception:
             # Fallback if literal_binds fails
             query_str = str(query.statement)
@@ -205,10 +205,7 @@ class CachedQuery:
 
         # Cache result
         await query_cache_integration.cache_query_result(
-            query_str=query_str,
-            result=result,
-            ttl=self.ttl,
-            tags=self.tags
+            query_str=query_str, result=result, ttl=self.ttl, tags=self.tags
         )
 
         return result
@@ -219,7 +216,9 @@ class CachedQuery:
             return query.scalar()
 
         try:
-            query_str = str(query.statement.compile(compile_kwargs={"literal_binds": True}))
+            query_str = str(
+                query.statement.compile(compile_kwargs={"literal_binds": True})
+            )
         except Exception:
             query_str = str(query.statement)
 
@@ -233,10 +232,7 @@ class CachedQuery:
 
         # Cache
         await query_cache_integration.cache_query_result(
-            query_str=query_str,
-            result=result,
-            ttl=self.ttl,
-            tags=self.tags
+            query_str=query_str, result=result, ttl=self.ttl, tags=self.tags
         )
 
         return result
@@ -245,7 +241,7 @@ class CachedQuery:
 def cached_db_query(
     ttl: int = CacheStrategy.DATABASE_QUERY_TTL,
     tags: Optional[Set[str]] = None,
-    bypass_on: Optional[callable] = None
+    bypass_on: Optional[callable] = None,
 ):
     """
     Decorator for caching database query results
@@ -255,6 +251,7 @@ def cached_db_query(
         def get_active_users(db: Session):
             return db.query(User).filter(User.is_active == True).all()
     """
+
     def decorator(func):
         @wraps(func)
         async def async_wrapper(*args, **kwargs):
@@ -270,10 +267,11 @@ def cached_db_query(
 
             # Try cache
             from app.core.redis_config import cache
+
             cached_result = await cache.get(cache_key)
             if cached_result is not None:
                 logger.debug(f"🎯 Cached DB query hit: {func_name}")
-                query_cache_integration.cache_stats['cache_hits'] += 1
+                query_cache_integration.cache_stats["cache_hits"] += 1
                 return cached_result
 
             # Execute function
@@ -284,7 +282,7 @@ def cached_db_query(
                 await invalidation_strategy.register_cache_entry(cache_key, tags)
 
             await cache.set(cache_key, result, ttl)
-            query_cache_integration.cache_stats['queries_cached'] += 1
+            query_cache_integration.cache_stats["queries_cached"] += 1
 
             logger.debug(f"📦 Cached DB query result: {func_name}")
             return result
@@ -299,6 +297,7 @@ def cached_db_query(
 
         # Return appropriate wrapper
         import asyncio
+
         if asyncio.iscoroutinefunction(func):
             return async_wrapper
         else:
@@ -312,11 +311,9 @@ def get_query_cache_stats() -> dict:
     stats = query_cache_integration.cache_stats.copy()
 
     # Calculate hit ratio
-    total_queries = stats['cache_hits'] + stats['cache_misses']
-    stats['hit_ratio'] = (
-        stats['cache_hits'] / total_queries * 100
-        if total_queries > 0
-        else 0
+    total_queries = stats["cache_hits"] + stats["cache_misses"]
+    stats["hit_ratio"] = (
+        stats["cache_hits"] / total_queries * 100 if total_queries > 0 else 0
     )
 
     return stats

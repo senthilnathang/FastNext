@@ -1,6 +1,7 @@
-import strawberry
-from typing import Optional, List
 from datetime import datetime
+from typing import List, Optional
+
+import strawberry
 from strawberry.scalars import JSON
 
 

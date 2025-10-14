@@ -219,7 +219,7 @@ ModelDefinition(
     name="Product",
     mixins=[
         ModelMixin.TIMESTAMP,    # created_at, updated_at
-        ModelMixin.AUDIT,        # created_by, updated_by  
+        ModelMixin.AUDIT,        # created_by, updated_by
         ModelMixin.SOFT_DELETE,  # is_deleted, deleted_at
         ModelMixin.METADATA      # metadata_json, tags, version
     ]
@@ -414,7 +414,7 @@ def create_ecommerce_product_model():
             sortable=True,
             description="Product name"
         ),
-        
+
         FieldDefinition(
             name="sku",
             type=FieldType.STRING,
@@ -428,7 +428,7 @@ def create_ecommerce_product_model():
             ),
             description="Stock Keeping Unit"
         ),
-        
+
         FieldDefinition(
             name="description",
             type=FieldType.TEXT,
@@ -437,7 +437,7 @@ def create_ecommerce_product_model():
             include_in_list=False,
             description="Product description"
         ),
-        
+
         # Pricing
         FieldDefinition(
             name="price",
@@ -448,7 +448,7 @@ def create_ecommerce_product_model():
             filterable=True,
             description="Product price"
         ),
-        
+
         FieldDefinition(
             name="sale_price",
             type=FieldType.FLOAT,
@@ -456,7 +456,7 @@ def create_ecommerce_product_model():
             validation=ValidationRule(min_value=0.01),
             description="Sale price (optional)"
         ),
-        
+
         # Inventory
         FieldDefinition(
             name="stock_quantity",
@@ -468,7 +468,7 @@ def create_ecommerce_product_model():
             filterable=True,
             description="Stock quantity"
         ),
-        
+
         FieldDefinition(
             name="low_stock_threshold",
             type=FieldType.INTEGER,
@@ -477,7 +477,7 @@ def create_ecommerce_product_model():
             validation=ValidationRule(min_value=0),
             description="Low stock warning threshold"
         ),
-        
+
         # Status and visibility
         FieldDefinition(
             name="status",
@@ -489,7 +489,7 @@ def create_ecommerce_product_model():
             filterable=True,
             description="Product status"
         ),
-        
+
         FieldDefinition(
             name="is_featured",
             type=FieldType.BOOLEAN,
@@ -498,7 +498,7 @@ def create_ecommerce_product_model():
             filterable=True,
             description="Featured product"
         ),
-        
+
         # Categorization
         FieldDefinition(
             name="category_id",
@@ -513,7 +513,7 @@ def create_ecommerce_product_model():
             filterable=True,
             description="Product category"
         ),
-        
+
         FieldDefinition(
             name="brand_id",
             type=FieldType.FOREIGN_KEY,
@@ -527,7 +527,7 @@ def create_ecommerce_product_model():
             filterable=True,
             description="Product brand"
         ),
-        
+
         # Media and specifications
         FieldDefinition(
             name="images",
@@ -536,7 +536,7 @@ def create_ecommerce_product_model():
             description="Product images URLs",
             example=["https://example.com/image1.jpg", "https://example.com/image2.jpg"]
         ),
-        
+
         FieldDefinition(
             name="specifications",
             type=FieldType.JSON,
@@ -544,7 +544,7 @@ def create_ecommerce_product_model():
             description="Product specifications",
             example={"weight": "1.2kg", "dimensions": "30x20x10cm", "material": "plastic"}
         ),
-        
+
         # SEO and marketing
         FieldDefinition(
             name="meta_title",
@@ -553,7 +553,7 @@ def create_ecommerce_product_model():
             max_length=60,
             description="SEO meta title"
         ),
-        
+
         FieldDefinition(
             name="meta_description",
             type=FieldType.STRING,
@@ -561,7 +561,7 @@ def create_ecommerce_product_model():
             max_length=160,
             description="SEO meta description"
         ),
-        
+
         # Dates
         FieldDefinition(
             name="launch_date",
@@ -571,7 +571,7 @@ def create_ecommerce_product_model():
             filterable=True,
             description="Product launch date"
         ),
-        
+
         # Ownership
         FieldDefinition(
             name="created_by_id",
@@ -586,13 +586,13 @@ def create_ecommerce_product_model():
             description="Created by user"
         ),
     ]
-    
+
     return ModelDefinition(
         name="Product",
         table_name="products",
         description="E-commerce product model",
         fields=fields,
-        
+
         # Use comprehensive mixins
         mixins=[
             ModelMixin.TIMESTAMP,
@@ -600,19 +600,19 @@ def create_ecommerce_product_model():
             ModelMixin.SOFT_DELETE,
             ModelMixin.METADATA
         ],
-        
+
         # Permission configuration
         permission_category="product",
         owner_field="created_by_id",
         project_scoped=False,
-        
+
         # API configuration
         list_page_size=20,
         max_page_size=100,
         enable_search=True,
         enable_filtering=True,
         enable_sorting=True,
-        
+
         # Generate all components
         generate_service=True,
         generate_migrations=True,

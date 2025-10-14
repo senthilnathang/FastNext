@@ -153,7 +153,7 @@ Document Submitted → Manager Review → Approved
    - **Initial State**: ✓
 
 3. **Add** variable nodes for calculations:
-   
+
    **Tax Calculation:**
    - **Add Node** → "Data Operations" → "Calculate"
    - **Configure**:
@@ -342,7 +342,7 @@ Batch Started → Load Recipients → ForEach Loop ┐
 3. **Add** amount-based routing:
    ```javascript
    // Condition: Amount Tiers
-   invoice.amount < 500 ? 'auto' : 
+   invoice.amount < 500 ? 'auto' :
    invoice.amount <= 5000 ? 'manager' : 'director'
    ```
 
@@ -368,7 +368,7 @@ Batch Started → Load Recipients → ForEach Loop ┐
 1. **Nested conditions**:
    ```javascript
    // Complex condition example
-   (invoice.department === 'IT' && invoice.amount < 1000) || 
+   (invoice.department === 'IT' && invoice.amount < 1000) ||
    (invoice.vendor === 'approved_vendor' && invoice.amount < 2000) ||
    (invoice.category === 'maintenance' && invoice.recurring === true)
    ```
@@ -398,7 +398,7 @@ Batch Started → Load Recipients → ForEach Loop ┐
 ### Step 1: Create Parent and Child Workflows
 
 **Parent Workflow**: Customer Onboarding
-**Child Workflows**: 
+**Child Workflows**:
 - Background Check
 - Account Setup
 - Welcome Email
@@ -511,16 +511,16 @@ Batch Started → Load Recipients → ForEach Loop ┐
      // Order validation and enrichment
      function validateOrder(order) {
        const errors = [];
-       
+
        // Validate required fields
        if (!order.customer_id) errors.push('Customer ID required');
        if (!order.items || order.items.length === 0) errors.push('Items required');
        if (order.total <= 0) errors.push('Total must be positive');
-       
+
        // Calculate additional fields
        const itemCount = order.items.reduce((sum, item) => sum + item.quantity, 0);
        const weight = order.items.reduce((sum, item) => sum + (item.weight * item.quantity), 0);
-       
+
        // Determine shipping method
        let shippingMethod = 'standard';
        if (order.total > 500 || order.priority === 'urgent') {
@@ -529,7 +529,7 @@ Batch Started → Load Recipients → ForEach Loop ┐
        if (weight > 50) {
          shippingMethod = 'freight';
        }
-       
+
        return {
          valid: errors.length === 0,
          errors: errors,
@@ -541,11 +541,11 @@ Batch Started → Load Recipients → ForEach Loop ┐
          }
        };
      }
-     
+
      // Execute validation
      const result = validateOrder(order);
      console.log('Validation result:', result);
-     
+
      // Return results
      return result;
      ```
@@ -564,33 +564,33 @@ Batch Started → Load Recipients → ForEach Loop ┐
      import pandas as pd
      import numpy as np
      from datetime import datetime, timedelta
-     
+
      def calculate_customer_score(customer_data, order_history):
          """Calculate customer value score"""
-         
+
          # Convert order history to DataFrame
          df = pd.DataFrame(order_history)
          df['order_date'] = pd.to_datetime(df['order_date'])
-         
+
          # Calculate metrics
          total_orders = len(df)
          total_spent = df['amount'].sum()
          avg_order_value = df['amount'].mean()
-         
+
          # Recent activity (last 90 days)
          recent_cutoff = datetime.now() - timedelta(days=90)
          recent_orders = df[df['order_date'] > recent_cutoff]
          recent_activity = len(recent_orders)
-         
+
          # Calculate score components
          spending_score = min(total_spent / 1000, 10)  # Max 10 points
          frequency_score = min(total_orders / 10, 10)  # Max 10 points
          recency_score = min(recent_activity * 2, 10)  # Max 10 points
          loyalty_score = min(avg_order_value / 100, 10)  # Max 10 points
-         
+
          # Final score (0-40)
          final_score = spending_score + frequency_score + recency_score + loyalty_score
-         
+
          # Determine tier
          if final_score >= 30:
              tier = 'platinum'
@@ -600,7 +600,7 @@ Batch Started → Load Recipients → ForEach Loop ┐
              tier = 'silver'
          else:
              tier = 'bronze'
-         
+
          return {
              'customer_score': round(final_score, 2),
              'customer_tier': tier,
@@ -612,11 +612,11 @@ Batch Started → Load Recipients → ForEach Loop ┐
              },
              'recommendations': generate_recommendations(tier, recent_activity)
          }
-     
+
      def generate_recommendations(tier, recent_activity):
          """Generate personalized recommendations"""
          recommendations = []
-         
+
          if tier == 'platinum':
              recommendations.append('Offer exclusive early access to new products')
              recommendations.append('Provide dedicated customer service')
@@ -626,13 +626,13 @@ Batch Started → Load Recipients → ForEach Loop ┐
          elif recent_activity == 0:
              recommendations.append('Send re-engagement campaign')
              recommendations.append('Offer comeback discount')
-         
+
          return recommendations
-     
+
      # Execute scoring
      result = calculate_customer_score(customer, order_history)
      print(json.dumps(result, indent=2))
-     
+
      # Return result
      return result
      ```
@@ -648,7 +648,7 @@ Batch Started → Load Recipients → ForEach Loop ┐
      ```sql
      -- Inventory availability check
      WITH inventory_check AS (
-       SELECT 
+       SELECT
          p.id as product_id,
          p.name as product_name,
          i.quantity_available,
@@ -663,20 +663,20 @@ Batch Started → Load Recipients → ForEach Loop ┐
        WHERE p.id IN ({{order_items}})
      ),
      stock_status AS (
-       SELECT 
+       SELECT
          *,
-         CASE 
+         CASE
            WHEN available_stock <= 0 THEN 'out_of_stock'
            WHEN available_stock < reorder_level THEN 'low_stock'
            ELSE 'in_stock'
          END as stock_status,
-         CASE 
+         CASE
            WHEN available_stock <= 0 THEN CURRENT_DATE + INTERVAL lead_time_days DAY
            ELSE CURRENT_DATE
          END as estimated_ship_date
        FROM inventory_check
      )
-     SELECT 
+     SELECT
        json_object(
          'inventory_status', json_arrayagg(
            json_object(
@@ -688,8 +688,8 @@ Batch Started → Load Recipients → ForEach Loop ┐
              'supplier', supplier_name
            )
          ),
-         'overall_status', 
-           CASE 
+         'overall_status',
+           CASE
              WHEN COUNT(*) = SUM(CASE WHEN stock_status = 'in_stock' THEN 1 ELSE 0 END) THEN 'available'
              WHEN SUM(CASE WHEN stock_status = 'out_of_stock' THEN 1 ELSE 0 END) > 0 THEN 'partial'
              ELSE 'delayed'
@@ -708,8 +708,8 @@ Batch Started → Load Recipients → ForEach Loop ┐
      return { success: true, data: result };
    } catch (error) {
      console.error('Script execution failed:', error);
-     return { 
-       success: false, 
+     return {
+       success: false,
        error: error.message,
        timestamp: new Date().toISOString()
      };
@@ -779,12 +779,12 @@ alerts:
     condition: "error_rate > 5%"
     severity: critical
     notification: ["email", "slack"]
-    
+
   sla_violation:
     condition: "avg_completion_time > sla_threshold"
     severity: warning
     notification: ["dashboard"]
-    
+
   queue_backlog:
     condition: "pending_instances > 50"
     severity: info
@@ -887,7 +887,7 @@ function validateInput(data) {
   if (!data || typeof data !== 'object') {
     throw new Error('Invalid input data');
   }
-  
+
   // Sanitize string inputs
   const sanitized = {};
   for (const [key, value] of Object.entries(data)) {
@@ -897,7 +897,7 @@ function validateInput(data) {
       sanitized[key] = value;
     }
   }
-  
+
   return sanitized;
 }
 ```
@@ -935,8 +935,8 @@ function validateInput(data) {
 ```sql
 -- Find stuck instances
 SELECT id, title, current_state_id, status, updated_at
-FROM workflow_instances 
-WHERE status = 'running' 
+FROM workflow_instances
+WHERE status = 'running'
   AND updated_at < NOW() - INTERVAL '1 hour';
 ```
 
@@ -1105,7 +1105,7 @@ Workflows    & Loops     & APIs    Development
 
 ---
 
-**Tutorial Version**: 1.0.0  
-**Last Updated**: 2024-09-26  
-**Estimated Total Time**: 3-4 hours  
+**Tutorial Version**: 1.0.0
+**Last Updated**: 2024-09-26
+**Estimated Total Time**: 3-4 hours
 **Prerequisites**: Basic FastNext knowledge

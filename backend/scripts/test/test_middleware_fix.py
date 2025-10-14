@@ -4,17 +4,20 @@ Test script to verify cache and rate limiting middleware are working properly
 """
 
 import asyncio
-import httpx
 import time
 from datetime import datetime
 
+import httpx
+
 BASE_URL = "http://localhost:8000"
+
 
 def print_header(text):
     """Print a formatted header"""
     print("\n" + "=" * 70)
     print(f"  {text}")
     print("=" * 70)
+
 
 async def test_health_endpoint():
     """Test basic health endpoint"""
@@ -37,6 +40,7 @@ async def test_health_endpoint():
         except Exception as e:
             print(f"❌ Error: {e}")
             return False
+
 
 async def test_cache_middleware():
     """Test cache middleware functionality"""
@@ -83,6 +87,7 @@ async def test_cache_middleware():
             print(f"❌ Error: {e}")
             return False
 
+
 async def test_rate_limiting():
     """Test rate limiting middleware"""
     print_header("Test 3: Rate Limiting Middleware")
@@ -96,8 +101,12 @@ async def test_rate_limiting():
                 response = await client.get(f"{BASE_URL}/health", timeout=10)
 
                 # Extract rate limit headers
-                for header in ["x-ratelimit-limit-minute", "x-ratelimit-remaining-minute",
-                              "x-ratelimit-limit-hour", "x-ratelimit-remaining-hour"]:
+                for header in [
+                    "x-ratelimit-limit-minute",
+                    "x-ratelimit-remaining-minute",
+                    "x-ratelimit-limit-hour",
+                    "x-ratelimit-remaining-hour",
+                ]:
                     if header in response.headers:
                         rate_limit_headers[header] = response.headers[header]
 
@@ -124,6 +133,7 @@ async def test_rate_limiting():
             print(f"❌ Error: {e}")
             return False
 
+
 async def test_cors_headers():
     """Test CORS headers"""
     print_header("Test 4: CORS Headers")
@@ -133,7 +143,7 @@ async def test_cors_headers():
             response = await client.options(
                 f"{BASE_URL}/api/v1/projects",
                 headers={"Origin": "http://localhost:3000"},
-                timeout=10
+                timeout=10,
             )
 
             print(f"✅ Status Code: {response.status_code}")
@@ -143,7 +153,7 @@ async def test_cors_headers():
                 "access-control-allow-credentials",
                 "access-control-allow-methods",
                 "access-control-allow-headers",
-                "access-control-expose-headers"
+                "access-control-expose-headers",
             }
 
             found_headers = set()
@@ -163,6 +173,7 @@ async def test_cors_headers():
             print(f"❌ Error: {e}")
             return False
 
+
 async def test_compression():
     """Test GZip compression"""
     print_header("Test 5: Response Compression")
@@ -172,7 +183,7 @@ async def test_compression():
             response = await client.get(
                 f"{BASE_URL}/api/v1/projects",
                 headers={"Accept-Encoding": "gzip"},
-                timeout=10
+                timeout=10,
             )
 
             print(f"✅ Status Code: {response.status_code}")
@@ -190,12 +201,13 @@ async def test_compression():
             print(f"❌ Error: {e}")
             return False
 
+
 async def main():
     """Run all middleware tests"""
-    print("\n" + "="*70)
+    print("\n" + "=" * 70)
     print("  🧪 FastNext Middleware Testing Suite")
     print("  Testing: Cache, Rate Limiting, CORS, and Compression")
-    print("="*70)
+    print("=" * 70)
     print(f"\n⏰ Test Started: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     print(f"🎯 Target: {BASE_URL}")
 
@@ -229,9 +241,10 @@ async def main():
     print("   - If Redis is not configured, those tests will show warnings")
     print("   - This is expected behavior in development without Redis")
 
-    print("\n" + "="*70)
+    print("\n" + "=" * 70)
     print(f"⏰ Test Completed: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-    print("="*70 + "\n")
+    print("=" * 70 + "\n")
+
 
 if __name__ == "__main__":
     try:
@@ -241,4 +254,5 @@ if __name__ == "__main__":
     except Exception as e:
         print(f"\n\n❌ Fatal error: {e}")
         import traceback
+
         traceback.print_exc()

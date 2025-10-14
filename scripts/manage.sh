@@ -60,13 +60,13 @@ start_backend() {
 
     print_status "Starting backend..."
     cd "$BACKEND_DIR"
-    
+
     # Check if virtual environment exists
     if [ ! -d "venv" ]; then
         print_error "Virtual environment not found. Please create one first: python -m venv venv"
         return 1
     fi
-    
+
     # Activate virtual environment and start server
     source venv/bin/activate
     nohup python main.py > /dev/null 2>&1 &
@@ -84,19 +84,19 @@ start_frontend() {
 
     print_status "Starting frontend..."
     cd "$FRONTEND_DIR"
-    
+
     # Check if node_modules exists
     if [ ! -d "node_modules" ]; then
         print_status "Installing frontend dependencies..."
         npm install
     fi
-    
+
     # Check if build exists, if not, create it
     if [ ! -d ".next" ]; then
         print_status "Building frontend for production..."
         npm run build
     fi
-    
+
     nohup npm start > /dev/null 2>&1 &
     echo $! > "$FRONTEND_PID_FILE"
     cd ..
@@ -106,7 +106,7 @@ start_frontend() {
 # Start development servers
 start_dev() {
     print_status "Starting development servers..."
-    
+
     # Start backend in dev mode
     if is_running "$BACKEND_PID_FILE"; then
         print_warning "Backend is already running"
@@ -122,7 +122,7 @@ start_dev() {
         cd ..
         print_success "Backend dev server started (PID: $(cat $BACKEND_PID_FILE))"
     fi
-    
+
     # Start frontend in dev mode
     if is_running "$FRONTEND_PID_FILE"; then
         print_warning "Frontend is already running"
@@ -168,7 +168,7 @@ stop_frontend() {
 # Build project
 build_project() {
     print_status "Building project..."
-    
+
     # Build frontend
     print_status "Building frontend..."
     cd "$FRONTEND_DIR"
@@ -179,7 +179,7 @@ build_project() {
     npm run build
     cd ..
     print_success "Frontend build completed"
-    
+
     # Backend doesn't need building, but we can run tests
     print_status "Running backend tests..."
     cd "$BACKEND_DIR"
@@ -193,14 +193,14 @@ build_project() {
         print_warning "Backend virtual environment not found, skipping tests"
     fi
     cd ..
-    
+
     print_success "Build process completed"
 }
 
 # Verify project
 verify_project() {
     print_status "Verifying project..."
-    
+
     # Verify frontend
     print_status "Verifying frontend..."
     cd "$FRONTEND_DIR"
@@ -208,15 +208,15 @@ verify_project() {
         print_status "Installing frontend dependencies..."
         npm install
     fi
-    
+
     print_status "Running frontend linter..."
     npm run lint || print_warning "Frontend linting issues found"
-    
+
     print_status "Running frontend tests..."
     npm run test || print_warning "Some frontend tests failed"
-    
+
     cd ..
-    
+
     # Verify backend
     print_status "Verifying backend..."
     cd "$BACKEND_DIR"
@@ -225,30 +225,30 @@ verify_project() {
         if [ -f "requirements.txt" ]; then
             pip install -r requirements.txt > /dev/null 2>&1
         fi
-        
+
         print_status "Running backend linter..."
         python -m pylint app/ || print_warning "Backend linting issues found"
-        
+
         print_status "Running backend tests..."
         python -m pytest tests/ || print_warning "Some backend tests failed"
     else
         print_warning "Backend virtual environment not found, skipping verification"
     fi
     cd ..
-    
+
     print_success "Project verification completed"
 }
 
 # Show status
 show_status() {
     print_status "Project Status:"
-    
+
     if is_running "$BACKEND_PID_FILE"; then
         print_success "Backend: Running (PID: $(cat $BACKEND_PID_FILE))"
     else
         print_warning "Backend: Stopped"
     fi
-    
+
     if is_running "$FRONTEND_PID_FILE"; then
         print_success "Frontend: Running (PID: $(cat $FRONTEND_PID_FILE))"
     else

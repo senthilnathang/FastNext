@@ -38,17 +38,17 @@ class ActivityLog(Base):
     # Event identification
     event_id = Column(String(36), unique=True, index=True)
     correlation_id = Column(String(36), index=True)
-    
+
     # Event categorization
     category = Column(Enum(EventCategory), nullable=False, index=True)
     action = Column(Enum(ActivityAction), nullable=False, index=True)
-    
+
     # Enhanced metadata
     metadata = Column(JSON, nullable=True)
     request_headers = Column(JSON, nullable=True)
     response_time_ms = Column(Integer, nullable=True)
     risk_score = Column(Integer, nullable=True)
-    
+
     # Geographic and session info
     country_code = Column(String(2), nullable=True)
     city = Column(String(100), nullable=True)
@@ -297,7 +297,7 @@ async def logging_middleware(request: Request, call_next):
     start_time = time.time()
     response = await call_next(request)
     response_time = int((time.time() - start_time) * 1000)
-    
+
     # Log API call
     log_api_call(
         db=get_db_session(),
@@ -307,7 +307,7 @@ async def logging_middleware(request: Request, call_next):
         user_id=getattr(request.state, 'user_id', None),
         username=getattr(request.state, 'username', None)
     )
-    
+
     return response
 ```
 

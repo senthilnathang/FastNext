@@ -63,7 +63,7 @@ class UserCreate(BaseModel):
     email: EmailStr = Field(..., max_length=255)
     username: str = Field(..., min_length=3, max_length=50, regex=r'^[a-zA-Z0-9_-]+$')
     password: str = Field(..., min_length=8, max_length=128)
-    
+
     @validator('password')
     def validate_password_strength(cls, v):
         if not re.search(r'[A-Z]', v):
@@ -145,25 +145,25 @@ from datetime import datetime
 
 class UserService:
     """Service for user-related operations."""
-    
+
     def __init__(self, db: Session):
         self.db = db
-    
+
     async def create_user(
-        self, 
+        self,
         user_data: UserCreate,
         created_by: Optional[int] = None
     ) -> UserResponse:
         """
         Create a new user with validation and security checks.
-        
+
         Args:
             user_data: User creation data
             created_by: ID of user creating this user
-            
+
         Returns:
             Created user information
-            
+
         Raises:
             ValidationError: If user data is invalid
             ConflictError: If user already exists
@@ -171,7 +171,7 @@ class UserService:
         # Validate unique constraints
         if self._user_exists(user_data.email, user_data.username):
             raise ConflictError("User already exists")
-        
+
         # Create user with security defaults
         hashed_password = get_password_hash(user_data.password)
         user = User(
@@ -182,11 +182,11 @@ class UserService:
             is_verified=False,
             created_at=datetime.utcnow()
         )
-        
+
         self.db.add(user)
         self.db.commit()
         self.db.refresh(user)
-        
+
         return UserResponse.from_orm(user)
 ```
 
@@ -214,7 +214,7 @@ async def security_error_handler(request: Request, exc: SecurityError):
         "user_agent": request.headers.get("user-agent"),
         "endpoint": request.url.path
     })
-    
+
     return JSONResponse(
         status_code=403,
         content={"error": "Security violation", "detail": str(exc)}
@@ -226,15 +226,15 @@ async def security_error_handler(request: Request, exc: SecurityError):
 # ✅ Good - Comprehensive database model
 class User(Base, TimestampMixin):
     """User model with security features."""
-    
+
     __tablename__ = "users"
-    
+
     id = Column(Integer, primary_key=True, index=True)
     uuid = Column(UUIDType, unique=True, index=True, default=generate_uuid)
     email = Column(String(255), unique=True, index=True, nullable=False)
     username = Column(String(100), unique=True, index=True, nullable=False)
     hashed_password = Column(String(255), nullable=False)
-    
+
     # Security fields
     is_active = Column(Boolean, default=True, nullable=False)
     is_verified = Column(Boolean, default=False, nullable=False)
@@ -242,17 +242,17 @@ class User(Base, TimestampMixin):
     locked_until = Column(DateTime(timezone=True), nullable=True)
     password_changed_at = Column(DateTime(timezone=True), nullable=True)
     last_login_at = Column(DateTime(timezone=True), nullable=True)
-    
+
     # Audit fields
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
-    
+
     def is_locked(self) -> bool:
         """Check if account is locked."""
         if not self.locked_until:
             return False
         return datetime.utcnow() < self.locked_until
-    
+
     def reset_failed_attempts(self) -> None:
         """Reset failed login attempts."""
         self.failed_login_attempts = 0
@@ -341,16 +341,16 @@ export default function PasswordStrength({
 }: PasswordStrengthProps): JSX.Element {
   const [strength, setStrength] = useState<number>(0);
   const [isValid, setIsValid] = useState<boolean>(false);
-  
+
   useEffect(() => {
     const calculatedStrength = calculatePasswordStrength(password);
     const valid = calculatedStrength >= minStrength;
-    
+
     setStrength(calculatedStrength);
     setIsValid(valid);
     onStrengthChange?.(calculatedStrength, valid);
   }, [password, minStrength, onStrengthChange]);
-  
+
   return (
     <div className="password-strength">
       {/* Component JSX */}
@@ -368,7 +368,7 @@ interface AuthState {
   error: string | null;
 }
 
-type AuthAction = 
+type AuthAction =
   | { type: 'LOGIN_START' }
   | { type: 'LOGIN_SUCCESS'; payload: User }
   | { type: 'LOGIN_FAILURE'; payload: string }
@@ -398,11 +398,11 @@ function authReducer(state: AuthState, action: AuthAction): AuthState {
 // ✅ Good - Secure API client
 class ApiClient {
   private baseURL: string;
-  
+
   constructor(baseURL: string) {
     this.baseURL = baseURL;
   }
-  
+
   private getAuthHeaders(): HeadersInit {
     const token = localStorage.getItem('access_token');
     return {
@@ -412,11 +412,11 @@ class ApiClient {
       'X-CSRF-Token': this.getCSRFToken()
     };
   }
-  
+
   private getCSRFToken(): string {
     return document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
   }
-  
+
   async request<T>(
     endpoint: string,
     options: RequestInit = {}
@@ -430,11 +430,11 @@ class ApiClient {
         },
         credentials: 'include'
       });
-      
+
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       }
-      
+
       return await response.json();
     } catch (error) {
       throw new Error(`API request failed: ${error.message}`);
@@ -460,17 +460,17 @@ CREATE TABLE users (
     email VARCHAR(255) UNIQUE NOT NULL,
     username VARCHAR(100) UNIQUE NOT NULL,
     hashed_password VARCHAR(255) NOT NULL,
-    
+
     -- Security fields
     is_active BOOLEAN NOT NULL DEFAULT true,
     is_verified BOOLEAN NOT NULL DEFAULT false,
     failed_login_attempts INTEGER NOT NULL DEFAULT 0,
     locked_until TIMESTAMP WITH TIME ZONE,
-    
+
     -- Audit fields
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE,
-    
+
     -- Constraints
     CONSTRAINT chk_email_format CHECK (email ~* '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$'),
     CONSTRAINT chk_username_format CHECK (username ~* '^[a-zA-Z0-9_-]+$'),
@@ -506,10 +506,10 @@ def upgrade():
     # Add security fields
     op.add_column('users', sa.Column('failed_login_attempts', sa.Integer(), nullable=False, server_default='0'))
     op.add_column('users', sa.Column('locked_until', sa.DateTime(timezone=True), nullable=True))
-    
+
     # Add constraints
     op.create_check_constraint('chk_failed_attempts', 'users', 'failed_login_attempts >= 0')
-    
+
     # Create indexes
     op.create_index('idx_users_active', 'users', ['is_active'], postgresql_where=sa.text('is_active = true'))
 
@@ -608,30 +608,30 @@ from sqlalchemy.orm import Session
 
 class TestUserAuthentication:
     """Test user authentication endpoints."""
-    
+
     def test_successful_login(self, client: TestClient, test_user: User):
         """Test successful user login."""
         response = client.post("/api/v1/auth/login", json={
             "username": test_user.username,
             "password": "test_password"
         })
-        
+
         assert response.status_code == 200
         data = response.json()
         assert "access_token" in data
         assert "refresh_token" in data
         assert data["token_type"] == "bearer"
-    
+
     def test_invalid_credentials(self, client: TestClient):
         """Test login with invalid credentials."""
         response = client.post("/api/v1/auth/login", json={
             "username": "nonexistent",
             "password": "wrong_password"
         })
-        
+
         assert response.status_code == 401
         assert "Incorrect username or password" in response.json()["detail"]
-    
+
     def test_rate_limiting(self, client: TestClient):
         """Test rate limiting on login endpoint."""
         # Make multiple failed attempts
@@ -640,12 +640,12 @@ class TestUserAuthentication:
                 "username": "test",
                 "password": "wrong"
             })
-        
+
         response = client.post("/api/v1/auth/login", json={
             "username": "test",
             "password": "wrong"
         })
-        
+
         assert response.status_code == 429  # Too Many Requests
 ```
 
@@ -664,42 +664,42 @@ describe('LoginForm', () => {
       </AuthProvider>
     );
   };
-  
+
   test('renders login form with all required fields', () => {
     renderLoginForm();
-    
+
     expect(screen.getByLabelText(/username/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/password/i)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /sign in/i })).toBeInTheDocument();
   });
-  
+
   test('shows validation errors for empty fields', async () => {
     renderLoginForm();
-    
+
     const submitButton = screen.getByRole('button', { name: /sign in/i });
     fireEvent.click(submitButton);
-    
+
     await waitFor(() => {
       expect(screen.getByText(/username is required/i)).toBeInTheDocument();
       expect(screen.getByText(/password is required/i)).toBeInTheDocument();
     });
   });
-  
+
   test('handles successful login', async () => {
     const mockLogin = jest.fn().mockResolvedValue(undefined);
     // Mock the auth context
-    
+
     renderLoginForm();
-    
+
     fireEvent.change(screen.getByLabelText(/username/i), {
       target: { value: 'testuser' }
     });
     fireEvent.change(screen.getByLabelText(/password/i), {
       target: { value: 'password123' }
     });
-    
+
     fireEvent.click(screen.getByRole('button', { name: /sign in/i }));
-    
+
     await waitFor(() => {
       expect(mockLogin).toHaveBeenCalledWith('testuser', 'password123');
     });
@@ -715,47 +715,47 @@ describe('LoginForm', () => {
 class SecurityService:
     """
     Service for handling security-related operations.
-    
+
     This service provides methods for authentication, authorization,
     threat detection, and security event logging.
-    
+
     Attributes:
         db: Database session
         logger: Logger instance
         config: Security configuration
-    
+
     Example:
         >>> service = SecurityService(db_session)
         >>> service.log_security_event("LOGIN_FAILED", user_id=123)
     """
-    
+
     def authenticate_user(
-        self, 
-        username: str, 
+        self,
+        username: str,
         password: str,
         ip_address: Optional[str] = None
     ) -> Optional[User]:
         """
         Authenticate user with username and password.
-        
+
         Performs comprehensive authentication including:
         - Password verification
         - Account status checks
         - Rate limiting validation
         - Security event logging
-        
+
         Args:
             username: Username or email address
             password: Plain text password
             ip_address: Client IP address for logging
-            
+
         Returns:
             User object if authentication successful, None otherwise
-            
+
         Raises:
             AccountLockedException: If account is locked
             RateLimitExceededException: If rate limit exceeded
-            
+
         Example:
             >>> user = service.authenticate_user("john_doe", "password123")
             >>> if user:
@@ -774,17 +774,17 @@ class SecurityService:
     summary="User Authentication",
     description="""
     **Authenticate user and obtain JWT tokens**
-    
+
     This endpoint authenticates a user with username/password and returns:
     - `access_token`: JWT token for API authentication (expires in 1 hour)
     - `refresh_token`: Token for obtaining new access tokens (expires in 7 days)
-    
+
     **Security Features:**
     - Rate limiting (5 attempts per minute)
     - IP address tracking and logging
     - Comprehensive audit logging
     - Account lockout protection
-    
+
     **Usage:**
     1. Send username and password
     2. Store both tokens securely
@@ -903,7 +903,7 @@ const UserList = memo(({
 }: UserListProps) => {
   // Memoize expensive filtering
   const filteredUsers = useMemo(() => {
-    return users.filter(user => 
+    return users.filter(user =>
       user.name.toLowerCase().includes(searchTerm.toLowerCase())
     );
   }, [users, searchTerm]);
@@ -1066,20 +1066,20 @@ async def get_users(
 ):
     cache_key = "users:all"
     cached_users = await cache.get(cache_key)
-    
+
     if cached_users:
         return json.loads(cached_users)
-    
+
     users = db.query(User).filter(User.is_active == True).all()
     user_responses = [UserResponse.from_orm(user) for user in users]
-    
+
     # Cache the result
     await cache.setex(
-        cache_key, 
+        cache_key,
         300,  # 5 minutes
         json.dumps([user.dict() for user in user_responses])
     )
-    
+
     return user_responses
 ```
 
@@ -1098,7 +1098,7 @@ class UserService:
             )\
             .filter(User.is_active == True)\
             .all()
-    
+
     @lru_cache(maxsize=128)
     def get_user_permissions(self, user_id: int, db: Session) -> Set[str]:
         # Cache expensive permission calculations
@@ -1106,14 +1106,14 @@ class UserService:
             .options(joinedload(User.roles).joinedload(Role.permissions))\
             .filter(User.id == user_id)\
             .first()
-        
+
         if not user:
             return set()
-        
+
         permissions = set()
         for role in user.roles:
             permissions.update(perm.name for perm in role.permissions)
-        
+
         return permissions
 ```
 
@@ -1137,7 +1137,7 @@ async def send_notification(
         notification.message,
         notification.type
     )
-    
+
     return {"message": "Notification queued"}
 
 async def send_user_notification(user_id: int, message: str, type: str):
@@ -1159,7 +1159,7 @@ function ExpensiveComponent() {
   useEffect(() => {
     const measure = performance.measureRenderTime('ExpensiveComponent');
     measure.start();
-    
+
     return () => {
       measure.end();
       memoryMonitor.logUsage('ExpensiveComponent');
@@ -1220,7 +1220,7 @@ const features = {
 };
 
 function FeatureLoader({ feature }: { feature: keyof typeof features }) {
-  const FeatureComponent = useMemo(() => 
+  const FeatureComponent = useMemo(() =>
     lazy(features[feature]), [feature]
   );
 

@@ -1,15 +1,16 @@
-from typing import Any, List
-from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.orm import Session
 import logging
+from typing import Any, List
 
 from app.auth.deps import get_current_active_user
-from app.services.permission_service import PermissionService
 from app.db.session import get_db
 from app.models.user import User
 from app.models.workflow import WorkflowState
-from app.schemas.workflow import WorkflowState as WorkflowStateSchema, WorkflowStateCreate, WorkflowStateUpdate
 from app.schemas.common import ListResponse
+from app.schemas.workflow import WorkflowState as WorkflowStateSchema
+from app.schemas.workflow import WorkflowStateCreate, WorkflowStateUpdate
+from app.services.permission_service import PermissionService
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.orm import Session
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -27,28 +28,25 @@ def read_workflow_states(
     """Get workflow states"""
     try:
         query = db.query(WorkflowState)
-        
+
         if search:
             search_term = f"%{search}%"
             query = query.filter(
-                (WorkflowState.name.ilike(search_term)) |
-                (WorkflowState.label.ilike(search_term))
+                (WorkflowState.name.ilike(search_term))
+                | (WorkflowState.label.ilike(search_term))
             )
-        
+
         total = query.count()
         workflow_states = query.offset(skip).limit(limit).all()
-        
+
         return ListResponse.paginate(
-            items=workflow_states,
-            total=total,
-            skip=skip,
-            limit=limit
+            items=workflow_states, total=total, skip=skip, limit=limit
         )
     except Exception as e:
         logger.error(f"Error fetching workflow states: {e}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Error fetching workflow states"
+            detail="Error fetching workflow states",
         )
 
 
@@ -62,20 +60,26 @@ def create_workflow_state(
 ) -> Any:
     """Create workflow state"""
     # Check if user has permission to create workflow states
-    if not PermissionService.check_permission(db, current_user.id, "create", "workflow_state"):
+    if not PermissionService.check_permission(
+        db, current_user.id, "create", "workflow_state"
+    ):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Insufficient permissions to create workflow states"
+            detail="Insufficient permissions to create workflow states",
         )
-    
+
     # Check if workflow state name already exists
-    existing_state = db.query(WorkflowState).filter(WorkflowState.name == workflow_state_in.name).first()
+    existing_state = (
+        db.query(WorkflowState)
+        .filter(WorkflowState.name == workflow_state_in.name)
+        .first()
+    )
     if existing_state:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Workflow state with this name already exists"
+            detail="Workflow state with this name already exists",
         )
-    
+
     workflow_state = WorkflowState(**workflow_state_in.dict())
     db.add(workflow_state)
     db.commit()
@@ -91,7 +95,9 @@ def read_workflow_state(
     current_user: User = Depends(get_current_active_user),
 ) -> Any:
     """Get workflow state by ID"""
-    workflow_state = db.query(WorkflowState).filter(WorkflowState.id == workflow_state_id).first()
+    workflow_state = (
+        db.query(WorkflowState).filter(WorkflowState.id == workflow_state_id).first()
+    )
     if not workflow_state:
         raise HTTPException(status_code=404, detail="Workflow state not found")
     return workflow_state
@@ -107,20 +113,24 @@ def update_workflow_state(
 ) -> Any:
     """Update workflow state"""
     # Check if user has permission to update workflow states
-    if not PermissionService.check_permission(db, current_user.id, "update", "workflow_state"):
+    if not PermissionService.check_permission(
+        db, current_user.id, "update", "workflow_state"
+    ):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Insufficient permissions to update workflow states"
+            detail="Insufficient permissions to update workflow states",
         )
-    
-    workflow_state = db.query(WorkflowState).filter(WorkflowState.id == workflow_state_id).first()
+
+    workflow_state = (
+        db.query(WorkflowState).filter(WorkflowState.id == workflow_state_id).first()
+    )
     if not workflow_state:
         raise HTTPException(status_code=404, detail="Workflow state not found")
-    
+
     workflow_state_data = workflow_state_in.dict(exclude_unset=True)
     for field, value in workflow_state_data.items():
         setattr(workflow_state, field, value)
-    
+
     db.add(workflow_state)
     db.commit()
     db.refresh(workflow_state)
@@ -136,17 +146,21 @@ def delete_workflow_state(
 ) -> Any:
     """Delete workflow state"""
     # Check if user has permission to delete workflow states
-    if not PermissionService.check_permission(db, current_user.id, "delete", "workflow_state"):
+    if not PermissionService.check_permission(
+        db, current_user.id, "delete", "workflow_state"
+    ):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Insufficient permissions to delete workflow states"
+            detail="Insufficient permissions to delete workflow states",
         )
-    
-    workflow_state = db.query(WorkflowState).filter(WorkflowState.id == workflow_state_id).first()
+
+    workflow_state = (
+        db.query(WorkflowState).filter(WorkflowState.id == workflow_state_id).first()
+    )
     if not workflow_state:
         raise HTTPException(status_code=404, detail="Workflow state not found")
-    
+
     db.delete(workflow_state)
     db.commit()
-    
+
     return {"message": "Workflow state deleted successfully"}

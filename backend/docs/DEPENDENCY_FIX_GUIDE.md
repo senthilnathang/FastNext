@@ -2,14 +2,14 @@
 
 ## Issue Summary
 
-**Problem**: Missing Python dependencies for Dynamic Import/Export system  
+**Problem**: Missing Python dependencies for Dynamic Import/Export system
 **Error**: `ModuleNotFoundError: No module named 'aiofiles'` (and others)
 
 ## Root Cause
 
 The system is missing several dependencies required by the Import/Export functionality:
 - `aiofiles` - Async file operations
-- `openpyxl` - Excel file handling  
+- `openpyxl` - Excel file handling
 - `xlsxwriter` - Excel file writing
 - `xlrd` - Excel file reading
 - `lxml` - XML processing
@@ -101,7 +101,7 @@ aiofiles==23.2.0  # Async file operations
 **Solution**: Make sure virtual environment is activated
 
 ### Issue: SSL or network errors during pip install
-**Solution**: 
+**Solution**:
 ```bash
 pip install --trusted-host pypi.org --trusted-host pypi.python.org --trusted-host files.pythonhosted.org openpyxl xlsxwriter xlrd lxml aiofiles
 ```
@@ -127,7 +127,7 @@ After successful setup:
 ## Files Created/Modified
 
 - ✅ `requirements/base.txt` - Added missing dependencies
-- ✅ `check_dependencies.py` - Dependency verification script  
+- ✅ `check_dependencies.py` - Dependency verification script
 - ✅ `setup_venv_and_deps.py` - Environment setup script
 - ✅ `DEPENDENCY_FIX_GUIDE.md` - This guide
 - ✅ Fixed syntax error in `app/api/v1/data_import_export.py`

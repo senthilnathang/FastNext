@@ -1,7 +1,16 @@
-from sqlalchemy import Boolean, Column, Integer, String, Text, DateTime, ForeignKey, JSON
-from sqlalchemy.sql import func
-from sqlalchemy.orm import relationship
 from app.db.base import Base
+from sqlalchemy import (
+    JSON,
+    Boolean,
+    Column,
+    DateTime,
+    ForeignKey,
+    Integer,
+    String,
+    Text,
+)
+from sqlalchemy.orm import relationship
+from sqlalchemy.sql import func
 
 
 class Project(Base):
@@ -18,5 +27,9 @@ class Project(Base):
 
     owner = relationship("User", back_populates="projects")
     pages = relationship("Page", back_populates="project", cascade="all, delete-orphan")
-    components = relationship("Component", back_populates="project", cascade="all, delete-orphan")
-    members = relationship("ProjectMember", back_populates="project", cascade="all, delete-orphan")
+    components = relationship(
+        "Component", back_populates="project", cascade="all, delete-orphan"
+    )
+    members = relationship(
+        "ProjectMember", back_populates="project", cascade="all, delete-orphan"
+    )

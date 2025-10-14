@@ -1,32 +1,42 @@
-from pydantic import BaseModel, Field, EmailStr, HttpUrl, validator
-from typing import Optional, List, Dict, Any
-from datetime import datetime, date
+from datetime import date, datetime
+from typing import Any, Dict, List, Optional
 
 from app.schemas.base import BaseResponseModel
+from pydantic import BaseModel, EmailStr, Field, HttpUrl, validator
+
 
 class SalesBase(BaseModel):
     """Base schema for Sales"""
+
     name: str
+
 
 class SalesCreate(SalesBase):
     """Schema for creating Sales"""
+
     name: str
+
 
 class SalesUpdate(BaseModel):
     """Schema for updating Sales"""
+
     name: Optional[str] = None
+
 
 class SalesResponse(SalesBase, BaseResponseModel):
     """Schema for Sales responses"""
+
     id: int
     name: str
     created_at: datetime
     updated_at: Optional[datetime] = None
-    
+
     model_config = {"from_attributes": True}
+
 
 class SalesListResponse(BaseModel):
     """Schema for Sales list responses"""
+
     items: List[SalesResponse]
     total: int
     skip: int

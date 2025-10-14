@@ -1,7 +1,8 @@
-from typing import Optional, Dict, Any
-from pydantic import BaseModel, Field
 from datetime import datetime
 from enum import Enum
+from typing import Any, Dict, Optional
+
+from pydantic import BaseModel, Field
 
 
 class ActivityLevel(str, Enum):
@@ -28,18 +29,32 @@ class ActivityLogBase(BaseModel):
     action: ActivityAction = Field(..., description="The action that was performed")
     entity_type: str = Field(..., max_length=100, description="Type of entity affected")
     entity_id: Optional[int] = Field(None, description="ID of the affected entity")
-    entity_name: Optional[str] = Field(None, max_length=255, description="Name of the affected entity")
+    entity_name: Optional[str] = Field(
+        None, max_length=255, description="Name of the affected entity"
+    )
     description: str = Field(..., description="Description of the activity")
-    level: ActivityLevel = Field(default=ActivityLevel.INFO, description="Severity level of the activity")
-    extra_data: Optional[str] = Field(None, description="Additional metadata as JSON string")
+    level: ActivityLevel = Field(
+        default=ActivityLevel.INFO, description="Severity level of the activity"
+    )
+    extra_data: Optional[str] = Field(
+        None, description="Additional metadata as JSON string"
+    )
 
 
 class ActivityLogCreate(ActivityLogBase):
-    user_id: Optional[int] = Field(None, description="ID of the user who performed the action")
-    ip_address: Optional[str] = Field(None, max_length=45, description="IP address of the request")
+    user_id: Optional[int] = Field(
+        None, description="ID of the user who performed the action"
+    )
+    ip_address: Optional[str] = Field(
+        None, max_length=45, description="IP address of the request"
+    )
     user_agent: Optional[str] = Field(None, description="User agent of the request")
-    request_method: Optional[str] = Field(None, max_length=10, description="HTTP method")
-    request_path: Optional[str] = Field(None, max_length=500, description="Request path")
+    request_method: Optional[str] = Field(
+        None, max_length=10, description="HTTP method"
+    )
+    request_path: Optional[str] = Field(
+        None, max_length=500, description="Request path"
+    )
     status_code: Optional[int] = Field(None, description="HTTP status code")
 
 
@@ -58,7 +73,7 @@ class ActivityLogResponse(ActivityLogBase):
     request_path: Optional[str]
     status_code: Optional[int]
     created_at: datetime
-    
+
     class Config:
         from_attributes = True
 

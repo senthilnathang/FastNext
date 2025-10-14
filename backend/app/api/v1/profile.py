@@ -1,22 +1,28 @@
+import json
+from datetime import datetime
 from typing import Any
-from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.orm import Session
 
 from app.auth.deps import get_current_active_user
 from app.core import security
 from app.db.session import get_db
+from app.models.activity_log import ActivityAction, ActivityLevel, ActivityLog
 from app.models.user import User
-from app.models.activity_log import ActivityLog, ActivityAction, ActivityLevel
 from app.schemas.profile import (
-    ProfileResponse, ProfileUpdate, EmailUpdate, PasswordChange, 
-    UsernameUpdate, AccountDeactivation, ProfileStats, QuickAction
+    AccountDeactivation,
+    EmailUpdate,
+    PasswordChange,
+    ProfileResponse,
+    ProfileStats,
+    ProfileUpdate,
+    QuickAction,
+    UsernameUpdate,
 )
-from app.services.user_service import UserService
 from app.services.password_service import PasswordService, PasswordValidationError
+from app.services.user_service import UserService
 from app.utils.activity_logger import log_activity
 from app.utils.audit_logger import log_audit_trail
-import json
-from datetime import datetime
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.orm import Session
 
 router = APIRouter()
 
@@ -44,20 +50,21 @@ def update_profile(
             "bio": current_user.bio,
             "location": current_user.location,
             "website": current_user.website,
-            "avatar_url": current_user.avatar_url
+            "avatar_url": current_user.avatar_url,
         }
-        
+
         # Update profile fields
         update_data = profile_in.model_dump(exclude_unset=True)
         for field, value in update_data.items():
             setattr(current_user, field, value)
-        
+
         db.add(current_user)
         db.commit()
         db.refresh(current_user)
-        
+
         # Log activity
         from app.models.activity_log import EventCategory
+
         log_activity(
             db=db,
             user_id=current_user.id,
@@ -67,20 +74,24 @@ def update_profile(
             entity_name=current_user.full_name or current_user.username,
             description=f"Updated profile information",
             level=ActivityLevel.INFO,
-            category=EventCategory.USER_MANAGEMENT
+            category=EventCategory.USER_MANAGEMENT,
         )
-        
+
         # Log audit trail
         new_values = {
             "full_name": current_user.full_name,
             "bio": current_user.bio,
             "location": current_user.location,
             "website": current_user.website,
-            "avatar_url": current_user.avatar_url
+            "avatar_url": current_user.avatar_url,
         }
-        
-        changed_fields = [key for key in update_data.keys() if old_values.get(key) != new_values.get(key)]
-        
+
+        changed_fields = [
+            key
+            for key in update_data.keys()
+            if old_values.get(key) != new_values.get(key)
+        ]
+
         if changed_fields:
             log_audit_trail(
                 db=db,
@@ -91,16 +102,16 @@ def update_profile(
                 operation="UPDATE",
                 old_values=json.dumps(old_values),
                 new_values=json.dumps(new_values),
-                changed_fields=json.dumps(changed_fields)
+                changed_fields=json.dumps(changed_fields),
             )
-        
+
         return current_user
-        
+
     except Exception as e:
         db.rollback()
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to update profile: {str(e)}"
+            detail=f"Failed to update profile: {str(e)}",
         )
 
 
@@ -113,29 +124,29 @@ def update_email(
 ) -> Any:
     """Update user's email address"""
     # Verify current password
-    if not security.verify_password(email_update.password, current_user.hashed_password):
+    if not security.verify_password(
+        email_update.password, current_user.hashed_password
+    ):
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Incorrect password"
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Incorrect password"
         )
-    
+
     # Check if email already exists
     existing_user = db.query(User).filter(User.email == email_update.email).first()
     if existing_user and existing_user.id != current_user.id:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Email already registered"
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Email already registered"
         )
-    
+
     try:
         old_email = current_user.email
         current_user.email = email_update.email
         current_user.is_verified = False  # Require re-verification for new email
-        
+
         db.add(current_user)
         db.commit()
         db.refresh(current_user)
-        
+
         # Log activity
         log_activity(
             db=db,
@@ -146,16 +157,16 @@ def update_email(
             entity_name=current_user.username,
             description=f"Changed email from {old_email} to {email_update.email}",
             level=ActivityLevel.WARNING,
-            category=EventCategory.USER_MANAGEMENT
+            category=EventCategory.USER_MANAGEMENT,
         )
-        
+
         return current_user
-        
+
     except Exception as e:
         db.rollback()
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to update email: {str(e)}"
+            detail=f"Failed to update email: {str(e)}",
         )
 
 
@@ -168,28 +179,30 @@ def change_password(
 ) -> Any:
     """Change user's password"""
     # Verify current password
-    if not security.verify_password(password_change.current_password, current_user.hashed_password):
+    if not security.verify_password(
+        password_change.current_password, current_user.hashed_password
+    ):
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Incorrect current password"
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Incorrect current password"
         )
 
     # Check if new password is different from current
-    if security.verify_password(password_change.new_password, current_user.hashed_password):
+    if security.verify_password(
+        password_change.new_password, current_user.hashed_password
+    ):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="New password must be different from current password"
+            detail="New password must be different from current password",
         )
 
     # Validate new password against security policies
     password_service = PasswordService(db)
     try:
-        password_service.validate_password_policy(password_change.new_password, current_user)
-    except PasswordValidationError as e:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=str(e)
+        password_service.validate_password_policy(
+            password_change.new_password, current_user
         )
+    except PasswordValidationError as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
 
     try:
         # Hash the new password
@@ -220,7 +233,7 @@ def change_password(
             entity_name=current_user.username,
             description="Password changed successfully",
             level=ActivityLevel.WARNING,
-            category=EventCategory.SECURITY
+            category=EventCategory.SECURITY,
         )
 
         return {"message": "Password changed successfully"}
@@ -229,7 +242,7 @@ def change_password(
         db.rollback()
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to change password: {str(e)}"
+            detail=f"Failed to change password: {str(e)}",
         )
 
 
@@ -242,28 +255,30 @@ def update_username(
 ) -> Any:
     """Update user's username"""
     # Verify current password
-    if not security.verify_password(username_update.password, current_user.hashed_password):
+    if not security.verify_password(
+        username_update.password, current_user.hashed_password
+    ):
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Incorrect password"
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Incorrect password"
         )
-    
+
     # Check if username already exists
-    existing_user = db.query(User).filter(User.username == username_update.username).first()
+    existing_user = (
+        db.query(User).filter(User.username == username_update.username).first()
+    )
     if existing_user and existing_user.id != current_user.id:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Username already taken"
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Username already taken"
         )
-    
+
     try:
         old_username = current_user.username
         current_user.username = username_update.username
-        
+
         db.add(current_user)
         db.commit()
         db.refresh(current_user)
-        
+
         # Log activity
         log_activity(
             db=db,
@@ -274,16 +289,16 @@ def update_username(
             entity_name=current_user.username,
             description=f"Changed username from {old_username} to {username_update.username}",
             level=ActivityLevel.INFO,
-            category=EventCategory.USER_MANAGEMENT
+            category=EventCategory.USER_MANAGEMENT,
         )
-        
+
         return current_user
-        
+
     except Exception as e:
         db.rollback()
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to update username: {str(e)}"
+            detail=f"Failed to update username: {str(e)}",
         )
 
 
@@ -296,27 +311,32 @@ def get_profile_stats(
     try:
         # Get user statistics (you'll need to implement these queries based on your models)
         projects_count = len(current_user.projects) if current_user.projects else 0
-        
+
         # Get last activity from activity logs
-        last_activity_log = db.query(ActivityLog).filter(
-            ActivityLog.user_id == current_user.id
-        ).order_by(ActivityLog.created_at.desc()).first()
-        
-        account_age_days = (datetime.utcnow() - current_user.created_at.replace(tzinfo=None)).days
-        
+        last_activity_log = (
+            db.query(ActivityLog)
+            .filter(ActivityLog.user_id == current_user.id)
+            .order_by(ActivityLog.created_at.desc())
+            .first()
+        )
+
+        account_age_days = (
+            datetime.utcnow() - current_user.created_at.replace(tzinfo=None)
+        ).days
+
         return ProfileStats(
             projects_count=projects_count,
             components_created=0,  # Implement based on your component model
-            pages_created=0,      # Implement based on your page model
+            pages_created=0,  # Implement based on your page model
             last_activity=last_activity_log.created_at if last_activity_log else None,
             member_since=current_user.created_at,
-            account_age_days=account_age_days
+            account_age_days=account_age_days,
         )
-        
+
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to get profile stats: {str(e)}"
+            detail=f"Failed to get profile stats: {str(e)}",
         )
 
 
@@ -334,7 +354,7 @@ def get_quick_actions(
             action_type="modal",
             endpoint="/api/v1/profile/me",
             method="PUT",
-            category="profile"
+            category="profile",
         ),
         QuickAction(
             id="change_password",
@@ -345,7 +365,7 @@ def get_quick_actions(
             endpoint="/api/v1/profile/me/password",
             method="PUT",
             requires_confirmation=True,
-            category="security"
+            category="security",
         ),
         QuickAction(
             id="security_settings",
@@ -354,7 +374,7 @@ def get_quick_actions(
             icon="shield",
             action_type="navigate",
             endpoint="/security",
-            category="security"
+            category="security",
         ),
         QuickAction(
             id="activity_log",
@@ -363,7 +383,7 @@ def get_quick_actions(
             icon="activity",
             action_type="navigate",
             endpoint="/activity",
-            category="monitoring"
+            category="monitoring",
         ),
         QuickAction(
             id="create_project",
@@ -373,7 +393,7 @@ def get_quick_actions(
             action_type="modal",
             endpoint="/api/v1/projects",
             method="POST",
-            category="project"
+            category="project",
         ),
         QuickAction(
             id="export_data",
@@ -383,10 +403,10 @@ def get_quick_actions(
             action_type="modal",
             endpoint="/api/v1/profile/me/export",
             method="POST",
-            category="data"
-        )
+            category="data",
+        ),
     ]
-    
+
     return quick_actions
 
 
@@ -399,17 +419,18 @@ def deactivate_account(
 ) -> Any:
     """Deactivate user account"""
     # Verify current password
-    if not security.verify_password(deactivation.password, current_user.hashed_password):
+    if not security.verify_password(
+        deactivation.password, current_user.hashed_password
+    ):
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Incorrect password"
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Incorrect password"
         )
-    
+
     try:
         current_user.is_active = False
         db.add(current_user)
         db.commit()
-        
+
         # Log activity
         log_activity(
             db=db,
@@ -423,15 +444,15 @@ def deactivate_account(
             category=EventCategory.USER_MANAGEMENT,
             extra_data={
                 "reason": deactivation.reason,
-                "feedback": deactivation.feedback
-            }
+                "feedback": deactivation.feedback,
+            },
         )
-        
+
         return {"message": "Account deactivated successfully"}
-        
+
     except Exception as e:
         db.rollback()
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to deactivate account: {str(e)}"
+            detail=f"Failed to deactivate account: {str(e)}",
         )

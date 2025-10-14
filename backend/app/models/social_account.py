@@ -1,7 +1,7 @@
-from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Text
-from sqlalchemy.sql import func
-from sqlalchemy.orm import relationship
 from app.db.base import Base
+from sqlalchemy import Column, DateTime, ForeignKey, Integer, String, Text
+from sqlalchemy.orm import relationship
+from sqlalchemy.sql import func
 
 
 class SocialAccount(Base):
@@ -13,8 +13,12 @@ class SocialAccount(Base):
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
 
     # OAuth provider details
-    provider = Column(String(50), nullable=False, index=True)  # 'google', 'github', 'microsoft'
-    provider_id = Column(String(255), nullable=False, index=True)  # Unique ID from provider
+    provider = Column(
+        String(50), nullable=False, index=True
+    )  # 'google', 'github', 'microsoft'
+    provider_id = Column(
+        String(255), nullable=False, index=True
+    )  # Unique ID from provider
     provider_email = Column(String(255), nullable=True)  # Email from provider
 
     # OAuth tokens
@@ -26,7 +30,9 @@ class SocialAccount(Base):
     account_data = Column(Text, nullable=True)  # JSON data from provider (encrypted)
 
     # Timestamps
-    created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+    created_at = Column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
     # Relationships

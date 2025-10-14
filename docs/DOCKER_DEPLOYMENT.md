@@ -96,7 +96,7 @@ The `deploy.sh` script provides comprehensive deployment automation:
 # Development environment
 ./deploy.sh dev
 
-# Production environment  
+# Production environment
 ./deploy.sh prod
 
 # With admin tools
@@ -361,7 +361,7 @@ deploy:
    ```bash
    # Check port usage
    sudo netstat -tulpn | grep :8000
-   
+
    # Change ports in docker-compose
    ports:
      - "8001:8000"  # Host:Container
@@ -383,7 +383,7 @@ deploy:
    ```bash
    # Check database logs
    docker-compose logs postgres
-   
+
    # Test connection
    docker-compose exec backend python -c "from app.db.session import get_db; print('DB OK')"
    ```

@@ -4,7 +4,7 @@
 
 ### 1. **API Layer Restructuring**
 - **Organized API routes** into versioned structure (`/api/v1/`)
-- **Moved all routes** from `app/api/routes/` to `app/api/v1/`  
+- **Moved all routes** from `app/api/routes/` to `app/api/v1/`
 - **Created centralized router** in `app/api/v1/main.py`
 - **Added missing sales router** inclusion
 - **Improved route tagging** with version prefixes
@@ -28,7 +28,7 @@ app/
 │   ├── repositories/     # Repository interfaces
 │   ├── services/        # Domain services
 │   └── value_objects/   # Value objects
-├── application/          # Application Layer (Use Cases)  
+├── application/          # Application Layer (Use Cases)
 │   ├── use_cases/       # Use case implementations
 │   ├── commands/        # Command handlers
 │   ├── queries/         # Query handlers
@@ -56,7 +56,7 @@ app/
 
 ### 1. **Separation of Concerns**
 - **Interface Layer**: HTTP concerns, validation, serialization
-- **Application Layer**: Use cases, orchestration, application logic  
+- **Application Layer**: Use cases, orchestration, application logic
 - **Domain Layer**: Business rules, entities, domain services
 - **Infrastructure Layer**: Database, external APIs, technical details
 
@@ -114,7 +114,7 @@ async def list_users(
 class User:
     def can_access_admin(self) -> bool:
         return self.is_active and self.is_verified
-    
+
     def update_profile(self, full_name: str, email: Email) -> None:
         if not self.is_active:
             raise ValueError("Cannot update inactive user")
@@ -198,7 +198,7 @@ def test_email_validation():
 async def test_create_user_use_case():
     mock_repo = AsyncMock(spec=UserRepository)
     use_case = CreateUserUseCase(mock_repo)
-    
+
     result = await use_case.execute(CreateUserCommand(...))
     assert result.email.value == "test@test.com"
 ```

@@ -676,7 +676,7 @@ railway init
 # Add PostgreSQL service
 railway add postgresql
 
-# Add Redis service  
+# Add Redis service
 railway add redis
 
 # Set environment variables
@@ -1249,12 +1249,12 @@ server {
 
     ssl_certificate /etc/nginx/ssl/cert.pem;
     ssl_certificate_key /etc/nginx/ssl/key.pem;
-    
+
     ssl_protocols TLSv1.2 TLSv1.3;
     ssl_ciphers ECDHE-RSA-AES256-GCM-SHA512:DHE-RSA-AES256-GCM-SHA512:ECDHE-RSA-AES256-GCM-SHA384:DHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-SHA384;
     ssl_prefer_server_ciphers on;
     ssl_session_cache shared:SSL:10m;
-    
+
     add_header Strict-Transport-Security "max-age=63072000; includeSubDomains; preload";
     add_header X-Content-Type-Options nosniff;
     add_header X-Frame-Options DENY;
@@ -1317,22 +1317,22 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
-    
+
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
         python-version: '3.11'
-    
+
     - name: Install dependencies
       run: |
         pip install -r requirements/test.txt
-    
+
     - name: Run tests
       run: |
         pytest --cov=app --cov-report=xml
       env:
         DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test_db
-    
+
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v3
 
@@ -1340,20 +1340,20 @@ jobs:
     needs: test
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
-    
+
     steps:
     - uses: actions/checkout@v3
-    
+
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v2
-    
+
     - name: Login to Container Registry
       uses: docker/login-action@v2
       with:
         registry: ghcr.io
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
-    
+
     - name: Build and push Docker image
       uses: docker/build-push-action@v3
       with:
@@ -1362,7 +1362,7 @@ jobs:
         tags: ghcr.io/${{ github.repository }}/backend:latest
         cache-from: type=gha
         cache-to: type=gha,mode=max
-    
+
     - name: Deploy to Kubernetes
       uses: azure/k8s-deploy@v1
       with:

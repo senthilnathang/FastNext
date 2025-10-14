@@ -4,7 +4,9 @@ Uvicorn configuration for FastNext Framework with performance optimizations
 
 import multiprocessing
 import os
+
 from app.core.config import settings
+
 
 # Calculate optimal worker count
 def get_workers():
@@ -17,6 +19,7 @@ def get_workers():
         # Cap at 8 workers to avoid memory issues
         workers = min(workers, 8)
     return workers
+
 
 # Uvicorn configuration
 bind = f"0.0.0.0:{os.getenv('PORT', '8000')}"
@@ -33,7 +36,7 @@ graceful_timeout = 30  # Graceful shutdown timeout
 # Logging configuration
 loglevel = os.getenv("LOG_LEVEL", "info").lower()
 accesslog = "-"  # Log to stdout
-errorlog = "-"   # Log to stderr
+errorlog = "-"  # Log to stderr
 access_log_format = '%(h)s %(l)s %(u)s %(t)s "%(r)s" %(s)s %(b)s "%(f)s" "%(a)s" %(D)s'
 
 # Performance settings

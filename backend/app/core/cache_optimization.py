@@ -7,86 +7,87 @@ import hashlib
 import json
 import logging
 import time
-from typing import Any, Dict, List, Optional, Set, Callable, TypeVar
-from datetime import datetime, timedelta
-from functools import wraps
 from contextlib import asynccontextmanager
 from dataclasses import dataclass
+from datetime import datetime, timedelta
 from enum import Enum
+from functools import wraps
+from typing import Any, Callable, Dict, List, Optional, Set, TypeVar
 
+from app.core.redis_config import CacheStrategy, cache, redis_manager
+from app.db.session import get_db
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 from sqlalchemy.sql import Select
 
-from app.core.redis_config import cache, redis_manager, CacheStrategy
-from app.db.session import get_db
-
 logger = logging.getLogger(__name__)
 
-T = TypeVar('T')
+T = TypeVar("T")
 
 
 class CacheLevel(Enum):
     """Cache hierarchy levels"""
-    BROWSER = "browser"      # L1: Browser/Service Worker (fastest, smallest)
-    CDN = "cdn"             # L2: CDN Edge Locations
-    REDIS = "redis"         # L3: Redis In-Memory
-    DATABASE = "database"   # L4: Database Query Cache
+
+    BROWSER = "browser"  # L1: Browser/Service Worker (fastest, smallest)
+    CDN = "cdn"  # L2: CDN Edge Locations
+    REDIS = "redis"  # L3: Redis In-Memory
+    DATABASE = "database"  # L4: Database Query Cache
 
 
 @dataclass
 class CachePolicy:
     """Caching policy configuration"""
-    ttl: int                           # Time to live in seconds
-    cache_levels: List[CacheLevel]     # Which cache levels to use
-    invalidation_tags: Set[str]        # Tags for invalidation
-    vary_by: List[str]                 # Vary cache by these factors (user, role, etc.)
-    stale_while_revalidate: int = 0    # Serve stale for N seconds while refreshing
-    stale_if_error: int = 0            # Serve stale for N seconds if error
+
+    ttl: int  # Time to live in seconds
+    cache_levels: List[CacheLevel]  # Which cache levels to use
+    invalidation_tags: Set[str]  # Tags for invalidation
+    vary_by: List[str]  # Vary cache by these factors (user, role, etc.)
+    stale_while_revalidate: int = 0  # Serve stale for N seconds while refreshing
+    stale_if_error: int = 0  # Serve stale for N seconds if error
 
     @staticmethod
-    def browser_cache(ttl: int = 300) -> 'CachePolicy':
+    def browser_cache(ttl: int = 300) -> "CachePolicy":
         """Browser-only cache policy"""
         return CachePolicy(
             ttl=ttl,
             cache_levels=[CacheLevel.BROWSER],
             invalidation_tags=set(),
-            vary_by=['user'],
-            stale_while_revalidate=60
+            vary_by=["user"],
+            stale_while_revalidate=60,
         )
 
     @staticmethod
-    def cdn_cache(ttl: int = 3600) -> 'CachePolicy':
+    def cdn_cache(ttl: int = 3600) -> "CachePolicy":
         """CDN + Browser cache policy"""
         return CachePolicy(
             ttl=ttl,
             cache_levels=[CacheLevel.BROWSER, CacheLevel.CDN],
             invalidation_tags=set(),
             vary_by=[],
-            stale_while_revalidate=300
+            stale_while_revalidate=300,
         )
 
     @staticmethod
-    def redis_cache(ttl: int = 600, tags: Set[str] = None) -> 'CachePolicy':
+    def redis_cache(ttl: int = 600, tags: Set[str] = None) -> "CachePolicy":
         """Redis + Browser cache policy"""
         return CachePolicy(
             ttl=ttl,
             cache_levels=[CacheLevel.BROWSER, CacheLevel.REDIS],
             invalidation_tags=tags or set(),
-            vary_by=['user'],
-            stale_while_revalidate=30
+            vary_by=["user"],
+            stale_while_revalidate=30,
         )
 
     @staticmethod
-    def full_cache(ttl: int = 1800, tags: Set[str] = None) -> 'CachePolicy':
+    def full_cache(ttl: int = 1800, tags: Set[str] = None) -> "CachePolicy":
         """Full multi-level cache policy"""
         return CachePolicy(
             ttl=ttl,
             cache_levels=[CacheLevel.BROWSER, CacheLevel.CDN, CacheLevel.REDIS],
             invalidation_tags=tags or set(),
-            vary_by=['user'],
+            vary_by=["user"],
             stale_while_revalidate=300,
-            stale_if_error=3600
+            stale_if_error=3600,
         )
 
 
@@ -95,7 +96,7 @@ class CacheInvalidationStrategy:
 
     def __init__(self):
         self.dependency_graph: Dict[str, Set[str]] = {}  # tag -> dependent keys
-        self.tag_registry: Dict[str, Set[str]] = {}      # key -> tags
+        self.tag_registry: Dict[str, Set[str]] = {}  # key -> tags
 
     async def register_cache_entry(self, key: str, tags: Set[str]):
         """Register a cache entry with its invalidation tags"""
@@ -108,9 +109,7 @@ class CacheInvalidationStrategy:
 
         # Store in Redis for distributed invalidation
         await cache.set(
-            f"cache_tags:{key}",
-            list(tags),
-            ttl=CacheStrategy.LONG_TERM_TTL
+            f"cache_tags:{key}", list(tags), ttl=CacheStrategy.LONG_TERM_TTL
         )
 
     async def invalidate_by_tags(self, tags: Set[str]) -> int:
@@ -157,9 +156,7 @@ class QueryCacheManager:
         self.query_stats: Dict[str, Dict[str, Any]] = {}
 
     def generate_query_hash(
-        self,
-        query: str,
-        params: Optional[Dict[str, Any]] = None
+        self, query: str, params: Optional[Dict[str, Any]] = None
     ) -> str:
         """Generate a unique hash for a query and its parameters"""
         query_normalized = query.strip().lower()
@@ -176,18 +173,18 @@ class QueryCacheManager:
         query_lower = query.lower()
 
         # Extract from FROM clause
-        if 'from' in query_lower:
-            parts = query_lower.split('from')[1].split('where')[0].split('join')
+        if "from" in query_lower:
+            parts = query_lower.split("from")[1].split("where")[0].split("join")
             for part in parts:
                 tokens = part.strip().split()
                 if tokens:
-                    table_name = tokens[0].replace(',', '').strip()
-                    if table_name and not table_name.startswith('('):
+                    table_name = tokens[0].replace(",", "").strip()
+                    if table_name and not table_name.startswith("("):
                         tables.add(table_name)
 
         # Extract from JOIN clauses
-        if 'join' in query_lower:
-            join_parts = query_lower.split('join')
+        if "join" in query_lower:
+            join_parts = query_lower.split("join")
             for part in join_parts[1:]:
                 tokens = part.strip().split()
                 if tokens:
@@ -203,7 +200,7 @@ class QueryCacheManager:
         result: Any,
         params: Optional[Dict[str, Any]] = None,
         ttl: int = CacheStrategy.DATABASE_QUERY_TTL,
-        tags: Optional[Set[str]] = None
+        tags: Optional[Set[str]] = None,
     ) -> bool:
         """Cache a database query result with automatic tag generation"""
         query_hash = self.generate_query_hash(query, params)
@@ -227,21 +224,19 @@ class QueryCacheManager:
         if success:
             # Track query stats
             self.query_stats[query_hash] = {
-                'query': query[:100] + '...' if len(query) > 100 else query,
-                'cache_key': cache_key,
-                'cached_at': time.time(),
-                'ttl': ttl,
-                'tags': list(tags),
-                'hit_count': 0
+                "query": query[:100] + "..." if len(query) > 100 else query,
+                "cache_key": cache_key,
+                "cached_at": time.time(),
+                "ttl": ttl,
+                "tags": list(tags),
+                "hit_count": 0,
             }
             logger.debug(f"📦 Cached query result: {cache_key[:16]}... (TTL: {ttl}s)")
 
         return success
 
     async def get_cached_query_result(
-        self,
-        query: str,
-        params: Optional[Dict[str, Any]] = None
+        self, query: str, params: Optional[Dict[str, Any]] = None
     ) -> Optional[Any]:
         """Retrieve cached query result"""
         query_hash = self.generate_query_hash(query, params)
@@ -252,7 +247,7 @@ class QueryCacheManager:
         if result is not None:
             # Update stats
             if query_hash in self.query_stats:
-                self.query_stats[query_hash]['hit_count'] += 1
+                self.query_stats[query_hash]["hit_count"] += 1
 
             logger.debug(f"🎯 Query cache hit: {cache_key[:16]}...")
 
@@ -262,7 +257,7 @@ class QueryCacheManager:
         self,
         query: Optional[str] = None,
         tables: Optional[Set[str]] = None,
-        tags: Optional[Set[str]] = None
+        tags: Optional[Set[str]] = None,
     ) -> int:
         """Invalidate cached queries by query, tables, or tags"""
         if query:
@@ -282,20 +277,20 @@ class QueryCacheManager:
     def get_stats(self) -> Dict[str, Any]:
         """Get query cache statistics"""
         total_queries = len(self.query_stats)
-        total_hits = sum(stat['hit_count'] for stat in self.query_stats.values())
+        total_hits = sum(stat["hit_count"] for stat in self.query_stats.values())
 
         # Most cached queries
         top_queries = sorted(
-            self.query_stats.values(),
-            key=lambda x: x['hit_count'],
-            reverse=True
+            self.query_stats.values(), key=lambda x: x["hit_count"], reverse=True
         )[:10]
 
         return {
-            'total_cached_queries': total_queries,
-            'total_cache_hits': total_hits,
-            'top_cached_queries': top_queries,
-            'avg_hits_per_query': total_hits / total_queries if total_queries > 0 else 0
+            "total_cached_queries": total_queries,
+            "total_cache_hits": total_hits,
+            "top_cached_queries": top_queries,
+            "avg_hits_per_query": (
+                total_hits / total_queries if total_queries > 0 else 0
+            ),
         }
 
 
@@ -306,7 +301,7 @@ query_cache_manager = QueryCacheManager()
 def cached_query(
     ttl: int = CacheStrategy.DATABASE_QUERY_TTL,
     tags: Optional[Set[str]] = None,
-    bypass_on: Optional[Callable[[], bool]] = None
+    bypass_on: Optional[Callable[[], bool]] = None,
 ):
     """
     Decorator for caching database query results
@@ -316,6 +311,7 @@ def cached_query(
         async def get_active_users(db: Session):
             return db.query(User).filter(User.is_active == True).all()
     """
+
     def decorator(func: Callable) -> Callable:
         @wraps(func)
         async def async_wrapper(*args, **kwargs):
@@ -326,7 +322,9 @@ def cached_query(
             # Generate cache key from function and arguments
             func_name = f"{func.__module__}.{func.__name__}"
             args_hash = hashlib.md5(str(args).encode()).hexdigest()[:8]
-            kwargs_hash = hashlib.md5(str(sorted(kwargs.items())).encode()).hexdigest()[:8]
+            kwargs_hash = hashlib.md5(str(sorted(kwargs.items())).encode()).hexdigest()[
+                :8
+            ]
             cache_key = f"query_func:{func_name}:{args_hash}:{kwargs_hash}"
 
             # Try to get from cache
@@ -353,7 +351,9 @@ def cached_query(
             # Generate cache key
             func_name = f"{func.__module__}.{func.__name__}"
             args_hash = hashlib.md5(str(args).encode()).hexdigest()[:8]
-            kwargs_hash = hashlib.md5(str(sorted(kwargs.items())).encode()).hexdigest()[:8]
+            kwargs_hash = hashlib.md5(str(sorted(kwargs.items())).encode()).hexdigest()[
+                :8
+            ]
 
             # For sync functions, we can't use async cache
             # Execute function directly
@@ -364,6 +364,7 @@ def cached_query(
 
         # Return appropriate wrapper
         import asyncio
+
         if asyncio.iscoroutinefunction(func):
             return async_wrapper
         else:
@@ -395,7 +396,7 @@ class CacheWarmingService:
                 query=query,
                 result=result,
                 ttl=CacheStrategy.USER_CACHE_TTL,
-                tags={'table:users', 'count', 'active_users'}
+                tags={"table:users", "count", "active_users"},
             )
             warmed += 1
         except Exception as e:
@@ -415,7 +416,7 @@ class CacheWarmingService:
                 query=query,
                 result=[dict(row._mapping) for row in result],
                 ttl=300,  # 5 minutes for recent data
-                tags={'table:activity_logs', 'recent'}
+                tags={"table:activity_logs", "recent"},
             )
             warmed += 1
         except Exception as e:
@@ -425,20 +426,19 @@ class CacheWarmingService:
         return warmed
 
     async def schedule_cache_warming(
-        self,
-        job_name: str,
-        warming_func: Callable,
-        interval_seconds: int = 300
+        self, job_name: str, warming_func: Callable, interval_seconds: int = 300
     ):
         """Schedule periodic cache warming"""
         self.warming_jobs[job_name] = {
-            'function': warming_func,
-            'interval': interval_seconds,
-            'last_run': None,
-            'next_run': time.time() + interval_seconds
+            "function": warming_func,
+            "interval": interval_seconds,
+            "last_run": None,
+            "next_run": time.time() + interval_seconds,
         }
 
-        logger.info(f"📅 Scheduled cache warming job: {job_name} (every {interval_seconds}s)")
+        logger.info(
+            f"📅 Scheduled cache warming job: {job_name} (every {interval_seconds}s)"
+        )
 
 
 # Global cache warming service
@@ -459,28 +459,30 @@ def get_cache_control_headers(policy: CachePolicy) -> Dict[str, str]:
         cache_directives.append("private")
 
     if policy.stale_while_revalidate > 0:
-        cache_directives.append(f"stale-while-revalidate={policy.stale_while_revalidate}")
+        cache_directives.append(
+            f"stale-while-revalidate={policy.stale_while_revalidate}"
+        )
 
     if policy.stale_if_error > 0:
         cache_directives.append(f"stale-if-error={policy.stale_if_error}")
 
-    headers['Cache-Control'] = ", ".join(cache_directives)
+    headers["Cache-Control"] = ", ".join(cache_directives)
 
     # Vary header
     if policy.vary_by:
         vary_headers = []
-        if 'user' in policy.vary_by:
-            vary_headers.append('Authorization')
-        if 'role' in policy.vary_by:
-            vary_headers.append('X-User-Role')
+        if "user" in policy.vary_by:
+            vary_headers.append("Authorization")
+        if "role" in policy.vary_by:
+            vary_headers.append("X-User-Role")
 
         if vary_headers:
-            headers['Vary'] = ", ".join(vary_headers)
+            headers["Vary"] = ", ".join(vary_headers)
 
     # CDN-specific headers
     if CacheLevel.CDN in policy.cache_levels:
-        headers['CDN-Cache-Control'] = f"public, max-age={policy.ttl}"
-        headers['Surrogate-Control'] = f"max-age={policy.ttl}"
+        headers["CDN-Cache-Control"] = f"public, max-age={policy.ttl}"
+        headers["Surrogate-Control"] = f"max-age={policy.ttl}"
 
     return headers
 
@@ -491,13 +493,11 @@ async def get_cache_statistics() -> Dict[str, Any]:
     query_stats = query_cache_manager.get_stats()
 
     return {
-        'redis': redis_stats,
-        'query_cache': query_stats,
-        'invalidation': {
-            'registered_tags': len(invalidation_strategy.dependency_graph),
-            'tracked_keys': len(invalidation_strategy.tag_registry)
+        "redis": redis_stats,
+        "query_cache": query_stats,
+        "invalidation": {
+            "registered_tags": len(invalidation_strategy.dependency_graph),
+            "tracked_keys": len(invalidation_strategy.tag_registry),
         },
-        'warming': {
-            'scheduled_jobs': len(cache_warming_service.warming_jobs)
-        }
+        "warming": {"scheduled_jobs": len(cache_warming_service.warming_jobs)},
     }

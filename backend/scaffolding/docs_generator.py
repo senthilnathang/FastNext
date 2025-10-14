@@ -9,14 +9,15 @@ Generates comprehensive API documentation including:
 - Rate limiting and error documentation
 """
 
-from typing import Dict, List, Optional, Any
 from pathlib import Path
-from .backend_generator import ModelDefinition, FieldDefinition, FieldType
+from typing import Any, Dict, List, Optional
+
+from .backend_generator import FieldDefinition, FieldType, ModelDefinition
 
 
 class DocsGenerator:
     """Generate comprehensive API documentation"""
-    
+
     def __init__(self, model_def: ModelDefinition, base_path: str = "."):
         self.model_def = model_def
         self.base_path = Path(base_path)
@@ -24,28 +25,28 @@ class DocsGenerator:
         self.snake_name = model_def.name.lower()
         self.plural_name = self.snake_name + 's'
         self.permission_category = model_def.permission_category or self.snake_name
-        
+
     def generate_all_docs(self):
         """Generate complete documentation suite"""
         print(f"📖 Generating API documentation for {self.model_name}...")
-        
+
         # Generate OpenAPI specifications
         self.generate_openapi_spec()
-        
+
         # Generate usage examples
         self.generate_usage_examples()
-        
+
         # Generate permission documentation
         self.generate_permission_docs()
-        
+
         # Generate error handling docs
         self.generate_error_docs()
-        
+
         # Generate integration guides
         self.generate_integration_guides()
-        
+
         print(f"✅ API documentation generated for {self.model_name}")
-    
+
     def generate_openapi_spec(self):
         """Generate OpenAPI/Swagger specification"""
         spec = {
@@ -69,7 +70,7 @@ class DocsGenerator:
                     "description": "Production server"
                 },
                 {
-                    "url": "https://staging-api.fastnext.com/v1", 
+                    "url": "https://staging-api.fastnext.com/v1",
                     "description": "Staging server"
                 },
                 {
@@ -106,13 +107,13 @@ class DocsGenerator:
                 }
             ]
         }
-        
+
         # Write OpenAPI spec as JSON
         import json
         spec_file = self.base_path / "docs" / "openapi" / f"{self.snake_name}.json"
         spec_file.parent.mkdir(parents=True, exist_ok=True)
         spec_file.write_text(json.dumps(spec, indent=2))
-        
+
         # Write OpenAPI spec as YAML
         try:
             import yaml
@@ -120,11 +121,11 @@ class DocsGenerator:
             yaml_file.write_text(yaml.dump(spec, default_flow_style=False))
         except ImportError:
             print("PyYAML not installed, skipping YAML generation")
-    
+
     def _generate_schemas(self) -> Dict[str, Any]:
         """Generate OpenAPI schema definitions"""
         schemas = {}
-        
+
         # Main model schema
         schemas[self.model_name] = {
             "type": "object",
@@ -144,7 +145,7 @@ class DocsGenerator:
                     "readOnly": True
                 },
                 "updated_at": {
-                    "type": "string", 
+                    "type": "string",
                     "format": "date-time",
                     "description": "Last update timestamp",
                     "example": "2023-12-01T15:30:00Z",
@@ -154,16 +155,16 @@ class DocsGenerator:
             },
             "required": ["id", "created_at"]
         }
-        
+
         # Add custom fields
         for field in self.model_def.fields:
             if field.name not in ['id', 'created_at', 'updated_at']:
                 field_schema = self._get_field_schema(field)
                 schemas[self.model_name]["properties"][field.name] = field_schema
-                
+
                 if field.required:
                     schemas[self.model_name]["required"].append(field.name)
-        
+
         # Create schema
         schemas[f"{self.model_name}Create"] = {
             "type": "object",
@@ -171,32 +172,32 @@ class DocsGenerator:
             "properties": {},
             "required": []
         }
-        
+
         for field in self.model_def.fields:
             if field.name not in ['id', 'created_at', 'updated_at']:
                 field_schema = self._get_field_schema(field)
                 # Remove readOnly for create schema
                 field_schema.pop('readOnly', None)
                 schemas[f"{self.model_name}Create"]["properties"][field.name] = field_schema
-                
+
                 if field.required:
                     schemas[f"{self.model_name}Create"]["required"].append(field.name)
-        
+
         # Update schema
         schemas[f"{self.model_name}Update"] = {
-            "type": "object", 
+            "type": "object",
             "description": f"Data for updating a {self.model_name}",
             "properties": {},
             "required": []
         }
-        
+
         for field in self.model_def.fields:
             if field.name not in ['id', 'created_at', 'updated_at']:
                 field_schema = self._get_field_schema(field)
                 # Remove readOnly and make optional for update
                 field_schema.pop('readOnly', None)
                 schemas[f"{self.model_name}Update"]["properties"][field.name] = field_schema
-        
+
         # List response schema
         schemas[f"{self.model_name}ListResponse"] = {
             "type": "object",
@@ -212,7 +213,7 @@ class DocsGenerator:
                     "example": 100
                 },
                 "page": {
-                    "type": "integer", 
+                    "type": "integer",
                     "description": "Current page number",
                     "example": 1
                 },
@@ -228,13 +229,13 @@ class DocsGenerator:
                 },
                 "has_prev": {
                     "type": "boolean",
-                    "description": "Whether there are previous pages", 
+                    "description": "Whether there are previous pages",
                     "example": False
                 }
             },
             "required": ["items", "total", "page", "limit", "has_next", "has_prev"]
         }
-        
+
         # Error schemas
         schemas["ValidationError"] = {
             "type": "object",
@@ -252,7 +253,7 @@ class DocsGenerator:
                 }
             }
         }
-        
+
         schemas["ErrorResponse"] = {
             "type": "object",
             "properties": {
@@ -261,9 +262,9 @@ class DocsGenerator:
                 "timestamp": {"type": "string", "format": "date-time"}
             }
         }
-        
+
         return schemas
-    
+
     def _generate_parameters(self) -> Dict[str, Any]:
         """Generate reusable parameters"""
         return {
@@ -279,7 +280,7 @@ class DocsGenerator:
                 "example": 1
             },
             "LimitParam": {
-                "name": "limit", 
+                "name": "limit",
                 "in": "query",
                 "description": "Number of items per page",
                 "schema": {
@@ -292,7 +293,7 @@ class DocsGenerator:
             },
             "SearchParam": {
                 "name": "search",
-                "in": "query", 
+                "in": "query",
                 "description": "Search query string",
                 "schema": {"type": "string"},
                 "example": "search term"
@@ -330,7 +331,7 @@ class DocsGenerator:
                 "example": 1
             }
         }
-    
+
     def _generate_responses(self) -> Dict[str, Any]:
         """Generate reusable responses"""
         return {
@@ -382,22 +383,22 @@ class DocsGenerator:
                 }
             }
         }
-    
+
     def _generate_examples(self) -> Dict[str, Any]:
         """Generate example data"""
         examples = {}
-        
+
         # Create example
         create_example = {}
         for field in self.model_def.fields:
             if field.name not in ['id', 'created_at', 'updated_at']:
                 create_example[field.name] = self._get_example_value(field)
-        
+
         examples[f"{self.model_name}CreateExample"] = {
             "summary": f"Create {self.model_name} example",
             "value": create_example
         }
-        
+
         # Full model example
         model_example = {
             "id": 1,
@@ -405,12 +406,12 @@ class DocsGenerator:
             "updated_at": "2023-12-01T15:30:00Z",
             **create_example
         }
-        
+
         examples[f"{self.model_name}Example"] = {
             "summary": f"{self.model_name} example",
             "value": model_example
         }
-        
+
         # List example
         examples[f"{self.model_name}ListExample"] = {
             "summary": f"{self.model_name} list example",
@@ -423,13 +424,13 @@ class DocsGenerator:
                 "has_prev": False
             }
         }
-        
+
         return examples
-    
+
     def _generate_paths(self) -> Dict[str, Any]:
         """Generate API paths/endpoints"""
         paths = {}
-        
+
         # List and Create endpoints
         paths[f"/{self.plural_name}"] = {
             "get": {
@@ -498,7 +499,7 @@ class DocsGenerator:
                 }
             }
         }
-        
+
         # Individual resource endpoints
         paths[f"/{self.plural_name}/{{id}}"] = {
             "get": {
@@ -583,7 +584,7 @@ class DocsGenerator:
                 }
             }
         }
-        
+
         # Bulk operations
         paths[f"/{self.plural_name}/bulk"] = {
             "post": {
@@ -664,13 +665,13 @@ class DocsGenerator:
                 }
             }
         }
-        
+
         return paths
-    
+
     def _get_field_schema(self, field: FieldDefinition) -> Dict[str, Any]:
         """Generate OpenAPI schema for a field"""
         schema = {}
-        
+
         if field.type == FieldType.STRING:
             schema["type"] = "string"
             if field.max_length:
@@ -707,7 +708,7 @@ class DocsGenerator:
         elif field.type == FieldType.FOREIGN_KEY:
             schema["type"] = "integer"
             schema["format"] = "int64"
-        
+
         # Add validation constraints
         if field.validation:
             if field.validation.min_length is not None:
@@ -720,29 +721,29 @@ class DocsGenerator:
                 schema["maximum"] = field.validation.max_value
             if field.validation.pattern:
                 schema["pattern"] = field.validation.pattern
-        
+
         # Add description and example
         if field.description:
             schema["description"] = field.description
         else:
             schema["description"] = f"{field.name.replace('_', ' ').title()}"
-        
+
         if field.example is not None:
             schema["example"] = field.example
         else:
             schema["example"] = self._get_example_value(field)
-        
+
         # Add nullable if applicable
         if field.nullable:
             schema["nullable"] = True
-        
+
         return schema
-    
+
     def _get_example_value(self, field: FieldDefinition) -> Any:
         """Generate example value for field"""
         if field.example is not None:
             return field.example
-        
+
         if field.type == FieldType.STRING:
             if 'name' in field.name.lower():
                 return "Sample Name"
@@ -776,7 +777,7 @@ class DocsGenerator:
             return 1
         else:
             return "example"
-    
+
     def generate_usage_examples(self):
         """Generate usage examples and code snippets"""
         content = f'''# {self.model_name} API Usage Examples
@@ -899,11 +900,11 @@ async function create{self.model_name}(data) {{
     }},
     body: JSON.stringify(data)
   }});
-  
+
   if (!response.ok) {{
     throw new Error(`HTTP ${{response.status}}: ${{response.statusText}}`);
   }}
-  
+
   return await response.json();
 }}
 
@@ -914,11 +915,11 @@ async function get{self.model_name}(id) {{
       'Authorization': `Bearer ${{token}}`
     }}
   }});
-  
+
   if (!response.ok) {{
     throw new Error(`HTTP ${{response.status}}: ${{response.statusText}}`);
   }}
-  
+
   return await response.json();
 }}
 
@@ -930,7 +931,7 @@ async function list{self.model_name}s(params = {{}}) {{
       'Authorization': `Bearer ${{token}}`
     }}
   }});
-  
+
   return await response.json();
 }}
 
@@ -942,7 +943,8 @@ const new{self.model_name} = await create{self.model_name}('''
 
 #### Using Axios
 ```javascript
-import axios from 'axios';
+import 'axios'
+import axios
 
 const api = axios.create({{
   baseURL: 'https://api.fastnext.com/v1',
@@ -973,8 +975,9 @@ const get{self.model_name} = async (id) => {{
 
 #### Using requests
 ```python
-import requests
 import json
+
+import requests
 
 API_BASE = 'https://api.fastnext.com/v1'
 token = 'YOUR_JWT_TOKEN'
@@ -1043,14 +1046,14 @@ result = asyncio.run(main())
 class {self.model_name}ApiClient {{
     private $baseUrl = 'https://api.fastnext.com/v1';
     private $token;
-    
+
     public function __construct($token) {{
         $this->token = $token;
     }}
-    
+
     private function makeRequest($method, $endpoint, $data = null) {{
         $curl = curl_init();
-        
+
         curl_setopt_array($curl, [
             CURLOPT_URL => $this->baseUrl . $endpoint,
             CURLOPT_RETURNTRANSFER => true,
@@ -1060,30 +1063,30 @@ class {self.model_name}ApiClient {{
                 'Content-Type: application/json'
             ]
         ]);
-        
+
         if ($data) {{
             curl_setopt($curl, CURLOPT_POSTFIELDS, json_encode($data));
         }}
-        
+
         $response = curl_exec($curl);
         $httpCode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
         curl_close($curl);
-        
+
         if ($httpCode >= 400) {{
             throw new Exception("HTTP Error: $httpCode");
         }}
-        
+
         return json_decode($response, true);
     }}
-    
+
     public function create{self.model_name}($data) {{
         return $this->makeRequest('POST', '/{self.plural_name}', $data);
     }}
-    
+
     public function get{self.model_name}($id) {{
         return $this->makeRequest('GET', "/{self.plural_name}/$id");
     }}
-    
+
     public function list{self.model_name}s($params = []) {{
         $query = http_build_query($params);
         return $this->makeRequest('GET', "/{self.plural_name}?$query");
@@ -1189,19 +1192,19 @@ X-RateLimit-Reset: 1609459200
 9. **Keep API tokens secure**
 10. **Validate data before sending requests**
 '''
-        
+
         self._write_file(f"docs/{self.snake_name}-usage.md", content)
-    
+
     def _get_create_example_json(self, indent="") -> str:
         """Generate JSON example for create operations"""
         example = {}
         for field in self.model_def.fields:
             if field.name not in ['id', 'created_at', 'updated_at']:
                 example[field.name] = self._get_example_value(field)
-        
+
         import json
         return json.dumps(example, indent=2 if not indent else None)
-    
+
     def _get_update_example_json(self) -> str:
         """Generate JSON example for update operations"""
         # Just update a few fields as example
@@ -1214,10 +1217,10 @@ X-RateLimit-Reset: 1609459200
                 else:
                     example[field.name] = self._get_example_value(field)
                 count += 1
-        
+
         import json
         return json.dumps(example, indent=2)
-    
+
     def generate_permission_docs(self):
         """Generate permission system documentation"""
         content = f'''# {self.model_name} Permission System
@@ -1261,7 +1264,7 @@ The {self.model_name} API uses a role-based access control (RBAC) system. Users 
 ```
 admin_{self.permission_category}
 ├── All CRUD permissions
-├── All bulk permissions  
+├── All bulk permissions
 ├── Export/import permissions
 └── Field-level permissions
 ```
@@ -1280,13 +1283,13 @@ Users need explicit permissions for each operation type.
             content += f'''Users who own a {self.model_name} (via `{self.model_def.owner_field}` field) may have additional access rights:
 
 - **Read**: Owners can always read their own {self.plural_name}
-- **Update**: Owners can update their own {self.plural_name}  
+- **Update**: Owners can update their own {self.plural_name}
 - **Delete**: Owners can delete their own {self.plural_name}
 
 This provides a balance between security and usability.
 
 '''
-        
+
         if self.model_def.project_scoped:
             content += f'''### 3. Project-Based Model
 {self.model_name} resources are scoped to projects. Users can only access resources within projects they are members of:
@@ -1296,35 +1299,35 @@ This provides a balance between security and usability.
 - **System Admins**: Have access to {self.plural_name} across all projects
 
 '''
-        
+
         content += f'''## Field-Level Permissions
 
 Some fields may require additional permissions to read or modify:
 
 '''
-        
+
         # Add sensitive fields documentation
-        sensitive_fields = [f for f in self.model_def.fields 
+        sensitive_fields = [f for f in self.model_def.fields
                            if f.name in ['password', 'secret', 'token', 'key'] or f.type == FieldType.EMAIL]
-        
+
         if sensitive_fields:
             content += "### Sensitive Fields\n\n"
             content += "| Field | Read Permission | Write Permission |\n"
             content += "|-------|----------------|------------------|\n"
-            
+
             for field in sensitive_fields:
                 read_perm = f"`read_{self.permission_category}_{field.name}`"
                 write_perm = f"`update_{self.permission_category}_{field.name}`"
                 content += f"| `{field.name}` | {read_perm} | {write_perm} |\n"
-            
+
             content += "\nWithout the appropriate field permissions, sensitive fields will be redacted in responses.\n\n"
-        
+
         content += f'''## Permission Checking
 
 ### API Level
 Permissions are checked at the API endpoint level before processing requests.
 
-### Resource Level  
+### Resource Level
 For update and delete operations, additional checks verify the user can access the specific resource.
 
 ### Field Level
@@ -1344,7 +1347,7 @@ When returning data, field-level permissions determine which fields are included
 ### 403 Forbidden
 ```json
 {{
-  "error": "Forbidden", 
+  "error": "Forbidden",
   "message": "Permission 'read_{self.permission_category}' required",
   "timestamp": "2023-12-01T10:00:00Z"
 }}
@@ -1389,7 +1392,7 @@ curl https://api.fastnext.com/v1/auth/permissions \\
 [
   "read_{self.permission_category}",
   "create_{self.permission_category}",
-  "update_{self.permission_category}", 
+  "update_{self.permission_category}",
   "delete_{self.permission_category}",
   "bulk_create_{self.permission_category}",
   "bulk_update_{self.permission_category}",
@@ -1429,7 +1432,7 @@ curl https://api.fastnext.com/v1/auth/permissions \\
 1. Verify user authentication token
 2. Check user's assigned permissions
 3. Verify resource ownership (if applicable)
-4. Check project membership (if applicable) 
+4. Check project membership (if applicable)
 5. Review field-level permission requirements
 
 ### Support
@@ -1440,9 +1443,9 @@ For permission-related issues, contact the API support team with:
 - Error message received
 - Expected behavior
 '''
-        
+
         self._write_file(f"docs/{self.snake_name}-permissions.md", content)
-    
+
     def generate_error_docs(self):
         """Generate error handling documentation"""
         content = f'''# {self.model_name} API Error Handling
@@ -1460,7 +1463,7 @@ All API errors follow a consistent format:
   "details": [
     {{
       "field": "field_name",
-      "message": "Field-specific error message", 
+      "message": "Field-specific error message",
       "type": "validation_type"
     }}
   ],
@@ -1545,7 +1548,7 @@ All API errors follow a consistent format:
 **Example**:
 ```json
 {{
-  "error": "Forbidden", 
+  "error": "Forbidden",
   "message": "Permission 'create_{self.permission_category}' required",
   "timestamp": "2023-12-01T10:00:00Z"
 }}
@@ -1616,7 +1619,7 @@ All API errors follow a consistent format:
         for field in self.model_def.fields:
             if field.name in ['id', 'created_at', 'updated_at']:
                 continue
-                
+
             if field.type == FieldType.EMAIL:
                 validation_examples.append(f'''    {{
       "field": "{field.name}",
@@ -1635,10 +1638,10 @@ All API errors follow a consistent format:
       "message": "Exceeds maximum length of {field.validation.max_length}",
       "type": "max_length"
     }}''')
-        
+
         # Take first few examples
         content += ',\n'.join(validation_examples[:3])
-        
+
         content += f'''
   ],
   "timestamp": "2023-12-01T10:00:00Z"
@@ -1679,7 +1682,7 @@ All API errors follow a consistent format:
 
 **Rate Limits**:
 - General API: 1000 requests/hour
-- Bulk operations: 100 requests/hour  
+- Bulk operations: 100 requests/hour
 - Search operations: 500 requests/hour
 
 **Solutions**:
@@ -1700,7 +1703,7 @@ async function handle{self.model_name}Request(requestFn) {{
   }} catch (error) {{
     if (error.response) {{
       const {{ status, data }} = error.response;
-      
+
       switch (status) {{
         case 400:
           console.error('Bad Request:', data.message);
@@ -1730,7 +1733,7 @@ async function handle{self.model_name}Request(requestFn) {{
     }} else {{
       console.error('Network error:', error.message);
     }}
-    
+
     throw error;
   }}
 }}
@@ -1745,7 +1748,7 @@ from typing import Dict, Any
 def handle_{self.snake_name}_request(request_func):
     max_retries = 3
     retry_count = 0
-    
+
     while retry_count < max_retries:
         try:
             return request_func()
@@ -1753,7 +1756,7 @@ def handle_{self.snake_name}_request(request_func):
             response = e.response
             status_code = response.status_code
             data = response.json() if response.content else {{}}
-            
+
             if status_code == 401:
                 print("Unauthorized - need to re-authenticate")
                 raise
@@ -1762,7 +1765,7 @@ def handle_{self.snake_name}_request(request_func):
                 raise
             elif status_code == 404:
                 print(f"Not Found: {{data.get('message')}}")
-                raise  
+                raise
             elif status_code == 422:
                 print("Validation Errors:")
                 for detail in data.get('details', []):
@@ -1790,7 +1793,7 @@ def handle_{self.snake_name}_request(request_func):
         except requests.exceptions.RequestException as e:
             print(f"Network error: {{e}}")
             raise
-    
+
     raise Exception("Max retries exceeded")
 ```
 
@@ -1820,7 +1823,7 @@ async function retryWithBackoff(fn, maxRetries = 3) {{
 function getUser{self.model_name}ErrorMessage(error) {{
   const status = error.response?.status;
   const data = error.response?.data;
-  
+
   switch (status) {{
     case 400:
       return "Please check your input and try again.";
@@ -1857,10 +1860,10 @@ function logError(error, context) {{
     user_id: getCurrentUserId(),
     request_id: error.response?.headers['x-request-id']
   }};
-  
+
   // Send to logging service
   console.error('API Error:', errorInfo);
-  
+
   // Send to monitoring service (e.g., Sentry, DataDog)
   if (typeof captureException !== 'undefined') {{
     captureException(error, {{ extra: errorInfo }});
@@ -1878,10 +1881,10 @@ describe('{self.model_name} API Error Handling', () => {{
     mockAxios.get.mockRejectedValue({{
       response: {{ status: 404, data: {{ message: '{self.model_name} not found' }} }}
     }});
-    
+
     await expect(get{self.model_name}(999)).rejects.toThrow();
   }});
-  
+
   test('handles validation errors', async () => {{
     const validationError = {{
       response: {{
@@ -1891,9 +1894,9 @@ describe('{self.model_name} API Error Handling', () => {{
         }}
       }}
     }};
-    
+
     mockAxios.post.mockRejectedValue(validationError);
-    
+
     await expect(create{self.model_name}({{}})).rejects.toThrow();
   }});
 }});
@@ -1939,9 +1942,9 @@ describe('{self.model_name} API Error Handling', () => {{
    - Steps to reproduce
    - Expected vs actual behavior
 '''
-        
+
         self._write_file(f"docs/{self.snake_name}-errors.md", content)
-    
+
     def generate_integration_guides(self):
         """Generate integration guides for different platforms"""
         content = f'''# {self.model_name} API Integration Guide
@@ -2011,7 +2014,7 @@ export const use{self.model_name} = (id) => {{
 
 export const useCreate{self.model_name} = () => {{
   const queryClient = useQueryClient();
-  
+
   return useMutation(
     {self.snake_name}Api.create,
     {{
@@ -2024,7 +2027,7 @@ export const useCreate{self.model_name} = () => {{
 
 export const useUpdate{self.model_name} = () => {{
   const queryClient = useQueryClient();
-  
+
   return useMutation(
     ({{ id, data }}) => {self.snake_name}Api.update(id, data),
     {{
@@ -2038,7 +2041,7 @@ export const useUpdate{self.model_name} = () => {{
 
 export const useDelete{self.model_name} = () => {{
   const queryClient = useQueryClient();
-  
+
   return useMutation(
     {self.snake_name}Api.delete,
     {{
@@ -2058,10 +2061,10 @@ import {{ use{self.model_name}s }} from '../hooks/use{self.model_name}';
 
 const {self.model_name}List = () => {{
   const {{ data, isLoading, error }} = use{self.model_name}s();
-  
+
   if (isLoading) return <div>Loading...</div>;
   if (error) return <div>Error: {{error.message}}</div>;
-  
+
   return (
     <div>
       <h2>{self.model_name}s</h2>
@@ -2097,11 +2100,11 @@ export function use{self.model_name}s() {{
   const {self.plural_name} = ref([]);
   const loading = ref(false);
   const error = ref(null);
-  
+
   const fetch{self.model_name}s = async (params = {{}}) => {{
     loading.value = true;
     error.value = null;
-    
+
     try {{
       const response = await {self.snake_name}Api.getAll(params);
       {self.plural_name}.value = response.data.items;
@@ -2111,7 +2114,7 @@ export function use{self.model_name}s() {{
       loading.value = false;
     }}
   }};
-  
+
   const create{self.model_name} = async (data) => {{
     try {{
       const response = await {self.snake_name}Api.create(data);
@@ -2122,7 +2125,7 @@ export function use{self.model_name}s() {{
       throw err;
     }}
   }};
-  
+
   return {{
     {self.plural_name}: readonly({self.plural_name}),
     loading: readonly(loading),
@@ -2142,24 +2145,24 @@ import {{ {self.snake_name}Api }} from '../../../lib/{self.snake_name}Api';
 
 export default async function handler(req, res) {{
   const {{ id }} = req.query;
-  
+
   try {{
     switch (req.method) {{
       case 'GET':
         const {self.snake_name} = await {self.snake_name}Api.getById(id);
         res.status(200).json({self.snake_name});
         break;
-        
+
       case 'PUT':
         const updated = await {self.snake_name}Api.update(id, req.body);
         res.status(200).json(updated);
         break;
-        
+
       case 'DELETE':
         await {self.snake_name}Api.delete(id);
         res.status(204).end();
         break;
-        
+
       default:
         res.setHeader('Allow', ['GET', 'PUT', 'DELETE']);
         res.status(405).end(`Method ${{req.method}} Not Allowed`);
@@ -2286,7 +2289,7 @@ class {self.model_name}Service:
             'Authorization': f'Bearer {{user_token}}',
             'Content-Type': 'application/json'
         }}
-    
+
     def get_all(self, params: Dict = None) -> Dict:
         response = requests.get(
             f'{{self.base_url}}/{self.plural_name}',
@@ -2295,7 +2298,7 @@ class {self.model_name}Service:
         )
         response.raise_for_status()
         return response.json()
-    
+
     def get_by_id(self, id: int) -> Dict:
         response = requests.get(
             f'{{self.base_url}}/{self.plural_name}/{{id}}',
@@ -2303,7 +2306,7 @@ class {self.model_name}Service:
         )
         response.raise_for_status()
         return response.json()
-    
+
     def create(self, data: Dict) -> Dict:
         response = requests.post(
             f'{{self.base_url}}/{self.plural_name}',
@@ -2325,7 +2328,7 @@ from .services.{self.snake_name}_service import {self.model_name}Service
 @login_required
 def {self.snake_name}_list(request):
     service = {self.model_name}Service(request.user.api_token)
-    
+
     try:
         data = service.get_all(request.GET.dict())
         return render(request, '{self.plural_name}/list.html', {{
@@ -2341,7 +2344,7 @@ def {self.snake_name}_list(request):
 def create_{self.snake_name}(request):
     if request.method == 'POST':
         service = {self.model_name}Service(request.user.api_token)
-        
+
         try:
             data = service.create(request.POST.dict())
             return JsonResponse(data, status=201)
@@ -2349,7 +2352,7 @@ def create_{self.snake_name}(request):
             return JsonResponse({{
                 'error': 'Failed to create {self.snake_name}'
             }}, status=e.response.status_code)
-    
+
     return render(request, '{self.plural_name}/create.html')
 ```
 
@@ -2375,7 +2378,7 @@ class {self.model_name}Service
     private $client;
     private $baseUrl;
     private $token;
-    
+
     public function __construct($userToken)
     {{
         $this->baseUrl = config('services.fastnext.base_url');
@@ -2390,27 +2393,27 @@ class {self.model_name}Service
             ]
         ]);
     }}
-    
+
     public function getAll($params = [])
     {{
         try {{
             $response = $this->client->get('/{self.plural_name}', [
                 'query' => $params
             ]);
-            
+
             return json_decode($response->getBody(), true);
         }} catch (RequestException $e) {{
             throw new \\Exception('Failed to fetch {self.plural_name}: ' . $e->getMessage());
         }}
     }}
-    
+
     public function create($data)
     {{
         try {{
             $response = $this->client->post('/{self.plural_name}', [
                 'json' => $data
             ]);
-            
+
             return json_decode($response->getBody(), true);
         }} catch (RequestException $e) {{
             throw new \\Exception('Failed to create {self.snake_name}: ' . $e->getMessage());
@@ -2434,10 +2437,10 @@ class {self.model_name}Controller extends Controller
     public function index(Request $request)
     {{
         $service = new {self.model_name}Service(auth()->user()->api_token);
-        
+
         try {{
             $data = $service->getAll($request->query());
-            
+
             return view('{self.plural_name}.index', [
                 '{self.plural_name}' => $data['items'],
                 'pagination' => [
@@ -2450,14 +2453,14 @@ class {self.model_name}Controller extends Controller
             return back()->withError('Failed to load {self.plural_name}');
         }}
     }}
-    
+
     public function store(Request $request)
     {{
         $service = new {self.model_name}Service(auth()->user()->api_token);
-        
+
         try {{
             ${self.snake_name} = $service->create($request->validated());
-            
+
             return redirect()->route('{self.plural_name}.index')
                            ->with('success', '{self.model_name} created successfully');
         }} catch (\\Exception $e) {{
@@ -2504,22 +2507,22 @@ export const {self.snake_name}Service = {{
     const response = await apiClient.get('/{self.plural_name}', {{ params }});
     return response.data;
   }},
-  
+
   async getById(id) {{
     const response = await apiClient.get(`/{self.plural_name}/${{id}}`);
     return response.data;
   }},
-  
+
   async create(data) {{
     const response = await apiClient.post('/{self.plural_name}', data);
     return response.data;
   }},
-  
+
   async update(id, data) {{
     const response = await apiClient.put(`/{self.plural_name}/${{id}}`, data);
     return response.data;
   }},
-  
+
   async delete(id) {{
     await apiClient.delete(`/{self.plural_name}/${{id}}`);
   }}
@@ -2545,12 +2548,12 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class {self.model_name}Service {{
   static const String baseUrl = 'https://api.fastnext.com/v1';
-  
+
   Future<String?> _getToken() async {{
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString('authToken');
   }}
-  
+
   Future<Map<String, String>> _getHeaders() async {{
     final token = await _getToken();
     return {{
@@ -2558,14 +2561,14 @@ class {self.model_name}Service {{
       if (token != null) 'Authorization': 'Bearer $token',
     }};
   }}
-  
+
   Future<List<dynamic>> getAll({{Map<String, String>? params}}) async {{
     final headers = await _getHeaders();
     final uri = Uri.parse('$baseUrl/{self.plural_name}');
     final finalUri = params != null ? uri.replace(queryParameters: params) : uri;
-    
+
     final response = await http.get(finalUri, headers: headers);
-    
+
     if (response.statusCode == 200) {{
       final data = json.decode(response.body);
       return data['items'];
@@ -2573,16 +2576,16 @@ class {self.model_name}Service {{
       throw Exception('Failed to load {self.plural_name}');
     }}
   }}
-  
+
   Future<Map<String, dynamic>> create(Map<String, dynamic> data) async {{
     final headers = await _getHeaders();
-    
+
     final response = await http.post(
       Uri.parse('$baseUrl/{self.plural_name}'),
       headers: headers,
       body: json.encode(data),
     );
-    
+
     if (response.statusCode == 201) {{
       return json.decode(response.body);
     }} else {{
@@ -2614,7 +2617,7 @@ describe('{self.model_name} API', () => {{
     mockedAxios.get.mockResolvedValue({{ data: mockData }});
 
     const result = await {self.snake_name}Api.getAll();
-    
+
     expect(result.data).toEqual(mockData);
     expect(mockedAxios.get).toHaveBeenCalledWith('/{self.plural_name}', {{ params: undefined }});
   }});
@@ -2625,7 +2628,7 @@ describe('{self.model_name} API', () => {{
     mockedAxios.post.mockResolvedValue({{ data: mockResponse }});
 
     const result = await {self.snake_name}Api.create(newData);
-    
+
     expect(result.data).toEqual(mockResponse);
     expect(mockedAxios.post).toHaveBeenCalledWith('/{self.plural_name}', newData);
   }});
@@ -2657,7 +2660,7 @@ afterAll(() => server.close());
 
 test('renders {self.snake_name} list', async () => {{
   render(<{self.model_name}List />);
-  
+
   await waitFor(() => {{
     expect(screen.getByText('Test {self.model_name}')).toBeInTheDocument();
   }});
@@ -2689,10 +2692,10 @@ test('renders {self.snake_name} list', async () => {{
 8. **Use efficient data structures**
 9. **Minimize API calls** with bulk operations
 10. **Implement offline-first** strategies where appropriate
-'''
-        
+"""
+
         self._write_file(f"docs/{self.snake_name}-integration.md", content)
-    
+
     def _write_file(self, relative_path: str, content: str):
         """Write content to file, creating directories as needed"""
         file_path = self.base_path / relative_path
