@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Card } from '@/shared/components/ui/card';
 import { Button } from '@/shared/components/ui/button';
 import { Input } from '@/shared/components/ui/input';
@@ -80,20 +80,12 @@ export default function RLSDashboard() {
   const [testResult, setTestResult] = useState<AccessCheckResponse | null>(null);
   const [testLoading, setTestLoading] = useState(false);
 
-  useEffect(() => {
-    fetchStatistics();
-    fetchAuditStats();
-  }, []);
 
-  useEffect(() => {
-    fetchAuditStats();
-  }, [selectedPeriod]);
 
   const fetchStatistics = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('access_token');
-      
+
       // In a real implementation, you would have a statistics endpoint
       // For now, we'll simulate the data
       const mockStats: RLSStatistics = {
@@ -132,10 +124,10 @@ export default function RLSDashboard() {
     }
   };
 
-  const fetchAuditStats = async () => {
+  const fetchAuditStats = useCallback(async () => {
     try {
       const token = localStorage.getItem('access_token');
-      
+
       const response = await fetch(
         `${getApiUrl('/api/v1/rls/audit-logs/stats')}?days=${selectedPeriod}`,
         {
@@ -158,14 +150,13 @@ export default function RLSDashboard() {
           denied_count: 14,
           success_rate: 91.0,
           top_denied_reasons: [
-            { reason: 'Access denied: not owner', count: 8 },
-            { reason: 'Not an organization member', count: 4 },
-            { reason: 'Required permissions missing', count: 2 }
+            { reason: 'INSUFFICIENT_PERMISSIONS', count: 8 },
+            { reason: 'POLICY_VIOLATION', count: 6 }
           ],
           entity_type_stats: [
-            { entity_type: 'PROJECT', count: 89 },
-            { entity_type: 'USER', count: 45 },
-            { entity_type: 'COMPONENT', count: 22 }
+            { entity_type: 'USER', count: 89 },
+            { entity_type: 'COMPONENT', count: 45 },
+            { entity_type: 'DATA', count: 22 }
           ]
         };
         setAuditStats(mockAuditStats);
@@ -173,7 +164,16 @@ export default function RLSDashboard() {
     } catch (err) {
       console.error('Failed to fetch audit stats:', err);
     }
-  };
+  }, [selectedPeriod]);
+
+  useEffect(() => {
+    fetchStatistics();
+    fetchAuditStats();
+  }, [fetchAuditStats]);
+
+  useEffect(() => {
+    fetchAuditStats();
+  }, [selectedPeriod, fetchAuditStats]);
 
   const testAccess = async () => {
     setTestLoading(true);
@@ -206,7 +206,7 @@ export default function RLSDashboard() {
         };
         setTestResult(mockResult);
       }
-    } catch (err) {
+    } catch {
       setError('Failed to test access');
     } finally {
       setTestLoading(false);

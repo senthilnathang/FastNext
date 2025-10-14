@@ -2,18 +2,6 @@ import { z } from 'zod'
 import { router, protectedProcedure } from '../server'
 import { userOperations } from '../graphql-client'
 
-const userSchema = z.object({
-  username: z.string().min(1),
-  email: z.string().email(),
-  fullName: z.string().optional(),
-  bio: z.string().optional(),
-  location: z.string().optional(),
-  website: z.string().optional(),
-  createdAt: z.string().optional(),
-  updatedAt: z.string().optional(),
-  lastLoginAt: z.string().optional(),
-})
-
 const createUserSchema = z.object({
   username: z.string().min(1),
   email: z.string().email(),

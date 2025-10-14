@@ -22,7 +22,7 @@ import {
 } from 'lucide-react';
 
 import { MultiStepWizard, WizardStep } from '@/shared/components/ui/multi-step-wizard';
-import { useDataImportExportConfig } from '@/shared/hooks/useDataImportExportConfig';
+
 
 interface TableInfo {
   table_name: string;
@@ -66,17 +66,16 @@ interface ExportData {
 }
 
 export default function DataExportPage() {
-  const { config: exportConfig } = useDataImportExportConfig();
   const [currentStep, setCurrentStep] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingTables, setIsLoadingTables] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  
+
   // Data states
   const [availableTables, setAvailableTables] = useState<string[]>([]);
   const [tableSchema, setTableSchema] = useState<TableInfo | null>(null);
   const [tablePermissions, setTablePermissions] = useState<TablePermissions | null>(null);
   const [tableData, setTableData] = useState<TableData | null>(null);
-  const [isLoadingTables, setIsLoadingTables] = useState(true);
   
   // Export wizard data
   const [exportData, setExportData] = useState<ExportData>({
@@ -312,12 +311,14 @@ export default function DataExportPage() {
   }, []);
 
   const fetchAvailableTables = async () => {
+    setIsLoadingTables(true);
     try {
       const token = localStorage.getItem('access_token');
 
       if (!token) {
         console.warn('No access token found - showing demo tables');
         setAvailableTables(['users', 'products', 'orders', 'customers']);
+        setIsLoadingTables(false);
         return;
       }
 
@@ -348,7 +349,7 @@ export default function DataExportPage() {
        // Set fallback tables for demo
        setAvailableTables(['users', 'products', 'orders', 'customers']);
       } finally {
-        setIsLoading(false);
+        setIsLoadingTables(false);
       }
     };
 

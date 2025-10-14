@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Bell, X, Check, CheckCheck, Trash2, Settings, ExternalLink } from 'lucide-react';
 import { Button } from '../ui/button';
 import { Badge } from '../ui/badge';
@@ -146,7 +146,7 @@ export function NotificationCenter({ trigger, className, open: externalOpen, onO
   const setIsOpen = onOpenChange || setInternalOpen;
 
   // Fetch notifications
-  const fetchNotifications = async () => {
+  const fetchNotifications = useCallback(async () => {
     if (!user) return;
 
     setLoading(true);
@@ -161,10 +161,10 @@ export function NotificationCenter({ trigger, className, open: externalOpen, onO
     } finally {
       setLoading(false);
     }
-  };
+  }, [user, setLoading, setNotifications]);
 
   // Fetch unread count
-  const fetchUnreadCount = async () => {
+  const fetchUnreadCount = useCallback(async () => {
     if (!user) return;
 
     try {
@@ -176,7 +176,7 @@ export function NotificationCenter({ trigger, className, open: externalOpen, onO
     } catch (error) {
       console.error('Failed to fetch unread count:', error);
     }
-  };
+  }, [user, setUnreadCount]);
 
   // Mark as read
   const markAsRead = async (notificationId: number) => {

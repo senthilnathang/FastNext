@@ -22,7 +22,7 @@ import {
 import type { SortOption, GroupOption } from '@/shared/components/ui'
 
 // Import event hooks and types
-import { useEvents, useEventStatistics, useExportEvents } from "@/modules/admin/hooks/useEvents"
+import { useEvents, useExportEvents } from "@/modules/admin/hooks/useEvents"
 import type { EventResponse } from "@/modules/admin/types/events"
 
 // Import dialogs

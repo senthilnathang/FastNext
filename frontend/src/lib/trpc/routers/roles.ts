@@ -52,7 +52,7 @@ export const rolesRouter = router({
   // For now, keeping basic structure for TypeScript compatibility
   create: protectedProcedure
     .input(createRoleSchema)
-    .mutation(async ({ input: _input }) => {
+    .mutation(async () => {
       try {
         // This would need a createRole mutation in GraphQL
         throw new Error('Create role mutation not implemented in GraphQL')
@@ -68,7 +68,7 @@ export const rolesRouter = router({
         data: updateRoleSchema,
       })
     )
-    .mutation(async ({ input: _input }) => {
+    .mutation(async () => {
       try {
         // This would need an updateRole mutation in GraphQL
         throw new Error('Update role mutation not implemented in GraphQL')
@@ -79,7 +79,7 @@ export const rolesRouter = router({
 
   delete: protectedProcedure
     .input(z.number())
-    .mutation(async ({ input: _id }) => {
+    .mutation(async () => {
       try {
         // This would need a deleteRole mutation in GraphQL
         throw new Error('Delete role mutation not implemented in GraphQL')

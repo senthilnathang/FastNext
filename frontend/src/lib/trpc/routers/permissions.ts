@@ -77,7 +77,7 @@ export const permissionsRouter = router({
   // Note: Create, update, delete operations would need corresponding GraphQL mutations
   create: protectedProcedure
     .input(createPermissionSchema)
-    .mutation(async ({ input: _input }) => {
+    .mutation(async () => {
       try {
         // This would need a createPermission mutation in GraphQL
         throw new Error('Create permission mutation not implemented in GraphQL')
@@ -93,7 +93,7 @@ export const permissionsRouter = router({
         data: updatePermissionSchema,
       })
     )
-    .mutation(async ({ input: _input }) => {
+    .mutation(async () => {
       try {
         // This would need an updatePermission mutation in GraphQL
         throw new Error('Update permission mutation not implemented in GraphQL')
@@ -104,7 +104,7 @@ export const permissionsRouter = router({
 
   delete: protectedProcedure
     .input(z.number())
-    .mutation(async ({ input: _id }) => {
+    .mutation(async () => {
       try {
         // This would need a deletePermission mutation in GraphQL
         throw new Error('Delete permission mutation not implemented in GraphQL')

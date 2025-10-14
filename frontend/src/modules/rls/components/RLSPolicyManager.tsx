@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import { Button } from '@/shared/components/ui/button';
 import { Input } from '@/shared/components/ui/input';
@@ -117,19 +117,15 @@ export default function RLSPolicyManager() {
 
   const watchPolicyType = watch('policy_type');
 
-  useEffect(() => {
-    fetchPolicies();
-  }, []);
-
-  const fetchPolicies = async () => {
+  const fetchPolicies = useCallback(async () => {
     try {
       setLoading(true);
       const token = localStorage.getItem('access_token');
-      
+
       const params = new URLSearchParams();
       if (filterEntityType) params.append('entity_type', filterEntityType);
       if (filterActive !== null) params.append('is_active', filterActive.toString());
-      
+
       const response = await fetch(`${getApiUrl('/api/v1/rls/policies')}?${params}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -138,7 +134,7 @@ export default function RLSPolicyManager() {
       });
 
       if (!response.ok) throw new Error('Failed to fetch RLS policies');
-      
+
       const data = await response.json();
       setPolicies(data);
     } catch (err) {
@@ -146,7 +142,11 @@ export default function RLSPolicyManager() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [filterEntityType, filterActive]);
+
+  useEffect(() => {
+    fetchPolicies();
+  }, [fetchPolicies]);
 
   const onSubmit = async (data: RLSPolicyFormData) => {
     setSaving(true);

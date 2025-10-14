@@ -92,7 +92,7 @@ export function GenericKanbanView<T>({
   const [draggedItem, setDraggedItem] = useState<KanbanItem<T> | null>(null)
   const [dragOverColumn, setDragOverColumn] = useState<string | null>(null)
 
-  const permissions = useGenericPermissions(resourceName, projectId)
+  const permissions = useGenericPermissions(resourceName)
 
   const getColumnItems = (columnId: string) => {
     return items.filter(item => item.status === columnId)

@@ -937,7 +937,7 @@ export const ViewManager = React.memo(function ViewManager<T extends { id: numbe
         descriptionField={calendarDescriptionField}
         statusField={calendarStatusField}
         priorityField={calendarPriorityField}
-        onCreateClick={onCreateClick ? (_date?: Date) => onCreateClick() : undefined}
+        onCreateClick={onCreateClick ? () => onCreateClick() : undefined}
         onEditClick={onEditClick}
         onDeleteClick={onDeleteClick}
         onViewClick={onViewClick}

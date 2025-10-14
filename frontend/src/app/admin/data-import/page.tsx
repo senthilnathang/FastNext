@@ -62,16 +62,16 @@ interface ImportData {
 }
 
 export default function DataImportPage() {
-  const { config: importConfig } = useDataImportExportConfig();
+  const { config } = useDataImportExportConfig();
   const [currentStep, setCurrentStep] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingTables, setIsLoadingTables] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
   // Data states
   const [availableTables, setAvailableTables] = useState<string[]>([]);
   const [tableSchema, setTableSchema] = useState<TableInfo | null>(null);
   const [tablePermissions, setTablePermissions] = useState<TablePermissions | null>(null);
-  const [isLoadingTables, setIsLoadingTables] = useState(true);
   
   // Import wizard data
   const [importData, setImportData] = useState<ImportData>({
@@ -123,12 +123,14 @@ export default function DataImportPage() {
 
 
   const fetchAvailableTables = async () => {
+    setIsLoadingTables(true);
     try {
       const token = localStorage.getItem('access_token');
-      
+
       if (!token) {
         console.warn('No access token found - showing demo tables');
         setAvailableTables(['users', 'products', 'orders', 'customers']);
+        setIsLoadingTables(false);
         return;
       }
 
@@ -145,6 +147,7 @@ export default function DataImportPage() {
         // For auth errors, show demo tables
         if (response.status === 401 || response.status === 403) {
           setAvailableTables(['users', 'products', 'orders', 'customers']);
+          setIsLoadingTables(false);
           return;
         }
         
@@ -159,7 +162,7 @@ export default function DataImportPage() {
         // Set fallback tables for demo
         setAvailableTables(['users', 'products', 'orders', 'customers']);
       } finally {
-        setIsLoading(false);
+        setIsLoadingTables(false);
       }
     };
 
@@ -406,7 +409,7 @@ export default function DataImportPage() {
         max_rows: null,
         on_duplicate: "skip",
         validate_only: false,
-        batch_size: importConfig.batch_size
+        batch_size: config.batch_size
       };
       
       formData.append('import_options', JSON.stringify(importOptions));
@@ -458,6 +461,7 @@ export default function DataImportPage() {
   };
 
   // Demo validation function for fallback when authentication fails
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const performDemoValidation = async (file: File, tableName: string): Promise<any> => {
     return new Promise((resolve) => {
       const reader = new FileReader();
@@ -580,7 +584,7 @@ export default function DataImportPage() {
         max_rows: null,
         on_duplicate: "skip",
         validate_only: false,
-        batch_size: importConfig.batch_size
+        batch_size: config.batch_size
       };
       
       parseFormData.append('import_options', JSON.stringify(importOptions));

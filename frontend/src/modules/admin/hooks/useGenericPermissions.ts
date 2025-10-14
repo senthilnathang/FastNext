@@ -34,8 +34,7 @@ export interface UseGenericPermissionsResult {
 }
 
 export const useGenericPermissions = (
-  resource?: string,
-  projectId?: number
+  resource?: string
 ): UseGenericPermissionsResult => {
   const { user, isAuthenticated } = useAuth()
   const [permissions, setPermissions] = useState<Permission[]>([])

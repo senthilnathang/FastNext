@@ -5,7 +5,7 @@ import { Handle, Position, NodeProps } from 'reactflow';
 import { WorkflowNodeData } from '../types/reactflow';
 import * as Icons from 'lucide-react';
 import { Button } from '@/shared/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/shared/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/shared/components/ui/dialog';
 import { Input } from '@/shared/components/ui/input';
 import { Label } from '@/shared/components/ui/label';
 import { Textarea } from '@/shared/components/ui/textarea';

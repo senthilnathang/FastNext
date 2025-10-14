@@ -334,7 +334,7 @@ function performHeuristicAnalysis(text: string): XSSDetectionResult {
         detectedPatterns.push('heuristic:base64_encoded_script');
         severity = 'high';
       }
-    } catch (_e) {
+    } catch {
       // Invalid base64, ignore
     }
   }
@@ -411,7 +411,7 @@ export class ClientXSSProtection {
       }
 
       return urlObj.toString();
-    } catch (_e) {
+    } catch {
       return 'about:blank';
     }
   }

@@ -69,12 +69,10 @@ function UserAvatar({ user, size = "default" }: { user: UserType; size?: "sm" | 
 function CompactUserMenu({
   user,
   onLogout,
-  showNotifications,
   setShowNotifications
 }: {
   user: UserType;
   onLogout: () => void;
-  showNotifications: boolean;
   setShowNotifications: (show: boolean) => void;
 }) {
   const router = useRouter()
@@ -178,12 +176,10 @@ function CompactUserMenu({
 function ExpandedUserMenu({
   user,
   onLogout,
-  showNotifications,
   setShowNotifications
 }: {
   user: UserType;
   onLogout: () => void;
-  showNotifications: boolean;
   setShowNotifications: (show: boolean) => void;
 }) {
   const router = useRouter()
@@ -308,21 +304,6 @@ function ExpandedUserMenu({
       </DropdownMenuContent>
     </DropdownMenu>
   )
-
-  return (
-    <>
-      {/* Existing ExpandedUserMenu content */}
-      <DropdownMenu>
-        {/* ... existing content ... */}
-      </DropdownMenu>
-
-      {/* Notification Center */}
-      <NotificationCenter
-        open={showNotifications}
-        onOpenChange={setShowNotifications}
-      />
-    </>
-  )
 }
 
 export function UserMenu({ isCollapsed = false, className }: UserMenuProps) {
@@ -350,7 +331,6 @@ export function UserMenu({ isCollapsed = false, className }: UserMenuProps) {
               <CompactUserMenu
                 user={user}
                 onLogout={handleLogout}
-                showNotifications={showNotifications}
                 setShowNotifications={setShowNotifications}
               />
             </div>
@@ -378,7 +358,6 @@ export function UserMenu({ isCollapsed = false, className }: UserMenuProps) {
         <ExpandedUserMenu
           user={user}
           onLogout={handleLogout}
-          showNotifications={showNotifications}
           setShowNotifications={setShowNotifications}
         />
       </div>

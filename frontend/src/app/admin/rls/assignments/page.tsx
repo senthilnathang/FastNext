@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { CommonFormViewManager, createFormViewConfig } from '@/shared/components/views/CommonFormViewManager'
 import { FormField } from '@/shared/components/views/GenericFormView'

@@ -16,7 +16,7 @@ interface ScriptNodeData extends WorkflowNodeData {
   dependencies?: string[];
 }
 
-function ScriptNode({ data, selected, id: _id }: NodeProps<ScriptNodeData>) {
+function ScriptNode({ data, selected }: NodeProps<ScriptNodeData>) {
   const getLanguageIcon = () => {
     switch (data.language) {
       case 'javascript':

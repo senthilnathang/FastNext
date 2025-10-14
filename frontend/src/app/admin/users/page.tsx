@@ -68,7 +68,7 @@ const formFields: FormField<User>[] = [
     type: 'password',
     placeholder: 'Enter password',
     description: 'Leave empty to keep current password when editing',
-     condition: (_formData) => {
+      condition: () => {
       // Show password field for create mode or when explicitly editing password
       const urlParams = new URLSearchParams(window.location.search)
       const mode = urlParams.get('mode')

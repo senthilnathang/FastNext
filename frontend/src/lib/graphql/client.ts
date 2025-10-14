@@ -44,7 +44,7 @@ const authLink = setContext((_, { headers }) => {
 });
 
 // Error link for handling GraphQL and network errors
-const errorLink = onError(({ graphQLErrors, networkError, operation: _operation, forward: _forward }) => {
+const errorLink = onError(({ graphQLErrors, networkError }) => {
   if (graphQLErrors) {
     graphQLErrors.forEach(({ message, locations, path }) => {
       console.error(
@@ -81,7 +81,7 @@ const retryLink = new RetryLink({
   },
   attempts: {
     max: 3,
-    retryIf: (error, _operation) => {
+    retryIf: (error) => {
       // Retry on network errors, but not on authentication errors
       return !!error && !error.message.includes('401');
     }

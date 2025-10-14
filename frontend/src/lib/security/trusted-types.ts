@@ -121,7 +121,7 @@ function sanitizeURL(url: string): string {
     }
 
     return urlObj.toString();
-  } catch (_e) {
+  } catch {
     return 'about:blank';
   }
 }

@@ -143,7 +143,7 @@ export function useDataImport({
     }
   }, [maxFileSize, maxRows, allowedFormats, columns]);
 
-  const generatePreviewAction = useCallback(async (options: Partial<ImportOptions> = {}) => {
+  const generatePreviewAction = useCallback(async () => {
     if (!selectedFile || !parsedData) return;
     
     setIsGeneratingPreview(true);

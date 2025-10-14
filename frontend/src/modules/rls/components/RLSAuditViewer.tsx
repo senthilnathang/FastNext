@@ -145,8 +145,6 @@ export default function RLSAuditViewer() {
 
   const exportLogs = async () => {
     try {
-      const token = localStorage.getItem('access_token');
-      
       const params = new URLSearchParams();
       Object.entries(filters).forEach(([key, value]) => {
         if (value !== undefined && value !== '') {
@@ -157,8 +155,8 @@ export default function RLSAuditViewer() {
       // In a real implementation, this would download a file
       // For now, we'll just show an alert
       alert('Export functionality would download the filtered audit logs as CSV/JSON');
-      
-    } catch (err) {
+
+    } catch {
       setError('Failed to export audit logs');
     }
   };

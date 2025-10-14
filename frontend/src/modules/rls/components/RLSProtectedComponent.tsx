@@ -143,7 +143,7 @@ export function RLSMultiProtected({
   className = ''
 }: RLSMultiProtectedProps) {
   // Call hooks for each check (hooks must be called at the top level)
-  const accessResults = checks.map((check, index) => {
+  const accessResults = checks.map((check) => {
     // eslint-disable-next-line react-hooks/rules-of-hooks
     return useConditionalAccess(check.entityType, check.action, check.entityId);
   });
@@ -322,7 +322,7 @@ export function RLSButton({
   showIcon = true,
   ...props
 }: RLSButtonProps) {
-  const { disabled, loading, hasAccess, error, title } = useRLSButton(
+  const { disabled, loading, hasAccess, title } = useRLSButton(
     entityType,
     action,
     entityId

@@ -110,7 +110,7 @@ export function GenericListView<T extends { id: number }>({
   const [filteredData, setFilteredData] = useState(data)
   const [selectedIds, setSelectedIds] = useState<number[]>([])
 
-  const permissions = useGenericPermissions(resourceName, projectId)
+  const permissions = useGenericPermissions(resourceName)
 
   // Filter data based on search query
   useEffect(() => {

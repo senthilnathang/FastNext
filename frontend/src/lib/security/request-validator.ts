@@ -340,7 +340,7 @@ export async function validateRequestBody(request: NextRequest): Promise<Validat
       const formData = await request.formData();
       return validateFormData(formData);
     }
-  } catch (_error) {
+  } catch {
     return {
       isValid: false,
       reason: 'Invalid request body format',

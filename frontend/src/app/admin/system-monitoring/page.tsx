@@ -4,7 +4,7 @@
  * System Monitoring Dashboard - Migrated to ECharts
  * Real-time system performance and health monitoring
  */
-import React, { useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect, useCallback, useMemo } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/components/ui/card'
 import { Button } from '@/shared/components/ui/button'
 import { Badge } from '@/shared/components/ui/badge'
@@ -167,7 +167,7 @@ export default function SystemMonitoringPageECharts() {
     }
   }, [])
 
-  const mockServices: ServiceStatus[] = [
+  const mockServices: ServiceStatus[] = useMemo(() => [
     {
       name: 'Web Server',
       status: 'healthy',
@@ -214,9 +214,9 @@ export default function SystemMonitoringPageECharts() {
       version: '2.1.0',
       description: 'Object storage service'
     }
-  ]
+  ], [])
 
-  const mockAlerts: AlertItem[] = [
+  const mockAlerts: AlertItem[] = useMemo(() => [
     {
       id: '1',
       type: 'critical',
@@ -237,9 +237,9 @@ export default function SystemMonitoringPageECharts() {
       acknowledged: true,
       resolved: false
     }
-  ]
+  ], [])
 
-  const mockPerformance: Performance[] = [
+  const mockPerformance: Performance[] = useMemo(() => [
     {
       metric: 'API Response Time',
       current: 125,
@@ -272,7 +272,7 @@ export default function SystemMonitoringPageECharts() {
       trend: 'down',
       status: 'good'
     }
-  ]
+  ], [])
 
   // Fetch/update metrics
   const updateMetrics = useCallback(() => {

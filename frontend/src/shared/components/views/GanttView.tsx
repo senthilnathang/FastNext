@@ -106,13 +106,11 @@ export function GanttView<T extends Record<string, any>>({
   onDeleteClick,
   onViewClick,
   onUpdateDates,
-  onUpdateProgress,
   renderBlock,
   renderSidebarItem,
   viewMode = 'weeks',
   showWeekends = false,
   showProgress = true,
-  showDependencies = false,
   allowResize = true,
   allowMove = true,
   canCreate = true,
@@ -494,7 +492,7 @@ export function GanttView<T extends Record<string, any>>({
           
           {/* Sidebar Items */}
           <div>
-            {ganttItems.map((item, _index) => (
+            {ganttItems.map((item) => (
               <div
                 key={item.id}
                 style={{ height: ROW_HEIGHT }}

@@ -143,7 +143,7 @@ export class AppConfig {
       try {
         const apiUrl = new URL(env.NEXT_PUBLIC_API_URL);
         domains.push(apiUrl.origin);
-      } catch (_error) {
+      } catch {
         console.warn('Invalid API URL in environment:', env.NEXT_PUBLIC_API_URL);
       }
     }

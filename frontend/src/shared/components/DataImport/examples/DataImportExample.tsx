@@ -209,20 +209,6 @@ export function BasicImportExample() {
 
 // Example 2: DataTable Integration
 export function DataTableImportExample() {
-  const adminPermissions: ImportPermission = {
-    canImport: true,
-    canValidate: true,
-    canPreview: true,
-    maxFileSize: 100 * 1024 * 1024,
-    maxRows: 100000,
-    allowedFormats: ['csv', 'json', 'excel', 'xml'],
-    requireApproval: false
-  };
-
-  const handleImport = async (data: any[]) => {
-    console.log('Table import:', data);
-    return { status: 'success', importedRows: data.length };
-  };
 
   return (
     <div className="space-y-4">
@@ -246,10 +232,6 @@ export function DataTableImportExample() {
 
 // Example 3: Simple Import Buttons
 export function SimpleImportExample() {
-  const handleImport = async (data: any[]) => {
-    console.log('Simple import:', data);
-    return { status: 'success', importedRows: data.length };
-  };
 
   return (
     <div className="space-y-4">

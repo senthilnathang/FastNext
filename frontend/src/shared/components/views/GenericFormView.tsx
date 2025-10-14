@@ -164,7 +164,7 @@ export function GenericFormView<T = any>({
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set())
   const [autosaveTimeout, setAutosaveTimeout] = useState<NodeJS.Timeout | null>(null)
 
-  const permissions = useGenericPermissions(resourceName, projectId)
+  const permissions = useGenericPermissions(resourceName)
 
   // Determine form permissions
   const canEdit = mode === 'create' 
