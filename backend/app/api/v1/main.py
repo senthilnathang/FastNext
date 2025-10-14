@@ -14,6 +14,7 @@ from . import (
     audit_trails,
     auth_routes,
     cache_management,
+    collaboration,
     components,
     data_import_export,
     database_performance,
@@ -98,6 +99,9 @@ v1_router.include_router(
 )
 v1_router.include_router(audit_trails.router, prefix="/audit-trails", tags=["v1-audit"])
 v1_router.include_router(events.router, tags=["v1-events"])
+v1_router.include_router(
+    collaboration.router, prefix="/collaboration", tags=["v1-collaboration"]
+)
 
 # Data Import/Export
 v1_router.include_router(
