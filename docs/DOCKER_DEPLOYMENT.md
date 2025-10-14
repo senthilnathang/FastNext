@@ -39,6 +39,31 @@ docker-compose up -d
 docker-compose -f docker-compose.prod.yml up -d
 ```
 
+### Scaled Production Environment (Phase 3)
+
+For enterprise-scale deployment with database replication, Redis clustering, and horizontal scaling:
+
+```bash
+# Start scaled environment with replication and clustering
+docker-compose -f docker-compose.scale.yml up -d
+
+# Scale backend instances (3-20 pods with auto-scaling)
+docker-compose -f docker-compose.scale.yml up -d --scale backend=5
+
+# Check scaling status
+docker-compose -f docker-compose.scale.yml ps
+
+# View logs
+docker-compose -f docker-compose.scale.yml logs -f backend
+```
+
+**Scaled Environment Features:**
+- **Database Replication**: 1 primary + 2 read replicas with automatic failover
+- **Redis Cluster**: 6-node cluster (3 masters + 3 replicas) for distributed caching
+- **Load Balancing**: Nginx with health checks and least-connection routing
+- **Horizontal Scaling**: Multiple backend instances with automatic scaling
+- **High Availability**: Zero-downtime deployments and automatic recovery
+
 ## 📁 Docker Architecture
 
 ### Services Overview
