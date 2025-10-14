@@ -43,7 +43,7 @@ export class SecureCookieManager {
     if (!name || typeof name !== 'string') {
       throw new Error('Cookie name must be a non-empty string');
     }
-    
+
     // Prevent cookie injection attacks
     if (name.includes(';') || name.includes('=') || name.includes('\n') || name.includes('\r')) {
       throw new Error('Cookie name contains invalid characters');
@@ -54,7 +54,7 @@ export class SecureCookieManager {
     if (typeof value !== 'string') {
       throw new Error('Cookie value must be a string');
     }
-    
+
     // Prevent cookie injection attacks
     if (value.includes(';') || value.includes('\n') || value.includes('\r')) {
       throw new Error('Cookie value contains invalid characters');
@@ -63,7 +63,7 @@ export class SecureCookieManager {
 
   private static serializeCookieOptions(options: CookieSecurityOptions): string {
     const parts: string[] = [];
-    
+
     if (options.httpOnly) parts.push('HttpOnly');
     if (options.secure) parts.push('Secure');
     if (options.sameSite) parts.push(`SameSite=${options.sameSite}`);
@@ -71,7 +71,7 @@ export class SecureCookieManager {
     if (options.path) parts.push(`Path=${options.path}`);
     if (options.domain) parts.push(`Domain=${options.domain}`);
     if (options.expires) parts.push(`Expires=${options.expires.toUTCString()}`);
-    
+
     return parts.join('; ');
   }
 
@@ -86,7 +86,7 @@ export class SecureCookieManager {
 
     const cookieOptions = { ...SECURE_COOKIE_DEFAULTS, ...options };
     const serializedOptions = this.serializeCookieOptions(cookieOptions);
-    
+
     const cookieString = `${name}=${value}; ${serializedOptions}`;
     response.headers.append('Set-Cookie', cookieString);
   }
@@ -98,7 +98,7 @@ export class SecureCookieManager {
   ): void {
     const config = type === 'session' ? SESSION_COOKIE_CONFIG : REFRESH_TOKEN_CONFIG;
     const cookieName = type === 'session' ? 'auth-token' : 'refresh-token';
-    
+
     this.setSecureCookie(response, cookieName, token, config);
   }
 
@@ -108,14 +108,14 @@ export class SecureCookieManager {
 
   static clearCookie(response: NextResponse, name: string, path: string = '/'): void {
     this.validateCookieName(name);
-    
+
     const expiredCookieOptions: CookieSecurityOptions = {
       ...SECURE_COOKIE_DEFAULTS,
       path,
       maxAge: 0,
       expires: new Date(0)
     };
-    
+
     this.setSecureCookie(response, name, '', expiredCookieOptions);
   }
 
@@ -127,7 +127,7 @@ export class SecureCookieManager {
 
   static getCookie(request: NextRequest, name: string): string | null {
     this.validateCookieName(name);
-    
+
     const cookieValue = request.cookies.get(name)?.value;
     return cookieValue || null;
   }
@@ -150,12 +150,12 @@ export class SecureCookieManager {
 
     // Check if running over HTTPS in production (unless bypassed for dev)
     const bypassHttpsCheck = process.env.BYPASS_HTTPS_CHECK === 'true';
-    
+
     if (process.env.NODE_ENV === 'production' && !bypassHttpsCheck) {
       const forwardedProto = request.headers.get('x-forwarded-proto');
       const urlProtocol = request.nextUrl.protocol;
       const isHttps = forwardedProto === 'https' || urlProtocol === 'https:';
-      
+
       if (!isHttps) {
         issues.push('Secure cookies require HTTPS in production');
       }
@@ -184,7 +184,7 @@ export class SecureCookieManager {
       if (authToken.length < 32) {
         warnings.push('Auth token appears to be too short');
       }
-      
+
       if (!/^[A-Za-z0-9+/=_-]+$/.test(authToken)) {
         issues.push('Auth token contains invalid characters');
       }
@@ -210,7 +210,7 @@ export function generateSecureRandomString(length: number = 32): string {
     crypto.getRandomValues(array);
     return Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('');
   }
-  
+
   // Fallback for environments without crypto
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
   let result = '';
@@ -230,7 +230,7 @@ export const CookieSecurityHeaders = {
     '__Secure-ID=123; Secure; HttpOnly; SameSite=Strict',
     '__Host-SessionID=abc; Secure; HttpOnly; SameSite=Strict; Path=/'
   ].join(', '),
-  
+
   // Additional security headers for cookie protection
   'X-Content-Type-Options': 'nosniff',
   'X-Frame-Options': 'DENY',

@@ -37,7 +37,7 @@ class SwaggerErrorBoundary extends Component<Props, State> {
       this.setState({ hasError: false, error: undefined })
       return
     }
-    
+
     console.error('SwaggerUI Error:', error, errorInfo)
   }
 

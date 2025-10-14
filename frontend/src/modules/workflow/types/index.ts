@@ -1,6 +1,6 @@
 export type WorkflowType = 'sales' | 'purchase' | 'invoice' | 'payment';
 
-export type WorkflowState = 
+export type WorkflowState =
   | 'new'
   | 'draft'
   | 'pending'

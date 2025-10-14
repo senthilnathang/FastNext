@@ -16,7 +16,7 @@ interface CheckResult {
 class APIIntegrationVerifier {
   private basePath: string = 'src'
   private results: CheckResult[] = []
-  
+
   constructor() {
     this.basePath = process.cwd() + '/src'
   }
@@ -24,23 +24,23 @@ class APIIntegrationVerifier {
   async verifyAllFiles(): Promise<void> {
     console.log('🔍 Frontend API Integration Verification')
     console.log('=' .repeat(50))
-    
+
     // Check API service files
     await this.checkAPIServices()
-    
+
     // Check tRPC routers
     await this.checkTRPCRouters()
-    
+
     // Check for old API patterns
     await this.checkForOldPatterns()
-    
+
     // Generate report
     this.generateReport()
   }
 
   private async checkAPIServices(): Promise<void> {
     console.log('\n📦 Checking API Service Files...')
-    
+
     const serviceFiles = [
       'src/shared/services/api/config.ts',
       'src/shared/services/api/users.ts',
@@ -50,7 +50,7 @@ class APIIntegrationVerifier {
       'src/shared/services/components.ts',
       'src/shared/services/pages.ts',
     ]
-    
+
     for (const file of serviceFiles) {
       const result = this.checkFile(file)
       if (result) {
@@ -66,14 +66,14 @@ class APIIntegrationVerifier {
 
   private async checkTRPCRouters(): Promise<void> {
     console.log('\n🔄 Checking tRPC Routers...')
-    
+
     const trpcFiles = [
       'src/lib/trpc/routers/users.ts',
       'src/lib/trpc/routers/roles.ts',
       'src/lib/trpc/routers/permissions.ts',
       'src/lib/trpc/routers/projects.ts',
     ]
-    
+
     for (const file of trpcFiles) {
       const result = this.checkTRPCFile(file)
       if (result) {
@@ -89,10 +89,10 @@ class APIIntegrationVerifier {
 
   private async checkForOldPatterns(): Promise<void> {
     console.log('\n🔍 Scanning for Old API Patterns...')
-    
+
     try {
       const allTsFiles = await glob('src/**/*.{ts,tsx}', { ignore: ['**/*.d.ts', '**/node_modules/**'] })
-      
+
       for (const file of allTsFiles) {
         const result = this.checkForOldAPIPatterns(file)
         if (result && !result.passed) {
@@ -123,8 +123,8 @@ class APIIntegrationVerifier {
       if (!content.includes('API_CONFIG')) {
         issues.push('Missing API_CONFIG import/usage')
       }
-      
-      if (content.includes('apiClient.get(\'/') || 
+
+      if (content.includes('apiClient.get(\'/') ||
           content.includes('apiClient.post(\'/') ||
           content.includes('apiClient.put(\'/') ||
           content.includes('apiClient.delete(\'/')
@@ -136,7 +136,7 @@ class APIIntegrationVerifier {
     // Check for proper v1 endpoints in config
     if (filePath.includes('api/config.ts')) {
       const requiredEndpoints = ['/api/v1/users', '/api/v1/roles', '/api/v1/permissions', '/api/v1/projects']
-      
+
       for (const endpoint of requiredEndpoints) {
         if (!content.includes(endpoint)) {
           issues.push(`Missing endpoint: ${endpoint}`)
@@ -172,7 +172,7 @@ class APIIntegrationVerifier {
     const oldPatterns = [
       'apiClient.get(\'/users',
       'apiClient.get(\'/roles',
-      'apiClient.get(\'/permissions', 
+      'apiClient.get(\'/permissions',
       'apiClient.get(\'/projects',
       'apiClient.post(\'/users',
       'apiClient.post(\'/roles',
@@ -222,7 +222,7 @@ class APIIntegrationVerifier {
 
   private generateReport(): void {
     console.log('\n' + '='.repeat(50))
-    
+
     const totalFiles = this.results.length
     const passedFiles = this.results.filter(r => r.passed).length
     const failedFiles = totalFiles - passedFiles
@@ -231,7 +231,7 @@ class APIIntegrationVerifier {
     console.log('📊 Verification Summary:')
     console.log(`  Total files checked: ${totalFiles}`)
     console.log(`  Passed: ${passedFiles} ✅`)
-    console.log(`  Failed: ${failedFiles} ❌`) 
+    console.log(`  Failed: ${failedFiles} ❌`)
     console.log(`  Total issues: ${totalIssues}`)
 
     if (failedFiles === 0) {

@@ -48,13 +48,13 @@ export default function ProjectsPage() {
       views={projectViews}
       activeView={activeView}
       onViewChange={setActiveView}
-      
+
       // Search & Filtering
       searchQuery={searchQuery}
       onSearchChange={setSearchQuery}
       filters={filters}
       onFiltersChange={setFilters}
-      
+
       // Sorting & Grouping
       sortBy={sortBy}
       sortOrder={sortOrder}
@@ -66,23 +66,23 @@ export default function ProjectsPage() {
       groupBy={groupBy}
       onGroupChange={setGroupBy}
       groupOptions={groupOptions}
-      
+
       // Selection & Actions
       selectedItems={selectedItems}
       onSelectionChange={setSelectedItems}
       selectable={true}
       bulkActions={bulkActions}
-      
+
       // CRUD Operations
       onCreateClick={() => setCreateDialogOpen(true)}
       onEditClick={handleEditProject}
       onDeleteClick={handleDeleteProject}
       onViewClick={handleViewProject}
-      
+
       // Export/Import
       onExport={handleExport}
       onImport={handleImport}
-      
+
       // UI Configuration
       showToolbar={true}
       showSearch={true}
@@ -148,7 +148,7 @@ const sortOptions: SortOption[] = [
   { key: 'updated_at', label: 'Last Modified', defaultOrder: 'desc' }
 ];
 
-// Group Options  
+// Group Options
 const groupOptions: GroupOption[] = [
   { key: 'is_public', label: 'Visibility', icon: <Globe className="h-4 w-4" /> },
   { key: 'status', label: 'Status', icon: <Clock className="h-4 w-4" /> },
@@ -186,7 +186,7 @@ src/shared/components/
 │   ├── GanttView.tsx            # Gantt chart component ✅
 │   ├── CalendarView.tsx         # Calendar view component ✅
 │   ├── GenericListView.tsx      # Legacy component
-│   ├── GenericKanbanView.tsx    # Legacy component  
+│   ├── GenericKanbanView.tsx    # Legacy component
 │   └── index.ts                 # Exports
 ├── ui/
 │   ├── sort-control.tsx         # Sorting interface
@@ -241,6 +241,6 @@ Currently implemented in:
 
 ---
 
-**Component Version**: 2.0.0  
-**Last Updated**: October 2025  
+**Component Version**: 2.0.0
+**Last Updated**: October 2025
 **Stability**: Production Ready ✅

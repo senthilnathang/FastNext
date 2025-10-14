@@ -1,9 +1,9 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { 
-  permissionsApi, 
-  type CreatePermissionRequest, 
-  type UpdatePermissionRequest, 
-  type PermissionListParams 
+import {
+  permissionsApi,
+  type CreatePermissionRequest,
+  type UpdatePermissionRequest,
+  type PermissionListParams
 } from '@/shared/services/api/permissions'
 
 // Query keys for permissions
@@ -62,7 +62,7 @@ export const usePermissionActions = () => {
 // Mutation hooks
 export const useCreatePermission = () => {
   const queryClient = useQueryClient()
-  
+
   return useMutation({
     mutationFn: (data: CreatePermissionRequest) => permissionsApi.createPermission(data),
     onSuccess: () => {
@@ -77,7 +77,7 @@ export const useCreatePermission = () => {
 
 export const useUpdatePermission = () => {
   const queryClient = useQueryClient()
-  
+
   return useMutation({
     mutationFn: ({ id, data }: { id: number; data: UpdatePermissionRequest }) =>
       permissionsApi.updatePermission(id, data),
@@ -94,7 +94,7 @@ export const useUpdatePermission = () => {
 
 export const useDeletePermission = () => {
   const queryClient = useQueryClient()
-  
+
   return useMutation({
     mutationFn: (id: number) => permissionsApi.deletePermission(id),
     onSuccess: (_, id) => {

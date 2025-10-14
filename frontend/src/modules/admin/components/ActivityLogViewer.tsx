@@ -21,9 +21,9 @@ import {
 } from 'lucide-react';
 import { API_CONFIG, getApiUrl } from '@/shared/services/api/config';
 import { fetchUserEvents, UserEvent, EventsResponse } from '@/shared/services/api/events';
-import { 
-  useSearchState, 
-  usePaginationState, 
+import {
+  useSearchState,
+  usePaginationState,
   useStringLiteralState,
   useBooleanFilterState
 } from '@/shared/hooks';
@@ -74,11 +74,11 @@ const actionColors = {
 } as const;
 
 // Memoized activity item component for better performance
-const ActivityItem = memo(({ 
-  activity, 
-  getLevelIcon, 
-  formatDate 
-}: { 
+const ActivityItem = memo(({
+  activity,
+  getLevelIcon,
+  formatDate
+}: {
   activity: ActivityLog
   getLevelIcon: (level: string) => React.ReactElement
   formatDate: (dateString: string) => string
@@ -90,7 +90,7 @@ const ActivityItem = memo(({
           {getLevelIcon(activity.level)}
         </div>
       </div>
-      
+
       <div className="flex-1 min-w-0">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
@@ -111,11 +111,11 @@ const ActivityItem = memo(({
             {formatDate(activity.created_at)}
           </span>
         </div>
-        
+
         <p className="mt-1 text-sm text-gray-700 dark:text-gray-300">
           {activity.description}
         </p>
-        
+
         <div className="mt-2 flex items-center space-x-4 text-xs text-gray-500">
           {activity.ip_address && (
             <span>IP: {activity.ip_address}</span>
@@ -140,7 +140,7 @@ export default function ActivityLogViewer({ showUserActivitiesOnly = false }: Ac
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [totalPages, setTotalPages] = useState(1);
-  
+
   // URL State Management with nuqs
   const [search, setSearch] = useSearchState();
   const { page: currentPage, setPage: setCurrentPage, limit: pageSize } = usePaginationState(1, 20);
@@ -148,7 +148,7 @@ export default function ActivityLogViewer({ showUserActivitiesOnly = false }: Ac
   const [level, setLevel] = useStringLiteralState('level', ['', 'info', 'warning', 'error', 'critical'] as const, '');
   const [days, setDays] = useStringLiteralState('days', ['7', '30', '90', '365'] as const, '30');
   const [showFilters, setShowFilters] = useBooleanFilterState('filters', false);
-  
+
   // Additional local filters not stored in URL
   const [entityType, setEntityType] = useState('');
   const [startDate, setStartDate] = useState('');
@@ -157,7 +157,7 @@ export default function ActivityLogViewer({ showUserActivitiesOnly = false }: Ac
   const fetchActivityLogs = React.useCallback(async () => {
     try {
       setLoading(true);
-      
+
       const filters = {
         page: currentPage,
         per_page: pageSize,
@@ -171,14 +171,14 @@ export default function ActivityLogViewer({ showUserActivitiesOnly = false }: Ac
       };
 
       const response: EventsResponse = await fetchUserEvents(filters);
-      
+
       // Transform events to match ActivityLog interface
       const transformedActivities: ActivityLog[] = response.items.map(event => ({
         ...event,
         level: (event.event_category as 'info' | 'warning' | 'error' | 'critical') || 'info',
         created_at: event.timestamp
       }));
-      
+
       setActivities(transformedActivities);
       setTotalPages(response.pages);
     } catch (err) {
@@ -247,9 +247,9 @@ export default function ActivityLogViewer({ showUserActivitiesOnly = false }: Ac
       });
 
       if (!response.ok) throw new Error('Export failed');
-      
+
       const data = await response.json();
-      
+
       // Download as JSON file
       const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
@@ -280,7 +280,7 @@ export default function ActivityLogViewer({ showUserActivitiesOnly = false }: Ac
     if (!stats?.events_by_action || Object.keys(stats.events_by_action).length === 0) {
       return 'N/A';
     }
-    return Object.entries(stats.events_by_action).reduce((a, b) => 
+    return Object.entries(stats.events_by_action).reduce((a, b) =>
       a[1] > b[1] ? a : b
     )[0];
   }, [stats?.events_by_action]);
@@ -308,7 +308,7 @@ export default function ActivityLogViewer({ showUserActivitiesOnly = false }: Ac
 {showUserActivitiesOnly ? 'My Activity Events' : 'User Events'}
           </h1>
         </div>
-        
+
         <div className="flex space-x-2">
           <Button
             variant="outline"
@@ -350,7 +350,7 @@ export default function ActivityLogViewer({ showUserActivitiesOnly = false }: Ac
               {stats.total_events.toLocaleString()}
             </div>
           </Card>
-          
+
           <Card className="p-4">
             <div className="flex items-center justify-between">
               <span className="text-sm font-medium text-gray-700">Recent Activity</span>
@@ -360,7 +360,7 @@ export default function ActivityLogViewer({ showUserActivitiesOnly = false }: Ac
               {stats.recent_activity_count}
             </div>
           </Card>
-          
+
           <Card className="p-4">
             <div className="flex items-center justify-between">
               <span className="text-sm font-medium text-gray-700">Most Common Action</span>
@@ -370,7 +370,7 @@ export default function ActivityLogViewer({ showUserActivitiesOnly = false }: Ac
               {mostCommonAction}
             </div>
           </Card>
-          
+
           <Card className="p-4">
             <div className="flex items-center justify-between">
               <span className="text-sm font-medium text-gray-700">Critical Events</span>
@@ -396,7 +396,7 @@ export default function ActivityLogViewer({ showUserActivitiesOnly = false }: Ac
                 onChange={(e) => setSearch(e.target.value || null)}
               />
             </div>
-            
+
             <div>
               <Label htmlFor="action">Action</Label>
               <select
@@ -414,7 +414,7 @@ export default function ActivityLogViewer({ showUserActivitiesOnly = false }: Ac
                 <option value="logout">Logout</option>
               </select>
             </div>
-            
+
             <div>
               <Label htmlFor="level">Level</Label>
               <select
@@ -430,7 +430,7 @@ export default function ActivityLogViewer({ showUserActivitiesOnly = false }: Ac
                 <option value="critical">Critical</option>
               </select>
             </div>
-            
+
             <div>
               <Label htmlFor="days">Time Range</Label>
               <select
@@ -446,7 +446,7 @@ export default function ActivityLogViewer({ showUserActivitiesOnly = false }: Ac
               </select>
             </div>
           </div>
-          
+
           <div className="flex justify-end mt-4 space-x-2">
             <Button
               variant="outline"

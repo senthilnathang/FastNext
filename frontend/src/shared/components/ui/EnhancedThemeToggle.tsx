@@ -45,7 +45,7 @@ interface ThemePreviewProps {
 
 function ThemePreview({ theme, isActive, onClick }: ThemePreviewProps) {
   const Icon = theme.icon;
-  
+
   return (
     <button
       onClick={onClick}
@@ -109,9 +109,9 @@ export function EnhancedThemeToggle() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button 
-          variant="ghost" 
-          size="sm" 
+        <Button
+          variant="ghost"
+          size="sm"
           className={cn(
             "h-8 w-8 px-0 transition-all duration-200",
             "hover:bg-gray-100 dark:hover:bg-gray-800",
@@ -129,7 +129,7 @@ export function EnhancedThemeToggle() {
           <span>Choose Theme</span>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        
+
         <div className="space-y-1">
           {themes.map((themeOption) => (
             <ThemePreview
@@ -142,7 +142,7 @@ export function EnhancedThemeToggle() {
         </div>
 
         <DropdownMenuSeparator />
-        
+
         <div className="px-2 py-1.5">
           <p className="text-xs text-gray-500 dark:text-gray-400">
             Current: <span className="font-medium">{currentTheme.label}</span>
@@ -197,10 +197,10 @@ export function CompactThemeToggle() {
   };
 
   return (
-    <Button 
-      variant="ghost" 
-      size="icon" 
-      onClick={toggleTheme} 
+    <Button
+      variant="ghost"
+      size="icon"
+      onClick={toggleTheme}
       title={getTooltip()}
       className={cn(
         "transition-all duration-200 hover:scale-110",

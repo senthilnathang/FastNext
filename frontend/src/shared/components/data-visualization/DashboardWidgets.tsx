@@ -1,12 +1,12 @@
 "use client"
 
 import * as React from "react"
-import { 
-  Users, 
-  Shield, 
-  Key, 
-  Settings, 
-  BarChart3, 
+import {
+  Users,
+  Shield,
+  Key,
+  Settings,
+  BarChart3,
   Download,
   RefreshCw,
   CheckCircle,
@@ -96,7 +96,6 @@ const defaultQuickActions: QuickAction[] = [
     title: 'Export Data',
     description: 'Download system reports',
     icon: Download,
-    action: () => console.log('Export data'),
     variant: 'secondary'
   },
   {
@@ -112,7 +111,6 @@ const defaultQuickActions: QuickAction[] = [
     title: 'View Analytics',
     description: 'Check system analytics',
     icon: BarChart3,
-    action: () => console.log('View analytics'),
     variant: 'secondary'
   }
 ]
@@ -222,10 +220,10 @@ export function QuickActionsWidget({ actions = defaultQuickActions, className }:
   )
 }
 
-export function SystemStatusWidget({ 
-  metrics = defaultSystemMetrics, 
-  loading = false, 
-  className 
+export function SystemStatusWidget({
+  metrics = defaultSystemMetrics,
+  loading = false,
+  className
 }: SystemStatusWidgetProps) {
   if (loading) {
     return (
@@ -290,8 +288,8 @@ export function SystemStatusWidget({
                 {metric.change && (
                   <p className={cn(
                     "text-xs",
-                    metric.change.type === 'increase' 
-                      ? "text-green-600 dark:text-green-400" 
+                    metric.change.type === 'increase'
+                      ? "text-green-600 dark:text-green-400"
                       : "text-red-600 dark:text-red-400"
                   )}>
                     {metric.change.type === 'increase' ? '+' : '-'}
@@ -308,10 +306,10 @@ export function SystemStatusWidget({
   )
 }
 
-export function RecentStatsWidget({ 
-  stats, 
-  loading = false, 
-  className 
+export function RecentStatsWidget({
+  stats,
+  loading = false,
+  className
 }: RecentStatsWidgetProps) {
   const defaultStats = {
     users: { total: 1247, active: 1158, new: 23 },

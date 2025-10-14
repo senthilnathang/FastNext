@@ -21,10 +21,10 @@ interface SidebarItemProps {
   isHovered?: boolean;
 }
 
-function SidebarItem({ 
-  item, 
-  level = 0, 
-  expandedItems, 
+function SidebarItem({
+  item,
+  level = 0,
+  expandedItems,
   onToggleExpanded,
   isCollapsed = false,
   isHovered = false
@@ -34,7 +34,7 @@ function SidebarItem({
   const isExpanded = expandedItems.includes(item.title);
   // Only highlight the exact current page, not parent pages
   const isActive = item.href ? pathname === item.href : false;
-  const hasActiveChild = hasChildren && item.children?.some(child => 
+  const hasActiveChild = hasChildren && item.children?.some(child =>
     child.href && pathname === child.href
   );
 
@@ -125,9 +125,9 @@ function SidebarItem({
       {hasChildren && (isExpanded || hasActiveChild) && showText && (
         <div className="mt-1 space-y-0.5 pl-2">
           {item.children?.map((child) => (
-            <SidebarItem 
-              key={child.title} 
-              item={child} 
+            <SidebarItem
+              key={child.title}
+              item={child}
               level={level + 1}
               expandedItems={expandedItems}
               onToggleExpanded={onToggleExpanded}
@@ -148,8 +148,8 @@ interface SidebarProps {
   isCollapsed?: boolean;
 }
 
-export default function Sidebar({ 
-  className, 
+export default function Sidebar({
+  className,
   onClose,
   showCloseButton = false,
   isCollapsed = false
@@ -176,8 +176,8 @@ export default function Sidebar({
   }, [expandedItems]);
 
   const handleToggleExpanded = useCallback((itemTitle: string) => {
-    setExpandedItems(prev => 
-      prev.includes(itemTitle) 
+    setExpandedItems(prev =>
+      prev.includes(itemTitle)
         ? prev.filter(item => item !== itemTitle)
         : [...prev, itemTitle]
     );
@@ -212,7 +212,7 @@ export default function Sidebar({
 
   return (
     <TooltipProvider>
-      <div 
+      <div
         className={cn(
           'bg-sidebar border-r border-border',
           'flex flex-col h-full transition-all duration-300 ease-in-out',
@@ -241,8 +241,8 @@ export default function Sidebar({
               </div>
             )}
           </div>
-          
-          
+
+
           {/* Mobile close button */}
           {showCloseButton && onClose && (
             <button
@@ -261,8 +261,8 @@ export default function Sidebar({
         )}>
           <div className="space-y-1">
             {filteredMenuItems.map((item) => (
-              <SidebarItem 
-                key={item.title} 
+              <SidebarItem
+                key={item.title}
                 item={item}
                 expandedItems={expandedItems}
                 onToggleExpanded={handleToggleExpanded}
@@ -279,8 +279,8 @@ export default function Sidebar({
             'border-t border-border',
             isCollapsed && !isHovered ? 'p-2' : 'p-3'
           )}>
-            <UserMenu 
-              isCollapsed={isCollapsed && !isHovered} 
+            <UserMenu
+              isCollapsed={isCollapsed && !isHovered}
               className="w-full"
             />
           </div>

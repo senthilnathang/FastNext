@@ -69,7 +69,7 @@ describe('ThemeContext', () => {
     localStorageMock.getItem.mockReturnValue(null);
     localStorageMock.setItem.mockClear();
     document.documentElement.className = '';
-    
+
     // Reset matchMedia to default (light theme)
     Object.defineProperty(window, 'matchMedia', {
       writable: true,
@@ -303,7 +303,7 @@ describe('ThemeContext', () => {
     });
 
     expect(consoleSpy).toHaveBeenCalledWith('Error loading theme:', expect.any(Error));
-    
+
     consoleSpy.mockRestore();
   });
 
@@ -329,7 +329,7 @@ describe('ThemeContext', () => {
     });
 
     expect(consoleSpy).toHaveBeenCalled();
-    
+
     consoleSpy.mockRestore();
   });
 

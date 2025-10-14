@@ -25,7 +25,7 @@ function ConditionalNode({ data, selected, id }: NodeProps<WorkflowNodeData>) {
   }, [id, editData]);
   return (
     <>
-      <div 
+      <div
         className={`
           px-3 py-2 shadow-md rounded-lg border-2 min-w-[120px] max-w-[180px] cursor-pointer
           ${selected ? 'border-orange-500' : 'border-orange-300'}
@@ -40,11 +40,11 @@ function ConditionalNode({ data, selected, id }: NodeProps<WorkflowNodeData>) {
           className="w-3 h-3 !bg-orange-400 border-2 border-white"
           style={{ top: -6 }}
         />
-        
+
         {/* Node content */}
         <div className="flex items-center space-x-2">
-          <GitBranch 
-            size={14} 
+          <GitBranch
+            size={14}
             className="text-orange-600 flex-shrink-0"
           />
           <div className="flex-1 min-w-0">
@@ -76,7 +76,7 @@ function ConditionalNode({ data, selected, id }: NodeProps<WorkflowNodeData>) {
             Decision
           </span>
         </div>
-        
+
         {/* Output handles - Left (False) and Right (True) */}
         <Handle
           type="source"
@@ -110,7 +110,7 @@ function ConditionalNode({ data, selected, id }: NodeProps<WorkflowNodeData>) {
                 placeholder="Enter condition label"
               />
             </div>
-            
+
             <div className="space-y-2">
               <Label htmlFor="description">Description</Label>
               <Textarea
@@ -120,7 +120,7 @@ function ConditionalNode({ data, selected, id }: NodeProps<WorkflowNodeData>) {
                 placeholder="Enter condition description"
               />
             </div>
-            
+
             <div className="space-y-2">
               <Label htmlFor="condition">Condition Expression</Label>
               <Input
@@ -130,7 +130,7 @@ function ConditionalNode({ data, selected, id }: NodeProps<WorkflowNodeData>) {
                 placeholder="e.g., value > 100"
               />
             </div>
-            
+
             <div className="flex justify-end space-x-2">
               <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
                 Cancel

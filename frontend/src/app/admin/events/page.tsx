@@ -39,7 +39,7 @@ const EventsPage: React.FC<EventsPageProps> = () => {
   const [sortOrder, setSortOrder] = React.useState<'asc' | 'desc'>('desc')
   const [groupBy, setGroupBy] = React.useState<string>('')
   const [selectedItems, setSelectedItems] = React.useState<EventResponse[]>([])
-  
+
   // State
   const [selectedEvent, setSelectedEvent] = React.useState<EventResponse | null>(null)
   const [timeRange, setTimeRange] = React.useState<number>(24) // Hours
@@ -47,13 +47,13 @@ const EventsPage: React.FC<EventsPageProps> = () => {
   const [refreshInterval] = React.useState<number>(30) // Seconds
 
   // Queries
-  const { 
-    data: eventsData, 
-    isLoading: eventsLoading, 
+  const {
+    data: eventsData,
+    isLoading: eventsLoading,
     error: eventsError,
-    refetch: refetchEvents 
+    refetch: refetchEvents
   } = useEvents()
-  
+
    const { mutate: exportEvents } = useExportEvents()
 
   // Level configuration
@@ -295,7 +295,6 @@ const EventsPage: React.FC<EventsPageProps> = () => {
   }
 
   const handleImport = () => {
-    console.log('Import events')
     // TODO: Implement import
   }
 
@@ -303,7 +302,6 @@ const EventsPage: React.FC<EventsPageProps> = () => {
     {
       label: 'Mark as Reviewed',
       action: (items: EventResponse[]) => {
-        console.log('Mark as reviewed:', items)
         // TODO: Implement bulk review
       },
       variant: 'default' as const

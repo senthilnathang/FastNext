@@ -5,10 +5,10 @@ import { Card, CardContent, CardHeader } from '@/shared/components/ui/card';
 import { Input } from '@/shared/components/ui/input';
 import { Button } from '@/shared/components/ui/button';
 import { Badge } from '@/shared/components/ui/badge';
-import { 
-  Search, 
-  ChevronLeft, 
-  ChevronRight, 
+import {
+  Search,
+  ChevronLeft,
+  ChevronRight,
   SortAsc,
   SortDesc,
   MoreVertical,
@@ -96,9 +96,9 @@ export function EnhancedListView<T extends Record<string, any>>({
       filtered = [...filtered].sort((a, b) => {
         const aVal = a[sortKey];
         const bVal = b[sortKey];
-        
+
         if (aVal === bVal) return 0;
-        
+
         const comparison = aVal < bVal ? -1 : 1;
         return sortOrder === 'asc' ? comparison : -comparison;
       });
@@ -123,11 +123,11 @@ export function EnhancedListView<T extends Record<string, any>>({
 
   const renderValue = (column: ListViewColumn<T>, item: T) => {
     const value = item[column.key];
-    
+
     if (column.render) {
       return column.render(value, item);
     }
-    
+
     if (typeof value === 'boolean') {
       return (
         <Badge variant={value ? 'default' : 'secondary'}>
@@ -135,7 +135,7 @@ export function EnhancedListView<T extends Record<string, any>>({
         </Badge>
       );
     }
-    
+
     if (Array.isArray(value)) {
       return (
         <div className="flex gap-1 flex-wrap">
@@ -152,16 +152,16 @@ export function EnhancedListView<T extends Record<string, any>>({
         </div>
       );
     }
-    
+
     if (value === null || value === undefined) {
       return <span className="text-gray-400">-</span>;
     }
-    
+
     return String(value);
   };
 
   const renderActions = (item: T) => {
-    const visibleActions = actions.filter(action => 
+    const visibleActions = actions.filter(action =>
       !action.show || action.show(item)
     );
 
@@ -243,7 +243,7 @@ export function EnhancedListView<T extends Record<string, any>>({
             </div>
           </div>
         )}
-        
+
         <div className="grid gap-4">
           {paginatedData.map((item, index) => (
             <div key={index} onClick={() => onItemClick?.(item)}>
@@ -301,7 +301,7 @@ export function EnhancedListView<T extends Record<string, any>>({
           </div>
         </CardHeader>
       )}
-      
+
       <CardContent className="p-0">
         {filteredData.length === 0 ? (
           <div className="text-center py-12">

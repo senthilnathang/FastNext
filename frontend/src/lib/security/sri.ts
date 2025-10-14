@@ -15,7 +15,7 @@ export const SRI_HASHES: Record<string, SRIResource> = {
     integrity: 'sha384-/bQdsTh/da6pkI1MST/rWKFNjaCP5gBSY4sEBT38Q/9RBh9AH40zEOg7Hlq2THRZ',
     crossorigin: 'anonymous'
   },
-  
+
   // React DOM CDN
   'react-dom@18.2.0': {
     url: 'https://unpkg.com/react-dom@18.2.0/umd/react-dom.production.min.js',
@@ -65,7 +65,7 @@ export async function generateSRIFromURL(url: string, algorithm: 'sha256' | 'sha
     if (!response.ok) {
       throw new Error(`Failed to fetch ${url}: ${response.statusText}`);
     }
-    
+
     const content = await response.text();
     return generateSRIHash(content, algorithm);
   } catch (error) {
@@ -126,7 +126,7 @@ export function SecureScript({
   script.defer = defer;
   if (onLoad) script.onload = onLoad;
   if (onError) script.onerror = (event) => onError(event instanceof Event ? event : new Event('error'));
-  
+
   return script;
 }
 
@@ -163,7 +163,7 @@ export function SecureStylesheet({
   if (media) link.media = media;
   if (onLoad) link.onload = onLoad;
   if (onError) link.onerror = (event) => onError(event instanceof Event ? event : new Event('error'));
-  
+
   return link;
 }
 
@@ -188,7 +188,7 @@ export function useSecureScript(src: string, integrity?: string) {
     // Set integrity if provided
     const knownResource = Object.values(SRI_HASHES).find(resource => resource.url === src);
     const finalIntegrity = integrity || knownResource?.integrity;
-    
+
     if (finalIntegrity) {
       script.integrity = finalIntegrity;
     } else {
@@ -279,7 +279,7 @@ export async function validateResourceBatch(resources: Array<{
 export class SRIGenerator {
   static async generateForURLs(urls: string[]): Promise<Record<string, SRIResource>> {
     const result: Record<string, SRIResource> = {};
-    
+
     for (const url of urls) {
       try {
         const integrity = await generateSRIFromURL(url);
@@ -288,26 +288,23 @@ export class SRIGenerator {
           integrity,
           crossorigin: 'anonymous'
         };
-        
-        console.log(`Generated SRI for ${url}: ${integrity}`);
+
       } catch (error) {
         console.error(`Failed to generate SRI for ${url}:`, error);
       }
     }
-    
+
     return result;
   }
 
   static async generateForFiles(files: Array<{ path: string; content: string }>): Promise<Record<string, string>> {
     const result: Record<string, string> = {};
-    
+
     for (const file of files) {
       const integrity = generateSRIHash(file.content);
       result[file.path] = integrity;
-      console.log(`Generated SRI for ${file.path}: ${integrity}`);
     }
-    
+
     return result;
   }
 }
-

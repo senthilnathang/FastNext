@@ -62,7 +62,7 @@ export function ColumnSelector({
             key={column.id}
             className="capitalize"
             checked={columnVisibility[column.id] !== false}
-            onCheckedChange={(isChecked) => 
+            onCheckedChange={(isChecked) =>
               handleColumnToggle(column.id, Boolean(isChecked))
             }
           >

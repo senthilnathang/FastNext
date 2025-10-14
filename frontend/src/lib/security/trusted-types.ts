@@ -108,7 +108,7 @@ function basicHTMLSanitize(html: string): string {
 function sanitizeURL(url: string): string {
   try {
     const urlObj = new URL(url);
-    
+
     // Block dangerous protocols
     const dangerousProtocols = ['javascript:', 'vbscript:', 'data:', 'file:', 'ftp:'];
     if (dangerousProtocols.some(protocol => url.toLowerCase().startsWith(protocol))) {
@@ -238,7 +238,7 @@ export class TrustedTypesHelper {
   // Safe HTML creation
   static async createSafeHTML(html: string, strict = false): Promise<TrustedHTML> {
     const policy = strict ? await this.getStrictPolicy() : await this.getSecurityPolicy();
-    
+
     if (!policy.createHTML) {
       throw new Error('Policy does not support HTML creation');
     }
@@ -249,7 +249,7 @@ export class TrustedTypesHelper {
   // Safe script creation
   static async createSafeScript(script: string): Promise<TrustedScript> {
     const policy = await this.getSecurityPolicy();
-    
+
     if (!policy.createScript) {
       throw new Error('Policy does not support script creation');
     }
@@ -260,7 +260,7 @@ export class TrustedTypesHelper {
   // Safe script URL creation
   static async createSafeScriptURL(url: string): Promise<TrustedScriptURL> {
     const policy = await this.getSecurityPolicy();
-    
+
     if (!policy.createScriptURL) {
       throw new Error('Policy does not support script URL creation');
     }
@@ -295,9 +295,9 @@ export function useSafeHTML(html: string, strict = false) {
       try {
         setLoading(true);
         setError(null);
-        
+
         const trusted = await TrustedTypesHelper.createSafeHTML(html, strict);
-        
+
         if (!isCancelled) {
           setTrustedHTML(trusted);
         }
@@ -350,7 +350,6 @@ export function initializeTrustedTypes(): void {
     createSecurityPolicy();
     createStrictPolicy();
 
-    console.log('Trusted Types initialized successfully');
   } catch (_error) {
     console.error('Failed to initialize Trusted Types:', _error);
   }

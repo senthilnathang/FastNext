@@ -6,66 +6,66 @@ import {
   PermissionManager,
   useDataImport
 } from '../index';
-import type { 
-  ImportColumn, 
+import type {
+  ImportColumn,
   ImportOptions,
   UserImportPermissions,
-  ImportPermission 
+  ImportPermission
 } from '../types';
 
 // Example user data structure
 
 // Example columns for user import
 const UserImportColumns: ImportColumn[] = [
-  { 
-    key: 'name', 
-    label: 'Full Name', 
-    type: 'string', 
+  {
+    key: 'name',
+    label: 'Full Name',
+    type: 'string',
     required: true,
     validation: [
       { type: 'required', message: 'Name is required' },
       { type: 'min', value: 2, message: 'Name must be at least 2 characters' }
     ]
   },
-  { 
-    key: 'email', 
-    label: 'Email Address', 
-    type: 'email', 
-    required: true, 
+  {
+    key: 'email',
+    label: 'Email Address',
+    type: 'email',
+    required: true,
     unique: true,
     validation: [
       { type: 'required', message: 'Email is required' },
       { type: 'email', message: 'Invalid email format' }
     ]
   },
-  { 
-    key: 'role', 
-    label: 'User Role', 
-    type: 'string', 
+  {
+    key: 'role',
+    label: 'User Role',
+    type: 'string',
     required: true,
     defaultValue: 'user',
     validation: [
-      { 
-        type: 'custom', 
+      {
+        type: 'custom',
         message: 'Role must be admin, manager, user, or viewer',
         validator: (value) => ['admin', 'manager', 'user', 'viewer'].includes(value)
       }
     ]
   },
-  { 
-    key: 'department', 
-    label: 'Department', 
-    type: 'string' 
+  {
+    key: 'department',
+    label: 'Department',
+    type: 'string'
   },
-  { 
-    key: 'active', 
-    label: 'Active Status', 
-    type: 'boolean', 
-    defaultValue: true 
+  {
+    key: 'active',
+    label: 'Active Status',
+    type: 'boolean',
+    defaultValue: true
   },
-  { 
-    key: 'createdAt', 
-    label: 'Creation Date', 
+  {
+    key: 'createdAt',
+    label: 'Creation Date',
     type: 'date',
     defaultValue: () => new Date().toISOString()
   }
@@ -145,9 +145,7 @@ const ExampleUsers: UserImportPermissions[] = [
 export function BasicImportExample() {
   const handleImport = async (data: Record<string, any>[], options: ImportOptions) => {
     // Simulate API call
-    console.log('Importing data:', data);
-    console.log('Import options:', options);
-    
+
     return new Promise<any>((resolve) => {
       setTimeout(() => {
         resolve({
@@ -161,9 +159,7 @@ export function BasicImportExample() {
 
   const handleValidate = async (data: Record<string, any>[], mappings: any[]) => {
     // Simulate validation
-    console.log('Validating data:', data);
-    console.log('Field mappings:', mappings);
-    
+
     return new Promise<any>((resolve) => {
       setTimeout(() => {
         const errors = data.filter(row => !row.email || !row.name).map((row, index) => ({
@@ -191,7 +187,7 @@ export function BasicImportExample() {
       <p className="text-gray-600 dark:text-gray-400">
         Full-featured import dialog with field mapping, validation, and progress tracking.
       </p>
-      
+
       <DataImport
         tableName="Users"
         columns={UserImportColumns}
@@ -216,7 +212,7 @@ export function DataTableImportExample() {
       <p className="text-gray-600 dark:text-gray-400">
         Import component designed for data tables with quick import options.
       </p>
-      
+
       {/* <DataTableImport
         tableName="Users"
         columns={tableColumns}
@@ -239,7 +235,7 @@ export function SimpleImportExample() {
       <p className="text-gray-600 dark:text-gray-400">
         Individual import buttons for specific formats.
       </p>
-      
+
       <div className="flex space-x-2">
         {/* <SimpleImportButton
           tableName="Users"
@@ -247,14 +243,14 @@ export function SimpleImportExample() {
           onImport={handleImport}
           format="csv"
         /> */}
-        
+
         {/* <SimpleImportButton
           tableName="Users"
           columns={tableColumns}
           onImport={handleImport}
           format="json"
         /> */}
-        
+
         {/* <SimpleImportButton
           tableName="Users"
           columns={tableColumns}
@@ -272,16 +268,15 @@ export function PermissionManagementExample() {
   const [users, setUsers] = useState<UserImportPermissions[]>(ExampleUsers);
 
   const handleUpdatePermissions = async (userId: string, permissions: ImportPermission) => {
-    console.log('Updating permissions for user:', userId, permissions);
-    
-    setUsers(prev => 
-      prev.map(user => 
-        user.userId === userId 
+
+    setUsers(prev =>
+      prev.map(user =>
+        user.userId === userId
           ? { ...user, permissions }
           : user
       )
     );
-    
+
     return Promise.resolve();
   };
 
@@ -302,7 +297,7 @@ export function PermissionManagementExample() {
       },
       importCount: 0
     };
-    
+
     setUsers(prev => [...prev, newUser]);
   };
 
@@ -316,7 +311,7 @@ export function PermissionManagementExample() {
       <p className="text-gray-600 dark:text-gray-400">
         Manage user permissions for import functionality.
       </p>
-      
+
       <PermissionManager
         users={users}
         currentUser={users[0]} // Admin user
@@ -365,7 +360,7 @@ export function ImportHookExample() {
       <p className="text-gray-600 dark:text-gray-400">
         Direct usage of the useDataImport hook for custom implementations.
       </p>
-      
+
       <div className="space-y-4 p-4 border rounded-lg">
         <div>
           <input
@@ -394,7 +389,7 @@ export function ImportHookExample() {
             <p className="text-green-600">
               File parsed successfully! Found {parsedData.totalRows} rows with columns: {parsedData.headers.join(', ')}
             </p>
-            
+
             {fieldMappings.length > 0 && (
               <div>
                 <button
@@ -403,7 +398,7 @@ export function ImportHookExample() {
                 >
                   Validate Data
                 </button>
-                
+
                 {validationResults && (
                   <button
                     onClick={() => startImport({

@@ -2,7 +2,7 @@
 # Generates TypeScript types from GraphQL schema and operations
 
 schema: "http://localhost:8000/api/v1/graphql"
-documents: 
+documents:
   - "src/**/*.{ts,tsx}"
   - "src/lib/graphql/*.ts"
 generates:
@@ -26,7 +26,7 @@ generates:
         JSON: any
         Upload: File
       # Avoid any types where possible
-      avoidOptionals: 
+      avoidOptionals:
         field: true
         inputValue: false
         object: false
@@ -54,7 +54,7 @@ generates:
       skipTypename: false
       # Array optimization
       arrayInputCoercion: false
-  
+
   # Generate schema introspection file for development
   src/lib/graphql/introspection.json:
     plugins:

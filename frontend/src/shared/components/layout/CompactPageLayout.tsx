@@ -58,7 +58,7 @@ export default function CompactPageLayout({
           </div>
         </div>
       )}
-      
+
       <div className={cn(
         paddingClasses[padding],
         fullHeight && 'h-full overflow-auto'

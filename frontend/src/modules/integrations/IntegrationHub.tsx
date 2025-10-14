@@ -1,11 +1,11 @@
 "use client"
 
 import { useState } from 'react'
-import { 
-  Plus, 
-  Settings, 
-  Check, 
-  X, 
+import {
+  Plus,
+  Settings,
+  Check,
+  X,
   AlertCircle,
   Zap,
   Database,
@@ -158,8 +158,8 @@ export function IntegrationHub() {
     { id: 'auth', label: 'Authentication', icon: Key }
   ]
 
-  const filteredTemplates = selectedCategory === 'all' 
-    ? integrationTemplates 
+  const filteredTemplates = selectedCategory === 'all'
+    ? integrationTemplates
     : integrationTemplates.filter(t => t.category === selectedCategory)
 
   const handleConfigureIntegration = (template: IntegrationTemplate) => {
@@ -171,10 +171,10 @@ export function IntegrationHub() {
     if (!isConfiguring) return
 
     const template = integrationTemplates.find(t => t.id === isConfiguring)!
-    
+
     // Simulate API call
     setTestingConnection(isConfiguring)
-    
+
     setTimeout(() => {
       const newIntegration: Integration = {
         id: `${isConfiguring}-${Date.now()}`,
@@ -197,7 +197,7 @@ export function IntegrationHub() {
 
   const handleTestConnection = async (integrationId: string) => {
     setTestingConnection(integrationId)
-    
+
     // Simulate test
     setTimeout(() => {
       setTestingConnection(null)
@@ -306,11 +306,11 @@ export function IntegrationHub() {
                           {template.category}
                         </Badge>
                       </div>
-                      
+
                       <div className="flex space-x-2">
                         <Dialog>
                           <DialogTrigger asChild>
-                            <Button 
+                            <Button
                               className="flex-1"
                               onClick={() => handleConfigureIntegration(template)}
                             >
@@ -324,7 +324,7 @@ export function IntegrationHub() {
                                 {template.description}
                               </DialogDescription>
                             </DialogHeader>
-                            
+
                             <div className="space-y-4">
                               {template.configFields.map(field => (
                                 <div key={field.name}>
@@ -333,9 +333,9 @@ export function IntegrationHub() {
                                     {field.required && <span className="text-red-500 ml-1">*</span>}
                                   </Label>
                                   {field.type === 'select' ? (
-                                    <Select 
+                                    <Select
                                       value={configData[field.name] || ''}
-                                      onValueChange={(value) => 
+                                      onValueChange={(value) =>
                                         setConfigData({...configData, [field.name]: value})
                                       }
                                     >
@@ -354,7 +354,7 @@ export function IntegrationHub() {
                                     <Textarea
                                       placeholder={field.placeholder}
                                       value={configData[field.name] || ''}
-                                      onChange={(e) => 
+                                      onChange={(e) =>
                                         setConfigData({...configData, [field.name]: e.target.value})
                                       }
                                     />
@@ -363,7 +363,7 @@ export function IntegrationHub() {
                                       type={field.type}
                                       placeholder={field.placeholder}
                                       value={configData[field.name] || ''}
-                                      onChange={(e) => 
+                                      onChange={(e) =>
                                         setConfigData({...configData, [field.name]: e.target.value})
                                       }
                                     />
@@ -375,9 +375,9 @@ export function IntegrationHub() {
                                   )}
                                 </div>
                               ))}
-                              
+
                               <div className="flex space-x-2 pt-4">
-                                <Button 
+                                <Button
                                   onClick={handleSaveIntegration}
                                   disabled={!!testingConnection}
                                   className="flex-1"
@@ -395,7 +395,7 @@ export function IntegrationHub() {
                             </div>
                           </DialogContent>
                         </Dialog>
-                        
+
                         {/* Documentation button removed - property doesn't exist on IntegrationTemplate */}
                       </div>
                     </div>
@@ -448,7 +448,7 @@ export function IntegrationHub() {
                             )}
                           </div>
                         </div>
-                        
+
                         <div className="flex items-center space-x-2">
                           <Button
                             variant="outline"
@@ -467,7 +467,7 @@ export function IntegrationHub() {
                           </Button>
                         </div>
                       </div>
-                      
+
                       {integration.features && (
                         <div className="mt-4 flex flex-wrap gap-2">
                           {integration.features.map(feature => (
@@ -489,11 +489,11 @@ export function IntegrationHub() {
           <Alert>
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>
-              Webhook endpoints allow external services to send data to FastNext. 
+              Webhook endpoints allow external services to send data to FastNext.
               Each integration can have its own webhook URL for receiving real-time updates.
             </AlertDescription>
           </Alert>
-          
+
           <Card>
             <CardHeader>
               <CardTitle>Webhook Endpoints</CardTitle>
@@ -519,7 +519,7 @@ export function IntegrationHub() {
                     </Button>
                   </div>
                 </div>
-                
+
                 {integrations.map(integration => (
                   <div key={integration.id} className="p-4 border rounded-lg">
                     <div className="flex items-center justify-between">

@@ -4,12 +4,12 @@ import React, { useState } from 'react';
 import { Card } from '@/shared/components/ui/card';
 import { Button } from '@/shared/components/ui/button';
 import { Badge } from '@/shared/components/ui/badge';
-import { 
-  Palette, 
-  Sidebar, 
-  Mouse, 
-  Keyboard, 
-  Zap, 
+import {
+  Palette,
+  Sidebar,
+  Mouse,
+  Keyboard,
+  Zap,
   Eye,
   Settings,
   Moon,
@@ -130,7 +130,7 @@ export default function EnhancedDemoPage() {
               <Palette className="h-5 w-5" />
               <span>Theme Switcher Variants</span>
             </h3>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="space-y-3">
                 <h4 className="font-medium text-sm text-gray-700 dark:text-gray-300">Enhanced Dropdown</h4>
@@ -141,7 +141,7 @@ export default function EnhancedDemoPage() {
                   Rich preview with theme descriptions
                 </p>
               </div>
-              
+
               <div className="space-y-3">
                 <h4 className="font-medium text-sm text-gray-700 dark:text-gray-300">Compact Toggle</h4>
                 <div className="flex items-center justify-center p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
@@ -151,7 +151,7 @@ export default function EnhancedDemoPage() {
                   Quick cycling through themes
                 </p>
               </div>
-              
+
               <div className="space-y-3">
                 <h4 className="font-medium text-sm text-gray-700 dark:text-gray-300">Theme Indicator</h4>
                 <div className="flex items-center justify-center p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
@@ -218,7 +218,7 @@ export default function EnhancedDemoPage() {
               <PanelLeft className="h-5 w-5" />
               <span>Sidebar Enhancements</span>
             </h3>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-4">
                 <h4 className="font-medium">Hover to Expand</h4>
@@ -232,7 +232,7 @@ export default function EnhancedDemoPage() {
                   </div>
                 </div>
               </div>
-              
+
               <div className="space-y-4">
                 <h4 className="font-medium">Persistent State</h4>
                 <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
@@ -284,7 +284,7 @@ export default function EnhancedDemoPage() {
               <Zap className="h-5 w-5" />
               <span>Smooth Animations</span>
             </h3>
-            
+
             <div className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <Button className="transition-all duration-200 hover:scale-105 hover:shadow-lg">

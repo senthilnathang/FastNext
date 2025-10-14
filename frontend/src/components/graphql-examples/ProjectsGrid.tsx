@@ -49,7 +49,7 @@ interface ProjectForm {
 export function ProjectsGrid() {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const { variables, loadMore } = usePagination();
-  
+
   const { data, loading, error, refetch } = useProjects(variables);
   const { createProject, loading: createLoading } = useCreateProject();
   const { deleteProject, loading: deleteLoading } = useDeleteProject();
@@ -122,7 +122,7 @@ export function ProjectsGrid() {
             {data?.projects.totalCount || 0} projects total
           </p>
         </div>
-        
+
         <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
           <DialogTrigger asChild>
             <Button>
@@ -143,7 +143,7 @@ export function ProjectsGrid() {
                   placeholder="Enter project name"
                 />
               </div>
-              
+
               <div>
                 <Label htmlFor="description">Description</Label>
                 <Textarea
@@ -153,7 +153,7 @@ export function ProjectsGrid() {
                   rows={3}
                 />
               </div>
-              
+
               <div className="flex items-center space-x-2">
                 <Switch
                   id="isPublic"
@@ -161,7 +161,7 @@ export function ProjectsGrid() {
                 />
                 <Label htmlFor="isPublic">Make project public</Label>
               </div>
-              
+
               <div className="flex justify-end space-x-2">
                 <Button
                   type="button"
@@ -204,7 +204,7 @@ export function ProjectsGrid() {
                       <FolderOpen className="h-5 w-5 text-primary" />
                       <CardTitle className="text-lg truncate">{project.name}</CardTitle>
                     </div>
-                    
+
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button
@@ -231,7 +231,7 @@ export function ProjectsGrid() {
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </div>
-                  
+
                   <div className="flex items-center gap-2 mt-2">
                     {project.isPublic ? (
                       <Badge variant="secondary">
@@ -246,14 +246,14 @@ export function ProjectsGrid() {
                     )}
                   </div>
                 </CardHeader>
-                
+
                 <CardContent className="space-y-3">
                   {project.description && (
                     <p className="text-sm text-muted-foreground line-clamp-2">
                       {project.description}
                     </p>
                   )}
-                  
+
                   <div className="flex items-center justify-between text-xs text-muted-foreground">
                     <div className="flex items-center gap-1">
                       <Calendar className="h-3 w-3" />
@@ -261,7 +261,7 @@ export function ProjectsGrid() {
                         {new Date(project.createdAt).toLocaleDateString()}
                       </span>
                     </div>
-                    
+
                     {project.owner && (
                       <div className="flex items-center gap-1">
                         <Users className="h-3 w-3" />
@@ -269,7 +269,7 @@ export function ProjectsGrid() {
                       </div>
                     )}
                   </div>
-                  
+
                   <Button variant="outline" className="w-full" size="sm">
                     View Project
                   </Button>

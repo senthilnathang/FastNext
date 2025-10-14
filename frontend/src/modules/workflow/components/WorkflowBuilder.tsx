@@ -25,10 +25,10 @@ import TimerNode from './TimerNode';
 import UserTaskNode from './UserTaskNode';
 import { Button } from '@/shared/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card';
-import { 
-  Plus, 
-  Save, 
-  ZoomOut, 
+import {
+  Plus,
+  Save,
+  ZoomOut,
   Maximize,
   Circle,
   GitBranch,
@@ -97,8 +97,8 @@ const WorkflowBuilderInner = memo(({
   useEffect(() => {
     const handleNodeDataUpdate = (event: CustomEvent) => {
       const { nodeId, newData } = event.detail;
-      setNodes(nds => nds.map(node => 
-        node.id === nodeId 
+      setNodes(nds => nds.map(node =>
+        node.id === nodeId
           ? { ...node, data: { ...node.data, ...newData } }
           : node
       ));
@@ -114,7 +114,7 @@ const WorkflowBuilderInner = memo(({
   const onConnect = useCallback(
     (params: Connection) => {
       if (readOnly || !params.source || !params.target) return;
-      
+
       const edge: WorkflowEdge = {
         id: `edge_${params.source}_${params.target}`,
         source: params.source,
@@ -216,7 +216,7 @@ const WorkflowBuilderInner = memo(({
   // Auto-layout nodes
   const autoLayout = useCallback(() => {
     if (readOnly) return;
-    
+
     // Simple horizontal layout
     const updatedNodes = nodes.map((node, index) => ({
       ...node,
@@ -225,7 +225,7 @@ const WorkflowBuilderInner = memo(({
         y: Math.floor(index / 3) * 150 + 100,
       },
     }));
-    
+
     setNodes(updatedNodes);
   }, [nodes, setNodes, readOnly]);
 
@@ -252,7 +252,7 @@ const WorkflowBuilderInner = memo(({
             </span>
           )}
         </div>
-        
+
         <div className="flex items-center space-x-2">
           {!readOnly && (
             <>
@@ -287,7 +287,7 @@ const WorkflowBuilderInner = memo(({
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
-              
+
               <Button
                 variant="outline"
                 size="sm"
@@ -298,7 +298,7 @@ const WorkflowBuilderInner = memo(({
               </Button>
             </>
           )}
-          
+
           <Button
             variant="outline"
             size="sm"
@@ -307,7 +307,7 @@ const WorkflowBuilderInner = memo(({
             <ZoomOut className="h-4 w-4 mr-2" />
             Fit View
           </Button>
-          
+
           {!readOnly && (
             <Button
               onClick={handleSave}
@@ -357,7 +357,7 @@ const WorkflowBuilderInner = memo(({
               size={1}
               color="#e5e7eb"
             />
-            
+
             {/* Custom Panel */}
             <Panel position="top-right" className="space-y-2">
               <Card className="w-64 shadow-lg">

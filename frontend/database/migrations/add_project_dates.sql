@@ -2,7 +2,7 @@
 -- Created: $(date)
 
 -- Add start_date and end_date columns to projects table
-ALTER TABLE projects 
+ALTER TABLE projects
 ADD COLUMN start_date TIMESTAMP NULL,
 ADD COLUMN end_date TIMESTAMP NULL;
 
@@ -16,6 +16,6 @@ COMMENT ON COLUMN projects.start_date IS 'Project start date';
 COMMENT ON COLUMN projects.end_date IS 'Project end date (can be null for ongoing projects)';
 
 -- Optional: Add a constraint to ensure end_date is after start_date when both are set
-ALTER TABLE projects 
-ADD CONSTRAINT chk_project_dates 
+ALTER TABLE projects
+ADD CONSTRAINT chk_project_dates
 CHECK (start_date IS NULL OR end_date IS NULL OR end_date >= start_date);

@@ -30,7 +30,7 @@ export function SortControl({
   className
 }: SortControlProps) {
   const selectedOption = options.find(option => option.key === value)
-  
+
   const handleSortChange = (field: string) => {
     if (value === field) {
       // Toggle order if same field

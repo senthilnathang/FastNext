@@ -9,39 +9,39 @@ import { z } from 'zod';
 const EnvSchema = z.object({
   // Node environment
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
-  
+
   // Next.js specific
   NEXT_PUBLIC_API_URL: z.string().url('Invalid API URL').optional(),
   NEXT_PUBLIC_ENVIRONMENT: z.string().default('development'),
   NEXT_PUBLIC_DOMAIN: z.string().optional(),
-  
+
   // Vercel specific (if deployed on Vercel)
   VERCEL_URL: z.string().optional(),
   VERCEL_ENV: z.enum(['development', 'preview', 'production']).optional(),
-  
+
   // Database (for full-stack features)
   DATABASE_URL: z.string().url('Invalid database URL').optional(),
-  
+
   // Authentication secrets (server-side only)
   NEXTAUTH_SECRET: z.string().min(32, 'Auth secret must be at least 32 characters').optional(),
   NEXTAUTH_URL: z.string().url('Invalid auth URL').optional(),
-  
+
   // External API keys (server-side only)
   STRIPE_SECRET_KEY: z.string().startsWith('sk_').optional(),
   STRIPE_PUBLISHABLE_KEY: z.string().startsWith('pk_').optional(),
-  
+
   // Monitoring and analytics
   NEXT_PUBLIC_SENTRY_DSN: z.string().url('Invalid Sentry DSN').optional(),
   NEXT_PUBLIC_GA_TRACKING_ID: z.string().optional(),
-  
+
   // Feature flags
   NEXT_PUBLIC_ENABLE_ANALYTICS: z.coerce.boolean().default(false),
   NEXT_PUBLIC_ENABLE_PWA: z.coerce.boolean().default(false),
-  
+
   // Security
   CSP_NONCE: z.string().optional(),
   SECURITY_HEADERS_ENABLED: z.coerce.boolean().default(true),
-  
+
   // Development only
   ANALYZE_BUNDLE: z.coerce.boolean().default(false),
   DISABLE_TELEMETRY: z.coerce.boolean().default(false)
@@ -89,19 +89,19 @@ class EnvironmentValidator {
     try {
       // Parse and validate environment variables
       const result = EnvSchema.safeParse(process.env);
-      
+
       if (!result.success) {
-        this.errors = result.error.issues.map(err => 
+        this.errors = result.error.issues.map(err =>
           `${err.path.join('.')}: ${err.message}`
         );
         throw new Error(`Environment validation failed:\n${this.errors.join('\n')}`);
       }
 
       this.validatedEnv = result.data;
-      
+
       // Perform additional security checks
       this.performSecurityChecks(result.data);
-      
+
       // Log warnings if any
       if (this.warnings.length > 0) {
         console.warn('Environment validation warnings:');
@@ -130,16 +130,16 @@ class EnvironmentValidator {
       );
 
       const result = ClientEnvSchema.safeParse(clientEnv);
-      
+
       if (!result.success) {
-        this.errors = result.error.issues.map(err => 
+        this.errors = result.error.issues.map(err =>
           `${err.path.join('.')}: ${err.message}`
         );
         throw new Error(`Client environment validation failed:\n${this.errors.join('\n')}`);
       }
 
       this.validatedClientEnv = result.data;
-      
+
       // Check for security issues in client env
       this.checkClientSecurity(result.data);
 
@@ -159,11 +159,11 @@ class EnvironmentValidator {
       if (env.NEXT_PUBLIC_API_URL?.includes('localhost')) {
         this.warnings.push('Using localhost API URL in production');
       }
-      
+
       if (!env.NEXTAUTH_SECRET && env.NEXTAUTH_URL) {
         this.errors.push('NEXTAUTH_SECRET is required in production');
       }
-      
+
       if (env.ANALYZE_BUNDLE) {
         this.warnings.push('Bundle analysis is enabled in production');
       }
@@ -196,14 +196,14 @@ class EnvironmentValidator {
         if (value.length > 40 && /^[A-Za-z0-9+/=]+$/.test(value)) {
           this.warnings.push(`${key} might contain sensitive data exposed to client`);
         }
-        
+
         // Check for common secret patterns
         const secretPatterns = [
           { pattern: /sk_live_/, name: 'Stripe secret key' },
           { pattern: /AKIA[0-9A-Z]{16}/, name: 'AWS access key' },
           { pattern: /AIza[0-9A-Za-z\-_]{35}/, name: 'Google API key' }
         ];
-        
+
         secretPatterns.forEach(({ pattern, name }) => {
           if (pattern.test(value)) {
             this.errors.push(`${key} contains ${name} which should not be public`);
@@ -244,8 +244,8 @@ class EnvironmentValidator {
     environment: string;
     publicVariables: Record<string, any>;
   } {
-    const env = typeof window === 'undefined' 
-      ? this.validateServerEnv() 
+    const env = typeof window === 'undefined'
+      ? this.validateServerEnv()
       : this.validateClientEnv();
 
     return {
@@ -253,7 +253,7 @@ class EnvironmentValidator {
       errors: this.errors,
       warnings: this.warnings,
       environment: process.env.NODE_ENV || env.NEXT_PUBLIC_ENVIRONMENT || 'unknown',
-      publicVariables: typeof window === 'undefined' 
+      publicVariables: typeof window === 'undefined'
         ? this.getPublicVariables(env as EnvConfig)
         : env
     };
@@ -308,7 +308,7 @@ export function useEnvironment(): {
   }
 
   const env = envValidator.validateClientEnv();
-  
+
   return {
     env,
     isValid: envValidator.isValid(),
@@ -333,12 +333,12 @@ export function getServerEnvironment(): EnvConfig {
  */
 export function getEnvVar(key: string, fallback?: string): string {
   const value = process.env[key];
-  
+
   if (!value && !fallback) {
     console.warn(`Environment variable ${key} is not set and no fallback provided`);
     return '';
   }
-  
+
   return value || fallback || '';
 }
 
@@ -349,10 +349,10 @@ export function isSecureContext(): boolean {
   if (typeof window !== 'undefined') {
     return window.isSecureContext;
   }
-  
+
   // Server-side check
   const env = envValidator.validateServerEnv();
-  return env.NODE_ENV === 'production' || 
+  return env.NODE_ENV === 'production' ||
          env.NEXT_PUBLIC_API_URL?.startsWith('https://') ||
          false;
 }

@@ -4,7 +4,7 @@ import * as React from "react"
 import { ColumnDef } from "@tanstack/react-table"
 import { Plus, Shield, UserCheck, Edit3, MoreHorizontal } from "lucide-react"
 
-import { 
+import {
   Button,
   VirtualizedTable,
   Badge,
@@ -36,12 +36,12 @@ function generateMockUsers(count: number): User[] {
   const users: User[] = []
   const roles = ['Admin', 'Editor', 'Viewer', 'Moderator', 'Contributor']
   const domains = ['gmail.com', 'yahoo.com', 'outlook.com', 'company.com', 'example.org']
-  
+
   for (let i = 1; i <= count; i++) {
     const firstName = `User${i}`
     const lastName = `Last${i}`
     const domain = domains[Math.floor(Math.random() * domains.length)]
-    
+
     users.push({
       id: i,
       username: `user${i}`,
@@ -55,13 +55,13 @@ function generateMockUsers(count: number): User[] {
       roles: Math.random() > 0.5 ? [roles[Math.floor(Math.random() * roles.length)]] : []
     })
   }
-  
+
   return users
 }
 
 const UsersPerformancePage: React.FC = () => {
   const [allUsers] = React.useState(() => generateMockUsers(10000)) // 10k users for performance testing
-  
+
   // Advanced search setup
   const availableFilters = [
     {
@@ -108,7 +108,6 @@ const UsersPerformancePage: React.FC = () => {
   } = useAdvancedSearch({
     initialPageSize: 50,
     onSearch: (state: SearchState) => {
-      console.log('Search state changed:', state)
     }
   })
 
@@ -129,7 +128,7 @@ const UsersPerformancePage: React.FC = () => {
     // Apply filters
     for (const filter of searchState.filters) {
       if (filter.value === undefined || filter.value === '') continue
-      
+
       switch (filter.field) {
         case 'is_active':
           filtered = filtered.filter(user => user.is_active === (filter.value === 'true'))
@@ -158,20 +157,20 @@ const UsersPerformancePage: React.FC = () => {
       filtered = [...filtered].sort((a, b) => {
         const field = searchState.sort!.field
         const direction = searchState.sort!.direction
-        
+
         let aValue: any = (a as any)[field]
         let bValue: any = (b as any)[field]
-        
+
         if (field === 'created_at' || field === 'last_login_at') {
           aValue = aValue ? new Date(aValue).getTime() : 0
           bValue = bValue ? new Date(bValue).getTime() : 0
         }
-        
+
         if (typeof aValue === 'string') {
           aValue = aValue.toLowerCase()
           bValue = bValue?.toLowerCase() || ''
         }
-        
+
         if (aValue < bValue) return direction === 'asc' ? -1 : 1
         if (aValue > bValue) return direction === 'asc' ? 1 : -1
         return 0
@@ -182,7 +181,6 @@ const UsersPerformancePage: React.FC = () => {
   }, [allUsers, searchState])
 
   const handleRowAction = (user: User, action: string) => {
-    console.log(`Action ${action} for user:`, user)
     // Implement actions here
   }
 
@@ -274,7 +272,7 @@ const UsersPerformancePage: React.FC = () => {
                 View Details
               </DropdownMenuItem>
               {!user.is_superuser && (
-                <DropdownMenuItem 
+                <DropdownMenuItem
                   onClick={() => handleRowAction(user, 'delete')}
                   className="text-red-600"
                 >
@@ -296,7 +294,7 @@ const UsersPerformancePage: React.FC = () => {
           <div>
             <h1 className="text-2xl font-bold tracking-tight">Users (Performance Demo)</h1>
             <p className="text-sm text-muted-foreground">
-              Virtual scrolling with {allUsers.length.toLocaleString()} users. 
+              Virtual scrolling with {allUsers.length.toLocaleString()} users.
               Showing {processedUsers.length.toLocaleString()} filtered results.
             </p>
           </div>

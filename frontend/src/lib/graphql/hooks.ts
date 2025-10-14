@@ -282,7 +282,7 @@ export const useAssets = (projectId?: number, assetType?: string) => {
 // Mutation hooks with optimistic updates and error handling
 export const useCreateUser = () => {
   const [mutate, { loading, error }] = useMutation<{ createUser: UserResponse }>(CREATE_USER);
-  
+
   return {
     createUser: useCallback(async (input: any) => {
       try {
@@ -303,7 +303,7 @@ export const useCreateUser = () => {
 
 export const useUpdateUser = () => {
   const [mutate, { loading, error }] = useMutation<{ updateUser: UserResponse }>(UPDATE_USER);
-  
+
   return {
     updateUser: useCallback(async (id: number, input: any) => {
       try {
@@ -324,7 +324,7 @@ export const useUpdateUser = () => {
 
 export const useDeleteUser = () => {
   const [mutate, { loading, error }] = useMutation<{ deleteUser: MutationResponse }>(DELETE_USER);
-  
+
   return {
     deleteUser: useCallback(async (id: number) => {
       try {
@@ -345,7 +345,7 @@ export const useDeleteUser = () => {
 
 export const useCreateProject = () => {
   const [mutate, { loading, error }] = useMutation<{ createProject: ProjectResponse }>(CREATE_PROJECT);
-  
+
   return {
     createProject: useCallback(async (input: any) => {
       try {
@@ -366,7 +366,7 @@ export const useCreateProject = () => {
 
 export const useUpdateProject = () => {
   const [mutate, { loading, error }] = useMutation<{ updateProject: ProjectResponse }>(UPDATE_PROJECT);
-  
+
   return {
     updateProject: useCallback(async (id: number, input: any) => {
       try {
@@ -387,7 +387,7 @@ export const useUpdateProject = () => {
 
 export const useDeleteProject = () => {
   const [mutate, { loading, error }] = useMutation<{ deleteProject: MutationResponse }>(DELETE_PROJECT);
-  
+
   return {
     deleteProject: useCallback(async (id: number) => {
       try {
@@ -409,17 +409,17 @@ export const useDeleteProject = () => {
 // Helper hook for handling GraphQL errors
 export const useGraphQLError = () => {
   const [error, setError] = useState<ApolloError | null>(null);
-  
+
   const handleError = useCallback((err: ApolloError) => {
     setError(err);
     console.error('GraphQL Error:', err);
-    
+
     // Handle specific error types
     if (err.networkError) {
       // Handle network errors
       console.error('Network Error:', err.networkError);
     }
-    
+
     if (err.graphQLErrors) {
       // Handle GraphQL errors
       err.graphQLErrors.forEach((gqlError) => {
@@ -427,11 +427,11 @@ export const useGraphQLError = () => {
       });
     }
   }, []);
-  
+
   const clearError = useCallback(() => {
     setError(null);
   }, []);
-  
+
   return { error, handleError, clearError };
 };
 
@@ -440,19 +440,19 @@ export const usePagination = () => {
   const [variables, setVariables] = useState<PaginationVariables>({
     first: 10,
   });
-  
+
   const loadMore = useCallback((endCursor: string) => {
     setVariables((prev) => ({
       ...prev,
       after: endCursor,
     }));
   }, []);
-  
+
   const reset = useCallback(() => {
     setVariables({
       first: 10,
     });
   }, []);
-  
+
   return { variables, loadMore, reset, setVariables };
 };

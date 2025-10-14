@@ -196,7 +196,7 @@ const columns: Column<RLSRuleAssignment>[] = [
 export default function RLSAssignmentsPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  
+
   // Use RLS hooks
   const { data: assignmentsData, isLoading, error } = useRLSAssignments()
   const { data: policiesData } = useRLSPolicies()
@@ -230,8 +230,8 @@ export default function RLSAssignmentsPage() {
     // Parse conditions if it's a string
     const processedData = {
       ...data,
-      conditions: typeof data.conditions === 'string' 
-        ? JSON.parse(data.conditions || '{}') 
+      conditions: typeof data.conditions === 'string'
+        ? JSON.parse(data.conditions || '{}')
         : data.conditions
     }
 
@@ -247,8 +247,8 @@ export default function RLSAssignmentsPage() {
     // Parse conditions if it's a string
     const processedData = {
       ...data,
-      conditions: typeof data.conditions === 'string' 
-        ? JSON.parse(data.conditions || '{}') 
+      conditions: typeof data.conditions === 'string'
+        ? JSON.parse(data.conditions || '{}')
         : data.conditions
     }
 

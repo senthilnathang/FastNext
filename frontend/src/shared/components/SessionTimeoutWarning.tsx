@@ -18,8 +18,8 @@ interface SessionTimeoutWarningProps {
   userRole?: string;
 }
 
-export function SessionTimeoutWarning({ 
-  userRole 
+export function SessionTimeoutWarning({
+  userRole
 }: SessionTimeoutWarningProps) {
   const {
     extendSession,
@@ -34,11 +34,9 @@ export function SessionTimeoutWarning({
       window.location.href = '/auth/login?reason=session_timeout';
     },
     onExtend: () => {
-      console.log('Session extended by user');
     },
     onIdle: () => {
       // Could show idle notification
-      console.log('User went idle');
     }
   });
 
@@ -53,7 +51,6 @@ export function SessionTimeoutWarning({
     extendSession();
     setAutoExtendCount(prev => prev + 1);
     setShowDialog(false);
-    console.log('Session extended by user');
   };
 
   const handleLogout = () => {
@@ -105,12 +102,12 @@ export function SessionTimeoutWarning({
 
             {/* Progress Bar */}
             <div className="space-y-2">
-              <Progress 
-                value={progressValue} 
+              <Progress
+                value={progressValue}
                 className="w-full"
                 // Custom colors based on urgency
                 style={{
-                  '--progress-background': progressValue > 60 ? '#10b981' : 
+                  '--progress-background': progressValue > 60 ? '#10b981' :
                                          progressValue > 30 ? '#f59e0b' : '#ef4444'
                 } as any}
               />
@@ -126,7 +123,7 @@ export function SessionTimeoutWarning({
                 <div className="text-sm">
                   <p className="font-medium text-blue-800">Security Notice</p>
                   <p className="text-blue-700">
-                    Sessions expire automatically for your security. 
+                    Sessions expire automatically for your security.
                     {autoExtendCount > 0 && (
                       <span className="block mt-1 text-xs">
                         Extended {autoExtendCount} time{autoExtendCount !== 1 ? 's' : ''} this session.
@@ -146,14 +143,14 @@ export function SessionTimeoutWarning({
           </div>
 
           <DialogFooter className="flex gap-2">
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               onClick={handleLogout}
               className="flex-1"
             >
               Logout Now
             </Button>
-            <Button 
+            <Button
               onClick={handleExtendSession}
               className="flex-1"
             >
@@ -169,7 +166,7 @@ export function SessionTimeoutWarning({
 // Session Status Component for UI
 export function SessionStatus() {
   const { sessionState, timeRemaining, isIdle } = useSessionTimeout();
-  
+
   if (!sessionState.isActive) {
     return null;
   }
@@ -184,7 +181,7 @@ export function SessionStatus() {
         Session: {hours > 0 ? `${hours}h ` : ''}{minutes}m
       </span>
       {isIdle && (
-        <span className="inline-block w-2 h-2 bg-yellow-400 rounded-full" 
+        <span className="inline-block w-2 h-2 bg-yellow-400 rounded-full"
               title="Session is idle" />
       )}
     </div>

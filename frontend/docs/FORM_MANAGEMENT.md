@@ -116,7 +116,7 @@ interface FormField<T> {
   dependency?: FieldDependency   // Field dependencies
 }
 
-type FieldType = 
+type FieldType =
   | 'text'
   | 'email'
   | 'password'
@@ -197,13 +197,13 @@ const projectSchema = z.object({
   name: z.string()
     .min(1, 'Project name is required')
     .max(100, 'Project name must be less than 100 characters'),
-  
+
   description: z.string()
     .max(500, 'Description must be less than 500 characters')
     .optional(),
-  
+
   status: z.enum(['planning', 'active', 'completed', 'archived']),
-  
+
   start_date: z.union([z.string(), z.date()])
     .optional()
     .transform((val) => {
@@ -211,7 +211,7 @@ const projectSchema = z.object({
       if (val instanceof Date) return val.toISOString().split('T')[0]
       return val
     }),
-  
+
   end_date: z.union([z.string(), z.date()])
     .optional()
     .transform((val) => {
@@ -219,11 +219,11 @@ const projectSchema = z.object({
       if (val instanceof Date) return val.toISOString().split('T')[0]
       return val
     }),
-  
+
   budget: z.number()
     .min(0, 'Budget must be positive')
     .optional(),
-  
+
   is_public: z.boolean()
     .default(false)
 }).refine((data) => {
@@ -256,26 +256,26 @@ import { useRouter, useSearchParams } from 'next/navigation'
 const useFormNavigation = (baseUrl: string) => {
   const router = useRouter()
   const searchParams = useSearchParams()
-  
+
   const mode = searchParams.get('mode') || 'list'
   const id = searchParams.get('id')
-  
+
   const navigateToList = () => {
     router.push(baseUrl)
   }
-  
+
   const navigateToCreate = () => {
     router.push(`${baseUrl}?mode=create`)
   }
-  
+
   const navigateToEdit = (itemId: string | number) => {
     router.push(`${baseUrl}?mode=edit&id=${itemId}`)
   }
-  
+
   const navigateToView = (itemId: string | number) => {
     router.push(`${baseUrl}?mode=view&id=${itemId}`)
   }
-  
+
   return {
     mode,
     id,
@@ -295,17 +295,17 @@ const useFormNavigation = (baseUrl: string) => {
 // API service for projects
 class ProjectsApiService {
   private baseUrl = '/api/v1/projects'
-  
+
   async getAll(params?: QueryParams): Promise<Project[]> {
     const response = await fetch(`${this.baseUrl}?${new URLSearchParams(params)}`)
     return response.json()
   }
-  
+
   async getById(id: string | number): Promise<Project> {
     const response = await fetch(`${this.baseUrl}/${id}`)
     return response.json()
   }
-  
+
   async create(data: CreateProjectRequest): Promise<Project> {
     const response = await fetch(this.baseUrl, {
       method: 'POST',
@@ -314,7 +314,7 @@ class ProjectsApiService {
     })
     return response.json()
   }
-  
+
   async update(id: string | number, data: UpdateProjectRequest): Promise<Project> {
     const response = await fetch(`${this.baseUrl}/${id}`, {
       method: 'PUT',
@@ -323,7 +323,7 @@ class ProjectsApiService {
     })
     return response.json()
   }
-  
+
   async delete(id: string | number): Promise<void> {
     await fetch(`${this.baseUrl}/${id}`, {
       method: 'DELETE'
@@ -340,7 +340,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 const useProjects = () => {
   const queryClient = useQueryClient()
   const apiService = new ProjectsApiService()
-  
+
   const {
     data: projects,
     isLoading,
@@ -349,14 +349,14 @@ const useProjects = () => {
     queryKey: ['projects'],
     queryFn: () => apiService.getAll()
   })
-  
+
   const createMutation = useMutation({
     mutationFn: (data: CreateProjectRequest) => apiService.create(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['projects'] })
     }
   })
-  
+
   const updateMutation = useMutation({
     mutationFn: ({ id, data }: { id: string, data: UpdateProjectRequest }) =>
       apiService.update(id, data),
@@ -364,14 +364,14 @@ const useProjects = () => {
       queryClient.invalidateQueries({ queryKey: ['projects'] })
     }
   })
-  
+
   const deleteMutation = useMutation({
     mutationFn: (id: string) => apiService.delete(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['projects'] })
     }
   })
-  
+
   return {
     projects,
     isLoading,
@@ -430,20 +430,20 @@ const projectStatisticsConfig: StatisticsConfig = {
 ```typescript
 const useProjectStatistics = () => {
   const { data: projects } = useProjects()
-  
+
   const statistics = useMemo(() => {
     if (!projects) return {}
-    
+
     return {
       totalProjects: projects.length,
       activeProjects: projects.filter(p => p.status === 'active').length,
       completedProjects: projects.filter(p => p.status === 'completed').length,
-      overbudgetProjects: projects.filter(p => 
+      overbudgetProjects: projects.filter(p =>
         p.budget && p.actual_cost && p.actual_cost > p.budget
       ).length
     }
   }, [projects])
-  
+
   return statistics
 }
 ```
@@ -521,11 +521,11 @@ interface ValidationRule {
 // Date formatting for forms
 const formatDateForInput = (date: Date | string | null | undefined): string => {
   if (!date) return ''
-  
+
   try {
     const dateObj = typeof date === 'string' ? new Date(date) : date
     if (isNaN(dateObj.getTime())) return ''
-    
+
     return dateObj.toISOString().split('T')[0]
   } catch {
     return ''
@@ -535,11 +535,11 @@ const formatDateForInput = (date: Date | string | null | undefined): string => {
 // Date conversion for API
 const convertDateForApi = (date: Date | string | null | undefined): string | null => {
   if (!date) return null
-  
+
   try {
     const dateObj = typeof date === 'string' ? new Date(date) : date
     if (isNaN(dateObj.getTime())) return null
-    
+
     return dateObj.toISOString().split('T')[0]
   } catch {
     return null
@@ -559,9 +559,9 @@ interface ErrorDisplayProps {
 
 const ErrorDisplay: React.FC<ErrorDisplayProps> = ({ errors, fieldName }) => {
   const error = errors[fieldName]
-  
+
   if (!error) return null
-  
+
   return (
     <div className="text-sm text-red-600 mt-1">
       {error.message}

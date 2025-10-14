@@ -18,12 +18,12 @@ export interface ResourceConfig<T extends BaseResource = BaseResource> {
   name: string
   displayName: string
   apiEndpoint: string
-  
+
   // List view configuration
   listColumns: Column<T>[]
   listTitle?: string
   listSubtitle?: string
-  
+
   // Kanban view configuration (optional)
   kanbanConfig?: {
     statusField: keyof T
@@ -34,16 +34,16 @@ export interface ResourceConfig<T extends BaseResource = BaseResource> {
       render?: (value: unknown, item: KanbanItem<T>) => React.ReactNode
     }>
   }
-  
+
   // Form configuration
   formFields: FormField<T>[]
   formSections?: FormSection<T>[]
   validationSchema?: z.ZodSchema<T>
-  
+
   // Permissions
   projectScoped?: boolean
   ownerField?: keyof T
-  
+
   // API methods (optional overrides)
   customApi?: {
     getList?: (filters?: Record<string, unknown>) => Promise<T[]>
@@ -57,52 +57,52 @@ export interface ResourceConfig<T extends BaseResource = BaseResource> {
 // Standard API factory
 export class ResourceApiFactory<T extends BaseResource> {
   private config: ResourceConfig<T>
-  
+
   constructor(config: ResourceConfig<T>) {
     this.config = config
   }
-  
+
   getList = async (filters?: Record<string, unknown>): Promise<T[]> => {
     if (this.config.customApi?.getList) {
       return this.config.customApi.getList(filters)
     }
-    
+
     const response = await apiClient.get(this.config.apiEndpoint, { params: filters })
     return response.data
   }
-  
+
   getById = async (id: number): Promise<T> => {
     if (this.config.customApi?.getById) {
       return this.config.customApi.getById(id)
     }
-    
+
     const response = await apiClient.get(`${this.config.apiEndpoint}/${id}`)
     return response.data
   }
-  
+
   create = async (data: Partial<T>): Promise<T> => {
     if (this.config.customApi?.create) {
       return this.config.customApi.create(data)
     }
-    
+
     const response = await apiClient.post(this.config.apiEndpoint, data)
     return response.data
   }
-  
+
   update = async (id: number, data: Partial<T>): Promise<T> => {
     if (this.config.customApi?.update) {
       return this.config.customApi.update(id, data)
     }
-    
+
     const response = await apiClient.put(`${this.config.apiEndpoint}/${id}`, data)
     return response.data
   }
-  
+
   delete = async (id: number): Promise<void> => {
     if (this.config.customApi?.delete) {
       return this.config.customApi.delete(id)
     }
-    
+
     await apiClient.delete(`${this.config.apiEndpoint}/${id}`)
   }
 }
@@ -111,12 +111,12 @@ export class ResourceApiFactory<T extends BaseResource> {
 export class ResourceComponentFactory<T extends BaseResource> {
   private config: ResourceConfig<T>
   private api: ResourceApiFactory<T>
-  
+
   constructor(config: ResourceConfig<T>) {
     this.config = config
     this.api = new ResourceApiFactory(config)
   }
-  
+
   createListView = (props?: {
     data?: T[]
     loading?: boolean
@@ -149,7 +149,7 @@ export class ResourceComponentFactory<T extends BaseResource> {
       />
     )
   }
-  
+
   createKanbanView = (props?: {
     items?: KanbanItem<T>[]
     loading?: boolean
@@ -165,7 +165,7 @@ export class ResourceComponentFactory<T extends BaseResource> {
     if (!this.config.kanbanConfig) {
       throw new Error(`Kanban view not configured for ${this.config.name}`)
     }
-    
+
     return (
       <GenericKanbanView<T>
         items={props?.items || []}
@@ -187,7 +187,7 @@ export class ResourceComponentFactory<T extends BaseResource> {
       />
     )
   }
-  
+
   createFormView = (props: {
     mode: 'create' | 'edit' | 'view'
     initialData?: Partial<T>
@@ -198,12 +198,12 @@ export class ResourceComponentFactory<T extends BaseResource> {
     loading?: boolean
     error?: string | null
   }) => {
-    const title = props.mode === 'create' 
+    const title = props.mode === 'create'
       ? `Create ${this.config.displayName}`
       : props.mode === 'edit'
       ? `Edit ${this.config.displayName}`
       : `View ${this.config.displayName}`
-    
+
     return (
       <GenericFormView<T>
         fields={this.config.formFields}
@@ -222,7 +222,7 @@ export class ResourceComponentFactory<T extends BaseResource> {
       />
     )
   }
-  
+
   getApi = () => this.api
 }
 

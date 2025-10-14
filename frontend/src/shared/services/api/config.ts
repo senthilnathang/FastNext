@@ -2,7 +2,7 @@
 export const API_CONFIG = {
   API_BASE_URL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000',
   TIMEOUT: 30000,
-  
+
   ENDPOINTS: {
     AUTH: {
       LOGIN: '/api/v1/auth/login',
@@ -42,7 +42,7 @@ export const API_CONFIG = {
     PERMISSIONS: '/api/v1/permissions',
     WORKFLOW: {
       TYPES: '/api/v1/workflow-types',
-      STATES: '/api/v1/workflow-states', 
+      STATES: '/api/v1/workflow-states',
       TEMPLATES: '/api/v1/workflow-templates',
       INSTANCES: '/api/v1/workflow-instances',
     },
@@ -60,12 +60,12 @@ export const API_CONFIG = {
 export const getApiUrl = (endpoint: string): string => {
   const baseUrl = API_CONFIG.API_BASE_URL.replace(/\/$/, '')
   const cleanEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`
-  
+
   // If no base URL is configured, use relative URLs (for Next.js API routes)
   if (!baseUrl) {
     return cleanEndpoint
   }
-  
+
   return `${baseUrl}${cleanEndpoint}`
 }
 

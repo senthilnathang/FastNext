@@ -10,7 +10,7 @@ import { Button } from "@/shared/components/ui/button"
 import { Badge } from "@/shared/components/ui/badge"
 import { Label } from "@/shared/components/ui/label"
 import { Separator } from "@/shared/components/ui/separator"
-import { 
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -142,25 +142,25 @@ const predefinedSchemes: ColorScheme[] = [
   }
 ]
 
-function ColorPreview({ scheme, isSelected, onClick }: { 
+function ColorPreview({ scheme, isSelected, onClick }: {
   scheme: ColorScheme
   isSelected: boolean
-  onClick: () => void 
+  onClick: () => void
 }) {
   const { theme } = useTheme()
   const previewColor = theme === 'dark' ? scheme.preview.dark : scheme.preview.light
-  
+
   return (
     <button
       onClick={onClick}
       className={cn(
         "relative flex flex-col items-center space-y-2 p-3 rounded-lg border-2 transition-all hover:scale-105",
-        isSelected 
-          ? "border-primary bg-primary/5" 
+        isSelected
+          ? "border-primary bg-primary/5"
           : "border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600"
       )}
     >
-      <div 
+      <div
         className="w-12 h-12 rounded-full shadow-md border-2 border-white dark:border-gray-800"
         style={{ backgroundColor: previewColor }}
       />
@@ -181,13 +181,13 @@ function ColorPreview({ scheme, isSelected, onClick }: {
 
 function ThemeModeSelector() {
   const { theme, setTheme } = useTheme()
-  
+
   const modes = [
     { id: 'light', name: 'Light', icon: Sun },
     { id: 'dark', name: 'Dark', icon: Moon },
     { id: 'system', name: 'System', icon: Monitor }
   ]
-  
+
   return (
     <div className="space-y-3">
       <Label className="text-sm font-medium">Appearance</Label>
@@ -195,15 +195,15 @@ function ThemeModeSelector() {
         {modes.map((mode) => {
           const Icon = mode.icon
           const isSelected = theme === mode.id
-          
+
           return (
             <button
               key={mode.id}
               onClick={() => setTheme(mode.id)}
               className={cn(
                 "flex-1 flex flex-col items-center space-y-2 p-3 rounded-lg border transition-all",
-                isSelected 
-                  ? "border-primary bg-primary/5 text-primary" 
+                isSelected
+                  ? "border-primary bg-primary/5 text-primary"
                   : "border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600"
               )}
             >
@@ -220,7 +220,7 @@ function ThemeModeSelector() {
 export function ThemeCustomizer({ className, compact = false }: ThemeCustomizerProps) {
   const [selectedScheme, setSelectedScheme] = React.useState('default')
   const [customSchemes, setCustomSchemes] = React.useState<ColorScheme[]>([])
-  
+
   // Load saved custom schemes from localStorage
   React.useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -232,14 +232,14 @@ export function ThemeCustomizer({ className, compact = false }: ThemeCustomizerP
           console.error('Failed to load custom color schemes:', error)
         }
       }
-      
+
       const savedScheme = localStorage.getItem('selected-color-scheme')
       if (savedScheme) {
         setSelectedScheme(savedScheme)
       }
     }
   }, [])
-  
+
   // Apply color scheme
   const applyColorScheme = React.useCallback((scheme: ColorScheme) => {
     if (typeof window !== 'undefined') {
@@ -251,7 +251,7 @@ export function ThemeCustomizer({ className, compact = false }: ThemeCustomizerP
       setSelectedScheme(scheme.id)
     }
   }, [])
-  
+
   const exportSchemes = () => {
     const data = {
       predefined: predefinedSchemes,
@@ -266,16 +266,16 @@ export function ThemeCustomizer({ className, compact = false }: ThemeCustomizerP
     a.click()
     URL.revokeObjectURL(url)
   }
-  
+
   const resetToDefault = () => {
     const defaultScheme = predefinedSchemes.find(s => s.id === 'default')
     if (defaultScheme) {
       applyColorScheme(defaultScheme)
     }
   }
-  
+
   const allSchemes = [...predefinedSchemes, ...customSchemes]
-  
+
   if (compact) {
     return (
       <Dialog>
@@ -324,7 +324,7 @@ export function ThemeCustomizer({ className, compact = false }: ThemeCustomizerP
       </Dialog>
     )
   }
-  
+
   return (
     <Card className={className}>
       <CardHeader className="pb-3">
@@ -340,9 +340,9 @@ export function ThemeCustomizer({ className, compact = false }: ThemeCustomizerP
       </CardHeader>
       <CardContent className="space-y-6">
         <ThemeModeSelector />
-        
+
         <Separator />
-        
+
         <div className="space-y-3">
           <div className="flex items-center justify-between">
             <Label className="text-sm font-medium">Color Schemes</Label>
@@ -365,7 +365,7 @@ export function ThemeCustomizer({ className, compact = false }: ThemeCustomizerP
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
-          
+
           <div className="grid grid-cols-2 gap-3">
             {allSchemes.map((scheme) => (
               <ColorPreview
@@ -377,7 +377,7 @@ export function ThemeCustomizer({ className, compact = false }: ThemeCustomizerP
             ))}
           </div>
         </div>
-        
+
         {customSchemes.length > 0 && (
           <>
             <Separator />

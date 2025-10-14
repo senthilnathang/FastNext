@@ -8,18 +8,18 @@ import { Badge } from '@/shared/components/ui/badge'
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/shared/components/ui/sheet'
 import { SortControl, GroupControl } from '@/shared/components/ui'
 import type { SortOption, GroupOption } from '@/shared/components/ui'
-import { 
-  LayoutGrid, 
-  List, 
-  Kanban, 
-  Calendar, 
-  BarChart3, 
-  Search, 
-  Filter, 
-  SortAsc, 
-  SortDesc, 
-  Download, 
-  Upload, 
+import {
+  LayoutGrid,
+  List,
+  Kanban,
+  Calendar,
+  BarChart3,
+  Search,
+  Filter,
+  SortAsc,
+  SortDesc,
+  Download,
+  Upload,
   Columns,
   GripVertical,
   Eye,
@@ -65,51 +65,51 @@ export interface ViewManagerProps<T = any> {
   columns: Column<T>[]
   loading?: boolean
   error?: string | null
-  
+
   // Views
   views: ViewConfig[]
   activeView?: string
   onViewChange?: (viewId: string) => void
-  
+
   // Search & Filtering
   searchQuery?: string
   onSearchChange?: (query: string) => void
   filters?: Record<string, any>
   onFiltersChange?: (filters: Record<string, any>) => void
-  
+
   // Sorting
   sortBy?: string
   sortOrder?: 'asc' | 'desc'
   onSortChange?: (field: string, order: 'asc' | 'desc') => void
   sortOptions?: SortOption[]
-  
+
   // Grouping
   groupBy?: string
   onGroupChange?: (field: string) => void
   groupOptions?: GroupOption[]
-  
+
   // Export/Import
   onExport?: (format: 'csv' | 'json' | 'excel') => void
   onImport?: (file: File) => void
-  
+
   // CRUD operations
   onCreateClick?: (columnId?: string) => void
   onEditClick?: (item: T) => void
   onDeleteClick?: (item: T) => void
   onViewClick?: (item: T) => void
-  
+
   // Selection
   selectable?: boolean
   selectedItems?: T[]
   onSelectionChange?: (items: T[]) => void
-  
+
   // Bulk actions
   bulkActions?: Array<{
     label: string
     icon?: React.ReactNode
     action: (items: T[]) => void
   }>
-  
+
   // Customization
   title?: string
   subtitle?: string
@@ -120,7 +120,7 @@ export interface ViewManagerProps<T = any> {
   showImport?: boolean
   showColumnSelector?: boolean
   showViewSelector?: boolean
-  
+
   // Kanban-specific props
   kanbanColumns?: KanbanColumn[]
   onMoveCard?: (cardId: string | number, sourceColumnId: string, targetColumnId: string) => void
@@ -135,7 +135,7 @@ export interface ViewManagerProps<T = any> {
     render?: (value: unknown, item: T) => React.ReactNode
     type?: 'text' | 'badge' | 'date' | 'avatar' | 'priority'
   }>
-  
+
   // Gantt-specific props
   ganttIdField?: keyof T | string
   ganttTitleField?: keyof T | string
@@ -152,7 +152,7 @@ export interface ViewManagerProps<T = any> {
   showDependencies?: boolean
   allowResize?: boolean
   allowMove?: boolean
-  
+
   // Calendar-specific props
   calendarIdField?: keyof T | string
   calendarTitleField?: keyof T | string
@@ -295,7 +295,7 @@ export const ViewManager = React.memo(function ViewManager<T extends { id: numbe
       result.sort((a, b) => {
         const aValue = a[sortBy as keyof T]
         const bValue = b[sortBy as keyof T]
-        
+
         const comparison = String(aValue || '').localeCompare(String(bValue || ''))
         return sortOrder === 'asc' ? comparison : -comparison
       })
@@ -320,7 +320,7 @@ export const ViewManager = React.memo(function ViewManager<T extends { id: numbe
     const newOrder = Array.from(columnOrder)
     const [reorderedColumn] = newOrder.splice(result.source.index, 1)
     newOrder.splice(result.destination.index, 0, reorderedColumn)
-    
+
     setColumnOrder(newOrder)
   }, [columnOrder])
 
@@ -533,7 +533,7 @@ export const ViewManager = React.memo(function ViewManager<T extends { id: numbe
           </DropdownMenuContent>
         </DropdownMenu>
       )}
-      
+
       {showImport && (
         <div>
           <input
@@ -558,7 +558,7 @@ export const ViewManager = React.memo(function ViewManager<T extends { id: numbe
     <div className="flex items-center justify-between space-x-4 mb-6">
       <div className="flex items-center space-x-4">
         {showViewSelector && renderViewSelector()}
-        
+
         {showSearch && (
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
@@ -572,9 +572,9 @@ export const ViewManager = React.memo(function ViewManager<T extends { id: numbe
             />
           </div>
         )}
-        
+
         {showFilters && renderFilterPanel()}
-        
+
         {sortOptions.length > 0 && onSortChange && (
           <SortControl
             options={sortOptions}
@@ -583,7 +583,7 @@ export const ViewManager = React.memo(function ViewManager<T extends { id: numbe
             onChange={onSortChange}
           />
         )}
-        
+
         {groupOptions.length > 0 && onGroupChange && (
           <GroupControl
             options={groupOptions}
@@ -592,11 +592,11 @@ export const ViewManager = React.memo(function ViewManager<T extends { id: numbe
           />
         )}
       </div>
-      
+
       <div className="flex items-center space-x-2">
         {showColumnSelector && renderColumnManager()}
         {(showExport || showImport) && renderExportImport()}
-        
+
         {bulkActions.length > 0 && selectedItems.length > 0 && (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -617,7 +617,7 @@ export const ViewManager = React.memo(function ViewManager<T extends { id: numbe
             </DropdownMenuContent>
           </DropdownMenu>
         )}
-        
+
         {onCreateClick && (
           <Button onClick={() => onCreateClick()}>
             Create New
@@ -628,14 +628,14 @@ export const ViewManager = React.memo(function ViewManager<T extends { id: numbe
   )
 
   const renderCardView = () => (
-    <div 
+    <div
       className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
       role="grid"
       aria-label={`${title || 'Data'} cards`}
     >
       {processedData.map((item, index) => (
-        <div 
-          key={item.id} 
+        <div
+          key={item.id}
           className="bg-background border rounded-lg p-4 hover:shadow-md transition-shadow focus-within:ring-2 focus-within:ring-primary"
           role="gridcell"
           tabIndex={0}
@@ -655,9 +655,9 @@ export const ViewManager = React.memo(function ViewManager<T extends { id: numbe
           ))}
           <div className="flex justify-end space-x-2 mt-4">
             {onViewClick && (
-              <Button 
-                variant="outline" 
-                size="sm" 
+              <Button
+                variant="outline"
+                size="sm"
                 onClick={() => onViewClick(item)}
                 aria-label={`View details for item ${item.id}`}
               >
@@ -665,9 +665,9 @@ export const ViewManager = React.memo(function ViewManager<T extends { id: numbe
               </Button>
             )}
             {onEditClick && (
-              <Button 
-                variant="outline" 
-                size="sm" 
+              <Button
+                variant="outline"
+                size="sm"
                 onClick={() => onEditClick(item)}
                 aria-label={`Edit item ${item.id}`}
               >
@@ -683,9 +683,9 @@ export const ViewManager = React.memo(function ViewManager<T extends { id: numbe
   const renderListView = () => (
     <div className="bg-background border rounded-lg overflow-hidden">
       <div className="overflow-x-auto">
-        <table 
-          className="w-full" 
-          role="table" 
+        <table
+          className="w-full"
+          role="table"
           aria-label={`${title || 'Data'} table with ${processedData.length} rows`}
         >
           <thead className="bg-muted/50">
@@ -703,12 +703,12 @@ export const ViewManager = React.memo(function ViewManager<T extends { id: numbe
                 </th>
               )}
               {orderedColumns.map((column) => (
-                <th 
-                  key={column.id} 
-                  className="text-left p-4 font-medium" 
+                <th
+                  key={column.id}
+                  className="text-left p-4 font-medium"
                   scope="col"
                   aria-sort={
-                    sortBy === column.key 
+                    sortBy === column.key
                       ? sortOrder === 'asc' ? 'ascending' : 'descending'
                       : column.sortable !== false ? 'none' : undefined
                   }
@@ -722,7 +722,7 @@ export const ViewManager = React.memo(function ViewManager<T extends { id: numbe
                         onClick={() => handleSortChange(column.key as string)}
                         className="h-auto p-0"
                         aria-label={`Sort by ${column.label} ${
-                          sortBy === column.key 
+                          sortBy === column.key
                             ? sortOrder === 'asc' ? 'descending' : 'ascending'
                             : 'ascending'
                         }`}
@@ -793,13 +793,13 @@ export const ViewManager = React.memo(function ViewManager<T extends { id: numbe
   const renderKanbanView = () => {
     // Default groupBy field if not specified
     const groupByField = kanbanGroupByField || groupBy || 'status'
-    
+
     // Default card title field if not specified
     const cardTitleField = kanbanCardTitleField || 'name' || 'title'
-    
+
     // Use provided kanban columns or auto-generate from data
     let columns = [...kanbanColumns]
-    
+
     // Auto-generate columns if none provided and we have a groupBy field
     if (columns.length === 0 && groupByField) {
       const uniqueGroups = [...new Set(processedData.map(item => String(item[groupByField as keyof T] || 'Unknown')))]
@@ -841,11 +841,11 @@ export const ViewManager = React.memo(function ViewManager<T extends { id: numbe
     const titleField = ganttTitleField || 'title' || 'name'
     const startDateField = ganttStartDateField || 'start_date' || 'startDate'
     const endDateField = ganttEndDateField || 'end_date' || 'endDate'
-    
+
     // Validate that required date fields exist in data
     const hasRequiredFields = processedData.length === 0 || (
-      processedData.some(item => 
-        item[startDateField as keyof T] && 
+      processedData.some(item =>
+        item[startDateField as keyof T] &&
         item[endDateField as keyof T]
       )
     )
@@ -902,10 +902,10 @@ export const ViewManager = React.memo(function ViewManager<T extends { id: numbe
     const idField = calendarIdField || 'id'
     const titleField = calendarTitleField || 'title' || 'name'
     const dateField = calendarDateField || 'created_at' || 'date'
-    
+
     // Validate that required date field exists in data
     const hasRequiredFields = processedData.length === 0 || (
-      processedData.some(item => 
+      processedData.some(item =>
         item[dateField as keyof T]
       )
     )

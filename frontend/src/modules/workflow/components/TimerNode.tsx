@@ -25,7 +25,7 @@ function TimerNode({ data, selected, id }: NodeProps<WorkflowNodeData>) {
   }, [id, editData]);
   return (
     <>
-      <div 
+      <div
         className={`
           px-3 py-2 shadow-md rounded-full border-2 min-w-[80px] min-h-[80px] cursor-pointer group
           ${selected ? 'border-yellow-500' : 'border-yellow-300'}
@@ -41,7 +41,7 @@ function TimerNode({ data, selected, id }: NodeProps<WorkflowNodeData>) {
           className="w-3 h-3 !bg-yellow-400 border-2 border-white"
           style={{ left: -6 }}
         />
-        
+
         {/* Edit button */}
         <Button
           variant="ghost"
@@ -54,11 +54,11 @@ function TimerNode({ data, selected, id }: NodeProps<WorkflowNodeData>) {
         >
           <Settings size={10} className="text-yellow-500" />
         </Button>
-        
+
         {/* Node content */}
         <div className="flex flex-col items-center space-y-1">
-          <Timer 
-            size={20} 
+          <Timer
+            size={20}
             className="text-yellow-600 flex-shrink-0"
           />
           <div className="text-center">
@@ -79,7 +79,7 @@ function TimerNode({ data, selected, id }: NodeProps<WorkflowNodeData>) {
             {data.duration || '1h'}
           </span>
         </div>
-        
+
         {/* Output handle */}
         <Handle
           type="source"
@@ -105,7 +105,7 @@ function TimerNode({ data, selected, id }: NodeProps<WorkflowNodeData>) {
                 placeholder="Enter timer name"
               />
             </div>
-            
+
             <div className="space-y-2">
               <Label htmlFor="description">Description</Label>
               <Textarea
@@ -115,7 +115,7 @@ function TimerNode({ data, selected, id }: NodeProps<WorkflowNodeData>) {
                 placeholder="Enter timer description"
               />
             </div>
-            
+
             <div className="space-y-2">
               <Label htmlFor="duration">Duration</Label>
               <Input
@@ -128,7 +128,7 @@ function TimerNode({ data, selected, id }: NodeProps<WorkflowNodeData>) {
                 Examples: 30s, 5m, 1h, 2d (seconds, minutes, hours, days)
               </div>
             </div>
-            
+
             <div className="flex justify-end space-x-2">
               <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
                 Cancel

@@ -141,7 +141,7 @@ export function getTriadicColors(oklchString: string): [string, string] {
 
   const triad1 = createOklch({ ...color, h: (color.h + 120) % 360 })
   const triad2 = createOklch({ ...color, h: (color.h + 240) % 360 })
-  
+
   return [triad1, triad2]
 }
 
@@ -154,7 +154,7 @@ export function getAnalogousColors(oklchString: string, spread = 30): [string, s
 
   const analogous1 = createOklch({ ...color, h: (color.h + spread) % 360 })
   const analogous2 = createOklch({ ...color, h: (color.h - spread + 360) % 360 })
-  
+
   return [analogous1, analogous2]
 }
 
@@ -189,18 +189,18 @@ export function getCssVariable(variableName: string, root: HTMLElement = documen
 export function hexToOklch(hex: string): string {
   // Remove # if present
   hex = hex.replace('#', '')
-  
+
   // Convert hex to RGB
   const r = parseInt(hex.substr(0, 2), 16) / 255
   const g = parseInt(hex.substr(2, 2), 16) / 255
   const b = parseInt(hex.substr(4, 2), 16) / 255
-  
+
   // Simple approximation to OKLCH
   // This is a basic conversion - for production use, consider a proper color conversion library
   const l = (r + g + b) / 3
   const c = Math.sqrt((r - l) ** 2 + (g - l) ** 2 + (b - l) ** 2) / Math.sqrt(3)
   const h = Math.atan2(g - b, r - g) * 180 / Math.PI
-  
+
   return createOklch({
     l: Math.max(0, Math.min(1, l)),
     c: Math.max(0, Math.min(0.4, c)),
@@ -215,40 +215,40 @@ export const semanticColorTokens = {
   // Core tokens
   background: '--background',
   foreground: '--foreground',
-  
+
   // Brand tokens
   primary: '--primary',
   'primary-foreground': '--primary-foreground',
   secondary: '--secondary',
   'secondary-foreground': '--secondary-foreground',
-  
+
   // UI tokens
   accent: '--accent',
   'accent-foreground': '--accent-foreground',
   muted: '--muted',
   'muted-foreground': '--muted-foreground',
-  
+
   // Border and input tokens
   border: '--border',
   input: '--input',
   ring: '--ring',
-  
+
   // Surface tokens
   card: '--card',
   'card-foreground': '--card-foreground',
   popover: '--popover',
   'popover-foreground': '--popover-foreground',
-  
+
   // Status tokens
   destructive: '--destructive',
   'destructive-foreground': '--destructive-foreground',
-  
+
   // Component-specific tokens
   sidebar: '--sidebar',
   'sidebar-foreground': '--sidebar-foreground',
   'sidebar-primary': '--sidebar-primary',
   'sidebar-accent': '--sidebar-accent',
-  
+
   // Chart tokens
   'chart-1': '--chart-1',
   'chart-2': '--chart-2',
@@ -271,29 +271,29 @@ export function createThemeFromPrimary(primaryColor: string): Record<string, str
   const variants = generateColorVariants(primaryColor)
   const complementary = getComplementaryColor(primaryColor)
   const [analogous1] = getAnalogousColors(primaryColor)
-  
+
   return {
     // Core colors
     primary: variants[500],
     'primary-foreground': getForegroundColor(variants[500]),
-    
+
     // Secondary from complementary
     secondary: adjustLightness(complementary, 0.4),
     'secondary-foreground': getForegroundColor(adjustLightness(complementary, 0.4)),
-    
+
     // Accent from analogous
     accent: adjustLightness(analogous1, 0.3),
     'accent-foreground': getForegroundColor(adjustLightness(analogous1, 0.3)),
-    
+
     // Muted from desaturated primary
     muted: adjustChroma(adjustLightness(primaryColor, 0.4), -0.1),
     'muted-foreground': getForegroundColor(adjustChroma(adjustLightness(primaryColor, 0.4), -0.1)),
-    
+
     // UI elements
     border: adjustLightness(primaryColor, 0.5),
     input: adjustLightness(primaryColor, 0.5),
     ring: variants[500],
-    
+
     // Status colors
     destructive: 'oklch(0.576 0.204 17.38)',
     'destructive-foreground': 'oklch(1 0 0)',

@@ -53,7 +53,7 @@ export function DateField({
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value
     setInputValue(newValue)
-    
+
     if (newValue) {
       const date = new Date(newValue)
       if (!isNaN(date.getTime())) {

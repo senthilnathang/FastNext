@@ -24,7 +24,7 @@ interface HeaderProps {
 
 export default function Header({ sidebarCollapsed, onToggleSidebar }: HeaderProps = {}) {
   const { user, logout } = useAuth()
-  
+
   const handleLogout = async () => {
     try {
       await logout()
@@ -48,7 +48,7 @@ export default function Header({ sidebarCollapsed, onToggleSidebar }: HeaderProp
               />
             </div>
           )}
-          
+
           <div className="relative hidden sm:block">
             <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-muted-foreground w-3.5 h-3.5" />
             <input
@@ -66,7 +66,7 @@ export default function Header({ sidebarCollapsed, onToggleSidebar }: HeaderProp
           <div className="hidden sm:block">
             <QuickActionButton />
           </div>
-          
+
           <Button variant="ghost" size="sm" title="Notifications" className="p-1.5 relative">
             <Bell className="w-4 h-4" />
             <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-red-500 rounded-full"></span>
@@ -109,7 +109,7 @@ export default function Header({ sidebarCollapsed, onToggleSidebar }: HeaderProp
                 <span>Settings</span>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem 
+              <DropdownMenuItem
                 className="text-destructive focus:text-destructive text-sm"
                 onClick={handleLogout}
               >
@@ -120,7 +120,7 @@ export default function Header({ sidebarCollapsed, onToggleSidebar }: HeaderProp
           </DropdownMenu>
         </div>
       </header>
-      
+
       <div className="px-3 py-1.5 bg-muted/30 border-t border-border">
         <Breadcrumb />
       </div>

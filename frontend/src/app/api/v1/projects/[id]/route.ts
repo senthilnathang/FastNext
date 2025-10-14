@@ -10,7 +10,7 @@ export async function GET(
   try {
     const { id: idString } = await params;
     const id = parseInt(idString);
-    
+
     if (isNaN(id)) {
       return NextResponse.json(
         { error: 'Invalid project ID' },
@@ -19,7 +19,7 @@ export async function GET(
     }
 
     const project = projectsStore.getById(id);
-    
+
     if (!project) {
       return NextResponse.json(
         { error: 'Project not found' },
@@ -45,7 +45,7 @@ export async function PUT(
   try {
     const { id: idString } = await params;
     const id = parseInt(idString);
-    
+
     if (isNaN(id)) {
       return NextResponse.json(
         { error: 'Invalid project ID' },
@@ -59,14 +59,14 @@ export async function PUT(
     if (body.start_date && body.end_date) {
       const startDate = new Date(body.start_date);
       const endDate = new Date(body.end_date);
-      
+
       if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
         return NextResponse.json(
           { error: 'Invalid date format. Use YYYY-MM-DD format.' },
           { status: 400 }
         );
       }
-      
+
       if (endDate < startDate) {
         return NextResponse.json(
           { error: 'End date must be after start date' },
@@ -77,7 +77,7 @@ export async function PUT(
 
     // Update project
     const updatedProject = projectsStore.update(id, body);
-    
+
     if (!updatedProject) {
       return NextResponse.json(
         { error: 'Project not found' },
@@ -103,7 +103,7 @@ export async function DELETE(
   try {
     const { id: idString } = await params;
     const id = parseInt(idString);
-    
+
     if (isNaN(id)) {
       return NextResponse.json(
         { error: 'Invalid project ID' },
@@ -112,7 +112,7 @@ export async function DELETE(
     }
 
     const deleted = projectsStore.delete(id);
-    
+
     if (!deleted) {
       return NextResponse.json(
         { error: 'Project not found' },

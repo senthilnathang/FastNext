@@ -1,7 +1,7 @@
 import { apiClient } from './api/client'
 import { API_CONFIG } from './api/config'
-import type { 
-  Component, 
+import type {
+  Component,
   ComponentInstance,
   CreateComponentRequest,
   CreateComponentInstanceRequest,
@@ -9,9 +9,9 @@ import type {
 } from '@/shared/types'
 
 export const componentsApi = {
-  getComponents: async (params?: { 
-    project_id?: number; 
-    is_global?: boolean 
+  getComponents: async (params?: {
+    project_id?: number;
+    is_global?: boolean
   }): Promise<Component[]> => {
     const response = await apiClient.get(API_CONFIG.ENDPOINTS.COMPONENTS, { params })
     return response.data
@@ -38,7 +38,7 @@ export const componentsApi = {
   },
 
   updateComponentInstance: async (
-    id: number, 
+    id: number,
     data: UpdateComponentInstanceRequest
   ): Promise<ComponentInstance> => {
     const response = await apiClient.put(`${API_CONFIG.ENDPOINTS.COMPONENTS}/instances/${id}`, data)

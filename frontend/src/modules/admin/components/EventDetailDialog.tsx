@@ -264,7 +264,7 @@ export const EventDetailDialog: React.FC<EventDetailDialogProps> = ({
                             variant="ghost"
                             size="sm"
                             onClick={() => copyToClipboard(
-                              event.entity.name || event.entity.id || '', 
+                              event.entity.name || event.entity.id || '',
                               event.entity.name ? 'Entity Name' : 'Entity ID'
                             )}
                           >

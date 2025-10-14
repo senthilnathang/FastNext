@@ -92,7 +92,7 @@ export function SelectionList({
     const allValues = filteredOptions
       .filter(option => !option.disabled)
       .map(option => option.value)
-    
+
     const newValues = selectedValues.length === allValues.length ? [] : allValues
     setSelectedValues(newValues)
     onChange?.(newValues)
@@ -186,8 +186,8 @@ export function SelectionList({
             filteredOptions.map(option => {
               const isSelected = selectedValues.includes(option.value)
               const isDisabled = disabled || option.disabled
-              const isMaxReached = Boolean(maxSelections && 
-                selectedValues.length >= maxSelections && 
+              const isMaxReached = Boolean(maxSelections &&
+                selectedValues.length >= maxSelections &&
                 !isSelected)
 
               return (

@@ -105,7 +105,7 @@ export default function PermissionsConfigPage() {
   });
 
   const togglePermission = (id: string) => {
-    setPermissions(prev => prev.map(p => 
+    setPermissions(prev => prev.map(p =>
       p.id === id ? { ...p, enabled: !p.enabled } : p
     ));
   };
@@ -131,15 +131,15 @@ export default function PermissionsConfigPage() {
                   className="pl-9"
                 />
               </div>
-              
+
               <div className="space-y-2">
                 <Label>Category</Label>
                 <div className="space-y-1">
                   <button
                     onClick={() => setSelectedCategory('all')}
                     className={`w-full text-left px-3 py-2 rounded-md text-sm transition-colors ${
-                      selectedCategory === 'all' 
-                        ? 'bg-primary text-primary-foreground' 
+                      selectedCategory === 'all'
+                        ? 'bg-primary text-primary-foreground'
                         : 'hover:bg-gray-100 dark:hover:bg-gray-800'
                     }`}
                   >
@@ -150,8 +150,8 @@ export default function PermissionsConfigPage() {
                       key={category}
                       onClick={() => setSelectedCategory(category)}
                       className={`w-full text-left px-3 py-2 rounded-md text-sm transition-colors ${
-                        selectedCategory === category 
-                          ? 'bg-primary text-primary-foreground' 
+                        selectedCategory === category
+                          ? 'bg-primary text-primary-foreground'
                           : 'hover:bg-gray-100 dark:hover:bg-gray-800'
                       }`}
                     >
@@ -226,17 +226,17 @@ export default function PermissionsConfigPage() {
                         {permission.enabled ? 'Active' : 'Inactive'}
                       </Badge>
                     </div>
-                    
+
                     <p className="text-gray-600 dark:text-gray-400 mb-3">
                       {permission.description}
                     </p>
-                    
+
                     <div className="flex items-center space-x-4 text-sm">
                       <div className="flex items-center space-x-1">
                         <span className="text-gray-500">Category:</span>
                         <Badge variant="outline">{permission.category}</Badge>
                       </div>
-                      
+
                       <div className="flex items-center space-x-1">
                         <span className="text-gray-500">Assigned Roles:</span>
                         <div className="flex space-x-1">
@@ -249,13 +249,13 @@ export default function PermissionsConfigPage() {
                       </div>
                     </div>
                   </div>
-                  
+
                   <div className="flex items-center space-x-2 ml-4">
                     <Switch
                       checked={permission.enabled}
                       onCheckedChange={() => togglePermission(permission.id)}
                     />
-                    
+
                     <div className="flex space-x-1">
                       <Button variant="ghost" size="sm">
                         <Eye className="h-4 w-4" />
@@ -272,7 +272,7 @@ export default function PermissionsConfigPage() {
               </CardContent>
             </Card>
           ))}
-          
+
           {filteredPermissions.length === 0 && (
             <Card>
               <CardContent className="p-12 text-center">

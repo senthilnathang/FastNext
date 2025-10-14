@@ -6,19 +6,19 @@ import { AuthContext } from '@/modules/auth'
 export const useUserRole = () => {
   const context = useContext(AuthContext)
   const user = context?.user || null
-  
+
   const hasPermission = (permission: string): boolean => {
     if (!user) return false
-    
+
     // Check if user is superuser/admin (full access)
     if (user.roles?.includes('admin') || user.is_superuser) return true
-    
+
     // Check specific permissions
     if (user.permissions?.includes(permission)) return true
-    
+
     // Check role-based permissions
     if (user.roles?.includes(permission)) return true
-    
+
     return false
   }
 
@@ -34,10 +34,10 @@ export const useUserRole = () => {
 
   const canAccessModule = (module: string): boolean => {
     if (!user) return false
-    
+
     // If user is admin, allow access to all modules
     if (isAdmin()) return true
-    
+
     // Check module-specific permissions
     const modulePermissions = {
       'compliance': ['compliance.*', 'compliance.read'],

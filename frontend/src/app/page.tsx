@@ -16,7 +16,7 @@ export default function Home() {
           />
           <div className="text-2xl font-bold text-blue-600">FastNext Framework</div>
         </div>
-        
+
         <div className="text-center sm:text-left">
           <h1 className="text-3xl font-bold mb-4">Custom App Builder</h1>
           <p className="text-gray-600 mb-6">

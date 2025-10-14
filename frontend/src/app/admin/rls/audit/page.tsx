@@ -168,7 +168,7 @@ const formFields: FormField<RLSAuditLog>[] = [
       return (
         <div className="p-2 bg-muted rounded">
           <pre className="text-xs whitespace-pre-wrap">
-            {log.applied_conditions 
+            {log.applied_conditions
               ? JSON.stringify(log.applied_conditions, null, 2)
               : 'No conditions applied'
             }

@@ -52,7 +52,7 @@ export const useRLSContext = () => {
     try {
       setLoading(true);
       const token = localStorage.getItem('access_token');
-      
+
       const response = await fetch(getApiUrl('/api/v1/rls/context'), {
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -78,7 +78,7 @@ export const useRLSContext = () => {
   const refreshContext = useCallback(async () => {
     try {
       const token = localStorage.getItem('access_token');
-      
+
       const response = await fetch(getApiUrl('/api/v1/rls/context/refresh'), {
         method: 'POST',
         headers: {
@@ -125,9 +125,9 @@ export const useRLSAccess = () => {
     try {
       setLoading(true);
       setError(null);
-      
+
       const token = localStorage.getItem('access_token');
-      
+
       const response = await fetch(getApiUrl('/api/v1/rls/check-access'), {
         method: 'POST',
         headers: {
@@ -157,11 +157,11 @@ export const useRLSAccess = () => {
     try {
       setLoading(true);
       setError(null);
-      
+
       const results = await Promise.all(
         requests.map(request => checkAccess(request))
       );
-      
+
       return results;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Multiple access check failed';
@@ -192,10 +192,10 @@ export const useRLSPolicies = () => {
     try {
       setLoading(true);
       setError(null);
-      
+
       const token = localStorage.getItem('access_token');
       const params = new URLSearchParams();
-      
+
       if (filters) {
         Object.entries(filters).forEach(([key, value]) => {
           if (value !== undefined && value !== '') {
@@ -205,7 +205,7 @@ export const useRLSPolicies = () => {
       }
 
       const url = `${getApiUrl('/api/v1/rls/policies')}${params.toString() ? `?${params}` : ''}`;
-      
+
       const response = await fetch(url, {
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -230,9 +230,9 @@ export const useRLSPolicies = () => {
     try {
       setLoading(true);
       setError(null);
-      
+
       const token = localStorage.getItem('access_token');
-      
+
       const response = await fetch(getApiUrl('/api/v1/rls/policies'), {
         method: 'POST',
         headers: {
@@ -263,9 +263,9 @@ export const useRLSPolicies = () => {
     try {
       setLoading(true);
       setError(null);
-      
+
       const token = localStorage.getItem('access_token');
-      
+
       const response = await fetch(`${getApiUrl('/api/v1/rls/policies')}/${policyId}`, {
         method: 'PUT',
         headers: {
@@ -277,8 +277,8 @@ export const useRLSPolicies = () => {
 
       if (response.ok) {
         const updatedPolicy = await response.json();
-        setPolicies(prev => 
-          prev.map(policy => 
+        setPolicies(prev =>
+          prev.map(policy =>
             policy.id === policyId ? updatedPolicy : policy
           )
         );
@@ -300,9 +300,9 @@ export const useRLSPolicies = () => {
     try {
       setLoading(true);
       setError(null);
-      
+
       const token = localStorage.getItem('access_token');
-      
+
       const response = await fetch(`${getApiUrl('/api/v1/rls/policies')}/${policyId}`, {
         method: 'DELETE',
         headers: {
@@ -354,13 +354,13 @@ export const useConditionalAccess = (
       try {
         setLoading(true);
         setError(null);
-        
+
         const result = await checkAccess({
           entity_type: entityType,
           action,
           entity_id: entityId
         });
-        
+
         setHasAccess(result.access_granted);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Access check failed');
@@ -386,13 +386,13 @@ export const useConditionalAccess = (
 export const useCachedAccess = () => {
   const [cache, setCache] = useState<Map<string, { result: AccessCheckResult; timestamp: number }>>(new Map());
   const { checkAccess } = useRLSAccess();
-  
+
   const cacheTimeout = 5 * 60 * 1000; // 5 minutes
 
   const getCachedAccess = useCallback(async (request: AccessCheckRequest): Promise<AccessCheckResult> => {
     const cacheKey = `${request.entity_type}-${request.action}-${request.entity_id || 'null'}`;
     const cached = cache.get(cacheKey);
-    
+
     // Check if cache is valid
     if (cached && (Date.now() - cached.timestamp) < cacheTimeout) {
       return cached.result;
@@ -400,13 +400,13 @@ export const useCachedAccess = () => {
 
     // Perform fresh access check
     const result = await checkAccess(request);
-    
+
     // Update cache
     setCache(prev => new Map(prev.set(cacheKey, {
       result,
       timestamp: Date.now()
     })));
-    
+
     return result;
   }, [cache, checkAccess, cacheTimeout]);
 
@@ -418,7 +418,7 @@ export const useCachedAccess = () => {
     setCache(prev => {
       const newCache = new Map(prev);
       const pattern = `${entityType}-`;
-      
+
       for (const [key] of newCache) {
         if (key.startsWith(pattern)) {
           if (!entityId || key.includes(`-${entityId}`)) {
@@ -426,7 +426,7 @@ export const useCachedAccess = () => {
           }
         }
       }
-      
+
       return newCache;
     });
   }, []);
@@ -453,23 +453,23 @@ export const useRLSManager = () => {
     access,
     policies,
     cachedAccess,
-    
+
     // Combined utilities
     isReady: !context.loading && context.context !== null,
     hasError: !!(context.error || access.error || policies.error),
     errors: [context.error, access.error, policies.error].filter(Boolean),
-    
+
     // Quick access checks
-    canRead: (entityType: string, entityId?: number) => 
+    canRead: (entityType: string, entityId?: number) =>
       access.checkAccess({ entity_type: entityType, action: 'SELECT', entity_id: entityId }),
-    
-    canWrite: (entityType: string, entityId?: number) => 
+
+    canWrite: (entityType: string, entityId?: number) =>
       access.checkAccess({ entity_type: entityType, action: 'UPDATE', entity_id: entityId }),
-    
-    canDelete: (entityType: string, entityId?: number) => 
+
+    canDelete: (entityType: string, entityId?: number) =>
       access.checkAccess({ entity_type: entityType, action: 'DELETE', entity_id: entityId }),
-    
-    canCreate: (entityType: string) => 
+
+    canCreate: (entityType: string) =>
       access.checkAccess({ entity_type: entityType, action: 'INSERT' })
   };
 };

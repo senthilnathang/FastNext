@@ -548,7 +548,7 @@ export function TagsField<T extends FieldValues>({
       {suggestions.length > 0 && inputValue && (
         <div className="mt-1 max-h-40 overflow-y-auto border rounded-md bg-background">
           {suggestions
-            .filter(suggestion => 
+            .filter(suggestion =>
               suggestion.toLowerCase().includes(inputValue.toLowerCase()) &&
               !value.includes(suggestion)
             )

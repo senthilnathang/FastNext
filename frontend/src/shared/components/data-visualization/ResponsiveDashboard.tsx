@@ -53,7 +53,7 @@ export function ResponsiveDashboard({
     "grid-cols-1",
     // Tablet
     `sm:grid-cols-${columns.tablet}`,
-    // Desktop  
+    // Desktop
     `lg:grid-cols-${columns.desktop}`,
     // Wide screens
     `xl:grid-cols-${columns.wide}`,

@@ -15,7 +15,7 @@ export function ThemeDemo() {
         <CardHeader>
           <CardTitle className="text-responsive-xl">Theme System Demo</CardTitle>
           <CardDescription>
-            Current theme: <Badge variant="outline">{theme}</Badge> 
+            Current theme: <Badge variant="outline">{theme}</Badge>
             {theme === 'system' && (
               <> (resolved to <Badge variant="outline">{actualTheme}</Badge>)</>
             )}
@@ -33,7 +33,7 @@ export function ThemeDemo() {
             <Button variant="info">Info Button</Button>
             <Button variant="link">Link Button</Button>
           </div>
-          
+
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             <Card>
               <CardHeader>
@@ -46,7 +46,7 @@ export function ThemeDemo() {
                 </p>
               </CardContent>
             </Card>
-            
+
             <Card className="bg-accent">
               <CardHeader>
                 <CardTitle className="text-lg">Accent Card</CardTitle>
@@ -58,7 +58,7 @@ export function ThemeDemo() {
                 </p>
               </CardContent>
             </Card>
-            
+
             <Card className="bg-muted">
               <CardHeader>
                 <CardTitle className="text-lg">Muted Card</CardTitle>
@@ -71,7 +71,7 @@ export function ThemeDemo() {
               </CardContent>
             </Card>
           </div>
-          
+
           <div className="space-y-2">
             <h3 className="text-responsive-lg font-semibold">Responsive Text Sizes</h3>
             <p className="text-responsive-xs">Extra small responsive text (12px → 12px)</p>
@@ -80,7 +80,7 @@ export function ThemeDemo() {
             <p className="text-responsive-lg">Large responsive text (18px → 20px on sm+)</p>
             <p className="text-responsive-xl">Extra large responsive text (20px → 24px on sm+ → 30px on md+)</p>
           </div>
-          
+
           <div className="space-y-2">
             <h3 className="text-responsive-lg font-semibold">Color Palette</h3>
             <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-2">

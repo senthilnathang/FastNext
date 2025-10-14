@@ -21,7 +21,7 @@ const apiFetch = async <T = any>(
 ): Promise<ApiResponse<T>> => {
   const url = getApiUrl(endpoint)
   const defaultHeaders = getAuthHeaders()
-  
+
   const config: RequestInit = {
     ...options,
     headers: {
@@ -34,10 +34,10 @@ const apiFetch = async <T = any>(
 
   try {
     const response = await fetch(url, config)
-    
+
     // Clone response to read body multiple times if needed
     const responseClone = response.clone()
-    
+
     let data: T
     try {
       data = await response.json()
@@ -68,18 +68,18 @@ const apiFetch = async <T = any>(
         timeoutError.status = 408
         throw timeoutError
       }
-      
+
       // Re-throw API errors as-is
       if ('status' in error) {
         throw error
       }
-      
+
       // Wrap other errors
       const networkError: ApiError = new Error(`Network error: ${error.message}`)
       networkError.status = 0
       throw networkError
     }
-    
+
     throw error
   }
 }
@@ -89,7 +89,7 @@ export const apiClient = {
   get: <T = any>(endpoint: string, options?: RequestInit & { params?: Record<string, any> }): Promise<ApiResponse<T>> => {
     const { params, ...fetchOptions } = options || {}
     let url = endpoint
-    
+
     if (params) {
       const searchParams = new URLSearchParams()
       Object.entries(params).forEach(([key, value]) => {
@@ -102,31 +102,31 @@ export const apiClient = {
         url += (url.includes('?') ? '&' : '?') + queryString
       }
     }
-    
+
     return apiFetch<T>(url, { ...fetchOptions, method: 'GET' })
   },
-    
+
   post: <T = any>(endpoint: string, data?: any, options?: RequestInit): Promise<ApiResponse<T>> =>
     apiFetch<T>(endpoint, {
       ...options,
       method: 'POST',
       body: data ? JSON.stringify(data) : undefined,
     }),
-    
+
   put: <T = any>(endpoint: string, data?: any, options?: RequestInit): Promise<ApiResponse<T>> =>
     apiFetch<T>(endpoint, {
       ...options,
       method: 'PUT',
       body: data ? JSON.stringify(data) : undefined,
     }),
-    
+
   patch: <T = any>(endpoint: string, data?: any, options?: RequestInit): Promise<ApiResponse<T>> =>
     apiFetch<T>(endpoint, {
       ...options,
       method: 'PATCH',
       body: data ? JSON.stringify(data) : undefined,
     }),
-    
+
   delete: <T = any>(endpoint: string, options?: RequestInit & { data?: any }): Promise<ApiResponse<T>> => {
     const { data, ...fetchOptions } = options || {}
     return apiFetch<T>(endpoint, {
@@ -142,43 +142,42 @@ export const apiUtils = {
   isApiError: (error: any): error is ApiError => {
     return error instanceof Error && 'status' in error
   },
-  
+
   isNetworkError: (error: any): boolean => {
     return apiUtils.isApiError(error) && (error.status === 0 || !error.status)
   },
-  
+
   isTimeoutError: (error: any): boolean => {
     return apiUtils.isApiError(error) && error.status === 408
   },
-  
+
   isAuthError: (error: any): boolean => {
     return apiUtils.isApiError(error) && error.status === 401
   },
-  
+
   isForbiddenError: (error: any): boolean => {
     return apiUtils.isApiError(error) && error.status === 403
   },
-  
+
   isNotFoundError: (error: any): boolean => {
     return apiUtils.isApiError(error) && error.status === 404
   },
-  
+
   isServerError: (error: any): boolean => {
     return apiUtils.isApiError(error) && typeof error.status === 'number' && error.status >= 500
   },
-  
+
   getErrorMessage: (error: any): string => {
     if (apiUtils.isApiError(error)) {
       if (error.data?.detail) return error.data.detail
       if (error.data?.message) return error.data.message
       return error.message
     }
-    
+
     if (error instanceof Error) {
       return error.message
     }
-    
+
     return 'An unexpected error occurred'
   },
 }
-

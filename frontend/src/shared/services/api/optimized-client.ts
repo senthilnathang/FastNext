@@ -50,7 +50,7 @@ class LRUCache<T> {
     if (!entry) return null
 
     const now = Date.now()
-    
+
     // Check if entry is expired
     if (now - entry.timestamp > entry.ttl) {
       this.cache.delete(key)
@@ -60,7 +60,7 @@ class LRUCache<T> {
     // Move to end (most recently used)
     this.cache.delete(key)
     this.cache.set(key, entry)
-    
+
     return entry.data
   }
 
@@ -105,7 +105,7 @@ class LRUCache<T> {
   isStale(key: string): boolean {
     const entry = this.cache.get(key)
     if (!entry) return false
-    
+
     const now = Date.now()
     return now - entry.timestamp > entry.ttl
   }
@@ -143,7 +143,7 @@ async function withRetry<T>(
       return await fn()
     } catch (error) {
       lastError = error as Error
-      
+
       if (attempt === config.attempts) {
         throw lastError
       }
@@ -166,14 +166,14 @@ function generateCacheKey(
   options?: RequestInit & { params?: Record<string, any> }
 ): string {
   const { params, ...fetchOptions } = options || {}
-  
+
   const keyParts = [
     endpoint,
     fetchOptions.method || 'GET',
     JSON.stringify(params || {}),
     JSON.stringify(fetchOptions.body || {})
   ]
-  
+
   return keyParts.join('|')
 }
 
@@ -190,7 +190,7 @@ export const optimizedApiClient = {
       ...defaultRetryConfig,
       ...config.retry
     } : defaultRetryConfig
-    
+
     // Check cache first
     if (config?.cache !== false) {
       const cachedData = globalCache.get(cacheKey)
@@ -210,7 +210,7 @@ export const optimizedApiClient = {
             .catch(() => {
               // Keep stale data if fresh fetch fails
             })
-          
+
           return staleData as ApiResponse<T>
         }
       }
@@ -227,15 +227,15 @@ export const optimizedApiClient = {
     // Create the request function
     const requestFn = async (): Promise<ApiResponse<T>> => {
       const measurementLabel = config?.measurement || `GET ${endpoint}`
-      
+
       return perfUtils.measure(measurementLabel, async () => {
         const response = await apiClient.get<T>(endpoint, options)
-        
+
         // Cache successful responses
         if (config?.cache !== false && response.status >= 200 && response.status < 300) {
           globalCache.set(cacheKey, response, cacheConfig.ttl)
         }
-        
+
         return response
       })
     }
@@ -249,7 +249,7 @@ export const optimizedApiClient = {
     if (config?.deduplication !== false) {
       const pendingKey = `${endpoint}|${JSON.stringify(options)}`
       pendingRequests.set(pendingKey, promise)
-      
+
       promise.finally(() => {
         pendingRequests.delete(pendingKey)
       })
@@ -268,16 +268,16 @@ export const optimizedApiClient = {
       ...defaultRetryConfig,
       ...config.retry
     } : defaultRetryConfig
-    
+
     const requestFn = async (): Promise<ApiResponse<T>> => {
       const measurementLabel = config?.measurement || `POST ${endpoint}`
-      
+
       return perfUtils.measure(measurementLabel, async () => {
         const response = await apiClient.post<T>(endpoint, data, options)
-        
+
         // Invalidate related cache entries
         this.invalidateCache(endpoint)
-        
+
         return response
       })
     }
@@ -297,16 +297,16 @@ export const optimizedApiClient = {
       ...defaultRetryConfig,
       ...config.retry
     } : defaultRetryConfig
-    
+
     const requestFn = async (): Promise<ApiResponse<T>> => {
       const measurementLabel = config?.measurement || `PUT ${endpoint}`
-      
+
       return perfUtils.measure(measurementLabel, async () => {
         const response = await apiClient.put<T>(endpoint, data, options)
-        
+
         // Invalidate related cache entries
         this.invalidateCache(endpoint)
-        
+
         return response
       })
     }
@@ -325,16 +325,16 @@ export const optimizedApiClient = {
       ...defaultRetryConfig,
       ...config.retry
     } : defaultRetryConfig
-    
+
     const requestFn = async (): Promise<ApiResponse<T>> => {
       const measurementLabel = config?.measurement || `DELETE ${endpoint}`
-      
+
       return perfUtils.measure(measurementLabel, async () => {
         const response = await apiClient.delete<T>(endpoint, options)
-        
+
         // Invalidate related cache entries
         this.invalidateCache(endpoint)
-        
+
         return response
       })
     }
@@ -423,14 +423,14 @@ export function useOptimizedApiQuery<T>(
 
   const optionsString = JSON.stringify(options)
   const configString = JSON.stringify(config)
-  
+
   const fetchData = useCallback(async () => {
     if (config?.enabled === false) return
 
     try {
       setLoading(true)
       setError(null)
-      
+
       const response = await optimizedApiClient.get<T>(endpoint, options, config)
       setData(response.data)
     } catch (err) {

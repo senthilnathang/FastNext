@@ -374,14 +374,14 @@ export function ResourceManagementExamples() {
   return (
     <div className="container mx-auto p-6 space-y-8">
       <h1 className="text-3xl font-bold">Resource Management Examples</h1>
-      
+
       <Tabs defaultValue="users" className="w-full">
         <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="users">Users</TabsTrigger>
           <TabsTrigger value="projects">Projects</TabsTrigger>
           <TabsTrigger value="tasks">Tasks</TabsTrigger>
         </TabsList>
-        
+
         <TabsContent value="users" className="space-y-4">
           <Card>
             <CardHeader>
@@ -392,7 +392,7 @@ export function ResourceManagementExamples() {
             </CardContent>
           </Card>
         </TabsContent>
-        
+
         <TabsContent value="projects" className="space-y-4">
           <Card>
             <CardHeader>
@@ -406,7 +406,7 @@ export function ResourceManagementExamples() {
             </CardContent>
           </Card>
         </TabsContent>
-        
+
         <TabsContent value="tasks" className="space-y-4">
           <Card>
             <CardHeader>

@@ -12,9 +12,8 @@ export const performance = {
     const start = window.performance.now()
     const result = await fn()
     const end = window.performance.now()
-    
-    console.log(`⚡ ${name} took ${(end - start).toFixed(2)}ms`)
-    
+
+
     // Send to analytics if available
     if (typeof window !== 'undefined' && (window as any).gtag) {
       (window as any).gtag('event', 'timing_complete', {
@@ -22,7 +21,7 @@ export const performance = {
         value: Math.round(end - start),
       })
     }
-    
+
     return result
   },
 
@@ -45,7 +44,6 @@ export const performance = {
         const measures = window.performance.getEntriesByName(name, 'measure')
         if (measures.length > 0) {
           const duration = measures[measures.length - 1].duration
-          console.log(`⚡ ${name} took ${duration.toFixed(2)}ms`)
         }
       } catch {
         console.warn('Performance measurement failed')
@@ -96,29 +94,29 @@ export function useMemoWithLimit<T>(
   limit: number = 100
 ): T {
   const cache = useRef<Map<string, { value: T; timestamp: number }>>(new Map())
-  
+
   return useMemo(() => {
     const key = JSON.stringify(deps)
     const cached = cache.current.get(key)
-    
+
     if (cached) {
       // Update timestamp for LRU
       cached.timestamp = Date.now()
       return cached.value
     }
-    
+
     const value = factory()
-    
+
     // Cleanup old entries if limit exceeded
     if (cache.current.size >= limit) {
       const entries = Array.from(cache.current.entries())
       entries.sort(([, a], [, b]) => a.timestamp - b.timestamp)
-      
+
       // Remove oldest entries
       const toRemove = entries.slice(0, Math.floor(limit * 0.3))
       toRemove.forEach(([key]) => cache.current.delete(key))
     }
-    
+
     cache.current.set(key, { value, timestamp: Date.now() })
     return value
   }, [factory, limit, deps])
@@ -143,17 +141,17 @@ export function useWebWorker<T, R>(
 
     try {
       workerRef.current = new Worker(workerScript)
-      
+
       workerRef.current.onmessage = (event) => {
         setResult(event.data)
         setLoading(false)
       }
-      
+
       workerRef.current.onerror = () => {
         setError(new Error('Worker error'))
         setLoading(false)
       }
-      
+
       workerRef.current.postMessage(input)
     } catch (err) {
       console.warn('WebWorker error:', err)
@@ -256,13 +254,13 @@ export function useVirtualScroll<T>(
   containerHeight: number
 ) {
   const [scrollTop, setScrollTop] = useState(0)
-  
+
   const startIndex = Math.floor(scrollTop / itemHeight)
   const endIndex = Math.min(
     startIndex + Math.ceil(containerHeight / itemHeight) + 1,
     items.length
   )
-  
+
   const visibleItems = items.slice(startIndex, endIndex)
   const totalHeight = items.length * itemHeight
   const offsetY = startIndex * itemHeight
@@ -287,9 +285,8 @@ export const bundleAnalyzer = {
     if (process.env.NODE_ENV === 'development') {
       const componentString = component.toString()
       const size = new Blob([componentString]).size
-      
-      console.log(`📦 Component ${componentName} estimated size: ${(size / 1024).toFixed(2)}KB`)
-      
+
+
       // Warn if component is large
       if (size > 50 * 1024) { // 50KB
         console.warn(`⚠️  Component ${componentName} is large (${(size / 1024).toFixed(2)}KB). Consider code splitting.`)
@@ -329,7 +326,6 @@ export const memoryMonitor = {
   logUsage: (label?: string) => {
     const usage = memoryMonitor.getUsage()
     if (usage) {
-      console.log(`🧠 Memory ${label || ''}: ${usage.used}MB / ${usage.total}MB (limit: ${usage.limit}MB)`)
     }
   },
 
@@ -346,13 +342,12 @@ export const performanceBudget = {
   checkLoadTime: (threshold: number = 3000) => {
     if (typeof window !== 'undefined' && window.performance?.timing) {
       const loadTime = window.performance.timing.loadEventEnd - window.performance.timing.navigationStart
-      
+
       if (loadTime > threshold) {
         console.warn(`⚠️  Page load time (${loadTime}ms) exceeds budget (${threshold}ms)`)
       } else {
-        console.log(`✅ Page load time: ${loadTime}ms (within budget: ${threshold}ms)`)
       }
-      
+
       return loadTime
     }
     return null

@@ -10,14 +10,14 @@ interface RouteProtectionProps {
 
 /**
  * Global route protection wrapper
- * 
+ *
  * This component automatically applies authentication guards to all routes
  * except those explicitly marked as public. It should be used at the root
  * layout level to provide consistent authentication across the application.
- * 
+ *
  * Features:
  * - Automatic route protection
- * - Public route exemptions  
+ * - Public route exemptions
  * - Role and permission-based access
  * - Seamless integration with AuthGuard
  */

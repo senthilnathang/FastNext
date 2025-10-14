@@ -50,7 +50,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   // Helper function to make authenticated requests
   const makeAuthenticatedRequest = useCallback(async (url: string, options: RequestInit = {}) => {
     const token = localStorage.getItem('access_token');
-    
+
     // Create Headers object for type safety
     const headers = new Headers(options.headers);
     headers.set('Content-Type', 'application/json');
@@ -68,24 +68,24 @@ export function AuthProvider({ children }: AuthProviderProps) {
     if (response.status === 401) {
       const authStatus = response.headers.get('X-Auth-Status');
       const autoLogout = response.headers.get('X-Auto-Logout');
-      
+
       if (autoLogout === 'true') {
         // Clear tokens and redirect to login
         localStorage.removeItem('access_token');
         localStorage.removeItem('refresh_token');
         localStorage.removeItem('user');
         setUser(null);
-        
+
         // Store current path for redirect after login
         const currentPath = window.location.pathname;
         if (currentPath !== '/login' && currentPath !== '/register') {
           sessionStorage.setItem('redirectAfterLogin', currentPath);
         }
-        
+
         // Redirect with reason
         const reason = authStatus || 'session_expired';
         router.push(`/login?reason=${reason}`);
-        
+
         throw new Error('Session expired');
       }
     }
@@ -102,7 +102,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const login = async (username: string, password: string) => {
     setIsLoading(true);
     try {
-      console.log('Login request to:', getApiUrl(API_CONFIG.ENDPOINTS.AUTH.LOGIN));
       const response = await fetch(getApiUrl(API_CONFIG.ENDPOINTS.AUTH.LOGIN), {
         method: 'POST',
         headers: {
@@ -117,14 +116,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
       }
 
       const data = await response.json();
-      
+
       // Store tokens
       localStorage.setItem('access_token', data.access_token);
       localStorage.setItem('refresh_token', data.refresh_token);
-      
+
       // Get user information
       await getCurrentUser();
-      
+
     } catch (error) {
       setIsLoading(false);
       throw error;
@@ -136,7 +135,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     try {
       const response = await makeAuthenticatedRequest(API_CONFIG.ENDPOINTS.AUTH.ME);
       const userData = await response.json();
-      
+
       setUser(userData);
       localStorage.setItem('user', JSON.stringify(userData));
       setIsLoading(false);
@@ -163,7 +162,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     localStorage.removeItem('refresh_token');
     localStorage.removeItem('user');
     sessionStorage.removeItem('redirectAfterLogin');
-    
+
     setUser(null);
     router.push('/login');
   }, [makeAuthenticatedRequest, router]);
@@ -189,11 +188,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
       }
 
       const data = await response.json();
-      
+
       // Update tokens
       localStorage.setItem('access_token', data.access_token);
       localStorage.setItem('refresh_token', data.refresh_token);
-      
+
     } catch (error) {
       console.error('Token refresh failed:', error);
       logout();
@@ -215,7 +214,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     const initAuth = async () => {
       const token = localStorage.getItem('access_token');
       const userData = localStorage.getItem('user');
-      
+
       if (token && userData) {
         try {
           // Validate token by getting current user
@@ -250,15 +249,15 @@ export function AuthProvider({ children }: AuthProviderProps) {
       const expiryTime = payload.exp * 1000; // Convert to milliseconds
       const currentTime = Date.now();
       const timeUntilExpiry = expiryTime - currentTime;
-      
+
       // Refresh token 5 minutes before expiry
       const refreshTime = timeUntilExpiry - (5 * 60 * 1000);
-      
+
       if (refreshTime > 0) {
         const refreshTimer = setTimeout(() => {
           refreshToken().catch(console.error);
         }, refreshTime);
-        
+
         return () => clearTimeout(refreshTimer);
       }
     } catch (error) {

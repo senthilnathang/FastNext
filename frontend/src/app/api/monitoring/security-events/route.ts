@@ -4,7 +4,7 @@ import { logSecurityEvent, getSecurityEvents } from '@/lib/monitoring/security-m
 export async function POST(request: NextRequest) {
   try {
     const event = await request.json();
-    
+
     // Validate event structure
     if (!event.type || !event.details || !event.severity) {
       return NextResponse.json(
@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    
+
     const filter = {
       type: searchParams.get('type') as any,
       severity: searchParams.get('severity') as any,
@@ -51,7 +51,7 @@ export async function GET(request: NextRequest) {
     });
 
     const events = getSecurityEvents(Object.keys(filter).length > 0 ? filter : undefined);
-    
+
     return NextResponse.json({ events });
   } catch (error) {
     console.error('Failed to get security events:', error);

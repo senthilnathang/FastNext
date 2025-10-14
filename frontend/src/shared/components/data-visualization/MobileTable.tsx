@@ -47,7 +47,7 @@ function DefaultMobileCard<TData>({ item, columns, onAction }: MobileCardProps<T
   })
 
   const row = table.getRowModel().rows[0]
-  
+
   if (!row) return null
 
   return (
@@ -65,7 +65,7 @@ function DefaultMobileCard<TData>({ item, columns, onAction }: MobileCardProps<T
               </div>
             )}
           </div>
-          
+
           {/* Actions dropdown */}
           {actionsField && actionsField.id === 'actions' && (
             <DropdownMenu>
@@ -81,7 +81,7 @@ function DefaultMobileCard<TData>({ item, columns, onAction }: MobileCardProps<T
                 <DropdownMenuItem onClick={() => onAction?.('edit')}>
                   Edit
                 </DropdownMenuItem>
-                <DropdownMenuItem 
+                <DropdownMenuItem
                   onClick={() => onAction?.('delete')}
                   className="text-red-600 dark:text-red-400"
                 >
@@ -92,18 +92,18 @@ function DefaultMobileCard<TData>({ item, columns, onAction }: MobileCardProps<T
           )}
         </div>
       </CardHeader>
-      
+
       <CardContent className="pt-0">
         {/* Secondary fields */}
         <div className="space-y-2">
           {secondaryFields.map((column, colIndex) => {
             const cell = row.getVisibleCells()[colIndex + 1]
             if (!cell) return null
-            
-            const header = typeof column.header === 'string' 
-              ? column.header 
+
+            const header = typeof column.header === 'string'
+              ? column.header
               : column.id || `Field ${colIndex + 1}`
-            
+
             return (
               <div key={column.id || colIndex} className="flex justify-between items-center text-sm">
                 <span className="text-gray-500 dark:text-gray-400 font-medium">
@@ -121,13 +121,13 @@ function DefaultMobileCard<TData>({ item, columns, onAction }: MobileCardProps<T
   )
 }
 
-function DesktopTable<TData, TValue>({ 
-  columns, 
-  data, 
-  searchKey, 
-  enableSearch, 
+function DesktopTable<TData, TValue>({
+  columns,
+  data,
+  searchKey,
+  enableSearch,
   searchValue,
-  onSearchChange 
+  onSearchChange
 }: {
   columns: ColumnDef<TData, TValue>[]
   data: TData[]
@@ -240,7 +240,7 @@ export function MobileTable<TData, TValue>({
   // Filter data based on search
   const filteredData = React.useMemo(() => {
     if (!searchValue || !searchKey) return data
-    
+
     return data.filter((item: any) => {
       const searchableValue = item[searchKey]
       if (typeof searchableValue === 'string') {
@@ -258,7 +258,7 @@ export function MobileTable<TData, TValue>({
 
   const desktopBreakpointClass = {
     sm: 'hidden sm:block',
-    md: 'hidden md:block', 
+    md: 'hidden md:block',
     lg: 'hidden lg:block'
   }[mobileBreakpoint]
 
@@ -278,7 +278,7 @@ export function MobileTable<TData, TValue>({
                 className="pl-10 h-12 text-base"
               />
             </div>
-            
+
             {searchValue && (
               <div className="flex items-center justify-between text-sm text-gray-600 dark:text-gray-400">
                 <span>{filteredData.length} results found</span>

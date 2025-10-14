@@ -29,11 +29,11 @@ export interface GenericKanbanViewProps<T = any> {
   columns: KanbanColumn[]
   loading?: boolean
   error?: string | null
-  
+
   // Permissions
   resourceName: string
   projectId?: number
-  
+
   // CRUD operations
   onCreateClick?: (columnId: string) => void
   onEditClick?: (item: KanbanItem<T>) => void
@@ -41,14 +41,14 @@ export interface GenericKanbanViewProps<T = any> {
   onViewClick?: (item: KanbanItem<T>) => void
   onRefresh?: () => void
   onMoveItem?: (itemId: number, newStatus: string) => void
-  
+
   // UI customization
   title?: string
   subtitle?: string
   createButtonText?: string
   emptyStateTitle?: string
   emptyStateDescription?: string
-  
+
   // Card rendering
   renderCard?: (item: KanbanItem<T>) => React.ReactNode
   cardFields?: Array<{
@@ -56,7 +56,7 @@ export interface GenericKanbanViewProps<T = any> {
     label: string
     render?: (value: unknown, item: KanbanItem<T>) => React.ReactNode
   }>
-  
+
   // Custom actions
   customActions?: Array<{
     label: string
@@ -120,7 +120,7 @@ export function GenericKanbanView<T>({
   const handleDrop = (e: React.DragEvent, columnId: string) => {
     e.preventDefault()
     setDragOverColumn(null)
-    
+
     if (draggedItem && draggedItem.status !== columnId) {
       onMoveItem?.(draggedItem.id, columnId)
     }
@@ -129,7 +129,7 @@ export function GenericKanbanView<T>({
 
   const renderDefaultCard = (item: KanbanItem<T>) => {
     return (
-      <Card 
+      <Card
         className="cursor-move hover:shadow-md transition-shadow bg-white"
         draggable={permissions.checkUpdate(resourceName, item.id, projectId)}
         onDragStart={(e) => handleDragStart(e, item)}
@@ -159,11 +159,11 @@ export function GenericKanbanView<T>({
                   </DropdownMenuItem>
                 )}
                 {customActions.map((action, actionIndex) => {
-                  const hasPermission = !action.requiresPermission || 
+                  const hasPermission = !action.requiresPermission ||
                     permissions.hasPermission({ action: action.requiresPermission, resource: resourceName })
-                  
+
                   if (!hasPermission) return null
-                  
+
                   return (
                     <DropdownMenuItem
                       key={actionIndex}
@@ -175,7 +175,7 @@ export function GenericKanbanView<T>({
                   )
                 })}
                 {permissions.checkDelete(resourceName, item.id, projectId) && onDeleteClick && (
-                  <DropdownMenuItem 
+                  <DropdownMenuItem
                     onClick={() => onDeleteClick(item)}
                     className="text-destructive"
                   >
@@ -192,7 +192,7 @@ export function GenericKanbanView<T>({
             </p>
           )}
         </CardHeader>
-        
+
         {cardFields.length > 0 && (
           <CardContent className="pt-0">
             <div className="space-y-1">
@@ -242,7 +242,7 @@ export function GenericKanbanView<T>({
           {title && <h2 className="text-2xl font-bold">{title}</h2>}
           {subtitle && <p className="text-muted-foreground">{subtitle}</p>}
         </div>
-        
+
         <div className="flex items-center gap-2">
           {onRefresh && (
             <Button onClick={onRefresh} variant="outline" size="sm">
@@ -264,7 +264,7 @@ export function GenericKanbanView<T>({
           {columns.map((column) => {
             const columnItems = getColumnItems(column.id)
             const isOverLimit = column.limit && columnItems.length >= column.limit
-            
+
             return (
               <div
                 key={column.id}
@@ -283,10 +283,10 @@ export function GenericKanbanView<T>({
                       {column.limit && `/${column.limit}`}
                     </Badge>
                   </div>
-                  
+
                   {canCreate && onCreateClick && !isOverLimit && (
-                    <Button 
-                      size="sm" 
+                    <Button
+                      size="sm"
                       variant="ghost"
                       onClick={() => onCreateClick(column.id)}
                     >
@@ -300,8 +300,8 @@ export function GenericKanbanView<T>({
                     <div className="text-center py-8">
                       <p className="text-sm text-muted-foreground">{emptyStateDescription}</p>
                       {canCreate && onCreateClick && (
-                        <Button 
-                          size="sm" 
+                        <Button
+                          size="sm"
                           variant="outline"
                           className="mt-2"
                           onClick={() => onCreateClick(column.id)}
@@ -319,7 +319,7 @@ export function GenericKanbanView<T>({
                     ))
                   )}
                 </div>
-                
+
                 {isOverLimit && (
                   <div className="mt-2 p-2 bg-yellow-50 border border-yellow-200 rounded text-xs text-yellow-800">
                     Column limit reached ({column.limit})

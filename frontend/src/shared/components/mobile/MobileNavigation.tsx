@@ -3,12 +3,12 @@
 import { useState, useEffect } from 'react'
 import { usePathname } from 'next/navigation'
 import Link from 'next/link'
-import { 
-  Home, 
-  Users, 
-  Settings, 
-  Menu, 
-  X, 
+import {
+  Home,
+  Users,
+  Settings,
+  Menu,
+  X,
   Database,
   Workflow,
   BarChart3,
@@ -91,8 +91,8 @@ export function MobileNavigation({ className, notificationCount = 0 }: MobileNav
           <Button variant="ghost" size="sm" className="relative">
             <Menu className="h-5 w-5" />
             {notificationCount > 0 && (
-              <Badge 
-                variant="destructive" 
+              <Badge
+                variant="destructive"
                 className="absolute -top-2 -right-2 h-5 w-5 rounded-full p-0 text-xs"
               >
                 {notificationCount > 99 ? '99+' : notificationCount}
@@ -100,7 +100,7 @@ export function MobileNavigation({ className, notificationCount = 0 }: MobileNav
             )}
           </Button>
         </SheetTrigger>
-        
+
         <SheetContent side="left" className="w-80 p-0">
           <div className="flex flex-col h-full">
             {/* Header */}
@@ -110,9 +110,9 @@ export function MobileNavigation({ className, notificationCount = 0 }: MobileNav
                   <h2 className="text-lg font-semibold">FastNext</h2>
                   <p className="text-sm text-muted-foreground">Admin Dashboard</p>
                 </div>
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
+                <Button
+                  variant="ghost"
+                  size="sm"
                   onClick={() => setIsOpen(false)}
                   className="h-8 w-8 p-0"
                 >
@@ -139,7 +139,7 @@ export function MobileNavigation({ className, notificationCount = 0 }: MobileNav
                 {navigationItems.map((item) => {
                   const Icon = item.icon
                   const isActive = pathname === item.href || pathname.startsWith(item.href + '/')
-                  
+
                   return (
                     <li key={item.href}>
                       <Link
@@ -190,7 +190,7 @@ export function MobileNavigation({ className, notificationCount = 0 }: MobileNav
                   </Badge>
                 )}
               </Link>
-              
+
               <Link
                 href="/help"
                 className="flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
@@ -238,7 +238,7 @@ export function MobileBottomNavigation({ className }: MobileBottomNavigationProp
         {bottomTabs.map((tab) => {
           const Icon = tab.icon
           const isActive = pathname === tab.href || pathname.startsWith(tab.href + '/')
-          
+
           return (
             <Link
               key={tab.href}
@@ -253,8 +253,8 @@ export function MobileBottomNavigation({ className }: MobileBottomNavigationProp
               <div className="relative">
                 <Icon className="h-5 w-5" />
                 {tab.badge && tab.badge > 0 && (
-                  <Badge 
-                    variant="destructive" 
+                  <Badge
+                    variant="destructive"
                     className="absolute -top-2 -right-2 h-4 w-4 rounded-full p-0 text-xs flex items-center justify-center"
                   >
                     {tab.badge > 9 ? '9+' : tab.badge}

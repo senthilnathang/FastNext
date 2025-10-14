@@ -206,7 +206,7 @@ describe('WorkflowBuilder', () => {
 
   test('renders workflow builder with basic elements', () => {
     renderWorkflowBuilder();
-    
+
     expect(screen.getByText('Workflow Builder')).toBeInTheDocument();
     expect(screen.getByText('Template #1')).toBeInTheDocument();
     expect(screen.getByTestId('reactflow-canvas')).toBeInTheDocument();
@@ -217,7 +217,7 @@ describe('WorkflowBuilder', () => {
 
   test('displays correct toolbar buttons when not read-only', () => {
     renderWorkflowBuilder({ readOnly: false });
-    
+
     expect(screen.getByText('Add Node')).toBeInTheDocument();
     expect(screen.getByText('Auto Layout')).toBeInTheDocument();
     expect(screen.getByText('Fit View')).toBeInTheDocument();
@@ -226,7 +226,7 @@ describe('WorkflowBuilder', () => {
 
   test('hides edit buttons in read-only mode', () => {
     renderWorkflowBuilder({ readOnly: true });
-    
+
     expect(screen.queryByText('Add Node')).not.toBeInTheDocument();
     expect(screen.queryByText('Auto Layout')).not.toBeInTheDocument();
     expect(screen.getByText('Fit View')).toBeInTheDocument(); // Should still be visible
@@ -251,7 +251,7 @@ describe('WorkflowBuilder', () => {
     ];
 
     renderWorkflowBuilder({ initialNodes, initialEdges });
-    
+
     expect(screen.getByText('Workflow Info')).toBeInTheDocument();
     expect(screen.getByText('States:')).toBeInTheDocument();
     expect(screen.getByText('Transitions:')).toBeInTheDocument();
@@ -264,36 +264,36 @@ describe('WorkflowBuilder', () => {
   test('calls onSave when save button is clicked', () => {
     const mockOnSave = jest.fn();
     renderWorkflowBuilder({ onSave: mockOnSave });
-    
+
     const saveButton = screen.getByText('Save');
     fireEvent.click(saveButton);
-    
+
     expect(mockOnSave).toHaveBeenCalledTimes(1);
   });
 
   test('displays status bar with correct information', () => {
     renderWorkflowBuilder({ readOnly: true });
-    
+
     expect(screen.getByText(/View Mode/)).toBeInTheDocument();
     expect(screen.getByText(/Snap to Grid: On/)).toBeInTheDocument();
   });
 
   test('displays edit mode in status bar when not read-only', () => {
     renderWorkflowBuilder({ readOnly: false });
-    
+
     expect(screen.getByText(/Edit Mode/)).toBeInTheDocument();
   });
 
   test('handles missing template ID', () => {
     renderWorkflowBuilder({ templateId: undefined });
-    
+
     expect(screen.getByText('Workflow Builder')).toBeInTheDocument();
     expect(screen.queryByText(/Template #/)).not.toBeInTheDocument();
   });
 
   test('disables save button when no onSave callback provided', () => {
     renderWorkflowBuilder({ onSave: undefined });
-    
+
     const saveButton = screen.getByText('Save');
     expect(saveButton).toBeDisabled();
   });
@@ -324,23 +324,23 @@ describe('WorkflowBuilder', () => {
     ];
 
     renderWorkflowBuilder({ initialNodes, initialEdges });
-    
+
     // Check nodes count
     expect(screen.getByTestId('nodes-count')).toHaveTextContent('2');
-    // Check edges count  
+    // Check edges count
     expect(screen.getByTestId('edges-count')).toHaveTextContent('1');
   });
 
   test('workflow info shows correct type ID', () => {
     renderWorkflowBuilder({ workflowTypeId: 5 });
-    
+
     expect(screen.getByText('Type:')).toBeInTheDocument();
     expect(screen.getByText('#5')).toBeInTheDocument();
   });
 
   test('workflow info shows N/A when no type ID', () => {
     renderWorkflowBuilder({ workflowTypeId: undefined });
-    
+
     expect(screen.getByText('Type:')).toBeInTheDocument();
     expect(screen.getByText('#N/A')).toBeInTheDocument();
   });
@@ -351,10 +351,10 @@ describe('WorkflowBuilder', () => {
 describe('WorkflowBuilder Accessibility', () => {
   test('should have proper ARIA labels and roles', () => {
     renderWorkflowBuilder();
-    
+
     // Check for important accessibility elements
     expect(screen.getByText('Workflow Builder')).toBeInTheDocument();
-    
+
     const saveButton = screen.getByText('Save');
     expect(saveButton).toBeInTheDocument();
     expect(saveButton.tagName).toBe('BUTTON');
@@ -362,9 +362,9 @@ describe('WorkflowBuilder Accessibility', () => {
 
   test('should handle keyboard interactions', () => {
     renderWorkflowBuilder();
-    
+
     const saveButton = screen.getByText('Save');
-    
+
     // Test Enter key
     fireEvent.keyDown(saveButton, { key: 'Enter', code: 'Enter' });
     // The button should still be functional

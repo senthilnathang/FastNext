@@ -54,7 +54,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
     <div className="min-h-screen bg-background">
       {/* Mobile sidebar backdrop */}
       {sidebarOpen && (
-        <div 
+        <div
           className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 md:hidden transition-opacity duration-300"
           onClick={() => setSidebarOpen(false)}
         />
@@ -65,7 +65,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
         'fixed inset-y-0 left-0 z-50 transform transition-all duration-300 ease-in-out md:translate-x-0',
         sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
       )}>
-        <Sidebar 
+        <Sidebar
           showCloseButton={true}
           onClose={() => setSidebarOpen(false)}
           isCollapsed={sidebarCollapsed}
@@ -85,7 +85,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
               >
                 <Menu className="h-4 w-4" />
               </button>
-              
+
               {/* Desktop sidebar toggle */}
               <div className="hidden md:block">
                 <SidebarToggle
@@ -95,14 +95,14 @@ export default function AppLayout({ children }: AppLayoutProps) {
                   size="sm"
                 />
               </div>
-              
+
               <div>
                 <h1 className="text-lg font-semibold text-card-foreground">
                   {getPageTitle(pathname)}
                 </h1>
               </div>
             </div>
-            
+
             <div className="flex items-center space-x-2">
               <Button variant="ghost" size="sm" className="relative p-1.5">
                 <Bell className="h-4 w-4" />

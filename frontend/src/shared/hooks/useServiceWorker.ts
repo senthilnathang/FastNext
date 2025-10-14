@@ -87,7 +87,6 @@ export function useServiceWorker(): ServiceWorkerState & ServiceWorkerActions {
   // Register service worker
   const register = useCallback(async (): Promise<boolean> => {
     if (!state.isSupported) {
-      console.log('Service workers not supported')
       return false
     }
 
@@ -99,26 +98,25 @@ export function useServiceWorker(): ServiceWorkerState & ServiceWorkerActions {
         updateViaCache: 'none'
       })
 
-      console.log('Service worker registered:', registration)
 
       // Handle installation states
       const handleStateChange = () => {
         if (registration.installing) {
           setState(prev => ({ ...prev, isInstalling: true, isWaiting: false }))
         } else if (registration.waiting) {
-          setState(prev => ({ 
-            ...prev, 
-            isInstalling: false, 
+          setState(prev => ({
+            ...prev,
+            isInstalling: false,
             isWaiting: true,
-            isUpdateAvailable: true 
+            isUpdateAvailable: true
           }))
         } else if (registration.active) {
-          setState(prev => ({ 
-            ...prev, 
-            isInstalling: false, 
+          setState(prev => ({
+            ...prev,
+            isInstalling: false,
             isWaiting: false,
             isRegistered: true,
-            registration 
+            registration
           }))
         }
       }
@@ -131,17 +129,16 @@ export function useServiceWorker(): ServiceWorkerState & ServiceWorkerActions {
         registration.waiting.addEventListener('statechange', handleStateChange)
       }
       if (registration.active) {
-        setState(prev => ({ 
-          ...prev, 
-          isRegistered: true, 
+        setState(prev => ({
+          ...prev,
+          isRegistered: true,
           isInstalling: false,
-          registration 
+          registration
         }))
       }
 
       // Listen for updates
       registration.addEventListener('updatefound', () => {
-        console.log('Service worker update found')
         handleStateChange()
       })
 
@@ -162,10 +159,10 @@ export function useServiceWorker(): ServiceWorkerState & ServiceWorkerActions {
     try {
       const result = await state.registration.unregister()
       if (result) {
-        setState(prev => ({ 
-          ...prev, 
-          isRegistered: false, 
-          registration: null 
+        setState(prev => ({
+          ...prev,
+          isRegistered: false,
+          registration: null
         }))
       }
       return result
@@ -183,7 +180,6 @@ export function useServiceWorker(): ServiceWorkerState & ServiceWorkerActions {
 
     try {
       const registration = await state.registration.update()
-      console.log('Service worker update triggered:', registration)
       return true
     } catch (error) {
       console.error('Service worker update failed:', error)
@@ -196,7 +192,7 @@ export function useServiceWorker(): ServiceWorkerState & ServiceWorkerActions {
     if (state.registration?.waiting) {
       state.registration.waiting.postMessage({ type: 'SKIP_WAITING' })
       setState(prev => ({ ...prev, isWaiting: false, isUpdateAvailable: false }))
-      
+
       // Reload page after activation
       navigator.serviceWorker.addEventListener('controllerchange', () => {
         window.location.reload()
@@ -212,16 +208,16 @@ export function useServiceWorker(): ServiceWorkerState & ServiceWorkerActions {
 
     return new Promise((resolve) => {
       const channel = new MessageChannel()
-      
+
       channel.port1.onmessage = (event) => {
         resolve(event.data)
       }
-      
+
       navigator.serviceWorker.controller?.postMessage(
         { type: 'GET_CACHE_STATUS' },
         [channel.port2]
       )
-      
+
       // Timeout after 5 seconds
       setTimeout(() => resolve(null), 5000)
     })
@@ -235,16 +231,16 @@ export function useServiceWorker(): ServiceWorkerState & ServiceWorkerActions {
 
     return new Promise((resolve) => {
       const channel = new MessageChannel()
-      
+
       channel.port1.onmessage = (event) => {
         resolve(event.data.success || false)
       }
-      
+
       navigator.serviceWorker.controller?.postMessage(
         { type: 'CLEAR_CACHE' },
         [channel.port2]
       )
-      
+
       // Timeout after 10 seconds
       setTimeout(() => resolve(false), 10000)
     })
@@ -330,8 +326,8 @@ export function usePushNotifications() {
 
   useEffect(() => {
     setIsSupported(
-      'serviceWorker' in navigator && 
-      'PushManager' in window && 
+      'serviceWorker' in navigator &&
+      'PushManager' in window &&
       'Notification' in window
     )
   }, [])

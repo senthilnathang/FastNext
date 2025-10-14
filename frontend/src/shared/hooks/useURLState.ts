@@ -1,9 +1,9 @@
 'use client'
 
-import { 
-  useQueryState, 
-  parseAsString, 
-  parseAsInteger, 
+import {
+  useQueryState,
+  parseAsString,
+  parseAsInteger,
   parseAsBoolean,
   parseAsArrayOf,
   parseAsStringLiteral,
@@ -23,7 +23,7 @@ export function useSearchState(defaultValue = '') {
 export function usePaginationState(defaultPage = 1, defaultLimit = 10) {
   const [page, setPage] = useQueryState('page', parseAsInteger.withDefault(defaultPage))
   const [limit, setLimit] = useQueryState('limit', parseAsInteger.withDefault(defaultLimit))
-  
+
   return {
     page,
     setPage,
@@ -39,10 +39,10 @@ export function usePaginationState(defaultPage = 1, defaultLimit = 10) {
 export function useSortState(defaultSortBy = '', defaultSortOrder: 'asc' | 'desc' = 'asc') {
   const [sortBy, setSortBy] = useQueryState('sortBy', parseAsString.withDefault(defaultSortBy))
   const [sortOrder, setSortOrder] = useQueryState(
-    'sortOrder', 
+    'sortOrder',
     parseAsStringLiteral(['asc', 'desc'] as const).withDefault(defaultSortOrder)
   )
-  
+
   return {
     sortBy,
     setSortBy,
@@ -101,7 +101,7 @@ export function useJSONState<T extends Record<string, any>>(key: string, default
 export function useDateRangeState() {
   const [startDate, setStartDate] = useQueryState('startDate', parseAsString)
   const [endDate, setEndDate] = useQueryState('endDate', parseAsString)
-  
+
   return {
     startDate,
     setStartDate,
@@ -132,7 +132,7 @@ export function useTabState<T extends readonly string[]>(
  */
 export function useModalState(defaultOpen = false) {
   const [isOpen, setIsOpen] = useQueryState('modal', parseAsBoolean.withDefault(defaultOpen))
-  
+
   return {
     isOpen,
     setIsOpen,

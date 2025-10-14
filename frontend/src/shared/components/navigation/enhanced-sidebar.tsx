@@ -238,7 +238,7 @@ function EnhancedSidebarProvider({
   const [width, setWidth] = React.useState(defaultWidth);
   const [openMobile, setOpenMobile] = React.useState(false);
   const [isDraggingRail, setIsDraggingRail] = React.useState(false);
-  
+
   // This is the internal state of the sidebar.
   const [_open, _setOpen] = React.useState(defaultOpen);
   const open = openProp ?? _open;
@@ -466,7 +466,7 @@ function EnhancedSidebarTrigger({
   ...props
 }: SidebarTriggerProps): React.JSX.Element {
   const { isMobile, open, toggleSidebar } = useEnhancedSidebar();
-  
+
   return (
     <Button
       type="button"
@@ -715,7 +715,7 @@ function EnhancedSidebarGroupLabel({
   ...props
 }: SidebarGroupLabelProps): React.JSX.Element {
   const Comp = asChild ? Slot : 'div';
-  
+
   return (
     <Comp
       data-slot="sidebar-group-label"
@@ -741,7 +741,7 @@ function EnhancedSidebarGroupAction({
   ...props
 }: SidebarGroupActionProps): React.JSX.Element {
   const Comp = asChild ? Slot : 'button';
-  
+
   return (
     <Comp
       data-slot="sidebar-group-action"

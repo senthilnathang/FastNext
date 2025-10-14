@@ -72,7 +72,7 @@ export default function RLSProtectedComponent({
           <div className="flex items-center">
             <Lock className="h-5 w-5 text-gray-400 mr-2" />
             <p className="text-sm text-gray-600">
-              {customDeniedMessage || 
+              {customDeniedMessage ||
                 `You don't have permission to ${action.toLowerCase()} ${entityType.toLowerCase()}.`
               }
             </p>
@@ -389,7 +389,7 @@ export function RLSForm({
       event.preventDefault();
       return;
     }
-    
+
     if (onSubmit) {
       onSubmit(event);
     }

@@ -17,7 +17,7 @@ export function useWorkflowTypes(params: {
 
 export function useCreateWorkflowType() {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: (data: WorkflowTypeCreate) => workflowAPI.createWorkflowType(data),
     onSuccess: () => {
@@ -28,9 +28,9 @@ export function useCreateWorkflowType() {
 
 export function useUpdateWorkflowType() {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
-    mutationFn: ({ id, data }: { id: number; data: WorkflowTypeUpdate }) => 
+    mutationFn: ({ id, data }: { id: number; data: WorkflowTypeUpdate }) =>
       workflowAPI.updateWorkflowType(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['workflow-types'] });
@@ -40,7 +40,7 @@ export function useUpdateWorkflowType() {
 
 export function useDeleteWorkflowType() {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: (id: number) => workflowAPI.deleteWorkflowType(id),
     onSuccess: () => {
@@ -63,7 +63,7 @@ export function useWorkflowStates(params: {
 
 export function useCreateWorkflowState() {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: (data: WorkflowStateCreate) => workflowAPI.createWorkflowState(data),
     onSuccess: () => {
@@ -95,7 +95,7 @@ export function useWorkflowTemplate(id: number) {
 
 export function useCreateWorkflowTemplate() {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: (data: WorkflowTemplateCreate) => workflowAPI.createWorkflowTemplate(data),
     onSuccess: () => {
@@ -106,9 +106,9 @@ export function useCreateWorkflowTemplate() {
 
 export function useUpdateWorkflowTemplate() {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
-    mutationFn: ({ id, data }: { id: number; data: WorkflowTemplateUpdate }) => 
+    mutationFn: ({ id, data }: { id: number; data: WorkflowTemplateUpdate }) =>
       workflowAPI.updateWorkflowTemplate(id, data),
     onSuccess: (_, { id }) => {
       queryClient.invalidateQueries({ queryKey: ['workflow-templates'] });
@@ -119,7 +119,7 @@ export function useUpdateWorkflowTemplate() {
 
 export function useDeleteWorkflowTemplate() {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: (id: number) => workflowAPI.deleteWorkflowTemplate(id),
     onSuccess: () => {
@@ -152,7 +152,7 @@ export function useWorkflowInstance(id: number) {
 
 export function useCreateWorkflowInstance() {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: (data: any) => workflowAPI.createWorkflowInstance(data),
     onSuccess: () => {
@@ -163,9 +163,9 @@ export function useCreateWorkflowInstance() {
 
 export function useUpdateWorkflowInstance() {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
-    mutationFn: ({ id, data }: { id: number; data: any }) => 
+    mutationFn: ({ id, data }: { id: number; data: any }) =>
       workflowAPI.updateWorkflowInstance(id, data),
     onSuccess: (_, { id }) => {
       queryClient.invalidateQueries({ queryKey: ['workflow-instances'] });
@@ -176,9 +176,9 @@ export function useUpdateWorkflowInstance() {
 
 export function useExecuteWorkflowAction() {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
-    mutationFn: ({ instanceId, action }: { instanceId: number; action: any }) => 
+    mutationFn: ({ instanceId, action }: { instanceId: number; action: any }) =>
       workflowAPI.executeWorkflowAction(instanceId, action),
     onSuccess: (_, { instanceId }) => {
       queryClient.invalidateQueries({ queryKey: ['workflow-instances'] });

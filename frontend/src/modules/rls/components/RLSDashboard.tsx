@@ -71,7 +71,7 @@ export default function RLSDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedPeriod, setSelectedPeriod] = useState(7);
-  
+
   // Access check testing
   const [testRequest, setTestRequest] = useState<AccessCheckRequest>({
     entity_type: 'PROJECT',
@@ -115,7 +115,7 @@ export default function RLSDashboard() {
           }
         ]
       };
-      
+
       setStatistics(mockStats);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load statistics');
@@ -178,10 +178,10 @@ export default function RLSDashboard() {
   const testAccess = async () => {
     setTestLoading(true);
     setTestResult(null);
-    
+
     try {
       const token = localStorage.getItem('access_token');
-      
+
       const response = await fetch(getApiUrl('/api/v1/rls/check-access'), {
         method: 'POST',
         headers: {
@@ -468,8 +468,8 @@ export default function RLSDashboard() {
 
             {testResult && (
               <div className={`p-4 rounded-lg border ${
-                testResult.access_granted 
-                  ? 'bg-green-50 border-green-200' 
+                testResult.access_granted
+                  ? 'bg-green-50 border-green-200'
                   : 'bg-red-50 border-red-200'
               }`}>
                 <div className="flex items-center space-x-2 mb-2">
@@ -484,13 +484,13 @@ export default function RLSDashboard() {
                     {testResult.access_granted ? 'Access Granted' : 'Access Denied'}
                   </span>
                 </div>
-                
+
                 {testResult.denial_reason && (
                   <p className="text-sm text-red-600">
                     Reason: {testResult.denial_reason}
                   </p>
                 )}
-                
+
                 <p className="text-xs text-gray-500 mt-2">
                   Tested: {testResult.entity_type} - {testResult.action}
                   {testResult.entity_id && ` (ID: ${testResult.entity_id})`}
@@ -544,12 +544,12 @@ export default function RLSDashboard() {
             <Settings className="h-4 w-4" />
             <span>Manage Policies</span>
           </Button>
-          
+
           <Button variant="outline" className="flex items-center space-x-2">
             <BarChart3 className="h-4 w-4" />
             <span>View Audit Logs</span>
           </Button>
-          
+
           <Button variant="outline" className="flex items-center space-x-2">
             <Users className="h-4 w-4" />
             <span>User Permissions</span>

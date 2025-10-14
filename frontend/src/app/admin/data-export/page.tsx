@@ -10,9 +10,9 @@ import { Input } from '@/shared/components/ui/input';
 import { Label } from '@/shared/components/ui/label';
 import { Button } from '@/shared/components/ui/button';
 import { Checkbox } from '@/shared/components/ui/checkbox';
-import { 
-  Database, 
-  AlertCircle, 
+import {
+  Database,
+  AlertCircle,
   Info,
   Columns,
   Settings,
@@ -76,7 +76,7 @@ export default function DataExportPage() {
   const [tableSchema, setTableSchema] = useState<TableInfo | null>(null);
   const [tablePermissions, setTablePermissions] = useState<TablePermissions | null>(null);
   const [tableData, setTableData] = useState<TableData | null>(null);
-  
+
   // Export wizard data
   const [exportData, setExportData] = useState<ExportData>({
     selectedTable: '',
@@ -417,7 +417,7 @@ export default function DataExportPage() {
 
   const exportColumns = useMemo(() => {
     if (!tableSchema) return [];
-    
+
     const allColumns = tableSchema.columns.map(col => ({
       key: col.name,
       label: col.name,
@@ -428,7 +428,7 @@ export default function DataExportPage() {
 
     // Filter by allowed columns if permissions specify them
     if (tablePermissions?.export_permission.allowed_columns?.length) {
-      return allColumns.filter(col => 
+      return allColumns.filter(col =>
         tablePermissions.export_permission.allowed_columns.includes(col.key)
       );
     }
@@ -438,18 +438,18 @@ export default function DataExportPage() {
 
   const filteredData = useMemo(() => {
     if (!tableData || !tableData.rows) return [];
-    
+
     let filtered = tableData.rows;
-    
+
     // Apply search filter
     if (exportData.searchTerm) {
-      filtered = filtered.filter(row => 
-        Object.values(row).some(value => 
+      filtered = filtered.filter(row =>
+        Object.values(row).some(value =>
           String(value).toLowerCase().includes(exportData.searchTerm.toLowerCase())
         )
       );
     }
-    
+
     // Apply row limit
     return filtered.slice(0, exportData.rowLimit);
   }, [tableData, exportData.searchTerm, exportData.rowLimit]);
@@ -457,7 +457,7 @@ export default function DataExportPage() {
   const handleExport = async () => {
     try {
       setIsLoading(true);
-      
+
       const exportRequest = {
         table_name: exportData.selectedTable,
         export_format: exportData.exportFormat,
@@ -502,7 +502,7 @@ export default function DataExportPage() {
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
         const errorMessage = errorData.detail || response.statusText || 'Export failed';
-        
+
         if (response.status === 401) {
           throw new Error('Authentication failed - please log in again');
         } else if (response.status === 403) {
@@ -515,10 +515,10 @@ export default function DataExportPage() {
       }
 
       const result = await response.json();
-      
+
       // Start polling for export completion
       await pollExportStatus(result.job_id);
-      
+
     } catch (error) {
       setError(`Export failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
@@ -570,18 +570,16 @@ export default function DataExportPage() {
       link.href = url;
       link.download = filename;
       link.target = '_blank'; // Open in new tab
-      
+
       // Append to body, click, and remove
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      
-      // Clean up the blob URL
-      window.URL.revokeObjectURL(url);
-      
-      console.log(`Downloaded file: ${filename}`);
-      
-    } catch (error) {
+
+       // Clean up the blob URL
+       window.URL.revokeObjectURL(url);
+
+     } catch (error) {
       console.error('Download failed:', error);
       setError(`Download failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
@@ -590,7 +588,7 @@ export default function DataExportPage() {
   const pollExportStatus = async (jobId: string) => {
     const maxAttempts = 30;
     let attempts = 0;
-    
+
     const poll = async () => {
       try {
         const response = await fetch(`/api/v1/data/export/${jobId}/status`, {
@@ -598,11 +596,11 @@ export default function DataExportPage() {
             'Authorization': `Bearer ${localStorage.getItem('access_token')}`
           }
         });
-        
+
         if (!response.ok) throw new Error('Failed to check export status');
-        
+
         const job = await response.json();
-        
+
         if (job.status === 'completed') {
           // Download the file in new tab with proper authentication
           await downloadExportFile(jobId);
@@ -620,7 +618,7 @@ export default function DataExportPage() {
         setError(`Export monitoring failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
       }
     };
-    
+
     poll();
   };
 
@@ -677,8 +675,8 @@ export default function DataExportPage() {
           <Skeleton className="h-10 w-full" />
         ) : (
           <div className="space-y-4">
-            <Select 
-              value={exportData.selectedTable} 
+            <Select
+              value={exportData.selectedTable}
               onValueChange={(value) => setExportData(prev => ({ ...prev, selectedTable: value }))}
             >
               <SelectTrigger>
@@ -744,9 +742,9 @@ export default function DataExportPage() {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => setExportData(prev => ({ 
-                  ...prev, 
-                  selectedColumns: exportColumns.map(col => col.key) 
+                onClick={() => setExportData(prev => ({
+                  ...prev,
+                  selectedColumns: exportColumns.map(col => col.key)
                 }))}
               >
                 Select All
@@ -763,7 +761,7 @@ export default function DataExportPage() {
               {exportData.selectedColumns.length} of {exportColumns.length} columns selected
             </div>
           </div>
-          
+
           <div className="grid grid-cols-2 gap-4 max-h-64 overflow-y-auto">
             {exportColumns.map((column) => (
               <div key={column.key} className="flex items-center space-x-2">
@@ -807,8 +805,8 @@ export default function DataExportPage() {
         <CardContent className="space-y-4">
           <div className="space-y-2">
             <Label>File Format</Label>
-            <Select 
-              value={exportData.exportFormat} 
+            <Select
+              value={exportData.exportFormat}
               onValueChange={(value) => setExportData(prev => ({ ...prev, exportFormat: value }))}
             >
               <SelectTrigger>
@@ -827,12 +825,12 @@ export default function DataExportPage() {
             <Label>Export Options</Label>
             <div className="grid grid-cols-2 gap-4">
               <div className="flex items-center space-x-2">
-                <Checkbox 
+                <Checkbox
                   id="include-headers"
                   checked={exportData.options.includeHeaders !== false}
-                  onCheckedChange={(checked) => 
-                    setExportData(prev => ({ 
-                      ...prev, 
+                  onCheckedChange={(checked) =>
+                    setExportData(prev => ({
+                      ...prev,
                       options: { ...prev.options, includeHeaders: checked }
                     }))
                   }
@@ -840,12 +838,12 @@ export default function DataExportPage() {
                 <Label htmlFor="include-headers">Include column headers</Label>
               </div>
               <div className="flex items-center space-x-2">
-                <Checkbox 
+                <Checkbox
                   id="compress-file"
                   checked={exportData.options.compress || false}
-                  onCheckedChange={(checked) => 
-                    setExportData(prev => ({ 
-                      ...prev, 
+                  onCheckedChange={(checked) =>
+                    setExportData(prev => ({
+                      ...prev,
                       options: { ...prev.options, compress: checked }
                     }))
                   }

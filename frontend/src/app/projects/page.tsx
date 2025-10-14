@@ -232,10 +232,10 @@ export default function ProjectsPage() {
         const now = new Date()
         const startDate = project.start_date ? new Date(project.start_date) : null
         const endDate = project.end_date ? new Date(project.end_date) : null
-        
+
         let status = 'Active'
         let variant: 'default' | 'secondary' | 'destructive' = 'default'
-        
+
         if (startDate && startDate > now) {
           status = 'Planned'
           variant = 'secondary'
@@ -243,7 +243,7 @@ export default function ProjectsPage() {
           status = 'Completed'
           variant = 'destructive'
         }
-        
+
         return (
           <Badge variant={variant} className={variant === 'default' ? 'bg-green-100 text-green-800' : ''}>
             {status}
@@ -270,7 +270,7 @@ export default function ProjectsPage() {
     const activeProjects = projects.filter(project => {
       const startDate = project.start_date ? new Date(project.start_date) : null
       const endDate = project.end_date ? new Date(project.end_date) : null
-      
+
       return (!startDate || startDate <= now) && (!endDate || endDate >= now)
     }).length
 
@@ -430,18 +430,15 @@ export default function ProjectsPage() {
   }
 
   const handleExport = (format: 'csv' | 'json' | 'excel') => {
-    console.log('Export projects as:', format)
     // TODO: Implement export functionality
   }
 
   const handleImport = (file: File) => {
-    console.log('Import projects from file:', file.name)
     // TODO: Implement import functionality
   }
 
   const handleMoveCard = (cardId: string | number, sourceColumnId: string, targetColumnId: string) => {
     // For projects, we could update dates based on status
-    console.log('Move project card:', cardId, 'from', sourceColumnId, 'to', targetColumnId)
     // TODO: Implement project status updates
   }
 
@@ -453,7 +450,7 @@ export default function ProjectsPage() {
       is_public: false,
       settings: {}
     }
-    
+
     // Set dates based on column
     if (columnId === 'planned') {
       const futureDate = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000) // 7 days from now
@@ -461,7 +458,7 @@ export default function ProjectsPage() {
     } else if (columnId === 'active') {
       newProject.start_date = now.toISOString().split('T')[0]
     }
-    
+
     createProject.mutate(newProject)
   }
 
@@ -675,7 +672,7 @@ export default function ProjectsPage() {
         onImport={handleImport}
         sortOptions={sortOptions}
         groupOptions={groupOptions}
-        
+
         // Kanban-specific props
         kanbanColumns={kanbanColumns}
         onMoveCard={handleMoveCard}
@@ -685,7 +682,7 @@ export default function ProjectsPage() {
         kanbanCardTitleField="name"
         kanbanCardDescriptionField="description"
         kanbanCardFields={kanbanCardFields}
-        
+
         // Calendar-specific props
         calendarIdField="id"
         calendarTitleField="name"
@@ -703,7 +700,7 @@ export default function ProjectsPage() {
         }}
         calendarView="month"
         calendarShowToday={true}
-        
+
         // Gantt-specific props
         ganttIdField="id"
         ganttTitleField="name"

@@ -31,9 +31,9 @@ export default function RootLayout({
           <GraphQLProvider>
             <TRPCProvider>
               <NuqsProvider>
-                <EnhancedThemeProvider 
-                  attribute="class" 
-                  defaultTheme="system" 
+                <EnhancedThemeProvider
+                  attribute="class"
+                  defaultTheme="system"
                   enableSystem
                   defaultColorScheme="default"
                   colorSchemeStorageKey="color-scheme"

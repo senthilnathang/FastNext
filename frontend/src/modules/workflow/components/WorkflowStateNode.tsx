@@ -34,10 +34,10 @@ function WorkflowStateNode({ data, selected, id }: NodeProps<WorkflowNodeData>) 
     'CheckCircle', 'XCircle', 'AlertCircle', 'Info', 'Settings',
     'User', 'Users', 'Mail', 'Phone', 'Calendar', 'Clock'
   ];
-  
+
   return (
     <>
-      <div 
+      <div
         className={`
           px-4 py-3 shadow-md rounded-lg border-2 min-w-[150px] max-w-[200px] cursor-pointer
           ${selected ? 'border-blue-500' : 'border-gray-300'}
@@ -56,7 +56,7 @@ function WorkflowStateNode({ data, selected, id }: NodeProps<WorkflowNodeData>) 
           className="w-3 h-3 !bg-gray-400 border-2 border-white"
           style={{ left: -6 }}
         />
-        
+
         {/* Node content */}
         <div className="flex items-center space-x-2">
           <IconComponent
@@ -103,7 +103,7 @@ function WorkflowStateNode({ data, selected, id }: NodeProps<WorkflowNodeData>) 
             </span>
           )}
         </div>
-        
+
         {/* Output handle */}
         <Handle
           type="source"
@@ -129,7 +129,7 @@ function WorkflowStateNode({ data, selected, id }: NodeProps<WorkflowNodeData>) 
                 placeholder="Enter state label"
               />
             </div>
-            
+
             <div className="space-y-2">
               <Label htmlFor="description">Description</Label>
               <Textarea
@@ -139,7 +139,7 @@ function WorkflowStateNode({ data, selected, id }: NodeProps<WorkflowNodeData>) 
                 placeholder="Enter state description"
               />
             </div>
-            
+
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="color">Color</Label>
@@ -150,7 +150,7 @@ function WorkflowStateNode({ data, selected, id }: NodeProps<WorkflowNodeData>) 
                   onChange={(e) => setEditData({ ...editData, color: e.target.value })}
                 />
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="bgColor">Background</Label>
                 <Input
@@ -161,7 +161,7 @@ function WorkflowStateNode({ data, selected, id }: NodeProps<WorkflowNodeData>) 
                 />
               </div>
             </div>
-            
+
             <div className="space-y-2">
               <Label htmlFor="icon">Icon</Label>
               <Select
@@ -183,7 +183,7 @@ function WorkflowStateNode({ data, selected, id }: NodeProps<WorkflowNodeData>) 
                 </SelectContent>
               </Select>
             </div>
-            
+
             <div className="flex items-center space-x-4">
               <div className="flex items-center space-x-2">
                 <Checkbox
@@ -193,7 +193,7 @@ function WorkflowStateNode({ data, selected, id }: NodeProps<WorkflowNodeData>) 
                 />
                 <Label htmlFor="isInitial">Start State</Label>
               </div>
-              
+
               <div className="flex items-center space-x-2">
                 <Checkbox
                   id="isFinal"
@@ -203,7 +203,7 @@ function WorkflowStateNode({ data, selected, id }: NodeProps<WorkflowNodeData>) 
                 <Label htmlFor="isFinal">End State</Label>
               </div>
             </div>
-            
+
             <div className="flex justify-end space-x-2">
               <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
                 Cancel

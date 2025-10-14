@@ -2,7 +2,7 @@ import { defineConfig, devices } from '@playwright/test';
 
 /**
  * Playwright E2E Testing Configuration for FastNext Framework
- * 
+ *
  * This configuration provides comprehensive end-to-end testing setup with:
  * - Multiple browser support (Chrome, Firefox, Safari)
  * - Mobile device testing
@@ -14,7 +14,7 @@ import { defineConfig, devices } from '@playwright/test';
 export default defineConfig({
   // Test directory
   testDir: './src/__tests__/e2e',
-  
+
   // Test file patterns
   testMatch: [
     '**/*.{test,spec}.{js,ts}',
@@ -42,7 +42,7 @@ export default defineConfig({
   workers: process.env.CI ? 1 : undefined,
 
   // Reporter configuration
-  reporter: process.env.CI 
+  reporter: process.env.CI
     ? [
         ['html', { outputFolder: 'playwright-report' }],
         ['json', { outputFile: 'test-results/results.json' }],
@@ -192,7 +192,7 @@ export default defineConfig({
 
   // Output directories
   outputDir: 'test-results/',
-  
+
   // Global test timeout
   globalTimeout: process.env.CI ? 10 * 60 * 1000 : undefined,
 });

@@ -83,7 +83,7 @@ export function BottomNavigation({
 
     const handleScroll = () => {
       const currentScrollY = window.scrollY
-      
+
       if (currentScrollY > lastScrollY && currentScrollY > 100) {
         // Scrolling down
         setIsVisible(false)
@@ -91,7 +91,7 @@ export function BottomNavigation({
         // Scrolling up
         setIsVisible(true)
       }
-      
+
       setLastScrollY(currentScrollY)
     }
 
@@ -106,11 +106,11 @@ export function BottomNavigation({
 
   const handleItemClick = (item: NavigationItem) => {
     if (item.disabled) return
-    
+
     if (item.onClick) {
       item.onClick()
     }
-    
+
     onItemClick?.(item)
   }
 
@@ -129,8 +129,8 @@ export function BottomNavigation({
           "relative flex flex-col items-center justify-center flex-1 py-2 px-1 min-h-[60px] transition-colors duration-200",
           "focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-gray-900",
           "disabled:opacity-50 disabled:cursor-not-allowed",
-          isActive 
-            ? "text-blue-600 dark:text-blue-400" 
+          isActive
+            ? "text-blue-600 dark:text-blue-400"
             : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
         )}
         aria-label={item.label}
@@ -143,7 +143,7 @@ export function BottomNavigation({
             "w-6 h-6 transition-all duration-200",
             isActive ? "text-blue-600 dark:text-blue-400" : ""
           )} />
-          
+
           {/* Badge */}
           <motion.div
             variants={badgeVariants}
@@ -152,8 +152,8 @@ export function BottomNavigation({
             className="absolute -top-1 -right-1"
           >
             {item.badge && (
-              <Badge 
-                variant="destructive" 
+              <Badge
+                variant="destructive"
                 className={cn(
                   "text-xs min-w-[16px] h-4 px-1 rounded-full flex items-center justify-center",
                   typeof item.badge === 'number' && item.badge > 99 ? "px-1.5" : ""
@@ -197,7 +197,7 @@ export function BottomNavigation({
       {/* Bottom Navigation */}
       <motion.nav
         initial={{ y: 100 }}
-        animate={{ 
+        animate={{
           y: isVisible ? 0 : 100,
           transition: {
             type: "spring" as const,
@@ -220,7 +220,7 @@ export function BottomNavigation({
         <div className="flex items-center justify-center px-2">
           {/* Visible Items */}
           {visibleItems.map((item) => renderNavigationItem(item))}
-          
+
           {/* Overflow Menu Button */}
           {hasOverflow && (
             <motion.button
@@ -230,8 +230,8 @@ export function BottomNavigation({
               className={cn(
                 "relative flex flex-col items-center justify-center flex-1 py-2 px-1 min-h-[60px] transition-colors duration-200",
                 "focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-gray-900",
-                showOverflow 
-                  ? "text-blue-600 dark:text-blue-400" 
+                showOverflow
+                  ? "text-blue-600 dark:text-blue-400"
                   : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
               )}
               aria-label="More options"
@@ -241,7 +241,7 @@ export function BottomNavigation({
                   <div key={index} className="w-2 h-2 bg-current rounded-full opacity-60" />
                 ))}
               </div>
-              
+
               {showLabels && (
                 <span className={cn(
                   "text-xs mt-1 transition-all duration-200",
@@ -280,7 +280,7 @@ export function BottomNavigation({
             onClick={() => setShowOverflow(false)}
             className="fixed inset-0 bg-black/20 backdrop-blur-sm z-30 md:hidden"
           />
-          
+
           {/* Overflow Items */}
           <motion.div
             initial={{ y: 100, opacity: 0 }}
@@ -303,7 +303,7 @@ export function BottomNavigation({
               {overflowItems.map((item) => {
                 const isActive = activeItem === item.id
                 const IconComponent = item.icon
-                
+
                 return (
                   <button
                     key={item.id}
@@ -316,24 +316,24 @@ export function BottomNavigation({
                       "relative flex flex-col items-center justify-center p-4 rounded-lg transition-colors duration-200",
                       "focus:outline-none focus:ring-2 focus:ring-blue-500",
                       "disabled:opacity-50 disabled:cursor-not-allowed",
-                      isActive 
-                        ? "bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400" 
+                      isActive
+                        ? "bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400"
                         : "hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300"
                     )}
                   >
                     <div className="relative">
                       <IconComponent className="w-6 h-6 mb-2" />
-                      
+
                       {item.badge && (
-                        <Badge 
-                          variant="destructive" 
+                        <Badge
+                          variant="destructive"
                           className="absolute -top-1 -right-1 text-xs min-w-[16px] h-4 px-1 rounded-full"
                         >
                           {typeof item.badge === 'number' && item.badge > 99 ? '99+' : item.badge}
                         </Badge>
                       )}
                     </div>
-                    
+
                     <span className="text-sm font-medium text-center line-clamp-2">
                       {item.label}
                     </span>
@@ -354,7 +354,7 @@ export function useBottomNavigation(items: NavigationItem[], defaultActive?: str
 
   const handleItemClick = React.useCallback((item: NavigationItem) => {
     setActiveItem(item.id)
-    
+
     // Handle navigation
     if (item.href && typeof window !== 'undefined') {
       window.location.href = item.href

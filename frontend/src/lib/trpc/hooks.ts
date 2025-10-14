@@ -18,7 +18,7 @@ export const useUser = (id: string | number) => {
 
 export const useCreateUser = () => {
   const utils = api.useUtils()
-  
+
   return api.users.create.useMutation({
     onSuccess: () => {
       utils.users.getAll.invalidate()
@@ -28,7 +28,7 @@ export const useCreateUser = () => {
 
 export const useUpdateUser = () => {
   const utils = api.useUtils()
-  
+
   return api.users.update.useMutation({
     onSuccess: (data, variables) => {
       utils.users.getAll.invalidate()
@@ -39,7 +39,7 @@ export const useUpdateUser = () => {
 
 export const useDeleteUser = () => {
   const utils = api.useUtils()
-  
+
   return api.users.delete.useMutation({
     onSuccess: () => {
       utils.users.getAll.invalidate()
@@ -64,7 +64,7 @@ export const useProject = (id: string | number) => {
 
 export const useCreateProject = () => {
   const utils = api.useUtils()
-  
+
   return api.projects.create.useMutation({
     onSuccess: () => {
       utils.projects.getAll.invalidate()

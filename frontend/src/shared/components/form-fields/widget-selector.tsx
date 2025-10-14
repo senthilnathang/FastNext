@@ -1,16 +1,16 @@
 "use client"
 
 import * as React from "react"
-import { 
-  Type, 
-  Calendar, 
-  Clock, 
-  Hash, 
-  ChevronDown, 
-  List, 
-  CheckSquare, 
-  ToggleLeft, 
-  Upload, 
+import {
+  Type,
+  Calendar,
+  Clock,
+  Hash,
+  ChevronDown,
+  List,
+  CheckSquare,
+  ToggleLeft,
+  Upload,
   Image as ImageIcon,
   FileText,
   Search,
@@ -50,7 +50,7 @@ const defaultWidgetTypes: WidgetType[] = [
     id: "textarea",
     name: "Text Area",
     icon: FileText,
-    category: "Input", 
+    category: "Input",
     description: "Multi-line text input"
   },
   {
@@ -74,7 +74,7 @@ const defaultWidgetTypes: WidgetType[] = [
     category: "Input",
     description: "Password input field"
   },
-  
+
   // Date & Time
   {
     id: "date",
@@ -97,7 +97,7 @@ const defaultWidgetTypes: WidgetType[] = [
     category: "Date & Time",
     description: "Time picker"
   },
-  
+
   // Selection
   {
     id: "select",
@@ -134,7 +134,7 @@ const defaultWidgetTypes: WidgetType[] = [
     category: "Selection",
     description: "Toggle switch"
   },
-  
+
   // File & Media
   {
     id: "file",
@@ -150,7 +150,7 @@ const defaultWidgetTypes: WidgetType[] = [
     category: "File & Media",
     description: "Image upload with preview"
   },
-  
+
   // Layout & Display
   {
     id: "table",
@@ -280,7 +280,7 @@ export function WidgetSelector({
             <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
           </Button>
         </PopoverTrigger>
-        
+
         <PopoverContent className="w-96 p-0" align="start">
           <div className="flex flex-col max-h-96">
             {/* Search and Filter */}
@@ -296,7 +296,7 @@ export function WidgetSelector({
                   />
                 </div>
               )}
-              
+
               {categoryFilter && (
                 <div className="flex flex-wrap gap-1">
                   <Button

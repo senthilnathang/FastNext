@@ -68,7 +68,7 @@ interface SwaggerUIProps {
   useStrictMode?: boolean // If false, uses vanilla SwaggerUI to avoid React warnings
 }
 
-export function SwaggerUI({ 
+export function SwaggerUI({
   className,
   apiUrl,
   showToolbar = true,
@@ -82,7 +82,7 @@ export function SwaggerUI({
   const [isConnected, setIsConnected] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  
+
   // Memoized token getter to prevent unnecessary function recreations
   const getToken = useCallback(() => {
     if (typeof window !== 'undefined') {
@@ -96,10 +96,10 @@ export function SwaggerUI({
     try {
       setIsLoading(true)
       setError(null)
-      
+
       const healthUrl = `${baseApiUrl}/health`
       const response = await fetch(healthUrl)
-      
+
       if (response.ok) {
         const data = await response.json()
         if (data.status === 'healthy') {
@@ -147,27 +147,24 @@ export function SwaggerUI({
         request.headers = request.headers || {}
         request.headers.Authorization = `Bearer ${token}`
       }
-      
+
       // Ensure content-type for POST/PUT requests
       if (['POST', 'PUT', 'PATCH'].includes(request.method) && request.body) {
         request.headers['Content-Type'] = request.headers['Content-Type'] || 'application/json'
       }
-      
-      console.log(`API Request: ${request.method} ${request.url}`)
+
       return request
     },
     responseInterceptor: (response: any) => {
-      console.log(`API Response: ${response.status} ${response.url}`)
-      
+
       // Handle authentication errors
       if (response.status === 401) {
         console.warn('Authentication required for this endpoint')
       }
-      
+
       return response
     },
     onComplete: () => {
-      console.log('SwaggerUI loaded successfully')
     },
     onFailure: (error: any) => {
       console.error('SwaggerUI failed to load:', error)
@@ -187,7 +184,7 @@ export function SwaggerUI({
                   isConnected ? 'text-green-500' : 'text-red-500'
                 )} />
                 <span className="text-sm font-medium">
-                  API Status: 
+                  API Status:
                   <span className={cn(
                     'ml-1',
                     isConnected ? 'text-green-600' : 'text-red-600'
@@ -196,7 +193,7 @@ export function SwaggerUI({
                   </span>
                 </span>
               </div>
-              
+
               {user && (
                 <div className="flex items-center space-x-2">
                   <Shield className="w-4 h-4 text-blue-500" />
@@ -206,7 +203,7 @@ export function SwaggerUI({
                 </div>
               )}
             </div>
-            
+
             <Button
               variant="outline"
               size="sm"
@@ -217,7 +214,7 @@ export function SwaggerUI({
               Refresh
             </Button>
           </div>
-          
+
           {error && (
             <div className="mt-3 p-3 bg-destructive/10 border border-destructive/20 rounded-lg">
               <div className="flex items-center space-x-2">
@@ -254,7 +251,7 @@ export function SwaggerUI({
           )}
         </div>
       </Card>
-      
+
       <style jsx global>{`
         .swagger-ui .info {
           margin: 0 !important;

@@ -32,7 +32,7 @@ export const componentsRouter = router({
           projectId: input.projectId,
           componentType: input.componentType,
         })
-        
+
         return {
           data: result.components,
           total: result.components.length,
@@ -108,7 +108,7 @@ export const componentsRouter = router({
         const result = await componentOperations.getAll({
           projectId,
         })
-        
+
         return {
           components: result.components,
           totalCount: result.components.length,
@@ -131,7 +131,7 @@ export const componentsRouter = router({
           projectId: input.projectId,
           componentType: input.componentType,
         })
-        
+
         return {
           components: result.components,
           totalCount: result.components.length,
@@ -152,10 +152,10 @@ export const componentsRouter = router({
         const result = await componentOperations.getAll({
           projectId: input.projectId,
         })
-        
+
         // Extract unique component types
         const types = [...new Set(result.components.map((component: Component) => component.componentType))]
-        
+
         return {
           types,
           totalCount: types.length,
@@ -179,13 +179,13 @@ export const componentsRouter = router({
           projectId: input.projectId,
           componentType: input.componentType,
         })
-        
+
         const searchTerm = input.query.toLowerCase()
         const filteredComponents = result.components.filter((component: Component) =>
           component.name.toLowerCase().includes(searchTerm) ||
           component.componentType.toLowerCase().includes(searchTerm)
         )
-        
+
         return {
           components: filteredComponents,
           totalCount: filteredComponents.length,

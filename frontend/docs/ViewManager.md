@@ -232,7 +232,7 @@ interface Column<T> {
 ### Column Types
 
 - **`text`**: Standard text column with string filtering
-- **`number`**: Numeric column with range filtering  
+- **`number`**: Numeric column with range filtering
 - **`date`**: Date column with date range filtering
 - **`boolean`**: Boolean column with true/false filtering
 - **`select`**: Dropdown selection with predefined options
@@ -304,8 +304,8 @@ const columns: Column<User>[] = [
     key: 'avatar',
     label: 'Avatar',
     render: (value, user) => (
-      <img 
-        src={user.avatarUrl} 
+      <img
+        src={user.avatarUrl}
         alt={user.name}
         className="w-8 h-8 rounded-full"
       />
@@ -332,7 +332,7 @@ const handleAdvancedFilter = (filters: Record<string, any>) => {
   const filtered = data.filter(item => {
     return Object.entries(filters).every(([key, value]) => {
       if (!value) return true;
-      
+
       switch (key) {
         case 'dateRange':
           return isWithinDateRange(item.createdAt, value);
@@ -343,7 +343,7 @@ const handleAdvancedFilter = (filters: Record<string, any>) => {
       }
     });
   });
-  
+
   setFilteredData(filtered);
 };
 ```
@@ -353,7 +353,7 @@ const handleAdvancedFilter = (filters: Record<string, any>) => {
 ```typescript
 const handleExport = async (format: 'csv' | 'json' | 'excel') => {
   const exportData = selectedItems.length > 0 ? selectedItems : data;
-  
+
   switch (format) {
     case 'csv':
       await exportToCSV(exportData, 'data-export.csv');
@@ -560,7 +560,7 @@ function ProjectManagement() {
       views={views}
       activeView={activeView}
       onViewChange={setActiveView}
-      
+
       // Kanban configuration
       kanbanColumns={kanbanColumns}
       kanbanGroupByField="status"
@@ -569,7 +569,7 @@ function ProjectManagement() {
       onMoveCard={handleMoveCard}
       enableQuickAdd={true}
       onQuickAdd={handleQuickAdd}
-      
+
       // Gantt configuration
       ganttIdField="id"
       ganttTitleField="name"
@@ -581,7 +581,7 @@ function ProjectManagement() {
       allowResize={true}
       allowMove={true}
       onUpdateDates={handleUpdateDates}
-      
+
       // Calendar configuration
       calendarIdField="id"
       calendarTitleField="name"
@@ -592,7 +592,7 @@ function ProjectManagement() {
       calendarEnableQuickAdd={true}
       onDateChange={handleDateChange}
       onCalendarQuickAdd={handleCalendarQuickAdd}
-      
+
       // Common functionality
       onCreateClick={handleCreate}
       onEditClick={handleEdit}

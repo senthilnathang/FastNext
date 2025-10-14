@@ -174,7 +174,7 @@ export function MultiStepWizard({
                 </Button>
               )}
             </div>
-            
+
             <div className="flex space-x-2">
               <Button
                 variant="outline"
@@ -184,7 +184,7 @@ export function MultiStepWizard({
                 <ChevronLeft className="w-4 h-4 mr-2" />
                 {previousButtonText}
               </Button>
-              
+
               <Button
                 onClick={handleNext}
                 disabled={isLoading || (!isLastStep && !canGoNext)}

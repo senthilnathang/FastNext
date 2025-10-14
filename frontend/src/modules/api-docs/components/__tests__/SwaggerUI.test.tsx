@@ -28,27 +28,27 @@ describe('SwaggerUI', () => {
 
   it('renders with toolbar by default', () => {
     render(<SwaggerUI />)
-    
+
     expect(screen.getByText('API Status:')).toBeInTheDocument()
     expect(screen.getByText('Authenticated as: testuser')).toBeInTheDocument()
   })
 
   it('renders without toolbar when showToolbar is false', () => {
     render(<SwaggerUI showToolbar={false} />)
-    
+
     expect(screen.queryByText('API Status:')).not.toBeInTheDocument()
   })
 
   it('can use strict mode', () => {
     render(<SwaggerUI useStrictMode={true} />)
-    
+
     // Should still render the component
     expect(screen.getByText('API Status:')).toBeInTheDocument()
   })
 
   it('uses non-strict mode by default', () => {
     render(<SwaggerUI useStrictMode={false} />)
-    
+
     // Should still render the component
     expect(screen.getByText('API Status:')).toBeInTheDocument()
   })

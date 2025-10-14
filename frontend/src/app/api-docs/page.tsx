@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react'
 import { SwaggerUI } from '@/modules/api-docs'
-import { 
+import {
   Card,
   Button,
   Tabs,
@@ -11,13 +11,13 @@ import {
   TabsTrigger,
   Badge
 } from '@/shared/components'
-import { 
-  Book, 
-  Code, 
-  Database, 
-  Shield, 
-  Server, 
-  TestTube, 
+import {
+  Book,
+  Code,
+  Database,
+  Shield,
+  Server,
+  TestTube,
   ExternalLink,
   Copy,
   CheckCircle
@@ -28,7 +28,7 @@ import { cn } from '@/shared/utils'
 export default function APIDocumentationPage() {
   const { user } = useAuth()
   const [copiedEndpoint, setCopiedEndpoint] = useState<string | null>(null)
-  
+
   // Get API base URL from environment
   const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
 
@@ -117,7 +117,7 @@ export default function APIDocumentationPage() {
       <div className="text-center space-y-4">
         <h1 className="text-4xl font-bold">FastNext API Documentation</h1>
         <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-          Interactive API documentation for the FastNext Framework. Test endpoints, 
+          Interactive API documentation for the FastNext Framework. Test endpoints,
           view schemas, and explore all available operations.
         </p>
         {user && (
@@ -150,9 +150,9 @@ export default function APIDocumentationPage() {
               <h2 className="text-2xl font-semibold">Interactive API Explorer</h2>
               <div className="flex items-center space-x-2">
                 <Button variant="outline" size="sm" asChild>
-                  <a 
+                  <a
                     href={`${apiBaseUrl}/docs`}
-                    target="_blank" 
+                    target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center gap-2"
                   >
@@ -163,11 +163,11 @@ export default function APIDocumentationPage() {
               </div>
             </div>
             <p className="text-muted-foreground mb-6">
-              Use the interactive interface below to test API endpoints directly. 
+              Use the interactive interface below to test API endpoints directly.
               Authentication is automatically handled when logged in.
             </p>
           </Card>
-          
+
           <SwaggerUI />
         </TabsContent>
 
@@ -175,10 +175,10 @@ export default function APIDocumentationPage() {
           <Card className="p-6">
             <h2 className="text-2xl font-semibold mb-4">Available Endpoints</h2>
             <p className="text-muted-foreground mb-6">
-              Overview of all available API endpoints organized by category. 
+              Overview of all available API endpoints organized by category.
               Click any endpoint to copy the full URL.
             </p>
-            
+
             <div className="grid gap-6">
               {apiEndpoints.map((category) => {
                 const IconComponent = category.icon
@@ -189,20 +189,20 @@ export default function APIDocumentationPage() {
                       <h3 className="text-lg font-semibold">{category.category}</h3>
                       <Badge variant="outline">{category.endpoints.length} endpoints</Badge>
                     </div>
-                    
+
                     <div className="space-y-2">
                       {category.endpoints.map((endpoint, index) => {
                         const fullPath = `${apiBaseUrl}/api/v1${endpoint.path}`
                         const isCopied = copiedEndpoint === fullPath
-                        
+
                         return (
-                          <div 
+                          <div
                             key={index}
                             className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer"
                             onClick={() => copyToClipboard(fullPath)}
                           >
                             <div className="flex items-center gap-3">
-                              <Badge 
+                              <Badge
                                 className={cn(
                                   'text-white font-mono text-xs w-16 justify-center',
                                   getMethodColor(endpoint.method)
@@ -217,7 +217,7 @@ export default function APIDocumentationPage() {
                                 {endpoint.description}
                               </span>
                             </div>
-                            
+
                             <div className="flex items-center gap-2">
                               {isCopied ? (
                                 <CheckCircle className="w-4 h-4 text-green-500" />
@@ -239,7 +239,7 @@ export default function APIDocumentationPage() {
         <TabsContent value="testing" className="space-y-6">
           <Card className="p-6">
             <h2 className="text-2xl font-semibold mb-4">Testing Guide</h2>
-            
+
             <div className="space-y-6">
               <div>
                 <h3 className="text-lg font-semibold mb-2">Authentication</h3>
@@ -250,14 +250,14 @@ export default function APIDocumentationPage() {
                   <div className="flex items-start gap-2">
                     <Badge variant="outline" className="mt-0.5">1</Badge>
                     <p>
-                      <strong>Automatic:</strong> Log in through the frontend application. 
+                      <strong>Automatic:</strong> Log in through the frontend application.
                       Your token will be automatically included in API requests.
                     </p>
                   </div>
                   <div className="flex items-start gap-2">
                     <Badge variant="outline" className="mt-0.5">2</Badge>
                     <p>
-                      <strong>Manual:</strong> Use the &ldquo;Authorize&rdquo; button in Swagger UI 
+                      <strong>Manual:</strong> Use the &ldquo;Authorize&rdquo; button in Swagger UI
                       and enter your bearer token manually.
                     </p>
                   </div>
@@ -273,28 +273,28 @@ export default function APIDocumentationPage() {
                   <Card className="p-4">
                     <h4 className="font-semibold mb-2 text-green-600">Create (POST)</h4>
                     <p className="text-sm text-muted-foreground">
-                      Use POST endpoints to create new resources. 
+                      Use POST endpoints to create new resources.
                       Provide required fields in the request body.
                     </p>
                   </Card>
                   <Card className="p-4">
                     <h4 className="font-semibold mb-2 text-blue-600">Read (GET)</h4>
                     <p className="text-sm text-muted-foreground">
-                      Use GET endpoints to retrieve resources. 
+                      Use GET endpoints to retrieve resources.
                       Test both list and individual resource endpoints.
                     </p>
                   </Card>
                   <Card className="p-4">
                     <h4 className="font-semibold mb-2 text-yellow-600">Update (PUT)</h4>
                     <p className="text-sm text-muted-foreground">
-                      Use PUT endpoints to modify existing resources. 
+                      Use PUT endpoints to modify existing resources.
                       Include the resource ID in the URL path.
                     </p>
                   </Card>
                   <Card className="p-4">
                     <h4 className="font-semibold mb-2 text-red-600">Delete (DELETE)</h4>
                     <p className="text-sm text-muted-foreground">
-                      Use DELETE endpoints to remove resources. 
+                      Use DELETE endpoints to remove resources.
                       Be careful - this operation is usually irreversible.
                     </p>
                   </Card>

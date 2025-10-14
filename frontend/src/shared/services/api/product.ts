@@ -63,7 +63,7 @@ export const productsApi = {
   // Get paginated list
   getProducts: async (params?: ProductListParams): Promise<ProductListResponse> => {
     const searchParams = new URLSearchParams()
-    
+
     if (params?.skip !== undefined) searchParams.set('skip', params.skip.toString())
     if (params?.limit !== undefined) searchParams.set('limit', params.limit.toString())
     if (params?.search) searchParams.set('search', params.search)
@@ -72,7 +72,7 @@ export const productsApi = {
     if (params?.category) searchParams.set('category', params.category.toString())
     if (params?.is_featured) searchParams.set('is_featured', params.is_featured.toString())
     if (params?.release_date) searchParams.set('release_date', params.release_date.toString())
-    
+
     const endpoint = `/api/v1/products${searchParams.toString() ? '/?' + searchParams.toString() : '/'}`
     const response = await apiClient.get<ProductListResponse>(endpoint)
     return response.data

@@ -22,7 +22,7 @@ export default function ViewProductPage() {
 
   const handleDelete = () => {
     if (!product) return
-    
+
     confirmDelete(`product ${product.name}`, async () => {
       try {
         await deleteProductMutation.mutateAsync(product.id)
@@ -67,16 +67,16 @@ export default function ViewProductPage() {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
-            <Button 
-              variant="outline" 
-              size="sm" 
+            <Button
+              variant="outline"
+              size="sm"
               onClick={() => router.back()}
               className="flex items-center space-x-2"
             >
               <ArrowLeft className="h-4 w-4" />
               <span>Back</span>
             </Button>
-            
+
             <div className="flex items-center space-x-3">
               <div className="p-2 rounded-lg bg-primary/10">
                 <Package className="h-5 w-5 text-primary" />
@@ -97,8 +97,8 @@ export default function ViewProductPage() {
               <Pencil className="h-4 w-4" />
               <span>Edit</span>
             </Button>
-            <Button 
-              variant="destructive" 
+            <Button
+              variant="destructive"
               onClick={handleDelete}
               className="flex items-center space-x-2"
             >
@@ -114,7 +114,7 @@ export default function ViewProductPage() {
               <CardTitle>Basic Information</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              
+
               <div>
                 <label className="text-sm font-medium text-muted-foreground">Product Name</label>
                 <div className="mt-1">
@@ -136,7 +136,7 @@ export default function ViewProductPage() {
               <div>
                 <label className="text-sm font-medium text-muted-foreground">Category</label>
                 <div className="mt-1">
-                  
+
                   <Badge variant="outline">
                     {product.category}
                   </Badge>
@@ -145,7 +145,7 @@ export default function ViewProductPage() {
               <div>
                 <label className="text-sm font-medium text-muted-foreground">Tags</label>
                 <div className="mt-1">
-                  
+
                   <div className="flex flex-wrap gap-1">
                     {product.tags?.map((item, index) => (
                       <Badge key={index} variant="outline" className="text-xs">
@@ -158,7 +158,7 @@ export default function ViewProductPage() {
               <div>
                 <label className="text-sm font-medium text-muted-foreground">Featured Product</label>
                 <div className="mt-1">
-                  
+
                   <Badge variant={product.is_featured ? 'default' : 'secondary'}>
                     {product.is_featured ? 'Yes' : 'No'}
                   </Badge>
@@ -167,8 +167,8 @@ export default function ViewProductPage() {
               <div>
                 <label className="text-sm font-medium text-muted-foreground">Product Website</label>
                 <div className="mt-1">
-                  
-                  <a 
+
+                  <a
                     href={product.website_url}
                     target="_blank"
                     rel="noopener noreferrer"
@@ -190,7 +190,7 @@ export default function ViewProductPage() {
                   {new Date(product.created_at).toLocaleString()}
                 </p>
               </div>
-              
+
               {product.updated_at && (
                 <div>
                   <label className="text-sm font-medium text-muted-foreground">Last Updated</label>
@@ -199,7 +199,7 @@ export default function ViewProductPage() {
                   </p>
                 </div>
               )}
-              
+
               <div>
                 <label className="text-sm font-medium text-muted-foreground">Status</label>
                 <div className="mt-1">

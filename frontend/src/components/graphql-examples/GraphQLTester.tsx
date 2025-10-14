@@ -11,11 +11,11 @@ import { Textarea } from '@/shared/components/ui/textarea';
 import { Alert, AlertDescription } from '@/shared/components/ui/alert';
 import { Badge } from '@/shared/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/components/ui/tabs';
-import { 
-  Play, 
-  CheckCircle, 
-  XCircle, 
-  Clock, 
+import {
+  Play,
+  CheckCircle,
+  XCircle,
+  Clock,
   Database,
   Code,
   Zap,
@@ -46,7 +46,7 @@ export function GraphQLTester() {
 
   const testGraphQLQuery = async (query: string, testName: string) => {
     const startTime = Date.now();
-    
+
     try {
       const response = await fetch('/api/v1/graphql', {
         method: 'POST',
@@ -68,7 +68,7 @@ export function GraphQLTester() {
             duration
           }
         }));
-        
+
         if (testName === 'Test Connection') {
           setConnectionStatus('connected');
         }
@@ -77,7 +77,7 @@ export function GraphQLTester() {
       }
     } catch (error) {
       const duration = Date.now() - startTime;
-      
+
       setTestResults(prev => ({
         ...prev,
         [testName]: {
@@ -86,7 +86,7 @@ export function GraphQLTester() {
           duration
         }
       }));
-      
+
       if (testName === 'Test Connection') {
         setConnectionStatus('error');
       }
@@ -95,7 +95,7 @@ export function GraphQLTester() {
 
   const runCustomQuery = async () => {
     if (!customQuery.trim()) return;
-    
+
     setIsLoading(true);
     await testGraphQLQuery(customQuery, 'Custom Query');
     setIsLoading(false);
@@ -104,26 +104,26 @@ export function GraphQLTester() {
   const runAllTests = async () => {
     setIsLoading(true);
     setTestResults({});
-    
+
     for (const [testName, query] of Object.entries(predefinedQueries)) {
       await testGraphQLQuery(query, testName);
       // Small delay between tests
       await new Promise(resolve => setTimeout(resolve, 100));
     }
-    
+
     setIsLoading(false);
   };
 
   const getStatusIcon = (result?: TestResult) => {
     if (!result) return <Clock className="h-4 w-4 text-muted-foreground" />;
-    return result.success 
+    return result.success
       ? <CheckCircle className="h-4 w-4 text-green-500" />
       : <XCircle className="h-4 w-4 text-red-500" />;
   };
 
   const getStatusBadge = (result?: TestResult) => {
     if (!result) return <Badge variant="secondary">Pending</Badge>;
-    return result.success 
+    return result.success
       ? <Badge variant="default">Pass</Badge>
       : <Badge variant="destructive">Fail</Badge>;
   };
@@ -171,7 +171,7 @@ export function GraphQLTester() {
           </div>
 
           <div className="mt-4">
-            <Button 
+            <Button
               onClick={() => testGraphQLQuery(predefinedQueries['Test Connection'], 'Test Connection')}
               variant="outline"
               size="sm"
@@ -201,7 +201,7 @@ export function GraphQLTester() {
           <div className="grid gap-4">
             {Object.entries(predefinedQueries).map(([testName, query]) => {
               const result = testResults[testName];
-              
+
               return (
                 <Card key={testName}>
                   <CardHeader className="pb-3">
@@ -236,7 +236,7 @@ export function GraphQLTester() {
                         <pre className={`p-3 rounded text-xs overflow-x-auto ${
                           result.success ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-800'
                         }`}>
-                          {result.success 
+                          {result.success
                             ? JSON.stringify(result.data, null, 2)
                             : result.error
                           }
@@ -289,8 +289,8 @@ export function GraphQLTester() {
                 </CardHeader>
                 <CardContent>
                   <pre className={`p-4 rounded text-sm overflow-x-auto ${
-                    testResults['Custom Query'].success 
-                      ? 'bg-green-50 text-green-800' 
+                    testResults['Custom Query'].success
+                      ? 'bg-green-50 text-green-800'
                       : 'bg-red-50 text-red-800'
                   }`}>
                     {testResults['Custom Query'].success
@@ -348,7 +348,7 @@ export function GraphQLTester() {
           <Alert>
             <AlertTriangle className="h-4 w-4" />
             <AlertDescription>
-              The GraphQL endpoint is available at <code>/api/v1/graphql</code>. 
+              The GraphQL endpoint is available at <code>/api/v1/graphql</code>.
               Some operations may require authentication via JWT token.
             </AlertDescription>
           </Alert>

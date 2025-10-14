@@ -66,7 +66,7 @@ export function useRLSAuditLogs(params?: {
     queryKey: [RLS_AUDIT_LOGS_QUERY_KEY, params],
     queryFn: async (): Promise<RLSAuditLog[]> => {
       const searchParams = new URLSearchParams()
-      
+
       if (params) {
         Object.entries(params).forEach(([key, value]) => {
           if (value !== undefined && value !== null) {
@@ -74,7 +74,7 @@ export function useRLSAuditLogs(params?: {
           }
         })
       }
-      
+
       const response = await apiClient.get(`/api/v1/rls/audit-logs?${searchParams.toString()}`)
       return response.data
     },

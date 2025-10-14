@@ -85,12 +85,12 @@ export function FileUpload({
 
     // Check file format
     const extension = file.name.toLowerCase().split('.').pop();
-    const isValidFormat = allowedFormats.some(format => 
+    const isValidFormat = allowedFormats.some(format =>
       formatConfig[format].extensions.includes(`.${extension}`)
     );
 
     if (!isValidFormat) {
-      const allowedExts = allowedFormats.flatMap(format => 
+      const allowedExts = allowedFormats.flatMap(format =>
         formatConfig[format].extensions
       ).join(', ');
       return `File format .${extension} is not supported. Allowed formats: ${allowedExts}`;
@@ -148,12 +148,12 @@ export function FileUpload({
     const units = ['B', 'KB', 'MB', 'GB'];
     let size = bytes;
     let unitIndex = 0;
-    
+
     while (size >= 1024 && unitIndex < units.length - 1) {
       size /= 1024;
       unitIndex++;
     }
-    
+
     return `${size.toFixed(1)} ${units[unitIndex]}`;
   };
 
@@ -167,7 +167,7 @@ export function FileUpload({
   const getFormatBadge = (file: File) => {
     const format = detectFileFormat(file);
     const config = formatConfig[format];
-    
+
     if (!config) return null;
 
     return (
@@ -210,12 +210,12 @@ export function FileUpload({
               onChange={handleInputChange}
               disabled={disabled}
             />
-            
+
             <div className="space-y-4">
               <Upload className={`h-12 w-12 mx-auto ${
                 uploadError ? 'text-red-500' : 'text-gray-400'
               }`} />
-              
+
               <div>
                 <p className="text-lg font-medium">
                   {dragActive ? 'Drop your file here' : 'Choose a file or drag it here'}
@@ -253,7 +253,7 @@ export function FileUpload({
                 </div>
               </div>
             </div>
-            
+
             <div className="flex items-center space-x-2">
               <CheckCircle className="h-5 w-5 text-green-500" />
               <Button
@@ -287,7 +287,7 @@ export function FileUpload({
             {allowedFormats.map(format => {
               const config = formatConfig[format];
               const Icon = config.icon;
-              
+
               return (
                 <div key={format} className="flex items-center space-x-2 px-3 py-2 bg-gray-100 dark:bg-gray-800 rounded-lg text-sm">
                   <Icon className="h-4 w-4" />

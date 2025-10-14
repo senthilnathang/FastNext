@@ -216,7 +216,7 @@ export function MobileSidebar({
                     </div>
                     <span className="font-semibold text-gray-900 dark:text-white">FastNext</span>
                   </div>
-                  
+
                   <Button
                     variant="ghost"
                     size="sm"
@@ -240,10 +240,10 @@ export function MobileSidebar({
 
               {/* Swipe indicator */}
               {enableSwipe && (
-                <div className="absolute top-1/2 -translate-y-1/2 w-1 h-16 bg-gray-300 dark:bg-gray-600 rounded-full opacity-20" 
-                     style={{ 
-                       [side === 'left' ? 'right' : 'left']: '-2px' 
-                     }} 
+                <div className="absolute top-1/2 -translate-y-1/2 w-1 h-16 bg-gray-300 dark:bg-gray-600 rounded-full opacity-20"
+                     style={{
+                       [side === 'left' ? 'right' : 'left']: '-2px'
+                     }}
                 />
               )}
             </motion.div>

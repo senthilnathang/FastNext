@@ -43,13 +43,11 @@ export default function EnhancedDashboardLayout({ children }: EnhancedDashboardL
       document.documentElement.requestFullscreen().then(() => {
         setIsFullscreen(true)
       }).catch(err => {
-        console.log('Error attempting to enable fullscreen:', err)
       })
     } else {
       document.exitFullscreen().then(() => {
         setIsFullscreen(false)
       }).catch(err => {
-        console.log('Error attempting to exit fullscreen:', err)
       })
     }
   }, [])
@@ -62,7 +60,7 @@ export default function EnhancedDashboardLayout({ children }: EnhancedDashboardL
         event.preventDefault()
         setSidebarCollapsed(!sidebarCollapsed)
       }
-      
+
       // F11 for fullscreen
       if (event.key === 'F11') {
         event.preventDefault()
@@ -93,12 +91,12 @@ export default function EnhancedDashboardLayout({ children }: EnhancedDashboardL
     <div className="flex h-screen bg-muted/30 overflow-hidden">
       {/* Mobile sidebar overlay */}
       {sidebarOpen && (
-        <div 
+        <div
           className="fixed inset-0 z-40 bg-background/80 backdrop-blur-sm lg:hidden transition-opacity duration-200"
           onClick={() => setSidebarOpen(false)}
         />
       )}
-      
+
       {/* Sidebar */}
       <div className={cn(
         "fixed inset-y-0 left-0 z-50 transform transition-all duration-300 ease-out",
@@ -106,8 +104,8 @@ export default function EnhancedDashboardLayout({ children }: EnhancedDashboardL
         "shadow-xl lg:shadow-none",
         sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
       )}>
-        <EnhancedSidebar 
-          className="h-full" 
+        <EnhancedSidebar
+          className="h-full"
           isCollapsed={sidebarCollapsed}
           onToggleCollapse={handleSidebarToggle}
           showCloseButton={sidebarOpen}
@@ -136,7 +134,7 @@ export default function EnhancedDashboardLayout({ children }: EnhancedDashboardL
                 <h1 className="text-lg font-semibold text-foreground">FastNext</h1>
               </div>
             </div>
-            
+
             <div className="flex items-center space-x-2">
               <EnhancedThemeToggle />
               <Button
@@ -154,12 +152,12 @@ export default function EnhancedDashboardLayout({ children }: EnhancedDashboardL
             </div>
           </div>
         </div>
-        
+
         {/* Desktop header */}
         <div className="hidden lg:block">
           <Header />
         </div>
-        
+
         {/* Main content area */}
         <main className="flex-1 overflow-auto bg-background">
           <div className={cn(
@@ -178,7 +176,7 @@ export default function EnhancedDashboardLayout({ children }: EnhancedDashboardL
               Press <kbd className="px-1.5 py-0.5 bg-background border border-border rounded text-xs">Ctrl+B</kbd> to toggle sidebar
             </span>
           </div>
-          
+
           <div className="flex items-center space-x-4">
             <span className="text-gray-500 dark:text-gray-400">
               {sidebarCollapsed ? 'Sidebar collapsed' : 'Sidebar expanded'}

@@ -99,11 +99,11 @@ export function useInfiniteData<T>({
       setError(null)
 
       const result = await fetchFn(currentPage, pageSize)
-      
+
       setData(prev => [...prev, ...result.data])
       setHasNextPage(result.hasMore)
       setCurrentPage(prev => prev + 1)
-      
+
       if (result.total !== undefined) {
         setTotal(result.total)
       }
@@ -134,11 +134,11 @@ export function useInfiniteData<T>({
         setError(null)
 
         const result = await fetchFn(1, pageSize)
-        
+
         setData(result.data)
         setHasNextPage(result.hasMore)
         setCurrentPage(2) // Next page will be 2
-        
+
         if (result.total !== undefined) {
           setTotal(result.total)
         }

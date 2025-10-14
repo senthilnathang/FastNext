@@ -1,15 +1,15 @@
 export const API_CONFIG = {
   BASE_URL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000',
   API_VERSION: '/api/v1',
-  
+
   get API_BASE_URL() {
     return `${this.BASE_URL}${this.API_VERSION}`;
   },
-  
+
   ENDPOINTS: {
     AUTH: {
       LOGIN: '/auth/login',
-      REGISTER: '/auth/register', 
+      REGISTER: '/auth/register',
       REFRESH: '/auth/refresh',
       LOGOUT: '/auth/logout',
       ME: '/auth/me',

@@ -99,7 +99,7 @@ export function InfiniteScrollList<T>({
       {showStats && (
         <div className="flex items-center justify-between text-sm text-gray-600 dark:text-gray-400">
           <span>
-            Showing {data.length.toLocaleString()} 
+            Showing {data.length.toLocaleString()}
             {total !== undefined && ` of ${total.toLocaleString()}`} items
           </span>
           {currentPage > 0 && (
@@ -157,7 +157,7 @@ export function InfiniteScrollList<T>({
       {!hasNextPage && data.length > 0 && (
         <div className="text-center py-8 text-gray-500 dark:text-gray-400">
           <p className="text-sm">
-            {total !== undefined 
+            {total !== undefined
               ? `All ${total.toLocaleString()} items loaded`
               : "No more items to load"
             }

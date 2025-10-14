@@ -8,9 +8,9 @@ import { Badge } from '@/shared/components/ui/badge'
 import { ViewManager } from '@/shared/components/views'
 import type { Column, ViewConfig } from '@/shared/components/views'
 
-import { 
-  useProducts, 
-  useDeleteProduct, useToggleProductStatus 
+import {
+  useProducts,
+  useDeleteProduct, useToggleProductStatus
 } from '@/modules/product/hooks/useProducts'
 import { apiUtils } from '@/shared/services/api/client'
 import type { Product } from '@/shared/services/api/product'
@@ -132,7 +132,7 @@ const ProductsPage: React.FC<ProductsPageProps> = () => {
       label: 'Website',
       render: (value) => (
         value ? (
-          <a 
+          <a
             href={String(value)}
             target="_blank"
             rel="noopener noreferrer"
@@ -236,7 +236,6 @@ const ProductsPage: React.FC<ProductsPageProps> = () => {
   }, [deleteProductMutation])
 
   const handleProductView = useCallback((product: Product) => {
-    console.log('View product:', product)
   }, [])
 
   const handleCreateProduct = useCallback(() => {
@@ -244,11 +243,9 @@ const ProductsPage: React.FC<ProductsPageProps> = () => {
   }, [])
 
   const handleExport = useCallback((format: 'csv' | 'json' | 'excel') => {
-    console.log('Export products as:', format)
   }, [])
 
   const handleImport = useCallback((file: File) => {
-    console.log('Import products from:', file.name)
   }, [])
 
   const products = useMemo(() => productsData?.items || [], [productsData])
@@ -274,13 +271,13 @@ const ProductsPage: React.FC<ProductsPageProps> = () => {
         views={views}
         activeView={activeView}
         onViewChange={setActiveView}
-        
+
         // Search & Filtering
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
         filters={filters}
         onFiltersChange={setFilters}
-        
+
         // Sorting & Grouping
         sortBy={sortBy}
         sortOrder={sortOrder}
@@ -292,27 +289,27 @@ const ProductsPage: React.FC<ProductsPageProps> = () => {
         groupBy={groupBy}
         onGroupChange={setGroupBy}
         groupOptions={groupOptions}
-        
+
         // Selection & Actions
         selectedItems={selectedItems}
         onSelectionChange={setSelectedItems as any}
         selectable={true}
         bulkActions={bulkActions as any}
-        
+
         // CRUD Operations
         onCreateClick={handleCreateProduct}
         onEditClick={handleProductEdit as any}
         onDeleteClick={handleProductDelete as any}
         onViewClick={handleProductView as any}
-        
+
         // Export/Import
         onExport={handleExport}
         onImport={handleImport}
-        
+
         // Loading & Error states
         loading={productsLoading}
         error={productsError ? apiUtils.getErrorMessage(productsError) : null}
-        
+
         // UI Configuration
         showToolbar={true}
         showSearch={true}
@@ -327,7 +324,7 @@ const ProductsPage: React.FC<ProductsPageProps> = () => {
         open={isCreateDialogOpen}
         onOpenChange={setIsCreateDialogOpen}
       />
-      
+
       <ProductEditDialog
         product={editingProduct}
         open={!!editingProduct}

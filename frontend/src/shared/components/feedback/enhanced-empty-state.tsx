@@ -208,7 +208,7 @@ function EmptySearch({
   onClear?: () => void;
 }) {
   const actions: EmptyStateAction[] = [];
-  
+
   if (onClear) {
     actions.push({
       label: 'Clear search',
@@ -236,7 +236,7 @@ function EmptyData({
   createLabel?: string;
 }) {
   const actions: EmptyStateAction[] = [];
-  
+
   if (onCreate) {
     actions.push({
       label: createLabel,
@@ -264,7 +264,7 @@ function EmptyError({
   retryLabel?: string;
 }) {
   const actions: EmptyStateAction[] = [];
-  
+
   if (onRetry) {
     actions.push({
       label: retryLabel,

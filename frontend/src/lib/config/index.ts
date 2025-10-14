@@ -39,7 +39,7 @@ export class AppConfig {
     if (this.config) return this.config;
 
     try {
-      const env = typeof window === 'undefined' 
+      const env = typeof window === 'undefined'
         ? validateServerEnvironment()
         : validateClientEnvironment();
 
@@ -129,15 +129,15 @@ export class AppConfig {
    */
   private getTrustedDomains(env: any): string[] {
     const domains = ['self'];
-    
+
     if (env.NEXT_PUBLIC_DOMAIN) {
       domains.push(env.NEXT_PUBLIC_DOMAIN);
     }
-    
+
     if (env.VERCEL_URL) {
       domains.push(env.VERCEL_URL);
     }
-    
+
     // Add API domain if different
     if (env.NEXT_PUBLIC_API_URL) {
       try {
@@ -147,7 +147,7 @@ export class AppConfig {
         console.warn('Invalid API URL in environment:', env.NEXT_PUBLIC_API_URL);
       }
     }
-    
+
     return domains;
   }
 
@@ -239,11 +239,11 @@ export function validateConfiguration(): {
       if (config.api.baseUrl.includes('localhost')) {
         warnings.push('Using localhost API in production');
       }
-      
+
       if (!config.monitoring.sentry.enabled) {
         warnings.push('Error monitoring not configured for production');
       }
-      
+
       if (!config.security.enableHSTS) {
         warnings.push('HSTS not enabled for production');
       }

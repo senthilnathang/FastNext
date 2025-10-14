@@ -9,10 +9,10 @@ import { Button } from '@/shared/components/ui/button';
 import { Input } from '@/shared/components/ui/input';
 import { Label } from '@/shared/components/ui/label';
 import { Checkbox } from '@/shared/components/ui/checkbox';
-import { 
-  Upload, 
-  Database, 
-  AlertCircle, 
+import {
+  Upload,
+  Database,
+  AlertCircle,
   Info,
   Columns,
   Settings,
@@ -67,12 +67,12 @@ export default function DataImportPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingTables, setIsLoadingTables] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  
+
   // Data states
   const [availableTables, setAvailableTables] = useState<string[]>([]);
   const [tableSchema, setTableSchema] = useState<TableInfo | null>(null);
   const [tablePermissions, setTablePermissions] = useState<TablePermissions | null>(null);
-  
+
   // Import wizard data
   const [importData, setImportData] = useState<ImportData>({
     selectedTable: '',
@@ -143,14 +143,14 @@ export default function DataImportPage() {
       if (!response.ok) {
         const errorText = await response.text();
         console.error(`Failed to fetch available tables (${response.status}):`, errorText);
-        
+
         // For auth errors, show demo tables
         if (response.status === 401 || response.status === 403) {
           setAvailableTables(['users', 'products', 'orders', 'customers']);
           setIsLoadingTables(false);
           return;
         }
-        
+
         throw new Error(`Failed to fetch available tables (${response.status})`);
       }
 
@@ -366,16 +366,16 @@ export default function DataImportPage() {
 
     try {
       setIsLoading(true);
-      
+
       // Check if we're in demo mode or validation was skipped
       if (importData.validationResults?.isDemoMode || importData.validationSkipped) {
         // Simulate import process in demo mode or when validation was skipped
         await new Promise(resolve => setTimeout(resolve, 2000)); // Simulate processing time
-        
-        const message = importData.validationSkipped 
+
+        const message = importData.validationSkipped
           ? 'Import completed (validation was skipped)'
           : 'Demo import completed successfully';
-          
+
         return {
           success: true,
           message,
@@ -386,18 +386,18 @@ export default function DataImportPage() {
           validation_skipped: importData.validationSkipped || false
         };
       }
-      
+
       // Use the existing import API for real import
       const formData = new FormData();
-      
+
       // Create a temporary CSV file from the data
       const csvContent = convertDataToCSV(data);
       const blob = new Blob([csvContent], { type: 'text/csv' });
       const file = new File([blob], `import_${importData.selectedTable}_${Date.now()}.csv`, { type: 'text/csv' });
-      
+
       formData.append('file', file);
       formData.append('table_name', importData.selectedTable);
-      
+
       const importOptions = {
         format: importData.format,
         has_headers: !importData.options.skipHeader,
@@ -411,10 +411,10 @@ export default function DataImportPage() {
         validate_only: false,
         batch_size: config.batch_size
       };
-      
+
       formData.append('import_options', JSON.stringify(importOptions));
       formData.append('field_mappings', JSON.stringify(importData.fieldMappings));
-      
+
       const response = await fetch('/api/v1/data/import/upload', {
         method: 'POST',
         headers: {
@@ -443,20 +443,20 @@ export default function DataImportPage() {
 
   const convertDataToCSV = (data: any[]): string => {
     if (data.length === 0) return '';
-    
+
     const headers = Object.keys(data[0]);
     const csvRows = [
       headers.join(','),
-      ...data.map(row => 
+      ...data.map(row =>
         headers.map(header => {
           const value = row[header];
-          return typeof value === 'string' && value.includes(',') 
-            ? `"${value.replace(/"/g, '""')}"` 
+          return typeof value === 'string' && value.includes(',')
+            ? `"${value.replace(/"/g, '""')}"`
             : value;
         }).join(',')
       )
     ];
-    
+
     return csvRows.join('\n');
   };
 
@@ -470,7 +470,7 @@ export default function DataImportPage() {
           const content = e.target?.result as string;
           const lines = content.split('\n').filter(line => line.trim());
           const headers = lines[0]?.split(',').map(h => h.trim().replace(/"/g, ''));
-          const dataRows = lines.slice(1).map(line => 
+          const dataRows = lines.slice(1).map(line =>
             line.split(',').map(cell => cell.trim().replace(/"/g, ''))
           );
 
@@ -507,10 +507,10 @@ export default function DataImportPage() {
           } else {
             // Generic validation for other tables
             dataRows.forEach((row, index) => {
-              const hasEmptyRequiredFields = row.some((cell, i) => 
+              const hasEmptyRequiredFields = row.some((cell, i) =>
                 headers[i] === 'name' && (!cell || cell.trim() === '')
               );
-              
+
               if (hasEmptyRequiredFields) {
                 errors.push(`Row ${index + 2}: Missing required fields`);
                 errorRows++;
@@ -520,7 +520,7 @@ export default function DataImportPage() {
             });
           }
 
-          const sampleRows = dataRows.slice(0, 5).map(row => 
+          const sampleRows = dataRows.slice(0, 5).map(row =>
             headers.reduce((obj, header, i) => {
               obj[header] = row[i] || '';
               return obj;
@@ -572,7 +572,7 @@ export default function DataImportPage() {
       // First try to parse the file with backend
       const parseFormData = new FormData();
       parseFormData.append('file', importData.file);
-      
+
       const importOptions = {
         format: importData.format,
         has_headers: !importData.options.skipHeader,
@@ -586,7 +586,7 @@ export default function DataImportPage() {
         validate_only: false,
         batch_size: config.batch_size
       };
-      
+
       parseFormData.append('import_options', JSON.stringify(importOptions));
 
       let parseResult;
@@ -640,13 +640,13 @@ export default function DataImportPage() {
       } catch (authError) {
         console.warn('Backend validation failed, switching to demo mode:', authError);
         isDemoMode = true;
-        
+
         // Fallback to demo validation
         const demoResults = await performDemoValidation(importData.file, importData.selectedTable);
         parseResult = demoResults.parseResult;
         validationResult = demoResults.validationResult;
       }
-      
+
       setImportData(prev => ({
         ...prev,
         previewData: parseResult.sample_rows || [],
@@ -696,7 +696,7 @@ export default function DataImportPage() {
 
   const handleSkipValidation = async () => {
     if (!importData.file || !importData.selectedTable) return;
-    
+
     // Parse file for preview data without validation
     try {
       setIsLoading(true);
@@ -710,7 +710,7 @@ export default function DataImportPage() {
             line.split(',').map(cell => cell.trim().replace(/"/g, ''))
           );
 
-          const sampleRows = dataRows.map(row => 
+          const sampleRows = dataRows.map(row =>
             headers.reduce((obj, header, i) => {
               obj[header] = row[i] || '';
               return obj;
@@ -752,7 +752,7 @@ export default function DataImportPage() {
     try {
       setIsLoading(true);
       const result = await handleImport(importData.previewData);
-      
+
       if (result?.demo_mode) {
         alert(`✅ Demo import simulation completed!\n\nRows processed: ${result.rows_imported}/${result.total_rows}\n\nNote: This was a demonstration. No actual data was imported to the database.`);
       } else if (result?.validation_skipped) {
@@ -800,8 +800,8 @@ export default function DataImportPage() {
           <Skeleton className="h-10 w-full" />
         ) : (
           <div className="space-y-4">
-            <Select 
-              value={importData.selectedTable} 
+            <Select
+              value={importData.selectedTable}
               onValueChange={(value) => setImportData(prev => ({ ...prev, selectedTable: value }))}
             >
               <SelectTrigger>
@@ -925,7 +925,7 @@ export default function DataImportPage() {
                 <div>
                   <div className="font-semibold text-green-800 dark:text-green-200">{importData.file.name}</div>
                   <div className="text-sm text-green-600 dark:text-green-400">
-                    Size: {(importData.file.size / 1024 / 1024).toFixed(2)} MB • 
+                    Size: {(importData.file.size / 1024 / 1024).toFixed(2)} MB •
                     Type: {importData.file.type || 'Unknown'}
                   </div>
                 </div>
@@ -937,8 +937,8 @@ export default function DataImportPage() {
         {/* Format Selection */}
         <div className="space-y-2">
           <Label>File Format</Label>
-          <Select 
-            value={importData.format} 
+          <Select
+            value={importData.format}
             onValueChange={(value) => setImportData(prev => ({ ...prev, format: value }))}
           >
             <SelectTrigger>
@@ -957,12 +957,12 @@ export default function DataImportPage() {
           <Label>Import Options</Label>
           <div className="grid grid-cols-2 gap-4">
             <div className="flex items-center space-x-2">
-              <Checkbox 
+              <Checkbox
                 id="skip-header"
                 checked={importData.options.skipHeader || false}
-                onCheckedChange={(checked) => 
-                  setImportData(prev => ({ 
-                    ...prev, 
+                onCheckedChange={(checked) =>
+                  setImportData(prev => ({
+                    ...prev,
                     options: { ...prev.options, skipHeader: checked }
                   }))
                 }
@@ -970,12 +970,12 @@ export default function DataImportPage() {
               <Label htmlFor="skip-header">Skip header row</Label>
             </div>
             <div className="flex items-center space-x-2">
-              <Checkbox 
+              <Checkbox
                 id="validate-data"
                 checked={importData.options.validateData || true}
-                onCheckedChange={(checked) => 
-                  setImportData(prev => ({ 
-                    ...prev, 
+                onCheckedChange={(checked) =>
+                  setImportData(prev => ({
+                    ...prev,
                     options: { ...prev.options, validateData: checked }
                   }))
                 }
@@ -1013,15 +1013,15 @@ export default function DataImportPage() {
                     </span>
                   </div>
                   <p className="mt-2 text-sm text-yellow-700 dark:text-yellow-300">
-                    Authentication is unavailable. Validation results are simulated based on basic rules. 
+                    Authentication is unavailable. Validation results are simulated based on basic rules.
                     For full validation and import functionality, please ensure the backend is running and you are logged in.
                   </p>
                 </div>
               )}
               {/* Validation Status */}
               <div className={`p-4 rounded-lg border ${
-                importData.validationResults.isValid 
-                  ? 'bg-green-50 dark:bg-green-950 border-green-200 dark:border-green-800' 
+                importData.validationResults.isValid
+                  ? 'bg-green-50 dark:bg-green-950 border-green-200 dark:border-green-800'
                   : 'bg-red-50 dark:bg-red-950 border-red-200 dark:border-red-800'
               }`}>
                 <div className="flex items-center space-x-2 mb-2">
@@ -1148,11 +1148,11 @@ export default function DataImportPage() {
             <div className="text-center py-8">
               <AlertCircle className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
               <p className="text-muted-foreground mb-4">No validation data available. Please go back and upload a file.</p>
-              
+
               {importData.file && (
                 <div className="space-y-4">
                   <p className="text-sm text-muted-foreground">Or skip validation if you&apos;re confident your data is correct:</p>
-                  <Button 
+                  <Button
                     onClick={handleSkipValidation}
                     disabled={isLoading}
                     variant="outline"
@@ -1168,7 +1168,7 @@ export default function DataImportPage() {
           {/* Skip Validation Button for when validation is available */}
           {importData.validationResults && !importData.validationSkipped && (
             <div className="flex justify-center pt-4 border-t">
-              <Button 
+              <Button
                 onClick={handleSkipValidation}
                 disabled={isLoading}
                 variant="outline"

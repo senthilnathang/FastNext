@@ -3,12 +3,12 @@
 import React from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/modules/auth';
-import { 
-  Card, 
-  CardContent, 
-  CardDescription, 
-  CardHeader, 
-  CardTitle 
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle
 } from '@/shared/components';
 import {
   Database,
@@ -93,7 +93,7 @@ export default function ConfigurationPage() {
             </div>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center space-x-2">

@@ -56,7 +56,7 @@ export default function DataImportExportConfigPage() {
   const loadConfiguration = async () => {
     setLoading(true);
     setError('');
-    
+
     try {
       const token = localStorage.getItem('access_token');
       if (!token) {
@@ -90,7 +90,7 @@ export default function DataImportExportConfigPage() {
   const saveConfiguration = async () => {
     setSaving(true);
     setError('');
-    
+
     try {
       const token = localStorage.getItem('access_token');
       if (!token) {
@@ -246,8 +246,8 @@ export default function DataImportExportConfigPage() {
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="compressionLevel">Compression Level</Label>
-              <Select 
-                value={config.compression_level} 
+              <Select
+                value={config.compression_level}
                 onValueChange={(value) => setConfig(prev => ({ ...prev, compression_level: value }))}
               >
                 <SelectTrigger>
@@ -313,7 +313,7 @@ export default function DataImportExportConfigPage() {
                       onCheckedChange={(checked) => {
                         setConfig(prev => ({
                           ...prev,
-                          allowed_formats: checked 
+                          allowed_formats: checked
                             ? [...prev.allowed_formats, format]
                             : prev.allowed_formats.filter(f => f !== format)
                         }));

@@ -18,7 +18,7 @@ const XSS_PATTERNS = {
     /data:text\/html/gi,
     /data:text\/javascript/gi
   ],
-  
+
   // Event handler XSS (in HTML context, not React props)
   events: [
     /on\w+\s*=\s*["']?javascript:/gi,
@@ -103,7 +103,7 @@ const PATTERN_SEVERITY: Record<string, 'low' | 'medium' | 'high' | 'critical'> =
 export async function detectXSSAttempts(request: NextRequest): Promise<XSSDetectionResult> {
   // Skip XSS detection in development or if explicitly bypassed
   const bypassXSSDetection = process.env.NODE_ENV === 'development' || process.env.BYPASS_XSS_DETECTION === 'true';
-  
+
   if (bypassXSSDetection) {
     return {
       detected: false,
@@ -252,7 +252,7 @@ async function analyzeRequestBody(request: NextRequest): Promise<XSSDetectionRes
       // Clone request to avoid consuming the body
       const clonedRequest = request.clone();
       const bodyText = await clonedRequest.text();
-      
+
       const results = analyzeText(bodyText, 'json_body');
       if (results.detected) {
         detectedPatterns.push(...results.patterns);
@@ -262,7 +262,7 @@ async function analyzeRequestBody(request: NextRequest): Promise<XSSDetectionRes
     } else if (contentType.includes('application/x-www-form-urlencoded')) {
       const clonedRequest = request.clone();
       const formData = await clonedRequest.formData();
-      
+
       for (const [key, value] of formData.entries()) {
         if (typeof value === 'string') {
           const keyResults = analyzeText(key, `form_key:${key}`);
@@ -284,7 +284,7 @@ async function analyzeRequestBody(request: NextRequest): Promise<XSSDetectionRes
     } else if (contentType.includes('text/')) {
       const clonedRequest = request.clone();
       const bodyText = await clonedRequest.text();
-      
+
       const results = analyzeText(bodyText, 'text_body');
       if (results.detected) {
         detectedPatterns.push(...results.patterns);
@@ -373,7 +373,7 @@ function getMaxSeverity(
   const severityOrder = ['low', 'medium', 'high', 'critical'];
   const currentIndex = severityOrder.indexOf(current);
   const newIndex = severityOrder.indexOf(newSeverity);
-  
+
   return newIndex > currentIndex ? newSeverity : current;
 }
 
@@ -403,7 +403,7 @@ export class ClientXSSProtection {
   static sanitizeURL(url: string): string {
     try {
       const urlObj = new URL(url);
-      
+
       // Block dangerous protocols
       const dangerousProtocols = ['javascript:', 'vbscript:', 'data:', 'file:'];
       if (dangerousProtocols.some(protocol => url.toLowerCase().startsWith(protocol))) {

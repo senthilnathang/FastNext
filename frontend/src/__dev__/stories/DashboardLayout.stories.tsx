@@ -65,7 +65,7 @@ export const Default: Story = {
             This is the main content area where dashboard content would be displayed.
           </p>
         </div>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {[1, 2, 3, 4, 5, 6].map(i => (
             <div key={i} className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
@@ -119,7 +119,7 @@ export const WithComplexContent: Story = {
                 <div className="text-sm text-purple-600 dark:text-purple-400">Components</div>
               </div>
             </div>
-            
+
             <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-8 text-center">
               <div className="text-gray-500 dark:text-gray-400">
                 Chart placeholder - Real charts would go here
@@ -127,7 +127,7 @@ export const WithComplexContent: Story = {
             </div>
           </div>
         </div>
-        
+
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow">
           <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
             <h2 className="text-xl font-semibold text-gray-900 dark:text-white">

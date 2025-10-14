@@ -42,10 +42,10 @@ export default function CompactTable<T extends Record<string, any>>({
   };
 
   const getCellValue = (item: T, column: Column<T>) => {
-    const value = typeof column.key === 'string' 
+    const value = typeof column.key === 'string'
       ? item[column.key as keyof T]
       : item[column.key];
-    
+
     return column.render ? column.render(item, value) : value;
   };
 

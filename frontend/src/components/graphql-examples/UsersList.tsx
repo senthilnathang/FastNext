@@ -18,7 +18,7 @@ import { Search, User, Mail, Calendar, ExternalLink } from 'lucide-react';
 export function UsersList() {
   const [searchTerm, setSearchTerm] = useState('');
   const { variables, reset } = usePagination();
-  
+
   const { data, loading, error, fetchMore } = useUsers({
     ...variables,
     search: searchTerm || undefined,
@@ -38,7 +38,7 @@ export function UsersList() {
         },
         updateQuery: (prev, { fetchMoreResult }) => {
           if (!fetchMoreResult) return prev;
-          
+
           return {
             users: {
               ...fetchMoreResult.users,
@@ -146,7 +146,7 @@ export function UsersList() {
                           <span>•</span>
                           <span>{user.email}</span>
                         </div>
-                        
+
                         {user.location && (
                           <div className="flex items-center gap-2">
                             <span>{user.location}</span>

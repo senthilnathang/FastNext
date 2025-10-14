@@ -9,7 +9,7 @@ interface WindowControlsProps {
   className?: string
   variant?: 'default' | 'compact'
   showClose?: boolean
-  showMinimize?: boolean 
+  showMinimize?: boolean
   showMaximize?: boolean
   onMinimize?: () => void
   onMaximize?: () => void
@@ -99,7 +99,7 @@ export function WindowControls({
           <Minus className={iconSize} />
         </Button>
       )}
-      
+
       {showMaximize && (
         <Button
           variant="ghost"
@@ -118,7 +118,7 @@ export function WindowControls({
           )}
         </Button>
       )}
-      
+
       {showClose && (
         <Button
           variant="ghost"

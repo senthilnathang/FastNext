@@ -18,8 +18,8 @@ interface SubWorkflowNodeData extends WorkflowNodeData {
 
 function SubWorkflowNode({ data, selected }: NodeProps<SubWorkflowNodeData>) {
   const getModeColor = () => {
-    return data.executionMode === 'synchronous' 
-      ? 'bg-blue-100 text-blue-700' 
+    return data.executionMode === 'synchronous'
+      ? 'bg-blue-100 text-blue-700'
       : 'bg-green-100 text-green-700';
   };
 
@@ -37,7 +37,7 @@ function SubWorkflowNode({ data, selected }: NodeProps<SubWorkflowNodeData>) {
   };
 
   return (
-    <div 
+    <div
       className={`
         px-3 py-2 shadow-md rounded-lg border-2 min-w-[160px] max-w-[220px]
         ${selected ? 'border-indigo-500' : 'border-indigo-300'}
@@ -51,7 +51,7 @@ function SubWorkflowNode({ data, selected }: NodeProps<SubWorkflowNodeData>) {
         className="w-3 h-3 !bg-indigo-400 border-2 border-white"
         style={{ top: -6 }}
       />
-      
+
       {/* Node header */}
       <div className="flex items-center space-x-2">
         <Workflow size={14} className="text-indigo-600 flex-shrink-0" />
@@ -110,7 +110,7 @@ function SubWorkflowNode({ data, selected }: NodeProps<SubWorkflowNodeData>) {
           </div>
         )}
       </div>
-      
+
       {/* Output handles */}
       {/* Success */}
       <Handle
@@ -120,7 +120,7 @@ function SubWorkflowNode({ data, selected }: NodeProps<SubWorkflowNodeData>) {
         className="w-3 h-3 !bg-green-400 border-2 border-white"
         style={{ bottom: -6, left: '30%' }}
       />
-      
+
       {/* Error */}
       <Handle
         type="source"

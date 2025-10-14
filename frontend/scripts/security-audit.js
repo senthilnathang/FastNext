@@ -24,25 +24,25 @@ class SecurityAuditor {
     try {
       // 1. NPM Audit
       await this.runNpmAudit();
-      
+
       // 2. Dependency Analysis
       await this.analyzeDependencies();
-      
+
       // 3. Bundle Analysis
       await this.analyzeBundleSize();
-      
+
       // 4. License Check
       await this.checkLicenses();
-      
+
       // 5. Outdated Packages
       await this.checkOutdatedPackages();
-      
+
       // 6. Security Headers Check
       await this.checkSecurityHeaders();
-      
+
       // 7. Generate Report
       this.generateReport();
-      
+
     } catch (error) {
       console.error('❌ Security audit failed:', error.message);
       process.exit(1);
@@ -51,15 +51,15 @@ class SecurityAuditor {
 
   async runNpmAudit() {
     console.log('📋 Running NPM Security Audit...');
-    
+
     try {
-      const auditResult = execSync('npm audit --json', { 
+      const auditResult = execSync('npm audit --json', {
         encoding: 'utf8',
         stdio: 'pipe'
       });
-      
+
       const audit = JSON.parse(auditResult);
-      
+
       if (audit.vulnerabilities) {
         Object.entries(audit.vulnerabilities).forEach(([pkg, vuln]) => {
           this.vulnerabilities.push({
@@ -72,9 +72,9 @@ class SecurityAuditor {
           });
         });
       }
-      
+
       console.log(`   Found ${Object.keys(audit.vulnerabilities || {}).length} vulnerabilities`);
-      
+
     } catch (error) {
       if (error.status === 1) {
         // NPM audit found vulnerabilities
@@ -108,7 +108,7 @@ class SecurityAuditor {
 
   async analyzeDependencies() {
     console.log('📦 Analyzing Dependencies...');
-    
+
     if (!fs.existsSync(this.packageJsonPath)) {
       this.warnings.push({
         type: 'missing-file',
@@ -175,7 +175,7 @@ class SecurityAuditor {
 
   async analyzeBundleSize() {
     console.log('📊 Analyzing Bundle Size...');
-    
+
     try {
       // Run bundle analyzer if available
       if (fs.existsSync(path.join(process.cwd(), 'node_modules', '@next', 'bundle-analyzer'))) {
@@ -213,16 +213,16 @@ class SecurityAuditor {
 
   async checkLicenses() {
     console.log('📄 Checking Licenses...');
-    
+
     try {
       const result = execSync('npx license-checker --json --onlyAllow "MIT;Apache-2.0;BSD-2-Clause;BSD-3-Clause;ISC" 2>/dev/null || echo "{}"', {
         encoding: 'utf8',
         stdio: 'pipe'
       });
-      
+
       const licenses = JSON.parse(result);
       const restrictiveLicenses = ['GPL', 'AGPL', 'LGPL', 'CDDL', 'EPL'];
-      
+
       Object.entries(licenses).forEach(([pkg, info]) => {
         if (info.licenses) {
           const license = Array.isArray(info.licenses) ? info.licenses.join(',') : info.licenses;
@@ -248,18 +248,18 @@ class SecurityAuditor {
 
   async checkOutdatedPackages() {
     console.log('🔄 Checking for Outdated Packages...');
-    
+
     try {
       const result = execSync('npm outdated --json', {
         encoding: 'utf8',
         stdio: 'pipe'
       });
-      
+
       const outdated = JSON.parse(result);
       Object.entries(outdated).forEach(([pkg, info]) => {
         const currentMajor = parseInt(info.current.split('.')[0]);
         const latestMajor = parseInt(info.latest.split('.')[0]);
-        
+
         if (latestMajor > currentMajor) {
           this.warnings.push({
             type: 'major-update-available',
@@ -269,7 +269,7 @@ class SecurityAuditor {
           });
         }
       });
-      
+
     } catch (error) {
       // npm outdated returns non-zero exit code when packages are outdated
       if (error.stdout) {
@@ -289,7 +289,7 @@ class SecurityAuditor {
 
   async checkSecurityHeaders() {
     console.log('🛡️  Checking Security Configuration...');
-    
+
     // Check if security middleware exists
     const middlewarePath = path.join(process.cwd(), 'middleware.ts');
     if (!fs.existsSync(middlewarePath)) {
@@ -299,7 +299,7 @@ class SecurityAuditor {
       });
     } else {
       const middlewareContent = fs.readFileSync(middlewarePath, 'utf8');
-      
+
       // Check for security features
       const securityFeatures = [
         { pattern: /CSP|Content-Security-Policy/i, name: 'Content Security Policy' },
@@ -308,7 +308,7 @@ class SecurityAuditor {
         { pattern: /rateLimit/i, name: 'Rate Limiting' },
         { pattern: /HSTS|Strict-Transport-Security/i, name: 'HSTS' }
       ];
-      
+
       securityFeatures.forEach(feature => {
         if (!feature.pattern.test(middlewareContent)) {
           this.warnings.push({
@@ -324,7 +324,7 @@ class SecurityAuditor {
     const nextConfigPath = path.join(process.cwd(), 'next.config.ts');
     if (fs.existsSync(nextConfigPath)) {
       const configContent = fs.readFileSync(nextConfigPath, 'utf8');
-      
+
       if (!configContent.includes('headers()')) {
         this.warnings.push({
           type: 'missing-security-headers',
@@ -382,19 +382,19 @@ class SecurityAuditor {
 
     // Recommendations
     console.log('💡 RECOMMENDATIONS:');
-    
+
     if (totalVulns > 0) {
       console.log('   • Run "npm audit fix" to resolve vulnerabilities');
     }
-    
+
     if (this.warnings.some(w => w.type === 'outdated-packages')) {
       console.log('   • Update outdated packages with "npm update"');
     }
-    
+
     if (this.warnings.some(w => w.type === 'missing-security-feature')) {
       console.log('   • Implement missing security features in middleware');
     }
-    
+
     console.log('   • Regularly run security audits');
     console.log('   • Keep dependencies updated');
     console.log('   • Review and update security policies');

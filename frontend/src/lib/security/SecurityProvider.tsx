@@ -37,13 +37,13 @@ export function SecurityProvider({ children }: SecurityProviderProps) {
   useEffect(() => {
     // Generate CSP nonce
     const nonce = generateNonce();
-    
+
     // Check for Trusted Types support
     const trustedTypesEnabled = typeof window !== 'undefined' && 'trustedTypes' in window;
-    
+
     // Check if we're in a secure context (HTTPS)
     const isSecureContext = typeof window !== 'undefined' && window.isSecureContext;
-    
+
     // Initialize Trusted Types
     if (trustedTypesEnabled) {
       try {
@@ -88,7 +88,7 @@ export function useSecurity(): SecurityContextType {
 
 function generateNonce(): string {
   if (typeof window === 'undefined') return '';
-  
+
   // Generate a cryptographically secure random nonce
   const array = new Uint8Array(16);
   window.crypto.getRandomValues(array);
@@ -187,7 +187,7 @@ function performSecurityChecks(): void {
 
 function checkDangerousGlobals(): void {
   const dangerousGlobals = ['eval', 'Function', 'setTimeout', 'setInterval'];
-  
+
   for (const global of dangerousGlobals) {
     if (typeof (window as any)[global] === 'function') {
       // Wrap dangerous functions to log usage

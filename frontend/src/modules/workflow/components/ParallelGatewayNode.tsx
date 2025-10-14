@@ -13,7 +13,7 @@ import { Textarea } from '@/shared/components/ui/textarea';
 function ParallelGatewayNode({ data, selected, id }: NodeProps<WorkflowNodeData>) {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [editData, setEditData] = useState(data);
-  
+
   const isStart = data.label?.toLowerCase().includes('split') || data.label?.toLowerCase().includes('fork');
   const isMerge = data.label?.toLowerCase().includes('merge') || data.label?.toLowerCase().includes('join');
 
@@ -26,10 +26,10 @@ function ParallelGatewayNode({ data, selected, id }: NodeProps<WorkflowNodeData>
     }
     setIsEditDialogOpen(false);
   }, [id, editData]);
-  
+
   return (
     <>
-      <div 
+      <div
         className={`
           relative px-3 py-2 shadow-md border-2 min-w-[100px] max-w-[150px] cursor-pointer group
           ${selected ? 'border-purple-500' : 'border-purple-300'}
@@ -45,7 +45,7 @@ function ParallelGatewayNode({ data, selected, id }: NodeProps<WorkflowNodeData>
           className="w-3 h-3 !bg-purple-400 border-2 border-white"
           style={{ left: -6 }}
         />
-        
+
         {/* Edit button */}
         <Button
           variant="ghost"
@@ -58,7 +58,7 @@ function ParallelGatewayNode({ data, selected, id }: NodeProps<WorkflowNodeData>
         >
           <Settings size={10} className="text-purple-500" />
         </Button>
-        
+
         {/* Node content */}
         <div className="flex flex-col items-center space-y-1">
           <div className="flex items-center space-x-1">
@@ -70,7 +70,7 @@ function ParallelGatewayNode({ data, selected, id }: NodeProps<WorkflowNodeData>
               <Zap size={16} className="text-purple-600" />
             )}
           </div>
-          
+
           <div className="text-center">
             <div className="font-medium text-xs text-purple-800 truncate">
               {data.label || 'Gateway'}
@@ -89,7 +89,7 @@ function ParallelGatewayNode({ data, selected, id }: NodeProps<WorkflowNodeData>
             </span>
           </div>
         </div>
-      
+
         {/* Output handles - Multiple for split gateway */}
         {isStart ? (
           <>
@@ -154,7 +154,7 @@ function ParallelGatewayNode({ data, selected, id }: NodeProps<WorkflowNodeData>
                 placeholder="Enter gateway name"
               />
             </div>
-            
+
             <div className="space-y-2">
               <Label htmlFor="description">Description</Label>
               <Textarea
@@ -164,12 +164,12 @@ function ParallelGatewayNode({ data, selected, id }: NodeProps<WorkflowNodeData>
                 placeholder="Enter gateway description"
               />
             </div>
-            
+
             <div className="text-xs text-gray-500">
-              <strong>Tip:</strong> Use &quot;split&quot; or &quot;fork&quot; in the name for splitting gateways, 
+              <strong>Tip:</strong> Use &quot;split&quot; or &quot;fork&quot; in the name for splitting gateways,
               &quot;merge&quot; or &quot;join&quot; for merging gateways.
             </div>
-            
+
             <div className="flex justify-end space-x-2">
               <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
                 Cancel

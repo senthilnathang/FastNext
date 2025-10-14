@@ -103,31 +103,31 @@ export const demoProjects: Project[] = [
 // Helper function to generate progress based on current date and project timeline
 export function calculateProjectProgress(project: Project): number {
   if (!project.start_date || !project.end_date) return 0;
-  
+
   const startDate = new Date(project.start_date);
   const endDate = new Date(project.end_date);
   const currentDate = new Date();
-  
+
   if (currentDate < startDate) return 0;
   if (currentDate > endDate) return 100;
-  
+
   const totalDuration = endDate.getTime() - startDate.getTime();
   const elapsed = currentDate.getTime() - startDate.getTime();
-  
+
   return Math.round((elapsed / totalDuration) * 100);
 }
 
 // Helper function to get project status based on dates
 export function getProjectStatus(project: Project): 'not_started' | 'in_progress' | 'completed' | 'overdue' {
   if (!project.start_date || !project.end_date) return 'in_progress';
-  
+
   const startDate = new Date(project.start_date);
   const endDate = new Date(project.end_date);
   const currentDate = new Date();
-  
+
   if (currentDate < startDate) return 'not_started';
   if (currentDate > endDate) return 'overdue';
-  
+
   const progress = calculateProjectProgress(project);
   return progress >= 100 ? 'completed' : 'in_progress';
 }
@@ -135,12 +135,12 @@ export function getProjectStatus(project: Project): 'not_started' | 'in_progress
 // Helper function to get days remaining in project
 export function getDaysRemaining(project: Project): number | null {
   if (!project.end_date) return null;
-  
+
   const endDate = new Date(project.end_date);
   const currentDate = new Date();
   const diffTime = endDate.getTime() - currentDate.getTime();
   const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-  
+
   return diffDays;
 }
 
@@ -149,7 +149,7 @@ export function formatDateRange(startDate?: string, endDate?: string): string {
   if (!startDate && !endDate) return 'No dates set';
   if (!startDate) return `Ends ${new Date(endDate!).toLocaleDateString()}`;
   if (!endDate) return `Starts ${new Date(startDate).toLocaleDateString()}`;
-  
+
   const start = new Date(startDate).toLocaleDateString();
   const end = new Date(endDate).toLocaleDateString();
   return `${start} - ${end}`;

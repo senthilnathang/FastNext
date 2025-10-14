@@ -32,7 +32,7 @@ export function useDataExport({
   const [currentJob, setCurrentJob] = useState<ExportJob | null>(null);
   const [exportProgress, setExportProgress] = useState(0);
   const [exportError, setExportError] = useState<string | null>(null);
-  
+
   const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const activeJobIds = useRef<Set<string>>(new Set());
 
@@ -74,22 +74,22 @@ export function useDataExport({
     try {
       const response = await fetch(`/api/v1/export/status/${jobId}`);
       if (!response.ok) throw new Error('Failed to fetch job status');
-      
+
       const job: ExportJob = await response.json();
-      
-      setExportJobs(prev => 
+
+      setExportJobs(prev =>
         prev.map(j => j.id === jobId ? job : j)
       );
-      
+
       if (currentJob?.id === jobId) {
         setCurrentJob(job);
         setExportProgress(job.progress);
       }
-      
+
       // Stop polling if job is completed, failed, or cancelled
       if (['completed', 'failed', 'cancelled'].includes(job.status)) {
         activeJobIds.current.delete(jobId);
-        
+
         if (currentJob?.id === jobId) {
           setIsExporting(false);
           if (job.status === 'failed') {
@@ -103,11 +103,11 @@ export function useDataExport({
           }
         }
       }
-      
+
     } catch (error) {
       console.error('Failed to poll job status:', error);
       activeJobIds.current.delete(jobId);
-      
+
        if (currentJob?.id === jobId) {
          setIsExporting(false);
          setExportError('Failed to track export progress');
@@ -117,17 +117,17 @@ export function useDataExport({
 
   const startPolling = useCallback((jobId: string) => {
     activeJobIds.current.add(jobId);
-    
+
     const poll = async () => {
       if (activeJobIds.current.has(jobId)) {
         await pollJobStatus(jobId);
-        
+
         if (activeJobIds.current.has(jobId)) {
           pollingIntervalRef.current = setTimeout(poll, pollingInterval);
         }
       }
     };
-    
+
     poll();
   }, [pollJobStatus, pollingInterval]);
 
@@ -142,7 +142,7 @@ export function useDataExport({
       setExportProgress(0);
 
       const response = await onExport(options);
-      
+
       if (response.jobId) {
         // Background job - start polling
         const newJob: ExportJob = {
@@ -152,11 +152,11 @@ export function useDataExport({
           createdAt: new Date().toISOString(),
           estimatedSize: response.estimatedRows
         };
-        
+
         setExportJobs(prev => [newJob, ...prev]);
         setCurrentJob(newJob);
         startPolling(response.jobId);
-        
+
       } else if (response.downloadUrl) {
         // Direct download
         setIsExporting(false);
@@ -167,7 +167,7 @@ export function useDataExport({
         link.click();
         document.body.removeChild(link);
       }
-      
+
     } catch (error) {
       setIsExporting(false);
       setExportError(error instanceof Error ? error.message : 'Export failed');
@@ -180,11 +180,11 @@ export function useDataExport({
       const response = await fetch(`/api/v1/export/cancel/${jobId}`, {
         method: 'POST'
       });
-      
+
       if (!response.ok) throw new Error('Failed to cancel export');
-      
+
       activeJobIds.current.delete(jobId);
-      
+
       setExportJobs(prev =>
         prev.map(job =>
           job.id === jobId
@@ -192,13 +192,13 @@ export function useDataExport({
             : job
         )
       );
-      
+
       if (currentJob?.id === jobId) {
         setCurrentJob(null);
         setIsExporting(false);
         setExportProgress(0);
       }
-      
+
     } catch (error) {
       console.error('Failed to cancel export:', error);
       throw error;
@@ -206,14 +206,14 @@ export function useDataExport({
   }, [currentJob]);
 
   const clearCompletedJobs = useCallback(() => {
-    setExportJobs(prev => 
+    setExportJobs(prev =>
       prev.filter(job => !['completed', 'failed', 'cancelled'].includes(job.status))
     );
   }, []);
 
   const getExportPreview = useCallback(async (options: Partial<ExportOptions>): Promise<ExportPreview | null> => {
     if (!onPreview) return null;
-    
+
     try {
       return await onPreview(options);
     } catch (error) {

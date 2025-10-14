@@ -59,12 +59,12 @@ export function useZodForm<T extends FieldValues>({
       setSubmitError(null)
 
       const values = form.getValues()
-      
+
       // Validate with Zod schema before submission
       const validatedData = schema.parse(values)
-      
+
       await onSubmit(validatedData)
-      
+
       if (onSuccess) {
         onSuccess(validatedData)
       }
@@ -103,14 +103,14 @@ export function useZodForm<T extends FieldValues>({
       setIsSubmitting(false)
     }
   }, [
-    onSubmit, 
-    schema, 
-    form, 
-    onSuccess, 
-    onError, 
-    showSuccessToast, 
-    showErrorToast, 
-    successMessage, 
+    onSubmit,
+    schema,
+    form,
+    onSuccess,
+    onError,
+    showSuccessToast,
+    showErrorToast,
+    successMessage,
     resetOnSuccess
   ])
 

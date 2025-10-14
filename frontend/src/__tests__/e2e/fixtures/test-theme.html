@@ -19,7 +19,7 @@
     <div id="root">
         <h1>Theme Switcher Test</h1>
         <p>The theme functionality has been successfully updated based on the CodeSecAI frontend implementation.</p>
-        
+
         <h2>Key Improvements Made:</h2>
         <ul>
             <li><strong>Enhanced ThemeContext:</strong> Added better error handling and user preferences loading</li>
@@ -28,7 +28,7 @@
             <li><strong>Consistent Code Style:</strong> Updated to match CodeSecAI frontend conventions</li>
             <li><strong>SimpleThemeToggle Component:</strong> Added an additional toggle component for simpler use cases</li>
         </ul>
-        
+
         <h2>Features:</h2>
         <ul>
             <li>✅ Light/Dark/System theme modes</li>
@@ -38,7 +38,7 @@
             <li>✅ Simple toggle button option</li>
             <li>✅ Smooth theme transitions</li>
         </ul>
-        
+
         <div style="margin-top: 20px; padding: 20px; border: 1px solid;">
             <p><strong>Test Instructions:</strong></p>
             <ol>
@@ -51,18 +51,18 @@
             </ol>
         </div>
     </div>
-    
+
     <script>
         // Simple theme demo for this test page
         let currentTheme = 'light';
         document.documentElement.className = currentTheme;
-        
+
         function toggleTheme() {
             currentTheme = currentTheme === 'light' ? 'dark' : 'light';
             document.documentElement.className = currentTheme;
         }
     </script>
-    
+
     <button onclick="toggleTheme()">Toggle Theme (Demo)</button>
 </body>
 </html>

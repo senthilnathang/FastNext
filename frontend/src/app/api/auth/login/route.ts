@@ -5,7 +5,7 @@ import { rateLimit } from '@/lib/security/rate-limit';
 
 export async function POST(request: NextRequest) {
   const clientIP = getClientIP(request);
-  
+
   try {
     // Rate limiting for login attempts
     const rateLimitResult = await rateLimit(clientIP, '/api/auth/login');
@@ -18,7 +18,7 @@ export async function POST(request: NextRequest) {
       }, 'medium');
 
       return NextResponse.json(
-        { 
+        {
           error: 'Too many login attempts',
           retryAfter: rateLimitResult.retryAfter
         },
@@ -48,7 +48,7 @@ export async function POST(request: NextRequest) {
 
     // Authenticate user (this would call your backend service)
     const authResult = await authenticateUser(email, password);
-    
+
     if (!authResult.success) {
       logSecurityEvent('authentication_failure', {
         email: email.substring(0, 3) + '***', // Partial email for privacy
@@ -94,14 +94,13 @@ export async function POST(request: NextRequest) {
     // Set secure auth cookies
     SecureCookieManager.setAuthCookie(response, accessToken, 'session');
     SecureCookieManager.setAuthCookie(response, refreshToken, 'refresh');
-    
+
     // Set CSRF token
     const csrfToken = createCSRFToken();
     SecureCookieManager.setCSRFToken(response, csrfToken);
 
     // Log successful login (for audit purposes)
     // Note: Successful logins are typically logged separately from security events
-    console.log('Successful login:', {
       userId: authResult.user.id,
       email: email.substring(0, 3) + '***',
       clientIP,
@@ -113,7 +112,7 @@ export async function POST(request: NextRequest) {
 
   } catch (error) {
     console.error('Login error:', error);
-    
+
     logSecurityEvent('suspicious_request', {
       clientIP,
       error: error instanceof Error ? error.message : 'Unknown error',
@@ -145,7 +144,7 @@ async function authenticateUser(
   try {
     // This would typically call your backend authentication service
     // For demo purposes, we'll create a mock authentication
-    
+
     // Mock user database
     const mockUsers = [
       {
@@ -167,10 +166,10 @@ async function authenticateUser(
     ];
 
     const user = mockUsers.find(u => u.email === email);
-    
+
     if (!user) {
-      return { 
-        success: false, 
+      return {
+        success: false,
         error: 'Invalid email or password',
         reason: 'user_not_found'
       };
@@ -178,8 +177,8 @@ async function authenticateUser(
 
     // In production, use proper password hashing comparison
     if (user.password !== password) {
-      return { 
-        success: false, 
+      return {
+        success: false,
         error: 'Invalid email or password',
         reason: 'invalid_password'
       };
@@ -225,10 +224,10 @@ async function checkAccountSecurity(): Promise<{
     // Check for suspicious IP addresses
     // Check for unusual login patterns
     // etc.
-    
+
     // Mock implementation
     return { allowed: true };
-    
+
   } catch (error) {
     // On error, allow login but log the issue
     console.error('Security check error:', error);
@@ -237,15 +236,15 @@ async function checkAccountSecurity(): Promise<{
 }
 
 async function generateTokens(
-  userId: string, 
-  roles: string[], 
+  userId: string,
+  roles: string[],
   rememberMe: boolean
 ): Promise<{
   accessToken: string;
   refreshToken: string;
 }> {
   const now = Math.floor(Date.now() / 1000);
-  
+
   // Access token (short-lived)
   const accessTokenPayload = {
     sub: userId,
@@ -257,7 +256,7 @@ async function generateTokens(
   };
 
   // Refresh token (longer-lived, even longer if "remember me")
-  const refreshTokenExpiry = rememberMe ? 
+  const refreshTokenExpiry = rememberMe ?
     now + (60 * 60 * 24 * 30) : // 30 days if remember me
     now + (60 * 60 * 24 * 7);   // 7 days normally
 
@@ -283,10 +282,10 @@ async function generateTokens(
 function getClientIP(request: NextRequest): string {
   const forwarded = request.headers.get('x-forwarded-for');
   const realIP = request.headers.get('x-real-ip');
-  
+
   if (forwarded) {
     return forwarded.split(',')[0].trim();
   }
-  
+
   return realIP || 'unknown';
 }

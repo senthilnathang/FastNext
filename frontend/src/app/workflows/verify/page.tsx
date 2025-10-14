@@ -1,19 +1,19 @@
 'use client';
 
 import React, { useState } from 'react';
-import { 
-  Card, 
-  CardContent, 
-  CardDescription, 
-  CardHeader, 
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
   CardTitle,
   Button,
   Alert,
   AlertDescription
 } from '@/shared/components';
-import { 
-  useWorkflowTypes, 
-  useWorkflowTemplates, 
+import {
+  useWorkflowTypes,
+  useWorkflowTemplates,
   useWorkflowInstances,
   useCreateWorkflowType,
   useCreateWorkflowTemplate,
@@ -33,7 +33,7 @@ export default function WorkflowVerifyPage() {
   const { data: typesData, refetch: refetchTypes } = useWorkflowTypes();
   const { data: templatesData, refetch: refetchTemplates } = useWorkflowTemplates();
   const { data: instancesData, refetch: refetchInstances } = useWorkflowInstances();
-  
+
   // Hook mutations
   const createTypeMutation = useCreateWorkflowType();
   const createTemplateMutation = useCreateWorkflowTemplate();
@@ -189,7 +189,6 @@ export default function WorkflowVerifyPage() {
       // Test Read (refetch)
       await refetchInstances();
 
-      console.log('Successfully created workflow instance:', newInstance);
     } finally {
       // Clean up
       await deleteTemplateMutation.mutateAsync(newTemplate.id);
@@ -200,7 +199,7 @@ export default function WorkflowVerifyPage() {
   const testDataReading = async () => {
     await Promise.all([
       refetchTypes(),
-      refetchTemplates(), 
+      refetchTemplates(),
       refetchInstances()
     ]);
   };
@@ -342,7 +341,7 @@ export default function WorkflowVerifyPage() {
         <Alert>
           <CheckCircle className="h-4 w-4" />
           <AlertDescription>
-            <strong>Test Information:</strong> These tests will create, modify, and delete test data to verify 
+            <strong>Test Information:</strong> These tests will create, modify, and delete test data to verify
             the workflow system is working correctly. All test data will be cleaned up automatically.
           </AlertDescription>
         </Alert>

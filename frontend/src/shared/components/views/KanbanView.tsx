@@ -6,12 +6,12 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui
 import { Badge } from '@/shared/components/ui/badge'
 import { Input } from '@/shared/components/ui/input'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/shared/components/ui/dropdown-menu'
-import { 
-  Plus, 
-  MoreHorizontal, 
-  Edit, 
-  Trash2, 
-  Eye, 
+import {
+  Plus,
+  MoreHorizontal,
+  Edit,
+  Trash2,
+  Eye,
   GripVertical,
   X
 } from 'lucide-react'
@@ -53,27 +53,27 @@ export interface KanbanViewProps<T = any> {
   columns: KanbanColumn[]
   loading?: boolean
   error?: string | null
-  
+
   // Column configuration
   groupByField: keyof T | string
   cardTitleField: keyof T | string
   cardDescriptionField?: keyof T | string
-  
+
   // Search & Filtering (handled by parent ViewManager)
   // searchQuery and onSearchChange removed - handled by ViewManager
   // filters removed - handled by ViewManager
-  
+
   // CRUD operations
   onCreateClick?: (columnId: string) => void
   onEditClick?: (item: T) => void
   onDeleteClick?: (item: T) => void
   onViewClick?: (item: T) => void
   onMoveCard?: (cardId: string | number, sourceColumnId: string, targetColumnId: string) => void
-  
+
   // Quick add
   enableQuickAdd?: boolean
   onQuickAdd?: (columnId: string, title: string) => void
-  
+
   // Card rendering
   renderCard?: (item: T, provided: any) => React.ReactNode
   cardFields?: Array<{
@@ -82,18 +82,18 @@ export interface KanbanViewProps<T = any> {
     render?: (value: unknown, item: T) => React.ReactNode
     type?: 'text' | 'badge' | 'date' | 'avatar' | 'priority'
   }>
-  
+
   // UI customization
   showColumnLimits?: boolean
   showCardCount?: boolean
   allowColumnReorder?: boolean
-  
+
   // Permissions
   canCreate?: boolean
   canEdit?: boolean
   canDelete?: boolean
   canMove?: boolean
-  
+
   // Custom actions
   customActions?: Array<{
     label: string
@@ -146,13 +146,13 @@ export function KanbanView<T extends { id: string | number }>({
   // Group data by columns
   const groupedData = useMemo(() => {
     const groups: Record<string, T[]> = {}
-    
+
     orderedColumns.forEach(column => {
-      groups[column.id] = filteredData.filter(item => 
+      groups[column.id] = filteredData.filter(item =>
         String(item[groupByField as keyof T]) === column.id
       )
     })
-    
+
     return groups
   }, [filteredData, orderedColumns, groupByField])
 
@@ -204,11 +204,11 @@ export function KanbanView<T extends { id: string | number }>({
   const renderPriorityBadge = (priority: string) => {
     const colors = {
       low: 'bg-green-100 text-green-800',
-      medium: 'bg-yellow-100 text-yellow-800', 
+      medium: 'bg-yellow-100 text-yellow-800',
       high: 'bg-orange-100 text-orange-800',
       urgent: 'bg-red-100 text-red-800'
     }
-    
+
     return (
       <Badge className={`text-xs ${colors[priority as keyof typeof colors] || colors.medium}`}>
         {priority}
@@ -219,9 +219,9 @@ export function KanbanView<T extends { id: string | number }>({
   const renderDefaultCard = useCallback((item: T, provided: any) => {
     const title = String(item[cardTitleField as keyof T] || '')
     const description = cardDescriptionField ? String(item[cardDescriptionField as keyof T] || '') : ''
-    
+
     return (
-      <Card 
+      <Card
         ref={provided.innerRef}
         {...provided.draggableProps}
         {...provided.dragHandleProps}
@@ -261,7 +261,7 @@ export function KanbanView<T extends { id: string | number }>({
                   </DropdownMenuItem>
                 ))}
                 {canDelete && onDeleteClick && (
-                  <DropdownMenuItem 
+                  <DropdownMenuItem
                     onClick={() => onDeleteClick(item)}
                     className="text-destructive"
                   >
@@ -272,20 +272,20 @@ export function KanbanView<T extends { id: string | number }>({
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
-          
+
           {description && (
             <p className="text-xs text-muted-foreground line-clamp-2 mt-1">
               {description}
             </p>
           )}
         </CardHeader>
-        
+
         {cardFields.length > 0 && (
           <CardContent className="pt-0 pb-3">
             <div className="space-y-2">
               {cardFields.map((field, index) => {
                 const value = item[field.key as keyof T]
-                
+
                 if (field.type === 'badge' && value) {
                   return (
                     <div key={index} className="flex items-center gap-1 flex-wrap">
@@ -296,7 +296,7 @@ export function KanbanView<T extends { id: string | number }>({
                     </div>
                   )
                 }
-                
+
                 if (field.type === 'priority' && value) {
                   return (
                     <div key={index} className="flex items-center gap-2">
@@ -305,7 +305,7 @@ export function KanbanView<T extends { id: string | number }>({
                     </div>
                   )
                 }
-                
+
                 if (field.type === 'date' && value) {
                   const date = new Date(value as string)
                   return (
@@ -315,7 +315,7 @@ export function KanbanView<T extends { id: string | number }>({
                     </div>
                   )
                 }
-                
+
                 return (
                   <div key={index} className="flex justify-between text-xs">
                     <span className="text-muted-foreground">{field.label}:</span>
@@ -338,9 +338,9 @@ export function KanbanView<T extends { id: string | number }>({
     const isQuickAddActive = quickAddStates[column.id]
 
     return (
-      <Draggable 
-        key={column.id} 
-        draggableId={column.id} 
+      <Draggable
+        key={column.id}
+        draggableId={column.id}
         index={index}
         isDragDisabled={!allowColumnReorder}
       >
@@ -352,7 +352,7 @@ export function KanbanView<T extends { id: string | number }>({
           >
             <div className="bg-muted/30 rounded-lg p-4 h-full">
               {/* Column Header */}
-              <div 
+              <div
                 {...(allowColumnReorder ? provided.dragHandleProps : {})}
                 className="flex items-center justify-between mb-4"
               >
@@ -368,10 +368,10 @@ export function KanbanView<T extends { id: string | number }>({
                     </Badge>
                   )}
                 </div>
-                
+
                 {canCreate && onCreateClick && !isOverLimit && (
-                  <Button 
-                    size="sm" 
+                  <Button
+                    size="sm"
                     variant="ghost"
                     onClick={() => onCreateClick(column.id)}
                     className="h-6 w-6 p-0"
@@ -389,9 +389,9 @@ export function KanbanView<T extends { id: string | number }>({
                       <Input
                         placeholder="Enter title..."
                         value={quickAddValues[column.id] || ''}
-                        onChange={(e) => setQuickAddValues(prev => ({ 
-                          ...prev, 
-                          [column.id]: e.target.value 
+                        onChange={(e) => setQuickAddValues(prev => ({
+                          ...prev,
+                          [column.id]: e.target.value
                         }))}
                         onKeyDown={(e) => {
                           if (e.key === 'Enter') {
@@ -403,15 +403,15 @@ export function KanbanView<T extends { id: string | number }>({
                         className="text-sm"
                         autoFocus
                       />
-                      <Button 
-                        size="sm" 
+                      <Button
+                        size="sm"
                         onClick={() => handleQuickAdd(column.id)}
                         disabled={!quickAddValues[column.id]?.trim()}
                       >
                         Add
                       </Button>
-                      <Button 
-                        size="sm" 
+                      <Button
+                        size="sm"
                         variant="ghost"
                         onClick={() => toggleQuickAdd(column.id, false)}
                       >
@@ -443,9 +443,9 @@ export function KanbanView<T extends { id: string | number }>({
                     }`}
                   >
                     {columnItems.map((item, cardIndex) => (
-                      <Draggable 
-                        key={String(item.id)} 
-                        draggableId={String(item.id)} 
+                      <Draggable
+                        key={String(item.id)}
+                        draggableId={String(item.id)}
                         index={cardIndex}
                         isDragDisabled={!canMove}
                       >
@@ -457,7 +457,7 @@ export function KanbanView<T extends { id: string | number }>({
                       </Draggable>
                     ))}
                     {provided.placeholder}
-                    
+
                     {/* Empty State */}
                     {columnItems.length === 0 && (
                       <div className="text-center py-8">
@@ -465,8 +465,8 @@ export function KanbanView<T extends { id: string | number }>({
                           No items in {column.title.toLowerCase()}
                         </p>
                         {canCreate && onCreateClick && (
-                          <Button 
-                            size="sm" 
+                          <Button
+                            size="sm"
                             variant="outline"
                             className="mt-2"
                             onClick={() => onCreateClick(column.id)}
@@ -480,7 +480,7 @@ export function KanbanView<T extends { id: string | number }>({
                   </div>
                 )}
               </Droppable>
-              
+
               {/* Column Limit Warning */}
               {isOverLimit && (
                 <div className="mt-2 p-2 bg-yellow-50 border border-yellow-200 rounded text-xs text-yellow-800">
@@ -524,9 +524,9 @@ export function KanbanView<T extends { id: string | number }>({
     <div className="h-full">
       {/* Kanban Board */}
       <DragDropContext onDragEnd={handleDragEnd}>
-        <Droppable 
-          droppableId="board" 
-          type="column" 
+        <Droppable
+          droppableId="board"
+          type="column"
           direction="horizontal"
           isDropDisabled={!allowColumnReorder}
         >

@@ -155,10 +155,10 @@ export default function RLSPolicyManager() {
 
     try {
       const token = localStorage.getItem('access_token');
-      const url = selectedPolicy 
+      const url = selectedPolicy
         ? `${getApiUrl('/api/v1/rls/policies')}/${selectedPolicy.id}`
         : getApiUrl('/api/v1/rls/policies');
-      
+
       const method = selectedPolicy ? 'PUT' : 'POST';
 
       const response = await fetch(url, {
@@ -181,7 +181,7 @@ export default function RLSPolicyManager() {
       setShowEditForm(false);
       setSelectedPolicy(null);
       await fetchPolicies();
-      
+
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
     } finally {
@@ -191,7 +191,7 @@ export default function RLSPolicyManager() {
 
   const handleEdit = (policy: RLSPolicy) => {
     setSelectedPolicy(policy);
-    
+
     // Populate form
     setValue('name', policy.name);
     setValue('description', policy.description || '');
@@ -207,7 +207,7 @@ export default function RLSPolicyManager() {
     setValue('priority', policy.priority);
     setValue('organization_id', policy.organization_id);
     setValue('is_active', policy.is_active);
-    
+
     setShowEditForm(true);
   };
 
@@ -219,7 +219,7 @@ export default function RLSPolicyManager() {
     try {
       setSaving(true);
       const token = localStorage.getItem('access_token');
-      
+
       const response = await fetch(`${getApiUrl('/api/v1/rls/policies')}/${policyId}`, {
         method: 'DELETE',
         headers: {
@@ -234,7 +234,7 @@ export default function RLSPolicyManager() {
 
       setSuccess(true);
       await fetchPolicies();
-      
+
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to delete policy');
     } finally {
@@ -246,7 +246,7 @@ export default function RLSPolicyManager() {
     try {
       setSaving(true);
       const token = localStorage.getItem('access_token');
-      
+
       const response = await fetch(`${getApiUrl('/api/v1/rls/policies')}/${policy.id}`, {
         method: 'PUT',
         headers: {
@@ -264,7 +264,7 @@ export default function RLSPolicyManager() {
       }
 
       await fetchPolicies();
-      
+
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to update policy');
     } finally {
@@ -273,10 +273,10 @@ export default function RLSPolicyManager() {
   };
 
   const filteredPolicies = policies.filter(policy => {
-    const matchesSearch = !searchTerm || 
+    const matchesSearch = !searchTerm ||
       policy.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       policy.description?.toLowerCase().includes(searchTerm.toLowerCase());
-    
+
     return matchesSearch;
   });
 
@@ -348,7 +348,7 @@ export default function RLSPolicyManager() {
               />
             </div>
           </div>
-          
+
           <div>
             <Label htmlFor="entity-filter">Entity Type</Label>
             <select
@@ -363,7 +363,7 @@ export default function RLSPolicyManager() {
               ))}
             </select>
           </div>
-          
+
           <div>
             <Label htmlFor="active-filter">Status</Label>
             <select
@@ -377,7 +377,7 @@ export default function RLSPolicyManager() {
               <option value="false">Inactive</option>
             </select>
           </div>
-          
+
           <div className="flex items-end space-x-2">
             <Button
               variant="outline"
@@ -429,11 +429,11 @@ export default function RLSPolicyManager() {
                     {policy.is_active ? 'Active' : 'Inactive'}
                   </span>
                 </div>
-                
+
                 {policy.description && (
                   <p className="text-gray-600 dark:text-gray-300 mb-3">{policy.description}</p>
                 )}
-                
+
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                   <div>
                     <span className="font-medium text-gray-500">Entity Type:</span>
@@ -452,7 +452,7 @@ export default function RLSPolicyManager() {
                     <p className="text-gray-900 dark:text-white">{policy.priority}</p>
                   </div>
                 </div>
-                
+
                 {policy.custom_condition && (
                   <div className="mt-3">
                     <span className="font-medium text-gray-500">Custom Condition:</span>
@@ -462,7 +462,7 @@ export default function RLSPolicyManager() {
                   </div>
                 )}
               </div>
-              
+
               <div className="flex items-center space-x-2 ml-4">
                 <Button
                   variant="outline"
@@ -553,7 +553,7 @@ export default function RLSPolicyManager() {
                       type="number"
                       min="1"
                       max="1000"
-                      {...register('priority', { 
+                      {...register('priority', {
                         required: 'Priority is required',
                         min: { value: 1, message: 'Priority must be at least 1' },
                         max: { value: 1000, message: 'Priority must be at most 1000' }
@@ -660,8 +660,8 @@ export default function RLSPolicyManager() {
                     <Label htmlFor="custom_condition">Custom Condition *</Label>
                     <Textarea
                       id="custom_condition"
-                      {...register('custom_condition', { 
-                        required: watchPolicyType === PolicyType.CONDITIONAL ? 'Custom condition is required for conditional policies' : false 
+                      {...register('custom_condition', {
+                        required: watchPolicyType === PolicyType.CONDITIONAL ? 'Custom condition is required for conditional policies' : false
                       })}
                       placeholder="is_public = true OR user_id = :user_id"
                       rows={3}

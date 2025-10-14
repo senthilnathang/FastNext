@@ -10,7 +10,7 @@ export interface SwaggerConfig {
 
 export const getSwaggerConfig = (token?: string): SwaggerConfig => {
   const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
-  
+
   return {
     apiUrl: baseUrl,
     openApiUrl: `${baseUrl}/api/v1/openapi.json`,
@@ -172,11 +172,11 @@ export class CRUDTester {
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
     }
-    
+
     if (this.token) {
       headers.Authorization = `Bearer ${this.token}`
     }
-    
+
     return headers
   }
 

@@ -32,8 +32,8 @@ import {
   SelectValue,
 } from '@/shared/components'
 
-import { 
-  useCreateProduct, 
+import {
+  useCreateProduct,
   useUpdateProduct
 } from '@/modules/product/hooks/useProducts'
 import type { Product } from '@/shared/services/api/product'
@@ -60,11 +60,11 @@ interface ProductFormProps {
   className?: string
 }
 
-export function ProductForm({ 
-  product, 
-  onSuccess, 
+export function ProductForm({
+  product,
+  onSuccess,
   onCancel,
-  className 
+  className
 }: ProductFormProps) {
   const isEditing = Boolean(product)
   const createMutation = useCreateProduct()
@@ -104,7 +104,7 @@ export function ProductForm({
   const onSubmit = async (data: ProductFormData) => {
     try {
       let result: Product
-      
+
       if (isEditing && product) {
         result = await updateMutation.mutateAsync({
           id: product.id,
@@ -113,9 +113,9 @@ export function ProductForm({
       } else {
         result = await createMutation.mutateAsync(data as any)
       }
-      
+
       onSuccess?.(result)
-      
+
       if (!isEditing) {
         form.reset()
       }
@@ -137,8 +137,8 @@ export function ProductForm({
             {isEditing ? `Edit ${product?.id ? `Product #${product.id}` : 'Product'}` : 'Create New Product'}
           </h3>
           <p className="text-sm text-muted-foreground">
-            {isEditing 
-              ? 'Update the product information below' 
+            {isEditing
+              ? 'Update the product information below'
               : 'Manage products in your inventory system'
             }
           </p>
@@ -154,8 +154,8 @@ export function ProductForm({
               <FormItem>
                 <FormLabel>Product Name *</FormLabel>
                 <FormControl>
-                    <Input 
-                      {...field} 
+                    <Input
+                      {...field}
                       placeholder="Enter product name..."
                       disabled={isSubmitting}
                     />
@@ -175,14 +175,14 @@ export function ProductForm({
               <FormItem>
                 <FormLabel>Description</FormLabel>
                 <FormControl>
-                    <Textarea 
-                      {...field} 
+                    <Textarea
+                      {...field}
                       placeholder="Enter product description..."
                       disabled={isSubmitting}
                       rows={3}
                     />
                   </FormControl>
-                
+
                 <FormMessage />
               </FormItem>
             )}
@@ -195,15 +195,15 @@ export function ProductForm({
               <FormItem>
                 <FormLabel>Price ($) *</FormLabel>
                 <FormControl>
-                    <Input 
-                      {...field} 
+                    <Input
+                      {...field}
                       type="number"
                       placeholder="Enter price ($)..."
                       disabled={isSubmitting}
                       onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : 0)}
                     />
                   </FormControl>
-                
+
                 <FormMessage />
               </FormItem>
             )}
@@ -215,8 +215,8 @@ export function ProductForm({
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Category *</FormLabel>
-                <Select 
-                    onValueChange={field.onChange} 
+                <Select
+                    onValueChange={field.onChange}
                     defaultValue={field.value}
                     disabled={isSubmitting}
                   >
@@ -233,7 +233,7 @@ export function ProductForm({
                       <SelectItem value="Home & Garden">Home & Garden</SelectItem>
                     </SelectContent>
                   </Select>
-                
+
                 <FormMessage />
               </FormItem>
             )}
@@ -269,7 +269,7 @@ export function ProductForm({
                         </label>
                       </div>
                     ))}</div>
-                
+
                 <FormMessage />
               </FormItem>
             )}
@@ -291,7 +291,7 @@ export function ProductForm({
                       <span className="text-sm">{field.value ? 'Yes' : 'No'}</span>
                     </div>
                   </FormControl>
-                
+
                 <FormMessage />
               </FormItem>
             )}
@@ -304,14 +304,14 @@ export function ProductForm({
               <FormItem>
                 <FormLabel>Product Website</FormLabel>
                 <FormControl>
-                    <Input 
-                      {...field} 
+                    <Input
+                      {...field}
                       type="url"
                       placeholder="Enter product website..."
                       disabled={isSubmitting}
                     />
                   </FormControl>
-                
+
                 <FormMessage />
               </FormItem>
             )}
@@ -324,13 +324,13 @@ export function ProductForm({
               <FormItem>
                 <FormLabel>Release Date</FormLabel>
                 <FormControl>
-                    <Input 
-                      {...field} 
+                    <Input
+                      {...field}
                       type="date"
                       disabled={isSubmitting}
                     />
                   </FormControl>
-                
+
                 <FormMessage />
               </FormItem>
             )}
@@ -338,22 +338,22 @@ export function ProductForm({
 
           <div className="flex items-center justify-end space-x-2 pt-4 border-t">
             {onCancel && (
-              <Button 
-                type="button" 
-                variant="outline" 
+              <Button
+                type="button"
+                variant="outline"
                 onClick={onCancel}
                 disabled={isSubmitting}
               >
                 Cancel
               </Button>
             )}
-            <Button 
-              type="submit" 
+            <Button
+              type="submit"
               disabled={isSubmitting}
             >
               {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {isSubmitting 
-                ? (isEditing ? 'Updating...' : 'Creating...') 
+              {isSubmitting
+                ? (isEditing ? 'Updating...' : 'Creating...')
                 : (isEditing ? 'Update Product' : 'Create Product')
               }
             </Button>
@@ -370,10 +370,10 @@ interface ProductCreateDialogProps {
   onSuccess?: (product: Product) => void
 }
 
-export function ProductCreateDialog({ 
-  open, 
-  onOpenChange, 
-  onSuccess 
+export function ProductCreateDialog({
+  open,
+  onOpenChange,
+  onSuccess
 }: ProductCreateDialogProps) {
   const handleSuccess = (product: Product) => {
     onOpenChange(false)
@@ -407,11 +407,11 @@ interface ProductEditDialogProps {
   onSuccess?: (product: Product) => void
 }
 
-export function ProductEditDialog({ 
-  product, 
-  open, 
-  onOpenChange, 
-  onSuccess 
+export function ProductEditDialog({
+  product,
+  open,
+  onOpenChange,
+  onSuccess
 }: ProductEditDialogProps) {
   const handleSuccess = (updatedProduct: Product) => {
     onOpenChange(false)

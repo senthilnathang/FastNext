@@ -32,7 +32,7 @@ A modern, mobile-first full-stack admin dashboard built with Next.js, featuring 
 ## Getting Started
 
 ### Prerequisites
-- Node.js 18+ 
+- Node.js 18+
 - npm, yarn, pnpm, or bun
 
 ### Installation
@@ -83,7 +83,7 @@ import { MobileSidebar, useMobileSidebar } from '@/shared/components/MobileSideb
 
 function App() {
   const { isOpen, toggle } = useMobileSidebar()
-  
+
   return (
     <MobileSidebar
       isOpen={isOpen}
@@ -104,7 +104,7 @@ import { MobileSearch } from '@/shared/components/MobileSearch'
 
 function SearchComponent() {
   const [value, setValue] = useState('')
-  
+
   return (
     <MobileSearch
       value={value}
@@ -164,9 +164,9 @@ function App() {
     { id: 'users', label: 'Users', icon: Users, badge: 5 },
     { id: 'settings', label: 'Settings', icon: Settings }
   ]
-  
+
   const { activeItem, handleItemClick } = useBottomNavigation(items)
-  
+
   return (
     <BottomNavigation
       items={items}
@@ -191,7 +191,7 @@ function GestureComponent() {
     onSwipeRight: () => console.log('Swiped right'),
     threshold: 50
   })
-  
+
   useEffect(() => {
     const element = ref.current
     if (element) {
@@ -236,7 +236,7 @@ import { ViewManager } from '@/shared/components/views'
 function DataPage() {
   const [activeView, setActiveView] = useState('data-list')
   const [selectedItems, setSelectedItems] = useState([])
-  
+
   return (
     <ViewManager
       title="My Data"
@@ -296,7 +296,7 @@ function ProjectBoard() {
     { id: 'in_progress', title: 'In Progress', color: '#3b82f6' },
     { id: 'done', title: 'Done', color: '#10b981' }
   ]
-  
+
   return (
     <KanbanView
       data={tasks}

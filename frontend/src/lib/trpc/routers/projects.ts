@@ -32,14 +32,14 @@ export const projectsRouter = router({
         // Convert pagination to GraphQL format
         const first = input.limit
         const after = input.page > 1 ? btoa(`cursor:${(input.page - 1) * input.limit}`) : undefined
-        
+
         const result = await projectOperations.getAll({
           first,
           after,
           userId: input.userId,
           isPublic: input.isPublic,
         })
-        
+
         // Convert GraphQL response to TRPC format for backward compatibility
         return {
           data: result.projects.edges,
@@ -125,13 +125,13 @@ export const projectsRouter = router({
       try {
         const first = input.limit
         const after = input.page > 1 ? btoa(`cursor:${(input.page - 1) * input.limit}`) : undefined
-        
+
         const result = await pageOperations.getAll({
           first,
           after,
           projectId: input.projectId,
         })
-        
+
         return {
           data: result.pages.edges,
           total: result.pages.totalCount,
@@ -158,7 +158,7 @@ export const projectsRouter = router({
           projectId: input.projectId,
           componentType: input.componentType,
         })
-        
+
         return {
           components: result.components,
         }

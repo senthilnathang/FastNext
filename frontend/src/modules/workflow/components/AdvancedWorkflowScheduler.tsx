@@ -84,7 +84,7 @@ export function AdvancedWorkflowScheduler({
   const timezones = [
     'UTC',
     'America/New_York',
-    'America/Los_Angeles', 
+    'America/Los_Angeles',
     'Europe/London',
     'Europe/Paris',
     'Asia/Tokyo',
@@ -128,7 +128,7 @@ export function AdvancedWorkflowScheduler({
   const getStatusBadge = (status: string) => {
     const variant = {
       running: 'default',
-      completed: 'default', 
+      completed: 'default',
       failed: 'destructive',
       cancelled: 'secondary'
     }[status] as any
@@ -192,8 +192,8 @@ export function AdvancedWorkflowScheduler({
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <Label>Schedule Type</Label>
-                      <Select 
-                        value={newSchedule.type} 
+                      <Select
+                        value={newSchedule.type}
                         onValueChange={(value) => setNewSchedule({...newSchedule, type: value as any})}
                       >
                         <SelectTrigger>
@@ -210,8 +210,8 @@ export function AdvancedWorkflowScheduler({
 
                     <div>
                       <Label>Timezone</Label>
-                      <Select 
-                        value={newSchedule.timezone} 
+                      <Select
+                        value={newSchedule.timezone}
                         onValueChange={(value) => setNewSchedule({...newSchedule, timezone: value})}
                       >
                         <SelectTrigger>
@@ -330,7 +330,7 @@ export function AdvancedWorkflowScheduler({
                     <div className="flex items-center space-x-2">
                       <Switch
                         checked={schedule.enabled}
-                        onCheckedChange={(checked) => 
+                        onCheckedChange={(checked) =>
                           onScheduleUpdate({...schedule, enabled: checked})
                         }
                       />
@@ -369,7 +369,7 @@ export function AdvancedWorkflowScheduler({
                         {getStatusBadge(execution.status)}
                         <Badge variant="outline">{execution.triggeredBy}</Badge>
                       </div>
-                      
+
                       <div className="text-sm text-muted-foreground space-y-1">
                         <div>Started: {execution.startTime.toLocaleString()}</div>
                         {execution.endTime && (
@@ -383,7 +383,7 @@ export function AdvancedWorkflowScheduler({
                         )}
                       </div>
                     </div>
-                    
+
                     <div className="flex items-center space-x-2">
                       {execution.status === 'running' && (
                         <Button
@@ -413,7 +413,7 @@ export function AdvancedWorkflowScheduler({
               </CardHeader>
               <CardContent>
                 <div className="text-3xl font-bold">
-                  {executions.length > 0 ? 
+                  {executions.length > 0 ?
                     Math.round((executions.filter(e => e.status === 'completed').length / executions.length) * 100)
                     : 0
                   }%

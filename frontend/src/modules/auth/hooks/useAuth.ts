@@ -61,10 +61,10 @@ export const useLogin = () => {
       // Store tokens
       localStorage.setItem('access_token', data.access_token)
       localStorage.setItem('refresh_token', data.refresh_token)
-      
+
       // Invalidate current user query to refetch user data
       queryClient.invalidateQueries({ queryKey: userKeys.current() })
-      
+
       // Redirect to stored path or dashboard
       const redirectPath = sessionStorage.getItem('redirectAfterLogin') || '/dashboard'
       sessionStorage.removeItem('redirectAfterLogin')
@@ -89,10 +89,10 @@ export const useLogout = () => {
       localStorage.removeItem('refresh_token')
       localStorage.removeItem('user')
       sessionStorage.removeItem('redirectAfterLogin')
-      
+
       // Clear all query cache
       queryClient.clear()
-      
+
       // Redirect to login
       router.push('/login')
     },
@@ -131,10 +131,10 @@ export const useRefreshToken = () => {
   })
 }
 
-// Hook to check if user is authenticated  
+// Hook to check if user is authenticated
 export const useIsAuthenticated = () => {
   const { data: user, isLoading } = useCurrentUser()
-  
+
   return {
     isAuthenticated: !!user && !!localStorage.getItem('access_token'),
     isLoading,

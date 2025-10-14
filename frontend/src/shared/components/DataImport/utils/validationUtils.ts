@@ -18,38 +18,38 @@ export function validateImportData(
   const errors: ImportError[] = [];
   const warnings: ImportWarning[] = [];
   const duplicates: DuplicateInfo[] = [];
-  
+
   // Create mapping lookup
   const mappingLookup = new Map<string, ImportFieldMapping>();
   mappings.forEach(mapping => {
     mappingLookup.set(mapping.sourceColumn, mapping);
   });
-  
+
   // Create column lookup
   const columnLookup = new Map<string, ImportColumn>();
   columns.forEach(column => {
     columnLookup.set(column.key, column);
   });
-  
+
   // Track unique field values for duplicate detection
   const uniqueTracking = new Map<string, Map<any, number[]>>();
-  
+
   // Initialize unique tracking for columns marked as unique
   columns.forEach(column => {
     if (column.unique) {
       uniqueTracking.set(column.key, new Map());
     }
   });
-  
+
   // Validate each row
   data.forEach((row, rowIndex) => {
     const processedRow: Record<string, any> = {};
-    
+
     // Process mapped fields
     mappings.forEach(mapping => {
       const sourceValue = row[mapping.sourceColumn];
       const targetColumn = columnLookup.get(mapping.targetColumn);
-      
+
       if (!targetColumn) {
         warnings.push({
           row: rowIndex + 1,
@@ -58,13 +58,13 @@ export function validateImportData(
         });
         return;
       }
-      
+
       // Skip empty values if specified
       if (mapping.skipEmpty && (sourceValue === null || sourceValue === undefined || sourceValue === '')) {
         processedRow[mapping.targetColumn] = targetColumn.defaultValue || null;
         return;
       }
-      
+
       // Apply transformation if specified
       let processedValue = sourceValue;
       if (mapping.transform) {
@@ -82,24 +82,24 @@ export function validateImportData(
           return;
         }
       }
-      
+
       processedRow[mapping.targetColumn] = processedValue;
     });
-    
+
     // Validate each mapped field
     Object.entries(processedRow).forEach(([fieldKey, value]) => {
       const column = columnLookup.get(fieldKey);
       if (!column) return;
-      
+
       // Type validation and conversion
       const validationResult = validateFieldValue(value, column, rowIndex + 1);
       errors.push(...validationResult.errors);
       warnings.push(...validationResult.warnings);
-      
+
       if (validationResult.convertedValue !== undefined) {
         processedRow[fieldKey] = validationResult.convertedValue;
       }
-      
+
       // Track unique values
       if (column.unique && value !== null && value !== undefined && value !== '') {
         const uniqueMap = uniqueTracking.get(fieldKey);
@@ -110,7 +110,7 @@ export function validateImportData(
         }
       }
     });
-    
+
     // Check for required fields
     columns.forEach(column => {
       if (column.required && (processedRow[column.key] === null || processedRow[column.key] === undefined || processedRow[column.key] === '')) {
@@ -123,7 +123,7 @@ export function validateImportData(
       }
     });
   });
-  
+
   // Check for duplicates
   uniqueTracking.forEach((valueMap, fieldKey) => {
     valueMap.forEach((rows, value) => {
@@ -137,11 +137,11 @@ export function validateImportData(
       }
     });
   });
-  
+
   const totalRows = data.length;
   const errorRows = new Set(errors.map(e => e.row)).size;
   const validRows = totalRows - errorRows;
-  
+
   return {
     isValid: errors.length === 0,
     totalRows,
@@ -167,18 +167,18 @@ function validateFieldValue(
   const errors: ImportError[] = [];
   const warnings: ImportWarning[] = [];
   let convertedValue = value;
-  
+
   // Skip validation for null/empty values (handled by required check)
   if (value === null || value === undefined || value === '') {
     return { errors, warnings, convertedValue: null };
   }
-  
+
   // Type-specific validation and conversion
   switch (column.type) {
     case 'string':
       convertedValue = String(value);
       break;
-      
+
     case 'number':
       const numValue = Number(value);
       if (isNaN(numValue)) {
@@ -193,7 +193,7 @@ function validateFieldValue(
         convertedValue = numValue;
       }
       break;
-      
+
     case 'date':
       const dateValue = new Date(value);
       if (isNaN(dateValue.getTime())) {
@@ -208,7 +208,7 @@ function validateFieldValue(
         convertedValue = dateValue.toISOString();
       }
       break;
-      
+
     case 'boolean':
       const stringValue = String(value).toLowerCase().trim();
       if (['true', 'yes', '1', 'on'].includes(stringValue)) {
@@ -225,7 +225,7 @@ function validateFieldValue(
         });
       }
       break;
-      
+
     case 'email':
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(String(value))) {
@@ -238,7 +238,7 @@ function validateFieldValue(
         });
       }
       break;
-      
+
     case 'url':
       try {
         new URL(String(value));
@@ -253,7 +253,7 @@ function validateFieldValue(
         });
       }
       break;
-      
+
     case 'object':
       if (typeof value === 'string') {
         try {
@@ -270,7 +270,7 @@ function validateFieldValue(
       }
       break;
   }
-  
+
   // Apply custom validation rules
   if (column.validation) {
     column.validation.forEach(rule => {
@@ -279,7 +279,7 @@ function validateFieldValue(
       warnings.push(...ruleResult.warnings);
     });
   }
-  
+
   // Apply transform function if provided
   if (column.transform && convertedValue !== null && convertedValue !== undefined) {
     try {
@@ -294,7 +294,7 @@ function validateFieldValue(
       });
     }
   }
-  
+
   return { errors, warnings, convertedValue };
 }
 
@@ -306,7 +306,7 @@ function validateRule(
 ): { errors: ImportError[]; warnings: ImportWarning[] } {
   const errors: ImportError[] = [];
   const warnings: ImportWarning[] = [];
-  
+
   switch (rule.type) {
     case 'required':
       if (value === null || value === undefined || value === '') {
@@ -319,7 +319,7 @@ function validateRule(
         });
       }
       break;
-      
+
     case 'min':
       if (typeof value === 'number' && value < rule.value) {
         errors.push({
@@ -339,7 +339,7 @@ function validateRule(
         });
       }
       break;
-      
+
     case 'max':
       if (typeof value === 'number' && value > rule.value) {
         errors.push({
@@ -359,7 +359,7 @@ function validateRule(
         });
       }
       break;
-      
+
     case 'pattern':
       const regex = new RegExp(rule.value);
       if (!regex.test(String(value))) {
@@ -372,7 +372,7 @@ function validateRule(
         });
       }
       break;
-      
+
     case 'email':
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(String(value))) {
@@ -385,7 +385,7 @@ function validateRule(
         });
       }
       break;
-      
+
     case 'url':
       try {
         new URL(String(value));
@@ -399,7 +399,7 @@ function validateRule(
         });
       }
       break;
-      
+
     case 'custom':
       if (rule.validator) {
         try {
@@ -433,7 +433,7 @@ function validateRule(
       }
       break;
   }
-  
+
   return { errors, warnings };
 }
 
@@ -463,21 +463,21 @@ export function createFieldMappings(
   targetColumns: ImportColumn[]
 ): ImportFieldMapping[] {
   const mappings: ImportFieldMapping[] = [];
-  
+
   sourceHeaders.forEach(sourceHeader => {
     // Try to find exact match first
-    let targetColumn = targetColumns.find(col => 
+    let targetColumn = targetColumns.find(col =>
       col.key === sourceHeader || col.label === sourceHeader
     );
-    
+
     // If no exact match, try case-insensitive match
     if (!targetColumn) {
-      targetColumn = targetColumns.find(col => 
+      targetColumn = targetColumns.find(col =>
         col.key.toLowerCase() === sourceHeader.toLowerCase() ||
         col.label.toLowerCase() === sourceHeader.toLowerCase()
       );
     }
-    
+
     // If still no match, try fuzzy matching
     if (!targetColumn) {
       const normalizedSource = normalizeFieldName(sourceHeader);
@@ -487,14 +487,14 @@ export function createFieldMappings(
         return normalizedKey === normalizedSource || normalizedLabel === normalizedSource;
       });
     }
-    
+
     mappings.push({
       sourceColumn: sourceHeader,
       targetColumn: targetColumn ? targetColumn.key : sourceHeader,
       skipEmpty: true
     });
   });
-  
+
   return mappings;
 }
 

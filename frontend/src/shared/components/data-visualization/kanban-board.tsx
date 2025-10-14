@@ -95,7 +95,7 @@ function KanbanItemCard({ item, onEdit, onDelete, renderItem }: KanbanItemProps)
 
   const priorityColors = {
     low: "bg-green-100 text-green-800",
-    medium: "bg-yellow-100 text-yellow-800", 
+    medium: "bg-yellow-100 text-yellow-800",
     high: "bg-red-100 text-red-800",
   }
 
@@ -134,7 +134,7 @@ function KanbanItemCard({ item, onEdit, onDelete, renderItem }: KanbanItemProps)
                 </DropdownMenuItem>
               )}
               {onDelete && (
-                <DropdownMenuItem 
+                <DropdownMenuItem
                   className="text-red-600"
                   onClick={() => onDelete(item)}
                 >
@@ -151,11 +151,11 @@ function KanbanItemCard({ item, onEdit, onDelete, renderItem }: KanbanItemProps)
             {item.description}
           </p>
         )}
-        
+
         <div className="flex flex-wrap gap-1 mb-2">
           {item.priority && (
-            <Badge 
-              variant="secondary" 
+            <Badge
+              variant="secondary"
               className={cn("text-xs", priorityColors[item.priority])}
             >
               {item.priority}
@@ -187,13 +187,13 @@ interface KanbanColumnProps {
   renderColumnHeader?: (column: KanbanColumn) => React.ReactNode
 }
 
-function KanbanColumnComponent({ 
-  column, 
-  onAddItem, 
-  onEditItem, 
-  onDeleteItem, 
+function KanbanColumnComponent({
+  column,
+  onAddItem,
+  onEditItem,
+  onDeleteItem,
   renderItem,
-  renderColumnHeader 
+  renderColumnHeader
 }: KanbanColumnProps) {
   const {
     setNodeRef,
@@ -302,7 +302,7 @@ export function KanbanBoard({
     const item = columns
       .flatMap(col => col.items)
       .find(item => item.id === active.id)
-    
+
     if (item) {
       setActiveItem(item)
     }
@@ -318,10 +318,10 @@ export function KanbanBoard({
     if (activeId === overId) return
 
     // Find the columns
-    const activeColumn = columns.find(col => 
+    const activeColumn = columns.find(col =>
       col.items.some(item => item.id === activeId)
     )
-    const overColumn = columns.find(col => 
+    const overColumn = columns.find(col =>
       col.id === overId || col.items.some(item => item.id === overId)
     )
 
@@ -375,13 +375,13 @@ export function KanbanBoard({
     if (activeId === overId) return
 
     // Handle reordering within the same column
-    const activeColumn = columns.find(col => 
+    const activeColumn = columns.find(col =>
       col.items.some(item => item.id === activeId)
     )
 
     if (activeColumn) {
       const overItem = activeColumn.items.find(item => item.id === overId)
-      
+
       if (overItem) {
         const activeIndex = activeColumn.items.findIndex(item => item.id === activeId)
         const overIndex = activeColumn.items.findIndex(item => item.id === overId)

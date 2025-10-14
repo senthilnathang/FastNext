@@ -34,7 +34,7 @@ export interface CalendarViewProps<T = any> {
   data: T[]
   loading?: boolean
   error?: string | null
-  
+
   // Field mapping
   idField: keyof T | string
   titleField: keyof T | string
@@ -42,32 +42,32 @@ export interface CalendarViewProps<T = any> {
   descriptionField?: keyof T | string
   statusField?: keyof T | string
   priorityField?: keyof T | string
-  
+
   // CRUD operations
   onCreateClick?: (date?: Date) => void
   onEditClick?: (item: T) => void
   onDeleteClick?: (item: T) => void
   onViewClick?: (item: T) => void
   onDateChange?: (itemId: string | number, newDate: Date) => void
-  
+
   // Quick add functionality
   enableQuickAdd?: boolean
   onQuickAdd?: (date: Date, title: string) => void
-  
+
   // Custom rendering
   renderItem?: (item: CalendarItem<T>, date: Date) => React.ReactNode
-  
+
   // View options
   view?: 'month' | 'week'
   showWeekends?: boolean
   showToday?: boolean
   allowDragDrop?: boolean
-  
+
   // Permissions
   canCreate?: boolean
   canEdit?: boolean
   canDelete?: boolean
-  
+
   // Custom actions
   customActions?: Array<{
     label: string
@@ -132,12 +132,12 @@ export function CalendarView<T extends Record<string, any>>({
   const calendarDays = useMemo(() => {
     const days = []
     const startOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1)
-    
+
     if (view === 'month') {
       // Get the first day of the week containing the first day of the month
       const startDate = new Date(startOfMonth)
       startDate.setDate(startDate.getDate() - startOfMonth.getDay())
-      
+
       // Get 42 days (6 weeks) to fill the calendar grid
       for (let i = 0; i < 42; i++) {
         const date = new Date(startDate)
@@ -148,21 +148,21 @@ export function CalendarView<T extends Record<string, any>>({
       // Week view: get 7 days starting from the beginning of the week
       const startOfWeek = new Date(currentDate)
       startOfWeek.setDate(currentDate.getDate() - currentDate.getDay())
-      
+
       for (let i = 0; i < 7; i++) {
         const date = new Date(startOfWeek)
         date.setDate(startOfWeek.getDate() + i)
         days.push(date)
       }
     }
-    
+
     return days
   }, [currentDate, view])
 
   // Group items by date
   const itemsByDate = useMemo(() => {
     const grouped: Record<string, CalendarItem<T>[]> = {}
-    
+
     calendarItems.forEach(item => {
       const dateKey = item.date.toDateString()
       if (!grouped[dateKey]) {
@@ -170,7 +170,7 @@ export function CalendarView<T extends Record<string, any>>({
       }
       grouped[dateKey].push(item)
     })
-    
+
     return grouped
   }, [calendarItems])
 
@@ -222,10 +222,10 @@ export function CalendarView<T extends Record<string, any>>({
   const handleDrop = useCallback((e: React.DragEvent, date: Date) => {
     if (!allowDragDrop || !draggedItem || !onDateChange) return
     e.preventDefault()
-    
+
     const newDate = new Date(date)
     newDate.setHours(draggedItem.date.getHours(), draggedItem.date.getMinutes())
-    
+
     onDateChange(draggedItem.id, newDate)
     setDraggedItem(null)
   }, [allowDragDrop, draggedItem, onDateChange])
@@ -286,12 +286,12 @@ export function CalendarView<T extends Record<string, any>>({
               <div className="text-xs opacity-75 truncate mt-1">{item.description}</div>
             )}
           </div>
-          
+
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button 
-                variant="ghost" 
-                size="sm" 
+              <Button
+                variant="ghost"
+                size="sm"
                 className="h-4 w-4 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
               >
                 <MoreHorizontal className="h-3 w-3" />
@@ -320,7 +320,7 @@ export function CalendarView<T extends Record<string, any>>({
                 </DropdownMenuItem>
               ))}
               {canDelete && onDeleteClick && (
-                <DropdownMenuItem 
+                <DropdownMenuItem
                   onClick={() => onDeleteClick(item.data)}
                   className="text-destructive"
                 >
@@ -359,7 +359,7 @@ export function CalendarView<T extends Record<string, any>>({
       >
         {/* Day Header */}
         <div className="flex items-center justify-between mb-2">
-          <span 
+          <span
             className={`
               text-sm font-medium
               ${!isCurrentMonthDay ? 'text-muted-foreground' : ''}
@@ -368,7 +368,7 @@ export function CalendarView<T extends Record<string, any>>({
           >
             {date.getDate()}
           </span>
-          
+
           {canCreate && onCreateClick && (
             <Button
               variant="ghost"
@@ -398,9 +398,9 @@ export function CalendarView<T extends Record<string, any>>({
                 <Input
                   placeholder="Add item..."
                   value={quickAddValues[dateKey] || ''}
-                  onChange={(e) => setQuickAddValues(prev => ({ 
-                    ...prev, 
-                    [dateKey]: e.target.value 
+                  onChange={(e) => setQuickAddValues(prev => ({
+                    ...prev,
+                    [dateKey]: e.target.value
                   }))}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') {
@@ -412,8 +412,8 @@ export function CalendarView<T extends Record<string, any>>({
                   className="text-xs h-6"
                   autoFocus
                 />
-                <Button 
-                  size="sm" 
+                <Button
+                  size="sm"
                   onClick={() => handleQuickAdd(date)}
                   disabled={!quickAddValues[dateKey]?.trim()}
                   className="h-6 px-2 text-xs"
@@ -477,14 +477,14 @@ export function CalendarView<T extends Record<string, any>>({
             >
               <ChevronLeft className="h-4 w-4" />
             </Button>
-            
+
             <h2 className="text-lg font-semibold min-w-[150px] text-center">
-              {view === 'month' 
+              {view === 'month'
                 ? `${MONTHS[currentDate.getMonth()]} ${currentDate.getFullYear()}`
                 : `Week of ${currentDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`
               }
             </h2>
-            
+
             <Button
               variant="outline"
               size="sm"
@@ -532,10 +532,10 @@ export function CalendarView<T extends Record<string, any>>({
           {WEEKDAYS.map((day, index) => {
             const isWeekendDay = index === 0 || index === 6
             if (!showWeekends && isWeekendDay) return null
-            
+
             return (
-              <div 
-                key={day} 
+              <div
+                key={day}
                 className="p-3 text-center font-medium text-sm border-r border-border last:border-r-0"
               >
                 {day}

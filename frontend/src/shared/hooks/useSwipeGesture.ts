@@ -68,11 +68,11 @@ export function useSwipeGesture(options: SwipeGestureOptions = {}) {
     }
 
     touchState.current.endTime = Date.now()
-    
+
     const deltaX = touchState.current.endX - touchState.current.startX
     const deltaY = touchState.current.endY - touchState.current.startY
     const deltaTime = touchState.current.endTime - touchState.current.startTime
-    
+
     // Only trigger if gesture is fast enough (< 500ms) and meets threshold
     if (deltaTime > 500) return
 
@@ -147,10 +147,10 @@ export function usePointerSwipe(options: SwipeGestureOptions = {}) {
     if (!pointerState.current.isDown) return
 
     pointerState.current.isDown = false
-    
+
     const deltaX = pointerState.current.endX - pointerState.current.startX
     const deltaY = pointerState.current.endY - pointerState.current.startY
-    
+
     const absDeltaX = Math.abs(deltaX)
     const absDeltaY = Math.abs(deltaY)
 

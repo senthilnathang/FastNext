@@ -178,16 +178,16 @@ export function PermissionManager({
 
   const formatFileSize = (bytes: number) => {
     if (bytes === 0) return '0 B';
-    
+
     const units = ['B', 'KB', 'MB', 'GB'];
     let size = bytes;
     let unitIndex = 0;
-    
+
     while (size >= 1024 && unitIndex < units.length - 1) {
       size /= 1024;
       unitIndex++;
     }
-    
+
     return `${size.toFixed(1)} ${units[unitIndex]}`;
   };
 
@@ -334,7 +334,7 @@ export function PermissionManager({
               Manage user permissions for data import functionality
             </CardDescription>
           </div>
-          
+
           {onAddUser && (
             <Button onClick={onAddUser} size="sm">
               <Plus className="h-4 w-4 mr-2" />
@@ -504,7 +504,7 @@ function PermissionEditor({
       {/* Basic Permissions */}
       <div className="space-y-4">
         <h4 className="font-medium">Basic Permissions</h4>
-        
+
         <div className="flex items-center space-x-2">
           <Switch
             id="canImport"
@@ -547,7 +547,7 @@ function PermissionEditor({
       {/* Limits */}
       <div className="space-y-4">
         <h4 className="font-medium">Limits</h4>
-        
+
         <div className="space-y-2">
           <Label htmlFor="maxFileSize">Maximum file size (MB)</Label>
           <Input

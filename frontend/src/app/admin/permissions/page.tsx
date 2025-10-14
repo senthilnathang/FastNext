@@ -106,7 +106,7 @@ export default function PermissionsPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [selectedItems, setSelectedItems] = React.useState<any[]>([])
-  
+
   const { data: permissionsData, isLoading, error } = usePermissions()
   const createPermission = useCreatePermission()
   const updatePermission = useUpdatePermission()
@@ -289,12 +289,10 @@ export default function PermissionsPage() {
   }
 
   const handleExport = (format: string) => {
-    console.log('Export permissions as', format)
     // TODO: Implement export
   }
 
   const handleImport = () => {
-    console.log('Import permissions')
     // TODO: Implement import
   }
 

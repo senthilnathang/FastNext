@@ -108,7 +108,7 @@ function PasswordExpiryWarning({ user }: { user: any }) {
 
 function SettingsContent() {
   const { user } = useAuth();
-  
+
   // Use nuqs for tab state management
   const [activeTab, setActiveTab] = useTabState(
     ['profile', 'security', 'password', 'notifications', 'activity'] as const,
@@ -183,8 +183,8 @@ function SettingsContent() {
                   <div>
                     <p className="text-sm font-medium text-gray-500">Status</p>
                     <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                      user.is_active 
-                        ? 'bg-green-100 text-green-800' 
+                      user.is_active
+                        ? 'bg-green-100 text-green-800'
                         : 'bg-red-100 text-red-800'
                     }`}>
                       {user.is_active ? 'Active' : 'Inactive'}
@@ -193,8 +193,8 @@ function SettingsContent() {
                   <div>
                     <p className="text-sm font-medium text-gray-500">Verification</p>
                     <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                      user.is_verified 
-                        ? 'bg-green-100 text-green-800' 
+                      user.is_verified
+                        ? 'bg-green-100 text-green-800'
                         : 'bg-yellow-100 text-yellow-800'
                     }`}>
                       {user.is_verified ? 'Verified' : 'Pending'}
@@ -231,24 +231,24 @@ function SettingsContent() {
                   <CardDescription>Common account tasks</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  <Button 
-                    variant="outline" 
+                  <Button
+                    variant="outline"
                     className="w-full justify-start"
                     onClick={() => setActiveTab('password')}
                   >
                     <Lock className="h-4 w-4 mr-2" />
                     Change Password
                   </Button>
-                  <Button 
-                    variant="outline" 
+                  <Button
+                    variant="outline"
                     className="w-full justify-start"
                     onClick={() => setActiveTab('security')}
                   >
                     <Shield className="h-4 w-4 mr-2" />
                     Security Settings
                   </Button>
-                  <Button 
-                    variant="outline" 
+                  <Button
+                    variant="outline"
                     className="w-full justify-start"
                     onClick={() => setActiveTab('activity')}
                   >

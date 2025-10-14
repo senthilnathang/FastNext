@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { 
+import {
   Button,
   Input,
   Label,
@@ -28,37 +28,37 @@ interface PasswordStrength {
 const calculatePasswordStrength = (password: string): PasswordStrength => {
   let score = 0;
   const feedback: string[] = [];
-  
+
   if (password.length >= 8) score += 20;
   else feedback.push('At least 8 characters');
-  
+
   if (password.length >= 12) score += 10;
-  
+
   if (/[a-z]/.test(password)) score += 10;
   else feedback.push('Add lowercase letters');
-  
+
   if (/[A-Z]/.test(password)) score += 10;
   else feedback.push('Add uppercase letters');
-  
+
   if (/\d/.test(password)) score += 10;
   else feedback.push('Add numbers');
-  
+
   if (/[!@#$%^&*(),.?":{}|<>]/.test(password)) score += 15;
   else feedback.push('Add special characters');
-  
+
   if (!/(.)\1{2,}/.test(password)) score += 5;
   else feedback.push('Avoid repeated characters');
-  
+
   const commonPatterns = ['123', 'abc', 'qwerty', 'password', 'admin'];
   if (!commonPatterns.some(pattern => password.toLowerCase().includes(pattern))) score += 10;
   else feedback.push('Avoid common patterns');
-  
+
   let strength = 'very_weak';
   if (score >= 85) strength = 'very_strong';
   else if (score >= 70) strength = 'strong';
   else if (score >= 50) strength = 'fair';
   else if (score >= 30) strength = 'weak';
-  
+
   return { score: Math.min(score, 100), strength, feedback };
 };
 
@@ -99,7 +99,7 @@ export default function RegisterPage() {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
-    
+
     // Clear field-specific errors
     if (fieldErrors[name]) {
       setFieldErrors(prev => ({ ...prev, [name]: '' }));
@@ -179,7 +179,7 @@ export default function RegisterPage() {
 
       // Registration successful - redirect to login
       router.push('/login?message=Registration successful! Please log in.');
-      
+
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : 'Registration failed. Please try again.';
       setError(errorMessage);
@@ -330,7 +330,7 @@ export default function RegisterPage() {
                     )}
                   </button>
                 </div>
-                
+
                 {/* Password Strength Indicator */}
                 {formData.password && (
                   <div className="space-y-2">
@@ -364,7 +364,7 @@ export default function RegisterPage() {
                     )}
                   </div>
                 )}
-                
+
                 {fieldErrors.password && (
                   <p className="text-sm text-red-600">{fieldErrors.password}</p>
                 )}

@@ -8,7 +8,7 @@ import { render, screen } from '@testing-library/react';
 describe('React Upgrade Verification', () => {
   test('React renders components correctly', () => {
     const TestComponent = () => <div data-testid="test">React Test</div>;
-    
+
     render(<TestComponent />);
     expect(screen.getByTestId('test')).toBeInTheDocument();
     expect(screen.getByText('React Test')).toBeInTheDocument();
@@ -17,12 +17,12 @@ describe('React Upgrade Verification', () => {
   test('React hooks work correctly', () => {
     const TestHook = () => {
       const [count, setCount] = React.useState(0);
-      
+
       return (
         <div>
           <span data-testid="count">{count}</span>
-          <button 
-            data-testid="increment" 
+          <button
+            data-testid="increment"
             onClick={() => setCount(c => c + 1)}
           >
             Increment
@@ -37,11 +37,11 @@ describe('React Upgrade Verification', () => {
 
   test('React context works correctly', () => {
     const TestContext = React.createContext('default');
-    
+
     const Provider = ({ children }: { children: React.ReactNode }) => (
       <TestContext.Provider value="updated">{children}</TestContext.Provider>
     );
-    
+
     const Consumer = () => {
       const value = React.useContext(TestContext);
       return <div data-testid="context-value">{value}</div>;
@@ -52,7 +52,7 @@ describe('React Upgrade Verification', () => {
         <Consumer />
       </Provider>
     );
-    
+
     expect(screen.getByTestId('context-value')).toHaveTextContent('updated');
   });
 });
@@ -77,7 +77,7 @@ describe('Storybook Package Verification', () => {
 describe('Next.js Compatibility', () => {
   test('Next.js dynamic imports work', async () => {
     // Test dynamic import syntax
-    const dynamicComponent = React.lazy(() => 
+    const dynamicComponent = React.lazy(() =>
       Promise.resolve({
         default: () => <div data-testid="dynamic">Dynamic Component</div>
       })
@@ -91,7 +91,7 @@ describe('Next.js Compatibility', () => {
 
     // Initially should show loading
     expect(screen.getByTestId('loading')).toBeInTheDocument();
-    
+
     // Wait for the component to load
     await screen.findByTestId('dynamic');
     expect(screen.getByTestId('dynamic')).toBeInTheDocument();
@@ -101,7 +101,7 @@ describe('Next.js Compatibility', () => {
     // Test JSX compilation
     const element = <div className="test-class">JSX Test</div>;
     render(element);
-    
+
     expect(screen.getByText('JSX Test')).toHaveClass('test-class');
   });
 });
@@ -122,7 +122,7 @@ describe('TypeScript Integration', () => {
     );
 
     render(<TypedComponent title="Test Title" count={42} />);
-    
+
     expect(screen.getByTestId('title')).toHaveTextContent('Test Title');
     expect(screen.getByTestId('count')).toHaveTextContent('42');
   });
@@ -138,10 +138,10 @@ describe('TypeScript Integration', () => {
     }
 
     const testData = { name: 'Test', value: 123 };
-    
+
     render(
-      <GenericComponent 
-        data={testData} 
+      <GenericComponent
+        data={testData}
         render={(data) => `${data.name}: ${data.value}`}
       />
     );

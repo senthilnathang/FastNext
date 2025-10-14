@@ -65,16 +65,16 @@ const BYPASS_PATTERNS = [
 
 export function validateRequest(request: NextRequest): ValidationResult {
   // Skip request validation in development or if explicitly bypassed
-  const bypassValidation = process.env.NODE_ENV === 'development' || 
+  const bypassValidation = process.env.NODE_ENV === 'development' ||
                           process.env.DISABLE_SECURITY_MONITORING === 'true';
-  
+
   if (bypassValidation) {
     return { isValid: true };
   }
 
   const url = request.nextUrl;
   const userAgent = request.headers.get('user-agent') || '';
-  
+
   // Check for suspicious user agents
   for (const pattern of SUSPICIOUS_USER_AGENTS) {
     if (pattern.test(userAgent)) {
@@ -254,26 +254,26 @@ function validateHeaders(headers: Headers): ValidationResult {
 
 function validateRequestTiming(request: NextRequest): ValidationResult {
   // Skip timing validation in development or if explicitly bypassed
-  const bypassTimingCheck = process.env.NODE_ENV === 'development' || 
+  const bypassTimingCheck = process.env.NODE_ENV === 'development' ||
                            process.env.BYPASS_RATE_LIMIT === 'true' ||
                            process.env.DISABLE_SECURITY_MONITORING === 'true';
-  
+
   if (bypassTimingCheck) {
     return { isValid: true };
   }
 
   // This is a simplified check - in production, you'd use a more sophisticated system
   // Check for suspiciously short intervals between requests from same IP
-  
+
   const clientIP = getClientIP(request);
   const now = Date.now();
   const key = `timing:${clientIP}`;
-  
+
   // Simple in-memory store (use Redis in production)
   if (typeof globalThis !== 'undefined') {
     const store = (globalThis as any).__requestTimingStore || new Map();
     (globalThis as any).__requestTimingStore = store;
-    
+
     const lastRequest = store.get(key);
     if (lastRequest && (now - lastRequest) < 100) { // Less than 100ms between requests
       return {
@@ -282,7 +282,7 @@ function validateRequestTiming(request: NextRequest): ValidationResult {
         severity: 'medium'
       };
     }
-    
+
     store.set(key, now);
   }
 
@@ -298,7 +298,7 @@ function isValidHost(host: string): boolean {
     process.env.VERCEL_URL
   ].filter(Boolean);
 
-  return allowedHosts.some(allowedHost => 
+  return allowedHosts.some(allowedHost =>
     host === allowedHost || host.startsWith(`${allowedHost}:`)
   );
 }
@@ -306,26 +306,26 @@ function isValidHost(host: string): boolean {
 function getClientIP(request: NextRequest): string {
   const forwarded = request.headers.get('x-forwarded-for');
   const realIP = request.headers.get('x-real-ip');
-  
+
   if (forwarded) {
     return forwarded.split(',')[0].trim();
   }
-  
+
   return realIP || 'unknown';
 }
 
 // Additional validation for specific content types
 export async function validateRequestBody(request: NextRequest): Promise<ValidationResult> {
   // Skip body validation in development or if explicitly bypassed
-  const bypassValidation = process.env.NODE_ENV === 'development' || 
+  const bypassValidation = process.env.NODE_ENV === 'development' ||
                           process.env.DISABLE_SECURITY_MONITORING === 'true';
-  
+
   if (bypassValidation) {
     return { isValid: true };
   }
 
   const contentType = request.headers.get('content-type');
-  
+
   if (!contentType) {
     return { isValid: true };
   }
@@ -335,7 +335,7 @@ export async function validateRequestBody(request: NextRequest): Promise<Validat
       const body = await request.json();
       return validateJsonPayload(body);
     }
-    
+
     if (contentType.includes('application/x-www-form-urlencoded')) {
       const formData = await request.formData();
       return validateFormData(formData);
@@ -353,7 +353,7 @@ export async function validateRequestBody(request: NextRequest): Promise<Validat
 
 function validateJsonPayload(payload: any): ValidationResult {
   const jsonString = JSON.stringify(payload);
-  
+
   // Check for XSS in JSON values
   for (const pattern of MALICIOUS_PATTERNS.xss) {
     if (pattern.test(jsonString)) {

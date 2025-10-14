@@ -31,7 +31,7 @@ export async function testAPIConnection(baseUrl: string = 'http://localhost:8000
     }
 
     const data = await response.json()
-    
+
     if (data.status !== 'healthy') {
       return {
         success: false,
@@ -77,7 +77,7 @@ export async function testOpenAPISpec(baseUrl: string = 'http://localhost:8000')
     }
 
     const spec = await response.json()
-    
+
     // Basic validation of OpenAPI spec
     if (!spec.openapi || !spec.info || !spec.paths) {
       return {
@@ -128,7 +128,7 @@ export async function testFastAPIDocsEndpoint(baseUrl: string = 'http://localhos
     }
 
     const content = await response.text()
-    
+
     // Check if it's actually Swagger UI
     if (!content.includes('swagger-ui') && !content.includes('Swagger UI')) {
       return {
@@ -163,21 +163,20 @@ export async function runAllAPITests(baseUrl?: string): Promise<{
   }
 }> {
   const apiUrl = baseUrl || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
-  
-  console.log(`Running API documentation tests against: ${apiUrl}`)
-  
+
+
   const tests = {
     connection: await testAPIConnection(apiUrl),
     openapi: await testOpenAPISpec(apiUrl),
     docs: await testFastAPIDocsEndpoint(apiUrl)
   }
-  
+
   const allPassed = Object.values(tests).every(test => test.success)
-  
+
   const overall: APITestResult = {
     success: allPassed,
-    message: allPassed 
-      ? 'All API documentation tests passed' 
+    message: allPassed
+      ? 'All API documentation tests passed'
       : 'Some API documentation tests failed',
     data: {
       passed: Object.values(tests).filter(test => test.success).length,
@@ -185,7 +184,7 @@ export async function runAllAPITests(baseUrl?: string): Promise<{
       total: Object.values(tests).length
     }
   }
-  
+
   return {
     overall,
     individual: tests

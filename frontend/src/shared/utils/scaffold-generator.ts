@@ -1,10 +1,10 @@
 /**
  * Model and Frontend Scaffolding Generator
- * 
+ *
  * This utility generates complete CRUD interfaces for new models including:
  * - TypeScript interfaces and types
  * - API service files
- * - React Query hooks  
+ * - React Query hooks
  * - DataTable components
  * - Form components
  * - Navigation menu entries
@@ -35,7 +35,7 @@ export interface FieldDefinition {
 
 export interface ModelDefinition {
   name: string // e.g., "Product", "Category", "Order"
-  pluralName?: string // e.g., "Products", "Categories", "Orders" 
+  pluralName?: string // e.g., "Products", "Categories", "Orders"
   description?: string
   tableName?: string // Database table name (snake_case)
   icon?: string // Lucide icon name
@@ -56,7 +56,7 @@ export class ScaffoldGenerator {
   constructor(model: ModelDefinition, basePath = '/home/sen/FastNext/frontend/src') {
     this.model = model
     this.basePath = basePath
-    
+
     // Set defaults
     if (!this.model.pluralName) {
       this.model.pluralName = this.model.name + 's'
@@ -98,11 +98,11 @@ export class ScaffoldGenerator {
   generateTypes(): string {
     const modelName = this.model.name
     const fields = this.model.fields
-    
+
     const interfaceFields = fields.map(field => {
       const optional = field.required ? '' : '?'
       let type: string
-      
+
       switch (field.type) {
         case 'number':
           type = 'number'
@@ -122,7 +122,7 @@ export class ScaffoldGenerator {
         default:
           type = 'string'
       }
-      
+
       return `  ${field.name}${optional}: ${type}`
     }).join('\n')
 
@@ -204,13 +204,13 @@ export const ${this.lowercaseFirst(this.model.pluralName!)}Api = {
   // Get paginated list
   get${this.model.pluralName}: async (params?: ${modelName}ListParams): Promise<${modelName}ListResponse> => {
     const searchParams = new URLSearchParams()
-    
+
     if (params?.skip !== undefined) searchParams.set('skip', params.skip.toString())
     if (params?.limit !== undefined) searchParams.set('limit', params.limit.toString())
     if (params?.search) searchParams.set('search', params.search)${this.model.hasStatus ? `
     if (params?.is_active !== undefined) searchParams.set('is_active', params.is_active.toString())` : ''}${fields.filter(f => f.filterType).map(f => `
     if (params?.${f.name}) searchParams.set('${f.name}', params.${f.name}.toString())`).join('')}
-    
+
     const url = \`\${API_CONFIG.BASE_URL}/${this.model.tableName}\${searchParams.toString() ? '?' + searchParams.toString() : ''}\`
     return apiClient.get<${modelName}ListResponse>(url)
   },
@@ -247,36 +247,27 @@ export const ${this.lowercaseFirst(this.model.pluralName!)}Api = {
 
   // Generate all scaffolded files
   generateAll(): void {
-    console.log(`🚀 Generating scaffolding for ${this.model.name}...`)
-    
+
     try {
       // 1. Generate API types
       this.generateAPIFile()
-      
+
       // 2. Generate hooks
       this.generateHooksFile()
-      
-      // 3. Generate DataTable component  
+
+      // 3. Generate DataTable component
       this.generateDataTableComponent()
-      
+
       // 4. Generate form components
       this.generateFormComponents()
-      
+
       // 5. Generate page components
       this.generatePageComponents()
-      
+
       // 6. Update navigation menu
       this.updateNavigationMenu()
-      
-      console.log(`✅ Successfully generated scaffolding for ${this.model.name}!`)
-      console.log('\nGenerated files:')
-      console.log(`📁 API: src/shared/services/api/${this.model.name.toLowerCase()}.ts`)
-      console.log(`📁 Hooks: src/modules/${this.model.name.toLowerCase()}/hooks/use${this.model.pluralName}.ts`)
-      console.log(`📁 DataTable: src/shared/components/data-table/${this.model.pluralName}DataTable.tsx`)
-      console.log(`📁 Form: src/modules/${this.model.name.toLowerCase()}/components/${this.model.name}Form.tsx`)
-      console.log(`📁 Pages: src/app/${this.model.name.toLowerCase()}/(list|create|edit)/page.tsx`)
-      console.log(`📁 Navigation: Updated menuConfig.ts`)
-      
+
+
     } catch (error) {
       console.error(`❌ Error generating scaffolding:`, error)
       throw error
@@ -287,11 +278,11 @@ export const ${this.lowercaseFirst(this.model.pluralName!)}Api = {
     const content = this.generateTypes()
     const dir = join(this.basePath, 'shared/services/api')
     const filePath = join(dir, `${this.model.name.toLowerCase()}.ts`)
-    
+
     if (!existsSync(dir)) {
       mkdirSync(dir, { recursive: true })
     }
-    
+
     writeFileSync(filePath, content)
   }
 
@@ -300,14 +291,14 @@ export const ${this.lowercaseFirst(this.model.pluralName!)}Api = {
     const pluralName = this.model.pluralName!
     const lowercasePlural = pluralName.toLowerCase()
     const lowercaseModel = modelName.toLowerCase()
-    
+
     const content = `import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { 
-  ${lowercasePlural}Api, 
-  type Create${modelName}Request, 
-  type Update${modelName}Request, 
-  type ${modelName}ListParams, 
-  type ${modelName} 
+import {
+  ${lowercasePlural}Api,
+  type Create${modelName}Request,
+  type Update${modelName}Request,
+  type ${modelName}ListParams,
+  type ${modelName}
 } from '@/shared/services/api/${lowercaseModel}'
 
 // Query keys for ${lowercasePlural}
@@ -387,11 +378,11 @@ export const useToggle${modelName}Status = () => {
 
     const dir = join(this.basePath, `modules/${lowercaseModel}/hooks`)
     const filePath = join(dir, `use${pluralName}.ts`)
-    
+
     if (!existsSync(dir)) {
       mkdirSync(dir, { recursive: true })
     }
-    
+
     writeFileSync(filePath, content)
   }
 
@@ -399,11 +390,11 @@ export const useToggle${modelName}Status = () => {
     const modelName = this.model.name
     const pluralName = this.model.pluralName!
     const lowercaseModel = modelName.toLowerCase()
-    
+
     // Generate column definitions based on fields
     const visibleFields = this.model.fields.filter(f => f.displayInList !== false)
     const columns = visibleFields.map(field => this.generateColumnDefinition(field)).join(',\n    ')
-    
+
     const content = `'use client'
 
 import * as React from 'react'
@@ -571,27 +562,22 @@ export function ${pluralName}DataTable({
 // Example usage component
 export function ${pluralName}DataTableExample() {
   const handleEdit${modelName} = (${lowercaseModel}: ${modelName}) => {
-    console.log('Edit ${lowercaseModel}:', ${lowercaseModel})
     // TODO: Implement edit functionality
   }
 
   const handleDelete${modelName} = (${lowercaseModel}: ${modelName}) => {
-    console.log('Delete ${lowercaseModel}:', ${lowercaseModel})
     // TODO: Implement delete functionality
   }
 
   const handleView${modelName} = (${lowercaseModel}: ${modelName}) => {
-    console.log('View ${lowercaseModel}:', ${lowercaseModel})
     // TODO: Implement view functionality
   }
 
   const handleAdd${modelName} = () => {
-    console.log('Add new ${lowercaseModel}')
     // TODO: Implement add functionality
   }${this.model.hasStatus ? `
 
   const handleToggleStatus = (${lowercaseModel}: ${modelName}) => {
-    console.log('Toggle ${lowercaseModel} status:', ${lowercaseModel})
     // TODO: Implement status toggle
   }` : ''}
 
@@ -605,7 +591,7 @@ export function ${pluralName}DataTableExample() {
           </p>
         </div>
       </div>
-      
+
       <${pluralName}DataTable
         onEdit${modelName}={handleEdit${modelName}}
         onDelete${modelName}={handleDelete${modelName}}
@@ -619,11 +605,11 @@ export function ${pluralName}DataTableExample() {
 
     const dir = join(this.basePath, 'shared/components/data-table')
     const filePath = join(dir, `${pluralName}DataTable.tsx`)
-    
+
     if (!existsSync(dir)) {
       mkdirSync(dir, { recursive: true })
     }
-    
+
     writeFileSync(filePath, content)
   }
 
@@ -631,7 +617,7 @@ export function ${pluralName}DataTableExample() {
     const modelName = this.model.name
     const lowercaseModel = modelName.toLowerCase()
     // Generate form content based on model fields
-    
+
     const content = `'use client'
 
 import * as React from 'react'
@@ -667,9 +653,9 @@ import {
   SelectValue,
 } from '@/shared/components'
 
-import { 
-  useCreate${modelName}, 
-  useUpdate${modelName}${this.model.hasStatus ? `, useToggle${modelName}Status` : ''} 
+import {
+  useCreate${modelName},
+  useUpdate${modelName}${this.model.hasStatus ? `, useToggle${modelName}Status` : ''}
 } from '@/modules/${lowercaseModel}/hooks/use${this.model.pluralName}'
 import type { ${modelName} } from '@/shared/services/api/${lowercaseModel}'
 
@@ -686,11 +672,11 @@ interface ${modelName}FormProps {
   className?: string
 }
 
-export function ${modelName}Form({ 
-  ${lowercaseModel}, 
-  onSuccess, 
+export function ${modelName}Form({
+  ${lowercaseModel},
+  onSuccess,
   onCancel,
-  className 
+  className
 }: ${modelName}FormProps) {
   const isEditing = Boolean(${lowercaseModel})
   const createMutation = useCreate${modelName}()
@@ -711,7 +697,7 @@ export function ${modelName}Form({
   const onSubmit = async (data: ${modelName}FormData) => {
     try {
       let result: ${modelName}
-      
+
       if (isEditing && ${lowercaseModel}) {
         result = await updateMutation.mutateAsync({
           id: ${lowercaseModel}.id,
@@ -720,9 +706,9 @@ export function ${modelName}Form({
       } else {
         result = await createMutation.mutateAsync(data as any)
       }
-      
+
       onSuccess?.(result)
-      
+
       if (!isEditing) {
         form.reset()
       }
@@ -744,8 +730,8 @@ export function ${modelName}Form({
             {isEditing ? \`Edit \${${lowercaseModel}?.id ? \`${modelName} #\${${lowercaseModel}.id}\` : '${modelName}'}\` : 'Create New ${modelName}'}
           </h3>
           <p className="text-sm text-muted-foreground">
-            {isEditing 
-              ? 'Update the ${lowercaseModel} information below' 
+            {isEditing
+              ? 'Update the ${lowercaseModel} information below'
               : '${this.model.description || `Fill in the information to create a new ${lowercaseModel}`}'
             }
           </p>
@@ -758,22 +744,22 @@ export function ${modelName}Form({
 
           <div className="flex items-center justify-end space-x-2 pt-4 border-t">
             {onCancel && (
-              <Button 
-                type="button" 
-                variant="outline" 
+              <Button
+                type="button"
+                variant="outline"
                 onClick={onCancel}
                 disabled={isSubmitting}
               >
                 Cancel
               </Button>
             )}
-            <Button 
-              type="submit" 
+            <Button
+              type="submit"
               disabled={isSubmitting}
             >
               {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {isSubmitting 
-                ? (isEditing ? 'Updating...' : 'Creating...') 
+              {isSubmitting
+                ? (isEditing ? 'Updating...' : 'Creating...')
                 : (isEditing ? 'Update ${modelName}' : 'Create ${modelName}')
               }
             </Button>
@@ -790,10 +776,10 @@ interface ${modelName}CreateDialogProps {
   onSuccess?: (${lowercaseModel}: ${modelName}) => void
 }
 
-export function ${modelName}CreateDialog({ 
-  open, 
-  onOpenChange, 
-  onSuccess 
+export function ${modelName}CreateDialog({
+  open,
+  onOpenChange,
+  onSuccess
 }: ${modelName}CreateDialogProps) {
   const handleSuccess = (${lowercaseModel}: ${modelName}) => {
     onOpenChange(false)
@@ -827,11 +813,11 @@ interface ${modelName}EditDialogProps {
   onSuccess?: (${lowercaseModel}: ${modelName}) => void
 }
 
-export function ${modelName}EditDialog({ 
-  ${lowercaseModel}, 
-  open, 
-  onOpenChange, 
-  onSuccess 
+export function ${modelName}EditDialog({
+  ${lowercaseModel},
+  open,
+  onOpenChange,
+  onSuccess
 }: ${modelName}EditDialogProps) {
   const handleSuccess = (updated${modelName}: ${modelName}) => {
     onOpenChange(false)
@@ -862,31 +848,30 @@ export function ${modelName}EditDialog({
 
     const dir = join(this.basePath, `modules/${lowercaseModel}/components`)
     const filePath = join(dir, `${modelName}Form.tsx`)
-    
+
     if (!existsSync(dir)) {
       mkdirSync(dir, { recursive: true })
     }
-    
+
     writeFileSync(filePath, content)
   }
 
   private generatePageComponents(): void {
     const modelName = this.model.name
     // Generate page components for the model
-    
+
     // Generate list page
     this.generateListPage()
-    
+
     // Generate create page
     this.generateCreatePage()
-    
+
     // Generate edit page
     this.generateEditPage()
-    
+
     // Generate view page (details)
     this.generateViewPage()
-    
-    console.log(`Generated page components for ${modelName}`)
+
   }
 
   private generateListPage(): void {
@@ -894,16 +879,16 @@ export function ${modelName}EditDialog({
     const pluralName = this.model.pluralName!
     const lowercaseModel = modelName.toLowerCase()
     const lowercasePlural = pluralName.toLowerCase()
-    
+
     const searchableFields = this.model.fields.filter(f => f.searchable)
     const filterableFields = this.model.fields.filter(f => f.filterType)
-    
+
     const content = `'use client'
 
 import * as React from 'react'
 import { Plus, Loader2, ${this.model.icon} } from 'lucide-react'
 
-import { 
+import {
   Button,
   Badge,
   AdvancedSearch,
@@ -914,9 +899,9 @@ import { useAdvancedSearch } from '@/shared/hooks/useAdvancedSearch'
 // import { ${pluralName}DataTable } from '@/shared/components/data-table/${pluralName}DataTable'
 // TODO: Update scaffold generator to use ViewManager instead of DataTable
 
-import { 
-  use${pluralName}, 
-  useDelete${modelName}${this.model.hasStatus ? `, useToggle${modelName}Status` : ''} 
+import {
+  use${pluralName},
+  useDelete${modelName}${this.model.hasStatus ? `, useToggle${modelName}Status` : ''}
 } from '@/modules/${lowercaseModel}/hooks/use${pluralName}'
 import { apiUtils } from '@/shared/services/api/client'
 import type { ${modelName} } from '@/shared/services/api/${lowercaseModel}'
@@ -946,7 +931,6 @@ const ${pluralName}Page: React.FC<${pluralName}PageProps> = () => {
   } = useAdvancedSearch({
     initialPageSize: 20,
     onSearch: (state: SearchState) => {
-      console.log('Search state changed:', state)
     }
   })
 
@@ -965,7 +949,6 @@ const ${pluralName}Page: React.FC<${pluralName}PageProps> = () => {
   }, [delete${modelName}Mutation])
 
   const handle${modelName}View = React.useCallback((${lowercaseModel}: ${modelName}) => {
-    console.log('View ${lowercaseModel}:', ${lowercaseModel})
   }, [])
 
   const handleAdd${modelName} = React.useCallback(() => {
@@ -981,50 +964,50 @@ const ${pluralName}Page: React.FC<${pluralName}PageProps> = () => {
   }, [toggleStatusMutation])` : ''}
 
   const ${lowercasePlural} = React.useMemo(() => ${lowercasePlural}Data?.items || [], [${lowercasePlural}Data])
-  
+
   const filtered${pluralName} = React.useMemo(() => {
     if (!hasActiveSearch()) return ${lowercasePlural}
-    
+
     return ${lowercasePlural}.filter(${lowercaseModel} => {
       if (searchState.query) {
         const query = searchState.query.toLowerCase()
         const searchableFields = [${searchableFields.map(f => `${lowercaseModel}.${f.name}`).join(', ')}]
-        if (!searchableFields.some(field => 
+        if (!searchableFields.some(field =>
           field && field.toString().toLowerCase().includes(query)
         )) {
           return false
         }
       }
-      
+
       for (const filter of searchState.filters) {
         if (filter.value === undefined || filter.value === '') continue
-        
+
         switch (filter.field) {${filterableFields.map(f => this.generateFilterCase(f)).join('')}${this.model.hasStatus ? `
           case 'is_active':
             if (${lowercaseModel}.is_active !== (filter.value === 'true')) return false
             break` : ''}
         }
       }
-      
+
       return true
     })
   }, [${lowercasePlural}, searchState, hasActiveSearch])
 
   const sorted${pluralName} = React.useMemo(() => {
     if (!searchState.sort) return filtered${pluralName}
-    
+
     return [...filtered${pluralName}].sort((a, b) => {
       const field = searchState.sort!.field
       const direction = searchState.sort!.direction
-      
+
       let aValue: any = a[field as keyof ${modelName}]
       let bValue: any = b[field as keyof ${modelName}]
-      
+
       if (field === 'created_at' || field === 'updated_at') {
         aValue = new Date(aValue)
         bValue = new Date(bValue)
       }
-      
+
       if (aValue < bValue) return direction === 'asc' ? -1 : 1
       if (aValue > bValue) return direction === 'asc' ? 1 : -1
       return 0
@@ -1095,7 +1078,7 @@ const ${pluralName}Page: React.FC<${pluralName}PageProps> = () => {
         open={isCreateDialogOpen}
         onOpenChange={setIsCreateDialogOpen}
       />
-      
+
       <${modelName}EditDialog
         ${lowercaseModel}={editing${modelName}}
         open={!!editing${modelName}}
@@ -1110,11 +1093,11 @@ export default ${pluralName}Page
 
     const dir = join(this.basePath, `app/${lowercasePlural}`)
     const filePath = join(dir, 'page.tsx')
-    
+
     if (!existsSync(dir)) {
       mkdirSync(dir, { recursive: true })
     }
-    
+
     writeFileSync(filePath, content)
   }
 
@@ -1122,7 +1105,7 @@ export default ${pluralName}Page
     const modelName = this.model.name
     const lowercaseModel = modelName.toLowerCase()
     const lowercasePlural = this.model.pluralName!.toLowerCase()
-    
+
     const content = `'use client'
 
 import { useRouter } from 'next/navigation'
@@ -1147,16 +1130,16 @@ export default function Create${modelName}Page() {
     <div className="container mx-auto px-4 py-6 max-w-2xl">
       <div className="space-y-6">
         <div className="flex items-center space-x-4">
-          <Button 
-            variant="outline" 
-            size="sm" 
+          <Button
+            variant="outline"
+            size="sm"
             onClick={() => router.back()}
             className="flex items-center space-x-2"
           >
             <ArrowLeft className="h-4 w-4" />
             <span>Back</span>
           </Button>
-          
+
           <div className="flex items-center space-x-3">
             <div className="p-2 rounded-lg bg-primary/10">
               <${this.model.icon} className="h-5 w-5 text-primary" />
@@ -1184,11 +1167,11 @@ export default function Create${modelName}Page() {
 
     const dir = join(this.basePath, `app/${lowercasePlural}/create`)
     const filePath = join(dir, 'page.tsx')
-    
+
     if (!existsSync(dir)) {
       mkdirSync(dir, { recursive: true })
     }
-    
+
     writeFileSync(filePath, content)
   }
 
@@ -1196,7 +1179,7 @@ export default function Create${modelName}Page() {
     const modelName = this.model.name
     const lowercaseModel = modelName.toLowerCase()
     const lowercasePlural = this.model.pluralName!.toLowerCase()
-    
+
     const content = `'use client'
 
 import { useRouter, useParams } from 'next/navigation'
@@ -1255,16 +1238,16 @@ export default function Edit${modelName}Page() {
     <div className="container mx-auto px-4 py-6 max-w-2xl">
       <div className="space-y-6">
         <div className="flex items-center space-x-4">
-          <Button 
-            variant="outline" 
-            size="sm" 
+          <Button
+            variant="outline"
+            size="sm"
             onClick={() => router.back()}
             className="flex items-center space-x-2"
           >
             <ArrowLeft className="h-4 w-4" />
             <span>Back</span>
           </Button>
-          
+
           <div className="flex items-center space-x-3">
             <div className="p-2 rounded-lg bg-primary/10">
               <${this.model.icon} className="h-5 w-5 text-primary" />
@@ -1295,11 +1278,11 @@ export default function Edit${modelName}Page() {
 
     const dir = join(this.basePath, `app/${lowercasePlural}/[id]/edit`)
     const filePath = join(dir, 'page.tsx')
-    
+
     if (!existsSync(dir)) {
       mkdirSync(dir, { recursive: true })
     }
-    
+
     writeFileSync(filePath, content)
   }
 
@@ -1307,7 +1290,7 @@ export default function Edit${modelName}Page() {
     const modelName = this.model.name
     const lowercaseModel = modelName.toLowerCase()
     const lowercasePlural = this.model.pluralName!.toLowerCase()
-    
+
     const content = `'use client'
 
 import { useRouter, useParams } from 'next/navigation'
@@ -1332,7 +1315,7 @@ export default function View${modelName}Page() {
 
   const handleDelete = () => {
     if (!${lowercaseModel}) return
-    
+
     confirmDelete('${lowercaseModel}', ${lowercaseModel}.id.toString(), async () => {
       try {
         await delete${modelName}Mutation.mutateAsync(${lowercaseModel}.id)
@@ -1377,16 +1360,16 @@ export default function View${modelName}Page() {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
-            <Button 
-              variant="outline" 
-              size="sm" 
+            <Button
+              variant="outline"
+              size="sm"
               onClick={() => router.back()}
               className="flex items-center space-x-2"
             >
               <ArrowLeft className="h-4 w-4" />
               <span>Back</span>
             </Button>
-            
+
             <div className="flex items-center space-x-3">
               <div className="p-2 rounded-lg bg-primary/10">
                 <${this.model.icon} className="h-5 w-5 text-primary" />
@@ -1407,8 +1390,8 @@ export default function View${modelName}Page() {
               <Pencil className="h-4 w-4" />
               <span>Edit</span>
             </Button>
-            <Button 
-              variant="destructive" 
+            <Button
+              variant="destructive"
               onClick={handleDelete}
               className="flex items-center space-x-2"
             >
@@ -1431,7 +1414,7 @@ export default function View${modelName}Page() {
                   {new Date(${lowercaseModel}.created_at).toLocaleString()}
                 </p>
               </div>
-              
+
               {${lowercaseModel}.updated_at && (
                 <div>
                   <label className="text-sm font-medium text-muted-foreground">Last Updated</label>
@@ -1440,7 +1423,7 @@ export default function View${modelName}Page() {
                   </p>
                 </div>
               )}` : ''}${this.model.hasStatus ? `
-              
+
               <div>
                 <label className="text-sm font-medium text-muted-foreground">Status</label>
                 <div className="mt-1">
@@ -1474,11 +1457,11 @@ export default function View${modelName}Page() {
 
     const dir = join(this.basePath, `app/${lowercasePlural}/[id]`)
     const filePath = join(dir, 'page.tsx')
-    
+
     if (!existsSync(dir)) {
       mkdirSync(dir, { recursive: true })
     }
-    
+
     writeFileSync(filePath, content)
   }
 
@@ -1492,18 +1475,18 @@ export default function View${modelName}Page() {
       field: '${field.name}',
       label: '${field.label || this.capitalize(field.name)}',
       type: '${field.filterType}'`
-        
+
         if (field.type === 'select' && field.options) {
           filterDef += `,
       options: [
         ${field.options.map(opt => `{ value: '${opt}', label: '${opt}' }`).join(',\n        ')}
       ]`
         }
-        
+
         filterDef += '\n    },'
         return filterDef
       }).join('')
-    
+
     if (this.model.hasStatus) {
       filters += `
     {
@@ -1517,7 +1500,7 @@ export default function View${modelName}Page() {
       ]
     },`
     }
-    
+
     if (this.model.hasTimestamps) {
       filters += `
     {
@@ -1527,7 +1510,7 @@ export default function View${modelName}Page() {
       type: 'daterange'
     },`
     }
-    
+
     return filters
   }
 
@@ -1537,14 +1520,14 @@ export default function View${modelName}Page() {
       .map(field => `
     { field: '${field.name}', label: '${field.label || this.capitalize(field.name)}' },`)
       .join('')
-    
+
     let additionalSorts = ''
     if (this.model.hasTimestamps) {
       additionalSorts += `
     { field: 'created_at', label: 'Created Date' },
     { field: 'updated_at', label: 'Last Modified' },`
     }
-    
+
     return sortFields + additionalSorts
   }
 
@@ -1582,7 +1565,7 @@ export default function View${modelName}Page() {
     return this.model.fields.map(field => {
       const label = field.label || this.capitalize(field.name)
       let valueDisplay = `{${this.lowercaseFirst(this.model.name)}.${field.name}}`
-      
+
       switch (field.type) {
         case 'boolean':
           valueDisplay = `
@@ -1595,7 +1578,7 @@ export default function View${modelName}Page() {
           break
         case 'email':
           valueDisplay = `
-                  <a 
+                  <a
                     href={\`mailto:\${${this.lowercaseFirst(this.model.name)}.${field.name}}\`}
                     className="text-blue-600 hover:underline"
                   >
@@ -1604,7 +1587,7 @@ export default function View${modelName}Page() {
           break
         case 'url':
           valueDisplay = `
-                  <a 
+                  <a
                     href={${this.lowercaseFirst(this.model.name)}.${field.name}}
                     target="_blank"
                     rel="noopener noreferrer"
@@ -1630,7 +1613,7 @@ export default function View${modelName}Page() {
                   </Badge>`
           break
       }
-      
+
       return `
               <div>
                 <label className="text-sm font-medium text-muted-foreground">${label}</label>
@@ -1644,21 +1627,21 @@ export default function View${modelName}Page() {
   private updateNavigationMenu(): void {
     const pluralName = this.model.pluralName!
     const lowercasePlural = pluralName.toLowerCase()
-    
+
     // Read the current menu config
     const menuConfigPath = join(this.basePath, 'shared/components/navigation/menuConfig.ts')
-    
+
     if (!existsSync(menuConfigPath)) {
       console.warn('menuConfig.ts not found, skipping navigation menu update')
       return
     }
-    
+
     let content = readFileSync(menuConfigPath, 'utf-8')
-    
+
     // Check if the icon is already imported
     const iconName = this.model.icon!
     const iconImportPattern = new RegExp(`\\b${iconName}\\b`)
-    
+
     if (!iconImportPattern.test(content)) {
       // Add the icon import
       const importMatch = content.match(/(import\s*\{[^}]+\}\s*from\s*['"]lucide-react['"];?)/)
@@ -1671,25 +1654,24 @@ export default function View${modelName}Page() {
         content = content.replace(importMatch[1], updatedImports)
       }
     }
-    
+
     // Check if the menu item already exists
     const menuItemPattern = new RegExp(`title:\\s*['"]${pluralName}['"]`)
     if (menuItemPattern.test(content)) {
-      console.log(`Menu item for ${pluralName} already exists, skipping navigation update`)
       return
     }
-    
+
     // Find where to insert the new menu item
     // Look for the Administration section or add before Settings
-    
+
     // Try to find Administration section first
     const adminSectionMatch = content.match(/(\s*){\s*title:\s*['"]Administration['"][\s\S]*?children:\s*\[[\s\S]*?\],?\s*},/)
-    
+
     if (adminSectionMatch && this.model.module === 'administration') {
       // Add to Administration section
       const adminSection = adminSectionMatch[0]
       const childrenMatch = adminSection.match(/(children:\s*\[[\s\S]*?)(],?\s*})/)
-      
+
       if (childrenMatch) {
         const newChild = `      {
         title: '${pluralName}',
@@ -1697,20 +1679,19 @@ export default function View${modelName}Page() {
         icon: ${iconName},
         requiredPermission: '${this.model.module || 'admin'}.${lowercasePlural}',
       },`
-        
+
         const updatedChildren = childrenMatch[1] + '\n' + newChild + '\n    ' + childrenMatch[2]
         const updatedAdminSection = adminSection.replace(
           /children:\s*\[[\s\S]*?\],?\s*}/,
           updatedChildren
         )
-        
+
         content = content.replace(adminSection, updatedAdminSection)
         writeFileSync(menuConfigPath, content)
-        console.log(`Added ${pluralName} to Administration section in navigation menu`)
         return
       }
     }
-    
+
     // If not adding to admin section, add as a top-level item
     const settingsItemMatch = content.match(/(\s*{\s*title:\s*['"]Settings['"][\s\S]*?},)/)
     if (settingsItemMatch) {
@@ -1719,13 +1700,12 @@ export default function View${modelName}Page() {
     href: '/${lowercasePlural}',
     icon: ${iconName},${this.model.module ? `\n    module: '${this.model.module}',` : ''}
   },`
-      
+
       content = content.replace(settingsItemMatch[1], newMenuItem + '\n' + settingsItemMatch[1])
       writeFileSync(menuConfigPath, content)
-      console.log(`Added ${pluralName} as top-level menu item`)
       return
     }
-    
+
     // Fallback: add before the last item
     const lastItemMatch = content.match(/(\s*},\s*];?\s*)$/)
     if (lastItemMatch) {
@@ -1734,10 +1714,9 @@ export default function View${modelName}Page() {
     href: '/${lowercasePlural}',
     icon: ${iconName},${this.model.module ? `\n    module: '${this.model.module}',` : ''}
   },`
-      
+
       content = content.replace(lastItemMatch[1], ',\n' + newMenuItem + '\n];')
       writeFileSync(menuConfigPath, content)
-      console.log(`Added ${pluralName} to navigation menu`)
     } else {
       console.warn('Could not find insertion point in menuConfig.ts')
     }
@@ -1764,7 +1743,7 @@ export default function View${modelName}Page() {
   private generateColumnDefinition(field: FieldDefinition): string {
     const sortable = field.sortable !== false
     let cellRenderer = 'row.getValue(\'{{name}}\')'
-    
+
     // Customize cell rendering based on field type
     switch (field.type) {
       case 'boolean':
@@ -1897,7 +1876,7 @@ export default function View${modelName}Page() {
   private generateZodSchema(): string {
     let schemaFields = this.model.fields.map(field => {
       let zodType: string
-      
+
       switch (field.type) {
         case 'number':
           zodType = `z.number()`
@@ -1921,8 +1900,8 @@ export default function View${modelName}Page() {
           zodType = `z.string().url('Invalid URL')`
           break
         case 'select':
-          zodType = field.options 
-            ? `z.enum(['${field.options.join("', '")}'])` 
+          zodType = field.options
+            ? `z.enum(['${field.options.join("', '")}'])`
             : `z.string()`
           break
         case 'multiselect':
@@ -1946,26 +1925,26 @@ export default function View${modelName}Page() {
             zodType += `.regex(/${field.validation.pattern}/, '${field.validation.message || 'Invalid format'}')`
           }
       }
-      
+
       if (!field.required) {
         zodType += `.optional()`
       }
-      
+
       return `\n  ${field.name}: ${zodType},`
     }).join('')
-    
+
     // Add status field if enabled
     if (this.model.hasStatus) {
       schemaFields += `\n  is_active: z.boolean().optional(),`
     }
-    
+
     return schemaFields
   }
 
   private generateDefaultValues(): string {
     let defaults = this.model.fields.map(field => {
       let defaultValue: string
-      
+
       switch (field.type) {
         case 'number':
           defaultValue = '0'
@@ -1979,14 +1958,14 @@ export default function View${modelName}Page() {
         default:
           defaultValue = "''"
       }
-      
+
       return `\n      ${field.name}: ${defaultValue},`
     }).join('')
-    
+
     if (this.model.hasStatus) {
       defaults += `\n      is_active: true,`
     }
-    
+
     return `{${defaults}\n    }`
   }
 
@@ -1994,11 +1973,11 @@ export default function View${modelName}Page() {
     let resetFields = this.model.fields.map(field => {
       return `\n        ${field.name}: ${field.name}?.${field.name} || ${this.getDefaultValueForField(field)},`
     }).join('')
-    
+
     if (this.model.hasStatus) {
       resetFields += `\n        is_active: ${this.lowercaseFirst(this.model.name)}?.is_active ?? true,`
     }
-    
+
     return resetFields
   }
 
@@ -2023,14 +2002,14 @@ export default function View${modelName}Page() {
     const label = field.label || this.capitalize(field.name)
     const placeholder = field.placeholder || `Enter ${label.toLowerCase()}...`
     const required = field.required ? ' *' : ''
-    
+
     let fieldComponent: string
-    
+
     switch (field.type) {
       case 'text':
         fieldComponent = `<FormControl>
-                    <Textarea 
-                      {...field} 
+                    <Textarea
+                      {...field}
                       placeholder="${placeholder}"
                       disabled={isSubmitting}
                       rows={3}
@@ -2039,8 +2018,8 @@ export default function View${modelName}Page() {
         break
       case 'number':
         fieldComponent = `<FormControl>
-                    <Input 
-                      {...field} 
+                    <Input
+                      {...field}
                       type="number"
                       placeholder="${placeholder}"
                       disabled={isSubmitting}
@@ -2062,8 +2041,8 @@ export default function View${modelName}Page() {
         break
       case 'date':
         fieldComponent = `<FormControl>
-                    <Input 
-                      {...field} 
+                    <Input
+                      {...field}
                       type="date"
                       disabled={isSubmitting}
                     />
@@ -2071,8 +2050,8 @@ export default function View${modelName}Page() {
         break
       case 'email':
         fieldComponent = `<FormControl>
-                    <Input 
-                      {...field} 
+                    <Input
+                      {...field}
                       type="email"
                       placeholder="${placeholder}"
                       disabled={isSubmitting}
@@ -2081,8 +2060,8 @@ export default function View${modelName}Page() {
         break
       case 'url':
         fieldComponent = `<FormControl>
-                    <Input 
-                      {...field} 
+                    <Input
+                      {...field}
                       type="url"
                       placeholder="${placeholder}"
                       disabled={isSubmitting}
@@ -2091,8 +2070,8 @@ export default function View${modelName}Page() {
         break
       case 'select':
         const options = field.options || ['Option 1', 'Option 2', 'Option 3']
-        fieldComponent = `<Select 
-                    onValueChange={field.onChange} 
+        fieldComponent = `<Select
+                    onValueChange={field.onChange}
                     defaultValue={field.value}
                     disabled={isSubmitting}
                   >
@@ -2135,14 +2114,14 @@ export default function View${modelName}Page() {
         break
       default:
         fieldComponent = `<FormControl>
-                    <Input 
-                      {...field} 
+                    <Input
+                      {...field}
                       placeholder="${placeholder}"
                       disabled={isSubmitting}
                     />
                   </FormControl>`
     }
-    
+
     return `<FormField
             control={form.control}
             name="${field.name}"

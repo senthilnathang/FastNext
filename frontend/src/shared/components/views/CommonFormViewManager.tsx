@@ -16,17 +16,17 @@ export interface FormViewConfig<T = any> {
   resourceName: string
   baseUrl: string // e.g., '/admin/rls/policies'
   apiEndpoint: string // e.g., '/api/v1/rls/policies'
-  
+
   // Form configuration
   formFields: FormField<T>[]
   formSections?: FormSection<T>[]
   validationSchema?: z.ZodSchema<T>
-  
+
   // Table configuration
   columns: Column<T>[]
   views: ViewConfig[]
   defaultView: string
-  
+
   // UI customization
   title: string
   subtitle?: string
@@ -34,13 +34,13 @@ export interface FormViewConfig<T = any> {
   editButtonText?: string
   viewButtonText?: string
   deleteButtonText?: string
-  
+
   // Permissions
   canCreate?: boolean
   canEdit?: boolean
   canView?: boolean
   canDelete?: boolean
-  
+
   // API configuration
   onFetch?: () => Promise<T[]>
   onCreate?: (data: T) => Promise<T>
@@ -235,10 +235,10 @@ export function CommonFormViewManager<T extends { id?: string | number }>({
       onSubmit: handleFormSubmit,
       onCancel: handleFormCancel,
       validationSchema: config.validationSchema,
-      title: mode === 'create' 
-        ? `Create ${config.title.slice(0, -1)}` 
-        : mode === 'edit' 
-        ? `Edit ${config.title.slice(0, -1)}` 
+      title: mode === 'create'
+        ? `Create ${config.title.slice(0, -1)}`
+        : mode === 'edit'
+        ? `Edit ${config.title.slice(0, -1)}`
         : `View ${config.title.slice(0, -1)}`,
       submitButtonText: mode === 'create' ? config.createButtonText : config.editButtonText,
       loading: formLoading,
@@ -248,7 +248,7 @@ export function CommonFormViewManager<T extends { id?: string | number }>({
     return (
       <div className="space-y-6">
         {renderBreadcrumb()}
-        
+
         <div className="flex items-center justify-between">
           <Button
             variant="ghost"
@@ -258,7 +258,7 @@ export function CommonFormViewManager<T extends { id?: string | number }>({
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to {config.title}
           </Button>
-          
+
           {mode === 'view' && config.canEdit && selectedItem && (
             <Button
               variant="outline"

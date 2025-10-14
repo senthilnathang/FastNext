@@ -61,7 +61,7 @@ function VariableNode({ data, selected }: NodeProps<VariableNodeData>) {
   };
 
   return (
-    <div 
+    <div
       className={`
         px-3 py-2 shadow-md rounded-lg border-2 min-w-[140px] max-w-[200px]
         ${selected ? 'border-teal-500' : 'border-teal-300'}
@@ -77,7 +77,7 @@ function VariableNode({ data, selected }: NodeProps<VariableNodeData>) {
           style={{ top: -6 }}
         />
       )}
-      
+
       {/* Node header */}
       <div className="flex items-center space-x-2">
         {getOperationIcon()}
@@ -121,7 +121,7 @@ function VariableNode({ data, selected }: NodeProps<VariableNodeData>) {
           </div>
         )}
       </div>
-      
+
       {/* Output handle (for get operations or after set) */}
       <Handle
         type="source"

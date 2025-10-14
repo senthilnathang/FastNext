@@ -44,12 +44,11 @@ apiClient.interceptors.request.use(
     }
 
     // Add request timestamp for logging
-    config.metadata = { 
+    config.metadata = {
       startTime: Date.now(),
       requestId: Math.random().toString(36).substring(7)
     }
 
-    console.log(`[API Request] ${config.method?.toUpperCase()} ${config.url}`, {
       requestId: config.metadata.requestId,
       headers: config.headers,
       data: config.data
@@ -68,8 +67,7 @@ apiClient.interceptors.response.use(
   (response: AxiosResponse) => {
     const config = response.config as ExtendedAxiosRequestConfig
     const duration = Date.now() - (config.metadata?.startTime || 0)
-    
-    console.log(`[API Response] ${response.status} ${config.method?.toUpperCase()} ${config.url}`, {
+
       requestId: config.metadata?.requestId,
       duration: `${duration}ms`,
       status: response.status
@@ -121,7 +119,7 @@ function createApiError(error: AxiosError<ApiErrorResponse>): ApiError {
 function getErrorMessage(data: ApiErrorResponse | undefined, error: AxiosError): string {
   if (data?.detail) return data.detail
   if (data?.message) return data.message
-  
+
   // Handle validation errors
   if (data?.errors) {
     const firstField = Object.keys(data.errors)[0]
@@ -149,23 +147,23 @@ function getErrorMessage(data: ApiErrorResponse | undefined, error: AxiosError):
 // Handle authentication errors
 async function handleAuthError(error: AxiosError<ApiErrorResponse>) {
   console.warn('[Auth Error] Handling 401 response', error.response?.headers)
-  
+
   // Check if auto-logout is requested by server
   const autoLogout = error.response?.headers['x-auto-logout']
   const authStatus = error.response?.headers['x-auth-status']
-  
+
   if (autoLogout === 'true') {
     // Clear all auth data
     localStorage.removeItem('access_token')
     localStorage.removeItem('refresh_token')
     localStorage.removeItem('user')
-    
+
     // Store current path for redirect after login
     const currentPath = window.location.pathname
     if (currentPath !== '/login' && currentPath !== '/register') {
       sessionStorage.setItem('redirectAfterLogin', currentPath)
     }
-    
+
     // Redirect with reason
     const reason = authStatus || 'session_expired'
     window.location.href = `/login?reason=${reason}`
@@ -175,7 +173,7 @@ async function handleAuthError(error: AxiosError<ApiErrorResponse>) {
 // Handle forbidden errors
 function handleForbiddenError(error: AxiosError<ApiErrorResponse>) {
   console.warn('[Forbidden] Access denied:', error.response?.data)
-  
+
   // Could show a toast notification or redirect to unauthorized page
   // For now, we'll let the component handle it
 }
@@ -183,7 +181,7 @@ function handleForbiddenError(error: AxiosError<ApiErrorResponse>) {
 // Handle server errors
 function handleServerError(error: AxiosError<ApiErrorResponse>) {
   console.error('[Server Error] Internal server error:', error.response?.data)
-  
+
   // Could show a global error notification
   // For now, we'll let the component handle it
 }
@@ -221,4 +219,3 @@ export const apiUtils = {
     return 'An unexpected error occurred. Please try again.'
   }
 }
-

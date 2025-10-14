@@ -8,26 +8,26 @@ import {
   PasswordChangeSchema,
   ForgotPasswordSchema,
   ResetPasswordSchema,
-  
+
   // Role schemas
   RoleCreateSchema,
   RoleUpdateSchema,
   PermissionCreateSchema,
-  
+
   // Project schemas
   ProjectCreateSchema,
   ProjectUpdateSchema,
   ProjectMemberInviteSchema,
-  
+
   // Workflow schemas
   WorkflowCreateSchema,
   WorkflowUpdateSchema,
-  
+
   // Data import/export schemas
   ImportJobCreateSchema,
   ExportJobCreateSchema,
   FileValidationRequestSchema,
-  
+
   // API schemas
   AuthLoginRequestSchema,
   AuthRegisterRequestSchema,
@@ -35,7 +35,7 @@ import {
   ProjectCreateRequestSchema,
   WorkflowCreateRequestSchema,
   ImportJobCreateRequestSchema,
-  
+
   // Common schemas
   EmailSchema,
   PasswordSchema,
@@ -267,7 +267,7 @@ export class ValidationService {
   static getValidationErrors<T>(schema: z.ZodType<T, any, any>, data: unknown): Array<{ path: string; message: string }> | null {
     const result = schema.safeParse(data)
     if (result.success) return null
-    
+
     return result.error.issues.map(err => ({
       path: err.path.join('.'),
       message: err.message
@@ -295,14 +295,14 @@ export class ValidationService {
     errors: Record<string, string>
   } {
     const errors: Record<string, string> = {}
-    
+
     for (const { schema, data, fieldName } of validations) {
       const result = this.validate(schema, data)
       if (!result.success) {
         errors[fieldName] = result.error || 'Validation failed'
       }
     }
-    
+
     return {
       isValid: Object.keys(errors).length === 0,
       errors
@@ -312,7 +312,7 @@ export class ValidationService {
   // Transform validation errors for form libraries
   static transformErrorsForForm(errors: z.ZodError): Record<string, { message: string; type: string }> {
     const formErrors: Record<string, { message: string; type: string }> = {}
-    
+
     errors.issues.forEach(error => {
       const path = error.path.join('.')
       formErrors[path] = {
@@ -320,7 +320,7 @@ export class ValidationService {
         type: error.code
       }
     })
-    
+
     return formErrors
   }
 
@@ -410,26 +410,26 @@ export {
   PasswordChangeSchema,
   ForgotPasswordSchema,
   ResetPasswordSchema,
-  
+
   // Role schemas
   RoleCreateSchema,
   RoleUpdateSchema,
   PermissionCreateSchema,
-  
+
   // Project schemas
   ProjectCreateSchema,
   ProjectUpdateSchema,
   ProjectMemberInviteSchema,
-  
+
   // Workflow schemas
   WorkflowCreateSchema,
   WorkflowUpdateSchema,
-  
+
   // Data import/export schemas
   ImportJobCreateSchema,
   ExportJobCreateSchema,
   FileValidationRequestSchema,
-  
+
   // Common schemas
   EmailSchema,
   PasswordSchema,

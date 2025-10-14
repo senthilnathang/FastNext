@@ -2,11 +2,11 @@
 
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/components/ui/card';
-import { 
-  BarChart3, 
-  Clock, 
-  AlertTriangle, 
-  CheckCircle, 
+import {
+  BarChart3,
+  Clock,
+  AlertTriangle,
+  CheckCircle,
   Activity
 } from 'lucide-react';
 import { AnalyticsDashboard, type KpiData } from '@/shared/components';
@@ -118,7 +118,7 @@ export default function WorkflowAnalytics({}: WorkflowAnalyticsProps) {
               {stateDistribution.map((item) => (
                 <div key={item.state} className="flex items-center justify-between">
                   <div className="flex items-center space-x-3">
-                    <div 
+                    <div
                       className="w-3 h-3 rounded-full"
                       style={{ backgroundColor: item.color }}
                     />
@@ -126,13 +126,13 @@ export default function WorkflowAnalytics({}: WorkflowAnalyticsProps) {
                   </div>
                   <div className="flex items-center space-x-2">
                     <span className="text-sm text-gray-600">{item.count}</span>
-                    <div 
+                    <div
                       className="h-2 rounded-full bg-gray-200"
                       style={{ width: '60px' }}
                     >
-                      <div 
+                      <div
                         className="h-2 rounded-full"
-                        style={{ 
+                        style={{
                           backgroundColor: item.color,
                           width: `${(item.count / 342) * 100}%`
                         }}

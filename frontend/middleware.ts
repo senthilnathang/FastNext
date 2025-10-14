@@ -14,7 +14,7 @@ const ROUTE_CONFIG = {
     '/projects',
     '/workflows',
   ],
-  
+
   // Admin-only routes
   admin: [
     '/admin',
@@ -24,7 +24,7 @@ const ROUTE_CONFIG = {
     '/api/v1/roles',
     '/api/v1/permissions'
   ],
-  
+
   // API routes requiring authentication
   apiProtected: [
     '/api/v1/projects',
@@ -32,7 +32,7 @@ const ROUTE_CONFIG = {
     '/api/v1/profile',
     '/api/v1/settings'
   ],
-  
+
   // Public routes (no authentication required)
   public: [
     '/',
@@ -44,14 +44,14 @@ const ROUTE_CONFIG = {
     '/robots.txt',
     '/sitemap.xml'
   ],
-  
+
   // Development-only routes
   development: [
     '/storybook',
     '/__dev__',
     '/test'
   ],
-  
+
   // Rate-limited routes with custom limits
   rateLimited: {
     '/api/v1/auth/login': { requests: 5, window: 15 * 60 * 1000 },
@@ -67,24 +67,24 @@ export async function middleware(request: NextRequest) {
   const clientIP = getClientIP(request);
   const method = request.method;
   const isDevelopment = process.env.NODE_ENV === 'development';
-  
+
   // Generate unique request ID for tracking
   const requestId = generateRequestId();
-  
+
   // Performance tracking
   const startTime = Date.now();
-  
+
   try {
     // Skip middleware for static files, favicon, and Next.js internals
     if (shouldSkipMiddleware(pathname)) {
       return NextResponse.next();
     }
-    
+
     // Block development routes in production
     if (!isDevelopment && isDevelopmentRoute(pathname)) {
       return new NextResponse('Not Found', { status: 404 });
     }
-    
+
     // Cookie security validation
     const cookieValidation = SecureCookieManager.validateCookieSecurity(request);
     if (!cookieValidation.isValid) {
@@ -95,7 +95,7 @@ export async function middleware(request: NextRequest) {
         issues: cookieValidation.issues,
         warnings: cookieValidation.warnings
       });
-      
+
       return createSecurityResponse('Invalid cookie security', 'COOKIE_SECURITY_VIOLATION', 400, requestId);
     }
 
@@ -187,11 +187,11 @@ export async function middleware(request: NextRequest) {
     // For public routes, add security headers and continue
     const response = NextResponse.next();
     const processingTime = Date.now() - startTime;
-    
+
     // Add performance and security headers
     response.headers.set('X-Request-ID', requestId);
     response.headers.set('X-Processing-Time', processingTime.toString());
-    
+
     Object.entries(getSecurityHeaders(request)).forEach(([key, value]) => {
       response.headers.set(key, value);
     });
@@ -203,7 +203,7 @@ export async function middleware(request: NextRequest) {
 
   } catch (error) {
     const processingTime = Date.now() - startTime;
-    
+
     console.error('Middleware error:', error, {
       requestId,
       method,
@@ -248,21 +248,21 @@ function shouldSkipMiddleware(pathname: string): boolean {
     '/sw.js',
     '/workbox-'
   ];
-  
+
   return skipPatterns.some(pattern => pathname.startsWith(pattern)) ||
          pathname.includes('.') && !pathname.startsWith('/api/');
 }
 
 function isDevelopmentRoute(pathname: string): boolean {
-  return ROUTE_CONFIG.development.some(route => 
+  return ROUTE_CONFIG.development.some(route =>
     pathname.startsWith(route) || pathname === route
   );
 }
 
 async function performSecurityChecks(
-  request: NextRequest, 
-  requestId: string, 
-  clientIP: string, 
+  request: NextRequest,
+  requestId: string,
+  clientIP: string,
   userAgent: string
 ): Promise<NextResponse | null> {
   // Request validation
@@ -297,43 +297,43 @@ async function performSecurityChecks(
 }
 
 async function handleRouteAuthorization(
-  request: NextRequest, 
-  pathname: string, 
+  request: NextRequest,
+  pathname: string,
   requestId: string
 ): Promise<NextResponse | null> {
   const isAuthenticated = await checkAuthentication(request);
-  
+
   // Check if route requires authentication
   if (requiresAuthentication(pathname)) {
     if (!isAuthenticated.isAuthenticated) {
       return handleUnauthenticated(request, pathname, requestId);
     }
-    
+
     // Check admin access
     if (requiresAdminAccess(pathname)) {
       if (!isAuthenticated.roles?.includes('admin') && !isAuthenticated.isAdmin) {
         return createSecurityResponse(
-          'Admin access required', 
-          'INSUFFICIENT_PERMISSIONS', 
-          403, 
+          'Admin access required',
+          'INSUFFICIENT_PERMISSIONS',
+          403,
           requestId
         );
       }
     }
-    
+
     // Add user context headers
     const response = NextResponse.next();
     response.headers.set('X-User-ID', isAuthenticated.userId || '');
     response.headers.set('X-User-Roles', JSON.stringify(isAuthenticated.roles || []));
     response.headers.set('X-Request-ID', requestId);
-    
+
     Object.entries(getSecurityHeaders(request)).forEach(([key, value]) => {
       response.headers.set(key, value);
     });
 
     return response;
   }
-  
+
   return null;
 }
 
@@ -343,7 +343,7 @@ function requiresAuthentication(pathname: string): boolean {
 }
 
 function requiresAdminAccess(pathname: string): boolean {
-  return ROUTE_CONFIG.admin.some(route => 
+  return ROUTE_CONFIG.admin.some(route =>
     pathname.startsWith(route) || matchesPattern(pathname, route)
   );
 }
@@ -356,34 +356,34 @@ function matchesPattern(pathname: string, pattern: string): boolean {
 }
 
 function handleUnauthenticated(
-  request: NextRequest, 
-  pathname: string, 
+  request: NextRequest,
+  pathname: string,
   requestId: string
 ): NextResponse {
   const isAPIRequest = pathname.startsWith('/api/');
   const acceptsHTML = request.headers.get('accept')?.includes('text/html');
-  
+
   if (isAPIRequest || !acceptsHTML) {
     return createSecurityResponse(
-      'Authentication required', 
-      'AUTH_REQUIRED', 
-      401, 
+      'Authentication required',
+      'AUTH_REQUIRED',
+      401,
       requestId
     );
   }
-  
+
   // Redirect to login for browser requests
   const loginUrl = new URL('/login', request.url);
   loginUrl.searchParams.set('from', pathname);
   loginUrl.searchParams.set('reason', 'authentication_required');
-  
+
   return NextResponse.redirect(loginUrl);
 }
 
 function createSecurityResponse(
-  message: string, 
-  code: string, 
-  status: number, 
+  message: string,
+  code: string,
+  status: number,
   requestId: string
 ): NextResponse {
   return new NextResponse(
@@ -415,9 +415,9 @@ async function checkAuthentication(request: NextRequest): Promise<{
   permissions?: string[];
 }> {
   // Use secure cookie manager to get auth token
-  const token = SecureCookieManager.getAuthToken(request) || 
+  const token = SecureCookieManager.getAuthToken(request) ||
                 request.headers.get('authorization')?.replace('Bearer ', '');
-  
+
   if (!token) {
     return { isAuthenticated: false };
   }
@@ -431,7 +431,7 @@ async function checkAuthentication(request: NextRequest): Promise<{
 
     // Decode payload
     const payload = JSON.parse(atob(parts[1]));
-    
+
     // Check expiration
     const isExpired = payload.exp * 1000 < Date.now();
     if (isExpired) {
@@ -461,11 +461,11 @@ function getClientIP(request: NextRequest): string {
   const forwarded = request.headers.get('x-forwarded-for');
   const realIP = request.headers.get('x-real-ip');
   const remoteAddr = request.headers.get('remote-addr');
-  
+
   if (forwarded) {
     return forwarded.split(',')[0].trim();
   }
-  
+
   return realIP || remoteAddr || 'unknown';
 }
 
@@ -475,30 +475,30 @@ function generateRequestId(): string {
 
 function getSecurityHeaders(request: NextRequest): Record<string, string> {
   const isHTTPS = request.nextUrl.protocol === 'https:';
-  
+
   return {
     // CSP Nonce for dynamic content
     'X-CSP-Nonce': generateCSPNonce(),
-    
+
     // Security headers
     'X-Content-Type-Options': 'nosniff',
     'X-Frame-Options': 'DENY',
     'X-XSS-Protection': '1; mode=block',
     'Referrer-Policy': 'strict-origin-when-cross-origin',
-    
+
     // HSTS only for HTTPS
     ...(isHTTPS && {
       'Strict-Transport-Security': 'max-age=31536000; includeSubDomains; preload'
     }),
-    
+
     // Permissions Policy
     'Permissions-Policy': 'camera=(), microphone=(), geolocation=(), gyroscope=(), magnetometer=(), payment=(), usb=()',
-    
+
     // Cross-Origin policies
     'Cross-Origin-Embedder-Policy': 'require-corp',
     'Cross-Origin-Opener-Policy': 'same-origin',
     'Cross-Origin-Resource-Policy': 'same-origin',
-    
+
     // Cache control for sensitive pages
     'Cache-Control': 'no-cache, no-store, must-revalidate',
     'Pragma': 'no-cache',
@@ -537,8 +537,6 @@ function logRequest(
     console.error('Request failed:', logData);
   } else if (processingTime > 1000) {
     console.warn('Slow request:', logData);
-  } else {
-    console.log('Request completed:', logData);
   }
 
   // Send to monitoring service in production

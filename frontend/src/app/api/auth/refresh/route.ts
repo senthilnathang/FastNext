@@ -5,7 +5,7 @@ import { logSecurityEvent } from '@/lib/monitoring/security-monitor';
 export async function POST(request: NextRequest) {
   try {
     const refreshToken = SecureCookieManager.getRefreshToken(request);
-    
+
     if (!refreshToken) {
       return NextResponse.json(
         { error: 'Refresh token not found' },
@@ -21,14 +21,14 @@ export async function POST(request: NextRequest) {
         { error: 'Invalid refresh token' },
         { status: 401 }
       );
-      
+
       SecureCookieManager.clearAuthCookies(response);
-      
+
       logSecurityEvent('authentication_failure', {
         reason: validation.reason,
         clientIP: getClientIP(request)
       }, 'medium');
-      
+
       return response;
     }
 
@@ -39,9 +39,9 @@ export async function POST(request: NextRequest) {
         { status: 401 }
       );
     }
-    
+
     const { accessToken, refreshToken: newRefreshToken } = await generateTokens(validation.userId);
-    
+
     // Set secure cookies
     const response = NextResponse.json({
       success: true,
@@ -61,15 +61,15 @@ export async function POST(request: NextRequest) {
 
   } catch (error) {
     console.error('Session refresh error:', error);
-    
+
     const response = NextResponse.json(
       { error: 'Failed to refresh session' },
       { status: 500 }
     );
-    
+
     // Clear cookies on error
     SecureCookieManager.clearAuthCookies(response);
-    
+
     return response;
   }
 }
@@ -88,7 +88,7 @@ async function validateRefreshToken(token: string): Promise<{
 
     // Decode payload
     const payload = JSON.parse(atob(parts[1]));
-    
+
     // Check expiration
     if (payload.exp * 1000 < Date.now()) {
       return { isValid: false, reason: 'expired' };
@@ -119,7 +119,7 @@ async function generateTokens(userId: string): Promise<{
 }> {
   // This would typically call your backend auth service
   // For now, we'll create mock tokens
-  
+
   const accessTokenPayload = {
     sub: userId,
     type: 'access',
@@ -150,10 +150,10 @@ async function generateTokens(userId: string): Promise<{
 function getClientIP(request: NextRequest): string {
   const forwarded = request.headers.get('x-forwarded-for');
   const realIP = request.headers.get('x-real-ip');
-  
+
   if (forwarded) {
     return forwarded.split(',')[0].trim();
   }
-  
+
   return realIP || 'unknown';
 }

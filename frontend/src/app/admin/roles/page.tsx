@@ -67,7 +67,7 @@ export default function RolesPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [selectedItems, setSelectedItems] = React.useState<any[]>([])
-  
+
   const { data: rolesData, isLoading, error } = useRoles()
   const createRole = useCreateRole()
   const updateRole = useUpdateRole()
@@ -240,12 +240,10 @@ export default function RolesPage() {
   }
 
   const handleExport = (format: string) => {
-    console.log('Export roles as', format)
     // TODO: Implement export
   }
 
   const handleImport = () => {
-    console.log('Import roles')
     // TODO: Implement import
   }
 

@@ -1,11 +1,11 @@
 'use client';
 
 import React, { useState } from 'react';
-import { 
-  Card, 
-  CardContent, 
-  CardDescription, 
-  CardHeader, 
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
   CardTitle,
   Button,
   Dialog,
@@ -112,26 +112,26 @@ export default function WorkflowsPage() {
       await createTypeMutation.mutateAsync(newType);
       setCreateTypeDialogOpen(false);
       setNewType({ name: '', description: '', icon: 'GitBranch', color: '#3B82F6' });
-      
+
       // Show success notification
       if (typeof window !== 'undefined') {
         const event = new CustomEvent('showNotification', {
-          detail: { 
-            type: 'success', 
-            message: 'Workflow type created successfully!' 
+          detail: {
+            type: 'success',
+            message: 'Workflow type created successfully!'
           }
         });
         window.dispatchEvent(event);
       }
     } catch (error) {
       console.error('Failed to create workflow type:', error);
-      
+
       // Show error notification
       if (typeof window !== 'undefined') {
         const event = new CustomEvent('showNotification', {
-          detail: { 
-            type: 'error', 
-            message: 'Failed to create workflow type. Please try again.' 
+          detail: {
+            type: 'error',
+            message: 'Failed to create workflow type. Please try again.'
           }
         });
         window.dispatchEvent(event);
@@ -176,7 +176,7 @@ export default function WorkflowsPage() {
   const handleUpdateType = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedType) return;
-    
+
     try {
       await updateTypeMutation.mutateAsync({
         id: selectedType.id,
@@ -184,26 +184,26 @@ export default function WorkflowsPage() {
       });
       setEditTypeDialogOpen(false);
       setSelectedType(null);
-      
+
       // Show success notification
       if (typeof window !== 'undefined') {
         const event = new CustomEvent('showNotification', {
-          detail: { 
-            type: 'success', 
-            message: 'Workflow type updated successfully!' 
+          detail: {
+            type: 'success',
+            message: 'Workflow type updated successfully!'
           }
         });
         window.dispatchEvent(event);
       }
     } catch (error) {
       console.error('Failed to update workflow type:', error);
-      
+
       // Show error notification
       if (typeof window !== 'undefined') {
         const event = new CustomEvent('showNotification', {
-          detail: { 
-            type: 'error', 
-            message: 'Failed to update workflow type. Please try again.' 
+          detail: {
+            type: 'error',
+            message: 'Failed to update workflow type. Please try again.'
           }
         });
         window.dispatchEvent(event);
@@ -214,7 +214,7 @@ export default function WorkflowsPage() {
   const handleUpdateTemplate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedTemplateForEdit) return;
-    
+
     try {
       await updateTemplateMutation.mutateAsync({
         id: selectedTemplateForEdit.id,
@@ -240,31 +240,31 @@ export default function WorkflowsPage() {
 
   const confirmDeleteType = async () => {
     if (!typeToDelete) return;
-    
+
     try {
       await deleteTypeMutation.mutateAsync(typeToDelete.id);
       setDeleteTypeDialogOpen(false);
       setTypeToDelete(null);
-      
+
       // Show success notification
       if (typeof window !== 'undefined') {
         const event = new CustomEvent('showNotification', {
-          detail: { 
-            type: 'success', 
-            message: 'Workflow type deleted successfully!' 
+          detail: {
+            type: 'success',
+            message: 'Workflow type deleted successfully!'
           }
         });
         window.dispatchEvent(event);
       }
     } catch (error) {
       console.error('Failed to delete workflow type:', error);
-      
+
       // Show error notification
       if (typeof window !== 'undefined') {
         const event = new CustomEvent('showNotification', {
-          detail: { 
-            type: 'error', 
-            message: 'Failed to delete workflow type. It may be in use by templates.' 
+          detail: {
+            type: 'error',
+            message: 'Failed to delete workflow type. It may be in use by templates.'
           }
         });
         window.dispatchEvent(event);
@@ -274,31 +274,31 @@ export default function WorkflowsPage() {
 
   const confirmDeleteTemplate = async () => {
     if (!templateToDelete) return;
-    
+
     try {
       await deleteTemplateMutation.mutateAsync(templateToDelete.id);
       setDeleteTemplateDialogOpen(false);
       setTemplateToDelete(null);
-      
+
       // Show success notification
       if (typeof window !== 'undefined') {
         const event = new CustomEvent('showNotification', {
-          detail: { 
-            type: 'success', 
-            message: 'Workflow template deleted successfully!' 
+          detail: {
+            type: 'success',
+            message: 'Workflow template deleted successfully!'
           }
         });
         window.dispatchEvent(event);
       }
     } catch (error) {
       console.error('Failed to delete workflow template:', error);
-      
+
       // Show error notification
       if (typeof window !== 'undefined') {
         const event = new CustomEvent('showNotification', {
-          detail: { 
-            type: 'error', 
-            message: 'Failed to delete workflow template. It may be in use by workflow instances.' 
+          detail: {
+            type: 'error',
+            message: 'Failed to delete workflow template. It may be in use by workflow instances.'
           }
         });
         window.dispatchEvent(event);
@@ -327,14 +327,13 @@ export default function WorkflowsPage() {
             }
           }
         });
-        console.log('Workflow template updated successfully');
-        
+
         // Show success feedback
         if (typeof window !== 'undefined') {
           const event = new CustomEvent('showNotification', {
-            detail: { 
-              type: 'success', 
-              message: 'Workflow template updated successfully!' 
+            detail: {
+              type: 'success',
+              message: 'Workflow template updated successfully!'
             }
           });
           window.dispatchEvent(event);
@@ -359,37 +358,36 @@ export default function WorkflowsPage() {
           }
         });
         setSelectedTemplate(newTemplate.id);
-        console.log('New workflow template created successfully');
-        
+
         // Show success feedback
         if (typeof window !== 'undefined') {
           const event = new CustomEvent('showNotification', {
-            detail: { 
-              type: 'success', 
-              message: 'New workflow template created successfully!' 
+            detail: {
+              type: 'success',
+              message: 'New workflow template created successfully!'
             }
           });
           window.dispatchEvent(event);
         }
       }
-      
+
       // Optionally close the dialog
       // setBuilderDialogOpen(false);
     } catch (error) {
       console.error('Failed to save workflow template:', error);
       const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
-      
+
       // Show error feedback
       if (typeof window !== 'undefined') {
         const event = new CustomEvent('showNotification', {
-          detail: { 
-            type: 'error', 
-            message: `Failed to save workflow: ${errorMessage}` 
+          detail: {
+            type: 'error',
+            message: `Failed to save workflow: ${errorMessage}`
           }
         });
         window.dispatchEvent(event);
       }
-      
+
       alert(`Failed to save workflow: ${errorMessage}`);
     }
   };
@@ -524,7 +522,7 @@ export default function WorkflowsPage() {
                               Edit
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
-                            <DropdownMenuItem 
+                            <DropdownMenuItem
                               onClick={() => handleDeleteType(type)}
                               className="text-red-600 hover:text-red-700"
                             >
@@ -555,8 +553,8 @@ export default function WorkflowsPage() {
                   <GitBranch className="h-4 w-4 mr-2" />
                   {useAdvancedBuilder ? 'Advanced Builder' : 'New Template'}
                 </Button>
-                <Button 
-                  variant="ghost" 
+                <Button
+                  variant="ghost"
                   size="sm"
                   onClick={() => setUseAdvancedBuilder(!useAdvancedBuilder)}
                   className="text-xs"
@@ -671,7 +669,7 @@ export default function WorkflowsPage() {
                               Edit Details
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
-                            <DropdownMenuItem 
+                            <DropdownMenuItem
                               onClick={() => handleDeleteTemplate(template)}
                               className="text-red-600 hover:text-red-700"
                             >
@@ -849,7 +847,7 @@ export default function WorkflowsPage() {
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Workflow Type</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete the workflow type &quot;{typeToDelete?.name}&quot;? 
+              Are you sure you want to delete the workflow type &quot;{typeToDelete?.name}&quot;?
               This action cannot be undone and may affect existing templates.
             </AlertDialogDescription>
           </AlertDialogHeader>
@@ -872,7 +870,7 @@ export default function WorkflowsPage() {
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Workflow Template</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete the workflow template &quot;{templateToDelete?.name}&quot;? 
+              Are you sure you want to delete the workflow template &quot;{templateToDelete?.name}&quot;?
               This action cannot be undone and may affect existing workflow instances.
             </AlertDialogDescription>
           </AlertDialogHeader>

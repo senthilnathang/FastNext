@@ -33,7 +33,7 @@ const authLink = setContext((_, { headers }) => {
       console.warn('Failed to access localStorage:', error);
     }
   }
-  
+
   return {
     headers: {
       ...headers,
@@ -55,7 +55,7 @@ const errorLink = onError(({ graphQLErrors, networkError }) => {
 
   if (networkError) {
     console.error(`[Network error]: ${networkError}`);
-    
+
     // Handle 401 errors by redirecting to login
     if ('statusCode' in networkError && networkError.statusCode === 401) {
       // Clear stored token
@@ -204,7 +204,7 @@ export const updateAuthToken = (token: string | null) => {
       } else {
         localStorage.removeItem('access_token');
       }
-      
+
       // Reset Apollo Client cache to refetch with new token
       const client = getApolloClient();
       client.resetStore();

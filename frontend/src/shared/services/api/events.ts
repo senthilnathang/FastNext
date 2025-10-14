@@ -60,7 +60,7 @@ export interface EventFilters {
  */
 export const fetchUserEvents = async (filters: EventFilters = {}): Promise<EventsResponse> => {
   const queryParams = new URLSearchParams()
-  
+
   // Add filters to query params
   Object.entries(filters).forEach(([key, value]) => {
     if (value !== undefined && value !== null && value !== '') {
@@ -69,7 +69,7 @@ export const fetchUserEvents = async (filters: EventFilters = {}): Promise<Event
   })
 
   const url = `${getApiUrl(API_CONFIG.ENDPOINTS.EVENTS.ME)}?${queryParams}`
-  
+
   const response = await fetch(url, {
     method: 'GET',
     headers: getAuthHeaders(),
@@ -87,7 +87,7 @@ export const fetchUserEvents = async (filters: EventFilters = {}): Promise<Event
  */
 export const fetchAllEvents = async (filters: EventFilters = {}): Promise<EventsResponse> => {
   const queryParams = new URLSearchParams()
-  
+
   Object.entries(filters).forEach(([key, value]) => {
     if (value !== undefined && value !== null && value !== '') {
       queryParams.append(key, String(value))
@@ -95,7 +95,7 @@ export const fetchAllEvents = async (filters: EventFilters = {}): Promise<Events
   })
 
   const url = `${getApiUrl(API_CONFIG.ENDPOINTS.EVENTS.LIST)}?${queryParams}`
-  
+
   const response = await fetch(url, {
     method: 'GET',
     headers: getAuthHeaders(),
@@ -113,7 +113,7 @@ export const fetchAllEvents = async (filters: EventFilters = {}): Promise<Events
  */
 export const fetchEventStatistics = async (days: number = 30): Promise<EventStatistics> => {
   const url = `${getApiUrl(API_CONFIG.ENDPOINTS.EVENTS.STATS)}?days=${days}`
-  
+
   const response = await fetch(url, {
     method: 'GET',
     headers: getAuthHeaders(),
@@ -134,7 +134,7 @@ export const exportEvents = async (
   filters: EventFilters = {}
 ): Promise<Blob> => {
   const queryParams = new URLSearchParams({ format })
-  
+
   Object.entries(filters).forEach(([key, value]) => {
     if (value !== undefined && value !== null && value !== '') {
       queryParams.append(key, String(value))
@@ -142,7 +142,7 @@ export const exportEvents = async (
   })
 
   const url = `${getApiUrl(API_CONFIG.ENDPOINTS.EVENTS.EXPORT)}?${queryParams}`
-  
+
   const response = await fetch(url, {
     method: 'GET',
     headers: getAuthHeaders(),

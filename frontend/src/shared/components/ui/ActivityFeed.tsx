@@ -2,13 +2,13 @@
 
 import * as React from "react"
 import { formatDistanceToNow } from "date-fns"
-import { 
-  User, 
-  Edit, 
-  Trash2, 
-  Shield, 
-  Key, 
-  UserPlus, 
+import {
+  User,
+  Edit,
+  Trash2,
+  Shield,
+  Key,
+  UserPlus,
   UserMinus,
   Settings,
   Eye,
@@ -24,7 +24,7 @@ import { Button } from "@/shared/components/ui/button"
 
 export interface ActivityItem {
   id: string
-  type: 'user_created' | 'user_updated' | 'user_deleted' | 'role_created' | 'role_updated' | 'role_deleted' | 
+  type: 'user_created' | 'user_updated' | 'user_deleted' | 'role_created' | 'role_updated' | 'role_deleted' |
         'permission_created' | 'permission_updated' | 'permission_deleted' | 'login' | 'logout' | 'profile_updated' | 'settings_changed'
   actor: {
     id: number
@@ -70,7 +70,7 @@ const activityIcons = {
 
 const activityColors = {
   user_created: "text-green-600 bg-green-100 dark:bg-green-900/20",
-  user_updated: "text-blue-600 bg-blue-100 dark:bg-blue-900/20", 
+  user_updated: "text-blue-600 bg-blue-100 dark:bg-blue-900/20",
   user_deleted: "text-red-600 bg-red-100 dark:bg-red-900/20",
   role_created: "text-purple-600 bg-purple-100 dark:bg-purple-900/20",
   role_updated: "text-blue-600 bg-blue-100 dark:bg-blue-900/20",
@@ -86,14 +86,14 @@ const activityColors = {
 
 const severityColors = {
   low: "border-l-gray-300",
-  medium: "border-l-yellow-400", 
+  medium: "border-l-yellow-400",
   high: "border-l-red-400"
 } as const
 
 function ActivityIcon({ type, className }: { type: ActivityItem['type']; className?: string }) {
   const Icon = activityIcons[type] || Activity
   const colorClass = activityColors[type] || "text-gray-600 bg-gray-100"
-  
+
   return (
     <div className={cn(
       "flex h-8 w-8 items-center justify-center rounded-full",
@@ -105,12 +105,12 @@ function ActivityIcon({ type, className }: { type: ActivityItem['type']; classNa
   )
 }
 
-function ActivityItemComponent({ 
-  activity, 
-  compact = false 
-}: { 
+function ActivityItemComponent({
+  activity,
+  compact = false
+}: {
   activity: ActivityItem
-  compact?: boolean 
+  compact?: boolean
 }) {
   return (
     <div className={cn(
@@ -118,7 +118,7 @@ function ActivityItemComponent({
       severityColors[activity.severity]
     )}>
       <ActivityIcon type={activity.type} />
-      
+
       <div className="flex-1 min-w-0">
         <div className="flex items-center space-x-2">
           <p className={cn(
@@ -133,14 +133,14 @@ function ActivityItemComponent({
             </Badge>
           )}
         </div>
-        
+
         <p className={cn(
           "text-gray-600 dark:text-gray-400 mt-1",
           compact ? "text-xs" : "text-sm"
         )}>
           {activity.description}
         </p>
-        
+
         {activity.target && (
           <div className="flex items-center space-x-1 mt-1">
             <span className={cn(
@@ -154,7 +154,7 @@ function ActivityItemComponent({
             </Badge>
           </div>
         )}
-        
+
         <div className="flex items-center space-x-2 mt-2">
           <Clock className="h-3 w-3 text-gray-400" />
           <span className={cn(
@@ -165,7 +165,7 @@ function ActivityItemComponent({
           </span>
         </div>
       </div>
-      
+
       {!compact && (
         <Button variant="ghost" size="sm" className="opacity-0 group-hover:opacity-100 transition-opacity">
           <Eye className="h-4 w-4" />
@@ -183,7 +183,7 @@ function generateMockActivities(): ActivityItem[] {
     { id: 3, name: "Admin User", username: "admin", avatar_url: undefined },
     { id: 4, name: "Bob Wilson", username: "bob", avatar_url: undefined },
   ]
-  
+
   const activities: Omit<ActivityItem, 'id' | 'timestamp'>[] = [
     {
       type: 'user_created',
@@ -239,7 +239,7 @@ function generateMockActivities(): ActivityItem[] {
       severity: 'low'
     }
   ]
-  
+
   return activities.map((activity, index) => ({
     ...activity,
     id: `activity-${index}`,
@@ -247,28 +247,28 @@ function generateMockActivities(): ActivityItem[] {
   }))
 }
 
-export function ActivityFeed({ 
-  activities, 
-  loading = false, 
+export function ActivityFeed({
+  activities,
+  loading = false,
   showHeader = true,
   maxItems = 10,
   className,
   compact = false
 }: ActivityFeedProps) {
   const [isExpanded, setIsExpanded] = React.useState(false)
-  
+
   // Use mock data if no activities provided
   const mockActivities = React.useMemo(() => generateMockActivities(), [])
   const displayActivities = activities || mockActivities
-  
+
   // Sort by timestamp (newest first)
-  const sortedActivities = React.useMemo(() => 
+  const sortedActivities = React.useMemo(() =>
     [...displayActivities]
       .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
       .slice(0, isExpanded ? displayActivities.length : maxItems),
     [displayActivities, isExpanded, maxItems]
   )
-  
+
   if (loading) {
     return (
       <Card className={className}>
@@ -294,7 +294,7 @@ export function ActivityFeed({
       </Card>
     )
   }
-  
+
   return (
     <Card className={className}>
       {showHeader && (
@@ -310,7 +310,7 @@ export function ActivityFeed({
           </div>
         </CardHeader>
       )}
-      
+
       <CardContent className={cn("space-y-1", compact ? "p-4" : "")}>
         {sortedActivities.length === 0 ? (
           <div className="text-center py-8">
@@ -331,12 +331,12 @@ export function ActivityFeed({
                 </div>
               ))}
             </div>
-            
+
             {displayActivities.length > maxItems && (
               <div className="pt-4 border-t">
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
+                <Button
+                  variant="ghost"
+                  size="sm"
                   onClick={() => setIsExpanded(!isExpanded)}
                   className="w-full"
                 >

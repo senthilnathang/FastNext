@@ -42,12 +42,12 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     <div className="flex h-screen bg-gray-50 dark:bg-gray-900">
       {/* Mobile sidebar overlay */}
       {sidebarOpen && (
-        <div 
+        <div
           className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm lg:hidden transition-opacity duration-300"
           onClick={() => setSidebarOpen(false)}
         />
       )}
-      
+
       {/* Sidebar */}
       <div className={`
         fixed inset-y-0 left-0 z-50 transform transition-all duration-300 ease-in-out
@@ -55,8 +55,8 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
         ${sidebarCollapsed ? 'w-14' : 'lg:w-56'}
       `}>
-        <Sidebar 
-          className="h-full" 
+        <Sidebar
+          className="h-full"
           isCollapsed={sidebarCollapsed}
           showCloseButton={true}
           onClose={() => setSidebarOpen(false)}
@@ -85,12 +85,12 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             </div>
           </div>
         </div>
-        
-        <Header 
+
+        <Header
           sidebarCollapsed={sidebarCollapsed}
           onToggleSidebar={() => setSidebarCollapsed(!sidebarCollapsed)}
         />
-        
+
         <main className="flex-1 overflow-auto">
           {children}
         </main>

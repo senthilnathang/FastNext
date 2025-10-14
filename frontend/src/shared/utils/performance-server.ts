@@ -9,9 +9,8 @@ export const serverPerformance = {
     const start = typeof performance !== 'undefined' ? performance.now() : Date.now()
     const result = await fn()
     const end = typeof performance !== 'undefined' ? performance.now() : Date.now()
-    
-    console.log(`⚡ ${name} took ${(end - start).toFixed(2)}ms`)
-    
+
+
     return result
   },
 
@@ -34,7 +33,6 @@ export const serverPerformance = {
         const measures = performance.getEntriesByName(name, 'measure')
         if (measures.length > 0) {
           const duration = measures[measures.length - 1].duration
-          console.log(`⚡ ${name} took ${duration.toFixed(2)}ms`)
         }
       } catch (error) {
         console.warn('Performance measurement failed:', error)
@@ -47,7 +45,7 @@ export const serverPerformance = {
 export const serverResourcePreloader = {
   preloadImage: (src: string): Promise<void> => {
     if (typeof window === 'undefined') return Promise.resolve()
-    
+
     return new Promise((resolve, reject) => {
       const img = new Image()
       img.onload = () => resolve()
@@ -58,7 +56,7 @@ export const serverResourcePreloader = {
 
   preloadScript: (src: string): Promise<void> => {
     if (typeof document === 'undefined') return Promise.resolve()
-    
+
     return new Promise((resolve, reject) => {
       if (document.querySelector(`script[src="${src}"]`)) {
         resolve()
@@ -75,7 +73,7 @@ export const serverResourcePreloader = {
 
   preloadCSS: (href: string): Promise<void> => {
     if (typeof document === 'undefined') return Promise.resolve()
-    
+
     return new Promise((resolve, reject) => {
       if (document.querySelector(`link[href="${href}"]`)) {
         resolve()
@@ -98,7 +96,7 @@ export const serverMemoryMonitor = {
     if (typeof window === 'undefined' || !('memory' in performance)) {
       return null
     }
-    
+
     const memory = (performance as any).memory
     return {
       used: Math.round(memory.usedJSHeapSize / 1048576), // MB
@@ -110,7 +108,6 @@ export const serverMemoryMonitor = {
   logUsage: (label?: string) => {
     const usage = serverMemoryMonitor.getUsage()
     if (usage) {
-      console.log(`🧠 Memory ${label || ''}: ${usage.used}MB / ${usage.total}MB (limit: ${usage.limit}MB)`)
     }
   },
 
@@ -128,15 +125,14 @@ export const serverPerformanceBudget = {
     if (typeof window === 'undefined' || !window.performance?.timing) {
       return null
     }
-    
+
     const loadTime = window.performance.timing.loadEventEnd - window.performance.timing.navigationStart
-    
+
     if (loadTime > threshold) {
       console.warn(`⚠️  Page load time (${loadTime}ms) exceeds budget (${threshold}ms)`)
     } else {
-      console.log(`✅ Page load time: ${loadTime}ms (within budget: ${threshold}ms)`)
     }
-    
+
     return loadTime
   },
 
@@ -144,12 +140,12 @@ export const serverPerformanceBudget = {
     if (typeof navigator === 'undefined' || !('connection' in navigator)) {
       return threshold
     }
-    
+
     const connection = (navigator as any).connection
     if (connection?.effectiveType === 'slow-2g' || connection?.effectiveType === '2g') {
       console.warn('⚠️  Slow connection detected. Consider reducing bundle size.')
     }
-    
+
     return threshold
   }
 }
@@ -158,13 +154,12 @@ export const serverPerformanceBudget = {
 export const serverBundleAnalyzer = {
   analyzeComponent: (componentName: string, component: React.ComponentType) => {
     if (typeof window === 'undefined') return
-    
+
     if (process.env.NODE_ENV === 'development') {
       const componentString = component.toString()
       const size = new Blob([componentString]).size
-      
-      console.log(`📦 Component ${componentName} estimated size: ${(size / 1024).toFixed(2)}KB`)
-      
+
+
       // Warn if component is large
       if (size > 50 * 1024) { // 50KB
         console.warn(`⚠️  Component ${componentName} is large (${(size / 1024).toFixed(2)}KB). Consider code splitting.`)
@@ -228,14 +223,14 @@ export const serverOptimizationUtils = {
     getKey?: (...args: Parameters<T>) => string
   ): T => {
     const cache = new Map<string, ReturnType<T>>()
-    
+
     return ((...args: Parameters<T>): ReturnType<T> => {
       const key = getKey ? getKey(...args) : JSON.stringify(args)
-      
+
       if (cache.has(key)) {
         return cache.get(key)!
       }
-      
+
       const result = func(...args)
       cache.set(key, result)
       return result

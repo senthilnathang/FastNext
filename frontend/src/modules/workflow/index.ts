@@ -1,9 +1,9 @@
 export { default as WorkflowBuilder } from './components/WorkflowBuilder';
 export { default as WorkflowStateNode } from './components/WorkflowStateNode';
 export * from './types';
-export type { 
-  WorkflowNode as ReactFlowWorkflowNode, 
+export type {
+  WorkflowNode as ReactFlowWorkflowNode,
   WorkflowEdge as ReactFlowWorkflowEdge,
   WorkflowNodeData,
-  WorkflowEdgeData 
+  WorkflowEdgeData
 } from './types/reactflow';

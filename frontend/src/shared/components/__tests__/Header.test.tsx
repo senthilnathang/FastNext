@@ -73,7 +73,7 @@ describe('Header Component', () => {
         <Header />
       </TestWrapper>
     )
-    
+
     const searchInput = screen.getByPlaceholderText('Search projects, components...')
     expect(searchInput).toBeInTheDocument()
     expect(searchInput).toHaveClass('pl-10', 'pr-4', 'py-2', 'w-80')
@@ -85,7 +85,7 @@ describe('Header Component', () => {
         <Header />
       </TestWrapper>
     )
-    
+
     // Check for buttons by their title attributes
     expect(screen.getByTitle('Help')).toBeInTheDocument()
     expect(screen.getByTitle('Notifications')).toBeInTheDocument()
@@ -98,7 +98,7 @@ describe('Header Component', () => {
         <Header />
       </TestWrapper>
     )
-    
+
     expect(screen.getByText('John Doe')).toBeInTheDocument()
     expect(screen.getByText('Admin')).toBeInTheDocument()
   })
@@ -109,12 +109,12 @@ describe('Header Component', () => {
         <Header />
       </TestWrapper>
     )
-    
+
     const userButton = screen.getByText('John Doe').closest('button')
     expect(userButton).toBeInTheDocument()
-    
+
     fireEvent.click(userButton!)
-    
+
     // Check for dropdown menu items (these might be in a portal)
     // Note: Testing dropdown content might require additional setup
     // for portal testing or using a different testing approach
@@ -126,7 +126,7 @@ describe('Header Component', () => {
         <Header />
       </TestWrapper>
     )
-    
+
     expect(screen.getByTestId('breadcrumb')).toBeInTheDocument()
     expect(screen.getByText('Home / Dashboard / Projects')).toBeInTheDocument()
   })
@@ -137,7 +137,7 @@ describe('Header Component', () => {
         <Header />
       </TestWrapper>
     )
-    
+
     const searchInput = screen.getByPlaceholderText('Search projects, components...')
     expect(searchInput).toHaveClass(
       'border',
@@ -155,14 +155,14 @@ describe('Header Component', () => {
         <Header />
       </TestWrapper>
     )
-    
+
     const themeButton = screen.getByTitle('Toggle theme')
     expect(themeButton).toBeInTheDocument()
-    
+
     // Check for Sun/Moon icons (they are rendered conditionally)
     const sunIcon = themeButton.querySelector('.lucide-sun')
     const moonIcon = themeButton.querySelector('.lucide-moon')
-    
+
     expect(sunIcon || moonIcon).toBeTruthy()
   })
 
@@ -172,11 +172,11 @@ describe('Header Component', () => {
         <Header />
       </TestWrapper>
     )
-    
+
     // Check main header structure
     const headerElement = container.querySelector('header')
     expect(headerElement).toHaveClass('h-16', 'flex', 'items-center', 'justify-between', 'px-6')
-    
+
     // Check breadcrumb section
     const breadcrumbSection = container.querySelector('.px-6.py-3')
     expect(breadcrumbSection).toBeInTheDocument()
@@ -188,7 +188,7 @@ describe('Header Component', () => {
         <Header />
       </TestWrapper>
     )
-    
+
     const headerContainer = container.firstChild
     expect(headerContainer).toHaveClass(
       'bg-white',

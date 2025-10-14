@@ -1,9 +1,9 @@
 import { apiClient } from './api/client'
 import { API_CONFIG } from './api/config'
-import type { 
-  Project, 
-  CreateProjectRequest, 
-  UpdateProjectRequest 
+import type {
+  Project,
+  CreateProjectRequest,
+  UpdateProjectRequest
 } from '@/shared/types'
 
 export const projectsApi = {

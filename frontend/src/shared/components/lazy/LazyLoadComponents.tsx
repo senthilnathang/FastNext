@@ -50,7 +50,7 @@ export function createLazyComponent<T extends ComponentType<any>>(
   } = {}
 ): ComponentType<React.ComponentProps<T>> {
   const LazyComponent = lazy(importFn)
-  
+
   // Preload if specified
   if (options.preload) {
     // Preload after a short delay to not block initial render
@@ -66,9 +66,9 @@ export function createLazyComponent<T extends ComponentType<any>>(
       <LazyComponent {...props} />
     </LazyWrapper>
   ))
-  
+
   WrappedComponent.displayName = `Lazy(${options.chunkName || 'Component'})`
-  
+
   // Add preload method to component
   ;(WrappedComponent as any).preload = importFn
 
@@ -85,7 +85,7 @@ export function createInteractiveLazyComponent<T extends ComponentType<any>>(
   } = {}
 ): ComponentType<React.ComponentProps<T> & { onTrigger?: () => void }> {
   let preloaded = false
-  
+
   const preload = () => {
     if (!preloaded) {
       preloaded = true
@@ -99,7 +99,7 @@ export function createInteractiveLazyComponent<T extends ComponentType<any>>(
 
   const InteractiveLazyComponent = memo((props: React.ComponentProps<T> & { onTrigger?: () => void }) => {
     const { onTrigger, ...componentProps } = props
-    
+
     const handleTrigger = () => {
       preload()
       onTrigger?.()
@@ -117,9 +117,9 @@ export function createInteractiveLazyComponent<T extends ComponentType<any>>(
       </div>
     )
   })
-  
+
   InteractiveLazyComponent.displayName = 'InteractiveLazyComponent'
-  
+
   return InteractiveLazyComponent
 }
 
@@ -129,9 +129,9 @@ export function createRouteLazyComponent<T extends ComponentType<any>>(
   routePath: string
 ): ComponentType<React.ComponentProps<T>> {
   const LazyComponent = lazy(importFn)
-  
+
   const RouteLazyComponent = memo((props: React.ComponentProps<T>) => (
-    <LazyWrapper 
+    <LazyWrapper
       fallback={
         <div className="min-h-screen flex items-center justify-center">
           <div className="space-y-4 text-center">
@@ -144,9 +144,9 @@ export function createRouteLazyComponent<T extends ComponentType<any>>(
       <LazyComponent {...props} />
     </LazyWrapper>
   ))
-  
+
   RouteLazyComponent.displayName = 'RouteLazyComponent'
-  
+
   return RouteLazyComponent
 }
 
@@ -167,9 +167,9 @@ export function createViewportLazyComponent<T extends ComponentType<any>>(
       <LazyComponent {...props} />
     </LazyWrapper>
   ))
-  
+
   ViewportLazyComponent.displayName = 'ViewportLazyComponent'
-  
+
   return ViewportLazyComponent
 }
 
@@ -278,13 +278,12 @@ export const lazyLoadingStats = {
 
   measureChunkLoadTime: (chunkName: string) => {
     const startTime = performance.now()
-    
+
     return () => {
       const endTime = performance.now()
       const loadTime = endTime - startTime
-      
-      console.log(`📦 Chunk ${chunkName} loaded in ${loadTime.toFixed(2)}ms`)
-      
+
+
       // Send to analytics if available
       if (typeof window !== 'undefined' && (window as any).gtag) {
         (window as any).gtag('event', 'chunk_loaded', {

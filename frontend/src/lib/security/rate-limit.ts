@@ -25,7 +25,7 @@ const rateLimitConfigs: Record<string, RateLimitConfig> = {
 export async function rateLimit(identifier: string, pathname: string): Promise<RateLimitResult> {
   // Skip rate limiting in development or if explicitly bypassed
   const bypassRateLimit = process.env.NODE_ENV === 'development' || process.env.BYPASS_RATE_LIMIT === 'true';
-  
+
   if (bypassRateLimit) {
     return {
       allowed: true,
@@ -38,7 +38,7 @@ export async function rateLimit(identifier: string, pathname: string): Promise<R
 
   // Determine rate limit config based on pathname
   let config = rateLimitConfigs.default;
-  
+
   for (const [path, pathConfig] of Object.entries(rateLimitConfigs)) {
     if (pathname.startsWith(path)) {
       config = pathConfig;
@@ -60,7 +60,7 @@ export async function rateLimit(identifier: string, pathname: string): Promise<R
   if (!entry || entry.resetTime < now) {
     // First request in window or window has expired
     rateLimitStore.set(key, { count: 1, resetTime });
-    
+
     return {
       allowed: true,
       limit: config.maxRequests,
@@ -101,8 +101,8 @@ export class AdvancedRateLimit {
 
   // Sliding window rate limit
   async slidingWindow(
-    identifier: string, 
-    windowMs: number, 
+    identifier: string,
+    windowMs: number,
     maxRequests: number
   ): Promise<RateLimitResult> {
     const key = `sliding:${identifier}`;
@@ -110,17 +110,17 @@ export class AdvancedRateLimit {
     const windowStart = now - windowMs;
 
     let requests = this.store.get(key) || [];
-    
+
     // Remove old requests outside window
     requests = requests.filter((timestamp: number) => timestamp > windowStart);
-    
+
     // Add current request
     requests.push(now);
     this.store.set(key, requests);
 
     const allowed = requests.length <= maxRequests;
     const remaining = Math.max(0, maxRequests - requests.length);
-    
+
     return {
       allowed,
       limit: maxRequests,
@@ -148,7 +148,7 @@ export class AdvancedRateLimit {
     // Calculate tokens to add based on time elapsed
     const timeDiff = now - bucket.lastRefill;
     const tokensToAdd = Math.floor(timeDiff / refillPeriod) * refillRate;
-    
+
     bucket.tokens = Math.min(capacity, bucket.tokens + tokensToAdd);
     bucket.lastRefill = now;
 

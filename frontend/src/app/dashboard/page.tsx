@@ -2,11 +2,11 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/modules/auth';
-import { 
-  Card, 
-  CardContent, 
-  CardDescription, 
-  CardHeader, 
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
   CardTitle,
   Button,
   AnalyticsDashboard,
@@ -123,7 +123,7 @@ export default function DashboardPage() {
     try {
       setLoading(true);
       const token = localStorage.getItem('access_token');
-      
+
       // Fetch projects
       const projectsResponse = await fetch(getApiUrl(API_CONFIG.ENDPOINTS.PROJECTS), {
         headers: {
@@ -137,7 +137,7 @@ export default function DashboardPage() {
         // Handle both array response and object with items property
         const projects = Array.isArray(projectsData) ? projectsData : (projectsData.items || []);
         setProjects(projects.slice(0, 6)); // Show only recent 6 projects
-        
+
         // Calculate stats
         setStats({
           totalProjects: projects.length,
@@ -187,7 +187,7 @@ export default function DashboardPage() {
             components_count: 38
           }
         ];
-        
+
         setProjects(mockProjects);
         setStats({
           totalProjects: 28,
@@ -276,7 +276,7 @@ export default function DashboardPage() {
                   </a>
                 </Button>
               </div>
-              
+
               <div className="group flex items-center space-x-3 p-4 rounded-xl bg-white/70 dark:bg-gray-900/70 border border-gray-200/50 dark:border-gray-700/50 hover:bg-white dark:hover:bg-gray-800 hover:shadow-md transition-all duration-200">
                 <div className="p-3 bg-purple-100 dark:bg-purple-900 rounded-xl group-hover:scale-110 transition-transform duration-200">
                   <Shield className="h-5 w-5 text-purple-600" />
@@ -291,7 +291,7 @@ export default function DashboardPage() {
                   </a>
                 </Button>
               </div>
-              
+
               <div className="group flex items-center space-x-3 p-4 rounded-xl bg-white/70 dark:bg-gray-900/70 border border-gray-200/50 dark:border-gray-700/50 hover:bg-white dark:hover:bg-gray-800 hover:shadow-md transition-all duration-200">
                 <div className="p-3 bg-green-100 dark:bg-green-900 rounded-xl group-hover:scale-110 transition-transform duration-200">
                   <Key className="h-5 w-5 text-green-600" />
@@ -325,7 +325,7 @@ export default function DashboardPage() {
 
         {/* Activity Feed */}
         <div className="bg-gradient-to-br from-white to-gray-50 dark:from-gray-900 dark:to-gray-800 rounded-xl border shadow-md p-6">
-          <ActivityFeed 
+          <ActivityFeed
             loading={loading}
             maxItems={8}
             className="lg:col-span-2"
@@ -403,9 +403,9 @@ export default function DashboardPage() {
                   </CardContent>
                 </Card>
               ))}
-              
+
               {/* Create new project card */}
-              <Card 
+              <Card
                 className="group border-dashed border-2 border-gray-300 dark:border-gray-600 hover:border-blue-500 hover:bg-blue-50/50 dark:hover:bg-blue-950/20 transition-all duration-300 cursor-pointer hover:shadow-lg"
                 variant="outlined"
               >

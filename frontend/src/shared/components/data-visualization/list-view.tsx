@@ -1,10 +1,10 @@
 "use client"
 
 import * as React from "react"
-import { 
-  ChevronLeft, 
-  ChevronRight, 
-  ChevronsLeft, 
+import {
+  ChevronLeft,
+  ChevronRight,
+  ChevronsLeft,
   ChevronsRight,
   Search,
   Filter,
@@ -123,7 +123,7 @@ export function ListView({
 
   const handleSort = (column: string) => {
     if (!sortable) return
-    
+
     const newDirection = sortColumn === column && sortDirection === "asc" ? "desc" : "asc"
     setSortColumn(column)
     setSortDirection(newDirection)
@@ -132,7 +132,7 @@ export function ListView({
 
   const handleSelectAll = () => {
     if (!selectable || !onSelectionChange) return
-    
+
     const allSelected = selectedItems.length === items.length
     const newSelection = allSelected ? [] : items.map(item => item.id)
     onSelectionChange(newSelection)
@@ -140,11 +140,11 @@ export function ListView({
 
   const handleSelectItem = (itemId: string) => {
     if (!selectable || !onSelectionChange) return
-    
+
     const newSelection = selectedItems.includes(itemId)
       ? selectedItems.filter(id => id !== itemId)
       : [...selectedItems, itemId]
-    
+
     onSelectionChange(newSelection)
   }
 
@@ -178,21 +178,21 @@ export function ListView({
                     {column.label}
                     {column.sortable && sortable && (
                       <div className="flex flex-col">
-                        <SortAsc 
+                        <SortAsc
                           className={cn(
                             "h-3 w-3",
-                            sortColumn === column.key && sortDirection === "asc" 
-                              ? "text-primary" 
+                            sortColumn === column.key && sortDirection === "asc"
+                              ? "text-primary"
                               : "text-muted-foreground"
-                          )} 
+                          )}
                         />
-                        <SortDesc 
+                        <SortDesc
                           className={cn(
                             "h-3 w-3",
-                            sortColumn === column.key && sortDirection === "desc" 
-                              ? "text-primary" 
+                            sortColumn === column.key && sortDirection === "desc"
+                              ? "text-primary"
                               : "text-muted-foreground"
-                          )} 
+                          )}
                         />
                       </div>
                     )}
@@ -206,8 +206,8 @@ export function ListView({
           </thead>
           <tbody>
             {items.map((item) => (
-              <tr 
-                key={item.id} 
+              <tr
+                key={item.id}
                 className="border-b hover:bg-muted/30 transition-colors"
               >
                 {selectable && (
@@ -222,7 +222,7 @@ export function ListView({
                 )}
                 {columns.map(column => (
                   <td key={column.key} className="p-3">
-                    {column.render 
+                    {column.render
                       ? column.render(item[column.key], item)
                       : String(item[column.key] ?? '')
                     }
@@ -272,7 +272,7 @@ export function ListView({
                   <div key={column.key}>
                     <div className="text-xs text-muted-foreground">{column.label}</div>
                     <div className="text-sm">
-                      {column.render 
+                      {column.render
                         ? column.render(item[column.key], item)
                         : String(item[column.key] ?? '')
                       }
@@ -375,7 +375,7 @@ export function ListView({
           >
             <ChevronLeft className="h-4 w-4" />
           </Button>
-          
+
           <div className="flex items-center gap-1">
             {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
               let pageNum: number
@@ -442,14 +442,14 @@ export function ListView({
               />
             </div>
           )}
-          
+
           {filterable && (
             <Button variant="outline" size="sm">
               <Filter className="mr-2 h-4 w-4" />
               Filter
             </Button>
           )}
-          
+
           {selectable && selectedItems.length > 0 && (
             <Badge variant="secondary">
               {selectedItems.length} selected

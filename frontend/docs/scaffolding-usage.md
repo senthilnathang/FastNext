@@ -316,7 +316,7 @@ const blogPostModel: ModelDefinition = {
       type: 'string',
       required: true,
       label: 'URL Slug',
-      validation: { 
+      validation: {
         pattern: '^[a-z0-9-]+$',
         message: 'Only lowercase letters, numbers, and hyphens'
       },

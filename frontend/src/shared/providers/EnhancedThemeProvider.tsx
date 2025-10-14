@@ -349,8 +349,8 @@ interface ColorSchemeProviderProps {
   storageKey?: string
 }
 
-function ColorSchemeProvider({ 
-  children, 
+function ColorSchemeProvider({
+  children,
   defaultScheme = 'default',
   storageKey = 'color-scheme'
 }: ColorSchemeProviderProps) {
@@ -371,7 +371,7 @@ function ColorSchemeProvider({
 
     const root = document.documentElement
     const isDark = root.classList.contains('dark')
-    
+
     // Only apply color scheme to light theme
     // Dark theme colors are protected by CSS !important declarations
     if (!isDark) {
@@ -441,16 +441,16 @@ interface EnhancedThemeProviderProps extends Omit<ThemeProviderProps, 'children'
   className?: string
 }
 
-export function EnhancedThemeProvider({ 
+export function EnhancedThemeProvider({
   children,
   defaultColorScheme,
   colorSchemeStorageKey,
   className,
-  ...props 
+  ...props
 }: EnhancedThemeProviderProps) {
   return (
     <NextThemeProvider {...props}>
-      <ColorSchemeProvider 
+      <ColorSchemeProvider
         defaultScheme={defaultColorScheme}
         storageKey={colorSchemeStorageKey}
       >

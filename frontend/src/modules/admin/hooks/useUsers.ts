@@ -49,7 +49,7 @@ export const useUserRoles = (id: number) => {
 // Mutation hooks
 export const useCreateUser = () => {
   const queryClient = useQueryClient()
-  
+
   return useMutation({
     mutationFn: (data: CreateUserRequest) => usersApi.createUser(data),
     onSuccess: () => {
@@ -64,17 +64,17 @@ export const useCreateUser = () => {
 
 export const useUpdateUser = () => {
   const queryClient = useQueryClient()
-  
+
   return useMutation({
     mutationFn: ({ id, data }: { id: number; data: UpdateUserRequest }) =>
       usersApi.updateUser(id, data),
     onSuccess: (updatedUser, { id }) => {
       // Update the user in cache
       queryClient.setQueryData(userKeys.detail(id), updatedUser)
-      
+
       // Invalidate lists to reflect changes
       queryClient.invalidateQueries({ queryKey: userKeys.lists() })
-      
+
       // Update current user if it's the same user
       const currentUserData = queryClient.getQueryData(userKeys.current()) as User | undefined
       if (currentUserData && currentUserData.id === id) {
@@ -89,13 +89,13 @@ export const useUpdateUser = () => {
 
 export const useDeleteUser = () => {
   const queryClient = useQueryClient()
-  
+
   return useMutation({
     mutationFn: (id: number) => usersApi.deleteUser(id),
     onSuccess: (_, id) => {
       // Remove user from cache
       queryClient.removeQueries({ queryKey: userKeys.detail(id) })
-      
+
       // Invalidate lists
       queryClient.invalidateQueries({ queryKey: userKeys.lists() })
     },
@@ -107,13 +107,13 @@ export const useDeleteUser = () => {
 
 export const useToggleUserStatus = () => {
   const queryClient = useQueryClient()
-  
+
   return useMutation({
     mutationFn: (id: number) => usersApi.toggleUserStatus(id),
     onSuccess: (updatedUser, id) => {
       // Update the user in cache
       queryClient.setQueryData(userKeys.detail(id), updatedUser)
-      
+
       // Invalidate lists to reflect changes
       queryClient.invalidateQueries({ queryKey: userKeys.lists() })
     },
@@ -134,17 +134,17 @@ export const useResetUserPassword = () => {
 
 export const useAssignUserRoles = () => {
   const queryClient = useQueryClient()
-  
+
   return useMutation({
     mutationFn: ({ id, roles }: { id: number; roles: string[] }) =>
       usersApi.assignUserRoles(id, roles),
     onSuccess: (updatedUser, { id }) => {
       // Update the user in cache
       queryClient.setQueryData(userKeys.detail(id), updatedUser)
-      
+
       // Invalidate role-specific cache
       queryClient.invalidateQueries({ queryKey: userKeys.roles(id) })
-      
+
       // Invalidate lists
       queryClient.invalidateQueries({ queryKey: userKeys.lists() })
     },
@@ -157,14 +157,14 @@ export const useAssignUserRoles = () => {
 // Utility hook for optimistic updates
 export const useOptimisticUserUpdate = () => {
   const queryClient = useQueryClient()
-  
+
   return {
     updateUserOptimistically: (id: number, updates: Partial<User>) => {
-      queryClient.setQueryData(userKeys.detail(id), (old: User | undefined) => 
+      queryClient.setQueryData(userKeys.detail(id), (old: User | undefined) =>
         old ? { ...old, ...updates } : old
       )
     },
-    
+
     revertUserUpdate: (id: number) => {
       queryClient.invalidateQueries({ queryKey: userKeys.detail(id) })
     }

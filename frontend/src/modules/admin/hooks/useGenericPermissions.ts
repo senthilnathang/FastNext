@@ -57,7 +57,7 @@ export const useGenericPermissions = (
       // Get user's permissions from the /me endpoint
       const userResponse = await apiClient.get('/api/v1/auth/me')
       const userPermissions = userResponse.data.permissions || []
-      
+
       // Convert permission strings to Permission objects
       const permissionObjects: Permission[] = userPermissions.map((permName: string, index: number) => ({
         id: index + 1,
@@ -67,7 +67,7 @@ export const useGenericPermissions = (
         action: permName.includes('.') ? permName.split('.')[1] : permName,
         is_system_permission: true
       }))
-      
+
       setPermissions(permissionObjects)
 
       // Extract allowed actions for specific resource from permissions
@@ -89,29 +89,29 @@ export const useGenericPermissions = (
 
   const hasPermission = (check: PermissionCheck): boolean => {
     if (!isAuthenticated || !user) return false
-    
+
     // Superusers have all permissions
     if (user.is_superuser) return true
 
     // Check exact permission match
-    const hasExactPermission = permissions.some(permission => 
-      permission.action === check.action && 
+    const hasExactPermission = permissions.some(permission =>
+      permission.action === check.action &&
       permission.category === check.resource
     )
 
     if (hasExactPermission) return true
 
     // Check for manage permission (implies all actions)
-    const hasManagePermission = permissions.some(permission => 
-      permission.action === 'manage' && 
+    const hasManagePermission = permissions.some(permission =>
+      permission.action === 'manage' &&
       permission.category === check.resource
     )
 
     if (hasManagePermission) return true
 
     // Check for system-wide permissions
-    const hasSystemPermission = permissions.some(permission => 
-      permission.action === check.action && 
+    const hasSystemPermission = permissions.some(permission =>
+      permission.action === check.action &&
       permission.category === 'system'
     )
 

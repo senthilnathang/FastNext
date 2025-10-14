@@ -85,7 +85,7 @@ const SidebarStory = ({ children, ...props }: any) => {
           <p>On desktop: Use browser dev tools to simulate mobile viewport.</p>
         </div>
       </div>
-      
+
       <MobileSidebar
         {...props}
         isOpen={isOpen}
@@ -175,7 +175,7 @@ export const NoCloseButton: Story = {
 export const CustomTrigger: Story = {
   render: (args) => {
     const [isOpen, setIsOpen] = useState(false)
-    
+
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
         <div className="p-4">
@@ -183,14 +183,14 @@ export const CustomTrigger: Story = {
             <p>Custom trigger button with search icon:</p>
           </div>
         </div>
-        
+
         <MobileSidebar
           {...args}
           isOpen={isOpen}
           onOpenChange={setIsOpen}
           triggerButton={
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               size="sm"
               onClick={() => setIsOpen(true)}
               className="md:hidden"
@@ -217,7 +217,7 @@ export const CustomTrigger: Story = {
 export const WithHook: Story = {
   render: () => {
     const { isOpen, toggle, close } = useMobileSidebar()
-    
+
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
         <div className="p-4">
@@ -235,7 +235,7 @@ export const WithHook: Story = {
             <p>Status: {isOpen ? 'Open' : 'Closed'}</p>
           </div>
         </div>
-        
+
         <MobileSidebar
           isOpen={isOpen}
           onOpenChange={close}

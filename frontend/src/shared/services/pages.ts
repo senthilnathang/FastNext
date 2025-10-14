@@ -1,9 +1,9 @@
 import { apiClient } from './api/client'
 import { API_CONFIG } from './api/config'
-import type { 
-  Page, 
-  CreatePageRequest, 
-  UpdatePageRequest 
+import type {
+  Page,
+  CreatePageRequest,
+  UpdatePageRequest
 } from '@/shared/types'
 
 export const pagesApi = {

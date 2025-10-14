@@ -11,11 +11,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/shared/components/ui/dialog';
 import { DataTable } from '@/shared/components/ui/data-table';
 import { DatePickerWithRange } from '@/shared/components/ui/date-range-picker';
-import { 
-  FileText, 
-  Search, 
-  Filter, 
-  Download, 
+import {
+  FileText,
+  Search,
+  Filter,
+  Download,
   Eye,
   Clock,
   User,
@@ -261,20 +261,20 @@ export default function AuditLogsPage() {
   // Filter logs based on current filters
   const filteredLogs = useMemo(() => {
     return mockAuditLogs.filter(log => {
-      const matchesSearch = !searchTerm || 
+      const matchesSearch = !searchTerm ||
         log.action.toLowerCase().includes(searchTerm.toLowerCase()) ||
         log.userName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         log.details?.toLowerCase().includes(searchTerm.toLowerCase());
-      
+
       const matchesCategory = categoryFilter === 'all' || log.category === categoryFilter;
       const matchesSeverity = severityFilter === 'all' || log.severity === severityFilter;
       const matchesUser = userFilter === 'all' || log.userId === userFilter;
       const matchesResult = resultFilter === 'all' || log.result === resultFilter;
-      
+
       const matchesDateRange = !dateRange?.from || !dateRange?.to ||
         (new Date(log.timestamp) >= dateRange.from && new Date(log.timestamp) <= dateRange.to);
 
-      return matchesSearch && matchesCategory && matchesSeverity && 
+      return matchesSearch && matchesCategory && matchesSeverity &&
              matchesUser && matchesResult && matchesDateRange;
     });
   }, [mockAuditLogs, searchTerm, categoryFilter, severityFilter, userFilter, resultFilter, dateRange]);
@@ -459,8 +459,8 @@ export default function AuditLogsPage() {
       cell: ({ row }: any) => {
         const log = row.original;
         return (
-          <Button 
-            variant="ghost" 
+          <Button
+            variant="ghost"
             size="sm"
             onClick={() => setSelectedLog(log)}
           >
@@ -573,7 +573,7 @@ export default function AuditLogsPage() {
                     className="pl-10"
                   />
                 </div>
-                
+
                 <Select value={categoryFilter} onValueChange={setCategoryFilter}>
                   <SelectTrigger>
                     <SelectValue placeholder="Category" />
@@ -625,12 +625,12 @@ export default function AuditLogsPage() {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4 border-t">
                   <div>
                     <Label>Date Range</Label>
-                    <DatePickerWithRange 
+                    <DatePickerWithRange
                       date={dateRange}
                       onDateChange={setDateRange}
                     />
                   </div>
-                  
+
                   <div>
                     <Label>User</Label>
                     <Select value={userFilter} onValueChange={setUserFilter}>
@@ -647,7 +647,7 @@ export default function AuditLogsPage() {
                       </SelectContent>
                     </Select>
                   </div>
-                  
+
                   <div>
                     <Label>Risk Level</Label>
                     <Select>
@@ -703,8 +703,8 @@ export default function AuditLogsPage() {
                       <div className="flex items-center space-x-2">
                         <span className="text-sm text-gray-600">{count}</span>
                         <div className="w-20 h-2 bg-gray-200 rounded">
-                          <div 
-                            className="h-full bg-blue-500 rounded" 
+                          <div
+                            className="h-full bg-blue-500 rounded"
                             style={{ width: `${(count / Math.max(...Object.values(mockStats.categoryCounts))) * 100}%` }}
                           />
                         </div>
@@ -831,7 +831,7 @@ export default function AuditLogsPage() {
                       </div>
                     </div>
                   </div>
-                  
+
                   <div>
                     <Label className="text-sm font-medium">User Information</Label>
                     <div className="space-y-2 mt-2">
@@ -845,7 +845,7 @@ export default function AuditLogsPage() {
                     </div>
                   </div>
                 </div>
-                
+
                 <div className="space-y-4">
                   <div>
                     <Label className="text-sm font-medium">Session & Device</Label>
@@ -871,7 +871,7 @@ export default function AuditLogsPage() {
                       </div>
                     </div>
                   </div>
-                  
+
                   <div>
                     <Label className="text-sm font-medium">Result</Label>
                     <div className="flex items-center space-x-2 mt-2">

@@ -12,7 +12,7 @@ import type {
 
 export function detectFileFormat(file: File): ImportFormat {
   const extension = file.name.toLowerCase().split('.').pop();
-  
+
   switch (extension) {
     case 'xlsx':
     case 'xls':
@@ -46,7 +46,7 @@ export async function parseFile(
   options: Partial<ImportOptions> = {}
 ): Promise<ParsedData> {
   const format = options.format || detectFileFormat(file);
-  
+
   switch (format) {
     case 'csv':
       return await parseCSV(file, options);
@@ -70,34 +70,34 @@ export async function parseCSV(
   const hasHeaders = options.hasHeaders ?? true;
   const skipFirstRows = options.skipFirstRows || 0;
   const maxRows = options.maxRows;
-  
+
   const lines = text.split('\n').map(line => line.trim()).filter(line => line);
   const errors: ImportError[] = [];
   const warnings: ImportWarning[] = [];
-  
+
   if (lines.length === 0) {
     throw new Error('File is empty');
   }
-  
+
   // Skip initial rows if specified
   const processLines = lines.slice(skipFirstRows);
-  
+
   if (processLines.length === 0) {
     throw new Error('No data rows found after skipping specified rows');
   }
-  
+
   // Parse headers
   const headerLine = processLines[0];
   const headers = parseCSVLine(headerLine, delimiter);
-  
+
   if (headers.length === 0) {
     throw new Error('No columns detected in header row');
   }
-  
+
   // Parse data rows
   const dataLines = hasHeaders ? processLines.slice(1) : processLines;
   const rows: Record<string, any>[] = [];
-  
+
   for (let i = 0; i < dataLines.length; i++) {
     if (maxRows && rows.length >= maxRows) {
       warnings.push({
@@ -106,22 +106,22 @@ export async function parseCSV(
       });
       break;
     }
-    
+
     const line = dataLines[i];
     if (!line.trim() && options.skipEmptyRows) {
       continue;
     }
-    
+
     try {
       const values = parseCSVLine(line, delimiter);
       const row: Record<string, any> = {};
-      
+
       for (let j = 0; j < headers.length; j++) {
         const header = headers[j];
         const value = j < values.length ? values[j] : '';
         row[header] = parseValue(value);
       }
-      
+
       rows.push(row);
     } catch (error) {
       errors.push({
@@ -131,7 +131,7 @@ export async function parseCSV(
       });
     }
   }
-  
+
   return {
     headers,
     rows,
@@ -149,11 +149,11 @@ export async function parseJSON(
   const maxRows = options.maxRows;
   const errors: ImportError[] = [];
   const warnings: ImportWarning[] = [];
-  
+
   try {
     const jsonData = JSON.parse(text);
     let dataArray: any[];
-    
+
     if (Array.isArray(jsonData)) {
       dataArray = jsonData;
     } else if (typeof jsonData === 'object' && jsonData !== null) {
@@ -172,20 +172,20 @@ export async function parseJSON(
     } else {
       throw new Error('JSON data must be an array or object containing an array');
     }
-    
+
     if (dataArray.length === 0) {
       throw new Error('No data found in JSON file');
     }
-    
+
     // Extract headers from first object
     const firstItem = dataArray[0];
     if (typeof firstItem !== 'object' || firstItem === null) {
       throw new Error('JSON array items must be objects');
     }
-    
+
     const headers = Object.keys(firstItem);
     const rows: Record<string, any>[] = [];
-    
+
     for (let i = 0; i < dataArray.length; i++) {
       if (maxRows && rows.length >= maxRows) {
         warnings.push({
@@ -194,9 +194,9 @@ export async function parseJSON(
         });
         break;
       }
-      
+
       const item = dataArray[i];
-      
+
       if (typeof item !== 'object' || item === null) {
         errors.push({
           row: i + 1,
@@ -206,16 +206,16 @@ export async function parseJSON(
         });
         continue;
       }
-      
+
       // Ensure all headers are present
       const row: Record<string, any> = {};
       headers.forEach(header => {
         row[header] = item[header] !== undefined ? item[header] : null;
       });
-      
+
       rows.push(row);
     }
-    
+
     return {
       headers,
       rows,
@@ -238,53 +238,53 @@ export async function parseExcel(
   const maxRows = options.maxRows;
   const errors: ImportError[] = [];
   const warnings: ImportWarning[] = [];
-  
+
   try {
     const workbook = XLSX.read(arrayBuffer, { type: 'array' });
-    
+
     if (workbook.SheetNames.length === 0) {
       throw new Error('No worksheets found in Excel file');
     }
-    
+
     // Use first sheet by default
     const sheetName = workbook.SheetNames[0];
     const worksheet = workbook.Sheets[sheetName];
-    
+
     if (workbook.SheetNames.length > 1) {
       warnings.push({
         row: 0,
         message: `Multiple sheets detected. Using first sheet: "${sheetName}"`
       });
     }
-    
+
     // Convert to JSON
     const jsonData = XLSX.utils.sheet_to_json(worksheet, {
       header: 1,
       defval: '',
       raw: false
     }) as any[][];
-    
+
     if (jsonData.length === 0) {
       throw new Error('No data found in Excel sheet');
     }
-    
+
     // Skip initial rows if specified
     const processRows = jsonData.slice(skipFirstRows);
-    
+
     if (processRows.length === 0) {
       throw new Error('No data rows found after skipping specified rows');
     }
-    
+
     // Extract headers
     const headerRow = processRows[0];
-    const headers = headerRow.map((cell: any, index: number) => 
+    const headers = headerRow.map((cell: any, index: number) =>
       cell ? String(cell).trim() : `Column_${index + 1}`
     );
-    
+
     // Process data rows
     const dataRows = hasHeaders ? processRows.slice(1) : processRows;
     const rows: Record<string, any>[] = [];
-    
+
     for (let i = 0; i < dataRows.length; i++) {
       if (maxRows && rows.length >= maxRows) {
         warnings.push({
@@ -293,24 +293,24 @@ export async function parseExcel(
         });
         break;
       }
-      
+
       const rowData = dataRows[i];
-      
+
       // Skip empty rows if option is set
       if (options.skipEmptyRows && (!rowData || rowData.every((cell: any) => !cell))) {
         continue;
       }
-      
+
       const row: Record<string, any> = {};
-      
+
       headers.forEach((header, j) => {
         const value = j < rowData.length ? rowData[j] : '';
         row[header] = parseValue(value);
       });
-      
+
       rows.push(row);
     }
-    
+
     return {
       headers,
       rows,
@@ -331,44 +331,44 @@ export async function parseXML(
   const maxRows = options.maxRows;
   const errors: ImportError[] = [];
   const warnings: ImportWarning[] = [];
-  
+
   try {
     const parser = new DOMParser();
     const xmlDoc = parser.parseFromString(text, 'text/xml');
-    
+
     // Check for parsing errors
     const parseError = xmlDoc.querySelector('parsererror');
     if (parseError) {
       throw new Error('Invalid XML format');
     }
-    
+
     // Find the root element and detect repeating elements
     const rootElement = xmlDoc.documentElement;
     const childElements = Array.from(rootElement.children);
-    
+
     if (childElements.length === 0) {
       throw new Error('No data elements found in XML');
     }
-    
+
     // Assume all direct children are data items
     const dataElements = childElements;
     const headers = new Set<string>();
-    
+
     // Extract all possible field names from all elements
     dataElements.forEach(element => {
       Array.from(element.children).forEach(child => {
         headers.add(child.tagName);
       });
-      
+
       // Also check for attributes
       Array.from(element.attributes).forEach(attr => {
         headers.add(`@${attr.name}`);
       });
     });
-    
+
     const headerArray = Array.from(headers);
     const rows: Record<string, any>[] = [];
-    
+
     for (let i = 0; i < dataElements.length; i++) {
       if (maxRows && rows.length >= maxRows) {
         warnings.push({
@@ -377,30 +377,30 @@ export async function parseXML(
         });
         break;
       }
-      
+
       const element = dataElements[i];
       const row: Record<string, any> = {};
-      
+
       // Extract child element values
       Array.from(element.children).forEach(child => {
         row[child.tagName] = parseValue(child.textContent || '');
       });
-      
+
       // Extract attribute values
       Array.from(element.attributes).forEach(attr => {
         row[`@${attr.name}`] = parseValue(attr.value);
       });
-      
+
       // Ensure all headers are present
       headerArray.forEach(header => {
         if (!(header in row)) {
           row[header] = null;
         }
       });
-      
+
       rows.push(row);
     }
-    
+
     return {
       headers: headerArray,
       rows,
@@ -417,12 +417,12 @@ export async function parseXML(
 function detectCSVDelimiter(text: string): string {
   const delimiters = [',', ';', '\t', '|'];
   const firstLine = text.split('\n')[0];
-  
+
   if (!firstLine) return ',';
-  
+
   let maxCount = 0;
   let detectedDelimiter = ',';
-  
+
   delimiters.forEach(delimiter => {
     const count = (firstLine.match(new RegExp(`\\${delimiter}`, 'g')) || []).length;
     if (count > maxCount) {
@@ -430,7 +430,7 @@ function detectCSVDelimiter(text: string): string {
       detectedDelimiter = delimiter;
     }
   });
-  
+
   return detectedDelimiter;
 }
 
@@ -438,11 +438,11 @@ function parseCSVLine(line: string, delimiter: string): string[] {
   const result: string[] = [];
   let current = '';
   let inQuotes = false;
-  
+
   for (let i = 0; i < line.length; i++) {
     const char = line[i];
     const nextChar = line[i + 1];
-    
+
     if (char === '"') {
       if (inQuotes && nextChar === '"') {
         // Escaped quote
@@ -460,10 +460,10 @@ function parseCSVLine(line: string, delimiter: string): string[] {
       current += char;
     }
   }
-  
+
   // Add last field
   result.push(current.trim());
-  
+
   return result;
 }
 
@@ -471,13 +471,13 @@ function parseValue(value: any): any {
   if (value === null || value === undefined || value === '') {
     return null;
   }
-  
+
   const stringValue = String(value).trim();
-  
+
   if (stringValue === '') {
     return null;
   }
-  
+
   // Try to parse as number
   if (/^-?\d+(\.\d+)?$/.test(stringValue)) {
     const num = Number(stringValue);
@@ -485,7 +485,7 @@ function parseValue(value: any): any {
       return num;
     }
   }
-  
+
   // Try to parse as boolean
   const lowerValue = stringValue.toLowerCase();
   if (lowerValue === 'true' || lowerValue === 'yes' || lowerValue === '1') {
@@ -494,7 +494,7 @@ function parseValue(value: any): any {
   if (lowerValue === 'false' || lowerValue === 'no' || lowerValue === '0') {
     return false;
   }
-  
+
   // Try to parse as date
   if (/^\d{4}-\d{2}-\d{2}/.test(stringValue) || /^\d{1,2}\/\d{1,2}\/\d{4}/.test(stringValue)) {
     const date = new Date(stringValue);
@@ -502,7 +502,7 @@ function parseValue(value: any): any {
       return date.toISOString();
     }
   }
-  
+
   return stringValue;
 }
 
@@ -512,14 +512,14 @@ export function createPreview(
 ): ImportPreview {
   const sampleSize = 5;
   const sampleData = parsedData.rows.slice(0, sampleSize);
-  
+
   // Generate suggested mappings (this would be more sophisticated in practice)
   const suggestedMappings = parsedData.headers.map(header => ({
     sourceColumn: header,
     targetColumn: header.toLowerCase().replace(/\s+/g, '_'),
     skipEmpty: true
   }));
-  
+
   // Create column definitions based on detected data types
   const columns = parsedData.headers.map(header => ({
     key: header,
@@ -527,7 +527,7 @@ export function createPreview(
     type: detectColumnType(parsedData.rows, header),
     required: false
   }));
-  
+
   return {
     headers: parsedData.headers,
     sampleData,
@@ -542,26 +542,26 @@ function detectColumnType(rows: Record<string, any>[], columnName: string): 'str
   const sampleValues = rows.slice(0, 10)
     .map(row => row[columnName])
     .filter(value => value !== null && value !== undefined && value !== '');
-  
+
   if (sampleValues.length === 0) {
     return 'string';
   }
-  
+
   // Check for email
   if (sampleValues.some(value => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(value)))) {
     return 'email';
   }
-  
+
   // Check for URL
   if (sampleValues.some(value => /^https?:\/\//.test(String(value)))) {
     return 'url';
   }
-  
+
   // Check for date
   if (sampleValues.some(value => !isNaN(new Date(value).getTime()))) {
     return 'date';
   }
-  
+
   // Check for boolean
   if (sampleValues.every(value => {
     const str = String(value).toLowerCase();
@@ -569,11 +569,11 @@ function detectColumnType(rows: Record<string, any>[], columnName: string): 'str
   })) {
     return 'boolean';
   }
-  
+
   // Check for number
   if (sampleValues.every(value => !isNaN(Number(value)))) {
     return 'number';
   }
-  
+
   return 'string';
 }

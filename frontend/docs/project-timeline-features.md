@@ -18,7 +18,7 @@ The project management system has been enhanced with comprehensive timeline capa
 
 ```sql
 -- Add start_date and end_date columns to projects table
-ALTER TABLE projects 
+ALTER TABLE projects
 ADD COLUMN start_date TIMESTAMP NULL,
 ADD COLUMN end_date TIMESTAMP NULL;
 
@@ -130,17 +130,17 @@ ganttProgressField="progress"
 ```typescript
 export function calculateProjectProgress(project: Project): number {
   if (!project.start_date || !project.end_date) return 0;
-  
+
   const startDate = new Date(project.start_date);
   const endDate = new Date(project.end_date);
   const currentDate = new Date();
-  
+
   if (currentDate < startDate) return 0;
   if (currentDate > endDate) return 100;
-  
+
   const totalDuration = endDate.getTime() - startDate.getTime();
   const elapsed = currentDate.getTime() - startDate.getTime();
-  
+
   return Math.round((elapsed / totalDuration) * 100);
 }
 ```
@@ -150,14 +150,14 @@ export function calculateProjectProgress(project: Project): number {
 ```typescript
 export function getProjectStatus(project: Project): 'not_started' | 'in_progress' | 'completed' | 'overdue' {
   if (!project.start_date || !project.end_date) return 'in_progress';
-  
+
   const startDate = new Date(project.start_date);
   const endDate = new Date(project.end_date);
   const currentDate = new Date();
-  
+
   if (currentDate < startDate) return 'not_started';
   if (currentDate > endDate) return 'overdue';
-  
+
   const progress = calculateProjectProgress(project);
   return progress >= 100 ? 'completed' : 'in_progress';
 }
@@ -182,13 +182,13 @@ const newProject: CreateProjectRequest = {
 
 ```typescript
 // Filter projects starting in 2024
-const projects2024 = projects.filter(p => 
+const projects2024 = projects.filter(p =>
   p.start_date && p.start_date.startsWith('2024')
 );
 
 // Find projects ending this month
 const thisMonth = new Date().toISOString().slice(0, 7); // YYYY-MM
-const endingThisMonth = projects.filter(p => 
+const endingThisMonth = projects.filter(p =>
   p.end_date && p.end_date.startsWith(thisMonth)
 );
 ```
@@ -218,7 +218,7 @@ The ViewManager component supports all the new timeline features through compreh
 ```typescript
 <ViewManager
   // ... other props
-  
+
   // Gantt view configuration
   ganttIdField="id"
   ganttTitleField="name"
@@ -226,13 +226,13 @@ The ViewManager component supports all the new timeline features through compreh
   ganttEndDateField="end_date"
   ganttStatusField="status"
   ganttProgressField="progress"
-  
+
   // Calendar view configuration
   calendarIdField="id"
   calendarTitleField="name"
   calendarDateField="created_at"
   calendarDescriptionField="description"
-  
+
   // Enhanced sorting options
   sortOptions={[
     { key: 'name', label: 'Project Name', defaultOrder: 'asc' },

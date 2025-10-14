@@ -101,7 +101,7 @@ class ProjectsDataStore {
 
     if (filters.search) {
       const search = filters.search.toLowerCase();
-      filtered = filtered.filter(p => 
+      filtered = filtered.filter(p =>
         p.name.toLowerCase().includes(search) ||
         (p.description && p.description.toLowerCase().includes(search))
       );
@@ -118,7 +118,7 @@ class ProjectsDataStore {
     // Apply pagination
     const skip = filters.skip || 0;
     const limit = filters.limit || 100;
-    
+
     return filtered.slice(skip, skip + limit);
   }
 }

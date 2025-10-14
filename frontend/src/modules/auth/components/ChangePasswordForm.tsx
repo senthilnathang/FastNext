@@ -73,7 +73,7 @@ export default function ChangePasswordForm({ onSuccess, onCancel }: ChangePasswo
 
       setSuccess(true);
       reset();
-      
+
       if (onSuccess) {
         setTimeout(onSuccess, 2000);
       }
@@ -142,19 +142,19 @@ export default function ChangePasswordForm({ onSuccess, onCancel }: ChangePasswo
     const numbers = '0123456789';
     const symbols = '!@#$%^&*(),.?":{}|<>';
     const allChars = lowercase + uppercase + numbers + symbols;
-    
+
     let password = '';
     // Ensure at least one character from each category
     password += lowercase[Math.floor(Math.random() * lowercase.length)];
     password += uppercase[Math.floor(Math.random() * uppercase.length)];
     password += numbers[Math.floor(Math.random() * numbers.length)];
     password += symbols[Math.floor(Math.random() * symbols.length)];
-    
+
     // Fill the rest with random characters
     for (let i = 4; i < 16; i++) {
       password += allChars[Math.floor(Math.random() * allChars.length)];
     }
-    
+
     // Shuffle the password
     return password.split('').sort(() => Math.random() - 0.5).join('');
   };
@@ -304,7 +304,7 @@ export default function ChangePasswordForm({ onSuccess, onCancel }: ChangePasswo
           {errors.new_password && (
             <p className="text-sm text-red-600 mt-1">{errors.new_password.message}</p>
           )}
-          
+
             {newPassword && (
               <div className="mt-3 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg border" role="region" aria-labelledby="password-strength-heading">
                 <div className="flex items-center justify-between mb-3">
@@ -449,7 +449,7 @@ export default function ChangePasswordForm({ onSuccess, onCancel }: ChangePasswo
                 <Key className="h-3 w-3" />
                 <span>Generate</span>
               </Button>
-              
+
                <Button
                  type="button"
                  variant="outline"
@@ -470,7 +470,7 @@ export default function ChangePasswordForm({ onSuccess, onCancel }: ChangePasswo
                  )}
                  <span>{historyLoading ? 'Loading...' : 'History'}</span>
                </Button>
-              
+
               <Button
                 type="button"
                 variant="outline"
@@ -482,7 +482,7 @@ export default function ChangePasswordForm({ onSuccess, onCancel }: ChangePasswo
                 <Download className="h-3 w-3" />
                 <span>Export</span>
               </Button>
-              
+
               <Button
                 type="button"
                 variant="outline"
@@ -499,7 +499,7 @@ export default function ChangePasswordForm({ onSuccess, onCancel }: ChangePasswo
                 <span>Reset</span>
               </Button>
             </div>
-            
+
             {generatedPassword && (
               <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-md">
                 <p className="text-xs text-blue-700 font-medium">Generated Password:</p>
@@ -507,7 +507,7 @@ export default function ChangePasswordForm({ onSuccess, onCancel }: ChangePasswo
                 <p className="text-xs text-blue-600 mt-1">Password has been filled in the form above.</p>
               </div>
             )}
-            
+
             {showPasswordHistory && (
               <div className="mt-3 p-3 bg-gray-50 border border-gray-200 rounded-md">
                 <p className="text-xs text-gray-700 font-medium mb-2">Recent Password Changes:</p>

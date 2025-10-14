@@ -26,7 +26,7 @@ const aspectRatios = {
 
 const ImageSkeleton = React.memo(function ImageSkeleton({ className }: { className?: string }) {
   return (
-    <div 
+    <div
       className={cn(
         "animate-pulse bg-gray-200 dark:bg-gray-700 rounded-lg",
         className
@@ -88,13 +88,13 @@ export const OptimizedImage = React.memo(function OptimizedImage({
 
   const handleError = React.useCallback((event: React.SyntheticEvent<HTMLImageElement>) => {
     setIsLoading(false)
-    
+
     if (!hasError && fallbackSrc && currentSrc !== fallbackSrc) {
       setHasError(true)
       setCurrentSrc(fallbackSrc)
       return
     }
-    
+
     setHasError(true)
     onError?.(event)
   }, [hasError, fallbackSrc, currentSrc, onError])
@@ -109,7 +109,7 @@ export const OptimizedImage = React.memo(function OptimizedImage({
   const aspectRatioClass = aspectRatio !== 'auto' ? aspectRatios[aspectRatio] : ''
 
   return (
-    <div 
+    <div
       className={cn(
         "relative overflow-hidden",
         aspectRatioClass,
@@ -119,11 +119,11 @@ export const OptimizedImage = React.memo(function OptimizedImage({
     >
       {/* Skeleton Loader */}
       {isLoading && showSkeleton && (
-        <ImageSkeleton 
+        <ImageSkeleton
           className={cn(
             "absolute inset-0 w-full h-full",
             skeletonClassName
-          )} 
+          )}
         />
       )}
 
@@ -131,9 +131,9 @@ export const OptimizedImage = React.memo(function OptimizedImage({
       {hasError && currentSrc === fallbackSrc && (
         <div className="absolute inset-0 flex items-center justify-center bg-gray-100 dark:bg-gray-800">
           <div className="text-center text-gray-500 dark:text-gray-400">
-            <svg 
-              className="mx-auto h-12 w-12 mb-2" 
-              fill="currentColor" 
+            <svg
+              className="mx-auto h-12 w-12 mb-2"
+              fill="currentColor"
               viewBox="0 0 24 24"
             >
               <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/>

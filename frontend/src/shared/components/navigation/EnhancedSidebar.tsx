@@ -8,13 +8,13 @@ import { useUserRole } from '@/modules/admin/hooks/useUserRole';
 import { useAuth } from '@/modules/auth';
 import { Button } from '../ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
-import { 
-  ChevronDown, 
-  ChevronRight, 
-  X, 
-  LogOut, 
-  User, 
-  PanelLeftClose, 
+import {
+  ChevronDown,
+  ChevronRight,
+  X,
+  LogOut,
+  User,
+  PanelLeftClose,
   PanelLeft,
   Settings
 } from 'lucide-react';
@@ -30,10 +30,10 @@ interface SidebarItemProps {
   isHovered?: boolean;
 }
 
-function SidebarItem({ 
-  item, 
-  level = 0, 
-  expandedItems, 
+function SidebarItem({
+  item,
+  level = 0,
+  expandedItems,
   onToggleExpanded,
   isCollapsed = false,
   isHovered = false
@@ -41,9 +41,9 @@ function SidebarItem({
   const pathname = usePathname();
   const hasChildren = item.children && item.children.length > 0;
   const isExpanded = expandedItems.includes(item.title);
-  const isActive = item.href ? 
+  const isActive = item.href ?
     pathname === item.href || pathname.startsWith(item.href) : false;
-  const hasActiveChild = hasChildren && item.children?.some(child => 
+  const hasActiveChild = hasChildren && item.children?.some(child =>
     child.href && (pathname === child.href || pathname.startsWith(child.href))
   );
 
@@ -127,9 +127,9 @@ function SidebarItem({
       {hasChildren && isExpanded && showText && (
         <div className="ml-3 mt-1 space-y-1 overflow-hidden transition-all duration-300">
           {item.children?.map((child) => (
-            <SidebarItem 
-              key={child.title} 
-              item={child} 
+            <SidebarItem
+              key={child.title}
+              item={child}
               level={level + 1}
               expandedItems={expandedItems}
               onToggleExpanded={onToggleExpanded}
@@ -151,8 +151,8 @@ interface EnhancedSidebarProps {
   onToggleCollapse?: () => void;
 }
 
-export default function EnhancedSidebar({ 
-  className, 
+export default function EnhancedSidebar({
+  className,
   onClose,
   showCloseButton = false,
   isCollapsed = false,
@@ -182,8 +182,8 @@ export default function EnhancedSidebar({
   }, [expandedItems]);
 
   const handleToggleExpanded = useCallback((itemTitle: string) => {
-    setExpandedItems(prev => 
-      prev.includes(itemTitle) 
+    setExpandedItems(prev =>
+      prev.includes(itemTitle)
         ? prev.filter(item => item !== itemTitle)
         : [...prev, itemTitle]
     );
@@ -218,7 +218,7 @@ export default function EnhancedSidebar({
 
   return (
     <TooltipProvider>
-      <div 
+      <div
         className={cn(
           'bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 flex flex-col h-full',
           'transition-all duration-300 ease-in-out transform',
@@ -249,7 +249,7 @@ export default function EnhancedSidebar({
               </div>
             )}
           </div>
-          
+
           {/* Toggle button - only show when not hovered */}
           {onToggleCollapse && (!isCollapsed || !isHovered) && (
             <button
@@ -267,7 +267,7 @@ export default function EnhancedSidebar({
               )}
             </button>
           )}
-          
+
           {/* Mobile close button */}
           {showCloseButton && onClose && (
             <button
@@ -286,8 +286,8 @@ export default function EnhancedSidebar({
         )}>
           <div className="space-y-1">
             {filteredMenuItems.map((item) => (
-              <SidebarItem 
-                key={item.title} 
+              <SidebarItem
+                key={item.title}
                 item={item}
                 expandedItems={expandedItems}
                 onToggleExpanded={handleToggleExpanded}
@@ -338,7 +338,7 @@ export default function EnhancedSidebar({
                 </div>
               )}
             </div>
-            
+
             {(!isCollapsed || isHovered) ? (
               <Button
                 variant="outline"

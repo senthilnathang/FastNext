@@ -119,10 +119,10 @@ export function useOfflineSync<T>({
 
     try {
       const unsyncedActions = pendingActions.filter(action => !action.synced)
-      
+
       if (unsyncedActions.length > 0) {
         await syncFn(unsyncedActions)
-        
+
         // Mark as synced
         setPendingActions(prev => {
           const updated = prev.map(action => ({ ...action, synced: true }))
@@ -269,17 +269,17 @@ export function useOfflineData<T extends { id: string }>({
   const create = React.useCallback((item: T) => {
     // Optimistic update
     setData(prev => [...prev, item])
-    
+
     // Add to offline queue
     addOfflineAction('create', item, item.id)
   }, [addOfflineAction])
 
   const update = React.useCallback((item: T) => {
     // Optimistic update
-    setData(prev => prev.map(existing => 
+    setData(prev => prev.map(existing =>
       existing.id === item.id ? item : existing
     ))
-    
+
     // Add to offline queue
     addOfflineAction('update', item, item.id)
   }, [addOfflineAction])
@@ -290,7 +290,7 @@ export function useOfflineData<T extends { id: string }>({
     if (!item) return
 
     setData(prev => prev.filter(item => item.id !== id))
-    
+
     // Add to offline queue
     addOfflineAction('delete', item, id)
   }, [data, addOfflineAction])

@@ -23,12 +23,12 @@ const ALLOWED_FILES = [
 
 function checkFile(filePath, content) {
   const issues = [];
-  
+
   // Skip allowed files
   if (ALLOWED_FILES.some(pattern => pattern.test(filePath))) {
     return issues;
   }
-  
+
   // Check for debug patterns
   DEBUG_PATTERNS.forEach(({ pattern, name }) => {
     const matches = content.match(pattern);
@@ -46,25 +46,25 @@ function checkFile(filePath, content) {
       });
     }
   });
-  
+
   return issues;
 }
 
 function main() {
   try {
     // Get staged files
-    const stagedFiles = execSync('git diff --cached --name-only --diff-filter=ACM', { 
-      encoding: 'utf8' 
+    const stagedFiles = execSync('git diff --cached --name-only --diff-filter=ACM', {
+      encoding: 'utf8'
     })
       .split('\n')
       .filter(file => file.match(/\.(ts|tsx|js|jsx)$/));
-    
+
     if (stagedFiles.length === 0) {
       process.exit(0);
     }
-    
+
     let allIssues = [];
-    
+
     stagedFiles.forEach(file => {
       try {
         const content = execSync(`git show :${file}`, { encoding: 'utf8' });
@@ -74,24 +74,24 @@ function main() {
         // File might be deleted or binary, skip
       }
     });
-    
+
     if (allIssues.length > 0) {
       console.error('\n❌ Debug code detected in staged files:\n');
-      
+
       allIssues.forEach(issue => {
         console.error(`  ${issue.file}:${issue.line}`);
         console.error(`    ${issue.pattern}: ${issue.code}`);
         console.error('');
       });
-      
+
       console.error('🚫 Please remove debug code before committing.\n');
       console.error('💡 Tip: Use a proper logging library in production code.\n');
-      
+
       process.exit(1);
     }
-    
+
     process.exit(0);
-    
+
   } catch (error) {
     console.error('Error checking debug code:', error.message);
     process.exit(1);

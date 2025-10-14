@@ -285,25 +285,25 @@ function CreateProjectForm() {
                 <pre className="bg-muted p-4 rounded-lg text-sm overflow-x-auto">
 {`@strawberry.field
 async def users(
-    self, 
+    self,
     info: strawberry.Info[GraphQLContext],
     first: Optional[int] = 10,
     after: Optional[str] = None,
     search: Optional[str] = None
 ) -> UserConnection:
     db = info.context.db
-    
+
     query = select(User)
-    
+
     if search:
         query = query.where(
             User.username.ilike(f"%{search}%") |
             User.email.ilike(f"%{search}%")
         )
-    
+
     result = await db.execute(query)
     users = result.scalars().all()
-    
+
     return UserConnection(
         edges=[convert_user_to_graphql(user) for user in users],
         page_info=PageInfo(...),

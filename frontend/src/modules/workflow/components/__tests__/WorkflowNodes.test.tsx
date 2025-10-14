@@ -10,7 +10,7 @@ import UserTaskNode from '../UserTaskNode';
 // Mock ReactFlow Handle component
 jest.mock('reactflow', () => ({
   Handle: ({ type, position, id, className, style }: any) => (
-    <div 
+    <div
       data-testid={`handle-${type}-${position}${id ? `-${id}` : ''}`}
       className={className}
       style={style}
@@ -64,7 +64,7 @@ describe('WorkflowStateNode', () => {
 
   test('renders basic state node with label and description', () => {
     render(<WorkflowStateNode {...mockNodeProps} />);
-    
+
     expect(screen.getByText('Test State')).toBeInTheDocument();
     expect(screen.getByText('Test description')).toBeInTheDocument();
     expect(screen.getByTestId('circle-icon')).toBeInTheDocument();
@@ -72,7 +72,7 @@ describe('WorkflowStateNode', () => {
 
   test('renders handles for input and output', () => {
     render(<WorkflowStateNode {...mockNodeProps} />);
-    
+
     expect(screen.getByTestId('handle-target-left')).toBeInTheDocument();
     expect(screen.getByTestId('handle-source-right')).toBeInTheDocument();
   });
@@ -87,7 +87,7 @@ describe('WorkflowStateNode', () => {
     };
 
     render(<WorkflowStateNode {...initialStateProps} />);
-    
+
     expect(screen.getByText('Start')).toBeInTheDocument();
   });
 
@@ -101,7 +101,7 @@ describe('WorkflowStateNode', () => {
     };
 
     render(<WorkflowStateNode {...finalStateProps} />);
-    
+
     expect(screen.getByText('End')).toBeInTheDocument();
   });
 
@@ -126,7 +126,7 @@ describe('WorkflowStateNode', () => {
     };
 
     render(<WorkflowStateNode {...noDescriptionProps} />);
-    
+
     expect(screen.getByText('Test State')).toBeInTheDocument();
     expect(screen.queryByText('Test description')).not.toBeInTheDocument();
   });
@@ -154,7 +154,7 @@ describe('ConditionalNode', () => {
 
   test('renders conditional node with decision styling', () => {
     render(<ConditionalNode {...mockConditionalProps} />);
-    
+
     expect(screen.getByText('Decision Point')).toBeInTheDocument();
     expect(screen.getByText('Check condition')).toBeInTheDocument();
     expect(screen.getByText('Decision')).toBeInTheDocument();
@@ -164,7 +164,7 @@ describe('ConditionalNode', () => {
 
   test('renders true and false output handles', () => {
     render(<ConditionalNode {...mockConditionalProps} />);
-    
+
     expect(screen.getByTestId('handle-target-top')).toBeInTheDocument();
     expect(screen.getByTestId('handle-source-left-false')).toBeInTheDocument();
     expect(screen.getByTestId('handle-source-right-true')).toBeInTheDocument();
@@ -180,7 +180,7 @@ describe('ConditionalNode', () => {
     };
 
     render(<ConditionalNode {...noLabelProps} />);
-    
+
     expect(screen.getByText('Condition')).toBeInTheDocument();
   });
 });
@@ -206,7 +206,7 @@ describe('ParallelGatewayNode', () => {
 
   test('renders parallel gateway node as split', () => {
     render(<ParallelGatewayNode {...mockParallelProps} />);
-    
+
     expect(screen.getByText('Parallel Split')).toBeInTheDocument();
     expect(screen.getByText('Fork execution')).toBeInTheDocument();
     expect(screen.getByText('Split')).toBeInTheDocument();
@@ -215,7 +215,7 @@ describe('ParallelGatewayNode', () => {
 
   test('renders multiple output handles for split gateway', () => {
     render(<ParallelGatewayNode {...mockParallelProps} />);
-    
+
     expect(screen.getByTestId('handle-target-left')).toBeInTheDocument();
     expect(screen.getByTestId('handle-source-right-out1')).toBeInTheDocument();
     expect(screen.getByTestId('handle-source-right-out2')).toBeInTheDocument();
@@ -231,7 +231,7 @@ describe('ParallelGatewayNode', () => {
     };
 
     render(<ParallelGatewayNode {...mergeProps} />);
-    
+
     expect(screen.getByText('Parallel Merge')).toBeInTheDocument();
     expect(screen.getByText('Merge')).toBeInTheDocument();
   });
@@ -246,7 +246,7 @@ describe('ParallelGatewayNode', () => {
     };
 
     render(<ParallelGatewayNode {...noLabelProps} />);
-    
+
     expect(screen.getByText('Gateway')).toBeInTheDocument();
   });
 });
@@ -273,7 +273,7 @@ describe('TimerNode', () => {
 
   test('renders timer node with circular styling', () => {
     render(<TimerNode {...mockTimerProps} />);
-    
+
     expect(screen.getByText('Wait Timer')).toBeInTheDocument();
     expect(screen.getByText('Wait 1 hour')).toBeInTheDocument();
     expect(screen.getByText('2h')).toBeInTheDocument();
@@ -282,7 +282,7 @@ describe('TimerNode', () => {
 
   test('renders input and output handles', () => {
     render(<TimerNode {...mockTimerProps} />);
-    
+
     expect(screen.getByTestId('handle-target-left')).toBeInTheDocument();
     expect(screen.getByTestId('handle-source-right')).toBeInTheDocument();
   });
@@ -297,7 +297,7 @@ describe('TimerNode', () => {
     };
 
     render(<TimerNode {...noDurationProps} />);
-    
+
     expect(screen.getByText('1h')).toBeInTheDocument();
   });
 
@@ -311,7 +311,7 @@ describe('TimerNode', () => {
     };
 
     render(<TimerNode {...noLabelProps} />);
-    
+
     expect(screen.getByText('Timer')).toBeInTheDocument();
   });
 });
@@ -341,7 +341,7 @@ describe('UserTaskNode', () => {
 
   test('renders user task node with all details', () => {
     render(<UserTaskNode {...mockUserTaskProps} />);
-    
+
     expect(screen.getByText('Review Order')).toBeInTheDocument();
     expect(screen.getByText('Manual review required')).toBeInTheDocument();
     expect(screen.getByText('john.doe')).toBeInTheDocument();
@@ -364,7 +364,7 @@ describe('UserTaskNode', () => {
 
   test('renders input and output handles', () => {
     render(<UserTaskNode {...mockUserTaskProps} />);
-    
+
     expect(screen.getByTestId('handle-target-left')).toBeInTheDocument();
     expect(screen.getByTestId('handle-source-right')).toBeInTheDocument();
   });
@@ -378,7 +378,7 @@ describe('UserTaskNode', () => {
     };
 
     render(<UserTaskNode {...minimalProps} />);
-    
+
     expect(screen.getByText('Simple Task')).toBeInTheDocument();
     expect(screen.getByText('Task')).toBeInTheDocument();
     expect(screen.queryByText('john.doe')).not.toBeInTheDocument();
@@ -395,13 +395,13 @@ describe('UserTaskNode', () => {
     };
 
     render(<UserTaskNode {...noLabelProps} />);
-    
+
     expect(screen.getByText('User Task')).toBeInTheDocument();
   });
 
   test('applies correct priority styling', () => {
     render(<UserTaskNode {...mockUserTaskProps} />);
-    
+
     const priorityBadge = screen.getByText('high');
     expect(priorityBadge).toHaveClass('bg-red-100', 'text-red-700');
   });
@@ -416,7 +416,7 @@ describe('UserTaskNode', () => {
     };
 
     render(<UserTaskNode {...mediumPriorityProps} />);
-    
+
     const priorityBadge = screen.getByText('medium');
     expect(priorityBadge).toHaveClass('bg-yellow-100', 'text-yellow-700');
   });
@@ -431,7 +431,7 @@ describe('UserTaskNode', () => {
     };
 
     render(<UserTaskNode {...lowPriorityProps} />);
-    
+
     const priorityBadge = screen.getByText('low');
     expect(priorityBadge).toHaveClass('bg-gray-100', 'text-gray-700');
   });

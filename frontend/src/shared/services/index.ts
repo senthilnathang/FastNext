@@ -11,9 +11,9 @@ export * from './api/components'
 export * from './api'
 
 // Re-export commonly used types
-export type { 
-  ApiError, 
-  ApiResponse 
+export type {
+  ApiError,
+  ApiResponse
 } from './api/client'
 
 export type {

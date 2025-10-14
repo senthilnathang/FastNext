@@ -139,7 +139,7 @@ export function DataExport({
           default:
             throw new Error(`Unsupported export format: ${selectedFormat}`);
         }
-        
+
         // Close dialog after successful export (for client-side exports)
         if (!embedded) {
           setIsOpen(false);
@@ -187,12 +187,12 @@ export function DataExport({
     const units = ['B', 'KB', 'MB', 'GB'];
     let size = bytes;
     let unitIndex = 0;
-    
+
     while (size >= 1024 && unitIndex < units.length - 1) {
       size /= 1024;
       unitIndex++;
     }
-    
+
     return `${size.toFixed(1)} ${units[unitIndex]}`;
   };
 
@@ -223,7 +223,7 @@ export function DataExport({
           <div className="text-sm text-yellow-700 dark:text-yellow-300">
             <div className="font-medium">Large Export</div>
             <div className="mt-1">
-              This export contains {actualRowCount.toLocaleString()} rows. 
+              This export contains {actualRowCount.toLocaleString()} rows.
               Large exports may take longer to process and download.
             </div>
           </div>
@@ -286,7 +286,7 @@ export function DataExport({
               </tbody>
             </table>
           </div>
-          
+
           {preview.sampleData.length > 5 && (
             <div className="mt-2 text-sm text-gray-500">
               ... and {preview.sampleData.length - 5} more rows
@@ -320,7 +320,7 @@ export function DataExport({
               {selectedColumns.length} columns
             </Badge>
           </div>
-          
+
           <div className="text-sm text-gray-600 dark:text-gray-400">
             {actualRowCount.toLocaleString()} rows
           </div>
@@ -356,7 +356,7 @@ export function DataExport({
         <DialogTrigger asChild>
           {exportButton}
         </DialogTrigger>
-        
+
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center space-x-2">
@@ -416,7 +416,7 @@ export function DataExport({
                     {isGeneratingPreview ? 'Generating...' : 'Generate Preview'}
                   </Button>
                 </div>
-                
+
                 {renderPreview()}
               </>
             )}
@@ -426,7 +426,7 @@ export function DataExport({
               <Button variant="outline" onClick={() => setIsOpen(false)}>
                 Cancel
               </Button>
-              
+
               <Button
                 onClick={handleExport}
                 disabled={selectedColumns.length === 0 || isExporting}

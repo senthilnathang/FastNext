@@ -202,7 +202,7 @@ export function FormatSelector({
             <Separator />
             <div className="space-y-3">
               <h4 className="font-medium">CSV Options</h4>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="delimiter">Delimiter</Label>
                 <Select
@@ -229,7 +229,7 @@ export function FormatSelector({
             <Separator />
             <div className="space-y-3">
               <h4 className="font-medium">JSON Options</h4>
-              
+
               <div className="flex items-center space-x-2">
                 <Switch
                   id="prettyPrint"
@@ -247,7 +247,7 @@ export function FormatSelector({
             <Separator />
             <div className="space-y-3">
               <h4 className="font-medium">Excel Options</h4>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="sheetName">Sheet name</Label>
                 <Input
@@ -280,11 +280,11 @@ export function FormatSelector({
         )}
 
         <Separator />
-        
+
         {/* Date Format Options */}
         <div className="space-y-3">
           <h4 className="font-medium">Date & Time Format</h4>
-          
+
           <div className="space-y-2">
             <Label htmlFor="dateFormat">Date format</Label>
             <Select
@@ -372,7 +372,7 @@ export function FormatSelector({
               )}
             </Button>
           </CollapsibleTrigger>
-          
+
           <CollapsibleContent className="mt-4">
             {renderAdvancedOptions()}
           </CollapsibleContent>

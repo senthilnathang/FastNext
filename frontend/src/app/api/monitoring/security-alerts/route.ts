@@ -4,12 +4,10 @@ import { getSecurityAlerts } from '@/lib/monitoring/security-monitor';
 export async function POST(request: NextRequest) {
   try {
     const alert = await request.json();
-    
+
     // Here you would implement alert handling logic
     // For example, sending emails, Slack notifications, etc.
-    
-    console.log('Security alert received:', alert);
-    
+
     // Example: Send to external alerting service
     if (process.env.WEBHOOK_URL) {
       await fetch(process.env.WEBHOOK_URL, {

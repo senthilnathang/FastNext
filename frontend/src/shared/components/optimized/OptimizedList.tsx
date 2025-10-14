@@ -70,10 +70,10 @@ function OptimizedListInner<T>({
   // Handle infinite scrolling
   const optimizedHandleScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
     handleScroll(e)
-    
+
     const element = e.currentTarget
     const scrollRatio = element.scrollTop / (element.scrollHeight - element.clientHeight)
-    
+
     if (scrollRatio >= onEndReachedThreshold && !isNearEnd) {
       setIsNearEnd(true)
       onEndReached?.()
@@ -175,19 +175,19 @@ export const OptimizedGrid = memo(<T,>({
   className = ''
 }: OptimizedGridProps<T>) => {
   const [scrollTop, setScrollTop] = useState(0)
-  
+
   const itemsPerRow = Math.floor((containerWidth + gap) / (itemWidth + gap))
   const rowHeight = itemHeight + gap
   const totalRows = Math.ceil(items.length / itemsPerRow)
-  
+
   const startRow = Math.floor(scrollTop / rowHeight)
   const endRow = Math.min(
     startRow + Math.ceil(containerHeight / rowHeight) + 1,
     totalRows
   )
-  
+
   const visibleItems = []
-  
+
   for (let row = startRow; row < endRow; row++) {
     for (let col = 0; col < itemsPerRow; col++) {
       const index = row * itemsPerRow + col
@@ -201,11 +201,11 @@ export const OptimizedGrid = memo(<T,>({
       }
     }
   }
-  
+
   const handleScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
     setScrollTop(e.currentTarget.scrollTop)
   }, [])
-  
+
   return (
     <div
       className={`overflow-auto ${className}`}
@@ -271,7 +271,7 @@ export const OptimizedTable = memo(<T,>({
 }: OptimizedTableProps<T>) => {
   const handleSort = useCallback((key: keyof T) => {
     if (!onSort) return
-    
+
     const newDirection = sortKey === key && sortDirection === 'asc' ? 'desc' : 'asc'
     onSort(key, newDirection)
   }, [onSort, sortKey, sortDirection])

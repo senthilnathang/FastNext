@@ -118,7 +118,7 @@ function EnhancedDataTable<TData>({
               className="h-8 w-[150px] lg:w-[250px]"
             />
           )}
-          
+
           {/* Selection count */}
           {showRowSelectionCount && hasSelection && (
             <div className="flex items-center space-x-2">
@@ -136,7 +136,7 @@ function EnhancedDataTable<TData>({
             </div>
           )}
         </div>
-        
+
         {/* Column visibility toggle */}
         <EnhancedDataTableColumnOptionsHeader table={table} />
       </div>
@@ -377,14 +377,14 @@ function EnhancedDataTablePagination<TData>({
             </Select>
           </div>
         )}
-        
+
         {showPageInfo && (
           <div className="flex w-[100px] items-center justify-center text-sm font-medium">
             Page {table.getState().pagination.pageIndex + 1} of{" "}
             {table.getPageCount()}
           </div>
         )}
-        
+
         <div className="flex items-center space-x-2">
           <Button
             variant="outline"
@@ -439,7 +439,7 @@ function EnhancedDataTableBulkActions<TData>({
   className,
 }: DataTableBulkActionsProps<TData>): React.JSX.Element {
   const selectedRows = table.getSelectedRowModel().rows;
-  
+
   if (selectedRows.length === 0) {
     return <></>;
   }

@@ -23,7 +23,7 @@ export default function QuickActionButton({ className = '' }: QuickActionButtonP
         <Zap className="h-4 w-4" />
         <span>Quick Actions</span>
       </Button>
-      
+
       <QuickActionsMenu
         isOpen={isMenuOpen}
         onClose={() => setIsMenuOpen(false)}

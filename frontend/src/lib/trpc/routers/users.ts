@@ -39,13 +39,13 @@ export const usersRouter = router({
         // Convert pagination to GraphQL format
         const first = input.limit
         const after = input.page > 1 ? btoa(`cursor:${(input.page - 1) * input.limit}`) : undefined
-        
+
         const result = await userOperations.getAll({
           first,
           after,
           search: input.search,
         })
-        
+
         // Convert GraphQL response to TRPC format for backward compatibility
         return {
           data: result.users.edges,
@@ -143,7 +143,7 @@ export const usersRouter = router({
           first: input.limit,
           search: input.query,
         })
-        
+
         return {
           users: result.users.edges,
           hasMore: result.users.pageInfo.hasNextPage,

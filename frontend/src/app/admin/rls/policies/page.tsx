@@ -223,7 +223,7 @@ const columns: Column<RLSPolicy>[] = [
 export default function RLSPoliciesPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  
+
   // Use RLS hooks
   const { data: policiesData, isLoading, error } = useRLSPolicies()
   const createPolicyMutation = useCreateRLSPolicy()

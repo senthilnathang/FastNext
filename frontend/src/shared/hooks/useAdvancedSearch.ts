@@ -158,8 +158,8 @@ export function useAdvancedSearch<T = any>({
           }
         } else {
           // Handle other filter types
-          params.set(`filter_${filter.field}`, 
-            filter.type === 'date' && filter.value instanceof Date 
+          params.set(`filter_${filter.field}`,
+            filter.type === 'date' && filter.value instanceof Date
               ? filter.value.toISOString()
               : String(filter.value)
           )

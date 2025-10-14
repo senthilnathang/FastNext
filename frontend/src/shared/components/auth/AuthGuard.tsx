@@ -55,7 +55,7 @@ const getRouteRequirements = (pathname: string) => {
   if (ROLE_PROTECTED_ROUTES[pathname]) {
     return ROLE_PROTECTED_ROUTES[pathname];
   }
-  
+
   // Check for parent path matches (e.g., /admin/users-simple matches /admin/users)
   const sortedRoutes = Object.keys(ROLE_PROTECTED_ROUTES).sort((a, b) => b.length - a.length);
   for (const route of sortedRoutes) {
@@ -63,7 +63,7 @@ const getRouteRequirements = (pathname: string) => {
       return ROLE_PROTECTED_ROUTES[route];
     }
   }
-  
+
   return {};
 };
 
@@ -116,12 +116,12 @@ const AuthLoadingComponent = () => (
 /**
  * Unauthorized access component
  */
-const UnauthorizedComponent = ({ 
-  reason = 'authentication', 
-  onLogin, 
-  pathname 
-}: { 
-  reason?: 'authentication' | 'roles' | 'permissions'; 
+const UnauthorizedComponent = ({
+  reason = 'authentication',
+  onLogin,
+  pathname
+}: {
+  reason?: 'authentication' | 'roles' | 'permissions';
   onLogin: () => void;
   pathname: string;
 }) => {
@@ -164,11 +164,11 @@ const UnauthorizedComponent = ({
               {message.description}
             </AlertDescription>
           </Alert>
-          
+
           <div className="text-sm text-muted-foreground">
             <strong>Attempted to access:</strong> {pathname}
           </div>
-          
+
           <div className="flex gap-2">
             {reason === 'authentication' && (
               <Button onClick={onLogin} className="flex-1">
@@ -176,15 +176,15 @@ const UnauthorizedComponent = ({
                 {message.action}
               </Button>
             )}
-            <Button 
-              variant="outline" 
-              onClick={() => window.history.back()} 
+            <Button
+              variant="outline"
+              onClick={() => window.history.back()}
               className={reason === 'authentication' ? 'flex-1' : 'w-full'}
             >
               Go Back
             </Button>
           </div>
-          
+
           {reason !== 'authentication' && (
             <div className="text-xs text-center text-muted-foreground">
               Contact your administrator if you believe this is an error
@@ -198,7 +198,7 @@ const UnauthorizedComponent = ({
 
 /**
  * AuthGuard - Comprehensive authentication and authorization guard
- * 
+ *
  * Features:
  * - Route-based authentication verification
  * - Role-based access control (RBAC)
@@ -279,8 +279,8 @@ export default function AuthGuard({
   // Check authentication requirement
   if (requireAuth && !isAuthenticated) {
     return (
-      <UnauthorizedComponent 
-        reason="authentication" 
+      <UnauthorizedComponent
+        reason="authentication"
         onLogin={() => router.push(`${redirectTo}?redirect=${encodeURIComponent(pathname)}`)}
         pathname={pathname}
       />
@@ -298,8 +298,8 @@ export default function AuthGuard({
 
     if (!hasRoles) {
       return (
-        <UnauthorizedComponent 
-          reason="roles" 
+        <UnauthorizedComponent
+          reason="roles"
           onLogin={() => {}}
           pathname={pathname}
         />
@@ -308,8 +308,8 @@ export default function AuthGuard({
 
     if (!hasPermissions) {
       return (
-        <UnauthorizedComponent 
-          reason="permissions" 
+        <UnauthorizedComponent
+          reason="permissions"
           onLogin={() => {}}
           pathname={pathname}
         />

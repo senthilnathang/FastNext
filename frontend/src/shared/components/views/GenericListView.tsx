@@ -24,18 +24,18 @@ export interface GenericListViewProps<T = any> {
   columns: Column<T>[]
   loading?: boolean
   error?: string | null
-  
+
   // Permissions
   resourceName: string
   projectId?: number
-  
+
   // CRUD operations
   onCreateClick?: () => void
   onEditClick?: (item: T) => void
   onDeleteClick?: (item: T) => void
   onViewClick?: (item: T) => void
   onRefresh?: () => void
-  
+
   // UI customization
   title?: string
   subtitle?: string
@@ -43,12 +43,12 @@ export interface GenericListViewProps<T = any> {
   emptyStateTitle?: string
   emptyStateDescription?: string
   className?: string
-  
+
   // Search and filtering
   searchable?: boolean
   searchPlaceholder?: string
   onSearch?: (query: string) => void
-  
+
   // Pagination
   pagination?: {
     current: number
@@ -56,12 +56,12 @@ export interface GenericListViewProps<T = any> {
     pageSize: number
     onPageChange: (page: number) => void
   }
-  
+
   // Selection
   selectable?: boolean
   selectedItems?: T[]
   onSelectionChange?: (items: T[]) => void
-  
+
   // Bulk actions
   bulkActions?: Array<{
     label: string
@@ -69,7 +69,7 @@ export interface GenericListViewProps<T = any> {
     action: (items: T[]) => void
     requiresPermission?: string
   }>
-  
+
   // Custom actions
   customActions?: Array<{
     label: string
@@ -151,7 +151,7 @@ export function GenericListView<T extends { id: number }>({
     const newSelectedIds = checked
       ? [...selectedIds, item.id]
       : selectedIds.filter(id => id !== item.id)
-    
+
     setSelectedIds(newSelectedIds)
     const newSelectedItems = filteredData.filter(item => newSelectedIds.includes(item.id))
     onSelectionChange?.(newSelectedItems)
@@ -159,11 +159,11 @@ export function GenericListView<T extends { id: number }>({
 
   const renderValue = (column: Column<T>, item: T) => {
     const value = item[column.key as keyof T]
-    
+
     if (column.render) {
       return column.render(value, item)
     }
-    
+
     if (typeof value === 'boolean') {
       return (
         <Badge variant={value ? 'default' : 'secondary'}>
@@ -171,11 +171,11 @@ export function GenericListView<T extends { id: number }>({
         </Badge>
       )
     }
-    
+
     if (value instanceof Date) {
       return value.toLocaleDateString()
     }
-    
+
     return String(value || '-')
   }
 
@@ -210,14 +210,14 @@ export function GenericListView<T extends { id: number }>({
           {title && <h2 className="text-2xl font-bold">{title}</h2>}
           {subtitle && <p className="text-muted-foreground">{subtitle}</p>}
         </div>
-        
+
         <div className="flex items-center gap-2">
           {onRefresh && (
             <Button onClick={onRefresh} variant="outline" size="sm">
               Refresh
             </Button>
           )}
-          
+
           {canCreate && onCreateClick && (
             <Button onClick={onCreateClick}>
               <Plus className="h-4 w-4 mr-2" />
@@ -239,7 +239,7 @@ export function GenericListView<T extends { id: number }>({
               className="pl-8"
             />
           </div>
-          
+
           {/* Bulk Actions */}
           {selectable && selectedIds.length > 0 && bulkActions.length > 0 && (
             <DropdownMenu>
@@ -250,11 +250,11 @@ export function GenericListView<T extends { id: number }>({
               </DropdownMenuTrigger>
               <DropdownMenuContent>
                 {bulkActions.map((action, index) => {
-                  const hasPermission = !action.requiresPermission || 
+                  const hasPermission = !action.requiresPermission ||
                     permissions.hasPermission({ action: action.requiresPermission, resource: resourceName })
-                  
+
                   if (!hasPermission) return null
-                  
+
                   return (
                     <DropdownMenuItem
                       key={index}
@@ -363,11 +363,11 @@ export function GenericListView<T extends { id: number }>({
                                 </DropdownMenuItem>
                               )}
                               {customActions.map((action, actionIndex) => {
-                                const hasPermission = !action.requiresPermission || 
+                                const hasPermission = !action.requiresPermission ||
                                   permissions.hasPermission({ action: action.requiresPermission, resource: resourceName })
-                                
+
                                 if (!hasPermission) return null
-                                
+
                                 return (
                                   <DropdownMenuItem
                                     key={actionIndex}
@@ -379,7 +379,7 @@ export function GenericListView<T extends { id: number }>({
                                 )
                               })}
                               {canDelete && onDeleteClick && (
-                                <DropdownMenuItem 
+                                <DropdownMenuItem
                                   onClick={() => onDeleteClick(item)}
                                   className="text-destructive"
                                 >
@@ -408,7 +408,7 @@ export function GenericListView<T extends { id: number }>({
             {Math.min(pagination.current * pagination.pageSize, pagination.total)} of{' '}
             {pagination.total} items
           </p>
-          
+
           <div className="flex items-center gap-2">
             <Button
               variant="outline"
@@ -418,11 +418,11 @@ export function GenericListView<T extends { id: number }>({
             >
               Previous
             </Button>
-            
+
             <span className="text-sm">
               Page {pagination.current} of {Math.ceil(pagination.total / pagination.pageSize)}
             </span>
-            
+
             <Button
               variant="outline"
               size="sm"

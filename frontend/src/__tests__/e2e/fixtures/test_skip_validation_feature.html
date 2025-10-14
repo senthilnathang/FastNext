@@ -5,18 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Skip Validation Feature - Data Import Wizard</title>
     <style>
-        body { 
-            font-family: Arial, sans-serif; 
-            max-width: 900px; 
-            margin: 0 auto; 
-            padding: 20px; 
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
             background-color: #f8f9fa;
         }
-        .feature-card { 
+        .feature-card {
             background: white;
-            padding: 20px; 
-            margin: 15px 0; 
-            border-radius: 8px; 
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 8px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             border-left: 4px solid #007bff;
         }
@@ -28,10 +28,10 @@
             border-left-color: #28a745;
             background-color: #d4edda;
         }
-        .code-block { 
-            background-color: #f8f9fa; 
-            padding: 15px; 
-            border-radius: 5px; 
+        .code-block {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
             overflow-x: auto;
             font-family: 'Courier New', monospace;
             border: 1px solid #e9ecef;
@@ -65,7 +65,7 @@
 </head>
 <body>
     <h1>🚀 Skip Validation Feature Added to Data Import Wizard</h1>
-    
+
     <div class="success-card">
         <h2>✅ Feature Implementation Complete</h2>
         <p>Users can now skip the validation step in the data import wizard and proceed directly to Execute Import. This is useful when:</p>
@@ -86,7 +86,7 @@
             <li><strong>When validation data is unavailable:</strong> Button appears with message "Skip Validation & Continue"</li>
             <li><strong>When validation results are shown:</strong> Button appears at bottom as "Skip Validation & Continue to Import"</li>
         </ul>
-        
+
         <div class="code-block">
 {/* Skip button when no validation data */}
 &lt;Button onClick={handleSkipValidation} variant="outline"&gt;
@@ -94,7 +94,7 @@
 &lt;/Button&gt;
 
 {/* Skip button when validation is available */}
-&lt;Button onClick={handleSkipValidation} 
+&lt;Button onClick={handleSkipValidation}
         className="text-yellow-600 border-yellow-300"&gt;
   Skip Validation & Continue to Import
 &lt;/Button&gt;
@@ -111,12 +111,12 @@
             <li>Jumps directly to <strong>Step 3 (Execute Import)</strong>, bypassing validation step</li>
             <li>Adds warning messages about skipped validation</li>
         </ul>
-        
+
         <div class="code-block">
 const handleSkipValidation = async () => {
   // Parse file for preview without validation
   const sampleRows = parseFirstFiveRows(file);
-  
+
   setImportData(prev => ({
     ...prev,
     previewData: sampleRows,
@@ -130,7 +130,7 @@ const handleSkipValidation = async () => {
       skipped: true
     }
   }));
-  
+
   setCurrentStep(3); // Skip to execution step
 };
         </div>
@@ -139,14 +139,14 @@ const handleSkipValidation = async () => {
     <div class="feature-card">
         <h3><span class="step-number">3</span>Navigation Logic Updates</h3>
         <p>The wizard navigation was updated to handle skipped validation:</p>
-        
+
         <div class="code-block">
 const canGoNext = () => {
   switch (currentStep) {
     case 0: return !!importData.selectedTable;
     case 1: return !!importData.file;
-    case 2: return (!!importData.validationResults && 
-                   importData.validationResults.isValid) || 
+    case 2: return (!!importData.validationResults &&
+                   importData.validationResults.isValid) ||
                    importData.validationSkipped; // ✅ NEW
     case 3: return true;
   }
@@ -162,7 +162,7 @@ const canGoNext = () => {
             <li><strong>Import completion alert:</strong> "Import completed with skipped validation"</li>
             <li><strong>Validation results warning:</strong> "Validation was skipped - data may contain errors"</li>
         </ul>
-        
+
         <div class="code-block">
 {/* Warning in execution step */}
 {importData.validationSkipped && (
@@ -192,7 +192,7 @@ if (result?.validation_skipped) {
                     <li>Should jump directly to Execute Import step</li>
                 </ul>
             </li>
-            
+
             <li><strong>Skip from successful validation:</strong>
                 <ul>
                     <li>Upload a file and let validation complete successfully</li>
@@ -200,7 +200,7 @@ if (result?.validation_skipped) {
                     <li>Click to proceed directly to execution</li>
                 </ul>
             </li>
-            
+
             <li><strong>Skip from failed validation:</strong>
                 <ul>
                     <li>Upload <code>projects_with_errors.csv</code> (has validation errors)</li>
@@ -239,9 +239,9 @@ if (result?.validation_skipped) {
 
     <div class="feature-card">
         <div style="background: linear-gradient(90deg, #e3f2fd 0%, #fff3e0 50%, #e8f5e8 100%); padding: 20px; border-radius: 8px; margin: 15px 0;">
-            <strong>Step 1:</strong> Select Table → 
-            <strong>Step 2:</strong> Upload File → 
-            <strong>Step 2.5:</strong> <span style="background: #ffc107; padding: 4px 8px; border-radius: 4px;">Skip Validation</span> → 
+            <strong>Step 1:</strong> Select Table →
+            <strong>Step 2:</strong> Upload File →
+            <strong>Step 2.5:</strong> <span style="background: #ffc107; padding: 4px 8px; border-radius: 4px;">Skip Validation</span> →
             <strong>Step 3:</strong> Execute Import ⚠️
         </div>
     </div>

@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react'
 import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { 
+import {
   Button,
   Input,
   Textarea,
@@ -24,16 +24,16 @@ import {
 import { useGenericPermissions } from '@/modules/admin/hooks/useGenericPermissions'
 import { Save, X, AlertCircle } from 'lucide-react'
 
-export type FieldType = 
-  | 'text' 
-  | 'email' 
-  | 'password' 
-  | 'number' 
-  | 'textarea' 
-  | 'select' 
-  | 'checkbox' 
-  | 'date' 
-  | 'datetime' 
+export type FieldType =
+  | 'text'
+  | 'email'
+  | 'password'
+  | 'number'
+  | 'textarea'
+  | 'select'
+  | 'checkbox'
+  | 'date'
+  | 'datetime'
   | 'file'
   | 'custom'
 
@@ -45,33 +45,33 @@ export interface FormField<T = any> {
   placeholder?: string
   description?: string
   defaultValue?: unknown
-  
+
   // Validation
   validation?: z.ZodType<unknown>
-  
+
   // For select fields
   options?: Array<{ value: string | number; label: string }>
   multiple?: boolean
-  
+
   // For number fields
   min?: number
   max?: number
   step?: number
-  
+
   // For text fields
   maxLength?: number
   minLength?: number
-  
+
   // For file fields
   accept?: string
   maxSize?: number
-  
+
   // Custom rendering
   render?: (field: FormField<T>, form: any) => React.ReactNode
-  
+
   // Conditional display
   condition?: (formData: T) => boolean
-  
+
   // Field styling
   className?: string
   disabled?: boolean
@@ -91,40 +91,40 @@ export interface GenericFormViewProps<T = any> {
   fields?: FormField<T>[]
   sections?: FormSection<T>[]
   initialData?: Partial<T>
-  
+
   // Permissions
   resourceName: string
   resourceId?: number
   projectId?: number
   mode: 'create' | 'edit' | 'view'
-  
+
   // Form handling
   onSubmit: (data: T) => Promise<void> | void
   onCancel?: () => void
   onFieldChange?: (name: string, value: unknown, formData: T) => void
-  
+
   // Validation
   validationSchema?: z.ZodSchema<T>
-  
+
   // UI customization
   title?: string
   subtitle?: string
   submitButtonText?: string
   cancelButtonText?: string
-  
+
   // Layout
   columns?: 1 | 2 | 3
   spacing?: 'compact' | 'normal' | 'relaxed'
-  
+
   // State
   loading?: boolean
   error?: string | null
-  
+
   // Advanced features
   autosave?: boolean
   autosaveDelay?: number
   showUnsavedChanges?: boolean
-  
+
   // Custom actions
   customActions?: Array<{
     label: string
@@ -167,10 +167,10 @@ export function GenericFormView<T = any>({
   const permissions = useGenericPermissions(resourceName)
 
   // Determine form permissions
-  const canEdit = mode === 'create' 
+  const canEdit = mode === 'create'
     ? permissions.checkCreate(resourceName, projectId)
     : permissions.checkUpdate(resourceName, resourceId, projectId)
-  
+
   const isReadOnly = mode === 'view' || !canEdit
 
   // Default submit button text
@@ -211,14 +211,14 @@ export function GenericFormView<T = any>({
       if (autosaveTimeout) {
         clearTimeout(autosaveTimeout)
       }
-      
+
       const timeout = setTimeout(() => {
         handleSubmit(onSubmit as any)()
       }, autosaveDelay)
-      
+
       setAutosaveTimeout(timeout)
     }
-    
+
     return () => {
       if (autosaveTimeout) {
         clearTimeout(autosaveTimeout)
@@ -376,13 +376,13 @@ export function GenericFormView<T = any>({
                 // Helper function to safely convert value to date string for input
                 const formatDateForInput = (value: any): string => {
                   if (!value) return ''
-                  
+
                   try {
                     // If it's already a proper date string (YYYY-MM-DD), return as is
                     if (typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value)) {
                       return value
                     }
-                    
+
                     // If it's a Date object or other date string, convert it
                     const date = new Date(value)
                     if (isNaN(date.getTime())) {
@@ -460,13 +460,13 @@ export function GenericFormView<T = any>({
             {field.required && <span className="text-destructive">*</span>}
           </Label>
         )}
-        
+
         {renderFieldInput()}
-        
+
         {field.description && (
           <p className="text-xs text-muted-foreground">{field.description}</p>
         )}
-        
+
         {fieldError && (
           <p className="text-xs text-destructive flex items-center gap-1">
             <AlertCircle className="h-3 w-3" />
@@ -513,7 +513,7 @@ export function GenericFormView<T = any>({
             </Badge>
           )}
         </div>
-        
+
         <div className="flex items-center gap-2">
           {headerActions.map((action, index) => (
             <Button
@@ -546,8 +546,8 @@ export function GenericFormView<T = any>({
       {sections.length > 0 ? (
         <div className="space-y-6">
           {sections.map((section) => {
-            const isExpanded = section.collapsible ? 
-              expandedSections.has(section.title) : 
+            const isExpanded = section.collapsible ?
+              expandedSections.has(section.title) :
               section.defaultExpanded !== false
 
             return (
@@ -566,7 +566,7 @@ export function GenericFormView<T = any>({
                     <p className="text-sm text-muted-foreground">{section.description}</p>
                   )}
                 </CardHeader>
-                
+
                 {isExpanded && (
                   <CardContent>
                     {renderFieldsGrid(section.fields)}
@@ -600,7 +600,7 @@ export function GenericFormView<T = any>({
             </Button>
           ))}
         </div>
-        
+
         <div className="flex items-center gap-2">
           {onCancel && (
             <Button
@@ -613,7 +613,7 @@ export function GenericFormView<T = any>({
               {cancelButtonText}
             </Button>
           )}
-          
+
           {canEdit && (
             <Button
               type="submit"

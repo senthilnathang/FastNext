@@ -8,7 +8,7 @@ export { AuthProvider } from './services/AuthContext'
 
 // Components
 export { default as ChangePasswordForm } from './components/ChangePasswordForm'
-export { default as UpdateProfileForm } from './components/UpdateProfileForm'  
+export { default as UpdateProfileForm } from './components/UpdateProfileForm'
 export { default as SecuritySettings } from './components/SecuritySettings'
 
 // Types (can be used in both contexts)

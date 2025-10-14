@@ -4,11 +4,11 @@ import React, { useState, useCallback, useMemo, useRef } from 'react'
 import { Button } from '@/shared/components/ui/button'
 import { Badge } from '@/shared/components/ui/badge'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/shared/components/ui/dropdown-menu'
-import { 
-  Plus, 
-  MoreHorizontal, 
-  Edit, 
-  Trash2, 
+import {
+  Plus,
+  MoreHorizontal,
+  Edit,
+  Trash2,
   Eye,
   ChevronLeft,
   ChevronRight
@@ -37,7 +37,7 @@ export interface GanttViewProps<T = any> {
   data: T[]
   loading?: boolean
   error?: string | null
-  
+
   // Field mapping
   idField: keyof T | string
   titleField: keyof T | string
@@ -46,7 +46,7 @@ export interface GanttViewProps<T = any> {
   progressField?: keyof T | string
   statusField?: keyof T | string
   priorityField?: keyof T | string
-  
+
   // CRUD operations
   onCreateClick?: () => void
   onEditClick?: (item: T) => void
@@ -54,11 +54,11 @@ export interface GanttViewProps<T = any> {
   onViewClick?: (item: T) => void
   onUpdateDates?: (itemId: string | number, startDate: Date, endDate: Date) => void
   onUpdateProgress?: (itemId: string | number, progress: number) => void
-  
+
   // Custom rendering
   renderBlock?: (item: GanttItem<T>) => React.ReactNode
   renderSidebarItem?: (item: GanttItem<T>) => React.ReactNode
-  
+
   // View options
   viewMode?: 'days' | 'weeks' | 'months'
   showWeekends?: boolean
@@ -66,12 +66,12 @@ export interface GanttViewProps<T = any> {
   showDependencies?: boolean
   allowResize?: boolean
   allowMove?: boolean
-  
+
   // Permissions
   canCreate?: boolean
   canEdit?: boolean
   canDelete?: boolean
-  
+
   // Custom actions
   customActions?: Array<{
     label: string
@@ -171,7 +171,7 @@ export function GanttView<T extends Record<string, any>>({
   const timelineColumns = useMemo(() => {
     const columns = []
     const current = new Date(dateRange.start)
-    
+
     while (current <= dateRange.end) {
       if (internalViewMode === 'days') {
         if (showWeekends || (current.getDay() !== 0 && current.getDay() !== 6)) {
@@ -186,7 +186,7 @@ export function GanttView<T extends Record<string, any>>({
         current.setMonth(current.getMonth() + 1)
       }
     }
-    
+
     return columns
   }, [dateRange, internalViewMode, showWeekends])
 
@@ -269,7 +269,7 @@ export function GanttView<T extends Record<string, any>>({
 
   const renderGanttBlock = useCallback((item: GanttItem<T>) => {
     const position = getItemPosition(item)
-    
+
     if (renderBlock) {
       return renderBlock(item)
     }
@@ -309,7 +309,7 @@ export function GanttView<T extends Record<string, any>>({
             style={{ width: `${item.progress}%` }}
           />
         )}
-        
+
         {/* Content */}
         <div className="flex items-center h-full px-2 text-white text-sm font-medium">
           <span className="truncate">{item.title}</span>
@@ -352,7 +352,7 @@ export function GanttView<T extends Record<string, any>>({
                 </DropdownMenuItem>
               ))}
               {canDelete && onDeleteClick && (
-                <DropdownMenuItem 
+                <DropdownMenuItem
                   onClick={() => onDeleteClick(item.data)}
                   className="text-destructive"
                 >
@@ -384,7 +384,7 @@ export function GanttView<T extends Record<string, any>>({
         </div>
         {item.priority && (
           <div className="ml-2">
-            <Badge 
+            <Badge
               variant={item.priority === 'urgent' || item.priority === 'high' ? 'destructive' : 'secondary'}
               className="text-xs"
             >
@@ -481,7 +481,7 @@ export function GanttView<T extends Record<string, any>>({
       {/* Gantt Chart */}
       <div className="flex-1 flex overflow-hidden">
         {/* Sidebar */}
-        <div 
+        <div
           className="border-r border-border bg-muted/50 overflow-y-auto"
           style={{ width: SIDEBAR_WIDTH }}
         >
@@ -489,7 +489,7 @@ export function GanttView<T extends Record<string, any>>({
           <div className="h-12 border-b border-border flex items-center px-3 bg-background font-medium text-sm">
             Tasks ({ganttItems.length})
           </div>
-          
+
           {/* Sidebar Items */}
           <div>
             {ganttItems.map((item) => (
@@ -505,7 +505,7 @@ export function GanttView<T extends Record<string, any>>({
         </div>
 
         {/* Timeline */}
-        <div 
+        <div
           ref={containerRef}
           className="flex-1 overflow-auto"
           onMouseMove={handleMouseMove}
@@ -552,7 +552,7 @@ export function GanttView<T extends Record<string, any>>({
               <div
                 key={item.id}
                 className="relative"
-                style={{ 
+                style={{
                   height: ROW_HEIGHT,
                   top: index * ROW_HEIGHT
                 }}

@@ -73,7 +73,7 @@ export default function UpdateProfileForm({ onSuccess, onCancel }: UpdateProfile
       const updatedUser = await response.json();
       updateUser(updatedUser);
       setSuccess(true);
-      
+
       if (onSuccess) {
         onSuccess();
       }
@@ -352,7 +352,7 @@ export default function UpdateProfileForm({ onSuccess, onCancel }: UpdateProfile
                 <Upload className="h-3 w-3" />
                 <span>Backup</span>
               </Button>
-              
+
               <Button
                 type="button"
                 variant="outline"
@@ -364,7 +364,7 @@ export default function UpdateProfileForm({ onSuccess, onCancel }: UpdateProfile
                 <Download className="h-3 w-3" />
                 <span>Restore</span>
               </Button>
-              
+
               <Button
                 type="button"
                 variant="outline"
@@ -376,7 +376,7 @@ export default function UpdateProfileForm({ onSuccess, onCancel }: UpdateProfile
                 <Eye className="h-3 w-3" />
                 <span>Export</span>
               </Button>
-              
+
               <Button
                 type="button"
                 variant="destructive"
@@ -389,7 +389,7 @@ export default function UpdateProfileForm({ onSuccess, onCancel }: UpdateProfile
                 <span>Clear</span>
               </Button>
             </div>
-            
+
             {profileBackup && (
               <p className="text-xs text-green-600 mt-2">
                 Profile backup created. You can restore your previous settings.

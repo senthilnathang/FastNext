@@ -253,7 +253,7 @@ export function UserEditDialog({ user, open, onOpenChange }: UserEditDialogProps
 
             <div className="space-y-4 border-t pt-4">
               <h4 className="text-sm font-medium">Account Status</h4>
-              
+
               <div className="grid grid-cols-3 gap-4">
                 <FormField
                   control={form.control}

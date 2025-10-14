@@ -55,7 +55,7 @@ describe('Sidebar Component', () => {
 
   it('renders the FastNext logo and title', () => {
     renderWithAuth(<Sidebar />)
-    
+
     expect(screen.getByText('FastNext')).toBeInTheDocument()
     expect(screen.getByText('Enterprise App Builder')).toBeInTheDocument()
     expect(screen.getByText('FN')).toBeInTheDocument()
@@ -63,7 +63,7 @@ describe('Sidebar Component', () => {
 
   it('renders main navigation items', () => {
     renderWithAuth(<Sidebar />)
-    
+
     expect(screen.getByText('Dashboard')).toBeInTheDocument()
     expect(screen.getByText('Projects')).toBeInTheDocument()
     expect(screen.getByText('Builder')).toBeInTheDocument()
@@ -75,15 +75,15 @@ describe('Sidebar Component', () => {
 
   it('expands and collapses submenu items', () => {
     renderWithAuth(<Sidebar />)
-    
+
     const complianceButton = screen.getByText('Compliance')
-    
+
     // Initially, submenu items should not be visible
     expect(screen.queryByText('AI Trust Center')).not.toBeInTheDocument()
-    
+
     // Click to expand
     fireEvent.click(complianceButton)
-    
+
     // Now submenu items should be visible
     expect(screen.getByText('AI Trust Center')).toBeInTheDocument()
     expect(screen.getByText('Policy Dashboard')).toBeInTheDocument()
@@ -92,24 +92,24 @@ describe('Sidebar Component', () => {
 
   it('renders version information', () => {
     renderWithAuth(<Sidebar />)
-    
+
     expect(screen.getByText('v2.1.0 - FastNext Platform')).toBeInTheDocument()
   })
 
   it('applies custom className when provided', () => {
     const { container } = renderWithAuth(<Sidebar className="custom-class" />)
-    
+
     expect(container.firstChild).toHaveClass('custom-class')
   })
 
   it('handles administration submenu expansion', () => {
     renderWithAuth(<Sidebar />)
-    
+
     const adminButton = screen.getByText('Administration')
-    
+
     // Click to expand administration menu
     fireEvent.click(adminButton)
-    
+
     expect(screen.getByText('Users')).toBeInTheDocument()
     expect(screen.getByText('Roles')).toBeInTheDocument()
     expect(screen.getByText('Permissions')).toBeInTheDocument()
@@ -117,7 +117,7 @@ describe('Sidebar Component', () => {
 
   it('shows all menu items when user has admin role', () => {
     renderWithAuth(<Sidebar />)
-    
+
     // All main menu items should be visible for admin
     expect(screen.getByText('Dashboard')).toBeInTheDocument()
     expect(screen.getByText('Projects')).toBeInTheDocument()

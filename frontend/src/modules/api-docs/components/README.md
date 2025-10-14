@@ -32,7 +32,7 @@ import { SwaggerUI } from '@/components/api'
 <SwaggerUI />
 
 // With custom configuration
-<SwaggerUI 
+<SwaggerUI
   apiUrl="http://localhost:8000/api/v1/openapi.json"
   showToolbar={true}
   className="custom-swagger"

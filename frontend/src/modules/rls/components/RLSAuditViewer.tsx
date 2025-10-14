@@ -6,11 +6,11 @@ import { Input } from '@/shared/components/ui/input';
 import { Label } from '@/shared/components/ui/label';
 import { Card } from '@/shared/components/ui/card';
 
-import { 
-  Shield, 
-  Search, 
-  Filter, 
-  Download, 
+import {
+  Shield,
+  Search,
+  Filter,
+  Download,
   AlertTriangle,
   CheckCircle,
   Clock,
@@ -61,7 +61,7 @@ export default function RLSAuditViewer() {
   const [filters, setFilters] = useState<FilterOptions>({});
   const [showFilters, setShowFilters] = useState(false);
   const [selectedLog, setSelectedLog] = useState<RLSAuditLog | null>(null);
-  
+
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -71,11 +71,11 @@ export default function RLSAuditViewer() {
     try {
       setLoading(true);
       const token = localStorage.getItem('access_token');
-      
+
       const params = new URLSearchParams();
       params.append('skip', ((currentPage - 1) * pageSize).toString());
       params.append('limit', pageSize.toString());
-      
+
       // Add filters
       Object.entries(filters).forEach(([key, value]) => {
         if (value !== undefined && value !== '') {
@@ -378,8 +378,8 @@ export default function RLSAuditViewer() {
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {auditLogs.map((log) => (
-                <tr 
-                  key={log.id} 
+                <tr
+                  key={log.id}
                   className={`hover:bg-gray-50 cursor-pointer ${
                     !log.access_granted ? 'bg-red-50' : ''
                   }`}

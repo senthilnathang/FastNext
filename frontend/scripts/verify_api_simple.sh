@@ -18,7 +18,7 @@ failed=0
 check_file() {
     local file="$1"
     local description="$2"
-    
+
     if [ -f "$file" ]; then
         echo -e "  ✅ ${GREEN}$description${NC}"
         ((passed++))
@@ -36,13 +36,13 @@ check_pattern() {
     local pattern="$2"
     local description="$3"
     local should_exist="$4" # true if pattern should exist, false if it shouldn't
-    
+
     if [ ! -f "$file" ]; then
         echo -e "  ❌ ${RED}$description - File not found${NC}"
         ((failed++))
         return 1
     fi
-    
+
     if grep -q "$pattern" "$file"; then
         if [ "$should_exist" = "true" ]; then
             echo -e "  ✅ ${GREEN}$description${NC}"
@@ -75,7 +75,7 @@ echo "🔧 Checking Service Files..."
 check_file "src/shared/services/api/users.ts" "Users service exists"
 check_pattern "src/shared/services/api/users.ts" "API_CONFIG" "Users service imports API_CONFIG" "true"
 
-check_file "src/shared/services/permissions.ts" "Permissions service exists"  
+check_file "src/shared/services/permissions.ts" "Permissions service exists"
 check_pattern "src/shared/services/permissions.ts" "API_CONFIG" "Permissions service uses API_CONFIG" "true"
 check_pattern "src/shared/services/permissions.ts" "apiClient.get('/permissions" "Permissions service avoids hardcoded endpoints" "false"
 

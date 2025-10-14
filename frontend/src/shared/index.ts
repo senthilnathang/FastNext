@@ -14,11 +14,11 @@ export * from './hooks/useApiQuery'
 export * from './services'
 
 // Types (excluding conflicting names)
-export type { 
-  Project, 
-  Page, 
-  Component, 
-  ComponentInstance, 
+export type {
+  Project,
+  Page,
+  Component,
+  ComponentInstance,
   ComponentType,
   Asset,
   CreateProjectRequest,

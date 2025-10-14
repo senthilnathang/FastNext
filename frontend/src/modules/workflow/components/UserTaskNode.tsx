@@ -27,7 +27,7 @@ function UserTaskNode({ data, selected, id }: NodeProps<WorkflowNodeData>) {
   }, [id, editData]);
   return (
     <>
-      <div 
+      <div
         className={`
           px-4 py-3 shadow-md rounded-lg border-2 min-w-[150px] max-w-[200px] cursor-pointer group
           ${selected ? 'border-indigo-500' : 'border-indigo-300'}
@@ -43,11 +43,11 @@ function UserTaskNode({ data, selected, id }: NodeProps<WorkflowNodeData>) {
           className="w-3 h-3 !bg-indigo-400 border-2 border-white"
           style={{ left: -6 }}
         />
-        
+
         {/* Node content */}
         <div className="flex items-center space-x-2">
-          <User 
-            size={16} 
+          <User
+            size={16}
             className="text-indigo-600 flex-shrink-0"
           />
           <div className="flex-1 min-w-0">
@@ -81,7 +81,7 @@ function UserTaskNode({ data, selected, id }: NodeProps<WorkflowNodeData>) {
               <span className="text-xs text-indigo-700">{data.assignee}</span>
             </div>
           )}
-          
+
           {data.requiredRoles && data.requiredRoles.length > 0 && (
             <div className="flex items-center space-x-1">
               <Users size={12} className="text-indigo-500" />
@@ -104,7 +104,7 @@ function UserTaskNode({ data, selected, id }: NodeProps<WorkflowNodeData>) {
           <span className="px-1.5 py-0.5 text-xs bg-indigo-100 text-indigo-700 rounded">
             Task
           </span>
-          
+
           {data.priority && (
             <span className={`px-1.5 py-0.5 text-xs rounded ${
               data.priority === 'high' ? 'bg-red-100 text-red-700' :
@@ -115,7 +115,7 @@ function UserTaskNode({ data, selected, id }: NodeProps<WorkflowNodeData>) {
             </span>
           )}
         </div>
-        
+
         {/* Output handle */}
         <Handle
           type="source"
@@ -141,7 +141,7 @@ function UserTaskNode({ data, selected, id }: NodeProps<WorkflowNodeData>) {
                 placeholder="Enter task name"
               />
             </div>
-            
+
             <div className="space-y-2">
               <Label htmlFor="description">Description</Label>
               <Textarea
@@ -151,7 +151,7 @@ function UserTaskNode({ data, selected, id }: NodeProps<WorkflowNodeData>) {
                 placeholder="Enter task description"
               />
             </div>
-            
+
             <div className="space-y-2">
               <Label htmlFor="assignee">Assignee</Label>
               <Input
@@ -161,20 +161,20 @@ function UserTaskNode({ data, selected, id }: NodeProps<WorkflowNodeData>) {
                 placeholder="Enter assignee name or email"
               />
             </div>
-            
+
             <div className="space-y-2">
               <Label htmlFor="requiredRoles">Required Roles</Label>
               <Input
                 id="requiredRoles"
                 value={editData.requiredRoles?.join(', ') || ''}
-                onChange={(e) => setEditData({ 
-                  ...editData, 
+                onChange={(e) => setEditData({
+                  ...editData,
                   requiredRoles: e.target.value.split(',').map(role => role.trim()).filter(Boolean)
                 })}
                 placeholder="Enter roles separated by commas"
               />
             </div>
-            
+
             <div className="space-y-2">
               <Label htmlFor="priority">Priority</Label>
               <Select
@@ -192,7 +192,7 @@ function UserTaskNode({ data, selected, id }: NodeProps<WorkflowNodeData>) {
                 </SelectContent>
               </Select>
             </div>
-            
+
             <div className="flex items-center space-x-2">
               <Checkbox
                 id="approval"
@@ -201,7 +201,7 @@ function UserTaskNode({ data, selected, id }: NodeProps<WorkflowNodeData>) {
               />
               <Label htmlFor="approval">Requires Approval</Label>
             </div>
-            
+
             <div className="flex justify-end space-x-2">
               <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
                 Cancel

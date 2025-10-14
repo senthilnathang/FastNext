@@ -32,10 +32,10 @@ interface UserMenuProps {
 function UserAvatar({ user, size = "default" }: { user: UserType; size?: "sm" | "default" | "lg" }) {
   const sizeClasses = {
     sm: "w-6 h-6",
-    default: "w-8 h-8", 
+    default: "w-8 h-8",
     lg: "w-10 h-10"
   }
-  
+
   const iconSizes = {
     sm: "h-3 w-3",
     default: "h-4 w-4",
@@ -49,8 +49,8 @@ function UserAvatar({ user, size = "default" }: { user: UserType; size?: "sm" | 
         sizeClasses[size]
       )}>
         {user.avatar_url ? (
-          <Image 
-            src={user.avatar_url} 
+          <Image
+            src={user.avatar_url}
             alt={user.full_name || user.username}
             width={size === "sm" ? 24 : size === "default" ? 32 : 40}
             height={size === "sm" ? 24 : size === "default" ? 32 : 40}
@@ -91,14 +91,14 @@ function CompactUserMenu({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button 
-          variant="ghost" 
+        <Button
+          variant="ghost"
           className="h-auto p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
         >
           <UserAvatar user={user} size="default" />
         </Button>
       </DropdownMenuTrigger>
-      
+
       <DropdownMenuContent side="right" align="end" className="w-64 p-2" sideOffset={8}>
         {/* User Info Header */}
         <div className="flex items-center space-x-3 p-2 rounded-lg bg-gray-50 dark:bg-gray-800/50">
@@ -161,7 +161,7 @@ function CompactUserMenu({
         <DropdownMenuSeparator />
 
         {/* Sign Out */}
-        <DropdownMenuItem 
+        <DropdownMenuItem
           onClick={onLogout}
           className="cursor-pointer text-red-600 dark:text-red-400 focus:text-red-600 dark:focus:text-red-400 focus:bg-red-50 dark:focus:bg-red-900/20"
         >
@@ -201,8 +201,8 @@ function ExpandedUserMenu({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button 
-          variant="ghost" 
+        <Button
+          variant="ghost"
           className="w-full h-auto p-3 justify-between hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors group"
         >
           <div className="flex items-center space-x-3">
@@ -219,7 +219,7 @@ function ExpandedUserMenu({
           <ChevronUp className="h-4 w-4 text-gray-500 group-hover:text-gray-700 dark:group-hover:text-gray-300 transition-colors" />
         </Button>
       </DropdownMenuTrigger>
-      
+
       <DropdownMenuContent side="top" align="start" className="w-72 p-2" sideOffset={8}>
         {/* User Info Header */}
         <div className="flex items-center space-x-3 p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50">
@@ -253,15 +253,15 @@ function ExpandedUserMenu({
 
         {/* Quick Actions */}
         <div className="grid grid-cols-2 gap-1">
-          <DropdownMenuItem 
-            onClick={() => router.push('/settings')} 
+          <DropdownMenuItem
+            onClick={() => router.push('/settings')}
             className="cursor-pointer p-3 h-auto flex-col items-start"
           >
             <UserCircle className="h-5 w-5 mb-1 text-blue-600 dark:text-blue-400" />
             <span className="font-medium">Profile</span>
             <span className="text-xs text-gray-500 dark:text-gray-400">Settings & preferences</span>
           </DropdownMenuItem>
-          
+
            <DropdownMenuItem
              className="cursor-pointer p-3 h-auto flex-col items-start"
              onClick={() => setShowNotifications(true)}
@@ -278,7 +278,7 @@ function ExpandedUserMenu({
         <DropdownMenuLabel className="text-xs font-medium text-muted-foreground px-2">
           Appearance & Colors
         </DropdownMenuLabel>
-        
+
         <div className="p-2">
           <ThemeSwitcher variant="inline" showColorSchemes={true} />
         </div>
@@ -294,7 +294,7 @@ function ExpandedUserMenu({
         <DropdownMenuSeparator />
 
         {/* Sign Out */}
-        <DropdownMenuItem 
+        <DropdownMenuItem
           onClick={onLogout}
           className="cursor-pointer text-red-600 dark:text-red-400 focus:text-red-600 dark:focus:text-red-400 focus:bg-red-50 dark:focus:bg-red-900/20"
         >

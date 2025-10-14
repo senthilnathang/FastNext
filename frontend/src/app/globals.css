@@ -68,20 +68,20 @@
   --destructive: oklch(0.576 0.204 17.38);
   --destructive-foreground: oklch(1 0 0);
   --radius: 0.5rem;
-  
+
   /* Component-specific tokens */
   --sidebar: oklch(1 0 0);
   --sidebar-foreground: oklch(0.145 0 0);
   --sidebar-primary: oklch(0.523 0.214 259.815);
   --sidebar-accent: oklch(0.941 0 0);
-  
+
   /* Chart colors */
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.548 0.166 160.613);
   --chart-3: oklch(0.631 0.204 16.756);
   --chart-4: oklch(0.569 0.214 286.078);
   --chart-5: oklch(0.398 0.021 221.463);
-  
+
   /* Status colors */
   --success: oklch(0.548 0.166 160.613);
   --success-foreground: oklch(1 0 0);
@@ -89,7 +89,7 @@
   --warning-foreground: oklch(1 0 0);
   --info: oklch(0.523 0.214 259.815);
   --info-foreground: oklch(1 0 0);
-  
+
   /* Backward compatibility RGB fallbacks */
   --background-rgb: 255 255 255;
   --foreground-rgb: 23 23 23;
@@ -118,20 +118,20 @@
   --popover-foreground: oklch(0.961 0 0) !important;
   --destructive: oklch(0.576 0.204 17.38) !important;
   --destructive-foreground: oklch(0.961 0 0) !important;
-  
+
   /* Component-specific tokens - Fixed for dark mode */
   --sidebar: oklch(0.145 0 0) !important;
   --sidebar-foreground: oklch(0.961 0 0) !important;
   --sidebar-primary: oklch(0.961 0 0) !important;
   --sidebar-accent: oklch(0.192 0 0) !important;
-  
+
   /* Chart colors for dark theme */
   --chart-1: oklch(0.746 0.222 41.116) !important;
   --chart-2: oklch(0.646 0.166 160.613) !important;
   --chart-3: oklch(0.731 0.204 16.756) !important;
   --chart-4: oklch(0.669 0.214 286.078) !important;
   --chart-5: oklch(0.648 0.021 221.463) !important;
-  
+
   /* Status colors for dark theme */
   --success: oklch(0.746 0.166 160.613) !important;
   --success-foreground: oklch(0.145 0 0) !important;
@@ -139,7 +139,7 @@
   --warning-foreground: oklch(0.145 0 0) !important;
   --info: oklch(0.746 0.222 259.815) !important;
   --info-foreground: oklch(0.145 0 0) !important;
-  
+
   /* Backward compatibility RGB fallbacks */
   --background-rgb: 10 10 10;
   --foreground-rgb: 237 237 237;
@@ -168,7 +168,7 @@
   --color-popover-foreground: var(--popover-foreground);
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
-  
+
   /* Status colors */
   --color-success: var(--success);
   --color-success-foreground: var(--success-foreground);
@@ -176,26 +176,26 @@
   --color-warning-foreground: var(--warning-foreground);
   --color-info: var(--info);
   --color-info-foreground: var(--info-foreground);
-  
+
   /* Component-specific colors */
   --color-sidebar: var(--sidebar);
   --color-sidebar-foreground: var(--sidebar-foreground);
   --color-sidebar-primary: var(--sidebar-primary);
   --color-sidebar-accent: var(--sidebar-accent);
-  
+
   /* Chart colors */
   --color-chart-1: var(--chart-1);
   --color-chart-2: var(--chart-2);
   --color-chart-3: var(--chart-3);
   --color-chart-4: var(--chart-4);
   --color-chart-5: var(--chart-5);
-  
+
   /* Backward compatibility for RGB values */
   --color-background-rgb: rgb(var(--background-rgb));
   --color-foreground-rgb: rgb(var(--foreground-rgb));
   --color-primary-rgb: rgb(var(--primary-rgb));
   --color-destructive-rgb: rgb(var(--destructive-rgb));
-  
+
   --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
   --font-mono: 'Fira Code', ui-monospace, monospace;
   --radius: var(--radius);
@@ -218,8 +218,8 @@ body {
 
 /* Smooth transitions for theme changes */
 * {
-  transition: background-color 0.2s ease-in-out, 
-              border-color 0.2s ease-in-out, 
+  transition: background-color 0.2s ease-in-out,
+              border-color 0.2s ease-in-out,
               color 0.2s ease-in-out,
               box-shadow 0.2s ease-in-out;
 }
@@ -393,7 +393,7 @@ body {
     font-size: 1.25rem; /* 20px */
     line-height: 1.75rem; /* 28px */
   }
-  
+
   .text-responsive-xl {
     font-size: 1.5rem; /* 24px */
     line-height: 2rem; /* 32px */

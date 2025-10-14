@@ -22,8 +22,8 @@ export const trpcClient = createTRPCClient<AppRouter>({
       url: `${getBaseUrl()}/api/trpc`,
       transformer: superjson,
       headers() {
-        const token = typeof window !== 'undefined' 
-          ? localStorage.getItem('access_token') 
+        const token = typeof window !== 'undefined'
+          ? localStorage.getItem('access_token')
           : null
         return token ? { authorization: `Bearer ${token}` } : {}
       },

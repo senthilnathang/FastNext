@@ -25,7 +25,7 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
     console.error('ErrorBoundary caught an error:', error, errorInfo)
-    
+
     // You could send this to an error reporting service
     // e.g., Sentry.captureException(error, { contexts: { react: errorInfo } })
   }
@@ -41,9 +41,9 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
       }
 
       return (
-        <DefaultErrorFallback 
-          error={this.state.error} 
-          resetError={this.resetError} 
+        <DefaultErrorFallback
+          error={this.state.error}
+          resetError={this.resetError}
         />
       )
     }
@@ -58,7 +58,7 @@ interface ErrorFallbackProps {
 }
 
 function DefaultErrorFallback({ error, resetError }: ErrorFallbackProps) {
-  const errorMessage = apiUtils.isApiError(error) 
+  const errorMessage = apiUtils.isApiError(error)
     ? apiUtils.getErrorMessage(error)
     : error.message || 'An unexpected error occurred'
 
@@ -67,17 +67,17 @@ function DefaultErrorFallback({ error, resetError }: ErrorFallbackProps) {
       <div className="max-w-md w-full space-y-8">
         <div className="text-center">
           <div className="mx-auto h-12 w-12 text-red-500">
-            <svg 
-              className="h-12 w-12" 
-              fill="none" 
-              viewBox="0 0 24 24" 
+            <svg
+              className="h-12 w-12"
+              fill="none"
+              viewBox="0 0 24 24"
               stroke="currentColor"
             >
-              <path 
-                strokeLinecap="round" 
-                strokeLinejoin="round" 
-                strokeWidth={2} 
-                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" 
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"
               />
             </svg>
           </div>
@@ -115,10 +115,10 @@ function DefaultErrorFallback({ error, resetError }: ErrorFallbackProps) {
 export function useErrorHandler() {
   return (error: Error) => {
     console.error('Handled error:', error)
-    
+
     // You could integrate with error tracking here
     // e.g., Sentry.captureException(error)
-    
+
     // Show user-friendly error message
     if (apiUtils.isApiError(error)) {
       // You could show a toast notification here

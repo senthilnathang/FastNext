@@ -5,7 +5,7 @@ import { ExportOptions, ExportColumn } from '../types';
 
 export function formatValue(value: any, column: ExportColumn): string {
   if (value === null || value === undefined) return '';
-  
+
   switch (column.type) {
     case 'boolean':
       return value ? 'Yes' : 'No';
@@ -29,10 +29,10 @@ export function formatValue(value: any, column: ExportColumn): string {
 
 export function formatDateValue(value: any, format?: string): string {
   if (!value) return '';
-  
+
   const date = value instanceof Date ? value : new Date(value);
   if (isNaN(date.getTime())) return String(value);
-  
+
   switch (format) {
     case 'iso':
       return date.toISOString();
@@ -58,26 +58,26 @@ export function prepareDataForExport(
 ): any[][] {
   const exportColumns = columns.filter(col => selectedColumns.includes(col.key));
   const rows: any[][] = [];
-  
+
   // Add headers if requested
   if (options.includeHeaders) {
     rows.push(exportColumns.map(col => col.label));
   }
-  
+
   // Add data rows
   data.forEach(row => {
     const exportRow = exportColumns.map(col => {
       const value = row[col.key];
-      
+
       if (col.type === 'date' && options.dateFormat) {
         return formatDateValue(value, options.dateFormat);
       }
-      
+
       return formatValue(value, col);
     });
     rows.push(exportRow);
   });
-  
+
   return rows;
 }
 
@@ -89,9 +89,9 @@ export function exportToCSV(
 ): void {
   const rows = prepareDataForExport(data, columns, selectedColumns, options);
   const delimiter = options.delimiter || ',';
-  
+
   const csvContent = rows
-    .map(row => 
+    .map(row =>
       row.map(field => {
         const stringField = String(field);
         // Escape delimiter and quotes
@@ -102,7 +102,7 @@ export function exportToCSV(
       }).join(delimiter)
     )
     .join('\n');
-  
+
   downloadFile(csvContent, options.fileName || 'export.csv', 'text/csv;charset=utf-8;');
 }
 
@@ -113,12 +113,12 @@ export function exportToJSON(
   options: ExportOptions
 ): void {
   const exportColumns = columns.filter(col => selectedColumns.includes(col.key));
-  
+
   const jsonData = data.map(row => {
     const exportRow: Record<string, any> = {};
     exportColumns.forEach(col => {
       const value = row[col.key];
-      
+
       if (col.type === 'date' && options.dateFormat) {
         exportRow[col.label] = formatDateValue(value, options.dateFormat);
       } else {
@@ -127,7 +127,7 @@ export function exportToJSON(
     });
     return exportRow;
   });
-  
+
   const jsonContent = JSON.stringify(jsonData, null, options.prettyPrint ? 2 : 0);
   downloadFile(jsonContent, options.fileName || 'export.json', 'application/json');
 }
@@ -139,11 +139,11 @@ export function exportToExcel(
   options: ExportOptions
 ): void {
   const rows = prepareDataForExport(data, columns, selectedColumns, options);
-  
+
   // Create workbook and worksheet
   const workbook = XLSX.utils.book_new();
   const worksheet = XLSX.utils.aoa_to_sheet(rows);
-  
+
   // Auto-fit columns if requested
   if (options.autoFitColumns) {
     const columnWidths = rows[0]?.map((_, colIndex) => {
@@ -152,21 +152,21 @@ export function exportToExcel(
       );
       return { wch: Math.min(maxLength + 2, 50) }; // Max width of 50 characters
     });
-    
+
     if (columnWidths) {
       worksheet['!cols'] = columnWidths;
     }
   }
-  
+
   // Freeze header row if requested
   if (options.freezeHeaders && options.includeHeaders) {
     worksheet['!freeze'] = { xSplit: 0, ySplit: 1 };
   }
-  
+
   // Add worksheet to workbook
   const sheetName = options.sheetName || 'Data';
   XLSX.utils.book_append_sheet(workbook, worksheet, sheetName);
-  
+
   // Write and download file
   const fileName = options.fileName || 'export.xlsx';
   XLSX.writeFile(workbook, fileName);
@@ -179,10 +179,10 @@ export function exportToXML(
   options: ExportOptions
 ): void {
   const exportColumns = columns.filter(col => selectedColumns.includes(col.key));
-  
+
   let xmlContent = '<?xml version="1.0" encoding="UTF-8"?>\n';
   xmlContent += '<data>\n';
-  
+
   data.forEach((row, index) => {
     xmlContent += `  <item id="${index + 1}">\n`;
     exportColumns.forEach(col => {
@@ -190,7 +190,7 @@ export function exportToXML(
       const formattedValue = col.type === 'date' && options.dateFormat
         ? formatDateValue(value, options.dateFormat)
         : formatValue(value, col);
-      
+
       // Escape XML special characters
       const escapedValue = String(formattedValue)
         .replace(/&/g, '&amp;')
@@ -198,14 +198,14 @@ export function exportToXML(
         .replace(/>/g, '&gt;')
         .replace(/"/g, '&quot;')
         .replace(/'/g, '&apos;');
-      
+
       xmlContent += `    <${col.key}>${escapedValue}</${col.key}>\n`;
     });
     xmlContent += '  </item>\n';
   });
-  
+
   xmlContent += '</data>';
-  
+
   downloadFile(xmlContent, options.fileName || 'export.xml', 'application/xml');
 }
 
@@ -216,7 +216,7 @@ export function exportToYAML(
   options: ExportOptions
 ): void {
   const exportColumns = columns.filter(col => selectedColumns.includes(col.key));
-  
+
   const yamlData = data.map((row) => {
     const exportRow: Record<string, any> = {};
     exportColumns.forEach(col => {
@@ -227,28 +227,28 @@ export function exportToYAML(
     });
     return exportRow;
   });
-  
+
   // Simple YAML serialization (for more complex needs, use a proper YAML library)
   let yamlContent = '# Data Export\n';
   yamlContent += 'data:\n';
-  
+
   yamlData.forEach((item, index) => {
     yamlContent += `  - # Item ${index + 1}\n`;
     Object.entries(item).forEach(([key, value]) => {
-      const yamlValue = typeof value === 'string' 
-        ? `"${value.replace(/"/g, '\\"')}"` 
+      const yamlValue = typeof value === 'string'
+        ? `"${value.replace(/"/g, '\\"')}"`
         : String(value);
       yamlContent += `    ${key}: ${yamlValue}\n`;
     });
   });
-  
+
   downloadFile(yamlContent, options.fileName || 'export.yaml', 'application/x-yaml');
 }
 
 function downloadFile(content: string, fileName: string, mimeType: string): void {
   const blob = new Blob([content], { type: mimeType });
   const link = document.createElement('a');
-  
+
   if (link.download !== undefined) {
     const url = URL.createObjectURL(blob);
     link.setAttribute('href', url);
@@ -268,13 +268,13 @@ export function estimateFileSize(
   format: 'csv' | 'json' | 'excel' | 'xml' | 'yaml'
 ): number {
   if (data.length === 0) return 0;
-  
+
   const exportColumns = columns.filter(col => selectedColumns.includes(col.key));
   const sampleSize = Math.min(100, data.length);
   const sampleData = data.slice(0, sampleSize);
-  
+
   let sampleContent: string;
-  
+
   switch (format) {
     case 'csv':
       sampleContent = sampleData.map(row =>
@@ -304,7 +304,7 @@ export function estimateFileSize(
     default:
       sampleContent = JSON.stringify(sampleData);
   }
-  
+
   const avgBytesPerRow = new Blob([sampleContent]).size / sampleSize;
   return Math.round(avgBytesPerRow * data.length);
 }

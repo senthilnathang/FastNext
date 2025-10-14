@@ -47,14 +47,14 @@ export async function POST(request: NextRequest) {
     if (body.start_date && body.end_date) {
       const startDate = new Date(body.start_date);
       const endDate = new Date(body.end_date);
-      
+
       if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
         return NextResponse.json(
           { error: 'Invalid date format. Use YYYY-MM-DD format.' },
           { status: 400 }
         );
       }
-      
+
       if (endDate < startDate) {
         return NextResponse.json(
           { error: 'End date must be after start date' },

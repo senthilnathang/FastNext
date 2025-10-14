@@ -1,10 +1,10 @@
 "use client"
 
 import * as React from "react"
-import { 
-  Card, 
-  CardContent, 
-  CardHeader, 
+import {
+  Card,
+  CardContent,
+  CardHeader,
   CardTitle,
   Badge,
   DateField,
@@ -42,7 +42,7 @@ const kanbanColumns: KanbanColumn[] = [
         tags: ["ui", "frontend"],
       },
       {
-        id: "2", 
+        id: "2",
         title: "Set up database",
         description: "Configure PostgreSQL database with proper schema",
         status: "todo",
@@ -60,7 +60,7 @@ const kanbanColumns: KanbanColumn[] = [
         id: "3",
         title: "API Integration",
         description: "Integrate with third-party APIs",
-        status: "inprogress", 
+        status: "inprogress",
         priority: "high",
         assignee: "Bob Johnson",
         tags: ["api", "integration"],
@@ -88,7 +88,7 @@ const listData: ListItem[] = [
   {
     id: "1",
     name: "John Doe",
-    email: "john@example.com", 
+    email: "john@example.com",
     role: "Admin",
     status: "Active",
     lastLogin: "2024-01-15",
@@ -98,7 +98,7 @@ const listData: ListItem[] = [
     id: "2",
     name: "Jane Smith",
     email: "jane@example.com",
-    role: "Editor", 
+    role: "Editor",
     status: "Active",
     lastLogin: "2024-01-14",
     projects: 3,
@@ -108,7 +108,7 @@ const listData: ListItem[] = [
     name: "Bob Johnson",
     email: "bob@example.com",
     role: "Viewer",
-    status: "Inactive", 
+    status: "Inactive",
     lastLogin: "2024-01-10",
     projects: 1,
   },
@@ -117,14 +117,14 @@ const listData: ListItem[] = [
 const listColumns: ListColumn[] = [
   { key: "name", label: "Name", sortable: true },
   { key: "email", label: "Email", sortable: true },
-  { 
-    key: "role", 
-    label: "Role", 
+  {
+    key: "role",
+    label: "Role",
     sortable: true,
     render: (value) => <Badge variant="secondary">{String(value)}</Badge>
   },
-  { 
-    key: "status", 
+  {
+    key: "status",
     label: "Status",
     render: (value) => (
       <Badge variant={value === "Active" ? "success" : "destructive"}>
@@ -152,7 +152,7 @@ export default function ComponentsDemoPage() {
       {/* Form Fields Section */}
       <div className="space-y-6">
         <h2 className="text-2xl font-semibold">Form Fields</h2>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {/* Date Field */}
           <Card>
@@ -297,16 +297,12 @@ export default function ComponentsDemoPage() {
               columns={kanbanData}
               onColumnsChange={setKanbanData}
               onAddItem={(columnId) => {
-                console.log("Add item to column:", columnId)
               }}
               onEditItem={(item) => {
-                console.log("Edit item:", item)
               }}
               onDeleteItem={(item) => {
-                console.log("Delete item:", item)
               }}
               onMoveItem={(itemId, fromColumn, toColumn) => {
-                console.log("Move item:", { itemId, fromColumn, toColumn })
               }}
             />
           </CardContent>
@@ -330,12 +326,10 @@ export default function ComponentsDemoPage() {
                 {
                   key: "edit",
                   label: "Edit",
-                  onClick: (item) => console.log("Edit:", item)
                 },
                 {
-                  key: "delete", 
+                  key: "delete",
                   label: "Delete",
-                  onClick: (item) => console.log("Delete:", item),
                   variant: "destructive"
                 }
               ]}
@@ -345,11 +339,6 @@ export default function ComponentsDemoPage() {
                 total: listData.length,
                 totalPages: 1
               }}
-              onPageChange={(page) => console.log("Page change:", page)}
-              onPageSizeChange={(size) => console.log("Page size change:", size)}
-              onSearch={(query) => console.log("Search:", query)}
-              onSort={(column, direction) => console.log("Sort:", { column, direction })}
-              onSelectionChange={(ids) => console.log("Selection:", ids)}
             />
           </CardContent>
         </Card>

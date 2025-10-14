@@ -6,14 +6,14 @@ export interface MenuFilterOptions {
 }
 
 export const filterMenuItems = (
-  items: MenuItem[], 
+  items: MenuItem[],
   options: MenuFilterOptions
 ): MenuItem[] => {
   return items.filter(item => {
     if (item.module && !options.canAccessModule(item.module)) {
       return false;
     }
-    
+
     if (item.requiredPermission && !options.hasPermission(item.requiredPermission)) {
       return false;
     }
@@ -34,7 +34,7 @@ export const getPageTitle = (pathname: string): string => {
     '/builder': 'Builder',
     '/settings': 'Settings',
     '/admin/users': 'User Management',
-    '/admin/roles': 'Role Management', 
+    '/admin/roles': 'Role Management',
     '/admin/permissions': 'Permission Management',
     '/admin/data-import': 'Data Import',
     '/admin/data-export': 'Data Export',

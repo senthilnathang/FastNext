@@ -47,13 +47,13 @@ export interface ButtonProps
 const Button = React.memo(React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant, size, asChild = false, ...props }, ref) => {
     const Comp = asChild ? Slot : "button"
-    
+
     // Memoize the computed className to prevent recalculation
     const computedClassName = React.useMemo(
       () => cn(buttonVariants({ variant, size, className })),
       [variant, size, className]
     )
-    
+
     return (
       <Comp
         className={computedClassName}

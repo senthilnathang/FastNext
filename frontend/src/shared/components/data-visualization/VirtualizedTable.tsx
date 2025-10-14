@@ -26,10 +26,10 @@ interface VirtualizedRowProps {
 
 const VirtualizedRow = React.memo(function VirtualizedRow({ row, index, style }: VirtualizedRowProps) {
   const cells = React.useMemo(() => row.getVisibleCells(), [row]);
-  
+
   return (
-    <div 
-      style={style} 
+    <div
+      style={style}
       className={cn(
         "flex items-center border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors",
         index % 2 === 0 ? "bg-white dark:bg-gray-900" : "bg-gray-50/50 dark:bg-gray-800/20"
@@ -105,11 +105,11 @@ export function VirtualizedTable<TData, TValue>({
   const [searchValue, setSearchValue] = React.useState("")
   const containerRef = React.useRef<HTMLDivElement>(null)
   const [scrollTop, setScrollTop] = React.useState(0)
-  
+
   // Filter data based on search
   const filteredData = React.useMemo(() => {
     if (!searchValue || !searchKey) return data
-    
+
     return data.filter((item: any) => {
       const searchableValue = item[searchKey]
       if (typeof searchableValue === 'string') {
@@ -131,7 +131,7 @@ export function VirtualizedTable<TData, TValue>({
     startIndex + Math.ceil(height / itemHeight) + 1,
     filteredData.length
   )
-  
+
   const visibleRows = table.getRowModel().rows.slice(startIndex, endIndex)
   const totalHeight = filteredData.length * itemHeight
   const offsetY = startIndex * itemHeight
@@ -182,7 +182,7 @@ export function VirtualizedTable<TData, TValue>({
       </div>
 
       {/* Virtualized Table */}
-      <div 
+      <div
         className="border rounded-lg overflow-hidden bg-white dark:bg-gray-900"
         role="table"
         aria-label={`Virtualized table with ${filteredData.length} rows`}
@@ -190,7 +190,7 @@ export function VirtualizedTable<TData, TValue>({
       >
         {/* Header */}
         <TableHeader table={table} />
-        
+
         {/* Virtual Container */}
         {filteredData.length > 0 ? (
           <div

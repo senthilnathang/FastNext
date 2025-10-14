@@ -27,7 +27,7 @@ export default function LoginPage() {
 
   const { login, isAuthenticated } = useAuth();
   const router = useRouter();
-  
+
   // Redirect if already authenticated
   useEffect(() => {
     if (isAuthenticated) {
@@ -40,7 +40,7 @@ export default function LoginPage() {
     const urlParams = new URLSearchParams(window.location.search);
     const redirectReason = urlParams.get('reason');
     const redirectPath = sessionStorage.getItem('redirectAfterLogin');
-    
+
     if (redirectReason) {
       const messages: Record<string, string> = {
         'session_expired': 'Your session has expired. Please log in again.',
@@ -49,12 +49,12 @@ export default function LoginPage() {
         'auto_logout': 'You have been automatically logged out for security reasons.',
         'timeout_verified': 'Your session timed out for security. Please log in again.'
       };
-      
+
       setTimeoutMessage(messages[redirectReason] || 'Please log in to continue.');
     }
-    
+
     if (redirectPath) {
-      setTimeoutMessage(prev => 
+      setTimeoutMessage(prev =>
         prev || `Please log in to continue to ${redirectPath}.`
       );
     }
@@ -67,20 +67,20 @@ export default function LoginPage() {
 
     try {
       await login(username, password);
-      
+
       // Check for redirect path from timeout
       const redirectPath = sessionStorage.getItem('redirectAfterLogin');
       sessionStorage.removeItem('redirectAfterLogin');
-      
+
       if (redirectPath) {
         // User was redirected due to timeout, take them back to original page
         router.push(redirectPath);
         return;
       }
-      
+
       // Default redirection
       router.push('/dashboard');
-      
+
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : 'Login failed. Please try again.';
 

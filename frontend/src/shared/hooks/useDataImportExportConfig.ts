@@ -46,7 +46,7 @@ export function useDataImportExportConfig() {
   const loadConfiguration = async () => {
     setLoading(true);
     setError(null);
-    
+
     try {
       const token = localStorage.getItem('access_token');
       if (!token) {

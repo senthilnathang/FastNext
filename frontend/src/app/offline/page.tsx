@@ -28,7 +28,7 @@ export default function OfflinePage() {
     // Listen for service worker messages
     navigator.serviceWorker?.addEventListener('message', (event) => {
       const { type, data } = event.data
-      
+
       switch (type) {
         case 'REQUEST_QUEUED':
           setQueuedActions(data.count)
@@ -56,7 +56,7 @@ export default function OfflinePage() {
           { type: 'GET_CACHE_STATUS' },
           [channel.port2]
         )
-        
+
         channel.port1.onmessage = (event) => {
           setCacheStatus(event.data)
         }
@@ -76,7 +76,6 @@ export default function OfflinePage() {
           window.location.reload()
         })
         .catch(() => {
-          console.log('Still offline')
         })
     }
   }
@@ -89,7 +88,7 @@ export default function OfflinePage() {
           { type: 'CLEAR_CACHE' },
           [channel.port2]
         )
-        
+
         channel.port1.onmessage = (event) => {
           if (event.data.success) {
             window.location.reload()
@@ -141,13 +140,13 @@ export default function OfflinePage() {
               </div>
             )}
           </div>
-          
+
           <div>
             <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
               {isOnline ? 'Connection Restored' : 'You\'re Offline'}
             </h1>
             <p className="text-lg text-gray-600 dark:text-gray-400 mt-2">
-              {isOnline 
+              {isOnline
                 ? 'Your internet connection has been restored. Click retry to reload the page.'
                 : 'No internet connection detected. You can still access cached content and features.'
               }
@@ -188,7 +187,7 @@ export default function OfflinePage() {
           <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
             Available Features
           </h2>
-          
+
           {offlineFeatures.map((feature, index) => {
             const Icon = feature.icon
             return (
@@ -196,13 +195,13 @@ export default function OfflinePage() {
                 <CardHeader className="pb-3">
                   <div className="flex items-center space-x-3">
                     <div className={`p-2 rounded-lg ${
-                      feature.available 
-                        ? 'bg-blue-100 dark:bg-blue-900/20' 
+                      feature.available
+                        ? 'bg-blue-100 dark:bg-blue-900/20'
                         : 'bg-gray-100 dark:bg-gray-800'
                     }`}>
                       <Icon className={`h-5 w-5 ${
-                        feature.available 
-                          ? 'text-blue-600 dark:text-blue-400' 
+                        feature.available
+                          ? 'text-blue-600 dark:text-blue-400'
                           : 'text-gray-400'
                       }`} />
                     </div>
@@ -271,9 +270,9 @@ export default function OfflinePage() {
             <RefreshCw className="h-4 w-4 mr-2" />
             {isOnline ? 'Reload Page' : 'Retry Connection'}
           </Button>
-          
-          <Button 
-            variant="outline" 
+
+          <Button
+            variant="outline"
             onClick={() => window.location.href = '/'}
             className="flex-1"
           >
@@ -284,9 +283,9 @@ export default function OfflinePage() {
 
         {/* Advanced Options */}
         <div className="text-center">
-          <Button 
-            variant="ghost" 
-            size="sm" 
+          <Button
+            variant="ghost"
+            size="sm"
             onClick={clearCache}
             className="text-gray-500 hover:text-gray-700"
           >

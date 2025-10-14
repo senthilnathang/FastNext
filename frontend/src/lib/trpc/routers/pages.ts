@@ -34,13 +34,13 @@ export const pagesRouter = router({
         // Convert pagination to GraphQL format
         const first = input.limit
         const after = input.page > 1 ? btoa(`cursor:${(input.page - 1) * input.limit}`) : undefined
-        
+
         const result = await pageOperations.getAll({
           first,
           after,
           projectId: input.projectId,
         })
-        
+
         // Convert GraphQL response to TRPC format for backward compatibility
         return {
           data: result.pages.edges,
@@ -126,13 +126,13 @@ export const pagesRouter = router({
       try {
         const first = input.limit
         const after = input.page > 1 ? btoa(`cursor:${(input.page - 1) * input.limit}`) : undefined
-        
+
         const result = await pageOperations.getAll({
           first,
           after,
           projectId: input.projectId,
         })
-        
+
         return {
           data: result.pages.edges,
           total: result.pages.totalCount,
@@ -160,12 +160,12 @@ export const pagesRouter = router({
         const result = await pageOperations.getAll({
           projectId: input.projectId,
         })
-        
+
         const page = result.pages.edges.find((page: Page) => page.path === input.path)
         if (!page) {
           throw new Error('Page not found')
         }
-        
+
         return page
       } catch (error) {
         throw new Error(`Failed to fetch page by path: ${error instanceof Error ? error.message : 'Unknown error'}`)

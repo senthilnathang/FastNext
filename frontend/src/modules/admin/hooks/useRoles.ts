@@ -39,7 +39,7 @@ export const useRolePermissions = (id: number) => {
 // Mutation hooks
 export const useCreateRole = () => {
   const queryClient = useQueryClient()
-  
+
   return useMutation({
     mutationFn: (data: CreateRoleRequest) => rolesApi.createRole(data),
     onSuccess: () => {
@@ -53,7 +53,7 @@ export const useCreateRole = () => {
 
 export const useUpdateRole = () => {
   const queryClient = useQueryClient()
-  
+
   return useMutation({
     mutationFn: ({ id, data }: { id: number; data: UpdateRoleRequest }) =>
       rolesApi.updateRole(id, data),
@@ -69,7 +69,7 @@ export const useUpdateRole = () => {
 
 export const useDeleteRole = () => {
   const queryClient = useQueryClient()
-  
+
   return useMutation({
     mutationFn: (id: number) => rolesApi.deleteRole(id),
     onSuccess: (_, id) => {
@@ -84,7 +84,7 @@ export const useDeleteRole = () => {
 
 export const useToggleRoleStatus = () => {
   const queryClient = useQueryClient()
-  
+
   return useMutation({
     mutationFn: (id: number) => rolesApi.toggleRoleStatus(id),
     onSuccess: (updatedRole, id) => {
@@ -99,7 +99,7 @@ export const useToggleRoleStatus = () => {
 
 export const useAssignRolePermissions = () => {
   const queryClient = useQueryClient()
-  
+
   return useMutation({
     mutationFn: ({ id, permissionIds }: { id: number; permissionIds: number[] }) =>
       rolesApi.assignRolePermissions(id, permissionIds),
@@ -116,7 +116,7 @@ export const useAssignRolePermissions = () => {
 
 export const useRemoveRolePermissions = () => {
   const queryClient = useQueryClient()
-  
+
   return useMutation({
     mutationFn: ({ id, permissionIds }: { id: number; permissionIds: number[] }) =>
       rolesApi.removeRolePermissions(id, permissionIds),

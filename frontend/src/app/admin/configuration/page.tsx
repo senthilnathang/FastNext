@@ -263,10 +263,10 @@ export default function ConfigurationPage() {
   // Filter configurations
   const filteredConfigs = useMemo(() => {
     return mockConfigs.filter(config => {
-      const matchesSearch = !searchTerm || 
+      const matchesSearch = !searchTerm ||
         config.key.toLowerCase().includes(searchTerm.toLowerCase()) ||
         config.description.toLowerCase().includes(searchTerm.toLowerCase());
-      
+
       const matchesCategory = categoryFilter === 'all' || config.category === categoryFilter;
       const matchesType = typeFilter === 'all' || config.type === typeFilter;
 
@@ -314,7 +314,6 @@ export default function ConfigurationPage() {
   };
 
   const handleBatchSave = useCallback(() => {
-    console.log('Saving batch changes:', Array.from(pendingChanges.entries()));
     // Implement batch save logic
     setPendingChanges(new Map());
   }, [pendingChanges]);
@@ -635,7 +634,7 @@ export default function ConfigurationPage() {
                     className="pl-10"
                   />
                 </div>
-                
+
                 <Select value={categoryFilter} onValueChange={setCategoryFilter}>
                   <SelectTrigger>
                     <SelectValue placeholder="Category" />
@@ -669,8 +668,8 @@ export default function ConfigurationPage() {
                 </Select>
 
                 <div className="flex items-center space-x-2">
-                  <Switch 
-                    id="show-sensitive" 
+                  <Switch
+                    id="show-sensitive"
                     checked={showSensitive}
                     onCheckedChange={setShowSensitive}
                   />
@@ -722,7 +721,7 @@ export default function ConfigurationPage() {
                           <div>Author: {template.author}</div>
                           <div>Created: {format(new Date(template.createdAt), 'MMM dd, yyyy')}</div>
                         </div>
-                        
+
                         <div>
                           <Label className="text-sm font-medium">Configurations ({template.configs.length})</Label>
                           <div className="mt-2 space-y-1">
@@ -738,7 +737,7 @@ export default function ConfigurationPage() {
                             )}
                           </div>
                         </div>
-                        
+
                         <div className="flex space-x-2">
                           <Button size="sm" variant="outline">
                             <Eye className="h-4 w-4 mr-2" />
@@ -833,7 +832,7 @@ export default function ConfigurationPage() {
                   <CheckCircle className="h-4 w-4 mr-2" />
                   Run Validation
                 </Button>
-                
+
                 <div className="space-y-2">
                   <div className="flex items-center space-x-2 text-green-600">
                     <CheckCircle className="h-4 w-4" />
@@ -888,26 +887,26 @@ export default function ConfigurationPage() {
                   </div>
                 </div>
               </div>
-              
+
               <div>
                 <Label>Current Value</Label>
                 <div className="font-mono text-sm p-3 bg-gray-50 rounded">
                   {maskSensitiveValue(selectedConfig)}
                 </div>
               </div>
-              
+
               <div>
                 <Label>Description</Label>
                 <div className="text-sm text-gray-600">{selectedConfig.description}</div>
               </div>
-              
+
               {selectedConfig.validationRule && (
                 <div>
                   <Label>Validation Rule</Label>
                   <div className="font-mono text-sm">{selectedConfig.validationRule}</div>
                 </div>
               )}
-              
+
               {selectedConfig.options && (
                 <div>
                   <Label>Valid Options</Label>
@@ -918,7 +917,7 @@ export default function ConfigurationPage() {
                   </div>
                 </div>
               )}
-              
+
               <div className="flex space-x-4">
                 <div className="flex items-center space-x-2">
                   {selectedConfig.required ? (
@@ -945,7 +944,7 @@ export default function ConfigurationPage() {
                   <span className="text-sm">Restart Required</span>
                 </div>
               </div>
-              
+
               <div>
                 <Label>Last Modified</Label>
                 <div className="text-sm">

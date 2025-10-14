@@ -18,16 +18,16 @@ interface ResponsiveLayoutProps {
   showPWAPrompt?: boolean
 }
 
-export function ResponsiveLayout({ 
-  children, 
-  className, 
+export function ResponsiveLayout({
+  children,
+  className,
   showBottomNav = true,
-  showPWAPrompt = true 
+  showPWAPrompt = true
 }: ResponsiveLayoutProps) {
   const pathname = usePathname()
   const [isMobile, setIsMobile] = useState(false)
   const [notificationCount, setNotificationCount] = useState(0)
-  
+
   const { isOnline, isUpdateAvailable, skipWaiting } = useServiceWorker()
   const { queuedRequests: offlineRequests, forceSync, isProcessing } = useOfflineQueue()
 
@@ -36,7 +36,7 @@ export function ResponsiveLayout({
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 1024) // lg breakpoint
     }
-    
+
     checkMobile()
     window.addEventListener('resize', checkMobile)
     return () => window.removeEventListener('resize', checkMobile)
@@ -48,7 +48,7 @@ export function ResponsiveLayout({
   }, [pathname])
 
   // Don't show bottom nav on certain pages
-  const hideBottomNav = ['/login', '/register', '/offline'].some(route => 
+  const hideBottomNav = ['/login', '/register', '/offline'].some(route =>
     pathname.startsWith(route)
   )
 
@@ -151,7 +151,7 @@ export function useIsMobile() {
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 1024)
     }
-    
+
     checkMobile()
     window.addEventListener('resize', checkMobile)
     return () => window.removeEventListener('resize', checkMobile)

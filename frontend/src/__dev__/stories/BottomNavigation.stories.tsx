@@ -1,13 +1,13 @@
 import type { Meta, StoryObj } from '@storybook/nextjs'
 import { useState } from 'react'
-import { 
-  Home, 
-  Users, 
-  Settings, 
-  Bell, 
-  Search, 
-  Heart, 
-  MessageCircle, 
+import {
+  Home,
+  Users,
+  Settings,
+  Bell,
+  Search,
+  Heart,
+  MessageCircle,
   ShoppingCart,
   BookOpen,
   Calendar,
@@ -90,7 +90,7 @@ const NavigationStory = ({ items, ...props }: any) => {
             </p>
           )}
         </div>
-        
+
         {/* Dummy content to demonstrate scroll behavior */}
         <div className="mt-8 space-y-4">
           {Array.from({ length: 20 }, (_, i) => (
@@ -177,7 +177,7 @@ export const ManyItems: Story = {
       { id: 'camera', label: 'Camera', icon: Camera },
       { id: 'settings', label: 'Settings', icon: Settings }
     ]
-    
+
     return <NavigationStory {...args} items={manyItems} />
   },
   args: {
@@ -195,16 +195,16 @@ export const Interactive: Story = {
     const { activeItem, handleItemClick } = useBottomNavigation(items)
 
     const addBadge = (itemId: string) => {
-      setItems(prev => prev.map(item => 
-        item.id === itemId 
+      setItems(prev => prev.map(item =>
+        item.id === itemId
           ? { ...item, badge: (item.badge || 0) + 1 }
           : item
       ))
     }
 
     const clearBadge = (itemId: string) => {
-      setItems(prev => prev.map(item => 
-        item.id === itemId 
+      setItems(prev => prev.map(item =>
+        item.id === itemId
           ? { ...item, badge: undefined }
           : item
       ))
@@ -216,7 +216,7 @@ export const Interactive: Story = {
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
             Interactive Bottom Navigation
           </h1>
-          
+
           <div className="space-y-4">
             <div>
               <h3 className="font-semibold text-gray-900 dark:text-white mb-2">Controls</h3>

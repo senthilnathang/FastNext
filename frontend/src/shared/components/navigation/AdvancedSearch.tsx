@@ -113,7 +113,7 @@ function FilterBuilder({ filter, onUpdate, onRemove }: FilterBuilderProps) {
           <Popover>
             <PopoverTrigger asChild>
               <Button variant="outline" className="w-48 justify-between">
-                {filter.value?.length > 0 
+                {filter.value?.length > 0
                   ? `${filter.value.length} selected`
                   : `Select ${filter.label.toLowerCase()}`
                 }
@@ -181,7 +181,7 @@ function FilterBuilder({ filter, onUpdate, onRemove }: FilterBuilderProps) {
             <PopoverTrigger asChild>
               <Button variant="outline" className="w-48 justify-start text-left font-normal">
                 <Calendar className="mr-2 h-4 w-4" />
-                {filter.value?.from 
+                {filter.value?.from
                   ? `${format(filter.value.from, "LLL dd")} - ${filter.value.to ? format(filter.value.to, "LLL dd") : "..."}`
                   : `Pick date range`
                 }
@@ -261,7 +261,7 @@ export function AdvancedSearch({
   }
 
   const updateFilter = (filterId: string, updatedFilter: SearchFilter) => {
-    const newFilters = searchState.filters.map(f => 
+    const newFilters = searchState.filters.map(f =>
       f.id === filterId ? updatedFilter : f
     )
     onSearchChange({ ...searchState, filters: newFilters, page: 1 })
@@ -273,19 +273,19 @@ export function AdvancedSearch({
   }
 
   const clearAllFilters = () => {
-    onSearchChange({ 
-      ...searchState, 
-      query: '', 
-      filters: [], 
-      sort: null, 
-      page: 1 
+    onSearchChange({
+      ...searchState,
+      query: '',
+      filters: [],
+      sort: null,
+      page: 1
     })
   }
 
   const updateSort = (field: string) => {
     const currentDirection = searchState.sort?.field === field ? searchState.sort.direction : null
     const newDirection = currentDirection === 'asc' ? 'desc' : 'asc'
-    
+
     const sortOption = availableSorts.find(s => s.field === field)
     if (sortOption) {
       onSearchChange({
@@ -312,7 +312,7 @@ export function AdvancedSearch({
             className="pl-10"
           />
         </div>
-        
+
         <Button
           variant="outline"
           onClick={() => setShowFilters(!showFilters)}

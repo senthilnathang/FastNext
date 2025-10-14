@@ -94,16 +94,16 @@ const getStatusLabel = (status: ImportJob['status']) => {
 
 const formatFileSize = (bytes?: number) => {
   if (!bytes) return 'Unknown';
-  
+
   const units = ['B', 'KB', 'MB', 'GB'];
   let size = bytes;
   let unitIndex = 0;
-  
+
   while (size >= 1024 && unitIndex < units.length - 1) {
     size /= 1024;
     unitIndex++;
   }
-  
+
   return `${size.toFixed(1)} ${units[unitIndex]}`;
 };
 
@@ -111,11 +111,11 @@ const formatDuration = (start: string, end?: string) => {
   const startTime = new Date(start);
   const endTime = end ? new Date(end) : new Date();
   const duration = endTime.getTime() - startTime.getTime();
-  
+
   if (duration < 1000) return '< 1s';
   if (duration < 60000) return `${Math.round(duration / 1000)}s`;
   if (duration < 3600000) return `${Math.round(duration / 60000)}m`;
-  
+
   return `${Math.round(duration / 3600000)}h`;
 };
 
@@ -158,12 +158,12 @@ export function ImportProgress({
               </div>
             </div>
           </div>
-          
+
           <div className="flex items-center space-x-2">
             <Badge className={getStatusColor(job.status)}>
               {getStatusLabel(job.status)}
             </Badge>
-            
+
             {canViewResults && onViewResults && (
               <Button
                 size="sm"
@@ -174,7 +174,7 @@ export function ImportProgress({
                 View Results
               </Button>
             )}
-            
+
             {canRetry && onRetry && (
               <Button
                 size="sm"
@@ -185,7 +185,7 @@ export function ImportProgress({
                 Retry
               </Button>
             )}
-            
+
             {canCancel && (
               <Button
                 size="sm"
@@ -206,7 +206,7 @@ export function ImportProgress({
             <Progress value={job.progress} className="h-2" />
             <div className="flex justify-between text-xs text-gray-500">
               <span>
-                {job.processedRows && job.totalRows 
+                {job.processedRows && job.totalRows
                   ? `${job.processedRows.toLocaleString()} / ${job.totalRows.toLocaleString()} rows`
                   : `${job.progress}% complete`
                 }
@@ -251,11 +251,11 @@ export function ImportProgress({
                 {job.validationResults.isValid ? 'Valid' : 'Has Errors'}
               </Badge>
             </div>
-            
+
             {job.validationResults.errors.length > 0 && (
               <ErrorList errors={job.validationResults.errors} />
             )}
-            
+
             {job.validationResults.warnings.length > 0 && (
               <WarningList warnings={job.validationResults.warnings} />
             )}
@@ -283,7 +283,7 @@ export function ImportProgress({
                   {currentJob.fileName && `Processing ${currentJob.fileName}...`}
                 </CardDescription>
               </div>
-              
+
               <Button
                 variant="outline"
                 size="sm"
@@ -294,7 +294,7 @@ export function ImportProgress({
               </Button>
             </div>
           </CardHeader>
-          
+
           <CardContent>
             <div className="space-y-3">
               <div className="flex items-center space-x-2">
@@ -303,24 +303,24 @@ export function ImportProgress({
                   {getStatusLabel(currentJob.status)}
                 </span>
               </div>
-              
+
               <Progress value={currentJob.progress} className="h-3" />
-              
+
               <div className="flex justify-between text-sm">
                 <span className="text-gray-600 dark:text-gray-400">
-                  {currentJob.processedRows && currentJob.totalRows 
+                  {currentJob.processedRows && currentJob.totalRows
                     ? `${currentJob.processedRows.toLocaleString()} / ${currentJob.totalRows.toLocaleString()} rows processed`
                     : `${currentJob.progress}% complete`
                   }
                 </span>
-                
+
                 {currentJob.fileSize && (
                   <span className="text-gray-500">
                     File size: {formatFileSize(currentJob.fileSize)}
                   </span>
                 )}
               </div>
-              
+
               <div className="text-xs text-gray-500">
                 Started {formatDuration(currentJob.createdAt)} ago
               </div>
@@ -341,7 +341,7 @@ export function ImportProgress({
                   {completedJobs.length} completed imports
                 </CardDescription>
               </div>
-              
+
               {completedJobs.length > 0 && (
                 <Button
                   variant="outline"
@@ -353,7 +353,7 @@ export function ImportProgress({
               )}
             </div>
           </CardHeader>
-          
+
           <CardContent>
             <div className="space-y-3 max-h-96 overflow-y-auto">
               {jobs.map(renderJobItem)}
@@ -388,7 +388,7 @@ function ErrorList({ errors }: { errors: ImportError[] }) {
             <ChevronRight className="h-4 w-4 text-red-600" />
           )}
         </CollapsibleTrigger>
-        
+
         <CollapsibleContent className="mt-2">
           <div className="space-y-2 max-h-48 overflow-y-auto">
             {errors.slice(0, maxDisplay).map((error, index) => (
@@ -432,7 +432,7 @@ function WarningList({ warnings }: { warnings: ImportWarning[] }) {
             <ChevronRight className="h-4 w-4 text-yellow-600" />
           )}
         </CollapsibleTrigger>
-        
+
         <CollapsibleContent className="mt-2">
           <div className="space-y-2 max-h-48 overflow-y-auto">
             {warnings.slice(0, maxDisplay).map((warning, index) => (

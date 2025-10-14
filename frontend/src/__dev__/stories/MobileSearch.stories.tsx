@@ -187,7 +187,7 @@ export const Interactive: Story = {
 
     const handleChange = (newValue: string) => {
       setValue(newValue)
-      
+
       // Simulate dynamic suggestions
       if (newValue.length > 1) {
         const mockSuggestions = [

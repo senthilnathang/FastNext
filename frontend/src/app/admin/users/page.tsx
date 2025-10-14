@@ -104,7 +104,7 @@ const UsersPage: React.FC<UsersPageProps> = () => {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [selectedItems, setSelectedItems] = React.useState<any[]>([])
-  
+
   const { data: usersData, isLoading, error } = useUsers()
   const createUser = useCreateUser()
   const updateUser = useUpdateUser()
@@ -272,15 +272,15 @@ const UsersPage: React.FC<UsersPageProps> = () => {
 
   // Define kanban columns for user status
   const kanbanColumns: KanbanColumn[] = React.useMemo(() => [
-    { 
-      id: 'true', 
-      title: 'Active Users', 
+    {
+      id: 'true',
+      title: 'Active Users',
       color: '#10b981',
       count: users.filter(user => user.is_active).length
     },
-    { 
-      id: 'false', 
-      title: 'Inactive Users', 
+    {
+      id: 'false',
+      title: 'Inactive Users',
       color: '#ef4444',
       count: users.filter(user => !user.is_active).length
     }
@@ -378,7 +378,7 @@ const UsersPage: React.FC<UsersPageProps> = () => {
   const handleMoveCard = (cardId: string | number, sourceColumnId: string, targetColumnId: string) => {
     const userId = Number(cardId)
     const shouldBeActive = targetColumnId === 'true'
-    
+
     // Find the user to toggle
     const user = users.find(u => u.id === userId)
     if (user && user.is_active !== shouldBeActive) {
@@ -390,7 +390,7 @@ const UsersPage: React.FC<UsersPageProps> = () => {
     // Extract email from title for quick user creation
     const email = title.includes('@') ? title : `${title}@example.com`
     const username = title.replace('@', '_').replace(/[^a-zA-Z0-9_]/g, '_')
-    
+
     createUser.mutate({
       email,
       username,
@@ -401,12 +401,10 @@ const UsersPage: React.FC<UsersPageProps> = () => {
   }
 
   const handleExport = (format: string) => {
-    console.log('Export users as', format)
     // TODO: Implement export
   }
 
   const handleImport = () => {
-    console.log('Import users')
     // TODO: Implement import
   }
 
@@ -565,7 +563,7 @@ const UsersPage: React.FC<UsersPageProps> = () => {
         bulkActions={bulkActions}
         onExport={handleExport}
         onImport={handleImport}
-        
+
         // Kanban-specific props
         kanbanColumns={kanbanColumns}
         onMoveCard={handleMoveCard}

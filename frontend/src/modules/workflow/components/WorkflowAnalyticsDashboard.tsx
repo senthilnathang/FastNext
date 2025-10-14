@@ -1,31 +1,31 @@
 'use client';
 
 import React, { memo } from 'react';
-import { 
-  Card, 
-  CardContent, 
-  CardHeader, 
-  CardTitle 
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle
 } from '@/shared/components/ui/card';
-import { 
-  BarChart, 
-  Bar, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
-  PieChart, 
-  Pie, 
-  Cell, 
-  LineChart, 
-  Line, 
-  ResponsiveContainer 
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  PieChart,
+  Pie,
+  Cell,
+  LineChart,
+  Line,
+  ResponsiveContainer
 } from 'recharts';
-import { 
-  Activity, 
-  Clock, 
-  CheckCircle, 
-  AlertCircle, 
+import {
+  Activity,
+  Clock,
+  CheckCircle,
+  AlertCircle,
   TrendingUp,
   Zap,
   GitBranch
@@ -68,10 +68,10 @@ interface WorkflowAnalyticsDashboardProps {
 }
 
 
-function WorkflowAnalyticsDashboard({ 
-  metrics, 
-  timeRange, 
-  onTimeRangeChange 
+function WorkflowAnalyticsDashboard({
+  metrics,
+  timeRange,
+  onTimeRangeChange
 }: WorkflowAnalyticsDashboardProps) {
   const formatTime = (minutes: number) => {
     if (minutes < 60) return `${minutes}m`;
@@ -90,7 +90,7 @@ function WorkflowAnalyticsDashboard({
           <Activity className="h-6 w-6 text-blue-600" />
           <h2 className="text-xl font-semibold text-gray-900">Workflow Analytics</h2>
         </div>
-        
+
         {/* Time Range Selector */}
         <div className="flex items-center space-x-1 bg-gray-100 rounded-lg p-1">
           {(['24h', '7d', '30d', '90d'] as const).map((range) => (
@@ -185,7 +185,7 @@ function WorkflowAnalyticsDashboard({
                       <Cell key={`cell-${index}`} fill={entry.color} />
                     ))}
                   </Pie>
-                  <Tooltip 
+                  <Tooltip
                     formatter={(value: number) => [value, 'Instances']}
                     labelFormatter={(label) => `Status: ${label}`}
                   />
@@ -196,8 +196,8 @@ function WorkflowAnalyticsDashboard({
               {metrics.statusDistribution.map((item, index) => (
                 <div key={index} className="flex items-center justify-between text-sm">
                   <div className="flex items-center space-x-2">
-                    <div 
-                      className="w-3 h-3 rounded-full" 
+                    <div
+                      className="w-3 h-3 rounded-full"
                       style={{ backgroundColor: item.color }}
                     />
                     <span className="capitalize">{item.status}</span>
@@ -219,30 +219,30 @@ function WorkflowAnalyticsDashboard({
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={metrics.completionTrend}>
                   <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis 
-                    dataKey="date" 
+                  <XAxis
+                    dataKey="date"
                     tick={{ fontSize: 12 }}
                     tickFormatter={(value) => new Date(value).toLocaleDateString()}
                   />
                   <YAxis tick={{ fontSize: 12 }} />
-                  <Tooltip 
+                  <Tooltip
                     labelFormatter={(value) => new Date(value).toLocaleDateString()}
                     formatter={(value: number, name: string) => [
-                      value, 
+                      value,
                       name === 'completed' ? 'Completed' : 'Failed'
                     ]}
                   />
-                  <Line 
-                    type="monotone" 
-                    dataKey="completed" 
-                    stroke="#10B981" 
+                  <Line
+                    type="monotone"
+                    dataKey="completed"
+                    stroke="#10B981"
                     strokeWidth={2}
                     dot={{ r: 4 }}
                   />
-                  <Line 
-                    type="monotone" 
-                    dataKey="failed" 
-                    stroke="#EF4444" 
+                  <Line
+                    type="monotone"
+                    dataKey="failed"
+                    stroke="#EF4444"
                     strokeWidth={2}
                     dot={{ r: 4 }}
                   />
@@ -265,16 +265,16 @@ function WorkflowAnalyticsDashboard({
                 <BarChart data={metrics.performanceByType} layout="horizontal">
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis type="number" tick={{ fontSize: 12 }} />
-                  <YAxis 
-                    dataKey="workflowType" 
-                    type="category" 
+                  <YAxis
+                    dataKey="workflowType"
+                    type="category"
                     tick={{ fontSize: 12 }}
                     width={100}
                   />
-                  <Tooltip 
+                  <Tooltip
                     formatter={(value: number, name: string) => [
-                      name === 'avgTime' ? formatTime(value) : 
-                      name === 'successRate' ? formatPercentage(value) : 
+                      name === 'avgTime' ? formatTime(value) :
+                      name === 'successRate' ? formatPercentage(value) :
                       value,
                       name === 'avgTime' ? 'Avg Time' :
                       name === 'successRate' ? 'Success Rate' :
@@ -350,7 +350,7 @@ function WorkflowAnalyticsDashboard({
               </div>
             </div>
             <div className="w-32 bg-gray-200 rounded-full h-3">
-              <div 
+              <div
                 className={`h-3 rounded-full transition-all duration-300 ${
                   metrics.successRate >= 90 ? 'bg-green-500' :
                   metrics.successRate >= 70 ? 'bg-yellow-500' :

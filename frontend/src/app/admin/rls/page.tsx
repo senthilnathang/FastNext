@@ -5,10 +5,10 @@ import Link from 'next/link'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/components/ui/card'
 import { Button } from '@/shared/components/ui/button'
 import { Badge } from '@/shared/components/ui/badge'
-import { 
-  Shield, 
-  UserCheck, 
-  AlertTriangle, 
+import {
+  Shield,
+  UserCheck,
+  AlertTriangle,
   Lock,
   ArrowRight,
   Database,
@@ -69,18 +69,18 @@ export default function RLSAdminPage() {
         <h1 className="text-3xl font-bold">Row Level Security</h1>
         <Badge variant="outline">Security Administration</Badge>
       </div>
-      
+
       <div className="mb-6">
         <p className="text-muted-foreground">
           Manage data access policies, security rules, and monitor access patterns across your application.
           Row Level Security (RLS) ensures users can only access data they&apos;re authorized to see.
         </p>
       </div>
-      
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {rlsMenuItems.map((item) => {
           const Icon = item.icon
-          
+
           return (
             <Link key={item.href} href={item.href}>
               <Card className="hover:shadow-lg transition-shadow cursor-pointer h-full">
@@ -123,7 +123,7 @@ export default function RLSAdminPage() {
               <p className="text-xs text-muted-foreground">Security policies configured</p>
             </CardContent>
           </Card>
-          
+
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">Rule Assignments</CardTitle>
@@ -133,7 +133,7 @@ export default function RLSAdminPage() {
               <p className="text-xs text-muted-foreground">Rules assigned to entities</p>
             </CardContent>
           </Card>
-          
+
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">Access Attempts</CardTitle>
@@ -143,7 +143,7 @@ export default function RLSAdminPage() {
               <p className="text-xs text-muted-foreground">Today&apos;s access attempts</p>
             </CardContent>
           </Card>
-          
+
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">Security Score</CardTitle>

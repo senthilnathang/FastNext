@@ -7,7 +7,7 @@ import { motion, AnimatePresence } from "framer-motion"
 
 import { cn } from "@/shared/utils"
 import { Button } from "@/shared/components/ui/button"
-import { 
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -28,7 +28,7 @@ const themes = [
     description: 'Clean and bright interface',
   },
   {
-    name: 'dark', 
+    name: 'dark',
     label: 'Dark',
     icon: Moon,
     description: 'Easy on the eyes',
@@ -57,7 +57,7 @@ interface ColorSchemePreviewProps {
 function ColorSchemePreview({ scheme, isSelected, onClick, currentTheme }: ColorSchemePreviewProps) {
   const { availableSchemes } = useColorScheme()
   const schemeConfig = availableSchemes.find(s => s.id === scheme)
-  
+
   if (!schemeConfig) return null
 
   const previewColor = currentTheme === 'dark' ? schemeConfig.preview.dark : schemeConfig.preview.light
@@ -68,14 +68,14 @@ function ColorSchemePreview({ scheme, isSelected, onClick, currentTheme }: Color
       className={cn(
         "relative flex flex-col items-center space-y-2 p-3 rounded-lg border-2 transition-all duration-200",
         "hover:scale-105 focus:outline-none focus:ring-2 focus:ring-primary/20",
-        isSelected 
-          ? "border-primary bg-primary/5" 
+        isSelected
+          ? "border-primary bg-primary/5"
           : "border-border hover:border-border/60"
       )}
       whileHover={{ scale: 1.05 }}
       whileTap={{ scale: 0.95 }}
     >
-      <div 
+      <div
         className="w-10 h-10 rounded-full shadow-sm border-2 border-background"
         style={{ backgroundColor: previewColor }}
       />
@@ -83,7 +83,7 @@ function ColorSchemePreview({ scheme, isSelected, onClick, currentTheme }: Color
         <p className="text-xs font-medium">{schemeConfig.name}</p>
       </div>
       {isSelected && (
-        <motion.div 
+        <motion.div
           className="absolute -top-1 -right-1 w-5 h-5 bg-primary text-primary-foreground rounded-full flex items-center justify-center"
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
@@ -130,7 +130,7 @@ function InlineThemeSwitcher({ showColorSchemes = true, className }: { showColor
           {themes.map((themeOption) => {
             const Icon = themeOption.icon
             const isSelected = theme === themeOption.name
-            
+
             return (
               <motion.button
                 key={themeOption.name}
@@ -138,8 +138,8 @@ function InlineThemeSwitcher({ showColorSchemes = true, className }: { showColor
                 className={cn(
                   "flex flex-col items-center space-y-2 p-3 rounded-lg border transition-all duration-200",
                   "hover:scale-105 focus:outline-none focus:ring-2 focus:ring-primary/20",
-                  isSelected 
-                    ? "border-primary bg-primary/5 text-primary" 
+                  isSelected
+                    ? "border-primary bg-primary/5 text-primary"
                     : "border-border hover:border-border/60"
                 )}
                 whileHover={{ scale: 1.05 }}
@@ -156,7 +156,7 @@ function InlineThemeSwitcher({ showColorSchemes = true, className }: { showColor
       {showColorSchemes && (
         <>
           <Separator />
-          
+
           {/* Color Scheme Selection */}
           <div className="space-y-3">
             <div className="flex items-center justify-between">
@@ -171,7 +171,7 @@ function InlineThemeSwitcher({ showColorSchemes = true, className }: { showColor
                 </Badge>
               )}
             </div>
-            
+
             {!isDarkMode ? (
               <div className="grid grid-cols-3 gap-2">
                 {availableSchemes.map((scheme) => (
@@ -224,9 +224,9 @@ function DropdownThemeSwitcher({ showColorSchemes = true, className }: { showCol
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button 
-          variant="ghost" 
-          size="sm" 
+        <Button
+          variant="ghost"
+          size="sm"
           className={cn("h-8 px-2 gap-1", className)}
         >
           <Icon className="h-4 w-4" />
@@ -238,7 +238,7 @@ function DropdownThemeSwitcher({ showColorSchemes = true, className }: { showCol
         {themes.map((themeOption) => {
           const Icon = themeOption.icon
           const isSelected = theme === themeOption.name
-          
+
           return (
             <DropdownMenuItem
               key={themeOption.name}
@@ -256,7 +256,7 @@ function DropdownThemeSwitcher({ showColorSchemes = true, className }: { showCol
             </DropdownMenuItem>
           )
         })}
-        
+
         {showColorSchemes && (
           <>
             <DropdownMenuSeparator />
@@ -328,9 +328,9 @@ function CompactThemeSwitcher({ className }: { className?: string }) {
   }
 
   return (
-    <Button 
-      variant="ghost" 
-      size="sm" 
+    <Button
+      variant="ghost"
+      size="sm"
       onClick={handleToggle}
       className={cn("h-8 w-8 p-0", className)}
     >
@@ -350,10 +350,10 @@ function CompactThemeSwitcher({ className }: { className?: string }) {
   )
 }
 
-export function ThemeSwitcher({ 
-  variant = 'dropdown', 
-  showColorSchemes = true, 
-  className 
+export function ThemeSwitcher({
+  variant = 'dropdown',
+  showColorSchemes = true,
+  className
 }: ThemeSwitcherProps) {
   switch (variant) {
     case 'inline':

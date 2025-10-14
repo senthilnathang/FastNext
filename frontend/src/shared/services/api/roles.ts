@@ -98,8 +98,8 @@ export const rolesApi = {
 
   // Assign permissions to role
   assignRolePermissions: async (id: number, permissionIds: number[]): Promise<Role> => {
-    const response = await apiClient.post(`${API_CONFIG.ENDPOINTS.ROLES}/${id}/permissions`, { 
-      permission_ids: permissionIds 
+    const response = await apiClient.post(`${API_CONFIG.ENDPOINTS.ROLES}/${id}/permissions`, {
+      permission_ids: permissionIds
     })
     return response.data
   },

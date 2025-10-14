@@ -5,7 +5,7 @@
 The FastNext frontend includes three advanced view components that extend the ViewManager's capabilities beyond traditional list and card layouts. These views are specifically designed for different data visualization and management scenarios:
 
 - **KanbanView** - Project management style boards
-- **GanttView** - Timeline visualization for project scheduling  
+- **GanttView** - Timeline visualization for project scheduling
 - **CalendarView** - Calendar-based data management
 
 All advanced views integrate seamlessly with the ViewManager component and share the same API patterns for consistency.
@@ -277,13 +277,13 @@ Full accessibility support:
 ```typescript
 function ProjectDashboard() {
   const [activeView, setActiveView] = useState('kanban')
-  
+
   const views = [
     { id: 'kanban', name: 'Board', type: 'kanban' },
     { id: 'gantt', name: 'Timeline', type: 'gantt' },
     { id: 'calendar', name: 'Calendar', type: 'calendar' }
   ]
-  
+
   return (
     <ViewManager
       title="Project Dashboard"
@@ -292,16 +292,16 @@ function ProjectDashboard() {
       views={views}
       activeView={activeView}
       onViewChange={setActiveView}
-      
+
       // Kanban config
       kanbanColumns={statusColumns}
       kanbanGroupByField="status"
-      
+
       // Gantt config
       ganttStartDateField="start_date"
       ganttEndDateField="end_date"
       ganttViewMode="weeks"
-      
+
       // Calendar config
       calendarDateField="deadline"
       calendarView="month"
@@ -321,7 +321,7 @@ function EventManager() {
       columns={eventColumns}
       views={eventViews}
       activeView="calendar"
-      
+
       // Calendar optimized for events
       calendarDateField="event_date"
       calendarDescriptionField="description"
@@ -344,12 +344,12 @@ function TaskManager() {
       data={tasks}
       columns={taskColumns}
       views={taskViews}
-      
+
       // Kanban for workflow
       kanbanColumns={workflowColumns}
       kanbanGroupByField="stage"
       enableQuickAdd={true}
-      
+
       // Gantt for planning
       ganttStartDateField="planned_start"
       ganttEndDateField="planned_end"
@@ -371,12 +371,12 @@ Customize appearance using CSS variables:
   --kanban-column-bg: theme('colors.muted.50');
   --kanban-card-bg: theme('colors.background');
   --kanban-card-border: theme('colors.border');
-  
+
   /* Gantt */
   --gantt-timeline-bg: theme('colors.background');
   --gantt-bar-bg: theme('colors.primary.500');
   --gantt-progress-bg: theme('colors.primary.700');
-  
+
   /* Calendar */
   --calendar-cell-bg: theme('colors.background');
   --calendar-today-bg: theme('colors.primary.50');

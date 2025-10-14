@@ -117,8 +117,8 @@ export function RoleCreateDialog({ open, onOpenChange }: RoleCreateDialogProps) 
                 <FormItem>
                   <FormLabel>Role Name *</FormLabel>
                   <FormControl>
-                    <Input 
-                      {...field} 
+                    <Input
+                      {...field}
                       placeholder="e.g., Moderator, Editor, Viewer"
                       disabled={isSubmitting}
                     />
@@ -135,8 +135,8 @@ export function RoleCreateDialog({ open, onOpenChange }: RoleCreateDialogProps) 
                 <FormItem>
                   <FormLabel>Description</FormLabel>
                   <FormControl>
-                    <Textarea 
-                      {...field} 
+                    <Textarea
+                      {...field}
                       placeholder="Brief description of what this role does..."
                       disabled={isSubmitting}
                       rows={3}
@@ -213,16 +213,16 @@ export function RoleCreateDialog({ open, onOpenChange }: RoleCreateDialogProps) 
             />
 
             <DialogFooter>
-              <Button 
-                type="button" 
-                variant="outline" 
+              <Button
+                type="button"
+                variant="outline"
                 onClick={() => onOpenChange(false)}
                 disabled={isSubmitting}
               >
                 Cancel
               </Button>
-              <Button 
-                type="submit" 
+              <Button
+                type="submit"
                 disabled={isSubmitting}
               >
                 {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}

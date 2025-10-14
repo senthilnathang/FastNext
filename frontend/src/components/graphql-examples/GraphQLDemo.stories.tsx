@@ -159,7 +159,7 @@ export const WithErrorState: Story = {
           error: new Error('GraphQL Error: Failed to fetch users'),
         },
       ]
-      
+
       return (
         <MockedProvider mocks={errorMocks} addTypename={false}>
           <div className="min-h-screen bg-background p-6">
@@ -216,7 +216,7 @@ export const WithEmptyData: Story = {
           },
         },
       ]
-      
+
       return (
         <MockedProvider mocks={emptyMocks} addTypename={false}>
           <div className="min-h-screen bg-background p-6">

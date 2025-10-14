@@ -54,7 +54,7 @@ export function MobileSearch({
     transcript: '',
     error: null
   })
-  
+
   const inputRef = React.useRef<HTMLInputElement>(null)
   const recognitionRef = React.useRef<any>(null)
 
@@ -83,10 +83,10 @@ export function MobileSearch({
         }
 
         recognitionRef.current.onerror = (event: any) => {
-          setVoiceSearch(prev => ({ 
-            ...prev, 
-            isListening: false, 
-            error: `Voice search error: ${event.error}` 
+          setVoiceSearch(prev => ({
+            ...prev,
+            isListening: false,
+            error: `Voice search error: ${event.error}`
           }))
         }
 
@@ -169,7 +169,7 @@ export function MobileSearch({
             </Button>
           )}
         </div>
-        
+
         {enableFilters && (
           <Button
             variant="outline"
@@ -206,7 +206,7 @@ export function MobileSearch({
           placeholder={placeholder}
           className="pl-12 pr-24 h-14 text-base rounded-xl border-2 focus:border-blue-500"
         />
-        
+
         <div className="absolute right-2 top-1/2 transform -translate-y-1/2 flex items-center space-x-1">
           {/* Voice Search */}
           {enableVoiceSearch && voiceSearch.isSupported && (
@@ -226,7 +226,7 @@ export function MobileSearch({
               )} />
             </Button>
           )}
-          
+
           {/* Clear Button */}
           {value && (
             <Button
@@ -238,7 +238,7 @@ export function MobileSearch({
               <X className="h-4 w-4" />
             </Button>
           )}
-          
+
           {/* Filters Button */}
           {enableFilters && (
             <Button

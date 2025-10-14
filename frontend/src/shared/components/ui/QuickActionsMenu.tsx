@@ -79,7 +79,7 @@ export default function QuickActionsMenu({ isOpen, onClose, onActionSelect }: Qu
     try {
       setLoading(true);
       const token = localStorage.getItem('access_token');
-      
+
       const response = await fetch(getApiUrl(API_CONFIG.ENDPOINTS.PROFILE.QUICK_ACTIONS), {
         headers: {
           'Authorization': `Bearer ${token}`,

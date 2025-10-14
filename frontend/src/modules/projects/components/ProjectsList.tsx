@@ -5,19 +5,19 @@ import { Card } from '@/shared/components/ui/card'
 import { Button } from '@/shared/components/ui/button'
 import { Input } from '@/shared/components/ui/input'
 import { Badge } from '@/shared/components/ui/badge'
-import { 
-  useSearchState, 
-  usePaginationState, 
-  useViewModeState, 
+import {
+  useSearchState,
+  usePaginationState,
+  useViewModeState,
   useSortState,
   useStringLiteralState
 } from '@/shared/hooks'
-import { 
-  Grid, 
-  List, 
-  Search, 
-  Filter, 
-  SortAsc, 
+import {
+  Grid,
+  List,
+  Search,
+  Filter,
+  SortAsc,
   SortDesc,
   Folder,
   Plus,
@@ -98,8 +98,8 @@ export default function ProjectsList() {
   const [viewMode, setViewMode] = useViewModeState(['grid', 'list'] as const, 'grid')
   const { sortBy, setSortBy, sortOrder, setSortOrder } = useSortState('updated_at', 'desc')
   const [statusFilter, setStatusFilter] = useStringLiteralState(
-    'status', 
-    ['', 'active', 'inactive', 'archived'] as const, 
+    'status',
+    ['', 'active', 'inactive', 'archived'] as const,
     ''
   )
 
@@ -111,9 +111,9 @@ export default function ProjectsList() {
       try {
         // Simulate delay
         await new Promise(resolve => setTimeout(resolve, 500))
-        
+
         let filteredProjects = [...mockProjects]
-        
+
         // Apply search filter
         if (search) {
           filteredProjects = filteredProjects.filter(project =>
@@ -121,31 +121,31 @@ export default function ProjectsList() {
             project.description.toLowerCase().includes(search.toLowerCase())
           )
         }
-        
+
         // Apply status filter
         if (statusFilter) {
-          filteredProjects = filteredProjects.filter(project => 
+          filteredProjects = filteredProjects.filter(project =>
             project.status === statusFilter
           )
         }
-        
+
         // Apply sorting
         filteredProjects.sort((a, b) => {
           const aValue = a[sortBy as keyof Project] || ''
           const bValue = b[sortBy as keyof Project] || ''
-          
+
           if (sortOrder === 'asc') {
             return aValue > bValue ? 1 : -1
           } else {
             return aValue < bValue ? 1 : -1
           }
         })
-        
+
         // Apply pagination
         const startIndex = offset
         const endIndex = startIndex + limit
         const paginatedProjects = filteredProjects.slice(startIndex, endIndex)
-        
+
         setProjects(paginatedProjects)
       } catch {
         setError('Failed to load projects')
@@ -153,7 +153,7 @@ export default function ProjectsList() {
         setLoading(false)
       }
     }
-    
+
     fetchProjects()
   }, [search, statusFilter, sortBy, sortOrder, page, limit, offset])
 
@@ -191,7 +191,7 @@ export default function ProjectsList() {
           <Folder className="h-6 w-6 text-blue-600" />
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Projects</h1>
         </div>
-        
+
         <Button>
           <Plus className="h-4 w-4 mr-2" />
           New Project
@@ -212,7 +212,7 @@ export default function ProjectsList() {
                 className="pl-10"
               />
             </div>
-            
+
             {/* Status Filter */}
             <select
               value={statusFilter}
@@ -224,7 +224,7 @@ export default function ProjectsList() {
               <option value="inactive">Inactive</option>
               <option value="archived">Archived</option>
             </select>
-            
+
             {/* Sort */}
             <div className="flex items-center space-x-2">
               <Button
@@ -238,7 +238,7 @@ export default function ProjectsList() {
                   sortOrder === 'asc' ? <SortAsc className="h-3 w-3" /> : <SortDesc className="h-3 w-3" />
                 )}
               </Button>
-              
+
               <Button
                 variant="outline"
                 size="sm"
@@ -252,14 +252,14 @@ export default function ProjectsList() {
               </Button>
             </div>
           </div>
-          
+
           <div className="flex items-center space-x-2">
             {/* Clear Filters */}
             <Button variant="outline" size="sm" onClick={clearFilters}>
               <Filter className="h-4 w-4 mr-2" />
               Clear
             </Button>
-            
+
             {/* View Mode Toggle */}
             <div className="flex border border-gray-200 rounded-md overflow-hidden">
               <Button
@@ -312,21 +312,21 @@ export default function ProjectsList() {
                       {project.status}
                     </Badge>
                   </div>
-                  
+
                   <p className="text-gray-600 dark:text-gray-300 text-sm mb-4 line-clamp-2">
                     {project.description}
                   </p>
-                  
+
                   <div className="flex justify-between items-center text-sm text-gray-500 mb-4">
                     <span>{project.pages_count} pages</span>
                     <span>{project.components_count} components</span>
                   </div>
-                  
+
                   <div className="flex justify-between items-center">
                     <span className="text-xs text-gray-500">
                       Updated {new Date(project.updated_at).toLocaleDateString()}
                     </span>
-                    
+
                     <div className="flex space-x-1">
                       <Button variant="ghost" size="sm">
                         <Eye className="h-4 w-4" />
@@ -356,18 +356,18 @@ export default function ProjectsList() {
                           {project.status}
                         </Badge>
                       </div>
-                      
+
                       <p className="text-gray-600 dark:text-gray-300 text-sm mt-1">
                         {project.description}
                       </p>
-                      
+
                       <div className="flex items-center space-x-4 text-sm text-gray-500 mt-2">
                         <span>{project.pages_count} pages</span>
                         <span>{project.components_count} components</span>
                         <span>Updated {new Date(project.updated_at).toLocaleDateString()}</span>
                       </div>
                     </div>
-                    
+
                     <div className="flex space-x-2">
                       <Button variant="ghost" size="sm">
                         <Eye className="h-4 w-4" />
@@ -384,7 +384,7 @@ export default function ProjectsList() {
               ))}
             </div>
           )}
-          
+
           {/* Pagination */}
           <div className="flex items-center justify-between">
             <div className="text-sm text-gray-700">

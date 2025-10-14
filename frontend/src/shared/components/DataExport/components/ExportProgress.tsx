@@ -68,16 +68,16 @@ const getStatusColor = (status: ExportJob['status']) => {
 
 const formatFileSize = (bytes?: number) => {
   if (!bytes) return 'Unknown';
-  
+
   const units = ['B', 'KB', 'MB', 'GB'];
   let size = bytes;
   let unitIndex = 0;
-  
+
   while (size >= 1024 && unitIndex < units.length - 1) {
     size /= 1024;
     unitIndex++;
   }
-  
+
   return `${size.toFixed(1)} ${units[unitIndex]}`;
 };
 
@@ -85,11 +85,11 @@ const formatDuration = (start: string, end?: string) => {
   const startTime = new Date(start);
   const endTime = end ? new Date(end) : new Date();
   const duration = endTime.getTime() - startTime.getTime();
-  
+
   if (duration < 1000) return '< 1s';
   if (duration < 60000) return `${Math.round(duration / 1000)}s`;
   if (duration < 3600000) return `${Math.round(duration / 60000)}m`;
-  
+
   return `${Math.round(duration / 3600000)}h`;
 };
 
@@ -130,12 +130,12 @@ export function ExportProgress({
               </div>
             </div>
           </div>
-          
+
           <div className="flex items-center space-x-2">
             <Badge className={getStatusColor(job.status)}>
               {job.status.replace('_', ' ')}
             </Badge>
-            
+
             {canDownload && (
               <Button
                 size="sm"
@@ -146,7 +146,7 @@ export function ExportProgress({
                 Download
               </Button>
             )}
-            
+
             {canCancel && (
               <Button
                 size="sm"
@@ -167,7 +167,7 @@ export function ExportProgress({
             <Progress value={job.progress} className="h-2" />
             <div className="flex justify-between text-xs text-gray-500">
               <span>
-                {job.processedRows && job.totalRows 
+                {job.processedRows && job.totalRows
                   ? `${job.processedRows.toLocaleString()} / ${job.totalRows.toLocaleString()} rows`
                   : `${job.progress}% complete`
                 }
@@ -189,7 +189,7 @@ export function ExportProgress({
               <span>{formatFileSize(job.actualSize)}</span>
             )}
           </div>
-          
+
           <div className="text-xs text-gray-500">
             ID: {job.id.slice(-8)}
           </div>
@@ -222,7 +222,7 @@ export function ExportProgress({
                   Your export is being processed...
                 </CardDescription>
               </div>
-              
+
               <Button
                 variant="outline"
                 size="sm"
@@ -233,26 +233,26 @@ export function ExportProgress({
               </Button>
             </div>
           </CardHeader>
-          
+
           <CardContent>
             <div className="space-y-3">
               <Progress value={currentJob.progress} className="h-3" />
-              
+
               <div className="flex justify-between text-sm">
                 <span className="text-gray-600 dark:text-gray-400">
-                  {currentJob.processedRows && currentJob.totalRows 
+                  {currentJob.processedRows && currentJob.totalRows
                     ? `${currentJob.processedRows.toLocaleString()} / ${currentJob.totalRows.toLocaleString()} rows processed`
                     : `${currentJob.progress}% complete`
                   }
                 </span>
-                
+
                 {currentJob.estimatedSize && (
                   <span className="text-gray-500">
                     Estimated size: {formatFileSize(currentJob.estimatedSize)}
                   </span>
                 )}
               </div>
-              
+
               <div className="text-xs text-gray-500">
                 Started {formatDuration(currentJob.createdAt)} ago
               </div>
@@ -273,7 +273,7 @@ export function ExportProgress({
                   {completedJobs.length} completed exports
                 </CardDescription>
               </div>
-              
+
               {completedJobs.length > 0 && (
                 <Button
                   variant="outline"
@@ -285,7 +285,7 @@ export function ExportProgress({
               )}
             </div>
           </CardHeader>
-          
+
           <CardContent>
             <div className="space-y-3 max-h-96 overflow-y-auto">
               {jobs.map(renderJobItem)}

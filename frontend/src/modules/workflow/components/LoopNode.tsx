@@ -41,7 +41,7 @@ function LoopNode({ data, selected }: NodeProps<LoopNodeData>) {
   };
 
   return (
-    <div 
+    <div
       className={`
         px-3 py-2 shadow-md rounded-lg border-2 min-w-[140px] max-w-[200px]
         ${selected ? 'border-purple-500' : 'border-purple-300'}
@@ -55,7 +55,7 @@ function LoopNode({ data, selected }: NodeProps<LoopNodeData>) {
         className="w-3 h-3 !bg-purple-400 border-2 border-white"
         style={{ top: -6 }}
       />
-      
+
       {/* Node header */}
       <div className="flex items-center space-x-2">
         {getLoopTypeIcon()}
@@ -88,7 +88,7 @@ function LoopNode({ data, selected }: NodeProps<LoopNodeData>) {
           {data.condition || data.iteratorVariable || data.collection}
         </div>
       )}
-      
+
       {/* Output handles */}
       {/* Main flow (continue loop) */}
       <Handle
@@ -98,7 +98,7 @@ function LoopNode({ data, selected }: NodeProps<LoopNodeData>) {
         className="w-3 h-3 !bg-purple-400 border-2 border-white"
         style={{ right: -6, top: '40%' }}
       />
-      
+
       {/* Loop body */}
       <Handle
         type="source"
@@ -107,7 +107,7 @@ function LoopNode({ data, selected }: NodeProps<LoopNodeData>) {
         className="w-3 h-3 !bg-blue-400 border-2 border-white"
         style={{ bottom: -6 }}
       />
-      
+
       {/* Exit condition */}
       <Handle
         type="source"

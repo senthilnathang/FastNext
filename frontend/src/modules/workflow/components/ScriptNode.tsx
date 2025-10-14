@@ -75,7 +75,7 @@ function ScriptNode({ data, selected }: NodeProps<ScriptNodeData>) {
   };
 
   return (
-    <div 
+    <div
       className={`
         px-3 py-2 shadow-md rounded-lg border-2 min-w-[150px] max-w-[200px]
         ${selected ? `border-opacity-80 ${getLanguageColor().split(' ')[2]}` : 'border-gray-300'}
@@ -89,7 +89,7 @@ function ScriptNode({ data, selected }: NodeProps<ScriptNodeData>) {
         className="w-3 h-3 !bg-gray-400 border-2 border-white"
         style={{ top: -6 }}
       />
-      
+
       {/* Node header */}
       <div className="flex items-center space-x-2 mb-2">
         {getLanguageIcon()}
@@ -153,7 +153,7 @@ function ScriptNode({ data, selected }: NodeProps<ScriptNodeData>) {
           {getScriptPreview()}
         </div>
       </div>
-      
+
       {/* Output handles */}
       {/* Success */}
       <Handle
@@ -163,7 +163,7 @@ function ScriptNode({ data, selected }: NodeProps<ScriptNodeData>) {
         className="w-3 h-3 !bg-green-400 border-2 border-white"
         style={{ bottom: -6, left: '30%' }}
       />
-      
+
       {/* Error */}
       <Handle
         type="source"

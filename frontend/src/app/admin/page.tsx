@@ -103,8 +103,7 @@ const adminMenuItems = [
 ];
 
 export default function AdminPage() {
-  console.log('AdminPage rendered with menu items:', adminMenuItems.map(item => item.title));
-  
+
   return (
     <div className="container mx-auto p-8">
       <div className="flex items-center space-x-2 mb-8">
@@ -112,11 +111,11 @@ export default function AdminPage() {
         <h1 className="text-3xl font-bold">Administration</h1>
         <Badge variant="outline">{adminMenuItems.length} menu items</Badge>
       </div>
-      
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {adminMenuItems.map((item) => {
           const Icon = item.icon;
-          
+
           return (
             <Link key={item.href} href={item.href}>
               <Card className="hover:shadow-lg transition-shadow cursor-pointer h-full">

@@ -74,8 +74,8 @@ export function WorkflowAnalyticsAdvanced({
 
   // Calculate derived metrics
   const derivedMetrics = useMemo(() => {
-    const successRate = metrics.totalExecutions > 0 
-      ? (metrics.successfulExecutions / metrics.totalExecutions) * 100 
+    const successRate = metrics.totalExecutions > 0
+      ? (metrics.successfulExecutions / metrics.totalExecutions) * 100
       : 0
 
     const failureRate = metrics.totalExecutions > 0
@@ -108,7 +108,7 @@ export function WorkflowAnalyticsAdvanced({
   const executionTimeline = useMemo(() => {
     const timeline: Record<string, number> = {}
     const now = new Date()
-    
+
     // Initialize last 24 hours
     for (let i = 23; i >= 0; i--) {
       const hour = new Date(now.getTime() - i * 60 * 60 * 1000)
@@ -124,9 +124,9 @@ export function WorkflowAnalyticsAdvanced({
     })
 
     return Object.entries(timeline).map(([hour, count]) => ({
-      hour: new Date(hour + ':00:00').toLocaleTimeString('en-US', { 
-        hour: 'numeric', 
-        hour12: true 
+      hour: new Date(hour + ':00:00').toLocaleTimeString('en-US', {
+        hour: 'numeric',
+        hour12: true
       }),
       count
     }))
@@ -299,7 +299,7 @@ export function WorkflowAnalyticsAdvanced({
                       </div>
                     </div>
                   </div>
-                  
+
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-2">
                       <XCircle className="h-4 w-4 text-red-500" />
@@ -312,7 +312,7 @@ export function WorkflowAnalyticsAdvanced({
                       </div>
                     </div>
                   </div>
-                  
+
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-2">
                       <Clock className="h-4 w-4 text-yellow-500" />
@@ -381,7 +381,7 @@ export function WorkflowAnalyticsAdvanced({
                         </Badge>
                       </div>
                     </div>
-                    
+
                     <div className="grid grid-cols-3 gap-4 text-sm">
                       <div>
                         <span className="text-muted-foreground">Executions</span>
@@ -439,8 +439,8 @@ export function WorkflowAnalyticsAdvanced({
             <CardContent className="p-0">
               <div className="space-y-0">
                 {filteredExecutions.slice(0, 20).map((execution, index) => (
-                  <div 
-                    key={execution.id} 
+                  <div
+                    key={execution.id}
                     className={`p-4 ${index !== filteredExecutions.length - 1 ? 'border-b' : ''}`}
                   >
                     <div className="flex items-center justify-between">
@@ -489,10 +489,10 @@ export function WorkflowAnalyticsAdvanced({
                     </div>
                     <div className="flex-1">
                       <div className="flex items-center space-x-2">
-                        <div 
+                        <div
                           className="bg-blue-500 h-4 rounded"
-                          style={{ 
-                            width: `${Math.max((point.count / Math.max(...executionTimeline.map(p => p.count))) * 100, 2)}%` 
+                          style={{
+                            width: `${Math.max((point.count / Math.max(...executionTimeline.map(p => p.count))) * 100, 2)}%`
                           }}
                         />
                         <span className="text-sm font-medium">{point.count}</span>

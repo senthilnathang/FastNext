@@ -79,7 +79,7 @@ export function hasGoodContrast(element: HTMLElement): boolean {
   const styles = window.getComputedStyle(element);
   const bgColor = styles.backgroundColor;
   const textColor = styles.color;
-  
+
   // This is a simplified check - in production you'd want to use a proper contrast ratio calculation
   // For now, just check if colors are explicitly set
   return bgColor !== 'rgba(0, 0, 0, 0)' && textColor !== 'rgba(0, 0, 0, 0)';
@@ -150,7 +150,7 @@ export function createKeyboardHandler(callbacks: {
  */
 export function useFocusManagement() {
   const focusManager = new FocusManager();
-  
+
   return {
     saveFocus: focusManager.saveFocus.bind(focusManager),
     restoreFocus: focusManager.restoreFocus.bind(focusManager),

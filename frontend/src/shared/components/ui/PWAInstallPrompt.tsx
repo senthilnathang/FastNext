@@ -53,7 +53,7 @@ export function PWAInstallPrompt({
       const installEvent = e as BeforeInstallPromptEvent
       setDeferredPrompt(installEvent)
       setIsInstallable(true)
-      
+
       // Show prompt after a delay if not dismissed
       setTimeout(() => {
         const dismissed = localStorage.getItem('pwa-install-dismissed')
@@ -76,7 +76,6 @@ export function PWAInstallPrompt({
       setIsInstalled(true)
       setIsVisible(false)
       setDeferredPrompt(null)
-      console.log('PWA was installed')
     }
 
     window.addEventListener('appinstalled', handler)
@@ -120,15 +119,13 @@ export function PWAInstallPrompt({
     try {
       await deferredPrompt.prompt()
       const choiceResult = await deferredPrompt.userChoice
-      
+
       if (choiceResult.outcome === 'accepted') {
-        console.log('User accepted the install prompt')
         setIsVisible(false)
       } else {
-        console.log('User dismissed the install prompt')
         handleDismiss()
       }
-      
+
       setDeferredPrompt(null)
     } catch (error) {
       console.error('Error showing install prompt:', error)
@@ -138,7 +135,7 @@ export function PWAInstallPrompt({
   const handleDismiss = () => {
     setIsVisible(false)
     localStorage.setItem('pwa-install-dismissed', 'true')
-    
+
     // Clear dismissal after 7 days
     setTimeout(() => {
       localStorage.removeItem('pwa-install-dismissed')
@@ -198,7 +195,7 @@ export function PWAInstallPrompt({
           </Button>
         </div>
       </CardHeader>
-      
+
       <CardContent className="space-y-4">
         <div className="flex items-center space-x-4 text-sm text-gray-600 dark:text-gray-400">
           <div className="flex items-center space-x-1">

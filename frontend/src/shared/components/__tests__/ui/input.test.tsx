@@ -35,10 +35,10 @@ describe('Input Component', () => {
   it('handles value changes', () => {
     const handleChange = jest.fn()
     render(<Input onChange={handleChange} data-testid="input" />)
-    
+
     const input = screen.getByTestId('input')
     fireEvent.change(input, { target: { value: 'test value' } })
-    
+
     expect(handleChange).toHaveBeenCalledTimes(1)
   })
 
@@ -81,13 +81,13 @@ describe('Input Component', () => {
   it('handles focus and blur events', () => {
     const handleFocus = jest.fn()
     const handleBlur = jest.fn()
-    
+
     render(<Input onFocus={handleFocus} onBlur={handleBlur} data-testid="input" />)
-    
+
     const input = screen.getByTestId('input')
     fireEvent.focus(input)
     expect(handleFocus).toHaveBeenCalledTimes(1)
-    
+
     fireEvent.blur(input)
     expect(handleBlur).toHaveBeenCalledTimes(1)
   })

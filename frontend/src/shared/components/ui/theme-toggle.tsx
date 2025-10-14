@@ -24,7 +24,7 @@ const themeToggleVariants = cva(
       },
       size: {
         sm: "h-8 w-8",
-        default: "h-9 w-9", 
+        default: "h-9 w-9",
         lg: "h-10 w-10",
       },
     },
@@ -35,28 +35,28 @@ const themeToggleVariants = cva(
   }
 )
 
-export interface ThemeToggleProps 
+export interface ThemeToggleProps
   extends Omit<React.ComponentProps<typeof Button>, 'size' | 'variant'>,
     VariantProps<typeof themeToggleVariants> {
   showLabels?: boolean;
   align?: 'start' | 'center' | 'end';
 }
 
-export function ThemeToggle({ 
-  className, 
-  variant = "default", 
-  size = "default", 
+export function ThemeToggle({
+  className,
+  variant = "default",
+  size = "default",
   showLabels = true,
   align = "end",
-  ...props 
+  ...props
 }: ThemeToggleProps) {
   const { theme, setTheme } = useTheme();
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button 
-          variant="ghost" 
+        <Button
+          variant="ghost"
           className={cn(themeToggleVariants({ variant, size }), "px-0", className)}
           data-slot="theme-toggle"
           {...props}
@@ -87,18 +87,18 @@ export function ThemeToggle({
   );
 }
 
-export interface SimpleThemeToggleProps 
+export interface SimpleThemeToggleProps
   extends Omit<React.ComponentProps<typeof Button>, 'onClick' | 'size' | 'variant'>,
     VariantProps<typeof themeToggleVariants> {
   cycle?: 'light-dark' | 'light-dark-system';
 }
 
-export function SimpleThemeToggle({ 
+export function SimpleThemeToggle({
   className,
-  variant = "default", 
+  variant = "default",
   size = "default",
   cycle = 'light-dark-system',
-  ...props 
+  ...props
 }: SimpleThemeToggleProps) {
   const { theme, setTheme, resolvedTheme } = useTheme();
 
@@ -131,10 +131,10 @@ export function SimpleThemeToggle({
   };
 
   return (
-    <Button 
-      variant="ghost" 
-      size="icon" 
-      onClick={toggleTheme} 
+    <Button
+      variant="ghost"
+      size="icon"
+      onClick={toggleTheme}
       title={getTooltip()}
       className={cn(themeToggleVariants({ variant, size }), className)}
       data-slot="simple-theme-toggle"

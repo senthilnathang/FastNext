@@ -7,11 +7,11 @@ import { Input } from '@/shared/components/ui/input';
 import { Label } from '@/shared/components/ui/label';
 import { Card } from '@/shared/components/ui/card';
 import { Checkbox } from '@/shared/components/ui/checkbox';
-import { 
-  Shield, 
-  Smartphone, 
-  Lock, 
-  Database, 
+import {
+  Shield,
+  Smartphone,
+  Lock,
+  Database,
   AlertTriangle,
   CheckCircle,
   Clock,
@@ -89,7 +89,7 @@ export default function SecuritySettings() {
       });
 
       if (!response.ok) throw new Error('Failed to fetch security settings');
-      
+
       const data = await response.json();
       setSettings(data);
     } catch (err) {
@@ -108,7 +108,7 @@ export default function SecuritySettings() {
       });
 
       if (!response.ok) throw new Error('Failed to fetch security overview');
-      
+
       const data = await response.json();
       setOverview(data);
     } catch (err) {
@@ -142,7 +142,7 @@ export default function SecuritySettings() {
       const updatedSettings = await response.json();
       setSettings(updatedSettings);
       setSuccess(true);
-      
+
       // Refresh overview
       await fetchSecurityOverview();
     } catch (err) {
@@ -307,7 +307,7 @@ export default function SecuritySettings() {
       try {
         const text = await file.text();
         const importData = JSON.parse(text);
-        
+
         if (importData.security_settings) {
           if (confirm('Are you sure you want to import these security settings? This will overwrite your current settings.')) {
             Object.entries(importData.security_settings).forEach(([key, value]) => {
@@ -358,7 +358,7 @@ export default function SecuritySettings() {
               Security Overview
             </h2>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
             <div className={`p-4 rounded-lg border-2 ${getSecurityScoreBg(overview.security_score)}`}>
               <div className="flex items-center justify-between">
@@ -369,7 +369,7 @@ export default function SecuritySettings() {
                 {overview.security_score}/100
               </div>
             </div>
-            
+
             <div className="p-4 bg-gray-50 rounded-lg border">
               <div className="flex items-center justify-between">
                 <span className="text-sm font-medium text-gray-700">2FA Status</span>
@@ -379,7 +379,7 @@ export default function SecuritySettings() {
                 {overview.two_factor_enabled ? 'Enabled' : 'Disabled'}
               </div>
             </div>
-            
+
             <div className="p-4 bg-gray-50 rounded-lg border">
               <div className="flex items-center justify-between">
                 <span className="text-sm font-medium text-gray-700">Active Sessions</span>
@@ -389,7 +389,7 @@ export default function SecuritySettings() {
                 {overview.active_sessions_count}
               </div>
             </div>
-            
+
             <div className="p-4 bg-gray-50 rounded-lg border">
               <div className="flex items-center justify-between">
                 <span className="text-sm font-medium text-gray-700">Recent Attempts</span>
@@ -400,7 +400,7 @@ export default function SecuritySettings() {
               </div>
             </div>
           </div>
-          
+
           {overview.recommendations.length > 0 && (
             <div className="border-t pt-4">
               <h3 className="text-sm font-semibold text-gray-700 mb-2 flex items-center">
@@ -444,7 +444,7 @@ export default function SecuritySettings() {
               Two-Factor Authentication
             </h3>
           </div>
-          
+
           <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
             <div>
               <p className="font-medium text-gray-900 dark:text-white">
@@ -488,7 +488,7 @@ export default function SecuritySettings() {
               Login Security
             </h3>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <Label htmlFor="password_expiry_days">Password Expiry (days)</Label>
@@ -505,7 +505,7 @@ export default function SecuritySettings() {
               />
               <p className="text-xs text-gray-500 mt-1">Set to 0 for no expiry</p>
             </div>
-            
+
             <div>
               <Label htmlFor="max_login_attempts">Max Login Attempts</Label>
               <Input
@@ -520,7 +520,7 @@ export default function SecuritySettings() {
                 className="mt-1"
               />
             </div>
-            
+
             <div>
               <Label htmlFor="lockout_duration_minutes">Lockout Duration (minutes)</Label>
               <Input
@@ -546,7 +546,7 @@ export default function SecuritySettings() {
               Session Security
             </h3>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <Label htmlFor="max_session_duration_hours">Max Session Duration (hours)</Label>
@@ -562,7 +562,7 @@ export default function SecuritySettings() {
                 className="mt-1"
               />
             </div>
-            
+
             {allowConcurrentSessions && (
               <div>
                 <Label htmlFor="max_concurrent_sessions">Max Concurrent Sessions</Label>
@@ -580,7 +580,7 @@ export default function SecuritySettings() {
               </div>
             )}
           </div>
-          
+
           <div className="mt-4">
             <div className="flex items-center space-x-2">
               <Checkbox
@@ -602,7 +602,7 @@ export default function SecuritySettings() {
               Email Notifications
             </h3>
           </div>
-          
+
           <div className="space-y-3">
             <div className="flex items-center space-x-2">
               <Checkbox
@@ -613,7 +613,7 @@ export default function SecuritySettings() {
                 Send email notification on login
               </Label>
             </div>
-            
+
             <div className="flex items-center space-x-2">
               <Checkbox
                 id="email_on_password_change"
@@ -623,7 +623,7 @@ export default function SecuritySettings() {
                 Send email notification on password change
               </Label>
             </div>
-            
+
             <div className="flex items-center space-x-2">
               <Checkbox
                 id="email_on_security_change"
@@ -633,7 +633,7 @@ export default function SecuritySettings() {
                 Send email notification on security changes
               </Label>
             </div>
-            
+
             <div className="flex items-center space-x-2">
               <Checkbox
                 id="email_on_suspicious_activity"
@@ -654,7 +654,7 @@ export default function SecuritySettings() {
               Privacy & Data
             </h3>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
             <div>
               <Label htmlFor="data_retention_days">Data Retention (days)</Label>
@@ -671,7 +671,7 @@ export default function SecuritySettings() {
               />
               <p className="text-xs text-gray-500 mt-1">Set to 0 for indefinite retention</p>
             </div>
-            
+
             <div>
               <Label htmlFor="api_rate_limit">API Rate Limit (requests/hour)</Label>
               <Input
@@ -687,7 +687,7 @@ export default function SecuritySettings() {
               />
             </div>
           </div>
-          
+
           <div className="space-y-3">
             <div className="flex items-center space-x-2">
               <Checkbox
@@ -698,7 +698,7 @@ export default function SecuritySettings() {
                 Enable activity logging
               </Label>
             </div>
-            
+
             <div className="flex items-center space-x-2">
               <Checkbox
                 id="api_access_enabled"
@@ -731,7 +731,7 @@ export default function SecuritySettings() {
                 Advanced Operations
               </h4>
             </div>
-            
+
             <div className="grid grid-cols-2 md:grid-cols-6 gap-2">
               <Button
                 type="button"
@@ -744,7 +744,7 @@ export default function SecuritySettings() {
                 <Upload className="h-3 w-3" />
                 <span>Backup</span>
               </Button>
-              
+
               <Button
                 type="button"
                 variant="outline"
@@ -756,7 +756,7 @@ export default function SecuritySettings() {
                 <Download className="h-3 w-3" />
                 <span>Restore</span>
               </Button>
-              
+
               <Button
                 type="button"
                 variant="outline"
@@ -768,7 +768,7 @@ export default function SecuritySettings() {
                 <Download className="h-3 w-3" />
                 <span>Export</span>
               </Button>
-              
+
               <Button
                 type="button"
                 variant="outline"
@@ -780,7 +780,7 @@ export default function SecuritySettings() {
                 <Upload className="h-3 w-3" />
                 <span>Import</span>
               </Button>
-              
+
               <Button
                 type="button"
                 variant="outline"
@@ -792,7 +792,7 @@ export default function SecuritySettings() {
                 <Copy className="h-3 w-3" />
                 <span>Copy</span>
               </Button>
-              
+
               <Button
                 type="button"
                 variant="destructive"
@@ -805,7 +805,7 @@ export default function SecuritySettings() {
                 <span>Reset</span>
               </Button>
             </div>
-            
+
             <div className="mt-3 space-y-1">
               {settingsBackup && (
                 <p className="text-xs text-green-600">

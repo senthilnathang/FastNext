@@ -31,10 +31,10 @@ import ScriptNode from './ScriptNode';
 
 import { Button } from '@/shared/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card';
-import { 
-  Plus, 
-  Save, 
-  ZoomOut, 
+import {
+  Plus,
+  Save,
+  ZoomOut,
   Maximize,
   Circle,
   GitBranch,
@@ -117,8 +117,8 @@ const AdvancedWorkflowBuilderInner = memo(({
   React.useEffect(() => {
     const handleNodeDataUpdate = (event: CustomEvent) => {
       const { nodeId, newData } = event.detail;
-      setNodes(nds => nds.map(node => 
-        node.id === nodeId 
+      setNodes(nds => nds.map(node =>
+        node.id === nodeId
           ? { ...node, data: { ...node.data, ...newData } }
           : node
       ));
@@ -134,11 +134,11 @@ const AdvancedWorkflowBuilderInner = memo(({
   const onConnect = useCallback(
     (params: Connection) => {
       if (readOnly || !params.source || !params.target) return;
-      
+
       // Validate connection based on node types
       const sourceNode = nodes.find(n => n.id === params.source);
       const targetNode = nodes.find(n => n.id === params.target);
-      
+
       if (!sourceNode || !targetNode) return;
 
       // Prevent self-loops (except for loop nodes)
@@ -148,7 +148,7 @@ const AdvancedWorkflowBuilderInner = memo(({
       if (sourceNode.type === 'loop' && params.sourceHandle === 'loop_back') {
         // This is a loop-back connection, allow it
       }
-      
+
       const edge: WorkflowEdge = {
         id: `edge_${params.source}_${params.target}_${Date.now()}`,
         source: params.source,
@@ -160,7 +160,7 @@ const AdvancedWorkflowBuilderInner = memo(({
         data: {
           action: 'transition',
           label: 'Transition',
-          condition: params.sourceHandle === 'false' ? 'condition === false' : 
+          condition: params.sourceHandle === 'false' ? 'condition === false' :
                     params.sourceHandle === 'true' ? 'condition === true' : undefined
         }
       };
@@ -312,7 +312,6 @@ const AdvancedWorkflowBuilderInner = memo(({
         description: 'Execute JavaScript code',
         color: '#F59E0B',
         language: 'javascript' as const,
-        script: 'console.log("Hello World");',
         inputVariables: [],
         outputVariables: [],
         environment: 'sandbox' as const,
@@ -376,7 +375,7 @@ const AdvancedWorkflowBuilderInner = memo(({
   // Auto-layout with improved algorithm
   const autoLayout = useCallback(() => {
     if (readOnly) return;
-    
+
     // Hierarchical layout for better workflow visualization
     const updatedNodes = nodes.map((node, index) => {
       const row = Math.floor(index / 4);
@@ -389,17 +388,17 @@ const AdvancedWorkflowBuilderInner = memo(({
         },
       };
     });
-    
+
     setNodes(updatedNodes);
   }, [nodes, setNodes, readOnly]);
 
   // Workflow execution simulation
   const executeWorkflow = useCallback(() => {
     if (readOnly || isExecuting) return;
-    
+
     setIsExecuting(true);
     setExecutionStatus('running');
-    
+
     // Simulate workflow execution
     setTimeout(() => {
       setExecutionStatus('completed');
@@ -413,7 +412,7 @@ const AdvancedWorkflowBuilderInner = memo(({
   // Validate workflow
   const validateWorkflow = useCallback(() => {
     const issues: string[] = [];
-    
+
     // Check for start node
     const startNodes = nodes.filter(n => n.data.isInitial);
     if (startNodes.length === 0) {
@@ -421,25 +420,25 @@ const AdvancedWorkflowBuilderInner = memo(({
     } else if (startNodes.length > 1) {
       issues.push('Multiple start nodes defined');
     }
-    
+
     // Check for end node
     const endNodes = nodes.filter(n => n.data.isFinal);
     if (endNodes.length === 0) {
       issues.push('No end node defined');
     }
-    
+
     // Check for orphaned nodes
     const connectedNodeIds = new Set();
     edges.forEach(edge => {
       connectedNodeIds.add(edge.source);
       connectedNodeIds.add(edge.target);
     });
-    
+
     const orphanedNodes = nodes.filter(n => !connectedNodeIds.has(n.id) && nodes.length > 1);
     if (orphanedNodes.length > 0) {
       issues.push(`${orphanedNodes.length} orphaned nodes found`);
     }
-    
+
     return issues;
   }, [nodes, edges]);
 
@@ -473,7 +472,7 @@ const AdvancedWorkflowBuilderInner = memo(({
             </span>
           )}
         </div>
-        
+
         <div className="flex items-center space-x-2">
           {!readOnly && (
             <>
@@ -508,7 +507,7 @@ const AdvancedWorkflowBuilderInner = memo(({
                     <User className="h-4 w-4 mr-2" />
                     User Task
                   </DropdownMenuItem>
-                  
+
                   {enableAdvancedFeatures && (
                     <>
                       <DropdownMenuSeparator />
@@ -525,7 +524,7 @@ const AdvancedWorkflowBuilderInner = memo(({
                         <RotateCw className="h-4 w-4 mr-2" />
                         For Each Loop
                       </DropdownMenuItem>
-                      
+
                       <DropdownMenuSeparator />
                       <DropdownMenuLabel>Data Operations</DropdownMenuLabel>
                       <DropdownMenuItem onClick={() => addNode('setVariable')}>
@@ -540,7 +539,7 @@ const AdvancedWorkflowBuilderInner = memo(({
                         <Variable className="h-4 w-4 mr-2" />
                         Calculate
                       </DropdownMenuItem>
-                      
+
                       <DropdownMenuSeparator />
                       <DropdownMenuLabel>Advanced</DropdownMenuLabel>
                       <DropdownMenuItem onClick={() => addNode('subWorkflow')}>
@@ -563,7 +562,7 @@ const AdvancedWorkflowBuilderInner = memo(({
                   )}
                 </DropdownMenuContent>
               </DropdownMenu>
-              
+
               <Button
                 variant="outline"
                 size="sm"
@@ -574,7 +573,7 @@ const AdvancedWorkflowBuilderInner = memo(({
               </Button>
             </>
           )}
-          
+
           <Button
             variant="outline"
             size="sm"
@@ -604,7 +603,7 @@ const AdvancedWorkflowBuilderInner = memo(({
               )}
             </Button>
           )}
-          
+
           {!readOnly && (
             <Button
               onClick={handleSave}
@@ -654,7 +653,7 @@ const AdvancedWorkflowBuilderInner = memo(({
               size={1}
               color="#e5e7eb"
             />
-            
+
             {/* Enhanced Panels */}
             <Panel position="top-right" className="space-y-2">
               {/* Workflow Info */}

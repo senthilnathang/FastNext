@@ -73,7 +73,7 @@ interface UserCreateDialogProps {
 export function UserCreateDialog({ open, onOpenChange }: UserCreateDialogProps) {
   const [showPassword, setShowPassword] = React.useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = React.useState(false)
-  
+
   const { data: rolesData, isLoading: rolesLoading } = useRoles({ active_only: true })
   const createUserMutation = useCreateUser()
 
@@ -106,7 +106,7 @@ export function UserCreateDialog({ open, onOpenChange }: UserCreateDialogProps) 
         role_id: data.role_id,
         send_invitation: data.send_invitation,
       })
-      
+
       form.reset()
       onOpenChange(false)
     } catch (error) {
@@ -123,21 +123,21 @@ export function UserCreateDialog({ open, onOpenChange }: UserCreateDialogProps) 
     const length = 12
     const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*"
     let password = ""
-    
+
     // Ensure at least one character from each required set
     password += "abcdefghijklmnopqrstuvwxyz"[Math.floor(Math.random() * 26)]
     password += "ABCDEFGHIJKLMNOPQRSTUVWXYZ"[Math.floor(Math.random() * 26)]
     password += "0123456789"[Math.floor(Math.random() * 10)]
     password += "!@#$%^&*"[Math.floor(Math.random() * 8)]
-    
+
     // Fill the rest randomly
     for (let i = 4; i < length; i++) {
       password += charset[Math.floor(Math.random() * charset.length)]
     }
-    
+
     // Shuffle the password
     const shuffled = password.split('').sort(() => Math.random() - 0.5).join('')
-    
+
     form.setValue('password', shuffled)
     form.setValue('confirm_password', shuffled)
   }
@@ -317,7 +317,7 @@ export function UserCreateDialog({ open, onOpenChange }: UserCreateDialogProps) 
 
             <div className="space-y-4 border-t pt-4">
               <h4 className="text-sm font-medium">Account Settings</h4>
-              
+
               <div className="grid grid-cols-2 gap-4">
                 <FormField
                   control={form.control}

@@ -23,17 +23,17 @@ interface UserItem {
 async function fetchUsers(page: number, pageSize: number): Promise<{ data: UserItem[]; hasMore: boolean; total: number }> {
   // Simulate network delay
   await new Promise(resolve => setTimeout(resolve, 800))
-  
+
   const startId = (page - 1) * pageSize + 1
   const users: UserItem[] = []
-  
+
   const roles = ['Admin', 'Editor', 'Viewer', 'Moderator', 'Contributor']
   const locations = ['New York', 'London', 'Tokyo', 'Sydney', 'Berlin', 'Paris', 'Toronto', 'São Paulo']
-  
+
   for (let i = 0; i < pageSize; i++) {
     const id = startId + i
     if (id > 500) break // Limit total to 500 users
-    
+
     users.push({
       id,
       name: `User ${id}`,
@@ -45,7 +45,7 @@ async function fetchUsers(page: number, pageSize: number): Promise<{ data: UserI
       isOnline: Math.random() > 0.3
     })
   }
-  
+
   return {
     data: users,
     hasMore: startId + pageSize <= 500,
@@ -71,7 +71,7 @@ function UserCard({ user }: { user: UserItem }) {
               <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white"></div>
             )}
           </div>
-          
+
           {/* User Info */}
           <div className="flex-1 min-w-0">
             <div className="flex items-center space-x-2 mb-2">
@@ -87,7 +87,7 @@ function UserCard({ user }: { user: UserItem }) {
                 </Badge>
               )}
             </div>
-            
+
             <div className="space-y-1 text-sm text-gray-600 dark:text-gray-400">
               <div className="flex items-center space-x-1">
                 <Mail className="w-3 h-3" />

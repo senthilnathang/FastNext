@@ -24,7 +24,7 @@ const eventsApi = {
     search_query?: string
   }): Promise<EventListResponse> => {
     const searchParams = new URLSearchParams()
-    
+
     Object.entries(params).forEach(([key, value]) => {
       if (value !== undefined && value !== null && value !== '') {
         searchParams.append(key, value.toString())
@@ -80,7 +80,7 @@ const eventsApi = {
   // Export events
   exportEvents: async (params: EventExportRequest): Promise<Blob> => {
     const searchParams = new URLSearchParams()
-    
+
     Object.entries(params).forEach(([key, value]) => {
       if (value !== undefined && value !== null && value !== '') {
         searchParams.append(key, value.toString())
@@ -107,7 +107,7 @@ const eventsApi = {
     lines?: number
   }) => {
     const searchParams = new URLSearchParams()
-    
+
     Object.entries(params).forEach(([key, value]) => {
       if (value !== undefined && value !== null && value !== '') {
         searchParams.append(key, value.toString())
@@ -258,16 +258,16 @@ export const useExportEvents = () => {
       const url = window.URL.createObjectURL(blob)
       const link = document.createElement('a')
       link.href = url
-      
+
       const filename = `events-${new Date().toISOString().split('T')[0]}.${variables.format}`
       link.setAttribute('download', filename)
-      
+
       document.body.appendChild(link)
       link.click()
       link.remove()
-      
+
       window.URL.revokeObjectURL(url)
-      
+
       toast.success(`Events exported successfully as ${variables.format.toUpperCase()}`)
     },
     onError: (error) => {
@@ -283,7 +283,7 @@ export const useRealTimeEvents = () => {
 
   // TODO: Implement WebSocket connection for real-time updates
   // This would invalidate queries when new events arrive
-  
+
   const invalidateEventsQueries = () => {
     queryClient.invalidateQueries({ queryKey: ['events'] })
     queryClient.invalidateQueries({ queryKey: ['event-statistics'] })

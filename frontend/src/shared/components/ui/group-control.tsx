@@ -30,7 +30,7 @@ export function GroupControl({
   allowClear = true
 }: GroupControlProps) {
   const selectedOption = options.find(option => option.key === value)
-  
+
   const handleGroupChange = (field: string) => {
     onChange(field)
   }

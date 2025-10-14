@@ -16,7 +16,7 @@ interface SecurityEvent {
   sessionId?: string;
 }
 
-type SecurityEventType = 
+type SecurityEventType =
   | 'xss_attempt'
   | 'sql_injection'
   | 'csrf_attempt'
@@ -68,9 +68,9 @@ class SecurityMonitor {
 
   private constructor() {
     // Check if security monitoring should be disabled
-    const disableMonitoring = process.env.NODE_ENV === 'development' || 
+    const disableMonitoring = process.env.NODE_ENV === 'development' ||
                               process.env.DISABLE_SECURITY_MONITORING === 'true';
-    
+
     if (disableMonitoring) {
       this.isEnabled = false;
       return;
@@ -97,7 +97,6 @@ class SecurityMonitor {
       this.processAlerts();
     }, 60000); // Every minute
 
-    console.log('Security monitoring initialized');
   }
 
   /**
@@ -186,7 +185,7 @@ class SecurityMonitor {
     }[event.severity];
 
     const message = `Security Event [${event.type}] ${event.severity.toUpperCase()}: ${JSON.stringify(event.details)}`;
-    
+
     console[logLevel as 'info' | 'warn' | 'error'](message, {
       eventId: event.id,
       timestamp: event.timestamp,
@@ -230,7 +229,7 @@ class SecurityMonitor {
   private processCriticalEvent(event: SecurityEvent): void {
     // Immediate actions for critical events
     console.error('CRITICAL SECURITY EVENT:', event);
-    
+
     // Could trigger immediate alerts, notifications, etc.
     this.createAlert(event.type, [event]);
   }
@@ -239,19 +238,19 @@ class SecurityMonitor {
     for (const [key, events] of this.eventBuffer.entries()) {
       const [eventType] = key.split(':') as [SecurityEventType, string];
       const threshold = this.alertThresholds[eventType];
-      
+
       if (!threshold) continue;
 
       // Filter events within time window
       const now = Date.now();
-      const recentEvents = events.filter(event => 
+      const recentEvents = events.filter(event =>
         now - new Date(event.timestamp).getTime() < threshold.timeWindow
       );
 
       // Check if threshold is exceeded
       if (recentEvents.length >= threshold.count) {
         this.createAlert(eventType, recentEvents);
-        
+
         // Clear processed events
         this.eventBuffer.set(key, []);
       }
@@ -260,7 +259,7 @@ class SecurityMonitor {
 
   private createAlert(eventType: SecurityEventType, events: SecurityEvent[]): void {
     const alertId = `alert_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    
+
     const alert: SecurityAlert = {
       id: alertId,
       eventType,
@@ -274,9 +273,9 @@ class SecurityMonitor {
     };
 
     this.alerts.push(alert);
-    
+
     console.error('SECURITY ALERT TRIGGERED:', alert);
-    
+
     // Send alert notification
     this.sendAlertNotification(alert);
   }
@@ -298,9 +297,9 @@ class SecurityMonitor {
 
   private cleanupOldEvents(): void {
     const cutoffTime = Date.now() - (24 * 60 * 60 * 1000); // 24 hours ago
-    
+
     // Clean main events array
-    this.events = this.events.filter(event => 
+    this.events = this.events.filter(event =>
       new Date(event.timestamp).getTime() > cutoffTime
     );
 
@@ -309,7 +308,7 @@ class SecurityMonitor {
       const filteredEvents = events.filter(event =>
         new Date(event.timestamp).getTime() > cutoffTime
       );
-      
+
       if (filteredEvents.length === 0) {
         this.eventBuffer.delete(key);
       } else {
@@ -345,28 +344,28 @@ class SecurityMonitor {
       if (filter.type) {
         filteredEvents = filteredEvents.filter(e => e.type === filter.type);
       }
-      
+
       if (filter.severity) {
         filteredEvents = filteredEvents.filter(e => e.severity === filter.severity);
       }
-      
+
       if (filter.timeRange) {
         const cutoff = Date.now() - filter.timeRange;
-        filteredEvents = filteredEvents.filter(e => 
+        filteredEvents = filteredEvents.filter(e =>
           new Date(e.timestamp).getTime() > cutoff
         );
       }
-      
+
       if (filter.clientIP) {
         filteredEvents = filteredEvents.filter(e => e.clientIP === filter.clientIP);
       }
-      
+
       if (filter.userId) {
         filteredEvents = filteredEvents.filter(e => e.userId === filter.userId);
       }
     }
 
-    return filteredEvents.sort((a, b) => 
+    return filteredEvents.sort((a, b) =>
       new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
     );
   }
@@ -375,7 +374,7 @@ class SecurityMonitor {
    * Get security alerts
    */
   getAlerts(): SecurityAlert[] {
-    return [...this.alerts].sort((a, b) => 
+    return [...this.alerts].sort((a, b) =>
       new Date(b.lastSeen).getTime() - new Date(a.lastSeen).getTime()
     );
   }
@@ -392,7 +391,7 @@ class SecurityMonitor {
     timeline: Array<{ timestamp: string; count: number }>;
   } {
     const cutoff = Date.now() - timeRange;
-    const recentEvents = this.events.filter(e => 
+    const recentEvents = this.events.filter(e =>
       new Date(e.timestamp).getTime() > cutoff
     );
 
@@ -403,10 +402,10 @@ class SecurityMonitor {
     recentEvents.forEach(event => {
       // Count by type
       eventsByType[event.type] = (eventsByType[event.type] || 0) + 1;
-      
+
       // Count by severity
       eventsBySeverity[event.severity]++;
-      
+
       // Count by IP
       if (event.clientIP) {
         ipCounts.set(event.clientIP, (ipCounts.get(event.clientIP) || 0) + 1);
@@ -435,7 +434,7 @@ class SecurityMonitor {
   private generateTimeline(events: SecurityEvent[], timeRange: number): Array<{ timestamp: string; count: number }> {
     const bucketSize = Math.max(timeRange / 24, 60 * 60 * 1000); // At least 1 hour buckets
     const buckets = new Map<number, number>();
-    
+
     events.forEach(event => {
       const eventTime = new Date(event.timestamp).getTime();
       const bucketKey = Math.floor(eventTime / bucketSize) * bucketSize;
@@ -455,7 +454,6 @@ class SecurityMonitor {
    */
   setEnabled(enabled: boolean): void {
     this.isEnabled = enabled;
-    console.log(`Security monitoring ${enabled ? 'enabled' : 'disabled'}`);
   }
 
   /**
@@ -463,7 +461,6 @@ class SecurityMonitor {
    */
   updateThresholds(newThresholds: Partial<typeof this.alertThresholds>): void {
     this.alertThresholds = { ...this.alertThresholds, ...newThresholds };
-    console.log('Security monitoring thresholds updated');
   }
 }
 
@@ -495,15 +492,13 @@ export function getSecurityStatistics(timeRange?: number) {
 }
 
 // Initialize monitoring
-const disableMonitoring = process.env.NODE_ENV === 'development' || 
+const disableMonitoring = process.env.NODE_ENV === 'development' ||
                           process.env.DISABLE_SECURITY_MONITORING === 'true';
 
 if (!disableMonitoring) {
   if (typeof window !== 'undefined') {
     // Client-side initialization
-    console.log('Security monitoring initialized on client');
   } else {
     // Server-side initialization
-    console.log('Security monitoring initialized on server');
   }
 }

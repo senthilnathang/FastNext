@@ -184,7 +184,7 @@ export function DataImport({
               allowedFormats={permissions?.allowedFormats || allowedFormats}
               disabled={!canImport}
             />
-            
+
             {parseError && (
               <div className="flex items-start space-x-2 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded">
                 <AlertCircle className="h-5 w-5 text-red-500 mt-0.5 flex-shrink-0" />
@@ -194,7 +194,7 @@ export function DataImport({
                 </div>
               </div>
             )}
-            
+
             {isParsing && (
               <div className="flex items-center justify-center py-8">
                 <div className="flex items-center space-x-2">
@@ -218,12 +218,12 @@ export function DataImport({
                 onMappingsChange={handleFieldMappingChange}
               />
             )}
-            
+
             <div className="flex items-center justify-between">
               <Button variant="outline" onClick={() => setCurrentStep('upload')}>
                 Back to Upload
               </Button>
-              <Button 
+              <Button
                 onClick={handleValidate}
                 disabled={fieldMappings.length === 0 || !canValidate}
               >
@@ -242,13 +242,13 @@ export function DataImport({
               validationError={validationError}
               isValidating={isValidating}
             />
-            
+
             <div className="flex items-center justify-between">
               <Button variant="outline" onClick={() => setCurrentStep('map')}>
                 Back to Mapping
               </Button>
               <div className="flex items-center space-x-2">
-                <Button 
+                <Button
                   variant="outline"
                   onClick={handleValidate}
                   disabled={isValidating}
@@ -280,13 +280,13 @@ export function DataImport({
               onRetry={retryImport}
               onClearCompleted={clearCompletedJobs}
             />
-            
+
             <div className="flex items-center justify-between">
               <Button variant="outline" onClick={handleRetry}>
                 Import Another File
               </Button>
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 onClick={() => embedded ? undefined : setIsOpen(false)}
               >
                 Close
@@ -325,7 +325,7 @@ export function DataImport({
               </Badge>
             )}
           </div>
-          
+
           {selectedFile && (
             <div className="text-sm text-gray-600 dark:text-gray-400">
               {selectedFile.name}
@@ -354,7 +354,7 @@ export function DataImport({
         <DialogTrigger asChild>
           {importButton}
         </DialogTrigger>
-        
+
         <DialogContent className="max-w-6xl max-h-[95vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center space-x-2">

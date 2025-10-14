@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 
 /**
  * E2E API tests for health checks and basic API functionality.
- * 
+ *
  * Tests API endpoints directly using Playwright's request capabilities.
  */
 
@@ -11,9 +11,9 @@ test.describe('API Health Checks', () => {
 
   test('should return healthy status from health endpoint', async ({ request }) => {
     const response = await request.get(`${apiBaseUrl}/health`);
-    
+
     expect(response.status()).toBe(200);
-    
+
     const data = await response.json();
     expect(data.status).toBe('healthy');
     expect(data.service).toBe('FastNext Framework API');
@@ -23,9 +23,9 @@ test.describe('API Health Checks', () => {
 
   test('should return API information from root endpoint', async ({ request }) => {
     const response = await request.get(`${apiBaseUrl}/`);
-    
+
     expect(response.status()).toBe(200);
-    
+
     const data = await response.json();
     expect(data.message).toContain('FastNext Framework');
     expect(data.version).toBeTruthy();
@@ -35,9 +35,9 @@ test.describe('API Health Checks', () => {
 
   test('should return OpenAPI spec', async ({ request }) => {
     const response = await request.get(`${apiBaseUrl}/api/v1/openapi.json`);
-    
+
     expect(response.status()).toBe(200);
-    
+
     const data = await response.json();
     expect(data.openapi).toBeTruthy();
     expect(data.info).toBeTruthy();
@@ -60,9 +60,9 @@ test.describe('API Health Checks', () => {
 
   test('should require authentication for protected endpoints', async ({ request }) => {
     const response = await request.get(`${apiBaseUrl}/api/v1/users`);
-    
+
     expect(response.status()).toBe(403);
-    
+
     const data = await response.json();
     expect(data.success).toBe(false);
     expect(data.error.message).toContain('authenticated');
@@ -79,9 +79,9 @@ test.describe('API Authentication', () => {
         password: 'wrongpassword'
       }
     });
-    
+
     expect(response.status()).toBe(401);
-    
+
     const data = await response.json();
     expect(data.success).toBe(false);
   });
@@ -93,7 +93,7 @@ test.describe('API Authentication', () => {
         username: ''
       }
     });
-    
+
     expect(response.status()).toBe(422);
   });
 
@@ -104,7 +104,7 @@ test.describe('API Authentication', () => {
         'content-type': 'application/json'
       }
     });
-    
+
     expect(response.status()).toBe(422);
   });
 });
@@ -117,9 +117,9 @@ test.describe('API Rate Limiting', () => {
     const promises = Array.from({ length: 10 }, () =>
       request.get(`${apiBaseUrl}/health`)
     );
-    
+
     const responses = await Promise.all(promises);
-    
+
     // Most requests should succeed (rate limiting might kick in for some)
     const successCount = responses.filter(r => r.status() === 200).length;
     expect(successCount).toBeGreaterThan(5); // At least half should succeed
@@ -131,7 +131,7 @@ test.describe('API Error Handling', () => {
 
   test('should return 404 for non-existent endpoints', async ({ request }) => {
     const response = await request.get(`${apiBaseUrl}/api/v1/nonexistent`);
-    
+
     expect(response.status()).toBe(404);
   });
 
@@ -141,9 +141,9 @@ test.describe('API Error Handling', () => {
         'Authorization': 'Bearer invalid_token'
       }
     });
-    
+
     expect(response.status()).toBe(401);
-    
+
     const data = await response.json();
     expect(data.success).toBe(false);
     expect(data.error).toBeTruthy();
@@ -158,11 +158,11 @@ test.describe('API Error Handling', () => {
       username: 'a'.repeat(10000), // Very long username
       password: 'b'.repeat(10000)  // Very long password
     };
-    
+
     const response = await request.post(`${apiBaseUrl}/api/v1/auth/login`, {
       data: largeData
     });
-    
+
     // Should handle gracefully (either validate or return proper error)
     expect([400, 413, 422]).toContain(response.status());
   });
@@ -173,21 +173,21 @@ test.describe('API Performance', () => {
 
   test('should respond to health check within reasonable time', async ({ request }) => {
     const startTime = Date.now();
-    
+
     const response = await request.get(`${apiBaseUrl}/health`);
-    
+
     const endTime = Date.now();
     const responseTime = endTime - startTime;
-    
+
     expect(response.status()).toBe(200);
     expect(responseTime).toBeLessThan(5000); // Should respond within 5 seconds
   });
 
   test('should include performance headers', async ({ request }) => {
     const response = await request.get(`${apiBaseUrl}/health`);
-    
+
     const headers = response.headers();
-    
+
     // Check for performance-related headers
     expect(headers['x-process-time']).toBeTruthy();
     expect(headers['x-request-id']).toBeTruthy();

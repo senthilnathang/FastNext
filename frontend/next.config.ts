@@ -3,7 +3,7 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   // Enable standalone output for Docker
   output: process.env.DOCKER_BUILD === 'true' ? 'standalone' : undefined,
-  
+
   // Turbopack configuration
   turbopack: {
     rules: {
@@ -21,7 +21,7 @@ const nextConfig: NextConfig = {
   experimental: {
     optimizePackageImports: ['@radix-ui/react-icons', 'lucide-react'],
   },
-  
+
   // Image optimization
   images: {
     domains: [
@@ -66,7 +66,7 @@ const nextConfig: NextConfig = {
       "frame-ancestors 'none'",
       // Frame sources - none (prevents embedding iframes)
       "frame-src 'none'",
-      // Connect sources - API and monitoring  
+      // Connect sources - API and monitoring
       `connect-src 'self' https://vercel.live wss://vercel.live https://vitals.vercel-insights.com ${isDev ? 'ws://localhost:* http://localhost:8000' : ''}`,
       // Worker sources
       "worker-src 'self' blob:",

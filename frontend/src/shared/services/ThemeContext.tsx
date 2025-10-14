@@ -27,7 +27,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
           setTheme(savedTheme);
           return savedTheme;
         }
-        
+
         // Then check user preferences
         const userPrefs = localStorage.getItem('userPreferences');
         if (userPrefs) {
@@ -37,7 +37,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
             return parsed.theme;
           }
         }
-        
+
         // Default to system
         setTheme('system');
         return 'system';
@@ -79,7 +79,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     const root = document.documentElement;
     root.classList.remove('light', 'dark');
     root.classList.add(actualTheme);
-    
+
     // Save to localStorage
     localStorage.setItem('theme', theme);
   }, [theme, actualTheme]);

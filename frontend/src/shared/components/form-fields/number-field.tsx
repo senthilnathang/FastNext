@@ -55,27 +55,27 @@ export function NumberField({
 
   const parseValue = (val: string): number | undefined => {
     if (!val.trim()) return undefined
-    
+
     const parsed = type === "integer" ? parseInt(val, 10) : parseFloat(val)
-    
+
     if (isNaN(parsed)) return undefined
-    
+
     // Apply min/max constraints
     if (min !== undefined && parsed < min) return min
     if (max !== undefined && parsed > max) return max
-    
+
     // Apply precision for float
     if (type === "float" && precision !== undefined) {
       return Number(parsed.toFixed(precision))
     }
-    
+
     return parsed
   }
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value
     setInputValue(newValue)
-    
+
     const parsed = parseValue(newValue)
     onChange?.(parsed)
   }
@@ -121,7 +121,7 @@ export function NumberField({
             error && "border-red-500 focus:border-red-500 focus:ring-red-500"
           )}
         />
-        
+
         {showControls && (
           <div className="absolute right-1 top-1 bottom-1 flex flex-col">
             <Button
@@ -147,7 +147,7 @@ export function NumberField({
           </div>
         )}
       </div>
-      
+
       {(min !== undefined || max !== undefined) && (
         <div className="text-xs text-muted-foreground">
           {min !== undefined && max !== undefined && `Range: ${min} - ${max}`}
@@ -155,7 +155,7 @@ export function NumberField({
           {min === undefined && max !== undefined && `Max: ${max}`}
         </div>
       )}
-      
+
       {error && (
         <p className="text-sm text-red-500">{error}</p>
       )}

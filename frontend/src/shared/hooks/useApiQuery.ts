@@ -45,21 +45,21 @@ export function useOptimisticMutation<TData, TVariables>(
   }
 ) {
   const queryClient = useQueryClient()
-  
+
   return useMutation({
     mutationFn,
     onMutate: async (variables) => {
       // Cancel outgoing refetches
       await queryClient.cancelQueries({ queryKey: options.queryKey })
-      
+
       // Snapshot the previous value
       const previousData = queryClient.getQueryData(options.queryKey)
-      
+
       // Optimistically update
-      queryClient.setQueryData(options.queryKey, (old: unknown) => 
+      queryClient.setQueryData(options.queryKey, (old: unknown) =>
         options.updater(old, variables)
       )
-      
+
       return { previousData }
     },
     onError: (error, variables, context) => {
@@ -86,7 +86,7 @@ export function useInfiniteApiQuery<TData = unknown>(
     staleTime?: number
   }
 ) {
-  
+
   return useInfiniteQuery({
     queryKey,
     queryFn,
@@ -106,28 +106,28 @@ export function useInfiniteApiQuery<TData = unknown>(
 // Utility hooks for common cache operations
 export function useCacheUtils() {
   const queryClient = useQueryClient()
-  
+
   return {
     // Prefetch data
     prefetch: <TData>(queryKey: unknown[], queryFn: () => Promise<TData>) => {
       return queryClient.prefetchQuery({ queryKey, queryFn })
     },
-    
+
     // Set cache data
     setCache: (queryKey: unknown[], data: unknown) => {
       queryClient.setQueryData(queryKey, data)
     },
-    
+
     // Invalidate queries
     invalidate: (queryKey: unknown[]) => {
       queryClient.invalidateQueries({ queryKey })
     },
-    
+
     // Remove from cache
     remove: (queryKey: unknown[]) => {
       queryClient.removeQueries({ queryKey })
     },
-    
+
     // Clear all cache
     clearAll: () => {
       queryClient.clear()
@@ -140,7 +140,7 @@ export function useLoadingStates(queries: Array<{ isLoading: boolean; error: unk
   const isLoading = queries.some(q => q.isLoading)
   const hasError = queries.some(q => q.error)
   const errors = queries.filter(q => q.error).map(q => q.error)
-  
+
   return {
     isLoading,
     hasError,

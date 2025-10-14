@@ -132,7 +132,7 @@ export function FieldSelector({
   const handleGroupToggle = (groupColumns: ExportColumn[]) => {
     const groupKeys = groupColumns.map(col => col.key);
     const allGroupSelected = groupKeys.every(key => selectedColumns.includes(key));
-    
+
     if (allGroupSelected) {
       // Deselect all in group
       onSelectionChange(selectedColumns.filter(key => !groupKeys.includes(key)));
@@ -160,7 +160,7 @@ export function FieldSelector({
 
   const renderColumnItem = (column: ExportColumn) => {
     const isSelected = selectedColumns.includes(column.key);
-    
+
     return (
       <div
         key={column.key}
@@ -171,7 +171,7 @@ export function FieldSelector({
           checked={isSelected}
           onCheckedChange={() => handleColumnToggle(column.key)}
         />
-        
+
         <div className="flex-1 min-w-0">
           <div className="flex items-center space-x-2">
             <Label
@@ -180,13 +180,13 @@ export function FieldSelector({
             >
               {column.label}
             </Label>
-            
+
             {column.required && (
               <Badge variant="destructive" className="text-xs">
                 Required
               </Badge>
             )}
-            
+
             <Badge variant="secondary" className={`text-xs ${getTypeColor(column.type)}`}>
               <div className="flex items-center space-x-1">
                 {getTypeIcon(column.type)}
@@ -194,26 +194,26 @@ export function FieldSelector({
               </div>
             </Badge>
           </div>
-          
+
           {column.key !== column.label && (
             <div className="text-xs text-gray-500 mt-1">
               {column.key}
             </div>
           )}
-          
+
           {column.description && (
             <div className="text-xs text-gray-600 dark:text-gray-400 mt-1">
               {column.description}
             </div>
           )}
-          
+
           {column.format && (
             <div className="text-xs text-blue-600 dark:text-blue-400 mt-1">
               Format: {column.format}
             </div>
           )}
         </div>
-        
+
         <div className="flex items-center text-gray-400">
           {isSelected ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
         </div>
@@ -223,7 +223,7 @@ export function FieldSelector({
 
   const renderGroup = (groupName: string, groupColumns: ExportColumn[]) => {
     const isExpanded = expandedGroups.has(groupName);
-    const groupSelectedCount = groupColumns.filter(col => 
+    const groupSelectedCount = groupColumns.filter(col =>
       selectedColumns.includes(col.key)
     ).length;
     const isGroupAllSelected = groupSelectedCount === groupColumns.length;
@@ -244,7 +244,7 @@ export function FieldSelector({
                   ) : (
                     <ChevronRight className="h-4 w-4" />
                   )}
-                  
+
                   <Button
                     variant="ghost"
                     size="sm"
@@ -265,7 +265,7 @@ export function FieldSelector({
                     )}
                   </Button>
                 </div>
-                
+
                 <div className="flex items-center space-x-2">
                   {getTypeIcon(groupName as ExportColumn['type'])}
                   <span className="font-medium capitalize">{groupName}</span>
@@ -275,7 +275,7 @@ export function FieldSelector({
                 </div>
               </div>
             </CollapsibleTrigger>
-            
+
             <CollapsibleContent className="space-y-1 mt-2 ml-6">
               {isExpanded && groupColumns.map(renderColumnItem)}
             </CollapsibleContent>
@@ -301,7 +301,7 @@ export function FieldSelector({
               Choose which fields to include in your export ({selectedCount}/{totalCount} selected)
             </CardDescription>
           </div>
-          
+
           <div className="flex items-center space-x-2">
             <Button
               variant="outline"
@@ -312,7 +312,7 @@ export function FieldSelector({
             </Button>
           </div>
         </div>
-        
+
         <div className="flex items-center space-x-4">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
@@ -323,7 +323,7 @@ export function FieldSelector({
               className="pl-10"
             />
           </div>
-          
+
           <Button
             variant="outline"
             size="sm"
@@ -344,7 +344,7 @@ export function FieldSelector({
           </Button>
         </div>
       </CardHeader>
-      
+
       <CardContent>
         {filteredColumns.length === 0 ? (
           <div className="text-center py-8 text-gray-500">
@@ -357,7 +357,7 @@ export function FieldSelector({
             )}
           </div>
         )}
-        
+
         {selectedCount > 0 && (
           <>
             <Separator className="my-4" />

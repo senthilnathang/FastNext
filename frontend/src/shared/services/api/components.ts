@@ -1,11 +1,11 @@
 import { apiClient } from './client'
 import { API_CONFIG } from './config'
-import type { 
-  Component, 
+import type {
+  Component,
   ComponentInstance,
-  CreateComponentRequest, 
+  CreateComponentRequest,
   CreateComponentInstanceRequest,
-  UpdateComponentInstanceRequest 
+  UpdateComponentInstanceRequest
 } from '@/shared/types'
 
 export interface ComponentListParams {

@@ -19,7 +19,7 @@ interface BreadcrumbProps {
 
 export default function Breadcrumb({ className, customItems }: BreadcrumbProps) {
   const pathname = usePathname()
-  
+
   const generateBreadcrumbs = (): BreadcrumbItem[] => {
     if (customItems) return customItems
 
@@ -35,12 +35,12 @@ export default function Breadcrumb({ className, customItems }: BreadcrumbProps) 
     let currentPath = ''
     pathSegments.forEach((segment) => {
       currentPath += `/${segment}`
-      
+
       const label = segment
         .split('-')
         .map(word => word.charAt(0).toUpperCase() + word.slice(1))
         .join(' ')
-      
+
       breadcrumbs.push({
         label,
         href: currentPath
@@ -56,13 +56,13 @@ export default function Breadcrumb({ className, customItems }: BreadcrumbProps) 
     <nav className={cn('flex items-center space-x-1 text-xs text-gray-500 dark:text-gray-400', className)}>
       {breadcrumbs.map((item, index) => {
         const isLast = index === breadcrumbs.length - 1
-        
+
         return (
           <React.Fragment key={`${item.href}-${index}`}>
             {index > 0 && (
               <ChevronRight className="w-3 h-3 mx-0.5" />
             )}
-            
+
             {isLast ? (
               <span className="flex items-center text-gray-900 dark:text-white font-medium">
                 {item.icon && <item.icon className="w-3 h-3 mr-1" />}
