@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import React from 'react';
-import { usePathname } from 'next/navigation';
-import AppLayout from './AppLayout';
-import RouteProtection from '../auth/RouteProtection';
+import { usePathname } from "next/navigation";
+import type React from "react";
+import RouteProtection from "../auth/RouteProtection";
+import AppLayout from "./AppLayout";
 
 interface ConditionalAppLayoutProps {
   children: React.ReactNode;
@@ -11,15 +11,15 @@ interface ConditionalAppLayoutProps {
 
 // Routes that should not have the sidebar (exact matches)
 const NO_SIDEBAR_ROUTES = [
-  '/', // Landing page
-  '/login',
-  '/register',
-  '/api-docs', // API docs has its own layout
+  "/", // Landing page
+  "/login",
+  "/register",
+  "/api-docs", // API docs has its own layout
 ];
 
 // Route patterns that should not have the sidebar (prefix matches)
 const NO_SIDEBAR_PATTERNS = [
-  '/api/', // API routes
+  "/api/", // API routes
 ];
 
 /**
@@ -34,7 +34,7 @@ const shouldShowSidebar = (pathname: string): boolean => {
   }
 
   // Check pattern matches
-  if (NO_SIDEBAR_PATTERNS.some(pattern => pathname.startsWith(pattern))) {
+  if (NO_SIDEBAR_PATTERNS.some((pattern) => pathname.startsWith(pattern))) {
     return false;
   }
 
@@ -54,7 +54,9 @@ const shouldShowSidebar = (pathname: string): boolean => {
  *
  * Used at the root layout level to provide consistent navigation and security across the application.
  */
-export default function ConditionalAppLayout({ children }: ConditionalAppLayoutProps) {
+export default function ConditionalAppLayout({
+  children,
+}: ConditionalAppLayoutProps) {
   const pathname = usePathname();
 
   return (
@@ -62,7 +64,7 @@ export default function ConditionalAppLayout({ children }: ConditionalAppLayoutP
       {shouldShowSidebar(pathname) ? (
         <AppLayout>{children}</AppLayout>
       ) : (
-        <>{children}</>
+        children
       )}
     </RouteProtection>
   );

@@ -1,20 +1,20 @@
-"use client"
+"use client";
 
-import React, { useState } from 'react'
-import { Menu } from 'lucide-react'
-import { Button } from '../ui/button'
-import Sidebar from '../navigation/Sidebar'
-import Header from './Header'
+import { Menu } from "lucide-react";
+import React, { useState } from "react";
+import Sidebar from "../navigation/Sidebar";
+import { Button } from "../ui/button";
+import Header from "./Header";
 
 interface DashboardLayoutProps {
-  children: React.ReactNode
+  children: React.ReactNode;
 }
 
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
-  const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('sidebar-collapsed');
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("sidebar-collapsed");
       return saved ? JSON.parse(saved) : false;
     }
     return false;
@@ -22,20 +22,20 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
   // Save collapsed state to localStorage
   React.useEffect(() => {
-    localStorage.setItem('sidebar-collapsed', JSON.stringify(sidebarCollapsed));
+    localStorage.setItem("sidebar-collapsed", JSON.stringify(sidebarCollapsed));
   }, [sidebarCollapsed]);
 
   // Keyboard shortcut for sidebar toggle (Ctrl+B)
   React.useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      if ((event.ctrlKey || event.metaKey) && event.key === 'b') {
+      if ((event.ctrlKey || event.metaKey) && event.key === "b") {
         event.preventDefault();
         setSidebarCollapsed(!sidebarCollapsed);
       }
     };
 
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
   }, [sidebarCollapsed]);
 
   return (
@@ -49,12 +49,14 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       )}
 
       {/* Sidebar */}
-      <div className={`
+      <div
+        className={`
         fixed inset-y-0 left-0 z-50 transform transition-all duration-300 ease-in-out
         lg:relative lg:translate-x-0
-        ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
-        ${sidebarCollapsed ? 'w-14' : 'lg:w-56'}
-      `}>
+        ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}
+        ${sidebarCollapsed ? "w-14" : "lg:w-56"}
+      `}
+      >
         <Sidebar
           className="h-full"
           isCollapsed={sidebarCollapsed}
@@ -91,10 +93,8 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           onToggleSidebar={() => setSidebarCollapsed(!sidebarCollapsed)}
         />
 
-        <main className="flex-1 overflow-auto">
-          {children}
-        </main>
+        <main className="flex-1 overflow-auto">{children}</main>
       </div>
     </div>
-  )
+  );
 }

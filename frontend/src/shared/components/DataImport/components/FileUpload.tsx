@@ -1,30 +1,30 @@
-'use client';
+"use client";
 
-import React, { useCallback, useState } from 'react';
-import { Button } from '@/shared/components/ui/button';
-import { Label } from '@/shared/components/ui/label';
+import {
+  AlertTriangle,
+  CheckCircle,
+  Code,
+  Database,
+  File,
+  FileSpreadsheet,
+  FileText,
+  Upload,
+  X,
+} from "lucide-react";
+import type React from "react";
+import { useCallback, useState } from "react";
+import { Badge } from "@/shared/components/ui/badge";
+import { Button } from "@/shared/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/shared/components/ui/card';
-import { Badge } from '@/shared/components/ui/badge';
-import {
-  Upload,
-  FileText,
-  FileSpreadsheet,
-  Code,
-  Database,
-  X,
-  AlertTriangle,
-  CheckCircle,
-  File
-} from 'lucide-react';
-
-import { detectFileFormat } from '../utils/parseUtils';
-import type { ImportFormat } from '../types';
+} from "@/shared/components/ui/card";
+import { Label } from "@/shared/components/ui/label";
+import type { ImportFormat } from "../types";
+import { detectFileFormat } from "../utils/parseUtils";
 
 interface FileUploadProps {
   selectedFile: File | null;
@@ -38,106 +38,126 @@ interface FileUploadProps {
 const formatConfig = {
   csv: {
     icon: FileText,
-    label: 'CSV',
-    extensions: ['.csv'],
-    mimeTypes: ['text/csv', 'application/csv'],
-    color: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300'
+    label: "CSV",
+    extensions: [".csv"],
+    mimeTypes: ["text/csv", "application/csv"],
+    color: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300",
   },
   json: {
     icon: Code,
-    label: 'JSON',
-    extensions: ['.json'],
-    mimeTypes: ['application/json'],
-    color: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
+    label: "JSON",
+    extensions: [".json"],
+    mimeTypes: ["application/json"],
+    color: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300",
   },
   excel: {
     icon: FileSpreadsheet,
-    label: 'Excel',
-    extensions: ['.xlsx', '.xls'],
-    mimeTypes: ['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'application/vnd.ms-excel'],
-    color: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-300'
+    label: "Excel",
+    extensions: [".xlsx", ".xls"],
+    mimeTypes: [
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "application/vnd.ms-excel",
+    ],
+    color:
+      "bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-300",
   },
   xml: {
     icon: Database,
-    label: 'XML',
-    extensions: ['.xml'],
-    mimeTypes: ['application/xml', 'text/xml'],
-    color: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300'
-  }
+    label: "XML",
+    extensions: [".xml"],
+    mimeTypes: ["application/xml", "text/xml"],
+    color:
+      "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300",
+  },
 };
 
 export function FileUpload({
   selectedFile,
   onFileSelect,
   maxFileSize = 10 * 1024 * 1024, // 10MB
-  allowedFormats = ['csv', 'json', 'excel', 'xml'],
+  allowedFormats = ["csv", "json", "excel", "xml"],
   disabled = false,
-  className
+  className,
 }: FileUploadProps) {
   const [dragActive, setDragActive] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
 
-  const validateFile = useCallback((file: File): string | null => {
-    // Check file size
-    if (file.size > maxFileSize) {
-      return `File size (${(file.size / 1024 / 1024).toFixed(1)}MB) exceeds maximum allowed size (${(maxFileSize / 1024 / 1024).toFixed(1)}MB)`;
-    }
+  const validateFile = useCallback(
+    (file: File): string | null => {
+      // Check file size
+      if (file.size > maxFileSize) {
+        return `File size (${(file.size / 1024 / 1024).toFixed(1)}MB) exceeds maximum allowed size (${(maxFileSize / 1024 / 1024).toFixed(1)}MB)`;
+      }
 
-    // Check file format
-    const extension = file.name.toLowerCase().split('.').pop();
-    const isValidFormat = allowedFormats.some(format =>
-      formatConfig[format].extensions.includes(`.${extension}`)
-    );
+      // Check file format
+      const extension = file.name.toLowerCase().split(".").pop();
+      const isValidFormat = allowedFormats.some((format) =>
+        formatConfig[format].extensions.includes(`.${extension}`),
+      );
 
-    if (!isValidFormat) {
-      const allowedExts = allowedFormats.flatMap(format =>
-        formatConfig[format].extensions
-      ).join(', ');
-      return `File format .${extension} is not supported. Allowed formats: ${allowedExts}`;
-    }
+      if (!isValidFormat) {
+        const allowedExts = allowedFormats
+          .flatMap((format) => formatConfig[format].extensions)
+          .join(", ");
+        return `File format .${extension} is not supported. Allowed formats: ${allowedExts}`;
+      }
 
-    return null;
-  }, [maxFileSize, allowedFormats]);
+      return null;
+    },
+    [maxFileSize, allowedFormats],
+  );
 
-  const handleFileSelect = useCallback((files: FileList | null) => {
-    if (!files || files.length === 0) return;
+  const handleFileSelect = useCallback(
+    (files: FileList | null) => {
+      if (!files || files.length === 0) return;
 
-    const file = files[0];
-    const error = validateFile(file);
+      const file = files[0];
+      const error = validateFile(file);
 
-    if (error) {
-      setUploadError(error);
-      return;
-    }
+      if (error) {
+        setUploadError(error);
+        return;
+      }
 
-    setUploadError(null);
-    onFileSelect(file);
-  }, [validateFile, onFileSelect]);
+      setUploadError(null);
+      onFileSelect(file);
+    },
+    [validateFile, onFileSelect],
+  );
 
-  const handleDragOver = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    if (!disabled) {
-      setDragActive(true);
-    }
-  }, [disabled]);
+  const handleDragOver = useCallback(
+    (e: React.DragEvent) => {
+      e.preventDefault();
+      if (!disabled) {
+        setDragActive(true);
+      }
+    },
+    [disabled],
+  );
 
   const handleDragLeave = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     setDragActive(false);
   }, []);
 
-  const handleDrop = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    setDragActive(false);
+  const handleDrop = useCallback(
+    (e: React.DragEvent) => {
+      e.preventDefault();
+      setDragActive(false);
 
-    if (disabled) return;
+      if (disabled) return;
 
-    handleFileSelect(e.dataTransfer.files);
-  }, [disabled, handleFileSelect]);
+      handleFileSelect(e.dataTransfer.files);
+    },
+    [disabled, handleFileSelect],
+  );
 
-  const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    handleFileSelect(e.target.files);
-  }, [handleFileSelect]);
+  const handleInputChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      handleFileSelect(e.target.files);
+    },
+    [handleFileSelect],
+  );
 
   const handleRemoveFile = useCallback(() => {
     onFileSelect(null);
@@ -145,7 +165,7 @@ export function FileUpload({
   }, [onFileSelect]);
 
   const formatFileSize = (bytes: number) => {
-    const units = ['B', 'KB', 'MB', 'GB'];
+    const units = ["B", "KB", "MB", "GB"];
     let size = bytes;
     let unitIndex = 0;
 
@@ -192,33 +212,41 @@ export function FileUpload({
           <div
             className={`relative border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
               dragActive
-                ? 'border-blue-500 bg-blue-50 dark:bg-blue-950'
+                ? "border-blue-500 bg-blue-50 dark:bg-blue-950"
                 : uploadError
-                ? 'border-red-300 bg-red-50 dark:bg-red-950'
-                : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500'
-            } ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+                  ? "border-red-300 bg-red-50 dark:bg-red-950"
+                  : "border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500"
+            } ${disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
-            onClick={() => !disabled && document.getElementById('file-input')?.click()}
+            onClick={() =>
+              !disabled && document.getElementById("file-input")?.click()
+            }
           >
             <input
               id="file-input"
               type="file"
               className="hidden"
-              accept={allowedFormats.flatMap(format => formatConfig[format].extensions).join(',')}
+              accept={allowedFormats
+                .flatMap((format) => formatConfig[format].extensions)
+                .join(",")}
               onChange={handleInputChange}
               disabled={disabled}
             />
 
             <div className="space-y-4">
-              <Upload className={`h-12 w-12 mx-auto ${
-                uploadError ? 'text-red-500' : 'text-gray-400'
-              }`} />
+              <Upload
+                className={`h-12 w-12 mx-auto ${
+                  uploadError ? "text-red-500" : "text-gray-400"
+                }`}
+              />
 
               <div>
                 <p className="text-lg font-medium">
-                  {dragActive ? 'Drop your file here' : 'Choose a file or drag it here'}
+                  {dragActive
+                    ? "Drop your file here"
+                    : "Choose a file or drag it here"}
                 </p>
                 <p className="text-sm text-gray-500 mt-1">
                   Maximum file size: {formatFileSize(maxFileSize)}
@@ -249,7 +277,10 @@ export function FileUpload({
                 <div className="flex items-center space-x-2 text-sm text-gray-500">
                   <span>{formatFileSize(selectedFile.size)}</span>
                   <span>•</span>
-                  <span>Last modified: {new Date(selectedFile.lastModified).toLocaleDateString()}</span>
+                  <span>
+                    Last modified:{" "}
+                    {new Date(selectedFile.lastModified).toLocaleDateString()}
+                  </span>
                 </div>
               </div>
             </div>
@@ -284,16 +315,19 @@ export function FileUpload({
         <div className="space-y-2">
           <Label className="text-sm font-medium">Supported Formats</Label>
           <div className="flex flex-wrap gap-2">
-            {allowedFormats.map(format => {
+            {allowedFormats.map((format) => {
               const config = formatConfig[format];
               const Icon = config.icon;
 
               return (
-                <div key={format} className="flex items-center space-x-2 px-3 py-2 bg-gray-100 dark:bg-gray-800 rounded-lg text-sm">
+                <div
+                  key={format}
+                  className="flex items-center space-x-2 px-3 py-2 bg-gray-100 dark:bg-gray-800 rounded-lg text-sm"
+                >
                   <Icon className="h-4 w-4" />
                   <span>{config.label}</span>
                   <Badge variant="outline" className="text-xs">
-                    {config.extensions.join(', ')}
+                    {config.extensions.join(", ")}
                   </Badge>
                 </div>
               );
@@ -305,10 +339,14 @@ export function FileUpload({
         <div className="text-xs text-gray-600 dark:text-gray-400 space-y-1">
           <div className="font-medium">File Guidelines:</div>
           <ul className="list-disc list-inside space-y-1 ml-2">
-            <li>Files should contain structured data with consistent columns</li>
+            <li>
+              Files should contain structured data with consistent columns
+            </li>
             <li>First row should contain column headers (recommended)</li>
             <li>Avoid merged cells in Excel files</li>
-            <li>CSV files should use proper delimiters (comma, semicolon, or tab)</li>
+            <li>
+              CSV files should use proper delimiters (comma, semicolon, or tab)
+            </li>
             <li>JSON files should contain an array of objects</li>
           </ul>
         </div>

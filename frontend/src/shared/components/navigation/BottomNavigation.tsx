@@ -1,30 +1,36 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { motion } from "framer-motion"
-import { LucideIcon, Briefcase, Users, Shield, Settings } from "lucide-react"
+import { motion } from "framer-motion";
+import {
+  Briefcase,
+  type LucideIcon,
+  Settings,
+  Shield,
+  Users,
+} from "lucide-react";
+import * as React from "react";
 
-import { cn } from "@/shared/utils"
-import { Badge } from "../ui/badge"
+import { cn } from "@/shared/utils";
+import { Badge } from "../ui/badge";
 
 interface NavigationItem {
-  id: string
-  label: string
-  icon: LucideIcon
-  href?: string
-  onClick?: () => void
-  badge?: number | string
-  disabled?: boolean
+  id: string;
+  label: string;
+  icon: LucideIcon;
+  href?: string;
+  onClick?: () => void;
+  badge?: number | string;
+  disabled?: boolean;
 }
 
 interface BottomNavigationProps {
-  items: NavigationItem[]
-  activeItem?: string
-  onItemClick?: (item: NavigationItem) => void
-  className?: string
-  showLabels?: boolean
-  maxVisibleItems?: number
-  hideOnScroll?: boolean
+  items: NavigationItem[];
+  activeItem?: string;
+  onItemClick?: (item: NavigationItem) => void;
+  className?: string;
+  showLabels?: boolean;
+  maxVisibleItems?: number;
+  hideOnScroll?: boolean;
 }
 
 const itemVariants = {
@@ -34,8 +40,8 @@ const itemVariants = {
     transition: {
       type: "spring" as const,
       damping: 20,
-      stiffness: 300
-    }
+      stiffness: 300,
+    },
   },
   active: {
     scale: 1.1,
@@ -43,15 +49,15 @@ const itemVariants = {
     transition: {
       type: "spring" as const,
       damping: 20,
-      stiffness: 300
-    }
-  }
-}
+      stiffness: 300,
+    },
+  },
+};
 
 const badgeVariants = {
   hidden: {
     scale: 0,
-    opacity: 0
+    opacity: 0,
   },
   visible: {
     scale: 1,
@@ -59,10 +65,10 @@ const badgeVariants = {
     transition: {
       type: "spring" as const,
       damping: 15,
-      stiffness: 400
-    }
-  }
-}
+      stiffness: 400,
+    },
+  },
+};
 
 export function BottomNavigation({
   items,
@@ -71,52 +77,52 @@ export function BottomNavigation({
   className,
   showLabels = true,
   maxVisibleItems = 5,
-  hideOnScroll = true
+  hideOnScroll = true,
 }: BottomNavigationProps) {
-  const [isVisible, setIsVisible] = React.useState(true)
-  const [lastScrollY, setLastScrollY] = React.useState(0)
-  const [showOverflow, setShowOverflow] = React.useState(false)
+  const [isVisible, setIsVisible] = React.useState(true);
+  const [lastScrollY, setLastScrollY] = React.useState(0);
+  const [showOverflow, setShowOverflow] = React.useState(false);
 
   // Handle scroll visibility
   React.useEffect(() => {
-    if (!hideOnScroll) return
+    if (!hideOnScroll) return;
 
     const handleScroll = () => {
-      const currentScrollY = window.scrollY
+      const currentScrollY = window.scrollY;
 
       if (currentScrollY > lastScrollY && currentScrollY > 100) {
         // Scrolling down
-        setIsVisible(false)
+        setIsVisible(false);
       } else {
         // Scrolling up
-        setIsVisible(true)
+        setIsVisible(true);
       }
 
-      setLastScrollY(currentScrollY)
-    }
+      setLastScrollY(currentScrollY);
+    };
 
-    window.addEventListener('scroll', handleScroll, { passive: true })
-    return () => window.removeEventListener('scroll', handleScroll)
-  }, [lastScrollY, hideOnScroll])
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [lastScrollY, hideOnScroll]);
 
   // Split items for overflow menu
-  const visibleItems = items.slice(0, maxVisibleItems - 1)
-  const overflowItems = items.slice(maxVisibleItems - 1)
-  const hasOverflow = items.length > maxVisibleItems
+  const visibleItems = items.slice(0, maxVisibleItems - 1);
+  const overflowItems = items.slice(maxVisibleItems - 1);
+  const hasOverflow = items.length > maxVisibleItems;
 
   const handleItemClick = (item: NavigationItem) => {
-    if (item.disabled) return
+    if (item.disabled) return;
 
     if (item.onClick) {
-      item.onClick()
+      item.onClick();
     }
 
-    onItemClick?.(item)
-  }
+    onItemClick?.(item);
+  };
 
   const renderNavigationItem = (item: NavigationItem) => {
-    const isActive = activeItem === item.id
-    const IconComponent = item.icon
+    const isActive = activeItem === item.id;
+    const IconComponent = item.icon;
 
     return (
       <motion.button
@@ -131,7 +137,7 @@ export function BottomNavigation({
           "disabled:opacity-50 disabled:cursor-not-allowed",
           isActive
             ? "text-blue-600 dark:text-blue-400"
-            : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
+            : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300",
         )}
         aria-label={item.label}
         role="tab"
@@ -139,10 +145,12 @@ export function BottomNavigation({
       >
         {/* Icon Container */}
         <div className="relative">
-          <IconComponent className={cn(
-            "w-6 h-6 transition-all duration-200",
-            isActive ? "text-blue-600 dark:text-blue-400" : ""
-          )} />
+          <IconComponent
+            className={cn(
+              "w-6 h-6 transition-all duration-200",
+              isActive ? "text-blue-600 dark:text-blue-400" : "",
+            )}
+          />
 
           {/* Badge */}
           <motion.div
@@ -156,10 +164,14 @@ export function BottomNavigation({
                 variant="destructive"
                 className={cn(
                   "text-xs min-w-[16px] h-4 px-1 rounded-full flex items-center justify-center",
-                  typeof item.badge === 'number' && item.badge > 99 ? "px-1.5" : ""
+                  typeof item.badge === "number" && item.badge > 99
+                    ? "px-1.5"
+                    : "",
                 )}
               >
-                {typeof item.badge === 'number' && item.badge > 99 ? '99+' : item.badge}
+                {typeof item.badge === "number" && item.badge > 99
+                  ? "99+"
+                  : item.badge}
               </Badge>
             )}
           </motion.div>
@@ -167,10 +179,12 @@ export function BottomNavigation({
 
         {/* Label */}
         {showLabels && (
-          <span className={cn(
-            "text-xs mt-1 transition-all duration-200 line-clamp-1",
-            isActive ? "font-medium" : "font-normal"
-          )}>
+          <span
+            className={cn(
+              "text-xs mt-1 transition-all duration-200 line-clamp-1",
+              isActive ? "font-medium" : "font-normal",
+            )}
+          >
             {item.label}
           </span>
         )}
@@ -183,14 +197,14 @@ export function BottomNavigation({
             transition={{
               type: "spring" as const,
               damping: 20,
-              stiffness: 300
+              stiffness: 300,
             }}
             style={{ x: "-50%" }}
           />
         )}
       </motion.button>
-    )
-  }
+    );
+  };
 
   return (
     <>
@@ -202,8 +216,8 @@ export function BottomNavigation({
           transition: {
             type: "spring" as const,
             damping: 20,
-            stiffness: 300
-          }
+            stiffness: 300,
+          },
         }}
         className={cn(
           "fixed bottom-0 left-0 right-0 z-40",
@@ -212,7 +226,7 @@ export function BottomNavigation({
           "shadow-lg shadow-black/5 dark:shadow-black/20",
           "safe-area-pb", // For devices with notches
           "md:hidden", // Hide on desktop
-          className
+          className,
         )}
         role="tablist"
         aria-label="Bottom navigation"
@@ -232,21 +246,26 @@ export function BottomNavigation({
                 "focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-gray-900",
                 showOverflow
                   ? "text-blue-600 dark:text-blue-400"
-                  : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
+                  : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300",
               )}
               aria-label="More options"
             >
               <div className="grid grid-cols-2 gap-0.5 w-6 h-6">
                 {overflowItems.slice(0, 4).map((_, index) => (
-                  <div key={index} className="w-2 h-2 bg-current rounded-full opacity-60" />
+                  <div
+                    key={index}
+                    className="w-2 h-2 bg-current rounded-full opacity-60"
+                  />
                 ))}
               </div>
 
               {showLabels && (
-                <span className={cn(
-                  "text-xs mt-1 transition-all duration-200",
-                  showOverflow ? "font-medium" : "font-normal"
-                )}>
+                <span
+                  className={cn(
+                    "text-xs mt-1 transition-all duration-200",
+                    showOverflow ? "font-medium" : "font-normal",
+                  )}
+                >
                   More
                 </span>
               )}
@@ -259,7 +278,7 @@ export function BottomNavigation({
                   transition={{
                     type: "spring" as const,
                     damping: 20,
-                    stiffness: 300
+                    stiffness: 300,
                   }}
                   style={{ x: "-50%" }}
                 />
@@ -289,27 +308,27 @@ export function BottomNavigation({
             transition={{
               type: "spring" as const,
               damping: 20,
-              stiffness: 300
+              stiffness: 300,
             }}
             className={cn(
               "fixed bottom-20 left-4 right-4 z-40",
               "bg-white dark:bg-gray-900 rounded-xl",
               "border border-gray-200 dark:border-gray-800",
               "shadow-xl shadow-black/10 dark:shadow-black/30",
-              "p-4 md:hidden"
+              "p-4 md:hidden",
             )}
           >
             <div className="grid grid-cols-2 gap-2">
               {overflowItems.map((item) => {
-                const isActive = activeItem === item.id
-                const IconComponent = item.icon
+                const isActive = activeItem === item.id;
+                const IconComponent = item.icon;
 
                 return (
                   <button
                     key={item.id}
                     onClick={() => {
-                      handleItemClick(item)
-                      setShowOverflow(false)
+                      handleItemClick(item);
+                      setShowOverflow(false);
                     }}
                     disabled={item.disabled}
                     className={cn(
@@ -318,7 +337,7 @@ export function BottomNavigation({
                       "disabled:opacity-50 disabled:cursor-not-allowed",
                       isActive
                         ? "bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400"
-                        : "hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300"
+                        : "hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300",
                     )}
                   >
                     <div className="relative">
@@ -329,7 +348,9 @@ export function BottomNavigation({
                           variant="destructive"
                           className="absolute -top-1 -right-1 text-xs min-w-[16px] h-4 px-1 rounded-full"
                         >
-                          {typeof item.badge === 'number' && item.badge > 99 ? '99+' : item.badge}
+                          {typeof item.badge === "number" && item.badge > 99
+                            ? "99+"
+                            : item.badge}
                         </Badge>
                       )}
                     </div>
@@ -338,66 +359,71 @@ export function BottomNavigation({
                       {item.label}
                     </span>
                   </button>
-                )
+                );
               })}
             </div>
           </motion.div>
         </>
       )}
     </>
-  )
+  );
 }
 
 // Hook for managing bottom navigation state
-export function useBottomNavigation(items: NavigationItem[], defaultActive?: string) {
-  const [activeItem, setActiveItem] = React.useState(defaultActive || items[0]?.id)
+export function useBottomNavigation(
+  items: NavigationItem[],
+  defaultActive?: string,
+) {
+  const [activeItem, setActiveItem] = React.useState(
+    defaultActive || items[0]?.id,
+  );
 
   const handleItemClick = React.useCallback((item: NavigationItem) => {
-    setActiveItem(item.id)
+    setActiveItem(item.id);
 
     // Handle navigation
-    if (item.href && typeof window !== 'undefined') {
-      window.location.href = item.href
+    if (item.href && typeof window !== "undefined") {
+      window.location.href = item.href;
     }
-  }, [])
+  }, []);
 
   return {
     activeItem,
     setActiveItem,
-    handleItemClick
-  }
+    handleItemClick,
+  };
 }
 
 // Pre-configured bottom navigation layouts
 export function AdminBottomNavigation() {
   const adminItems: NavigationItem[] = [
     {
-      id: 'dashboard',
-      label: 'Dashboard',
+      id: "dashboard",
+      label: "Dashboard",
       icon: Briefcase,
-      href: '/admin'
+      href: "/admin",
     },
     {
-      id: 'users',
-      label: 'Users',
+      id: "users",
+      label: "Users",
       icon: Users,
-      href: '/admin/users'
+      href: "/admin/users",
     },
     {
-      id: 'roles',
-      label: 'Roles',
+      id: "roles",
+      label: "Roles",
       icon: Shield,
-      href: '/admin/roles'
+      href: "/admin/roles",
     },
     {
-      id: 'settings',
-      label: 'Settings',
+      id: "settings",
+      label: "Settings",
       icon: Settings,
-      href: '/admin/settings'
-    }
-  ]
+      href: "/admin/settings",
+    },
+  ];
 
-  const { activeItem, handleItemClick } = useBottomNavigation(adminItems)
+  const { activeItem, handleItemClick } = useBottomNavigation(adminItems);
 
   return (
     <BottomNavigation
@@ -405,7 +431,7 @@ export function AdminBottomNavigation() {
       activeItem={activeItem}
       onItemClick={handleItemClick}
     />
-  )
+  );
 }
 
-export default BottomNavigation
+export default BottomNavigation;

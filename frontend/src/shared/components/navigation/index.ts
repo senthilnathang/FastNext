@@ -1,5 +1,8 @@
 // Navigation Components Index
-export { default as Sidebar } from './Sidebar';
+
+export { default as AdvancedSearch } from "./AdvancedSearch";
+export { default as BottomNavigation } from "./BottomNavigation";
+export { default as Breadcrumb } from "./Breadcrumb";
 export {
   EnhancedSidebar,
   EnhancedSidebarContent,
@@ -20,15 +23,12 @@ export {
   EnhancedSidebarSeparator,
   EnhancedSidebarTrigger,
   useEnhancedSidebar,
-} from './enhanced-sidebar';
-export { default as MobileSidebar } from './MobileSidebar';
-export { default as SidebarToggle } from './SidebarToggle';
-export { default as BottomNavigation } from './BottomNavigation';
-export { default as Breadcrumb } from './Breadcrumb';
-export { UserMenu } from './UserMenu';
-export { default as AdvancedSearch } from './AdvancedSearch';
-export { default as MobileSearch } from './MobileSearch';
-
+} from "./enhanced-sidebar";
+export { default as MobileSearch } from "./MobileSearch";
+export { default as MobileSidebar } from "./MobileSidebar";
 // Navigation utilities
-export * from './menuConfig';
-export * from './menuUtils';
+export * from "./menuConfig";
+export * from "./menuUtils";
+export { default as Sidebar } from "./Sidebar";
+export { default as SidebarToggle } from "./SidebarToggle";
+export { UserMenu } from "./UserMenu";

@@ -1,26 +1,27 @@
-'use client';
+"use client";
 
-import React, { useState, useMemo } from 'react';
-import { Card, CardContent, CardHeader } from '@/shared/components/ui/card';
-import { Input } from '@/shared/components/ui/input';
-import { Button } from '@/shared/components/ui/button';
-import { Badge } from '@/shared/components/ui/badge';
 import {
-  Search,
   ChevronLeft,
   ChevronRight,
+  Edit,
+  MoreVertical,
+  Search,
   SortAsc,
   SortDesc,
-  MoreVertical,
-  Edit
-} from 'lucide-react';
+} from "lucide-react";
+import type React from "react";
+import { useMemo, useState } from "react";
+import { Badge } from "@/shared/components/ui/badge";
+import { Button } from "@/shared/components/ui/button";
+import { Card, CardContent, CardHeader } from "@/shared/components/ui/card";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/shared/components/ui/dropdown-menu';
-import { cn } from '@/shared/utils';
+} from "@/shared/components/ui/dropdown-menu";
+import { Input } from "@/shared/components/ui/input";
+import { cn } from "@/shared/utils";
 
 export interface ListViewColumn<T = any> {
   key: string;
@@ -29,7 +30,7 @@ export interface ListViewColumn<T = any> {
   filterable?: boolean;
   render?: (value: any, item: T) => React.ReactNode;
   width?: string;
-  align?: 'left' | 'center' | 'right';
+  align?: "left" | "center" | "right";
 }
 
 export interface ListViewAction<T = any> {
@@ -37,7 +38,7 @@ export interface ListViewAction<T = any> {
   label: string;
   icon?: React.ComponentType<{ className?: string }>;
   onClick: (item: T) => void;
-  variant?: 'default' | 'destructive' | 'secondary';
+  variant?: "default" | "destructive" | "secondary";
   show?: (item: T) => boolean;
 }
 
@@ -52,7 +53,7 @@ export interface ListViewProps<T = any> {
   showPagination?: boolean;
   emptyMessage?: string;
   className?: string;
-  variant?: 'table' | 'cards' | 'list';
+  variant?: "table" | "cards" | "list";
   onItemClick?: (item: T) => void;
   renderItem?: (item: T, index: number) => React.ReactNode;
 }
@@ -63,28 +64,28 @@ export function EnhancedListView<T extends Record<string, any>>({
   actions = [],
   loading = false,
   searchable = true,
-  searchKey = 'name',
+  searchKey = "name",
   pageSize = 10,
   showPagination = true,
-  emptyMessage = 'No data available',
+  emptyMessage = "No data available",
   className,
-  variant = 'table',
+  variant = "table",
   onItemClick,
-  renderItem
+  renderItem,
 }: ListViewProps<T>) {
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [sortKey, setSortKey] = useState<string | null>(null);
-  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
 
   // Filter and search data
   const filteredData = useMemo(() => {
     let filtered = data;
 
     if (searchTerm && searchKey) {
-      filtered = filtered.filter(item => {
+      filtered = filtered.filter((item) => {
         const value = item[searchKey];
-        if (typeof value === 'string') {
+        if (typeof value === "string") {
           return value.toLowerCase().includes(searchTerm.toLowerCase());
         }
         return false;
@@ -100,7 +101,7 @@ export function EnhancedListView<T extends Record<string, any>>({
         if (aVal === bVal) return 0;
 
         const comparison = aVal < bVal ? -1 : 1;
-        return sortOrder === 'asc' ? comparison : -comparison;
+        return sortOrder === "asc" ? comparison : -comparison;
       });
     }
 
@@ -114,10 +115,10 @@ export function EnhancedListView<T extends Record<string, any>>({
 
   const handleSort = (key: string) => {
     if (sortKey === key) {
-      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+      setSortOrder(sortOrder === "asc" ? "desc" : "asc");
     } else {
       setSortKey(key);
-      setSortOrder('asc');
+      setSortOrder("asc");
     }
   };
 
@@ -128,10 +129,10 @@ export function EnhancedListView<T extends Record<string, any>>({
       return column.render(value, item);
     }
 
-    if (typeof value === 'boolean') {
+    if (typeof value === "boolean") {
       return (
-        <Badge variant={value ? 'default' : 'secondary'}>
-          {value ? 'Yes' : 'No'}
+        <Badge variant={value ? "default" : "secondary"}>
+          {value ? "Yes" : "No"}
         </Badge>
       );
     }
@@ -161,8 +162,8 @@ export function EnhancedListView<T extends Record<string, any>>({
   };
 
   const renderActions = (item: T) => {
-    const visibleActions = actions.filter(action =>
-      !action.show || action.show(item)
+    const visibleActions = actions.filter(
+      (action) => !action.show || action.show(item),
     );
 
     if (visibleActions.length === 0) return null;
@@ -176,8 +177,9 @@ export function EnhancedListView<T extends Record<string, any>>({
           size="sm"
           onClick={() => action.onClick(item)}
           className={cn(
-            'h-8 w-8 p-0',
-            action.variant === 'destructive' && 'text-red-600 hover:text-red-700'
+            "h-8 w-8 p-0",
+            action.variant === "destructive" &&
+              "text-red-600 hover:text-red-700",
           )}
         >
           <Icon className="h-4 w-4" />
@@ -200,7 +202,8 @@ export function EnhancedListView<T extends Record<string, any>>({
                 key={action.key}
                 onClick={() => action.onClick(item)}
                 className={cn(
-                  action.variant === 'destructive' && 'text-red-600 focus:text-red-700'
+                  action.variant === "destructive" &&
+                    "text-red-600 focus:text-red-700",
                 )}
               >
                 <Icon className="h-4 w-4 mr-2" />
@@ -227,9 +230,9 @@ export function EnhancedListView<T extends Record<string, any>>({
     );
   }
 
-  if (variant === 'cards' && renderItem) {
+  if (variant === "cards" && renderItem) {
     return (
-      <div className={cn('space-y-4', className)}>
+      <div className={cn("space-y-4", className)}>
         {searchable && (
           <div className="flex items-center space-x-2">
             <div className="relative flex-1">
@@ -255,13 +258,15 @@ export function EnhancedListView<T extends Record<string, any>>({
         {showPagination && totalPages > 1 && (
           <div className="flex items-center justify-between">
             <div className="text-sm text-gray-500">
-              Showing {startIndex + 1} to {Math.min(startIndex + pageSize, filteredData.length)} of {filteredData.length} results
+              Showing {startIndex + 1} to{" "}
+              {Math.min(startIndex + pageSize, filteredData.length)} of{" "}
+              {filteredData.length} results
             </div>
             <div className="flex items-center space-x-2">
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => setCurrentPage(page => Math.max(1, page - 1))}
+                onClick={() => setCurrentPage((page) => Math.max(1, page - 1))}
                 disabled={currentPage === 1}
               >
                 <ChevronLeft className="h-4 w-4" />
@@ -272,7 +277,9 @@ export function EnhancedListView<T extends Record<string, any>>({
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => setCurrentPage(page => Math.min(totalPages, page + 1))}
+                onClick={() =>
+                  setCurrentPage((page) => Math.min(totalPages, page + 1))
+                }
                 disabled={currentPage === totalPages}
               >
                 <ChevronRight className="h-4 w-4" />
@@ -316,10 +323,10 @@ export function EnhancedListView<T extends Record<string, any>>({
                     <th
                       key={column.key}
                       className={cn(
-                        'px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider',
-                        column.sortable && 'cursor-pointer hover:text-gray-700',
-                        column.align === 'center' && 'text-center',
-                        column.align === 'right' && 'text-right'
+                        "px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider",
+                        column.sortable && "cursor-pointer hover:text-gray-700",
+                        column.align === "center" && "text-center",
+                        column.align === "right" && "text-right",
                       )}
                       style={{ width: column.width }}
                       onClick={() => column.sortable && handleSort(column.key)}
@@ -328,14 +335,22 @@ export function EnhancedListView<T extends Record<string, any>>({
                         <span>{column.title}</span>
                         {column.sortable && (
                           <div className="flex flex-col">
-                            <SortAsc className={cn(
-                              'h-3 w-3',
-                              sortKey === column.key && sortOrder === 'asc' ? 'text-blue-600' : 'text-gray-400'
-                            )} />
-                            <SortDesc className={cn(
-                              'h-3 w-3 -mt-1',
-                              sortKey === column.key && sortOrder === 'desc' ? 'text-blue-600' : 'text-gray-400'
-                            )} />
+                            <SortAsc
+                              className={cn(
+                                "h-3 w-3",
+                                sortKey === column.key && sortOrder === "asc"
+                                  ? "text-blue-600"
+                                  : "text-gray-400",
+                              )}
+                            />
+                            <SortDesc
+                              className={cn(
+                                "h-3 w-3 -mt-1",
+                                sortKey === column.key && sortOrder === "desc"
+                                  ? "text-blue-600"
+                                  : "text-gray-400",
+                              )}
+                            />
                           </div>
                         )}
                       </div>
@@ -353,8 +368,8 @@ export function EnhancedListView<T extends Record<string, any>>({
                   <tr
                     key={index}
                     className={cn(
-                      'hover:bg-gray-50 transition-colors',
-                      onItemClick && 'cursor-pointer'
+                      "hover:bg-gray-50 transition-colors",
+                      onItemClick && "cursor-pointer",
                     )}
                     onClick={() => onItemClick?.(item)}
                   >
@@ -362,9 +377,9 @@ export function EnhancedListView<T extends Record<string, any>>({
                       <td
                         key={column.key}
                         className={cn(
-                          'px-6 py-4 whitespace-nowrap text-sm text-gray-900',
-                          column.align === 'center' && 'text-center',
-                          column.align === 'right' && 'text-right'
+                          "px-6 py-4 whitespace-nowrap text-sm text-gray-900",
+                          column.align === "center" && "text-center",
+                          column.align === "right" && "text-right",
                         )}
                       >
                         {renderValue(column, item)}
@@ -385,13 +400,15 @@ export function EnhancedListView<T extends Record<string, any>>({
         {showPagination && totalPages > 1 && (
           <div className="flex items-center justify-between p-6 border-t">
             <div className="text-sm text-gray-500">
-              Showing {startIndex + 1} to {Math.min(startIndex + pageSize, filteredData.length)} of {filteredData.length} results
+              Showing {startIndex + 1} to{" "}
+              {Math.min(startIndex + pageSize, filteredData.length)} of{" "}
+              {filteredData.length} results
             </div>
             <div className="flex items-center space-x-2">
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => setCurrentPage(page => Math.max(1, page - 1))}
+                onClick={() => setCurrentPage((page) => Math.max(1, page - 1))}
                 disabled={currentPage === 1}
               >
                 <ChevronLeft className="h-4 w-4" />
@@ -402,7 +419,9 @@ export function EnhancedListView<T extends Record<string, any>>({
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => setCurrentPage(page => Math.min(totalPages, page + 1))}
+                onClick={() =>
+                  setCurrentPage((page) => Math.min(totalPages, page + 1))
+                }
                 disabled={currentPage === totalPages}
               >
                 <ChevronRight className="h-4 w-4" />

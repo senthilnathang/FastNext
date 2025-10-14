@@ -1,30 +1,29 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { Clock } from "lucide-react"
-import { format } from "date-fns"
-
-import { cn } from '@/shared/utils'
-import { Button } from "@/shared/components/ui/button"
-import { Input } from "@/shared/components/ui/input"
-import { Label } from "@/shared/components/ui/label"
+import { format } from "date-fns";
+import { Clock } from "lucide-react";
+import * as React from "react";
+import { Button } from "@/shared/components/ui/button";
+import { Input } from "@/shared/components/ui/input";
+import { Label } from "@/shared/components/ui/label";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/shared/components/ui/popover"
+} from "@/shared/components/ui/popover";
+import { cn } from "@/shared/utils";
 
 interface DateTimeFieldProps {
-  value?: Date
-  onChange?: (date: Date | undefined) => void
-  label?: string
-  placeholder?: string
-  required?: boolean
-  disabled?: boolean
-  className?: string
-  error?: string
-  id?: string
-  showSeconds?: boolean
+  value?: Date;
+  onChange?: (date: Date | undefined) => void;
+  label?: string;
+  placeholder?: string;
+  required?: boolean;
+  disabled?: boolean;
+  className?: string;
+  error?: string;
+  id?: string;
+  showSeconds?: boolean;
 }
 
 export function DateTimeField({
@@ -39,60 +38,63 @@ export function DateTimeField({
   id,
   showSeconds = false,
 }: DateTimeFieldProps) {
-  const [open, setOpen] = React.useState(false)
-  const [dateValue, setDateValue] = React.useState("")
-  const [timeValue, setTimeValue] = React.useState("")
+  const [open, setOpen] = React.useState(false);
+  const [dateValue, setDateValue] = React.useState("");
+  const [timeValue, setTimeValue] = React.useState("");
 
   React.useEffect(() => {
     if (value) {
-      setDateValue(format(value, "yyyy-MM-dd"))
-      setTimeValue(format(value, showSeconds ? "HH:mm:ss" : "HH:mm"))
+      setDateValue(format(value, "yyyy-MM-dd"));
+      setTimeValue(format(value, showSeconds ? "HH:mm:ss" : "HH:mm"));
     } else {
-      setDateValue("")
-      setTimeValue("")
+      setDateValue("");
+      setTimeValue("");
     }
-  }, [value, showSeconds])
+  }, [value, showSeconds]);
 
   const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newDateValue = e.target.value
-    setDateValue(newDateValue)
-    updateDateTime(newDateValue, timeValue)
-  }
+    const newDateValue = e.target.value;
+    setDateValue(newDateValue);
+    updateDateTime(newDateValue, timeValue);
+  };
 
   const handleTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newTimeValue = e.target.value
-    setTimeValue(newTimeValue)
-    updateDateTime(dateValue, newTimeValue)
-  }
+    const newTimeValue = e.target.value;
+    setTimeValue(newTimeValue);
+    updateDateTime(dateValue, newTimeValue);
+  };
 
   const updateDateTime = (date: string, time: string) => {
     if (date && time) {
-      const dateTime = new Date(`${date}T${time}`)
-      if (!isNaN(dateTime.getTime())) {
-        onChange?.(dateTime)
+      const dateTime = new Date(`${date}T${time}`);
+      if (!Number.isNaN(dateTime.getTime())) {
+        onChange?.(dateTime);
       }
     } else if (date && !time) {
-      const dateOnly = new Date(date)
-      if (!isNaN(dateOnly.getTime())) {
-        onChange?.(dateOnly)
+      const dateOnly = new Date(date);
+      if (!Number.isNaN(dateOnly.getTime())) {
+        onChange?.(dateOnly);
       }
     } else if (!date && !time) {
-      onChange?.(undefined)
+      onChange?.(undefined);
     }
-  }
+  };
 
   const handleNow = () => {
-    const now = new Date()
-    onChange?.(now)
-    setOpen(false)
-  }
+    const now = new Date();
+    onChange?.(now);
+    setOpen(false);
+  };
 
   const formatDisplayValue = () => {
     if (value) {
-      return format(value, showSeconds ? "yyyy-MM-dd HH:mm:ss" : "yyyy-MM-dd HH:mm")
+      return format(
+        value,
+        showSeconds ? "yyyy-MM-dd HH:mm:ss" : "yyyy-MM-dd HH:mm",
+      );
     }
-    return ""
-  }
+    return "";
+  };
 
   return (
     <div className={cn("space-y-2", className)}>
@@ -112,7 +114,7 @@ export function DateTimeField({
           readOnly
           className={cn(
             "pr-10 cursor-pointer",
-            error && "border-red-500 focus:border-red-500 focus:ring-red-500"
+            error && "border-red-500 focus:border-red-500 focus:ring-red-500",
           )}
           onClick={() => !disabled && setOpen(true)}
         />
@@ -132,7 +134,10 @@ export function DateTimeField({
               <div className="text-sm font-medium">Select Date & Time</div>
 
               <div className="space-y-2">
-                <Label htmlFor="date-input" className="text-xs text-muted-foreground">
+                <Label
+                  htmlFor="date-input"
+                  className="text-xs text-muted-foreground"
+                >
                   Date
                 </Label>
                 <Input
@@ -145,7 +150,10 @@ export function DateTimeField({
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="time-input" className="text-xs text-muted-foreground">
+                <Label
+                  htmlFor="time-input"
+                  className="text-xs text-muted-foreground"
+                >
                   Time
                 </Label>
                 <Input
@@ -159,11 +167,7 @@ export function DateTimeField({
               </div>
 
               <div className="flex justify-between pt-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleNow}
-                >
+                <Button variant="outline" size="sm" onClick={handleNow}>
                   Now
                 </Button>
                 <div className="space-x-2">
@@ -174,10 +178,7 @@ export function DateTimeField({
                   >
                     Cancel
                   </Button>
-                  <Button
-                    size="sm"
-                    onClick={() => setOpen(false)}
-                  >
+                  <Button size="sm" onClick={() => setOpen(false)}>
                     Select
                   </Button>
                 </div>
@@ -186,9 +187,7 @@ export function DateTimeField({
           </PopoverContent>
         </Popover>
       </div>
-      {error && (
-        <p className="text-sm text-red-500">{error}</p>
-      )}
+      {error && <p className="text-sm text-red-500">{error}</p>}
     </div>
-  )
+  );
 }

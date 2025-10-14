@@ -1,14 +1,14 @@
-import { cva, type VariantProps } from 'class-variance-authority';
-import { Loader2Icon } from 'lucide-react';
-import type * as React from 'react';
+import { cva, type VariantProps } from "class-variance-authority";
+import { Loader2Icon } from "lucide-react";
+import type * as React from "react";
 
-import { cn } from '@/shared/utils/utils';
+import { cn } from "@/shared/utils/utils";
 
-const spinnerVariants = cva('flex-col items-center justify-center', {
+const spinnerVariants = cva("flex-col items-center justify-center", {
   variants: {
     show: {
-      true: 'flex',
-      false: 'hidden',
+      true: "flex",
+      false: "hidden",
     },
   },
   defaultVariants: {
@@ -16,21 +16,21 @@ const spinnerVariants = cva('flex-col items-center justify-center', {
   },
 });
 
-const loaderVariants = cva('animate-spin text-current', {
+const loaderVariants = cva("animate-spin text-current", {
   variants: {
     size: {
-      small: 'size-2 shrink-0',
-      medium: 'size-4 shrink-0',
-      large: 'size-6 shrink-0',
+      small: "size-2 shrink-0",
+      medium: "size-4 shrink-0",
+      large: "size-6 shrink-0",
     },
   },
   defaultVariants: {
-    size: 'medium',
+    size: "medium",
   },
 });
 
-export type SpinnerElement = React.ComponentRef<'span'>;
-export type SpinnerProps = React.ComponentPropsWithoutRef<'span'> &
+export type SpinnerElement = React.ComponentRef<"span">;
+export type SpinnerProps = React.ComponentPropsWithoutRef<"span"> &
   VariantProps<typeof spinnerVariants> &
   VariantProps<typeof loaderVariants> & {
     children?: React.ReactNode;
@@ -50,10 +50,10 @@ function Spinner({
   );
 }
 
-export type CenteredSpinnerElement = React.ComponentRef<'div'>;
-export type CenteredSpinnerProps = React.ComponentPropsWithoutRef<'div'> &
+export type CenteredSpinnerElement = React.ComponentRef<"div">;
+export type CenteredSpinnerProps = React.ComponentPropsWithoutRef<"div"> &
   SpinnerProps & {
-    containerClassName?: React.HTMLAttributes<HTMLDivElement>['className'];
+    containerClassName?: React.HTMLAttributes<HTMLDivElement>["className"];
   };
 function CenteredSpinner({
   containerClassName,
@@ -62,8 +62,8 @@ function CenteredSpinner({
   return (
     <div
       className={cn(
-        'pointer-events-none absolute inset-0 flex select-none items-center justify-center opacity-65',
-        containerClassName
+        "pointer-events-none absolute inset-0 flex select-none items-center justify-center opacity-65",
+        containerClassName,
       )}
     >
       <Spinner {...props} />

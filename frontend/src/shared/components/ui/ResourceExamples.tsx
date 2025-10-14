@@ -1,18 +1,28 @@
-'use client'
+"use client";
 
-import React from 'react'
 // Temporarily commented out until resource factory components are implemented
 // import { UserFactory, ProjectFactory, TaskFactory } from '@/shared/utils/resource-factory'
-import { Card, CardContent, CardHeader, CardTitle, Tabs, TabsContent, TabsList, TabsTrigger } from '../'
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "../";
 
 // Example 1: Users Management
 export function UsersExample() {
   return (
     <div className="p-4 border rounded">
       <h3 className="text-lg font-semibold mb-2">Users Example</h3>
-      <p className="text-gray-600">Resource factory components are not yet implemented.</p>
+      <p className="text-gray-600">
+        Resource factory components are not yet implemented.
+      </p>
     </div>
-  )
+  );
 }
 
 // Commented out until resource factory is implemented
@@ -401,7 +411,9 @@ export function ResourceManagementExamples() {
             <CardContent>
               <div className="p-4 border rounded">
                 <h3 className="text-lg font-semibold mb-2">Projects Example</h3>
-                <p className="text-gray-600">Resource factory components are not yet implemented.</p>
+                <p className="text-gray-600">
+                  Resource factory components are not yet implemented.
+                </p>
               </div>
             </CardContent>
           </Card>
@@ -415,12 +427,14 @@ export function ResourceManagementExamples() {
             <CardContent>
               <div className="p-4 border rounded">
                 <h3 className="text-lg font-semibold mb-2">Tasks Example</h3>
-                <p className="text-gray-600">Resource factory components are not yet implemented.</p>
+                <p className="text-gray-600">
+                  Resource factory components are not yet implemented.
+                </p>
               </div>
             </CardContent>
           </Card>
         </TabsContent>
       </Tabs>
     </div>
-  )
+  );
 }

@@ -1,14 +1,16 @@
-'use client';
+"use client";
 
-import React, { useState, useMemo, useCallback } from 'react';
-import { Button } from '@/shared/components/ui/button';
+import { AlertCircle, Download, Eye, FileText, Settings } from "lucide-react";
+import { useCallback, useMemo, useState } from "react";
+import { Badge } from "@/shared/components/ui/badge";
+import { Button } from "@/shared/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/shared/components/ui/card';
+} from "@/shared/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -16,36 +18,26 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '@/shared/components/ui/dialog';
-import { Badge } from '@/shared/components/ui/badge';
-import { Separator } from '@/shared/components/ui/separator';
-import {
-  Download,
-  FileText,
-  Settings,
-  Eye,
-  AlertCircle
-} from 'lucide-react';
-
-import { FieldSelector } from './components/FieldSelector';
-import { FormatSelector } from './components/FormatSelector';
-import { ExportProgress } from './components/ExportProgress';
-import { useDataExport } from './hooks/useDataExport';
-import {
-  exportToCSV,
-  exportToJSON,
-  exportToExcel,
-  exportToXML,
-  exportToYAML,
-  estimateFileSize
-} from './utils/exportUtils';
-
+} from "@/shared/components/ui/dialog";
+import { Separator } from "@/shared/components/ui/separator";
+import { ExportProgress } from "./components/ExportProgress";
+import { FieldSelector } from "./components/FieldSelector";
+import { FormatSelector } from "./components/FormatSelector";
+import { useDataExport } from "./hooks/useDataExport";
 import type {
   ExportComponentProps,
-  ExportOptions,
   ExportFormat,
-  ExportPreview
-} from './types';
+  ExportOptions,
+  ExportPreview,
+} from "./types";
+import {
+  estimateFileSize,
+  exportToCSV,
+  exportToExcel,
+  exportToJSON,
+  exportToXML,
+  exportToYAML,
+} from "./utils/exportUtils";
 
 export function DataExport({
   tableName,
@@ -56,21 +48,22 @@ export function DataExport({
   onExport,
   onPreview,
   maxRows = 100000,
-  allowedFormats = ['csv', 'json', 'excel'],
-  defaultFormat = 'csv',
+  allowedFormats = ["csv", "json", "excel"],
+  defaultFormat = "csv",
   showPreview = true,
   embedded = false,
-  className
+  className,
 }: ExportComponentProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedColumns, setSelectedColumns] = useState<string[]>(
-    columns.filter(col => col.required !== false).map(col => col.key)
+    columns.filter((col) => col.required !== false).map((col) => col.key),
   );
-  const [selectedFormat, setSelectedFormat] = useState<ExportFormat>(defaultFormat);
+  const [selectedFormat, setSelectedFormat] =
+    useState<ExportFormat>(defaultFormat);
   const [exportOptions, setExportOptions] = useState<Partial<ExportOptions>>({
     includeHeaders: true,
-    dateFormat: 'iso',
-    encoding: 'utf-8'
+    dateFormat: "iso",
+    encoding: "utf-8",
   });
   const [preview, setPreview] = useState<ExportPreview | null>(null);
   const [isGeneratingPreview, setIsGeneratingPreview] = useState(false);
@@ -84,10 +77,10 @@ export function DataExport({
     downloadExport,
     clearCompletedJobs,
     getExportPreview,
-    exportError
+    exportError,
   } = useDataExport({
     onExport,
-    onPreview
+    onPreview,
   });
 
   const exportData = data.slice(0, maxRows);
@@ -96,7 +89,12 @@ export function DataExport({
 
   const estimatedSize = useMemo(() => {
     if (selectedColumns.length === 0 || exportData.length === 0) return 0;
-    return estimateFileSize(exportData, columns, selectedColumns, selectedFormat);
+    return estimateFileSize(
+      exportData,
+      columns,
+      selectedColumns,
+      selectedFormat,
+    );
   }, [exportData, columns, selectedColumns, selectedFormat]);
 
   const handleExport = useCallback(async () => {
@@ -107,11 +105,13 @@ export function DataExport({
       columns: selectedColumns,
       filters,
       includeHeaders: exportOptions.includeHeaders ?? true,
-      fileName: exportOptions.fileName || `${tableName || 'export'}_${Date.now()}.${selectedFormat}`,
+      fileName:
+        exportOptions.fileName ||
+        `${tableName || "export"}_${Date.now()}.${selectedFormat}`,
       dateFormat: exportOptions.dateFormat,
       delimiter: exportOptions.delimiter,
       encoding: exportOptions.encoding,
-      ...exportOptions
+      ...exportOptions,
     };
 
     try {
@@ -121,19 +121,19 @@ export function DataExport({
       } else {
         // Use client-side export utilities
         switch (selectedFormat) {
-          case 'csv':
+          case "csv":
             exportToCSV(exportData, columns, selectedColumns, options);
             break;
-          case 'json':
+          case "json":
             exportToJSON(exportData, columns, selectedColumns, options);
             break;
-          case 'excel':
+          case "excel":
             exportToExcel(exportData, columns, selectedColumns, options);
             break;
-          case 'xml':
+          case "xml":
             exportToXML(exportData, columns, selectedColumns, options);
             break;
-          case 'yaml':
+          case "yaml":
             exportToYAML(exportData, columns, selectedColumns, options);
             break;
           default:
@@ -146,7 +146,7 @@ export function DataExport({
         }
       }
     } catch (error) {
-      console.error('Export failed:', error);
+      console.error("Export failed:", error);
     }
   }, [
     selectedColumns,
@@ -158,7 +158,7 @@ export function DataExport({
     startExport,
     exportData,
     columns,
-    embedded
+    embedded,
   ]);
 
   const handlePreview = useCallback(async () => {
@@ -171,20 +171,27 @@ export function DataExport({
         columns: selectedColumns,
         filters,
         includeHeaders: exportOptions.includeHeaders,
-        dateFormat: exportOptions.dateFormat
+        dateFormat: exportOptions.dateFormat,
       };
 
       const previewData = await getExportPreview(previewOptions);
       setPreview(previewData);
     } catch (error) {
-      console.error('Preview failed:', error);
+      console.error("Preview failed:", error);
     } finally {
       setIsGeneratingPreview(false);
     }
-  }, [onPreview, selectedColumns, selectedFormat, exportOptions, filters, getExportPreview]);
+  }, [
+    onPreview,
+    selectedColumns,
+    selectedFormat,
+    exportOptions,
+    filters,
+    getExportPreview,
+  ]);
 
   const formatFileSize = (bytes: number) => {
-    const units = ['B', 'KB', 'MB', 'GB'];
+    const units = ["B", "KB", "MB", "GB"];
     let size = bytes;
     let unitIndex = 0;
 
@@ -201,7 +208,9 @@ export function DataExport({
       <div className="grid grid-cols-2 gap-4 text-sm">
         <div>
           <span className="text-gray-600 dark:text-gray-400">Rows:</span>
-          <span className="ml-2 font-medium">{actualRowCount.toLocaleString()}</span>
+          <span className="ml-2 font-medium">
+            {actualRowCount.toLocaleString()}
+          </span>
         </div>
         <div>
           <span className="text-gray-600 dark:text-gray-400">Columns:</span>
@@ -213,7 +222,9 @@ export function DataExport({
         </div>
         <div>
           <span className="text-gray-600 dark:text-gray-400">Est. Size:</span>
-          <span className="ml-2 font-medium">{formatFileSize(estimatedSize)}</span>
+          <span className="ml-2 font-medium">
+            {formatFileSize(estimatedSize)}
+          </span>
         </div>
       </div>
 
@@ -223,8 +234,8 @@ export function DataExport({
           <div className="text-sm text-yellow-700 dark:text-yellow-300">
             <div className="font-medium">Large Export</div>
             <div className="mt-1">
-              This export contains {actualRowCount.toLocaleString()} rows.
-              Large exports may take longer to process and download.
+              This export contains {actualRowCount.toLocaleString()} rows. Large
+              exports may take longer to process and download.
             </div>
           </div>
         </div>
@@ -260,7 +271,7 @@ export function DataExport({
             <table className="w-full text-sm border-collapse border border-gray-200 dark:border-gray-700">
               <thead>
                 <tr className="bg-gray-50 dark:bg-gray-800">
-                  {preview.columns.map(col => (
+                  {preview.columns.map((col) => (
                     <th
                       key={col.key}
                       className="border border-gray-200 dark:border-gray-700 px-3 py-2 text-left font-medium"
@@ -272,13 +283,16 @@ export function DataExport({
               </thead>
               <tbody>
                 {preview.sampleData.slice(0, 5).map((row, index) => (
-                  <tr key={index} className="hover:bg-gray-50 dark:hover:bg-gray-800">
-                    {preview.columns.map(col => (
+                  <tr
+                    key={`preview-row-${index}-${JSON.stringify(row).slice(0, 50)}`}
+                    className="hover:bg-gray-50 dark:hover:bg-gray-800"
+                  >
+                    {preview.columns.map((col) => (
                       <td
                         key={col.key}
                         className="border border-gray-200 dark:border-gray-700 px-3 py-2"
                       >
-                        {String(row[col.key] || '')}
+                        {String(row[col.key] || "")}
                       </td>
                     ))}
                   </tr>
@@ -305,7 +319,7 @@ export function DataExport({
       className={embedded ? "h-8" : ""}
     >
       <Download className="h-4 w-4 mr-2" />
-      {isExporting ? 'Exporting...' : 'Export Data'}
+      {isExporting ? "Exporting..." : "Export Data"}
     </Button>
   );
 
@@ -316,9 +330,7 @@ export function DataExport({
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
             {exportButton}
-            <Badge variant="outline">
-              {selectedColumns.length} columns
-            </Badge>
+            <Badge variant="outline">{selectedColumns.length} columns</Badge>
           </div>
 
           <div className="text-sm text-gray-600 dark:text-gray-400">
@@ -353,21 +365,18 @@ export function DataExport({
   return (
     <div className={className}>
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogTrigger asChild>
-          {exportButton}
-        </DialogTrigger>
+        <DialogTrigger asChild>{exportButton}</DialogTrigger>
 
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center space-x-2">
               <FileText className="h-5 w-5" />
               <span>Export Data</span>
-              {tableName && (
-                <Badge variant="outline">{tableName}</Badge>
-              )}
+              {tableName && <Badge variant="outline">{tableName}</Badge>}
             </DialogTitle>
             <DialogDescription>
-              Configure your data export settings and download your data in the desired format.
+              Configure your data export settings and download your data in the
+              desired format.
             </DialogDescription>
           </DialogHeader>
 
@@ -397,9 +406,7 @@ export function DataExport({
               <CardHeader className="pb-3">
                 <CardTitle className="text-lg">Export Summary</CardTitle>
               </CardHeader>
-              <CardContent>
-                {renderExportSummary()}
-              </CardContent>
+              <CardContent>{renderExportSummary()}</CardContent>
             </Card>
 
             {/* Preview */}
@@ -410,10 +417,12 @@ export function DataExport({
                   <Button
                     variant="outline"
                     onClick={handlePreview}
-                    disabled={isGeneratingPreview || selectedColumns.length === 0}
+                    disabled={
+                      isGeneratingPreview || selectedColumns.length === 0
+                    }
                   >
                     <Eye className="h-4 w-4 mr-2" />
-                    {isGeneratingPreview ? 'Generating...' : 'Generate Preview'}
+                    {isGeneratingPreview ? "Generating..." : "Generate Preview"}
                   </Button>
                 </div>
 

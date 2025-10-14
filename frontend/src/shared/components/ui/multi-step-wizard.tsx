@@ -1,12 +1,12 @@
-'use client';
+"use client";
 
-import React, { ReactNode } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from './card';
-import { Button } from './button';
-import { Badge } from './badge';
-import { Separator } from './separator';
-import { CheckCircle, ChevronLeft, ChevronRight } from 'lucide-react';
-import { cn } from '@/shared/utils';
+import { CheckCircle, ChevronLeft, ChevronRight } from "lucide-react";
+import type { ReactNode } from "react";
+import { cn } from "@/shared/utils";
+import { Badge } from "./badge";
+import { Button } from "./button";
+import { Card, CardContent, CardHeader, CardTitle } from "./card";
+import { Separator } from "./separator";
 
 export interface WizardStep {
   id: string;
@@ -48,7 +48,7 @@ export function MultiStepWizard({
   previousButtonText = "Previous",
   completeButtonText = "Complete",
   cancelButtonText = "Cancel",
-  className
+  className,
 }: MultiStepWizardProps) {
   const isFirstStep = currentStep === 0;
   const isLastStep = currentStep === steps.length - 1;
@@ -84,7 +84,9 @@ export function MultiStepWizard({
             Step {currentStep + 1} of {steps.length}: {currentStepData.title}
           </CardTitle>
           {currentStepData.description && (
-            <p className="text-sm text-muted-foreground">{currentStepData.description}</p>
+            <p className="text-sm text-muted-foreground">
+              {currentStepData.description}
+            </p>
           )}
         </CardHeader>
         <CardContent>
@@ -99,7 +101,7 @@ export function MultiStepWizard({
                   <div
                     className={cn(
                       "flex items-center cursor-pointer transition-colors",
-                      isClickable ? "hover:opacity-80" : "cursor-not-allowed"
+                      isClickable ? "hover:opacity-80" : "cursor-not-allowed",
                     )}
                     onClick={() => isClickable && handleStepClick(index)}
                   >
@@ -110,8 +112,8 @@ export function MultiStepWizard({
                           isCompleted
                             ? "bg-primary border-primary text-primary-foreground"
                             : isActive
-                            ? "border-primary text-primary bg-background"
-                            : "border-muted-foreground/30 text-muted-foreground"
+                              ? "border-primary text-primary bg-background"
+                              : "border-muted-foreground/30 text-muted-foreground",
                         )}
                       >
                         {isCompleted ? (
@@ -119,14 +121,16 @@ export function MultiStepWizard({
                         ) : step.icon ? (
                           step.icon
                         ) : (
-                          <span className="text-sm font-medium">{index + 1}</span>
+                          <span className="text-sm font-medium">
+                            {index + 1}
+                          </span>
                         )}
                       </div>
                       <div className="text-center">
                         <div
                           className={cn(
                             "text-xs font-medium",
-                            isActive ? "text-primary" : "text-muted-foreground"
+                            isActive ? "text-primary" : "text-muted-foreground",
                           )}
                         >
                           {step.title}
@@ -143,7 +147,7 @@ export function MultiStepWizard({
                     <Separator
                       className={cn(
                         "w-12 mx-4",
-                        isCompleted ? "bg-primary" : "bg-muted-foreground/30"
+                        isCompleted ? "bg-primary" : "bg-muted-foreground/30",
                       )}
                     />
                   )}
@@ -155,9 +159,7 @@ export function MultiStepWizard({
       </Card>
 
       {/* Step Content */}
-      <div className="min-h-[400px]">
-        {children}
-      </div>
+      <div className="min-h-[400px]">{children}</div>
 
       {/* Navigation Buttons */}
       <Card>

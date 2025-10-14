@@ -1,83 +1,95 @@
-'use client'
+"use client";
 
-import React, { useState, useEffect } from 'react'
-import { Button } from '@/shared/components/ui/button'
-import { Input } from '@/shared/components/ui/input'
-import { Card, CardContent } from '@/shared/components/ui/card'
-import { Badge } from '@/shared/components/ui/badge'
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/shared/components/ui/dropdown-menu'
-import { useGenericPermissions } from '@/modules/admin/hooks/useGenericPermissions'
-import { Plus, Search, MoreHorizontal, Edit, Trash2, Eye } from 'lucide-react'
+import { Edit, Eye, MoreHorizontal, Plus, Search, Trash2 } from "lucide-react";
+import type React from "react";
+import { useEffect, useState } from "react";
+import { useGenericPermissions } from "@/modules/admin/hooks/useGenericPermissions";
+import { Badge } from "@/shared/components/ui/badge";
+import { Button } from "@/shared/components/ui/button";
+import { Card, CardContent } from "@/shared/components/ui/card";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/shared/components/ui/dropdown-menu";
+import { Input } from "@/shared/components/ui/input";
 
 export interface Column<T = any> {
-  key: keyof T | string
-  label: string
-  render?: (value: unknown, row: T) => React.ReactNode
-  sortable?: boolean
-  searchable?: boolean
-  width?: string
+  key: keyof T | string;
+  label: string;
+  render?: (value: unknown, row: T) => React.ReactNode;
+  sortable?: boolean;
+  searchable?: boolean;
+  width?: string;
 }
 
 export interface GenericListViewProps<T = any> {
   // Data and API
-  data: T[]
-  columns: Column<T>[]
-  loading?: boolean
-  error?: string | null
+  data: T[];
+  columns: Column<T>[];
+  loading?: boolean;
+  error?: string | null;
 
   // Permissions
-  resourceName: string
-  projectId?: number
+  resourceName: string;
+  projectId?: number;
 
   // CRUD operations
-  onCreateClick?: () => void
-  onEditClick?: (item: T) => void
-  onDeleteClick?: (item: T) => void
-  onViewClick?: (item: T) => void
-  onRefresh?: () => void
+  onCreateClick?: () => void;
+  onEditClick?: (item: T) => void;
+  onDeleteClick?: (item: T) => void;
+  onViewClick?: (item: T) => void;
+  onRefresh?: () => void;
 
   // UI customization
-  title?: string
-  subtitle?: string
-  createButtonText?: string
-  emptyStateTitle?: string
-  emptyStateDescription?: string
-  className?: string
+  title?: string;
+  subtitle?: string;
+  createButtonText?: string;
+  emptyStateTitle?: string;
+  emptyStateDescription?: string;
+  className?: string;
 
   // Search and filtering
-  searchable?: boolean
-  searchPlaceholder?: string
-  onSearch?: (query: string) => void
+  searchable?: boolean;
+  searchPlaceholder?: string;
+  onSearch?: (query: string) => void;
 
   // Pagination
   pagination?: {
-    current: number
-    total: number
-    pageSize: number
-    onPageChange: (page: number) => void
-  }
+    current: number;
+    total: number;
+    pageSize: number;
+    onPageChange: (page: number) => void;
+  };
 
   // Selection
-  selectable?: boolean
-  selectedItems?: T[]
-  onSelectionChange?: (items: T[]) => void
+  selectable?: boolean;
+  selectedItems?: T[];
+  onSelectionChange?: (items: T[]) => void;
 
   // Bulk actions
   bulkActions?: Array<{
-    label: string
-    icon?: React.ReactNode
-    action: (items: T[]) => void
-    requiresPermission?: string
-  }>
+    label: string;
+    icon?: React.ReactNode;
+    action: (items: T[]) => void;
+    requiresPermission?: string;
+  }>;
 
   // Custom actions
   customActions?: Array<{
-    label: string
-    icon?: React.ReactNode
-    action: (item: T) => void
-    requiresPermission?: string
-    variant?: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link'
-  }>
+    label: string;
+    icon?: React.ReactNode;
+    action: (item: T) => void;
+    requiresPermission?: string;
+    variant?:
+      | "default"
+      | "destructive"
+      | "outline"
+      | "secondary"
+      | "ghost"
+      | "link";
+  }>;
 }
 
 export function GenericListView<T extends { id: number }>({
@@ -94,95 +106,97 @@ export function GenericListView<T extends { id: number }>({
   onRefresh,
   title,
   subtitle,
-  createButtonText = 'Create New',
-  emptyStateTitle = 'No items found',
-  emptyStateDescription = 'Get started by creating your first item',
+  createButtonText = "Create New",
+  emptyStateTitle = "No items found",
+  emptyStateDescription = "Get started by creating your first item",
   className,
   searchable = true,
-  searchPlaceholder = 'Search...',
+  searchPlaceholder = "Search...",
   onSearch,
   pagination,
   selectable = false,
   selectedItems = [],
   onSelectionChange,
   bulkActions = [],
-  customActions = []
+  customActions = [],
 }: GenericListViewProps<T>) {
-  const [searchQuery, setSearchQuery] = useState('')
-  const [filteredData, setFilteredData] = useState(data)
-  const [selectedIds, setSelectedIds] = useState<number[]>([])
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filteredData, setFilteredData] = useState(data);
+  const [selectedIds, setSelectedIds] = useState<number[]>([]);
 
-  const permissions = useGenericPermissions(resourceName)
+  const permissions = useGenericPermissions(resourceName);
 
   // Filter data based on search query
   useEffect(() => {
     if (!searchQuery) {
-      setFilteredData(data)
-      return
+      setFilteredData(data);
+      return;
     }
 
-    const searchableColumns = columns.filter(col => col.searchable !== false)
-    const filtered = data.filter(item =>
-      searchableColumns.some(col => {
-        const value = item[col.key as keyof T]
-        return String(value).toLowerCase().includes(searchQuery.toLowerCase())
-      })
-    )
-    setFilteredData(filtered)
-  }, [data, searchQuery, columns])
+    const searchableColumns = columns.filter((col) => col.searchable !== false);
+    const filtered = data.filter((item) =>
+      searchableColumns.some((col) => {
+        const value = item[col.key as keyof T];
+        return String(value).toLowerCase().includes(searchQuery.toLowerCase());
+      }),
+    );
+    setFilteredData(filtered);
+  }, [data, searchQuery, columns]);
 
   const handleSearchChange = (value: string) => {
-    setSearchQuery(value)
-    onSearch?.(value)
-  }
+    setSearchQuery(value);
+    onSearch?.(value);
+  };
 
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
-      const allIds = filteredData.map(item => item.id)
-      setSelectedIds(allIds)
-      onSelectionChange?.(filteredData)
+      const allIds = filteredData.map((item) => item.id);
+      setSelectedIds(allIds);
+      onSelectionChange?.(filteredData);
     } else {
-      setSelectedIds([])
-      onSelectionChange?.([])
+      setSelectedIds([]);
+      onSelectionChange?.([]);
     }
-  }
+  };
 
   const handleSelectItem = (item: T, checked: boolean) => {
     const newSelectedIds = checked
       ? [...selectedIds, item.id]
-      : selectedIds.filter(id => id !== item.id)
+      : selectedIds.filter((id) => id !== item.id);
 
-    setSelectedIds(newSelectedIds)
-    const newSelectedItems = filteredData.filter(item => newSelectedIds.includes(item.id))
-    onSelectionChange?.(newSelectedItems)
-  }
+    setSelectedIds(newSelectedIds);
+    const newSelectedItems = filteredData.filter((item) =>
+      newSelectedIds.includes(item.id),
+    );
+    onSelectionChange?.(newSelectedItems);
+  };
 
   const renderValue = (column: Column<T>, item: T) => {
-    const value = item[column.key as keyof T]
+    const value = item[column.key as keyof T];
 
     if (column.render) {
-      return column.render(value, item)
+      return column.render(value, item);
     }
 
-    if (typeof value === 'boolean') {
+    if (typeof value === "boolean") {
       return (
-        <Badge variant={value ? 'default' : 'secondary'}>
-          {value ? 'Yes' : 'No'}
+        <Badge variant={value ? "default" : "secondary"}>
+          {value ? "Yes" : "No"}
         </Badge>
-      )
+      );
     }
 
     if (value instanceof Date) {
-      return value.toLocaleDateString()
+      return value.toLocaleDateString();
     }
 
-    return String(value || '-')
-  }
+    return String(value || "-");
+  };
 
-  const canCreate = permissions.checkCreate(resourceName, projectId)
-  const canEdit = permissions.checkUpdate(resourceName, undefined, projectId)
-  const canDelete = permissions.checkDelete(resourceName, undefined, projectId)
-  const canView = permissions.checkRead(resourceName, undefined, projectId)
+  const canCreate = permissions.checkCreate(resourceName, projectId);
+  const canEdit = permissions.checkUpdate(resourceName, undefined, projectId);
+  const canDelete = permissions.checkDelete(resourceName, undefined, projectId);
+  const canView = permissions.checkRead(resourceName, undefined, projectId);
 
   if (error) {
     return (
@@ -199,11 +213,11 @@ export function GenericListView<T extends { id: number }>({
           </div>
         </CardContent>
       </Card>
-    )
+    );
   }
 
   return (
-    <div className={`space-y-4${className ? ` ${className}` : ''}`}>
+    <div className={`space-y-4${className ? ` ${className}` : ""}`}>
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -250,10 +264,14 @@ export function GenericListView<T extends { id: number }>({
               </DropdownMenuTrigger>
               <DropdownMenuContent>
                 {bulkActions.map((action, index) => {
-                  const hasPermission = !action.requiresPermission ||
-                    permissions.hasPermission({ action: action.requiresPermission, resource: resourceName })
+                  const hasPermission =
+                    !action.requiresPermission ||
+                    permissions.hasPermission({
+                      action: action.requiresPermission,
+                      resource: resourceName,
+                    });
 
-                  if (!hasPermission) return null
+                  if (!hasPermission) return null;
 
                   return (
                     <DropdownMenuItem
@@ -263,7 +281,7 @@ export function GenericListView<T extends { id: number }>({
                       {action.icon}
                       {action.label}
                     </DropdownMenuItem>
-                  )
+                  );
                 })}
               </DropdownMenuContent>
             </DropdownMenu>
@@ -285,7 +303,9 @@ export function GenericListView<T extends { id: number }>({
             <div className="flex items-center justify-center h-64">
               <div className="text-center">
                 <h3 className="text-lg font-semibold">{emptyStateTitle}</h3>
-                <p className="text-muted-foreground mb-4">{emptyStateDescription}</p>
+                <p className="text-muted-foreground mb-4">
+                  {emptyStateDescription}
+                </p>
                 {canCreate && onCreateClick && (
                   <Button onClick={onCreateClick}>
                     <Plus className="h-4 w-4 mr-2" />
@@ -303,7 +323,10 @@ export function GenericListView<T extends { id: number }>({
                       <th className="p-4 text-left">
                         <input
                           type="checkbox"
-                          checked={selectedIds.length === filteredData.length && filteredData.length > 0}
+                          checked={
+                            selectedIds.length === filteredData.length &&
+                            filteredData.length > 0
+                          }
                           onChange={(e) => handleSelectAll(e.target.checked)}
                           className="rounded"
                         />
@@ -318,8 +341,13 @@ export function GenericListView<T extends { id: number }>({
                         {column.label}
                       </th>
                     ))}
-                    {(canEdit || canDelete || canView || customActions.length > 0) && (
-                      <th className="p-4 text-left font-medium w-20">Actions</th>
+                    {(canEdit ||
+                      canDelete ||
+                      canView ||
+                      customActions.length > 0) && (
+                      <th className="p-4 text-left font-medium w-20">
+                        Actions
+                      </th>
                     )}
                   </tr>
                 </thead>
@@ -331,7 +359,9 @@ export function GenericListView<T extends { id: number }>({
                           <input
                             type="checkbox"
                             checked={selectedIds.includes(item.id)}
-                            onChange={(e) => handleSelectItem(item, e.target.checked)}
+                            onChange={(e) =>
+                              handleSelectItem(item, e.target.checked)
+                            }
                             className="rounded"
                           />
                         </td>
@@ -341,7 +371,10 @@ export function GenericListView<T extends { id: number }>({
                           {renderValue(column, item)}
                         </td>
                       ))}
-                      {(canEdit || canDelete || canView || customActions.length > 0) && (
+                      {(canEdit ||
+                        canDelete ||
+                        canView ||
+                        customActions.length > 0) && (
                         <td className="p-4">
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
@@ -351,22 +384,30 @@ export function GenericListView<T extends { id: number }>({
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
                               {canView && onViewClick && (
-                                <DropdownMenuItem onClick={() => onViewClick(item)}>
+                                <DropdownMenuItem
+                                  onClick={() => onViewClick(item)}
+                                >
                                   <Eye className="h-4 w-4 mr-2" />
                                   View
                                 </DropdownMenuItem>
                               )}
                               {canEdit && onEditClick && (
-                                <DropdownMenuItem onClick={() => onEditClick(item)}>
+                                <DropdownMenuItem
+                                  onClick={() => onEditClick(item)}
+                                >
                                   <Edit className="h-4 w-4 mr-2" />
                                   Edit
                                 </DropdownMenuItem>
                               )}
                               {customActions.map((action, actionIndex) => {
-                                const hasPermission = !action.requiresPermission ||
-                                  permissions.hasPermission({ action: action.requiresPermission, resource: resourceName })
+                                const hasPermission =
+                                  !action.requiresPermission ||
+                                  permissions.hasPermission({
+                                    action: action.requiresPermission,
+                                    resource: resourceName,
+                                  });
 
-                                if (!hasPermission) return null
+                                if (!hasPermission) return null;
 
                                 return (
                                   <DropdownMenuItem
@@ -376,7 +417,7 @@ export function GenericListView<T extends { id: number }>({
                                     {action.icon}
                                     {action.label}
                                   </DropdownMenuItem>
-                                )
+                                );
                               })}
                               {canDelete && onDeleteClick && (
                                 <DropdownMenuItem
@@ -404,9 +445,12 @@ export function GenericListView<T extends { id: number }>({
       {pagination && (
         <div className="flex items-center justify-between">
           <p className="text-sm text-muted-foreground">
-            Showing {((pagination.current - 1) * pagination.pageSize) + 1} to{' '}
-            {Math.min(pagination.current * pagination.pageSize, pagination.total)} of{' '}
-            {pagination.total} items
+            Showing {(pagination.current - 1) * pagination.pageSize + 1} to{" "}
+            {Math.min(
+              pagination.current * pagination.pageSize,
+              pagination.total,
+            )}{" "}
+            of {pagination.total} items
           </p>
 
           <div className="flex items-center gap-2">
@@ -420,14 +464,18 @@ export function GenericListView<T extends { id: number }>({
             </Button>
 
             <span className="text-sm">
-              Page {pagination.current} of {Math.ceil(pagination.total / pagination.pageSize)}
+              Page {pagination.current} of{" "}
+              {Math.ceil(pagination.total / pagination.pageSize)}
             </span>
 
             <Button
               variant="outline"
               size="sm"
               onClick={() => pagination.onPageChange(pagination.current + 1)}
-              disabled={pagination.current >= Math.ceil(pagination.total / pagination.pageSize)}
+              disabled={
+                pagination.current >=
+                Math.ceil(pagination.total / pagination.pageSize)
+              }
             >
               Next
             </Button>
@@ -435,5 +483,5 @@ export function GenericListView<T extends { id: number }>({
         </div>
       )}
     </div>
-  )
+  );
 }

@@ -1,21 +1,25 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { useTheme } from "next-themes"
-import { Check, Palette, Monitor, Sun, Moon, Settings2, Download, RotateCcw } from "lucide-react"
-
-import { cn } from "@/shared/utils"
-import { Card, CardContent, CardHeader, CardTitle } from "@/shared/components/ui/card"
-import { Button } from "@/shared/components/ui/button"
-import { Badge } from "@/shared/components/ui/badge"
-import { Label } from "@/shared/components/ui/label"
-import { Separator } from "@/shared/components/ui/separator"
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/shared/components/ui/dropdown-menu"
+  Check,
+  Download,
+  Monitor,
+  Moon,
+  Palette,
+  RotateCcw,
+  Settings2,
+  Sun,
+} from "lucide-react";
+import { useTheme } from "next-themes";
+import * as React from "react";
+import { Badge } from "@/shared/components/ui/badge";
+import { Button } from "@/shared/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/shared/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -23,132 +27,146 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/shared/components/ui/dialog"
+} from "@/shared/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/shared/components/ui/dropdown-menu";
+import { Label } from "@/shared/components/ui/label";
+import { Separator } from "@/shared/components/ui/separator";
+import { cn } from "@/shared/utils";
 
 interface ColorScheme {
-  id: string
-  name: string
-  description: string
+  id: string;
+  name: string;
+  description: string;
   colors: {
-    primary: string
-    secondary: string
-    accent: string
-    background: string
-    foreground: string
-    muted: string
-    border: string
-  }
+    primary: string;
+    secondary: string;
+    accent: string;
+    background: string;
+    foreground: string;
+    muted: string;
+    border: string;
+  };
   preview: {
-    light: string
-    dark: string
-  }
+    light: string;
+    dark: string;
+  };
 }
 
 interface ThemeCustomizerProps {
-  className?: string
-  compact?: boolean
+  className?: string;
+  compact?: boolean;
 }
 
 const predefinedSchemes: ColorScheme[] = [
   {
-    id: 'default',
-    name: 'Default',
-    description: 'Clean and modern default theme',
+    id: "default",
+    name: "Default",
+    description: "Clean and modern default theme",
     colors: {
-      primary: 'hsl(221, 83%, 53%)',
-      secondary: 'hsl(210, 40%, 98%)',
-      accent: 'hsl(210, 40%, 96%)',
-      background: 'hsl(0, 0%, 100%)',
-      foreground: 'hsl(222, 84%, 5%)',
-      muted: 'hsl(210, 40%, 96%)',
-      border: 'hsl(214, 32%, 91%)'
+      primary: "hsl(221, 83%, 53%)",
+      secondary: "hsl(210, 40%, 98%)",
+      accent: "hsl(210, 40%, 96%)",
+      background: "hsl(0, 0%, 100%)",
+      foreground: "hsl(222, 84%, 5%)",
+      muted: "hsl(210, 40%, 96%)",
+      border: "hsl(214, 32%, 91%)",
     },
-    preview: { light: '#3b82f6', dark: '#1e40af' }
+    preview: { light: "#3b82f6", dark: "#1e40af" },
   },
   {
-    id: 'emerald',
-    name: 'Emerald',
-    description: 'Fresh green theme for nature lovers',
+    id: "emerald",
+    name: "Emerald",
+    description: "Fresh green theme for nature lovers",
     colors: {
-      primary: 'hsl(142, 76%, 36%)',
-      secondary: 'hsl(138, 76%, 97%)',
-      accent: 'hsl(138, 76%, 94%)',
-      background: 'hsl(0, 0%, 100%)',
-      foreground: 'hsl(222, 84%, 5%)',
-      muted: 'hsl(138, 76%, 94%)',
-      border: 'hsl(138, 62%, 85%)'
+      primary: "hsl(142, 76%, 36%)",
+      secondary: "hsl(138, 76%, 97%)",
+      accent: "hsl(138, 76%, 94%)",
+      background: "hsl(0, 0%, 100%)",
+      foreground: "hsl(222, 84%, 5%)",
+      muted: "hsl(138, 76%, 94%)",
+      border: "hsl(138, 62%, 85%)",
     },
-    preview: { light: '#059669', dark: '#065f46' }
+    preview: { light: "#059669", dark: "#065f46" },
   },
   {
-    id: 'rose',
-    name: 'Rose',
-    description: 'Elegant pink theme with warm tones',
+    id: "rose",
+    name: "Rose",
+    description: "Elegant pink theme with warm tones",
     colors: {
-      primary: 'hsl(330, 81%, 60%)',
-      secondary: 'hsl(330, 81%, 98%)',
-      accent: 'hsl(330, 81%, 95%)',
-      background: 'hsl(0, 0%, 100%)',
-      foreground: 'hsl(222, 84%, 5%)',
-      muted: 'hsl(330, 81%, 95%)',
-      border: 'hsl(330, 67%, 87%)'
+      primary: "hsl(330, 81%, 60%)",
+      secondary: "hsl(330, 81%, 98%)",
+      accent: "hsl(330, 81%, 95%)",
+      background: "hsl(0, 0%, 100%)",
+      foreground: "hsl(222, 84%, 5%)",
+      muted: "hsl(330, 81%, 95%)",
+      border: "hsl(330, 67%, 87%)",
     },
-    preview: { light: '#e11d48', dark: '#be123c' }
+    preview: { light: "#e11d48", dark: "#be123c" },
   },
   {
-    id: 'violet',
-    name: 'Violet',
-    description: 'Creative purple theme for artists',
+    id: "violet",
+    name: "Violet",
+    description: "Creative purple theme for artists",
     colors: {
-      primary: 'hsl(262, 83%, 58%)',
-      secondary: 'hsl(262, 83%, 98%)',
-      accent: 'hsl(262, 83%, 95%)',
-      background: 'hsl(0, 0%, 100%)',
-      foreground: 'hsl(222, 84%, 5%)',
-      muted: 'hsl(262, 83%, 95%)',
-      border: 'hsl(262, 69%, 87%)'
+      primary: "hsl(262, 83%, 58%)",
+      secondary: "hsl(262, 83%, 98%)",
+      accent: "hsl(262, 83%, 95%)",
+      background: "hsl(0, 0%, 100%)",
+      foreground: "hsl(222, 84%, 5%)",
+      muted: "hsl(262, 83%, 95%)",
+      border: "hsl(262, 69%, 87%)",
     },
-    preview: { light: '#7c3aed', dark: '#5b21b6' }
+    preview: { light: "#7c3aed", dark: "#5b21b6" },
   },
   {
-    id: 'orange',
-    name: 'Orange',
-    description: 'Energetic orange theme for productivity',
+    id: "orange",
+    name: "Orange",
+    description: "Energetic orange theme for productivity",
     colors: {
-      primary: 'hsl(24, 95%, 53%)',
-      secondary: 'hsl(24, 95%, 98%)',
-      accent: 'hsl(24, 95%, 95%)',
-      background: 'hsl(0, 0%, 100%)',
-      foreground: 'hsl(222, 84%, 5%)',
-      muted: 'hsl(24, 95%, 95%)',
-      border: 'hsl(24, 81%, 87%)'
+      primary: "hsl(24, 95%, 53%)",
+      secondary: "hsl(24, 95%, 98%)",
+      accent: "hsl(24, 95%, 95%)",
+      background: "hsl(0, 0%, 100%)",
+      foreground: "hsl(222, 84%, 5%)",
+      muted: "hsl(24, 95%, 95%)",
+      border: "hsl(24, 81%, 87%)",
     },
-    preview: { light: '#ea580c', dark: '#c2410c' }
+    preview: { light: "#ea580c", dark: "#c2410c" },
   },
   {
-    id: 'slate',
-    name: 'Slate',
-    description: 'Professional gray theme for business',
+    id: "slate",
+    name: "Slate",
+    description: "Professional gray theme for business",
     colors: {
-      primary: 'hsl(215, 28%, 17%)',
-      secondary: 'hsl(210, 40%, 98%)',
-      accent: 'hsl(210, 40%, 96%)',
-      background: 'hsl(0, 0%, 100%)',
-      foreground: 'hsl(222, 84%, 5%)',
-      muted: 'hsl(210, 40%, 96%)',
-      border: 'hsl(214, 32%, 91%)'
+      primary: "hsl(215, 28%, 17%)",
+      secondary: "hsl(210, 40%, 98%)",
+      accent: "hsl(210, 40%, 96%)",
+      background: "hsl(0, 0%, 100%)",
+      foreground: "hsl(222, 84%, 5%)",
+      muted: "hsl(210, 40%, 96%)",
+      border: "hsl(214, 32%, 91%)",
     },
-    preview: { light: '#334155', dark: '#1e293b' }
-  }
-]
+    preview: { light: "#334155", dark: "#1e293b" },
+  },
+];
 
-function ColorPreview({ scheme, isSelected, onClick }: {
-  scheme: ColorScheme
-  isSelected: boolean
-  onClick: () => void
+function ColorPreview({
+  scheme,
+  isSelected,
+  onClick,
+}: {
+  scheme: ColorScheme;
+  isSelected: boolean;
+  onClick: () => void;
 }) {
-  const { theme } = useTheme()
-  const previewColor = theme === 'dark' ? scheme.preview.dark : scheme.preview.light
+  const { theme } = useTheme();
+  const previewColor =
+    theme === "dark" ? scheme.preview.dark : scheme.preview.light;
 
   return (
     <button
@@ -157,7 +175,7 @@ function ColorPreview({ scheme, isSelected, onClick }: {
         "relative flex flex-col items-center space-y-2 p-3 rounded-lg border-2 transition-all hover:scale-105",
         isSelected
           ? "border-primary bg-primary/5"
-          : "border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600"
+          : "border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600",
       )}
     >
       <div
@@ -176,25 +194,25 @@ function ColorPreview({ scheme, isSelected, onClick }: {
         </div>
       )}
     </button>
-  )
+  );
 }
 
 function ThemeModeSelector() {
-  const { theme, setTheme } = useTheme()
+  const { theme, setTheme } = useTheme();
 
   const modes = [
-    { id: 'light', name: 'Light', icon: Sun },
-    { id: 'dark', name: 'Dark', icon: Moon },
-    { id: 'system', name: 'System', icon: Monitor }
-  ]
+    { id: "light", name: "Light", icon: Sun },
+    { id: "dark", name: "Dark", icon: Moon },
+    { id: "system", name: "System", icon: Monitor },
+  ];
 
   return (
     <div className="space-y-3">
       <Label className="text-sm font-medium">Appearance</Label>
       <div className="flex space-x-2">
         {modes.map((mode) => {
-          const Icon = mode.icon
-          const isSelected = theme === mode.id
+          const Icon = mode.icon;
+          const isSelected = theme === mode.id;
 
           return (
             <button
@@ -204,77 +222,82 @@ function ThemeModeSelector() {
                 "flex-1 flex flex-col items-center space-y-2 p-3 rounded-lg border transition-all",
                 isSelected
                   ? "border-primary bg-primary/5 text-primary"
-                  : "border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600"
+                  : "border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600",
               )}
             >
               <Icon className="w-5 h-5" />
               <span className="text-sm font-medium">{mode.name}</span>
             </button>
-          )
+          );
         })}
       </div>
     </div>
-  )
+  );
 }
 
-export function ThemeCustomizer({ className, compact = false }: ThemeCustomizerProps) {
-  const [selectedScheme, setSelectedScheme] = React.useState('default')
-  const [customSchemes, setCustomSchemes] = React.useState<ColorScheme[]>([])
+export function ThemeCustomizer({
+  className,
+  compact = false,
+}: ThemeCustomizerProps) {
+  const [selectedScheme, setSelectedScheme] = React.useState("default");
+  const [customSchemes, setCustomSchemes] = React.useState<ColorScheme[]>([]);
 
   // Load saved custom schemes from localStorage
   React.useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('custom-color-schemes')
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("custom-color-schemes");
       if (saved) {
         try {
-          setCustomSchemes(JSON.parse(saved))
+          setCustomSchemes(JSON.parse(saved));
         } catch (error) {
-          console.error('Failed to load custom color schemes:', error)
+          console.error("Failed to load custom color schemes:", error);
         }
       }
 
-      const savedScheme = localStorage.getItem('selected-color-scheme')
+      const savedScheme = localStorage.getItem("selected-color-scheme");
       if (savedScheme) {
-        setSelectedScheme(savedScheme)
+        setSelectedScheme(savedScheme);
       }
     }
-  }, [])
+  }, []);
 
   // Apply color scheme
   const applyColorScheme = React.useCallback((scheme: ColorScheme) => {
-    if (typeof window !== 'undefined') {
-      const root = document.documentElement
+    if (typeof window !== "undefined") {
+      const root = document.documentElement;
       Object.entries(scheme.colors).forEach(([key, value]) => {
-        root.style.setProperty(`--${key}`, value)
-      })
-      localStorage.setItem('selected-color-scheme', scheme.id)
-      setSelectedScheme(scheme.id)
+        root.style.setProperty(`--${key}`, value);
+      });
+      localStorage.setItem("selected-color-scheme", scheme.id);
+      setSelectedScheme(scheme.id);
     }
-  }, [])
+  }, []);
 
   const exportSchemes = () => {
     const data = {
       predefined: predefinedSchemes,
       custom: customSchemes,
-      selected: selectedScheme
-    }
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = 'theme-schemes.json'
-    a.click()
-    URL.revokeObjectURL(url)
-  }
+      selected: selectedScheme,
+    };
+    const blob = new Blob([JSON.stringify(data, null, 2)], {
+      type: "application/json",
+    });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "theme-schemes.json";
+    a.click();
+    URL.revokeObjectURL(url);
+  };
 
   const resetToDefault = () => {
-    const defaultScheme = predefinedSchemes.find(s => s.id === 'default')
+    const defaultScheme = predefinedSchemes.find((s) => s.id === "default");
     if (defaultScheme) {
-      applyColorScheme(defaultScheme)
+      applyColorScheme(defaultScheme);
     }
-  }
+  };
 
-  const allSchemes = [...predefinedSchemes, ...customSchemes]
+  const allSchemes = [...predefinedSchemes, ...customSchemes];
 
   if (compact) {
     return (
@@ -322,7 +345,7 @@ export function ThemeCustomizer({ className, compact = false }: ThemeCustomizerP
           </div>
         </DialogContent>
       </Dialog>
-    )
+    );
   }
 
   return (
@@ -333,9 +356,7 @@ export function ThemeCustomizer({ className, compact = false }: ThemeCustomizerP
             <Palette className="h-5 w-5 mr-2" />
             Theme Customizer
           </CardTitle>
-          <Badge variant="secondary">
-            {allSchemes.length} schemes
-          </Badge>
+          <Badge variant="secondary">{allSchemes.length} schemes</Badge>
         </div>
       </CardHeader>
       <CardContent className="space-y-6">
@@ -383,14 +404,15 @@ export function ThemeCustomizer({ className, compact = false }: ThemeCustomizerP
             <Separator />
             <div className="text-center">
               <p className="text-sm text-gray-600 dark:text-gray-400">
-                {customSchemes.length} custom scheme{customSchemes.length !== 1 ? 's' : ''} available
+                {customSchemes.length} custom scheme
+                {customSchemes.length !== 1 ? "s" : ""} available
               </p>
             </div>
           </>
         )}
       </CardContent>
     </Card>
-  )
+  );
 }
 
-export default ThemeCustomizer
+export default ThemeCustomizer;

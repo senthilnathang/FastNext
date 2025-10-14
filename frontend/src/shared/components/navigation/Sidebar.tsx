@@ -1,16 +1,21 @@
-'use client';
+"use client";
 
-import React, { useState, useCallback, useEffect } from 'react';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { cn } from '@/shared/utils';
-import { useUserRole } from '@/modules/admin/hooks/useUserRole';
-import { useAuth } from '@/modules/auth';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
-import { ChevronDown, ChevronRight, X } from 'lucide-react';
-import { MenuItem, menuItems } from './menuConfig';
-import { filterMenuItems } from './menuUtils';
-import { UserMenu } from './UserMenu';
+import { ChevronDown, ChevronRight, X } from "lucide-react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { useCallback, useEffect, useState } from "react";
+import { useUserRole } from "@/modules/admin/hooks/useUserRole";
+import { useAuth } from "@/modules/auth";
+import { cn } from "@/shared/utils";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "../ui/tooltip";
+import { type MenuItem, menuItems } from "./menuConfig";
+import { filterMenuItems } from "./menuUtils";
+import { UserMenu } from "./UserMenu";
 
 interface SidebarItemProps {
   item: MenuItem;
@@ -27,16 +32,16 @@ function SidebarItem({
   expandedItems,
   onToggleExpanded,
   isCollapsed = false,
-  isHovered = false
+  isHovered = false,
 }: SidebarItemProps) {
   const pathname = usePathname();
   const hasChildren = item.children && item.children.length > 0;
   const isExpanded = expandedItems.includes(item.title);
   // Only highlight the exact current page, not parent pages
   const isActive = item.href ? pathname === item.href : false;
-  const hasActiveChild = hasChildren && item.children?.some(child =>
-    child.href && pathname === child.href
-  );
+  const hasActiveChild =
+    hasChildren &&
+    item.children?.some((child) => child.href && pathname === child.href);
 
   const handleToggle = () => {
     if (hasChildren) {
@@ -58,7 +63,7 @@ function SidebarItem({
           </span>
           {hasChildren && (
             <div className="flex-shrink-0 transition-transform duration-200">
-              {(isExpanded || hasActiveChild) ? (
+              {isExpanded || hasActiveChild ? (
                 <ChevronDown className="w-3 h-3" />
               ) : (
                 <ChevronRight className="w-3 h-3" />
@@ -71,33 +76,32 @@ function SidebarItem({
   );
 
   const itemClasses = cn(
-    'group flex items-center w-full text-sm rounded-lg transition-all duration-200',
-    'hover:bg-sidebar-accent',
-    'focus:outline-none focus:ring-1 focus:ring-primary/30',
+    "group flex items-center w-full text-sm rounded-lg transition-all duration-200",
+    "hover:bg-sidebar-accent",
+    "focus:outline-none focus:ring-1 focus:ring-primary/30",
     {
       // Only highlight the exact current page
-      'bg-primary text-primary-foreground shadow-sm': isActive,
+      "bg-primary text-primary-foreground shadow-sm": isActive,
       // Parent items with active children get subtle highlighting
-      'bg-sidebar-accent/50 text-primary font-medium': !isActive && hasActiveChild,
+      "bg-sidebar-accent/50 text-primary font-medium":
+        !isActive && hasActiveChild,
       // Default styling for non-active items
-      'text-sidebar-foreground hover:text-primary': !isActive && !hasActiveChild,
-      'px-2 py-2': showText,
-      'px-2 py-2 justify-center': !showText,
-      'ml-3 pl-4': level > 0 && showText,
-      'relative': isActive
-    }
+      "text-sidebar-foreground hover:text-primary":
+        !isActive && !hasActiveChild,
+      "px-2 py-2": showText,
+      "px-2 py-2 justify-center": !showText,
+      "ml-3 pl-4": level > 0 && showText,
+      relative: isActive,
+    },
   );
 
   const renderItem = () => {
     const content = hasChildren ? (
-      <button
-        onClick={handleToggle}
-        className={itemClasses}
-      >
+      <button onClick={handleToggle} className={itemClasses}>
         <ItemContent />
       </button>
     ) : (
-      <Link href={item.href || '#'} className={itemClasses}>
+      <Link href={item.href || "#"} className={itemClasses}>
         <ItemContent />
       </Link>
     );
@@ -105,9 +109,7 @@ function SidebarItem({
     if (isCollapsed && !isHovered) {
       return (
         <Tooltip>
-          <TooltipTrigger asChild>
-            {content}
-          </TooltipTrigger>
+          <TooltipTrigger asChild>{content}</TooltipTrigger>
           <TooltipContent side="right" sideOffset={8} className="text-xs">
             <p>{item.title}</p>
           </TooltipContent>
@@ -152,34 +154,40 @@ export default function Sidebar({
   className,
   onClose,
   showCloseButton = false,
-  isCollapsed = false
+  isCollapsed = false,
 }: SidebarProps) {
   const { canAccessModule, hasPermission } = useUserRole();
   const { user } = useAuth();
-  const [expandedItems, setExpandedItems] = useState<string[]>(['Settings', 'Administration']);
+  const [expandedItems, setExpandedItems] = useState<string[]>([
+    "Settings",
+    "Administration",
+  ]);
   const [isHovered, setIsHovered] = useState(false);
   const [hoverTimer, setHoverTimer] = useState<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
-    const saved = localStorage.getItem('sidebar-expanded-items');
+    const saved = localStorage.getItem("sidebar-expanded-items");
     if (saved) {
       try {
         setExpandedItems(JSON.parse(saved));
       } catch (error) {
-        console.error('Error loading sidebar state:', error);
+        console.error("Error loading sidebar state:", error);
       }
     }
   }, []);
 
   useEffect(() => {
-    localStorage.setItem('sidebar-expanded-items', JSON.stringify(expandedItems));
+    localStorage.setItem(
+      "sidebar-expanded-items",
+      JSON.stringify(expandedItems),
+    );
   }, [expandedItems]);
 
   const handleToggleExpanded = useCallback((itemTitle: string) => {
-    setExpandedItems(prev =>
+    setExpandedItems((prev) =>
       prev.includes(itemTitle)
-        ? prev.filter(item => item !== itemTitle)
-        : [...prev, itemTitle]
+        ? prev.filter((item) => item !== itemTitle)
+        : [...prev, itemTitle],
     );
   }, []);
 
@@ -205,43 +213,48 @@ export default function Sidebar({
 
   const filteredMenuItems = filterMenuItems(menuItems, {
     canAccessModule,
-    hasPermission
+    hasPermission,
   });
 
-  const sidebarWidth = isCollapsed ? (isHovered ? 'w-56' : 'w-14') : 'w-56';
+  const sidebarWidth = isCollapsed ? (isHovered ? "w-56" : "w-14") : "w-56";
 
   return (
     <TooltipProvider>
       <div
         className={cn(
-          'bg-sidebar border-r border-border',
-          'flex flex-col h-full transition-all duration-300 ease-in-out',
-          'shadow-sm',
+          "bg-sidebar border-r border-border",
+          "flex flex-col h-full transition-all duration-300 ease-in-out",
+          "shadow-sm",
           sidebarWidth,
-          className
+          className,
         )}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
       >
         {/* Compact Header */}
-        <div className={cn(
-          'flex items-center justify-between border-b border-border h-12',
-          isCollapsed && !isHovered ? 'px-3' : 'px-4'
-        )}>
+        <div
+          className={cn(
+            "flex items-center justify-between border-b border-border h-12",
+            isCollapsed && !isHovered ? "px-3" : "px-4",
+          )}
+        >
           <div className="flex items-center space-x-3 min-w-0 flex-1">
             <div className="relative flex-shrink-0">
               <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center shadow-sm">
-                <span className="text-primary-foreground font-bold text-sm">FN</span>
+                <span className="text-primary-foreground font-bold text-sm">
+                  FN
+                </span>
               </div>
               <div className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-success rounded-full border border-sidebar"></div>
             </div>
             {(!isCollapsed || isHovered) && (
               <div className="min-w-0 flex-1">
-                <h1 className="text-sm font-bold text-sidebar-foreground truncate">FastNext</h1>
+                <h1 className="text-sm font-bold text-sidebar-foreground truncate">
+                  FastNext
+                </h1>
               </div>
             )}
           </div>
-
 
           {/* Mobile close button */}
           {showCloseButton && onClose && (
@@ -255,10 +268,12 @@ export default function Sidebar({
         </div>
 
         {/* Navigation */}
-        <nav className={cn(
-          'flex-1 overflow-y-auto',
-          isCollapsed && !isHovered ? 'p-2' : 'p-3'
-        )}>
+        <nav
+          className={cn(
+            "flex-1 overflow-y-auto",
+            isCollapsed && !isHovered ? "p-2" : "p-3",
+          )}
+        >
           <div className="space-y-1">
             {filteredMenuItems.map((item) => (
               <SidebarItem
@@ -275,10 +290,12 @@ export default function Sidebar({
 
         {/* Enhanced User Menu */}
         {user && (
-          <div className={cn(
-            'border-t border-border',
-            isCollapsed && !isHovered ? 'p-2' : 'p-3'
-          )}>
+          <div
+            className={cn(
+              "border-t border-border",
+              isCollapsed && !isHovered ? "p-2" : "p-3",
+            )}
+          >
             <UserMenu
               isCollapsed={isCollapsed && !isHovered}
               className="w-full"

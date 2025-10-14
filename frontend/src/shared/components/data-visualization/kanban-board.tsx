@@ -1,67 +1,69 @@
-"use client"
+"use client";
 
-import * as React from "react"
 import {
+  closestCorners,
   DndContext,
-  DragEndEvent,
-  DragOverEvent,
+  type DragEndEvent,
+  type DragOverEvent,
   DragOverlay,
-  DragStartEvent,
+  type DragStartEvent,
   PointerSensor,
   useSensor,
   useSensors,
-  closestCorners,
-} from "@dnd-kit/core"
+} from "@dnd-kit/core";
 import {
-  SortableContext,
   arrayMove,
-  verticalListSortingStrategy,
-} from "@dnd-kit/sortable"
-import {
+  SortableContext,
   useSortable,
-} from "@dnd-kit/sortable"
-import { Plus, MoreHorizontal, GripVertical } from "lucide-react"
-
-import { cn } from '@/shared/utils'
-import { Button } from "@/shared/components/ui/button"
-import { Card, CardContent, CardHeader } from "@/shared/components/ui/card"
-import { Badge } from "@/shared/components/ui/badge"
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { GripVertical, MoreHorizontal, Plus } from "lucide-react";
+import * as React from "react";
+import { Badge } from "@/shared/components/ui/badge";
+import { Button } from "@/shared/components/ui/button";
+import { Card, CardContent, CardHeader } from "@/shared/components/ui/card";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/shared/components/ui/dropdown-menu"
+} from "@/shared/components/ui/dropdown-menu";
+import { cn } from "@/shared/utils";
 
 export interface KanbanItem {
-  id: string
-  title: string
-  description?: string
-  status: string
-  priority?: "low" | "medium" | "high"
-  assignee?: string
-  tags?: string[]
-  createdAt?: Date
-  updatedAt?: Date
-  [key: string]: unknown
+  id: string;
+  title: string;
+  description?: string;
+  status: string;
+  priority?: "low" | "medium" | "high";
+  assignee?: string;
+  tags?: string[];
+  createdAt?: Date;
+  updatedAt?: Date;
+  [key: string]: unknown;
 }
 
 export interface KanbanColumn {
-  id: string
-  title: string
-  items: KanbanItem[]
-  color?: string
-  limit?: number
+  id: string;
+  title: string;
+  items: KanbanItem[];
+  color?: string;
+  limit?: number;
 }
 
 interface KanbanItemProps {
-  item: KanbanItem
-  onEdit?: (item: KanbanItem) => void
-  onDelete?: (item: KanbanItem) => void
-  renderItem?: (item: KanbanItem) => React.ReactNode
+  item: KanbanItem;
+  onEdit?: (item: KanbanItem) => void;
+  onDelete?: (item: KanbanItem) => void;
+  renderItem?: (item: KanbanItem) => React.ReactNode;
 }
 
-function KanbanItemCard({ item, onEdit, onDelete, renderItem }: KanbanItemProps) {
+function KanbanItemCard({
+  item,
+  onEdit,
+  onDelete,
+  renderItem,
+}: KanbanItemProps) {
   const {
     attributes,
     listeners,
@@ -71,13 +73,15 @@ function KanbanItemCard({ item, onEdit, onDelete, renderItem }: KanbanItemProps)
     isDragging,
   } = useSortable({
     id: item.id,
-  })
+  });
 
   const style = {
-    transform: transform ? `translate3d(${transform.x}px, ${transform.y}px, 0)` : undefined,
+    transform: transform
+      ? `translate3d(${transform.x}px, ${transform.y}px, 0)`
+      : undefined,
     transition,
     opacity: isDragging ? 0.5 : 1,
-  }
+  };
 
   if (renderItem) {
     return (
@@ -90,14 +94,14 @@ function KanbanItemCard({ item, onEdit, onDelete, renderItem }: KanbanItemProps)
       >
         {renderItem(item)}
       </div>
-    )
+    );
   }
 
   const priorityColors = {
     low: "bg-green-100 text-green-800",
     medium: "bg-yellow-100 text-yellow-800",
     high: "bg-red-100 text-red-800",
-  }
+  };
 
   return (
     <Card
@@ -105,7 +109,7 @@ function KanbanItemCard({ item, onEdit, onDelete, renderItem }: KanbanItemProps)
       style={style}
       className={cn(
         "cursor-grab active:cursor-grabbing mb-3 hover:shadow-md transition-shadow",
-        isDragging && "shadow-lg"
+        isDragging && "shadow-lg",
       )}
       {...attributes}
       {...listeners}
@@ -161,7 +165,7 @@ function KanbanItemCard({ item, onEdit, onDelete, renderItem }: KanbanItemProps)
               {item.priority}
             </Badge>
           )}
-          {item.tags?.map(tag => (
+          {item.tags?.map((tag) => (
             <Badge key={tag} variant="outline" className="text-xs">
               {tag}
             </Badge>
@@ -175,16 +179,16 @@ function KanbanItemCard({ item, onEdit, onDelete, renderItem }: KanbanItemProps)
         )}
       </CardContent>
     </Card>
-  )
+  );
 }
 
 interface KanbanColumnProps {
-  column: KanbanColumn
-  onAddItem?: (columnId: string) => void
-  onEditItem?: (item: KanbanItem) => void
-  onDeleteItem?: (item: KanbanItem) => void
-  renderItem?: (item: KanbanItem) => React.ReactNode
-  renderColumnHeader?: (column: KanbanColumn) => React.ReactNode
+  column: KanbanColumn;
+  onAddItem?: (columnId: string) => void;
+  onEditItem?: (item: KanbanItem) => void;
+  onDeleteItem?: (item: KanbanItem) => void;
+  renderItem?: (item: KanbanItem) => React.ReactNode;
+  renderColumnHeader?: (column: KanbanColumn) => React.ReactNode;
 }
 
 function KanbanColumnComponent({
@@ -193,27 +197,24 @@ function KanbanColumnComponent({
   onEditItem,
   onDeleteItem,
   renderItem,
-  renderColumnHeader
+  renderColumnHeader,
 }: KanbanColumnProps) {
-  const {
-    setNodeRef,
-    isOver,
-  } = useSortable({
+  const { setNodeRef, isOver } = useSortable({
     id: column.id,
     data: {
       type: "column",
       column,
     },
-  })
+  });
 
-  const isOverLimit = column.limit && column.items.length >= column.limit
+  const isOverLimit = column.limit && column.items.length >= column.limit;
 
   return (
     <div
       ref={setNodeRef}
       className={cn(
         "bg-muted/30 rounded-lg p-3 min-h-96 w-72 flex-shrink-0",
-        isOver && "bg-muted/50"
+        isOver && "bg-muted/50",
       )}
     >
       <div className="flex items-center justify-between mb-3">
@@ -248,9 +249,12 @@ function KanbanColumnComponent({
         </div>
       )}
 
-      <SortableContext items={column.items.map(item => item.id)} strategy={verticalListSortingStrategy}>
+      <SortableContext
+        items={column.items.map((item) => item.id)}
+        strategy={verticalListSortingStrategy}
+      >
         <div className="space-y-2">
-          {column.items.map(item => (
+          {column.items.map((item) => (
             <KanbanItemCard
               key={item.id}
               item={item}
@@ -268,19 +272,19 @@ function KanbanColumnComponent({
         </div>
       )}
     </div>
-  )
+  );
 }
 
 interface KanbanBoardProps {
-  columns: KanbanColumn[]
-  onColumnsChange?: (columns: KanbanColumn[]) => void
-  onAddItem?: (columnId: string) => void
-  onEditItem?: (item: KanbanItem) => void
-  onDeleteItem?: (item: KanbanItem) => void
-  onMoveItem?: (itemId: string, fromColumn: string, toColumn: string) => void
-  renderItem?: (item: KanbanItem) => React.ReactNode
-  renderColumnHeader?: (column: KanbanColumn) => React.ReactNode
-  className?: string
+  columns: KanbanColumn[];
+  onColumnsChange?: (columns: KanbanColumn[]) => void;
+  onAddItem?: (columnId: string) => void;
+  onEditItem?: (item: KanbanItem) => void;
+  onDeleteItem?: (item: KanbanItem) => void;
+  onMoveItem?: (itemId: string, fromColumn: string, toColumn: string) => void;
+  renderItem?: (item: KanbanItem) => React.ReactNode;
+  renderColumnHeader?: (column: KanbanColumn) => React.ReactNode;
+  className?: string;
 }
 
 export function KanbanBoard({
@@ -294,112 +298,119 @@ export function KanbanBoard({
   renderColumnHeader,
   className,
 }: KanbanBoardProps) {
-  const [activeItem, setActiveItem] = React.useState<KanbanItem | null>(null)
-  const sensors = useSensors(useSensor(PointerSensor))
+  const [activeItem, setActiveItem] = React.useState<KanbanItem | null>(null);
+  const sensors = useSensors(useSensor(PointerSensor));
 
   const handleDragStart = (event: DragStartEvent) => {
-    const { active } = event
+    const { active } = event;
     const item = columns
-      .flatMap(col => col.items)
-      .find(item => item.id === active.id)
+      .flatMap((col) => col.items)
+      .find((item) => item.id === active.id);
 
     if (item) {
-      setActiveItem(item)
+      setActiveItem(item);
     }
-  }
+  };
 
   const handleDragOver = (event: DragOverEvent) => {
-    const { active, over } = event
-    if (!over) return
+    const { active, over } = event;
+    if (!over) return;
 
-    const activeId = active.id
-    const overId = over.id
+    const activeId = active.id;
+    const overId = over.id;
 
-    if (activeId === overId) return
+    if (activeId === overId) return;
 
     // Find the columns
-    const activeColumn = columns.find(col =>
-      col.items.some(item => item.id === activeId)
-    )
-    const overColumn = columns.find(col =>
-      col.id === overId || col.items.some(item => item.id === overId)
-    )
+    const activeColumn = columns.find((col) =>
+      col.items.some((item) => item.id === activeId),
+    );
+    const overColumn = columns.find(
+      (col) =>
+        col.id === overId || col.items.some((item) => item.id === overId),
+    );
 
-    if (!activeColumn || !overColumn) return
+    if (!activeColumn || !overColumn) return;
 
     // If moving to a different column
     if (activeColumn.id !== overColumn.id) {
       // Check column limits
       if (overColumn.limit && overColumn.items.length >= overColumn.limit) {
-        return
+        return;
       }
 
-      const newColumns = columns.map(col => {
+      const newColumns = columns.map((col) => {
         if (col.id === activeColumn.id) {
           return {
             ...col,
-            items: col.items.filter(item => item.id !== activeId)
-          }
+            items: col.items.filter((item) => item.id !== activeId),
+          };
         }
         if (col.id === overColumn.id) {
-          const activeItem = activeColumn.items.find(item => item.id === activeId)!
-          const overIndex = col.items.findIndex(item => item.id === overId)
-          const insertIndex = overIndex >= 0 ? overIndex : col.items.length
+          const activeItem = activeColumn.items.find(
+            (item) => item.id === activeId,
+          )!;
+          const overIndex = col.items.findIndex((item) => item.id === overId);
+          const insertIndex = overIndex >= 0 ? overIndex : col.items.length;
 
           return {
             ...col,
             items: [
               ...col.items.slice(0, insertIndex),
               { ...activeItem, status: col.id },
-              ...col.items.slice(insertIndex)
-            ]
-          }
+              ...col.items.slice(insertIndex),
+            ],
+          };
         }
-        return col
-      })
+        return col;
+      });
 
-      onColumnsChange?.(newColumns)
-      onMoveItem?.(activeId.toString(), activeColumn.id, overColumn.id)
+      onColumnsChange?.(newColumns);
+      onMoveItem?.(activeId.toString(), activeColumn.id, overColumn.id);
     }
-  }
+  };
 
   const handleDragEnd = (event: DragEndEvent) => {
-    setActiveItem(null)
-    const { active, over } = event
+    setActiveItem(null);
+    const { active, over } = event;
 
-    if (!over) return
+    if (!over) return;
 
-    const activeId = active.id
-    const overId = over.id
+    const activeId = active.id;
+    const overId = over.id;
 
-    if (activeId === overId) return
+    if (activeId === overId) return;
 
     // Handle reordering within the same column
-    const activeColumn = columns.find(col =>
-      col.items.some(item => item.id === activeId)
-    )
+    const activeColumn = columns.find((col) =>
+      col.items.some((item) => item.id === activeId),
+    );
 
     if (activeColumn) {
-      const overItem = activeColumn.items.find(item => item.id === overId)
+      const overItem = activeColumn.items.find((item) => item.id === overId);
 
       if (overItem) {
-        const activeIndex = activeColumn.items.findIndex(item => item.id === activeId)
-        const overIndex = activeColumn.items.findIndex(item => item.id === overId)
+        const activeIndex = activeColumn.items.findIndex(
+          (item) => item.id === activeId,
+        );
+        const overIndex = activeColumn.items.findIndex(
+          (item) => item.id === overId,
+        );
 
-        const newColumns = columns.map(col => {
+        const newColumns = columns.map((col) => {
           if (col.id === activeColumn.id) {
             return {
               ...col,
-              items: arrayMove(col.items, activeIndex, overIndex)
-            }
+              items: arrayMove(col.items, activeIndex, overIndex),
+            };
           }
-          return col
-        })
+          return col;
+        });
 
-        onColumnsChange?.(newColumns)
+        onColumnsChange?.(newColumns);
       }
     }
-  }
+  };
 
   return (
     <DndContext
@@ -410,7 +421,7 @@ export function KanbanBoard({
       onDragEnd={handleDragEnd}
     >
       <div className={cn("flex gap-4 overflow-x-auto pb-4", className)}>
-        {columns.map(column => (
+        {columns.map((column) => (
           <KanbanColumnComponent
             key={column.id}
             column={column}
@@ -425,12 +436,9 @@ export function KanbanBoard({
 
       <DragOverlay>
         {activeItem ? (
-          <KanbanItemCard
-            item={activeItem}
-            renderItem={renderItem}
-          />
+          <KanbanItemCard item={activeItem} renderItem={renderItem} />
         ) : null}
       </DragOverlay>
     </DndContext>
-  )
+  );
 }

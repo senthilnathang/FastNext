@@ -1,92 +1,91 @@
-"use client"
+"use client";
 
-import * as React from "react"
 import {
   ChevronLeft,
   ChevronRight,
   ChevronsLeft,
   ChevronsRight,
-  Search,
   Filter,
-  SortAsc,
-  SortDesc,
   Grid,
   List,
-  MoreHorizontal
-} from "lucide-react"
-
-import { cn } from '@/shared/utils'
-import { Button } from "@/shared/components/ui/button"
-import { Input } from "@/shared/components/ui/input"
-import { Badge } from "@/shared/components/ui/badge"
-import { Card, CardContent } from "@/shared/components/ui/card"
+  MoreHorizontal,
+  Search,
+  SortAsc,
+  SortDesc,
+} from "lucide-react";
+import * as React from "react";
+import { Badge } from "@/shared/components/ui/badge";
+import { Button } from "@/shared/components/ui/button";
+import { Card, CardContent } from "@/shared/components/ui/card";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/shared/components/ui/dropdown-menu";
+import { Input } from "@/shared/components/ui/input";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/shared/components/ui/select"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/shared/components/ui/dropdown-menu"
+} from "@/shared/components/ui/select";
+import { cn } from "@/shared/utils";
 
 export interface ListItem {
-  id: string
-  [key: string]: unknown
+  id: string;
+  [key: string]: unknown;
 }
 
 export interface ListColumn {
-  key: string
-  label: string
-  sortable?: boolean
-  searchable?: boolean
-  render?: (value: unknown, item: ListItem) => React.ReactNode
-  width?: string | number
+  key: string;
+  label: string;
+  sortable?: boolean;
+  searchable?: boolean;
+  render?: (value: unknown, item: ListItem) => React.ReactNode;
+  width?: string | number;
 }
 
 export interface ListAction {
-  key: string
-  label: string
-  icon?: React.ComponentType<{ className?: string }>
-  onClick: (item: ListItem) => void
-  variant?: "default" | "destructive"
-  show?: (item: ListItem) => boolean
+  key: string;
+  label: string;
+  icon?: React.ComponentType<{ className?: string }>;
+  onClick: (item: ListItem) => void;
+  variant?: "default" | "destructive";
+  show?: (item: ListItem) => boolean;
 }
 
 export interface PaginationInfo {
-  page: number
-  pageSize: number
-  total: number
-  totalPages: number
+  page: number;
+  pageSize: number;
+  total: number;
+  totalPages: number;
 }
 
 interface ListViewProps {
-  items: ListItem[]
-  columns: ListColumn[]
-  pagination?: PaginationInfo
-  onPageChange?: (page: number) => void
-  onPageSizeChange?: (pageSize: number) => void
-  onSearch?: (query: string) => void
-  onSort?: (column: string, direction: "asc" | "desc") => void
-  onFilter?: (filters: Record<string, unknown>) => void
-  actions?: ListAction[]
-  searchable?: boolean
-  sortable?: boolean
-  filterable?: boolean
-  selectable?: boolean
-  selectedItems?: string[]
-  onSelectionChange?: (selectedIds: string[]) => void
-  viewMode?: "list" | "grid" | "cards"
-  onViewModeChange?: (mode: "list" | "grid" | "cards") => void
-  loading?: boolean
-  emptyMessage?: string
-  className?: string
-  renderItem?: (item: ListItem) => React.ReactNode
-  itemsPerPageOptions?: number[]
+  items: ListItem[];
+  columns: ListColumn[];
+  pagination?: PaginationInfo;
+  onPageChange?: (page: number) => void;
+  onPageSizeChange?: (pageSize: number) => void;
+  onSearch?: (query: string) => void;
+  onSort?: (column: string, direction: "asc" | "desc") => void;
+  onFilter?: (filters: Record<string, unknown>) => void;
+  actions?: ListAction[];
+  searchable?: boolean;
+  sortable?: boolean;
+  filterable?: boolean;
+  selectable?: boolean;
+  selectedItems?: string[];
+  onSelectionChange?: (selectedIds: string[]) => void;
+  viewMode?: "list" | "grid" | "cards";
+  onViewModeChange?: (mode: "list" | "grid" | "cards") => void;
+  loading?: boolean;
+  emptyMessage?: string;
+  className?: string;
+  renderItem?: (item: ListItem) => React.ReactNode;
+  itemsPerPageOptions?: number[];
 }
 
 export function ListView({
@@ -112,41 +111,44 @@ export function ListView({
   renderItem,
   itemsPerPageOptions = [10, 25, 50, 100],
 }: ListViewProps) {
-  const [searchQuery, setSearchQuery] = React.useState("")
-  const [sortColumn, setSortColumn] = React.useState<string | null>(null)
-  const [sortDirection, setSortDirection] = React.useState<"asc" | "desc">("asc")
+  const [searchQuery, setSearchQuery] = React.useState("");
+  const [sortColumn, setSortColumn] = React.useState<string | null>(null);
+  const [sortDirection, setSortDirection] = React.useState<"asc" | "desc">(
+    "asc",
+  );
 
   const handleSearch = (query: string) => {
-    setSearchQuery(query)
-    onSearch?.(query)
-  }
+    setSearchQuery(query);
+    onSearch?.(query);
+  };
 
   const handleSort = (column: string) => {
-    if (!sortable) return
+    if (!sortable) return;
 
-    const newDirection = sortColumn === column && sortDirection === "asc" ? "desc" : "asc"
-    setSortColumn(column)
-    setSortDirection(newDirection)
-    onSort?.(column, newDirection)
-  }
+    const newDirection =
+      sortColumn === column && sortDirection === "asc" ? "desc" : "asc";
+    setSortColumn(column);
+    setSortDirection(newDirection);
+    onSort?.(column, newDirection);
+  };
 
   const handleSelectAll = () => {
-    if (!selectable || !onSelectionChange) return
+    if (!selectable || !onSelectionChange) return;
 
-    const allSelected = selectedItems.length === items.length
-    const newSelection = allSelected ? [] : items.map(item => item.id)
-    onSelectionChange(newSelection)
-  }
+    const allSelected = selectedItems.length === items.length;
+    const newSelection = allSelected ? [] : items.map((item) => item.id);
+    onSelectionChange(newSelection);
+  };
 
   const handleSelectItem = (itemId: string) => {
-    if (!selectable || !onSelectionChange) return
+    if (!selectable || !onSelectionChange) return;
 
     const newSelection = selectedItems.includes(itemId)
-      ? selectedItems.filter(id => id !== itemId)
-      : [...selectedItems, itemId]
+      ? selectedItems.filter((id) => id !== itemId)
+      : [...selectedItems, itemId];
 
-    onSelectionChange(newSelection)
-  }
+    onSelectionChange(newSelection);
+  };
 
   const renderTableView = () => (
     <div className="border rounded-lg">
@@ -158,18 +160,22 @@ export function ListView({
                 <th className="w-12 p-3">
                   <input
                     type="checkbox"
-                    checked={selectedItems.length === items.length && items.length > 0}
+                    checked={
+                      selectedItems.length === items.length && items.length > 0
+                    }
                     onChange={handleSelectAll}
                     className="rounded"
                   />
                 </th>
               )}
-              {columns.map(column => (
+              {columns.map((column) => (
                 <th
                   key={column.key}
                   className={cn(
                     "text-left p-3 font-medium",
-                    column.sortable && sortable && "cursor-pointer hover:bg-muted"
+                    column.sortable &&
+                      sortable &&
+                      "cursor-pointer hover:bg-muted",
                   )}
                   style={{ width: column.width }}
                   onClick={() => column.sortable && handleSort(column.key)}
@@ -183,15 +189,16 @@ export function ListView({
                             "h-3 w-3",
                             sortColumn === column.key && sortDirection === "asc"
                               ? "text-primary"
-                              : "text-muted-foreground"
+                              : "text-muted-foreground",
                           )}
                         />
                         <SortDesc
                           className={cn(
                             "h-3 w-3",
-                            sortColumn === column.key && sortDirection === "desc"
+                            sortColumn === column.key &&
+                              sortDirection === "desc"
                               ? "text-primary"
-                              : "text-muted-foreground"
+                              : "text-muted-foreground",
                           )}
                         />
                       </div>
@@ -199,9 +206,7 @@ export function ListView({
                   </div>
                 </th>
               ))}
-              {actions.length > 0 && (
-                <th className="w-20 p-3">Actions</th>
-              )}
+              {actions.length > 0 && <th className="w-20 p-3">Actions</th>}
             </tr>
           </thead>
           <tbody>
@@ -220,12 +225,11 @@ export function ListView({
                     />
                   </td>
                 )}
-                {columns.map(column => (
+                {columns.map((column) => (
                   <td key={column.key} className="p-3">
                     {column.render
                       ? column.render(item[column.key], item)
-                      : String(item[column.key] ?? '')
-                    }
+                      : String(item[column.key] ?? "")}
                   </td>
                 ))}
                 {actions.length > 0 && (
@@ -237,13 +241,19 @@ export function ListView({
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        {actions.map(action => (
+                        {actions.map((action) => (
                           <DropdownMenuItem
                             key={action.key}
                             onClick={() => action.onClick(item)}
-                            className={action.variant === "destructive" ? "text-red-600" : ""}
+                            className={
+                              action.variant === "destructive"
+                                ? "text-red-600"
+                                : ""
+                            }
                           >
-                            {action.icon && <action.icon className="mr-2 h-4 w-4" />}
+                            {action.icon && (
+                              <action.icon className="mr-2 h-4 w-4" />
+                            )}
                             {action.label}
                           </DropdownMenuItem>
                         ))}
@@ -257,7 +267,7 @@ export function ListView({
         </table>
       </div>
     </div>
-  )
+  );
 
   const renderGridView = () => (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
@@ -268,14 +278,15 @@ export function ListView({
               renderItem(item)
             ) : (
               <div className="space-y-2">
-                {columns.slice(0, 3).map(column => (
+                {columns.slice(0, 3).map((column) => (
                   <div key={column.key}>
-                    <div className="text-xs text-muted-foreground">{column.label}</div>
+                    <div className="text-xs text-muted-foreground">
+                      {column.label}
+                    </div>
                     <div className="text-sm">
                       {column.render
                         ? column.render(item[column.key], item)
-                        : String(item[column.key] ?? '')
-                      }
+                        : String(item[column.key] ?? "")}
                     </div>
                   </div>
                 ))}
@@ -299,13 +310,19 @@ export function ListView({
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      {actions.map(action => (
+                      {actions.map((action) => (
                         <DropdownMenuItem
                           key={action.key}
                           onClick={() => action.onClick(item)}
-                          className={action.variant === "destructive" ? "text-red-600" : ""}
+                          className={
+                            action.variant === "destructive"
+                              ? "text-red-600"
+                              : ""
+                          }
                         >
-                          {action.icon && <action.icon className="mr-2 h-4 w-4" />}
+                          {action.icon && (
+                            <action.icon className="mr-2 h-4 w-4" />
+                          )}
                           {action.label}
                         </DropdownMenuItem>
                       ))}
@@ -318,14 +335,14 @@ export function ListView({
         </Card>
       ))}
     </div>
-  )
+  );
 
   const renderPagination = () => {
-    if (!pagination) return null
+    if (!pagination) return null;
 
-    const { page, pageSize, total, totalPages } = pagination
-    const startItem = (page - 1) * pageSize + 1
-    const endItem = Math.min(page * pageSize, total)
+    const { page, pageSize, total, totalPages } = pagination;
+    const startItem = (page - 1) * pageSize + 1;
+    const endItem = Math.min(page * pageSize, total);
 
     return (
       <div className="flex items-center justify-between">
@@ -338,13 +355,13 @@ export function ListView({
               <span>Show</span>
               <Select
                 value={pageSize.toString()}
-                onValueChange={(value) => onPageSizeChange(parseInt(value))}
+                onValueChange={(value) => onPageSizeChange(parseInt(value, 10))}
               >
                 <SelectTrigger className="w-16 h-8">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {itemsPerPageOptions.map(option => (
+                  {itemsPerPageOptions.map((option) => (
                     <SelectItem key={option} value={option.toString()}>
                       {option}
                     </SelectItem>
@@ -378,15 +395,15 @@ export function ListView({
 
           <div className="flex items-center gap-1">
             {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-              let pageNum: number
+              let pageNum: number;
               if (totalPages <= 5) {
-                pageNum = i + 1
+                pageNum = i + 1;
               } else if (page <= 3) {
-                pageNum = i + 1
+                pageNum = i + 1;
               } else if (page >= totalPages - 2) {
-                pageNum = totalPages - 4 + i
+                pageNum = totalPages - 4 + i;
               } else {
-                pageNum = page - 2 + i
+                pageNum = page - 2 + i;
               }
 
               return (
@@ -399,7 +416,7 @@ export function ListView({
                 >
                   {pageNum}
                 </Button>
-              )
+              );
             })}
           </div>
 
@@ -423,8 +440,8 @@ export function ListView({
           </Button>
         </div>
       </div>
-    )
-  }
+    );
+  };
 
   return (
     <div className={cn("space-y-4", className)}>
@@ -451,9 +468,7 @@ export function ListView({
           )}
 
           {selectable && selectedItems.length > 0 && (
-            <Badge variant="secondary">
-              {selectedItems.length} selected
-            </Badge>
+            <Badge variant="secondary">{selectedItems.length} selected</Badge>
           )}
         </div>
 
@@ -483,21 +498,19 @@ export function ListView({
 
       {/* Content */}
       {loading ? (
-        <div className="text-center py-8 text-muted-foreground">
-          Loading...
-        </div>
+        <div className="text-center py-8 text-muted-foreground">Loading...</div>
       ) : items.length === 0 ? (
         <div className="text-center py-8 text-muted-foreground">
           {emptyMessage}
         </div>
+      ) : viewMode === "list" ? (
+        renderTableView()
       ) : (
-        <>
-          {viewMode === "list" ? renderTableView() : renderGridView()}
-        </>
+        renderGridView()
       )}
 
       {/* Pagination */}
       {pagination && renderPagination()}
     </div>
-  )
+  );
 }

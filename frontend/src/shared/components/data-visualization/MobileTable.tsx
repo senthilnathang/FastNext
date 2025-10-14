@@ -1,54 +1,62 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { ColumnDef, flexRender, getCoreRowModel, useReactTable } from "@tanstack/react-table"
-import { ChevronDown, ChevronUp, MoreHorizontal, Search } from "lucide-react"
-
-import { cn } from "@/shared/utils"
-import { Button } from "@/shared/components/ui/button"
-import { Input } from "@/shared/components/ui/input"
-import { Card, CardContent, CardHeader } from "@/shared/components/ui/card"
+import {
+  type ColumnDef,
+  flexRender,
+  getCoreRowModel,
+  useReactTable,
+} from "@tanstack/react-table";
+import { ChevronDown, ChevronUp, MoreHorizontal, Search } from "lucide-react";
+import * as React from "react";
+import { Button } from "@/shared/components/ui/button";
+import { Card, CardContent, CardHeader } from "@/shared/components/ui/card";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/shared/components/ui/dropdown-menu"
+} from "@/shared/components/ui/dropdown-menu";
+import { Input } from "@/shared/components/ui/input";
+import { cn } from "@/shared/utils";
 
 interface MobileTableProps<TData, TValue> {
-  columns: ColumnDef<TData, TValue>[]
-  data: TData[]
-  searchKey?: string
-  enableSearch?: boolean
-  renderMobileCard?: (item: TData, index: number) => React.ReactNode
-  onRowAction?: (row: TData, action: string) => void
-  className?: string
-  mobileBreakpoint?: 'sm' | 'md' | 'lg'
-  showDesktopTable?: boolean
+  columns: ColumnDef<TData, TValue>[];
+  data: TData[];
+  searchKey?: string;
+  enableSearch?: boolean;
+  renderMobileCard?: (item: TData, index: number) => React.ReactNode;
+  onRowAction?: (row: TData, action: string) => void;
+  className?: string;
+  mobileBreakpoint?: "sm" | "md" | "lg";
+  showDesktopTable?: boolean;
 }
 
 interface MobileCardProps<TData> {
-  item: TData
-  columns: ColumnDef<TData, any>[]
-  index: number
-  onAction?: (action: string) => void
+  item: TData;
+  columns: ColumnDef<TData, any>[];
+  index: number;
+  onAction?: (action: string) => void;
 }
 
-function DefaultMobileCard<TData>({ item, columns, onAction }: MobileCardProps<TData>) {
+function DefaultMobileCard<TData>({
+  item,
+  columns,
+  onAction,
+}: MobileCardProps<TData>) {
   // Extract primary and secondary fields
-  const primaryField = columns[0]
-  const secondaryFields = columns.slice(1, -1) // Exclude actions column
-  const actionsField = columns[columns.length - 1]
+  const primaryField = columns[0];
+  const secondaryFields = columns.slice(1, -1); // Exclude actions column
+  const actionsField = columns[columns.length - 1];
 
   const table = useReactTable({
     data: [item],
     columns,
     getCoreRowModel: getCoreRowModel(),
-  })
+  });
 
-  const row = table.getRowModel().rows[0]
+  const row = table.getRowModel().rows[0];
 
-  if (!row) return null
+  if (!row) return null;
 
   return (
     <Card className="w-full">
@@ -60,14 +68,14 @@ function DefaultMobileCard<TData>({ item, columns, onAction }: MobileCardProps<T
               <div className="font-medium text-gray-900 dark:text-white">
                 {flexRender(
                   primaryField.cell,
-                  row.getVisibleCells()[0].getContext()
+                  row.getVisibleCells()[0].getContext(),
                 )}
               </div>
             )}
           </div>
 
           {/* Actions dropdown */}
-          {actionsField && actionsField.id === 'actions' && (
+          {actionsField && actionsField.id === "actions" && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
@@ -75,14 +83,14 @@ function DefaultMobileCard<TData>({ item, columns, onAction }: MobileCardProps<T
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => onAction?.('view')}>
+                <DropdownMenuItem onClick={() => onAction?.("view")}>
                   View Details
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => onAction?.('edit')}>
+                <DropdownMenuItem onClick={() => onAction?.("edit")}>
                   Edit
                 </DropdownMenuItem>
                 <DropdownMenuItem
-                  onClick={() => onAction?.('delete')}
+                  onClick={() => onAction?.("delete")}
                   className="text-red-600 dark:text-red-400"
                 >
                   Delete
@@ -97,15 +105,19 @@ function DefaultMobileCard<TData>({ item, columns, onAction }: MobileCardProps<T
         {/* Secondary fields */}
         <div className="space-y-2">
           {secondaryFields.map((column, colIndex) => {
-            const cell = row.getVisibleCells()[colIndex + 1]
-            if (!cell) return null
+            const cell = row.getVisibleCells()[colIndex + 1];
+            if (!cell) return null;
 
-            const header = typeof column.header === 'string'
-              ? column.header
-              : column.id || `Field ${colIndex + 1}`
+            const header =
+              typeof column.header === "string"
+                ? column.header
+                : column.id || `Field ${colIndex + 1}`;
 
             return (
-              <div key={column.id || colIndex} className="flex justify-between items-center text-sm">
+              <div
+                key={column.id || colIndex}
+                className="flex justify-between items-center text-sm"
+              >
                 <span className="text-gray-500 dark:text-gray-400 font-medium">
                   {header}:
                 </span>
@@ -113,12 +125,12 @@ function DefaultMobileCard<TData>({ item, columns, onAction }: MobileCardProps<T
                   {flexRender(column.cell, cell.getContext())}
                 </div>
               </div>
-            )
+            );
           })}
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }
 
 function DesktopTable<TData, TValue>({
@@ -127,20 +139,20 @@ function DesktopTable<TData, TValue>({
   searchKey,
   enableSearch,
   searchValue,
-  onSearchChange
+  onSearchChange,
 }: {
-  columns: ColumnDef<TData, TValue>[]
-  data: TData[]
-  searchKey?: string
-  enableSearch?: boolean
-  searchValue: string
-  onSearchChange: (value: string) => void
+  columns: ColumnDef<TData, TValue>[];
+  data: TData[];
+  searchKey?: string;
+  enableSearch?: boolean;
+  searchValue: string;
+  onSearchChange: (value: string) => void;
 }) {
   const table = useReactTable({
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
-  })
+  });
 
   return (
     <>
@@ -164,7 +176,10 @@ function DesktopTable<TData, TValue>({
         <table className="w-full">
           <thead>
             {table.getHeaderGroups().map((headerGroup) => (
-              <tr key={headerGroup.id} className="border-b bg-gray-50 dark:bg-gray-800">
+              <tr
+                key={headerGroup.id}
+                className="border-b bg-gray-50 dark:bg-gray-800"
+              >
                 {headerGroup.headers.map((header) => (
                   <th
                     key={header.id}
@@ -174,25 +189,33 @@ function DesktopTable<TData, TValue>({
                       <div
                         className={cn(
                           "flex items-center space-x-2",
-                          header.column.getCanSort() && "cursor-pointer select-none hover:text-gray-600"
+                          header.column.getCanSort() &&
+                            "cursor-pointer select-none hover:text-gray-600",
                         )}
                         onClick={header.column.getToggleSortingHandler()}
                       >
                         <span>
-                          {flexRender(header.column.columnDef.header, header.getContext())}
+                          {flexRender(
+                            header.column.columnDef.header,
+                            header.getContext(),
+                          )}
                         </span>
                         {header.column.getCanSort() && (
                           <div className="flex flex-col">
                             <ChevronUp
                               className={cn(
                                 "h-3 w-3 -mb-1",
-                                header.column.getIsSorted() === "asc" ? "text-blue-600" : "text-gray-400"
+                                header.column.getIsSorted() === "asc"
+                                  ? "text-blue-600"
+                                  : "text-gray-400",
                               )}
                             />
                             <ChevronDown
                               className={cn(
                                 "h-3 w-3",
-                                header.column.getIsSorted() === "desc" ? "text-blue-600" : "text-gray-400"
+                                header.column.getIsSorted() === "desc"
+                                  ? "text-blue-600"
+                                  : "text-gray-400",
                               )}
                             />
                           </div>
@@ -221,7 +244,7 @@ function DesktopTable<TData, TValue>({
         </table>
       </div>
     </>
-  )
+  );
 }
 
 export function MobileTable<TData, TValue>({
@@ -232,35 +255,37 @@ export function MobileTable<TData, TValue>({
   renderMobileCard,
   onRowAction,
   className,
-  mobileBreakpoint = 'md',
-  showDesktopTable = true
+  mobileBreakpoint = "md",
+  showDesktopTable = true,
 }: MobileTableProps<TData, TValue>) {
-  const [searchValue, setSearchValue] = React.useState("")
+  const [searchValue, setSearchValue] = React.useState("");
 
   // Filter data based on search
   const filteredData = React.useMemo(() => {
-    if (!searchValue || !searchKey) return data
+    if (!searchValue || !searchKey) return data;
 
     return data.filter((item: any) => {
-      const searchableValue = item[searchKey]
-      if (typeof searchableValue === 'string') {
-        return searchableValue.toLowerCase().includes(searchValue.toLowerCase())
+      const searchableValue = item[searchKey];
+      if (typeof searchableValue === "string") {
+        return searchableValue
+          .toLowerCase()
+          .includes(searchValue.toLowerCase());
       }
-      return false
-    })
-  }, [data, searchValue, searchKey])
+      return false;
+    });
+  }, [data, searchValue, searchKey]);
 
   const breakpointClass = {
-    sm: 'sm:hidden',
-    md: 'md:hidden',
-    lg: 'lg:hidden'
-  }[mobileBreakpoint]
+    sm: "sm:hidden",
+    md: "md:hidden",
+    lg: "lg:hidden",
+  }[mobileBreakpoint];
 
   const desktopBreakpointClass = {
-    sm: 'hidden sm:block',
-    md: 'hidden md:block',
-    lg: 'hidden lg:block'
-  }[mobileBreakpoint]
+    sm: "hidden sm:block",
+    md: "hidden md:block",
+    lg: "hidden lg:block",
+  }[mobileBreakpoint];
 
   return (
     <div className={cn("space-y-4", className)}>
@@ -322,7 +347,9 @@ export function MobileTable<TData, TValue>({
                   </>
                 ) : (
                   <>
-                    <p className="text-lg font-medium mb-2">No data available</p>
+                    <p className="text-lg font-medium mb-2">
+                      No data available
+                    </p>
                     <p className="text-sm">Start by adding some items</p>
                   </>
                 )}
@@ -346,7 +373,7 @@ export function MobileTable<TData, TValue>({
         </div>
       )}
     </div>
-  )
+  );
 }
 
-export default MobileTable
+export default MobileTable;

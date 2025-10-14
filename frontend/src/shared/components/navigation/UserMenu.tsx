@@ -1,12 +1,22 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { User, LogOut, ChevronUp, UserCircle, Bell, HelpCircle } from "lucide-react"
-import { useRouter } from "next/navigation"
-import Image from "next/image"
-
-import { cn } from "@/shared/utils"
-import { Button } from "../ui/button"
+import {
+  Bell,
+  ChevronUp,
+  HelpCircle,
+  LogOut,
+  User,
+  UserCircle,
+} from "lucide-react";
+import Image from "next/image";
+import { useRouter } from "next/navigation";
+import * as React from "react";
+import { useAuth } from "@/modules/auth";
+import type { User as UserType } from "@/shared/services/api/users";
+import { cn } from "@/shared/utils";
+import { NotificationCenter } from "../notifications";
+import { Badge } from "../ui/badge";
+import { Button } from "../ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -14,40 +24,42 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "../ui/dropdown-menu"
-import { Badge } from "../ui/badge"
-import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip"
-import { ThemeSwitcher } from "../ui/ThemeSwitcher"
-import { NotificationCenter } from "../notifications"
-
-import { useAuth } from "@/modules/auth"
-import type { User as UserType } from "@/shared/services/api/users"
+} from "../ui/dropdown-menu";
+import { ThemeSwitcher } from "../ui/ThemeSwitcher";
+import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 
 interface UserMenuProps {
-  isCollapsed?: boolean
-  className?: string
+  isCollapsed?: boolean;
+  className?: string;
 }
 
-
-function UserAvatar({ user, size = "default" }: { user: UserType; size?: "sm" | "default" | "lg" }) {
+function UserAvatar({
+  user,
+  size = "default",
+}: {
+  user: UserType;
+  size?: "sm" | "default" | "lg";
+}) {
   const sizeClasses = {
     sm: "w-6 h-6",
     default: "w-8 h-8",
-    lg: "w-10 h-10"
-  }
+    lg: "w-10 h-10",
+  };
 
   const iconSizes = {
     sm: "h-3 w-3",
     default: "h-4 w-4",
-    lg: "h-5 w-5"
-  }
+    lg: "h-5 w-5",
+  };
 
   return (
     <div className="relative flex-shrink-0">
-      <div className={cn(
-        "bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center",
-        sizeClasses[size]
-      )}>
+      <div
+        className={cn(
+          "bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center",
+          sizeClasses[size],
+        )}
+      >
         {user.avatar_url ? (
           <Image
             src={user.avatar_url}
@@ -63,29 +75,29 @@ function UserAvatar({ user, size = "default" }: { user: UserType; size?: "sm" | 
       {/* Online status indicator */}
       <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-green-500 rounded-full border-2 border-white dark:border-gray-900"></div>
     </div>
-  )
+  );
 }
 
 function CompactUserMenu({
   user,
   onLogout,
-  setShowNotifications
+  setShowNotifications,
 }: {
   user: UserType;
   onLogout: () => void;
   setShowNotifications: (show: boolean) => void;
 }) {
-  const router = useRouter()
-  const [mounted, setMounted] = React.useState(false)
+  const router = useRouter();
+  const [mounted, setMounted] = React.useState(false);
 
   React.useEffect(() => {
-    setMounted(true)
-  }, [])
+    setMounted(true);
+  }, []);
 
   if (!mounted) {
     return (
       <div className="w-8 h-8 bg-gray-200 dark:bg-gray-700 rounded-full animate-pulse" />
-    )
+    );
   }
 
   return (
@@ -99,7 +111,12 @@ function CompactUserMenu({
         </Button>
       </DropdownMenuTrigger>
 
-      <DropdownMenuContent side="right" align="end" className="w-64 p-2" sideOffset={8}>
+      <DropdownMenuContent
+        side="right"
+        align="end"
+        className="w-64 p-2"
+        sideOffset={8}
+      >
         {/* User Info Header */}
         <div className="flex items-center space-x-3 p-2 rounded-lg bg-gray-50 dark:bg-gray-800/50">
           <UserAvatar user={user} size="lg" />
@@ -128,7 +145,10 @@ function CompactUserMenu({
         <DropdownMenuSeparator />
 
         {/* Profile */}
-        <DropdownMenuItem onClick={() => router.push('/settings')} className="cursor-pointer">
+        <DropdownMenuItem
+          onClick={() => router.push("/settings")}
+          className="cursor-pointer"
+        >
           <UserCircle className="h-4 w-4 mr-3" />
           <span>Profile & Settings</span>
         </DropdownMenuItem>
@@ -149,7 +169,11 @@ function CompactUserMenu({
 
         {/* Theme & Color Selection */}
         <div className="px-2 py-1">
-          <ThemeSwitcher variant="dropdown" showColorSchemes={true} className="w-full" />
+          <ThemeSwitcher
+            variant="dropdown"
+            showColorSchemes={true}
+            className="w-full"
+          />
         </div>
 
         {/* Help */}
@@ -170,24 +194,24 @@ function CompactUserMenu({
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
-  )
+  );
 }
 
 function ExpandedUserMenu({
   user,
   onLogout,
-  setShowNotifications
+  setShowNotifications,
 }: {
   user: UserType;
   onLogout: () => void;
   setShowNotifications: (show: boolean) => void;
 }) {
-  const router = useRouter()
-  const [mounted, setMounted] = React.useState(false)
+  const router = useRouter();
+  const [mounted, setMounted] = React.useState(false);
 
   React.useEffect(() => {
-    setMounted(true)
-  }, [])
+    setMounted(true);
+  }, []);
 
   if (!mounted) {
     return (
@@ -195,7 +219,7 @@ function ExpandedUserMenu({
         <div className="h-12 bg-gray-200 dark:bg-gray-700 rounded-lg" />
         <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded-lg" />
       </div>
-    )
+    );
   }
 
   return (
@@ -220,7 +244,12 @@ function ExpandedUserMenu({
         </Button>
       </DropdownMenuTrigger>
 
-      <DropdownMenuContent side="top" align="start" className="w-72 p-2" sideOffset={8}>
+      <DropdownMenuContent
+        side="top"
+        align="start"
+        className="w-72 p-2"
+        sideOffset={8}
+      >
         {/* User Info Header */}
         <div className="flex items-center space-x-3 p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50">
           <UserAvatar user={user} size="lg" />
@@ -242,7 +271,10 @@ function ExpandedUserMenu({
                   Admin
                 </Badge>
               )}
-              <Badge variant="outline" className="text-xs px-1.5 py-0.5 text-green-600 dark:text-green-400">
+              <Badge
+                variant="outline"
+                className="text-xs px-1.5 py-0.5 text-green-600 dark:text-green-400"
+              >
                 Online
               </Badge>
             </div>
@@ -254,22 +286,26 @@ function ExpandedUserMenu({
         {/* Quick Actions */}
         <div className="grid grid-cols-2 gap-1">
           <DropdownMenuItem
-            onClick={() => router.push('/settings')}
+            onClick={() => router.push("/settings")}
             className="cursor-pointer p-3 h-auto flex-col items-start"
           >
             <UserCircle className="h-5 w-5 mb-1 text-blue-600 dark:text-blue-400" />
             <span className="font-medium">Profile</span>
-            <span className="text-xs text-gray-500 dark:text-gray-400">Settings & preferences</span>
+            <span className="text-xs text-gray-500 dark:text-gray-400">
+              Settings & preferences
+            </span>
           </DropdownMenuItem>
 
-           <DropdownMenuItem
-             className="cursor-pointer p-3 h-auto flex-col items-start"
-             onClick={() => setShowNotifications(true)}
-           >
-             <Bell className="h-5 w-5 mb-1 text-orange-600 dark:text-orange-400" />
-             <span className="font-medium">Notifications</span>
-             <span className="text-xs text-gray-500 dark:text-gray-400">2 new messages</span>
-           </DropdownMenuItem>
+          <DropdownMenuItem
+            className="cursor-pointer p-3 h-auto flex-col items-start"
+            onClick={() => setShowNotifications(true)}
+          >
+            <Bell className="h-5 w-5 mb-1 text-orange-600 dark:text-orange-400" />
+            <span className="font-medium">Notifications</span>
+            <span className="text-xs text-gray-500 dark:text-gray-400">
+              2 new messages
+            </span>
+          </DropdownMenuItem>
         </div>
 
         <DropdownMenuSeparator />
@@ -303,24 +339,24 @@ function ExpandedUserMenu({
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
-  )
+  );
 }
 
 export function UserMenu({ isCollapsed = false, className }: UserMenuProps) {
-  const { user, logout } = useAuth()
-  const [showNotifications, setShowNotifications] = React.useState(false)
+  const { user, logout } = useAuth();
+  const [showNotifications, setShowNotifications] = React.useState(false);
 
   if (!user) {
-    return null
+    return null;
   }
 
   const handleLogout = async () => {
     try {
-      await logout()
+      await logout();
     } catch (error) {
-      console.error('Logout failed:', error)
+      console.error("Logout failed:", error);
     }
-  }
+  };
 
   if (isCollapsed) {
     return (
@@ -349,7 +385,7 @@ export function UserMenu({ isCollapsed = false, className }: UserMenuProps) {
           onOpenChange={setShowNotifications}
         />
       </>
-    )
+    );
   }
 
   return (
@@ -368,5 +404,5 @@ export function UserMenu({ isCollapsed = false, className }: UserMenuProps) {
         onOpenChange={setShowNotifications}
       />
     </>
-  )
+  );
 }

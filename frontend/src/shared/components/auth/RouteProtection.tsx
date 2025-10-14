@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import React from 'react';
-import { usePathname } from 'next/navigation';
-import AuthGuard from './AuthGuard';
+import { usePathname } from "next/navigation";
+import type React from "react";
+import AuthGuard from "./AuthGuard";
 
 interface RouteProtectionProps {
   children: React.ReactNode;
@@ -26,14 +26,15 @@ export default function RouteProtection({ children }: RouteProtectionProps) {
 
   // Public routes that don't require authentication
   const publicRoutes = [
-    '/',           // Landing page
-    '/login',      // Login page
-    '/register',   // Registration page
-    '/api-docs',   // API documentation
+    "/", // Landing page
+    "/login", // Login page
+    "/register", // Registration page
+    "/api-docs", // API documentation
   ];
 
   // Check if current route is public
-  const isPublicRoute = publicRoutes.includes(pathname) || pathname.startsWith('/api/');
+  const isPublicRoute =
+    publicRoutes.includes(pathname) || pathname.startsWith("/api/");
 
   // For public routes, render children directly without auth guard
   if (isPublicRoute) {
@@ -41,9 +42,5 @@ export default function RouteProtection({ children }: RouteProtectionProps) {
   }
 
   // For all other routes, apply authentication guard
-  return (
-    <AuthGuard requireAuth={true}>
-      {children}
-    </AuthGuard>
-  );
+  return <AuthGuard requireAuth={true}>{children}</AuthGuard>;
 }

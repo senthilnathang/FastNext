@@ -1,26 +1,25 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { Search, Filter, X, ChevronDown, Calendar, SortAsc, SortDesc } from "lucide-react"
-
-import { cn } from "@/shared/utils"
-import { Button } from "@/shared/components/ui/button"
-import { Input } from "@/shared/components/ui/input"
-import { Label } from "@/shared/components/ui/label"
-import { Badge } from "@/shared/components/ui/badge"
-import { Card, CardContent, CardHeader, CardTitle } from "@/shared/components/ui/card"
+import { format } from "date-fns";
 import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/shared/components/ui/popover"
+  Calendar,
+  ChevronDown,
+  Filter,
+  Search,
+  SortAsc,
+  SortDesc,
+  X,
+} from "lucide-react";
+import * as React from "react";
+import { Badge } from "@/shared/components/ui/badge";
+import { Button } from "@/shared/components/ui/button";
+import { Calendar as CalendarComponent } from "@/shared/components/ui/calendar";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/shared/components/ui/select"
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/shared/components/ui/card";
 import {
   Command,
   CommandEmpty,
@@ -28,75 +27,105 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
-} from "@/shared/components/ui/command"
-import { Calendar as CalendarComponent } from "@/shared/components/ui/calendar"
-import { format } from "date-fns"
+} from "@/shared/components/ui/command";
+import { Input } from "@/shared/components/ui/input";
+import { Label } from "@/shared/components/ui/label";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/shared/components/ui/popover";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/shared/components/ui/select";
+import { cn } from "@/shared/utils";
 
 export interface SearchFilter {
-  id: string
-  type: 'text' | 'select' | 'multiselect' | 'date' | 'daterange' | 'boolean'
-  field: string
-  label: string
-  placeholder?: string
-  options?: { value: string; label: string }[]
-  value?: any
-  operator?: 'equals' | 'contains' | 'startsWith' | 'endsWith' | 'gt' | 'lt' | 'gte' | 'lte' | 'in' | 'between'
+  id: string;
+  type: "text" | "select" | "multiselect" | "date" | "daterange" | "boolean";
+  field: string;
+  label: string;
+  placeholder?: string;
+  options?: { value: string; label: string }[];
+  value?: any;
+  operator?:
+    | "equals"
+    | "contains"
+    | "startsWith"
+    | "endsWith"
+    | "gt"
+    | "lt"
+    | "gte"
+    | "lte"
+    | "in"
+    | "between";
 }
 
 export interface SortOption {
-  field: string
-  label: string
-  direction: 'asc' | 'desc'
+  field: string;
+  label: string;
+  direction: "asc" | "desc";
 }
 
 export interface SearchState {
-  query: string
-  filters: SearchFilter[]
-  sort: SortOption | null
-  page: number
-  pageSize: number
+  query: string;
+  filters: SearchFilter[];
+  sort: SortOption | null;
+  page: number;
+  pageSize: number;
 }
 
 interface AdvancedSearchProps {
-  searchState: SearchState
-  onSearchChange: (state: SearchState) => void
-  availableFilters: Omit<SearchFilter, 'value'>[]
-  availableSorts: Omit<SortOption, 'direction'>[]
-  className?: string
-  placeholder?: string
-  showResultCount?: boolean
-  resultCount?: number
-  loading?: boolean
+  searchState: SearchState;
+  onSearchChange: (state: SearchState) => void;
+  availableFilters: Omit<SearchFilter, "value">[];
+  availableSorts: Omit<SortOption, "direction">[];
+  className?: string;
+  placeholder?: string;
+  showResultCount?: boolean;
+  resultCount?: number;
+  loading?: boolean;
 }
 
 interface FilterBuilderProps {
-  filter: SearchFilter
-  onUpdate: (filter: SearchFilter) => void
-  onRemove: () => void
+  filter: SearchFilter;
+  onUpdate: (filter: SearchFilter) => void;
+  onRemove: () => void;
 }
 
 function FilterBuilder({ filter, onUpdate, onRemove }: FilterBuilderProps) {
-  const updateValue = React.useCallback((value: any) => {
-    onUpdate({ ...filter, value })
-  }, [filter, onUpdate])
+  const updateValue = React.useCallback(
+    (value: any) => {
+      onUpdate({ ...filter, value });
+    },
+    [filter, onUpdate],
+  );
 
   const renderFilterInput = () => {
     switch (filter.type) {
-      case 'text':
+      case "text":
         return (
           <Input
-            placeholder={filter.placeholder || `Search ${filter.label.toLowerCase()}...`}
-            value={filter.value || ''}
+            placeholder={
+              filter.placeholder || `Search ${filter.label.toLowerCase()}...`
+            }
+            value={filter.value || ""}
             onChange={(e) => updateValue(e.target.value)}
             className="w-48"
           />
-        )
+        );
 
-      case 'select':
+      case "select":
         return (
-          <Select value={filter.value || ''} onValueChange={updateValue}>
+          <Select value={filter.value || ""} onValueChange={updateValue}>
             <SelectTrigger className="w-48">
-              <SelectValue placeholder={`Select ${filter.label.toLowerCase()}`} />
+              <SelectValue
+                placeholder={`Select ${filter.label.toLowerCase()}`}
+              />
             </SelectTrigger>
             <SelectContent>
               {filter.options?.map((option) => (
@@ -106,23 +135,24 @@ function FilterBuilder({ filter, onUpdate, onRemove }: FilterBuilderProps) {
               ))}
             </SelectContent>
           </Select>
-        )
+        );
 
-      case 'multiselect':
+      case "multiselect":
         return (
           <Popover>
             <PopoverTrigger asChild>
               <Button variant="outline" className="w-48 justify-between">
                 {filter.value?.length > 0
                   ? `${filter.value.length} selected`
-                  : `Select ${filter.label.toLowerCase()}`
-                }
+                  : `Select ${filter.label.toLowerCase()}`}
                 <ChevronDown className="h-4 w-4 opacity-50" />
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-48 p-0">
               <Command>
-                <CommandInput placeholder={`Search ${filter.label.toLowerCase()}...`} />
+                <CommandInput
+                  placeholder={`Search ${filter.label.toLowerCase()}...`}
+                />
                 <CommandList>
                   <CommandEmpty>No options found.</CommandEmpty>
                   <CommandGroup>
@@ -130,11 +160,13 @@ function FilterBuilder({ filter, onUpdate, onRemove }: FilterBuilderProps) {
                       <CommandItem
                         key={option.value}
                         onSelect={() => {
-                          const currentValues = filter.value || []
+                          const currentValues = filter.value || [];
                           const newValues = currentValues.includes(option.value)
-                            ? currentValues.filter((v: string) => v !== option.value)
-                            : [...currentValues, option.value]
-                          updateValue(newValues)
+                            ? currentValues.filter(
+                                (v: string) => v !== option.value,
+                              )
+                            : [...currentValues, option.value];
+                          updateValue(newValues);
                         }}
                       >
                         <div className="flex items-center space-x-2">
@@ -153,15 +185,20 @@ function FilterBuilder({ filter, onUpdate, onRemove }: FilterBuilderProps) {
               </Command>
             </PopoverContent>
           </Popover>
-        )
+        );
 
-      case 'date':
+      case "date":
         return (
           <Popover>
             <PopoverTrigger asChild>
-              <Button variant="outline" className="w-48 justify-start text-left font-normal">
+              <Button
+                variant="outline"
+                className="w-48 justify-start text-left font-normal"
+              >
                 <Calendar className="mr-2 h-4 w-4" />
-                {filter.value ? format(filter.value, "PPP") : `Pick ${filter.label.toLowerCase()}`}
+                {filter.value
+                  ? format(filter.value, "PPP")
+                  : `Pick ${filter.label.toLowerCase()}`}
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0" align="start">
@@ -173,18 +210,20 @@ function FilterBuilder({ filter, onUpdate, onRemove }: FilterBuilderProps) {
               />
             </PopoverContent>
           </Popover>
-        )
+        );
 
-      case 'daterange':
+      case "daterange":
         return (
           <Popover>
             <PopoverTrigger asChild>
-              <Button variant="outline" className="w-48 justify-start text-left font-normal">
+              <Button
+                variant="outline"
+                className="w-48 justify-start text-left font-normal"
+              >
                 <Calendar className="mr-2 h-4 w-4" />
                 {filter.value?.from
                   ? `${format(filter.value.from, "LLL dd")} - ${filter.value.to ? format(filter.value.to, "LLL dd") : "..."}`
-                  : `Pick date range`
-                }
+                  : `Pick date range`}
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0" align="start">
@@ -197,25 +236,30 @@ function FilterBuilder({ filter, onUpdate, onRemove }: FilterBuilderProps) {
               />
             </PopoverContent>
           </Popover>
-        )
+        );
 
-      case 'boolean':
+      case "boolean":
         return (
-          <Select value={filter.value?.toString() || ''} onValueChange={(value) => updateValue(value === 'true')}>
+          <Select
+            value={filter.value?.toString() || ""}
+            onValueChange={(value) => updateValue(value === "true")}
+          >
             <SelectTrigger className="w-48">
-              <SelectValue placeholder={`Select ${filter.label.toLowerCase()}`} />
+              <SelectValue
+                placeholder={`Select ${filter.label.toLowerCase()}`}
+              />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="true">Yes</SelectItem>
               <SelectItem value="false">No</SelectItem>
             </SelectContent>
           </Select>
-        )
+        );
 
       default:
-        return null
+        return null;
     }
-  }
+  };
 
   return (
     <div className="flex items-center space-x-2 p-2 border rounded-lg bg-gray-50 dark:bg-gray-800/50">
@@ -227,7 +271,7 @@ function FilterBuilder({ filter, onUpdate, onRemove }: FilterBuilderProps) {
         <X className="h-4 w-4" />
       </Button>
     </div>
-  )
+  );
 }
 
 export function AdvancedSearch({
@@ -239,65 +283,69 @@ export function AdvancedSearch({
   placeholder = "Search...",
   showResultCount = true,
   resultCount,
-  loading = false
+  loading = false,
 }: AdvancedSearchProps) {
-  const [showFilters, setShowFilters] = React.useState(false)
+  const [showFilters, setShowFilters] = React.useState(false);
 
   const updateSearchQuery = (query: string) => {
-    onSearchChange({ ...searchState, query, page: 1 })
-  }
+    onSearchChange({ ...searchState, query, page: 1 });
+  };
 
-  const addFilter = (filterConfig: Omit<SearchFilter, 'value'>) => {
+  const addFilter = (filterConfig: Omit<SearchFilter, "value">) => {
     const newFilter: SearchFilter = {
       ...filterConfig,
       id: `${filterConfig.field}-${Date.now()}`,
-      value: undefined
-    }
+      value: undefined,
+    };
     onSearchChange({
       ...searchState,
       filters: [...searchState.filters, newFilter],
-      page: 1
-    })
-  }
+      page: 1,
+    });
+  };
 
   const updateFilter = (filterId: string, updatedFilter: SearchFilter) => {
-    const newFilters = searchState.filters.map(f =>
-      f.id === filterId ? updatedFilter : f
-    )
-    onSearchChange({ ...searchState, filters: newFilters, page: 1 })
-  }
+    const newFilters = searchState.filters.map((f) =>
+      f.id === filterId ? updatedFilter : f,
+    );
+    onSearchChange({ ...searchState, filters: newFilters, page: 1 });
+  };
 
   const removeFilter = (filterId: string) => {
-    const newFilters = searchState.filters.filter(f => f.id !== filterId)
-    onSearchChange({ ...searchState, filters: newFilters, page: 1 })
-  }
+    const newFilters = searchState.filters.filter((f) => f.id !== filterId);
+    onSearchChange({ ...searchState, filters: newFilters, page: 1 });
+  };
 
   const clearAllFilters = () => {
     onSearchChange({
       ...searchState,
-      query: '',
+      query: "",
       filters: [],
       sort: null,
-      page: 1
-    })
-  }
+      page: 1,
+    });
+  };
 
   const updateSort = (field: string) => {
-    const currentDirection = searchState.sort?.field === field ? searchState.sort.direction : null
-    const newDirection = currentDirection === 'asc' ? 'desc' : 'asc'
+    const currentDirection =
+      searchState.sort?.field === field ? searchState.sort.direction : null;
+    const newDirection = currentDirection === "asc" ? "desc" : "asc";
 
-    const sortOption = availableSorts.find(s => s.field === field)
+    const sortOption = availableSorts.find((s) => s.field === field);
     if (sortOption) {
       onSearchChange({
         ...searchState,
         sort: { ...sortOption, direction: newDirection },
-        page: 1
-      })
+        page: 1,
+      });
     }
-  }
+  };
 
-  const activeFilterCount = searchState.filters.filter(f => f.value !== undefined && f.value !== '').length
-  const hasActiveSearch = searchState.query || activeFilterCount > 0 || searchState.sort
+  const activeFilterCount = searchState.filters.filter(
+    (f) => f.value !== undefined && f.value !== "",
+  ).length;
+  const hasActiveSearch =
+    searchState.query || activeFilterCount > 0 || searchState.sort;
 
   return (
     <div className={cn("space-y-4", className)}>
@@ -318,7 +366,8 @@ export function AdvancedSearch({
           onClick={() => setShowFilters(!showFilters)}
           className={cn(
             "shrink-0",
-            activeFilterCount > 0 && "border-blue-500 bg-blue-50 dark:bg-blue-900/20"
+            activeFilterCount > 0 &&
+              "border-blue-500 bg-blue-50 dark:bg-blue-900/20",
           )}
         >
           <Filter className="h-4 w-4 mr-2" />
@@ -336,12 +385,16 @@ export function AdvancedSearch({
               <Button variant="outline" className="shrink-0">
                 {searchState.sort ? (
                   <>
-                    {searchState.sort.direction === 'asc' ? (
+                    {searchState.sort.direction === "asc" ? (
                       <SortAsc className="h-4 w-4 mr-2" />
                     ) : (
                       <SortDesc className="h-4 w-4 mr-2" />
                     )}
-                    {availableSorts.find(s => s.field === searchState.sort?.field)?.label}
+                    {
+                      availableSorts.find(
+                        (s) => s.field === searchState.sort?.field,
+                      )?.label
+                    }
                   </>
                 ) : (
                   <>
@@ -361,7 +414,7 @@ export function AdvancedSearch({
                     onClick={() => updateSort(sort.field)}
                   >
                     {searchState.sort?.field === sort.field ? (
-                      searchState.sort.direction === 'asc' ? (
+                      searchState.sort.direction === "asc" ? (
                         <SortAsc className="h-4 w-4 mr-2" />
                       ) : (
                         <SortDesc className="h-4 w-4 mr-2" />
@@ -378,7 +431,9 @@ export function AdvancedSearch({
                     <Button
                       variant="ghost"
                       className="w-full justify-start text-red-600 dark:text-red-400"
-                      onClick={() => onSearchChange({ ...searchState, sort: null, page: 1 })}
+                      onClick={() =>
+                        onSearchChange({ ...searchState, sort: null, page: 1 })
+                      }
                     >
                       <X className="h-4 w-4 mr-2" />
                       Clear Sort
@@ -395,7 +450,9 @@ export function AdvancedSearch({
       {showResultCount && resultCount !== undefined && (
         <div className="flex items-center justify-between text-sm text-gray-600 dark:text-gray-400">
           <span>
-            {loading ? 'Searching...' : `${resultCount.toLocaleString()} result${resultCount !== 1 ? 's' : ''} found`}
+            {loading
+              ? "Searching..."
+              : `${resultCount.toLocaleString()} result${resultCount !== 1 ? "s" : ""} found`}
           </span>
           {hasActiveSearch && (
             <Button
@@ -418,7 +475,9 @@ export function AdvancedSearch({
             <FilterBuilder
               key={filter.id}
               filter={filter}
-              onUpdate={(updatedFilter) => updateFilter(filter.id, updatedFilter)}
+              onUpdate={(updatedFilter) =>
+                updateFilter(filter.id, updatedFilter)
+              }
               onRemove={() => removeFilter(filter.id)}
             />
           ))}
@@ -439,12 +498,16 @@ export function AdvancedSearch({
                   variant="outline"
                   className="h-auto p-4 justify-start"
                   onClick={() => addFilter(filterConfig)}
-                  disabled={searchState.filters.some(f => f.field === filterConfig.field)}
+                  disabled={searchState.filters.some(
+                    (f) => f.field === filterConfig.field,
+                  )}
                 >
                   <div className="text-left">
                     <div className="font-medium">{filterConfig.label}</div>
                     <div className="text-xs text-gray-500 dark:text-gray-400">
-                      {filterConfig.type.charAt(0).toUpperCase() + filterConfig.type.slice(1)} filter
+                      {filterConfig.type.charAt(0).toUpperCase() +
+                        filterConfig.type.slice(1)}{" "}
+                      filter
                     </div>
                   </div>
                 </Button>
@@ -454,7 +517,7 @@ export function AdvancedSearch({
         </Card>
       )}
     </div>
-  )
+  );
 }
 
-export default AdvancedSearch
+export default AdvancedSearch;

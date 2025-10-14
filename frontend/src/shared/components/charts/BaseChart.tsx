@@ -1,22 +1,23 @@
-'use client'
+"use client";
 
+import type { EChartsOption } from "echarts";
 /**
  * Base Chart Component
  * Wrapper around ECharts with common functionality
  */
-import React, { useEffect } from 'react'
-import type { EChartsOption } from 'echarts'
-import { useECharts } from './hooks/useECharts'
-import { cn } from '@/shared/lib/utils'
+import type React from "react";
+import { useEffect } from "react";
+import { cn } from "@/shared/lib/utils";
+import { useECharts } from "./hooks/useECharts";
 
 export interface BaseChartProps {
-  option: EChartsOption
-  className?: string
-  style?: React.CSSProperties
-  loading?: boolean
-  theme?: string | object
-  renderer?: 'canvas' | 'svg'
-  onChartReady?: (chart: any) => void
+  option: EChartsOption;
+  className?: string;
+  style?: React.CSSProperties;
+  loading?: boolean;
+  theme?: string | object;
+  renderer?: "canvas" | "svg";
+  onChartReady?: (chart: any) => void;
 }
 
 export const BaseChart: React.FC<BaseChartProps> = ({
@@ -25,39 +26,39 @@ export const BaseChart: React.FC<BaseChartProps> = ({
   style,
   loading = false,
   theme,
-  renderer = 'canvas',
-  onChartReady
+  renderer = "canvas",
+  onChartReady,
 }) => {
   const { chartRef, chartInstance } = useECharts(option, {
     theme,
-    renderer
-  })
+    renderer,
+  });
 
   // Show/hide loading
   useEffect(() => {
     if (chartInstance) {
       if (loading) {
-        chartInstance.showLoading()
+        chartInstance.showLoading();
       } else {
-        chartInstance.hideLoading()
+        chartInstance.hideLoading();
       }
     }
-  }, [loading, chartInstance])
+  }, [loading, chartInstance]);
 
   // Call onChartReady when chart is ready
   useEffect(() => {
     if (chartInstance && onChartReady) {
-      onChartReady(chartInstance)
+      onChartReady(chartInstance);
     }
-  }, [chartInstance, onChartReady])
+  }, [chartInstance, onChartReady]);
 
   return (
     <div
       ref={chartRef}
-      className={cn('w-full h-full', className)}
+      className={cn("w-full h-full", className)}
       style={style}
     />
-  )
-}
+  );
+};
 
-BaseChart.displayName = 'BaseChart'
+BaseChart.displayName = "BaseChart";

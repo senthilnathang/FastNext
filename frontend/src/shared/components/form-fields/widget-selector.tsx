@@ -1,40 +1,39 @@
-"use client"
+"use client";
 
-import * as React from "react"
 import {
-  Type,
+  BarChart3,
   Calendar,
-  Clock,
-  Hash,
-  ChevronDown,
-  List,
   CheckSquare,
-  ToggleLeft,
-  Upload,
-  Image as ImageIcon,
+  ChevronDown,
+  Clock,
   FileText,
-  Search,
   Grid3X3,
-  BarChart3
-} from "lucide-react"
-
-import { cn } from '@/shared/utils'
-import { Button } from "@/shared/components/ui/button"
-import { Input } from "@/shared/components/ui/input"
-import { Label } from "@/shared/components/ui/label"
+  Hash,
+  Image as ImageIcon,
+  List,
+  Search,
+  ToggleLeft,
+  Type,
+  Upload,
+} from "lucide-react";
+import * as React from "react";
+import { Button } from "@/shared/components/ui/button";
+import { Input } from "@/shared/components/ui/input";
+import { Label } from "@/shared/components/ui/label";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/shared/components/ui/popover"
+} from "@/shared/components/ui/popover";
+import { cn } from "@/shared/utils";
 
 export interface WidgetType {
-  id: string
-  name: string
-  icon: React.ComponentType<{ className?: string }>
-  category: string
-  description: string
-  properties?: Record<string, unknown>
+  id: string;
+  name: string;
+  icon: React.ComponentType<{ className?: string }>;
+  category: string;
+  description: string;
+  properties?: Record<string, unknown>;
 }
 
 const defaultWidgetTypes: WidgetType[] = [
@@ -44,35 +43,35 @@ const defaultWidgetTypes: WidgetType[] = [
     name: "Text Input",
     icon: Type,
     category: "Input",
-    description: "Single line text input"
+    description: "Single line text input",
   },
   {
     id: "textarea",
     name: "Text Area",
     icon: FileText,
     category: "Input",
-    description: "Multi-line text input"
+    description: "Multi-line text input",
   },
   {
     id: "number",
     name: "Number",
     icon: Hash,
     category: "Input",
-    description: "Numeric input with validation"
+    description: "Numeric input with validation",
   },
   {
     id: "email",
     name: "Email",
     icon: Type,
     category: "Input",
-    description: "Email input with validation"
+    description: "Email input with validation",
   },
   {
     id: "password",
     name: "Password",
     icon: Type,
     category: "Input",
-    description: "Password input field"
+    description: "Password input field",
   },
 
   // Date & Time
@@ -81,21 +80,21 @@ const defaultWidgetTypes: WidgetType[] = [
     name: "Date",
     icon: Calendar,
     category: "Date & Time",
-    description: "Date picker"
+    description: "Date picker",
   },
   {
     id: "datetime",
     name: "Date & Time",
     icon: Clock,
     category: "Date & Time",
-    description: "Date and time picker"
+    description: "Date and time picker",
   },
   {
     id: "time",
     name: "Time",
     icon: Clock,
     category: "Date & Time",
-    description: "Time picker"
+    description: "Time picker",
   },
 
   // Selection
@@ -104,35 +103,35 @@ const defaultWidgetTypes: WidgetType[] = [
     name: "Dropdown",
     icon: ChevronDown,
     category: "Selection",
-    description: "Dropdown selection"
+    description: "Dropdown selection",
   },
   {
     id: "multiselect",
     name: "Multi-Select",
     icon: List,
     category: "Selection",
-    description: "Multiple selection dropdown"
+    description: "Multiple selection dropdown",
   },
   {
     id: "radio",
     name: "Radio Group",
     icon: CheckSquare,
     category: "Selection",
-    description: "Single selection radio buttons"
+    description: "Single selection radio buttons",
   },
   {
     id: "checkbox",
     name: "Checkbox",
     icon: CheckSquare,
     category: "Selection",
-    description: "Checkbox input"
+    description: "Checkbox input",
   },
   {
     id: "switch",
     name: "Switch",
     icon: ToggleLeft,
     category: "Selection",
-    description: "Toggle switch"
+    description: "Toggle switch",
   },
 
   // File & Media
@@ -141,14 +140,14 @@ const defaultWidgetTypes: WidgetType[] = [
     name: "File Upload",
     icon: Upload,
     category: "File & Media",
-    description: "File upload component"
+    description: "File upload component",
   },
   {
     id: "image",
     name: "Image Upload",
     icon: ImageIcon,
     category: "File & Media",
-    description: "Image upload with preview"
+    description: "Image upload with preview",
   },
 
   // Layout & Display
@@ -157,30 +156,30 @@ const defaultWidgetTypes: WidgetType[] = [
     name: "Data Table",
     icon: Grid3X3,
     category: "Display",
-    description: "Data table with sorting and filtering"
+    description: "Data table with sorting and filtering",
   },
   {
     id: "chart",
     name: "Chart",
     icon: BarChart3,
     category: "Display",
-    description: "Chart visualization"
-  }
-]
+    description: "Chart visualization",
+  },
+];
 
 interface WidgetSelectorProps {
-  value?: WidgetType
-  onChange?: (widget: WidgetType) => void
-  label?: string
-  placeholder?: string
-  required?: boolean
-  disabled?: boolean
-  className?: string
-  error?: string
-  id?: string
-  widgetTypes?: WidgetType[]
-  searchable?: boolean
-  categoryFilter?: boolean
+  value?: WidgetType;
+  onChange?: (widget: WidgetType) => void;
+  label?: string;
+  placeholder?: string;
+  required?: boolean;
+  disabled?: boolean;
+  className?: string;
+  error?: string;
+  id?: string;
+  widgetTypes?: WidgetType[];
+  searchable?: boolean;
+  categoryFilter?: boolean;
 }
 
 export function WidgetSelector({
@@ -197,54 +196,62 @@ export function WidgetSelector({
   searchable = true,
   categoryFilter = true,
 }: WidgetSelectorProps) {
-  const [open, setOpen] = React.useState(false)
-  const [searchTerm, setSearchTerm] = React.useState("")
-  const [selectedCategory, setSelectedCategory] = React.useState<string | null>(null)
+  const [open, setOpen] = React.useState(false);
+  const [searchTerm, setSearchTerm] = React.useState("");
+  const [selectedCategory, setSelectedCategory] = React.useState<string | null>(
+    null,
+  );
 
   const categories = React.useMemo(() => {
-    const categorySet = new Set(widgetTypes.map(widget => widget.category))
-    return Array.from(categorySet).sort()
-  }, [widgetTypes])
+    const categorySet = new Set(widgetTypes.map((widget) => widget.category));
+    return Array.from(categorySet).sort();
+  }, [widgetTypes]);
 
   const filteredWidgets = React.useMemo(() => {
-    let filtered = widgetTypes
+    let filtered = widgetTypes;
 
     // Filter by search term
     if (searchTerm) {
-      filtered = filtered.filter(widget =>
-        widget.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        widget.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        widget.category.toLowerCase().includes(searchTerm.toLowerCase())
-      )
+      filtered = filtered.filter(
+        (widget) =>
+          widget.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          widget.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          widget.category.toLowerCase().includes(searchTerm.toLowerCase()),
+      );
     }
 
     // Filter by category
     if (selectedCategory) {
-      filtered = filtered.filter(widget => widget.category === selectedCategory)
+      filtered = filtered.filter(
+        (widget) => widget.category === selectedCategory,
+      );
     }
 
-    return filtered
-  }, [widgetTypes, searchTerm, selectedCategory])
+    return filtered;
+  }, [widgetTypes, searchTerm, selectedCategory]);
 
   const groupedWidgets = React.useMemo(() => {
-    return filteredWidgets.reduce((groups, widget) => {
-      const category = widget.category
-      if (!groups[category]) {
-        groups[category] = []
-      }
-      groups[category].push(widget)
-      return groups
-    }, {} as Record<string, WidgetType[]>)
-  }, [filteredWidgets])
+    return filteredWidgets.reduce(
+      (groups, widget) => {
+        const category = widget.category;
+        if (!groups[category]) {
+          groups[category] = [];
+        }
+        groups[category].push(widget);
+        return groups;
+      },
+      {} as Record<string, WidgetType[]>,
+    );
+  }, [filteredWidgets]);
 
   const handleSelect = (widget: WidgetType) => {
-    onChange?.(widget)
-    setOpen(false)
-  }
+    onChange?.(widget);
+    setOpen(false);
+  };
 
   const handleClearCategory = () => {
-    setSelectedCategory(null)
-  }
+    setSelectedCategory(null);
+  };
 
   return (
     <div className={cn("space-y-2", className)}>
@@ -264,7 +271,7 @@ export function WidgetSelector({
             className={cn(
               "w-full justify-between",
               !value && "text-muted-foreground",
-              error && "border-red-500 focus:border-red-500 focus:ring-red-500"
+              error && "border-red-500 focus:border-red-500 focus:ring-red-500",
             )}
             disabled={disabled}
           >
@@ -272,7 +279,9 @@ export function WidgetSelector({
               <div className="flex items-center gap-2">
                 <value.icon className="h-4 w-4" />
                 <span>{value.name}</span>
-                <span className="text-xs text-muted-foreground">({value.category})</span>
+                <span className="text-xs text-muted-foreground">
+                  ({value.category})
+                </span>
               </div>
             ) : (
               placeholder
@@ -307,14 +316,18 @@ export function WidgetSelector({
                   >
                     All
                   </Button>
-                  {categories.map(category => (
+                  {categories.map((category) => (
                     <Button
                       key={category}
-                      variant={selectedCategory === category ? "default" : "outline"}
+                      variant={
+                        selectedCategory === category ? "default" : "outline"
+                      }
                       size="sm"
-                      onClick={() => setSelectedCategory(
-                        selectedCategory === category ? null : category
-                      )}
+                      onClick={() =>
+                        setSelectedCategory(
+                          selectedCategory === category ? null : category,
+                        )
+                      }
                       className="text-xs"
                     >
                       {category}
@@ -337,18 +350,20 @@ export function WidgetSelector({
                       {category}
                     </div>
                     <div className="p-1">
-                      {widgets.map(widget => (
+                      {widgets.map((widget) => (
                         <div
                           key={widget.id}
                           className={cn(
                             "flex items-start gap-3 p-2 rounded cursor-pointer hover:bg-muted/50",
-                            value?.id === widget.id && "bg-muted"
+                            value?.id === widget.id && "bg-muted",
                           )}
                           onClick={() => handleSelect(widget)}
                         >
                           <widget.icon className="h-4 w-4 mt-0.5 text-muted-foreground" />
                           <div className="flex-1 min-w-0">
-                            <div className="text-sm font-medium">{widget.name}</div>
+                            <div className="text-sm font-medium">
+                              {widget.name}
+                            </div>
                             <div className="text-xs text-muted-foreground">
                               {widget.description}
                             </div>
@@ -364,9 +379,7 @@ export function WidgetSelector({
         </PopoverContent>
       </Popover>
 
-      {error && (
-        <p className="text-sm text-red-500">{error}</p>
-      )}
+      {error && <p className="text-sm text-red-500">{error}</p>}
     </div>
-  )
+  );
 }

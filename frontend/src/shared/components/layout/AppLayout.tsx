@@ -1,17 +1,17 @@
-'use client';
+"use client";
 
-import React, { useState } from 'react';
-import { usePathname } from 'next/navigation';
-import { useAuth } from '@/modules/auth';
-import { cn } from '@/shared/utils';
-import { Menu, Bell } from 'lucide-react';
-import { Button } from '../ui/button';
-import Sidebar from '../navigation/Sidebar';
-import SidebarToggle from '../navigation/SidebarToggle';
-import BottomNavigation from '../navigation/BottomNavigation';
-import { NotificationCenter } from '../notifications/NotificationCenter';
-import { getPageTitle } from '../navigation/menuUtils';
-import { menuItems } from '../navigation/menuConfig';
+import { Bell, Menu } from "lucide-react";
+import { usePathname } from "next/navigation";
+import React, { useState } from "react";
+import { useAuth } from "@/modules/auth";
+import { cn } from "@/shared/utils";
+import BottomNavigation from "../navigation/BottomNavigation";
+import { menuItems } from "../navigation/menuConfig";
+import { getPageTitle } from "../navigation/menuUtils";
+import Sidebar from "../navigation/Sidebar";
+import SidebarToggle from "../navigation/SidebarToggle";
+import { NotificationCenter } from "../notifications/NotificationCenter";
+import { Button } from "../ui/button";
 
 interface AppLayoutProps {
   children: React.ReactNode;
@@ -22,8 +22,8 @@ export default function AppLayout({ children }: AppLayoutProps) {
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('sidebar-collapsed');
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("sidebar-collapsed");
       return saved ? JSON.parse(saved) : false;
     }
     return false;
@@ -31,27 +31,27 @@ export default function AppLayout({ children }: AppLayoutProps) {
 
   // Save collapsed state to localStorage
   React.useEffect(() => {
-    localStorage.setItem('sidebar-collapsed', JSON.stringify(sidebarCollapsed));
+    localStorage.setItem("sidebar-collapsed", JSON.stringify(sidebarCollapsed));
   }, [sidebarCollapsed]);
 
   // Keyboard shortcut for sidebar toggle (Ctrl+B)
   React.useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      if ((event.ctrlKey || event.metaKey) && event.key === 'b') {
+      if ((event.ctrlKey || event.metaKey) && event.key === "b") {
         event.preventDefault();
         setSidebarCollapsed(!sidebarCollapsed);
       }
     };
 
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
   }, [sidebarCollapsed]);
 
   if (!user) {
     return <div>{children}</div>;
   }
 
-  const sidebarWidth = sidebarCollapsed ? 'md:pl-14' : 'md:pl-56';
+  const sidebarWidth = sidebarCollapsed ? "md:pl-14" : "md:pl-56";
 
   return (
     <div className="min-h-screen bg-background">
@@ -75,8 +75,8 @@ export default function AppLayout({ children }: AppLayoutProps) {
       {/* Sidebar */}
       <nav
         className={cn(
-          'fixed inset-y-0 left-0 z-50 transform transition-all duration-300 ease-in-out md:translate-x-0',
-          sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
+          "fixed inset-y-0 left-0 z-50 transform transition-all duration-300 ease-in-out md:translate-x-0",
+          sidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0",
         )}
         aria-label="Main navigation"
       >
@@ -88,9 +88,11 @@ export default function AppLayout({ children }: AppLayoutProps) {
       </nav>
 
       {/* Main content */}
-      <div className={cn('transition-all duration-300 ease-in-out', sidebarWidth)}>
+      <div
+        className={cn("transition-all duration-300 ease-in-out", sidebarWidth)}
+      >
         {/* Compact header */}
-        <header className="bg-card border-b border-border px-4 py-2" role="banner">
+        <header className="bg-card border-b border-border px-4 py-2">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
               {/* Mobile menu button */}
@@ -130,7 +132,10 @@ export default function AppLayout({ children }: AppLayoutProps) {
                     aria-label="Notifications"
                   >
                     <Bell className="h-4 w-4" aria-hidden="true" />
-                    <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-red-500 rounded-full" aria-label="Unread notifications"></span>
+                    <span
+                      className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-red-500 rounded-full"
+                      aria-label="Unread notifications"
+                    ></span>
                   </Button>
                 }
               />
@@ -139,21 +144,21 @@ export default function AppLayout({ children }: AppLayoutProps) {
         </header>
 
         {/* Page content - no wrapper container */}
-        <main id="main-content" className="flex-1 overflow-auto pb-16 md:pb-0" role="main">
+        <main id="main-content" className="flex-1 overflow-auto pb-16 md:pb-0">
           {children}
         </main>
       </div>
 
       {/* Mobile Bottom Navigation */}
       <BottomNavigation
-        items={menuItems.slice(0, 5).map(item => ({
-          id: item.title.toLowerCase().replace(/\s+/g, '-'),
+        items={menuItems.slice(0, 5).map((item) => ({
+          id: item.title.toLowerCase().replace(/\s+/g, "-"),
           label: item.title,
           icon: item.icon as any,
           href: item.href,
-          disabled: false
+          disabled: false,
         }))}
-        activeItem={getPageTitle(pathname).toLowerCase().replace(/\s+/g, '-')}
+        activeItem={getPageTitle(pathname).toLowerCase().replace(/\s+/g, "-")}
       />
     </div>
   );

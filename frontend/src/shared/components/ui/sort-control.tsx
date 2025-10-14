@@ -1,53 +1,61 @@
-'use client'
+"use client";
 
-import React from 'react'
-import { Button } from '@/shared/components/ui/button'
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/shared/components/ui/dropdown-menu'
-import { Badge } from '@/shared/components/ui/badge'
-import { ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react'
+import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
+import { Badge } from "@/shared/components/ui/badge";
+import { Button } from "@/shared/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/shared/components/ui/dropdown-menu";
 
 export interface SortOption {
-  key: string
-  label: string
-  defaultOrder?: 'asc' | 'desc'
+  key: string;
+  label: string;
+  defaultOrder?: "asc" | "desc";
 }
 
 export interface SortControlProps {
-  options: SortOption[]
-  value?: string
-  order?: 'asc' | 'desc'
-  onChange: (field: string, order: 'asc' | 'desc') => void
-  placeholder?: string
-  className?: string
+  options: SortOption[];
+  value?: string;
+  order?: "asc" | "desc";
+  onChange: (field: string, order: "asc" | "desc") => void;
+  placeholder?: string;
+  className?: string;
 }
 
 export function SortControl({
   options,
   value,
-  order = 'asc',
+  order = "asc",
   onChange,
-  placeholder = 'Sort by...',
-  className
+  placeholder = "Sort by...",
+  className,
 }: SortControlProps) {
-  const selectedOption = options.find(option => option.key === value)
+  const selectedOption = options.find((option) => option.key === value);
 
   const handleSortChange = (field: string) => {
     if (value === field) {
       // Toggle order if same field
-      const newOrder = order === 'asc' ? 'desc' : 'asc'
-      onChange(field, newOrder)
+      const newOrder = order === "asc" ? "desc" : "asc";
+      onChange(field, newOrder);
     } else {
       // Use default order for new field
-      const option = options.find(opt => opt.key === field)
-      const defaultOrder = option?.defaultOrder || 'asc'
-      onChange(field, defaultOrder)
+      const option = options.find((opt) => opt.key === field);
+      const defaultOrder = option?.defaultOrder || "asc";
+      onChange(field, defaultOrder);
     }
-  }
+  };
 
   const getSortIcon = () => {
-    if (!value) return <ArrowUpDown className="h-4 w-4" />
-    return order === 'asc' ? <ArrowUp className="h-4 w-4" /> : <ArrowDown className="h-4 w-4" />
-  }
+    if (!value) return <ArrowUpDown className="h-4 w-4" />;
+    return order === "asc" ? (
+      <ArrowUp className="h-4 w-4" />
+    ) : (
+      <ArrowDown className="h-4 w-4" />
+    );
+  };
 
   return (
     <DropdownMenu>
@@ -59,7 +67,7 @@ export function SortControl({
           </span>
           {value && (
             <Badge variant="secondary" className="ml-2">
-              {order === 'asc' ? 'A-Z' : 'Z-A'}
+              {order === "asc" ? "A-Z" : "Z-A"}
             </Badge>
           )}
         </Button>
@@ -69,13 +77,13 @@ export function SortControl({
           <DropdownMenuItem
             key={option.key}
             onClick={() => handleSortChange(option.key)}
-            className={value === option.key ? 'bg-accent' : ''}
+            className={value === option.key ? "bg-accent" : ""}
           >
             <div className="flex items-center justify-between w-full">
               <span>{option.label}</span>
               {value === option.key && (
                 <div className="flex items-center space-x-1">
-                  {order === 'asc' ? (
+                  {order === "asc" ? (
                     <ArrowUp className="h-3 w-3" />
                   ) : (
                     <ArrowDown className="h-3 w-3" />
@@ -86,13 +94,14 @@ export function SortControl({
           </DropdownMenuItem>
         ))}
         {value && (
-          <>
-            <DropdownMenuItem onClick={() => onChange('', 'asc')} className="text-muted-foreground">
-              Clear sorting
-            </DropdownMenuItem>
-          </>
+          <DropdownMenuItem
+            onClick={() => onChange("", "asc")}
+            className="text-muted-foreground"
+          >
+            Clear sorting
+          </DropdownMenuItem>
         )}
       </DropdownMenuContent>
     </DropdownMenu>
-  )
+  );
 }

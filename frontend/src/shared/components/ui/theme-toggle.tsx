@@ -1,17 +1,17 @@
-'use client';
+"use client";
 
-import { cva, type VariantProps } from 'class-variance-authority';
-import { Moon, Sun, Monitor, Check } from 'lucide-react';
-import * as React from 'react';
-import { Button } from '@/shared/components/ui/button';
+import { cva, type VariantProps } from "class-variance-authority";
+import { Check, Monitor, Moon, Sun } from "lucide-react";
+import { useTheme } from "next-themes";
+import type * as React from "react";
+import { Button } from "@/shared/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/shared/components/ui/dropdown-menu';
-import { useTheme } from 'next-themes';
-import { cn } from '@/shared/utils/utils';
+} from "@/shared/components/ui/dropdown-menu";
+import { cn } from "@/shared/utils/utils";
 
 const themeToggleVariants = cva(
   "relative inline-flex items-center justify-center",
@@ -32,14 +32,14 @@ const themeToggleVariants = cva(
       variant: "default",
       size: "default",
     },
-  }
-)
+  },
+);
 
 export interface ThemeToggleProps
-  extends Omit<React.ComponentProps<typeof Button>, 'size' | 'variant'>,
+  extends Omit<React.ComponentProps<typeof Button>, "size" | "variant">,
     VariantProps<typeof themeToggleVariants> {
   showLabels?: boolean;
-  align?: 'start' | 'center' | 'end';
+  align?: "start" | "center" | "end";
 }
 
 export function ThemeToggle({
@@ -57,7 +57,11 @@ export function ThemeToggle({
       <DropdownMenuTrigger asChild>
         <Button
           variant="ghost"
-          className={cn(themeToggleVariants({ variant, size }), "px-0", className)}
+          className={cn(
+            themeToggleVariants({ variant, size }),
+            "px-0",
+            className,
+          )}
           data-slot="theme-toggle"
           {...props}
         >
@@ -67,20 +71,29 @@ export function ThemeToggle({
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align={align} data-slot="theme-toggle-content">
-        <DropdownMenuItem onClick={() => setTheme('light')} className="cursor-pointer">
+        <DropdownMenuItem
+          onClick={() => setTheme("light")}
+          className="cursor-pointer"
+        >
           <Sun className="mr-2 h-4 w-4" />
           {showLabels && <span>Light</span>}
-          {theme === 'light' && <Check className="ml-auto h-4 w-4" />}
+          {theme === "light" && <Check className="ml-auto h-4 w-4" />}
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setTheme('dark')} className="cursor-pointer">
+        <DropdownMenuItem
+          onClick={() => setTheme("dark")}
+          className="cursor-pointer"
+        >
           <Moon className="mr-2 h-4 w-4" />
           {showLabels && <span>Dark</span>}
-          {theme === 'dark' && <Check className="ml-auto h-4 w-4" />}
+          {theme === "dark" && <Check className="ml-auto h-4 w-4" />}
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setTheme('system')} className="cursor-pointer">
+        <DropdownMenuItem
+          onClick={() => setTheme("system")}
+          className="cursor-pointer"
+        >
           <Monitor className="mr-2 h-4 w-4" />
           {showLabels && <span>System</span>}
-          {theme === 'system' && <Check className="ml-auto h-4 w-4" />}
+          {theme === "system" && <Check className="ml-auto h-4 w-4" />}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
@@ -88,46 +101,53 @@ export function ThemeToggle({
 }
 
 export interface SimpleThemeToggleProps
-  extends Omit<React.ComponentProps<typeof Button>, 'onClick' | 'size' | 'variant'>,
+  extends Omit<
+      React.ComponentProps<typeof Button>,
+      "onClick" | "size" | "variant"
+    >,
     VariantProps<typeof themeToggleVariants> {
-  cycle?: 'light-dark' | 'light-dark-system';
+  cycle?: "light-dark" | "light-dark-system";
 }
 
 export function SimpleThemeToggle({
   className,
   variant = "default",
   size = "default",
-  cycle = 'light-dark-system',
+  cycle = "light-dark-system",
   ...props
 }: SimpleThemeToggleProps) {
   const { theme, setTheme, resolvedTheme } = useTheme();
 
   const toggleTheme = () => {
-    if (cycle === 'light-dark') {
-      setTheme(theme === 'light' ? 'dark' : 'light');
+    if (cycle === "light-dark") {
+      setTheme(theme === "light" ? "dark" : "light");
     } else {
-      if (theme === 'light') {
-        setTheme('dark');
-      } else if (theme === 'dark') {
-        setTheme('system');
+      if (theme === "light") {
+        setTheme("dark");
+      } else if (theme === "dark") {
+        setTheme("system");
       } else {
-        setTheme('light');
+        setTheme("light");
       }
     }
   };
 
   const getIcon = () => {
-    if (theme === 'system') {
+    if (theme === "system") {
       return <Monitor className="h-5 w-5" />;
     }
-    return resolvedTheme === 'dark' ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />;
+    return resolvedTheme === "dark" ? (
+      <Moon className="h-5 w-5" />
+    ) : (
+      <Sun className="h-5 w-5" />
+    );
   };
 
   const getTooltip = () => {
-    if (theme === 'system') {
+    if (theme === "system") {
       return `System (${resolvedTheme})`;
     }
-    return theme === 'dark' ? 'Dark mode' : 'Light mode';
+    return theme === "dark" ? "Dark mode" : "Light mode";
   };
 
   return (

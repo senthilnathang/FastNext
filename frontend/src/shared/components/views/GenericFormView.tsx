@@ -1,138 +1,145 @@
-'use client'
+"use client";
 
-import React, { useState, useEffect } from 'react'
-import { useForm, Controller } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { z } from 'zod'
+import { zodResolver } from "@hookform/resolvers/zod";
+import { AlertCircle, Save, X } from "lucide-react";
+import type React from "react";
+import { useEffect, useState } from "react";
+import { Controller, useForm } from "react-hook-form";
+import { z } from "zod";
+import { useGenericPermissions } from "@/modules/admin/hooks/useGenericPermissions";
 import {
+  Badge,
   Button,
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  Checkbox,
   Input,
-  Textarea,
+  Label,
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-  Checkbox,
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  Label,
-  Badge
-} from '../'
-import { useGenericPermissions } from '@/modules/admin/hooks/useGenericPermissions'
-import { Save, X, AlertCircle } from 'lucide-react'
+  Textarea,
+} from "../";
 
 export type FieldType =
-  | 'text'
-  | 'email'
-  | 'password'
-  | 'number'
-  | 'textarea'
-  | 'select'
-  | 'checkbox'
-  | 'date'
-  | 'datetime'
-  | 'file'
-  | 'custom'
+  | "text"
+  | "email"
+  | "password"
+  | "number"
+  | "textarea"
+  | "select"
+  | "checkbox"
+  | "date"
+  | "datetime"
+  | "file"
+  | "custom";
 
 export interface FormField<T = any> {
-  name: keyof T | string
-  label: string
-  type: FieldType
-  required?: boolean
-  placeholder?: string
-  description?: string
-  defaultValue?: unknown
+  name: keyof T | string;
+  label: string;
+  type: FieldType;
+  required?: boolean;
+  placeholder?: string;
+  description?: string;
+  defaultValue?: unknown;
 
   // Validation
-  validation?: z.ZodType<unknown>
+  validation?: z.ZodType<unknown>;
 
   // For select fields
-  options?: Array<{ value: string | number; label: string }>
-  multiple?: boolean
+  options?: Array<{ value: string | number; label: string }>;
+  multiple?: boolean;
 
   // For number fields
-  min?: number
-  max?: number
-  step?: number
+  min?: number;
+  max?: number;
+  step?: number;
 
   // For text fields
-  maxLength?: number
-  minLength?: number
+  maxLength?: number;
+  minLength?: number;
 
   // For file fields
-  accept?: string
-  maxSize?: number
+  accept?: string;
+  maxSize?: number;
 
   // Custom rendering
-  render?: (field: FormField<T>, form: any) => React.ReactNode
+  render?: (field: FormField<T>, form: any) => React.ReactNode;
 
   // Conditional display
-  condition?: (formData: T) => boolean
+  condition?: (formData: T) => boolean;
 
   // Field styling
-  className?: string
-  disabled?: boolean
-  readOnly?: boolean
+  className?: string;
+  disabled?: boolean;
+  readOnly?: boolean;
 }
 
 export interface FormSection<T = any> {
-  title: string
-  description?: string
-  fields: FormField<T>[]
-  collapsible?: boolean
-  defaultExpanded?: boolean
+  title: string;
+  description?: string;
+  fields: FormField<T>[];
+  collapsible?: boolean;
+  defaultExpanded?: boolean;
 }
 
 export interface GenericFormViewProps<T = any> {
   // Form configuration
-  fields?: FormField<T>[]
-  sections?: FormSection<T>[]
-  initialData?: Partial<T>
+  fields?: FormField<T>[];
+  sections?: FormSection<T>[];
+  initialData?: Partial<T>;
 
   // Permissions
-  resourceName: string
-  resourceId?: number
-  projectId?: number
-  mode: 'create' | 'edit' | 'view'
+  resourceName: string;
+  resourceId?: number;
+  projectId?: number;
+  mode: "create" | "edit" | "view";
 
   // Form handling
-  onSubmit: (data: T) => Promise<void> | void
-  onCancel?: () => void
-  onFieldChange?: (name: string, value: unknown, formData: T) => void
+  onSubmit: (data: T) => Promise<void> | void;
+  onCancel?: () => void;
+  onFieldChange?: (name: string, value: unknown, formData: T) => void;
 
   // Validation
-  validationSchema?: z.ZodSchema<T>
+  validationSchema?: z.ZodSchema<T>;
 
   // UI customization
-  title?: string
-  subtitle?: string
-  submitButtonText?: string
-  cancelButtonText?: string
+  title?: string;
+  subtitle?: string;
+  submitButtonText?: string;
+  cancelButtonText?: string;
 
   // Layout
-  columns?: 1 | 2 | 3
-  spacing?: 'compact' | 'normal' | 'relaxed'
+  columns?: 1 | 2 | 3;
+  spacing?: "compact" | "normal" | "relaxed";
 
   // State
-  loading?: boolean
-  error?: string | null
+  loading?: boolean;
+  error?: string | null;
 
   // Advanced features
-  autosave?: boolean
-  autosaveDelay?: number
-  showUnsavedChanges?: boolean
+  autosave?: boolean;
+  autosaveDelay?: number;
+  showUnsavedChanges?: boolean;
 
   // Custom actions
   customActions?: Array<{
-    label: string
-    icon?: React.ReactNode
-    action: (formData: T) => void
-    variant?: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link'
-    position?: 'header' | 'footer'
-  }>
+    label: string;
+    icon?: React.ReactNode;
+    action: (formData: T) => void;
+    variant?:
+      | "default"
+      | "destructive"
+      | "outline"
+      | "secondary"
+      | "ghost"
+      | "link";
+    position?: "header" | "footer";
+  }>;
 }
 
 export function GenericFormView<T = any>({
@@ -150,125 +157,146 @@ export function GenericFormView<T = any>({
   title,
   subtitle,
   submitButtonText,
-  cancelButtonText = 'Cancel',
+  cancelButtonText = "Cancel",
   columns = 1,
-  spacing = 'normal',
+  spacing = "normal",
   loading = false,
   error = null,
   autosave = false,
   autosaveDelay = 2000,
   showUnsavedChanges = true,
-  customActions = []
+  customActions = [],
 }: GenericFormViewProps<T>) {
-  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
-  const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set())
-  const [autosaveTimeout, setAutosaveTimeout] = useState<NodeJS.Timeout | null>(null)
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [expandedSections, setExpandedSections] = useState<Set<string>>(
+    new Set(),
+  );
+  const [autosaveTimeout, setAutosaveTimeout] = useState<NodeJS.Timeout | null>(
+    null,
+  );
 
-  const permissions = useGenericPermissions(resourceName)
+  const permissions = useGenericPermissions(resourceName);
 
   // Determine form permissions
-  const canEdit = mode === 'create'
-    ? permissions.checkCreate(resourceName, projectId)
-    : permissions.checkUpdate(resourceName, resourceId, projectId)
+  const canEdit =
+    mode === "create"
+      ? permissions.checkCreate(resourceName, projectId)
+      : permissions.checkUpdate(resourceName, resourceId, projectId);
 
-  const isReadOnly = mode === 'view' || !canEdit
+  const isReadOnly = mode === "view" || !canEdit;
 
   // Default submit button text
-  const defaultSubmitText = mode === 'create' ? 'Create' : mode === 'edit' ? 'Save' : 'Update'
-  const finalSubmitText = submitButtonText || defaultSubmitText
+  const defaultSubmitText =
+    mode === "create" ? "Create" : mode === "edit" ? "Save" : "Update";
+  const finalSubmitText = submitButtonText || defaultSubmitText;
 
   // Create default validation schema if none provided
-  const defaultSchema = z.object({}) as any
-  const schema = validationSchema || defaultSchema
+  const defaultSchema = z.object({}) as any;
+  const schema = validationSchema || defaultSchema;
 
   const form = useForm<any>({
     resolver: zodResolver(schema) as any,
     defaultValues: initialData as any,
-    mode: 'onChange'
-  })
+    mode: "onChange",
+  });
 
-  const { handleSubmit, control, watch, reset, formState: { errors, isDirty, isSubmitting } } = form
+  const {
+    handleSubmit,
+    control,
+    watch,
+    reset,
+    formState: { errors, isDirty, isSubmitting },
+  } = form;
 
   // Watch for form changes
-  const watchedData = watch()
+  const watchedData = watch();
 
   // Update form when initialData changes (important for edit mode)
   useEffect(() => {
     if (initialData && Object.keys(initialData).length > 0) {
-      reset(initialData as any)
+      reset(initialData as any);
     }
-  }, [initialData, reset])
+  }, [initialData, reset]);
 
   useEffect(() => {
     if (showUnsavedChanges) {
-      setHasUnsavedChanges(isDirty)
+      setHasUnsavedChanges(isDirty);
     }
-  }, [isDirty, showUnsavedChanges])
+  }, [isDirty, showUnsavedChanges]);
 
   // Handle autosave
   useEffect(() => {
-    if (autosave && isDirty && mode === 'edit' && canEdit) {
+    if (autosave && isDirty && mode === "edit" && canEdit) {
       if (autosaveTimeout) {
-        clearTimeout(autosaveTimeout)
+        clearTimeout(autosaveTimeout);
       }
 
       const timeout = setTimeout(() => {
-        handleSubmit(onSubmit as any)()
-      }, autosaveDelay)
+        handleSubmit(onSubmit as any)();
+      }, autosaveDelay);
 
-      setAutosaveTimeout(timeout)
+      setAutosaveTimeout(timeout);
     }
 
     return () => {
       if (autosaveTimeout) {
-        clearTimeout(autosaveTimeout)
+        clearTimeout(autosaveTimeout);
       }
-    }
-  }, [watchedData, autosave, isDirty, mode, canEdit, autosaveDelay, autosaveTimeout, handleSubmit, onSubmit])
+    };
+  }, [
+    autosave,
+    isDirty,
+    mode,
+    canEdit,
+    autosaveDelay,
+    autosaveTimeout,
+    handleSubmit,
+    onSubmit,
+  ]);
 
   // Handle field changes
   useEffect(() => {
     if (onFieldChange) {
       const subscription = watch((value, { name }) => {
         if (name) {
-          onFieldChange(name, value[name], value as T)
+          onFieldChange(name, value[name], value as T);
         }
-      })
-      return () => subscription.unsubscribe()
+      });
+      return () => subscription.unsubscribe();
     }
-  }, [watch, onFieldChange])
+  }, [watch, onFieldChange]);
 
   const toggleSection = (sectionTitle: string) => {
-    const newExpanded = new Set(expandedSections)
+    const newExpanded = new Set(expandedSections);
     if (newExpanded.has(sectionTitle)) {
-      newExpanded.delete(sectionTitle)
+      newExpanded.delete(sectionTitle);
     } else {
-      newExpanded.add(sectionTitle)
+      newExpanded.add(sectionTitle);
     }
-    setExpandedSections(newExpanded)
-  }
+    setExpandedSections(newExpanded);
+  };
 
   const renderField = (field: FormField<T>) => {
     // Check field condition
     if (field.condition && !field.condition(watchedData)) {
-      return null
+      return null;
     }
 
     const fieldProps = {
       disabled: isReadOnly || field.disabled || loading,
       readOnly: field.readOnly,
-      className: field.className
-    }
+      className: field.className,
+    };
 
     const renderFieldInput = () => {
       if (field.render) {
-        return field.render(field, form)
+        return field.render(field, form);
       }
 
       switch (field.type) {
-        case 'text':
-        case 'email':
-        case 'password':
+        case "text":
+        case "email":
+        case "password":
           return (
             <Controller
               name={field.name as any}
@@ -283,9 +311,9 @@ export function GenericFormView<T = any>({
                 />
               )}
             />
-          )
+          );
 
-        case 'number':
+        case "number":
           return (
             <Controller
               name={field.name as any}
@@ -303,9 +331,9 @@ export function GenericFormView<T = any>({
                 />
               )}
             />
-          )
+          );
 
-        case 'textarea':
+        case "textarea":
           return (
             <Controller
               name={field.name as any}
@@ -320,9 +348,9 @@ export function GenericFormView<T = any>({
                 />
               )}
             />
-          )
+          );
 
-        case 'select':
+        case "select":
           return (
             <Controller
               name={field.name as any}
@@ -338,7 +366,10 @@ export function GenericFormView<T = any>({
                   </SelectTrigger>
                   <SelectContent>
                     {field.options?.map((option) => (
-                      <SelectItem key={option.value} value={String(option.value)}>
+                      <SelectItem
+                        key={option.value}
+                        value={String(option.value)}
+                      >
                         {option.label}
                       </SelectItem>
                     ))}
@@ -346,9 +377,9 @@ export function GenericFormView<T = any>({
                 </Select>
               )}
             />
-          )
+          );
 
-        case 'checkbox':
+        case "checkbox":
           return (
             <Controller
               name={field.name as any}
@@ -365,9 +396,9 @@ export function GenericFormView<T = any>({
                 </div>
               )}
             />
-          )
+          );
 
-        case 'date':
+        case "date":
           return (
             <Controller
               name={field.name as any}
@@ -375,24 +406,27 @@ export function GenericFormView<T = any>({
               render={({ field: formField }) => {
                 // Helper function to safely convert value to date string for input
                 const formatDateForInput = (value: any): string => {
-                  if (!value) return ''
+                  if (!value) return "";
 
                   try {
                     // If it's already a proper date string (YYYY-MM-DD), return as is
-                    if (typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value)) {
-                      return value
+                    if (
+                      typeof value === "string" &&
+                      /^\d{4}-\d{2}-\d{2}$/.test(value)
+                    ) {
+                      return value;
                     }
 
                     // If it's a Date object or other date string, convert it
-                    const date = new Date(value)
-                    if (isNaN(date.getTime())) {
-                      return ''
+                    const date = new Date(value);
+                    if (Number.isNaN(date.getTime())) {
+                      return "";
                     }
-                    return date.toISOString().split('T')[0]
+                    return date.toISOString().split("T")[0];
                   } catch {
-                    return ''
+                    return "";
                   }
-                }
+                };
 
                 return (
                   <Input
@@ -400,14 +434,18 @@ export function GenericFormView<T = any>({
                     {...fieldProps}
                     type="date"
                     value={formatDateForInput(formField.value)}
-                    onChange={(e) => formField.onChange(e.target.value ? new Date(e.target.value) : null)}
+                    onChange={(e) =>
+                      formField.onChange(
+                        e.target.value ? new Date(e.target.value) : null,
+                      )
+                    }
                   />
-                )
+                );
               }}
             />
-          )
+          );
 
-        case 'datetime':
+        case "datetime":
           return (
             <Controller
               name={field.name as any}
@@ -417,14 +455,22 @@ export function GenericFormView<T = any>({
                   {...formField}
                   {...fieldProps}
                   type="datetime-local"
-                  value={formField.value ? new Date(formField.value).toISOString().slice(0, 16) : ''}
-                  onChange={(e) => formField.onChange(e.target.value ? new Date(e.target.value) : null)}
+                  value={
+                    formField.value
+                      ? new Date(formField.value).toISOString().slice(0, 16)
+                      : ""
+                  }
+                  onChange={(e) =>
+                    formField.onChange(
+                      e.target.value ? new Date(e.target.value) : null,
+                    )
+                  }
                 />
               )}
             />
-          )
+          );
 
-        case 'file':
+        case "file":
           return (
             <Controller
               name={field.name as any}
@@ -438,24 +484,25 @@ export function GenericFormView<T = any>({
                 />
               )}
             />
-          )
+          );
 
         default:
-          return (
-            <Input
-              {...fieldProps}
-              placeholder={field.placeholder}
-            />
-          )
+          return <Input {...fieldProps} placeholder={field.placeholder} />;
       }
-    }
+    };
 
-    const fieldError = errors[field.name as string]
+    const fieldError = errors[field.name as string];
 
     return (
-      <div key={String(field.name)} className={`space-y-2 ${field.className || ''}`}>
-        {field.type !== 'checkbox' && (
-          <Label htmlFor={String(field.name)} className="flex items-center gap-1">
+      <div
+        key={String(field.name)}
+        className={`space-y-2 ${field.className || ""}`}
+      >
+        {field.type !== "checkbox" && (
+          <Label
+            htmlFor={String(field.name)}
+            className="flex items-center gap-1"
+          >
             {field.label}
             {field.required && <span className="text-destructive">*</span>}
           </Label>
@@ -474,31 +521,35 @@ export function GenericFormView<T = any>({
           </p>
         )}
       </div>
-    )
-  }
+    );
+  };
 
   const renderFieldsGrid = (fieldsToRender: FormField<T>[]) => {
     const gridCols = {
-      1: 'grid-cols-1',
-      2: 'grid-cols-1 md:grid-cols-2',
-      3: 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'
-    }
+      1: "grid-cols-1",
+      2: "grid-cols-1 md:grid-cols-2",
+      3: "grid-cols-1 md:grid-cols-2 lg:grid-cols-3",
+    };
 
     const spacingClass = {
-      compact: 'gap-3',
-      normal: 'gap-4',
-      relaxed: 'gap-6'
-    }
+      compact: "gap-3",
+      normal: "gap-4",
+      relaxed: "gap-6",
+    };
 
     return (
       <div className={`grid ${gridCols[columns]} ${spacingClass[spacing]}`}>
         {fieldsToRender.map(renderField)}
       </div>
-    )
-  }
+    );
+  };
 
-  const headerActions = customActions.filter(action => action.position === 'header' || !action.position)
-  const footerActions = customActions.filter(action => action.position === 'footer')
+  const headerActions = customActions.filter(
+    (action) => action.position === "header" || !action.position,
+  );
+  const footerActions = customActions.filter(
+    (action) => action.position === "footer",
+  );
 
   return (
     <form onSubmit={handleSubmit(onSubmit as any)} className="space-y-6">
@@ -519,7 +570,7 @@ export function GenericFormView<T = any>({
             <Button
               key={index}
               type="button"
-              variant={action.variant || 'outline'}
+              variant={action.variant || "outline"}
               onClick={() => action.action(watchedData)}
               disabled={loading}
             >
@@ -546,41 +597,43 @@ export function GenericFormView<T = any>({
       {sections.length > 0 ? (
         <div className="space-y-6">
           {sections.map((section) => {
-            const isExpanded = section.collapsible ?
-              expandedSections.has(section.title) :
-              section.defaultExpanded !== false
+            const isExpanded = section.collapsible
+              ? expandedSections.has(section.title)
+              : section.defaultExpanded !== false;
 
             return (
               <Card key={section.title}>
                 <CardHeader
-                  className={section.collapsible ? 'cursor-pointer' : ''}
-                  onClick={section.collapsible ? () => toggleSection(section.title) : undefined}
+                  className={section.collapsible ? "cursor-pointer" : ""}
+                  onClick={
+                    section.collapsible
+                      ? () => toggleSection(section.title)
+                      : undefined
+                  }
                 >
                   <CardTitle className="flex items-center justify-between">
                     {section.title}
                     {section.collapsible && (
-                      <span>{isExpanded ? '−' : '+'}</span>
+                      <span>{isExpanded ? "−" : "+"}</span>
                     )}
                   </CardTitle>
                   {section.description && (
-                    <p className="text-sm text-muted-foreground">{section.description}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {section.description}
+                    </p>
                   )}
                 </CardHeader>
 
                 {isExpanded && (
-                  <CardContent>
-                    {renderFieldsGrid(section.fields)}
-                  </CardContent>
+                  <CardContent>{renderFieldsGrid(section.fields)}</CardContent>
                 )}
               </Card>
-            )
+            );
           })}
         </div>
       ) : (
         <Card>
-          <CardContent className="pt-6">
-            {renderFieldsGrid(fields)}
-          </CardContent>
+          <CardContent className="pt-6">{renderFieldsGrid(fields)}</CardContent>
         </Card>
       )}
 
@@ -591,7 +644,7 @@ export function GenericFormView<T = any>({
             <Button
               key={index}
               type="button"
-              variant={action.variant || 'outline'}
+              variant={action.variant || "outline"}
               onClick={() => action.action(watchedData)}
               disabled={loading}
             >
@@ -617,7 +670,9 @@ export function GenericFormView<T = any>({
           {canEdit && (
             <Button
               type="submit"
-              disabled={loading || isSubmitting || (!isDirty && mode === 'edit')}
+              disabled={
+                loading || isSubmitting || (!isDirty && mode === "edit")
+              }
             >
               {loading || isSubmitting ? (
                 <div className="animate-spin h-4 w-4 border-b-2 border-white rounded-full mr-2"></div>
@@ -630,5 +685,5 @@ export function GenericFormView<T = any>({
         </div>
       </div>
     </form>
-  )
+  );
 }

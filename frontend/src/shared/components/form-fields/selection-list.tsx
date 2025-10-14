@@ -1,36 +1,35 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { Check, X } from "lucide-react"
-
-import { cn } from '@/shared/utils'
-import { Badge } from "@/shared/components/ui/badge"
-import { Button } from "@/shared/components/ui/button"
-import { Input } from "@/shared/components/ui/input"
-import { Label } from "@/shared/components/ui/label"
-import { Checkbox } from "@/shared/components/ui/checkbox"
+import { Check, X } from "lucide-react";
+import * as React from "react";
+import { Badge } from "@/shared/components/ui/badge";
+import { Button } from "@/shared/components/ui/button";
+import { Checkbox } from "@/shared/components/ui/checkbox";
+import { Input } from "@/shared/components/ui/input";
+import { Label } from "@/shared/components/ui/label";
+import { cn } from "@/shared/utils";
 
 interface SelectionOption {
-  value: string
-  label: string
-  disabled?: boolean
+  value: string;
+  label: string;
+  disabled?: boolean;
 }
 
 interface SelectionListProps {
-  options: SelectionOption[]
-  value?: string[]
-  onChange?: (value: string[]) => void
-  label?: string
-  placeholder?: string
-  required?: boolean
-  disabled?: boolean
-  className?: string
-  error?: string
-  id?: string
-  multiple?: boolean
-  searchable?: boolean
-  maxSelections?: number
-  showSelectAll?: boolean
+  options: SelectionOption[];
+  value?: string[];
+  onChange?: (value: string[]) => void;
+  label?: string;
+  placeholder?: string;
+  required?: boolean;
+  disabled?: boolean;
+  className?: string;
+  error?: string;
+  id?: string;
+  multiple?: boolean;
+  searchable?: boolean;
+  maxSelections?: number;
+  showSelectAll?: boolean;
 }
 
 export function SelectionList({
@@ -49,68 +48,70 @@ export function SelectionList({
   maxSelections,
   showSelectAll = true,
 }: SelectionListProps) {
-  const [searchTerm, setSearchTerm] = React.useState("")
-  const [selectedValues, setSelectedValues] = React.useState<string[]>(value)
+  const [searchTerm, setSearchTerm] = React.useState("");
+  const [selectedValues, setSelectedValues] = React.useState<string[]>(value);
 
   React.useEffect(() => {
-    setSelectedValues(value)
-  }, [value])
+    setSelectedValues(value);
+  }, [value]);
 
   const filteredOptions = React.useMemo(() => {
-    if (!searchTerm) return options
-    return options.filter(option =>
-      option.label.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      option.value.toLowerCase().includes(searchTerm.toLowerCase())
-    )
-  }, [options, searchTerm])
+    if (!searchTerm) return options;
+    return options.filter(
+      (option) =>
+        option.label.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        option.value.toLowerCase().includes(searchTerm.toLowerCase()),
+    );
+  }, [options, searchTerm]);
 
   const handleToggle = (optionValue: string) => {
-    if (disabled) return
+    if (disabled) return;
 
-    let newValues: string[]
+    let newValues: string[];
 
     if (multiple) {
       if (selectedValues.includes(optionValue)) {
-        newValues = selectedValues.filter(v => v !== optionValue)
+        newValues = selectedValues.filter((v) => v !== optionValue);
       } else {
         if (maxSelections && selectedValues.length >= maxSelections) {
-          return
+          return;
         }
-        newValues = [...selectedValues, optionValue]
+        newValues = [...selectedValues, optionValue];
       }
     } else {
-      newValues = selectedValues.includes(optionValue) ? [] : [optionValue]
+      newValues = selectedValues.includes(optionValue) ? [] : [optionValue];
     }
 
-    setSelectedValues(newValues)
-    onChange?.(newValues)
-  }
+    setSelectedValues(newValues);
+    onChange?.(newValues);
+  };
 
   const handleSelectAll = () => {
-    if (disabled) return
+    if (disabled) return;
 
     const allValues = filteredOptions
-      .filter(option => !option.disabled)
-      .map(option => option.value)
+      .filter((option) => !option.disabled)
+      .map((option) => option.value);
 
-    const newValues = selectedValues.length === allValues.length ? [] : allValues
-    setSelectedValues(newValues)
-    onChange?.(newValues)
-  }
+    const newValues =
+      selectedValues.length === allValues.length ? [] : allValues;
+    setSelectedValues(newValues);
+    onChange?.(newValues);
+  };
 
   const handleRemove = (optionValue: string) => {
-    const newValues = selectedValues.filter(v => v !== optionValue)
-    setSelectedValues(newValues)
-    onChange?.(newValues)
-  }
+    const newValues = selectedValues.filter((v) => v !== optionValue);
+    setSelectedValues(newValues);
+    onChange?.(newValues);
+  };
 
   const getSelectedOptions = () => {
-    return options.filter(option => selectedValues.includes(option.value))
-  }
+    return options.filter((option) => selectedValues.includes(option.value));
+  };
 
   const isAllSelected = filteredOptions
-    .filter(option => !option.disabled)
-    .every(option => selectedValues.includes(option.value))
+    .filter((option) => !option.disabled)
+    .every((option) => selectedValues.includes(option.value));
 
   return (
     <div className={cn("space-y-2", className)}>
@@ -124,7 +125,7 @@ export function SelectionList({
       {/* Selected Items Display */}
       {selectedValues.length > 0 && (
         <div className="flex flex-wrap gap-1 p-2 border rounded-md bg-muted/30">
-          {getSelectedOptions().map(option => (
+          {getSelectedOptions().map((option) => (
             <Badge
               key={option.value}
               variant="secondary"
@@ -170,7 +171,7 @@ export function SelectionList({
                 disabled={disabled}
               />
               <label className="text-sm font-medium cursor-pointer">
-                Select All ({filteredOptions.filter(o => !o.disabled).length})
+                Select All ({filteredOptions.filter((o) => !o.disabled).length})
               </label>
             </div>
           </div>
@@ -183,12 +184,14 @@ export function SelectionList({
               No options found
             </div>
           ) : (
-            filteredOptions.map(option => {
-              const isSelected = selectedValues.includes(option.value)
-              const isDisabled = disabled || option.disabled
-              const isMaxReached = Boolean(maxSelections &&
-                selectedValues.length >= maxSelections &&
-                !isSelected)
+            filteredOptions.map((option) => {
+              const isSelected = selectedValues.includes(option.value);
+              const isDisabled = disabled || option.disabled;
+              const isMaxReached = Boolean(
+                maxSelections &&
+                  selectedValues.length >= maxSelections &&
+                  !isSelected,
+              );
 
               return (
                 <div
@@ -196,9 +199,11 @@ export function SelectionList({
                   className={cn(
                     "flex items-center space-x-2 p-2 rounded cursor-pointer hover:bg-muted/50",
                     isDisabled && "opacity-50 cursor-not-allowed",
-                    isMaxReached && "opacity-50 cursor-not-allowed"
+                    isMaxReached && "opacity-50 cursor-not-allowed",
                   )}
-                  onClick={() => !isDisabled && !isMaxReached && handleToggle(option.value)}
+                  onClick={() =>
+                    !isDisabled && !isMaxReached && handleToggle(option.value)
+                  }
                 >
                   {multiple ? (
                     <Checkbox
@@ -207,18 +212,24 @@ export function SelectionList({
                       onCheckedChange={() => handleToggle(option.value)}
                     />
                   ) : (
-                    <div className={cn(
-                      "w-4 h-4 rounded-full border-2",
-                      isSelected ? "bg-primary border-primary" : "border-muted-foreground"
-                    )}>
-                      {isSelected && <Check className="w-2 h-2 text-white m-0.5" />}
+                    <div
+                      className={cn(
+                        "w-4 h-4 rounded-full border-2",
+                        isSelected
+                          ? "bg-primary border-primary"
+                          : "border-muted-foreground",
+                      )}
+                    >
+                      {isSelected && (
+                        <Check className="w-2 h-2 text-white m-0.5" />
+                      )}
                     </div>
                   )}
                   <label className="text-sm cursor-pointer flex-1">
                     {option.label}
                   </label>
                 </div>
-              )
+              );
             })
           )}
         </div>
@@ -231,13 +242,13 @@ export function SelectionList({
           {maxSelections && ` (max ${maxSelections})`}
         </span>
         {searchable && searchTerm && (
-          <span>{filteredOptions.length} of {options.length} shown</span>
+          <span>
+            {filteredOptions.length} of {options.length} shown
+          </span>
         )}
       </div>
 
-      {error && (
-        <p className="text-sm text-red-500">{error}</p>
-      )}
+      {error && <p className="text-sm text-red-500">{error}</p>}
     </div>
-  )
+  );
 }

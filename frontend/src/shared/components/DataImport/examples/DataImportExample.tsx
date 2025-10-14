@@ -1,173 +1,179 @@
-'use client';
+"use client";
 
-import React, { useState } from 'react';
-import {
-  DataImport,
-  PermissionManager,
-  useDataImport
-} from '../index';
+import type React from "react";
+import { useState } from "react";
+import { DataImport, PermissionManager, useDataImport } from "../index";
 import type {
   ImportColumn,
   ImportOptions,
+  ImportPermission,
   UserImportPermissions,
-  ImportPermission
-} from '../types';
+} from "../types";
 
 // Example user data structure
 
 // Example columns for user import
 const UserImportColumns: ImportColumn[] = [
   {
-    key: 'name',
-    label: 'Full Name',
-    type: 'string',
+    key: "name",
+    label: "Full Name",
+    type: "string",
     required: true,
     validation: [
-      { type: 'required', message: 'Name is required' },
-      { type: 'min', value: 2, message: 'Name must be at least 2 characters' }
-    ]
+      { type: "required", message: "Name is required" },
+      { type: "min", value: 2, message: "Name must be at least 2 characters" },
+    ],
   },
   {
-    key: 'email',
-    label: 'Email Address',
-    type: 'email',
+    key: "email",
+    label: "Email Address",
+    type: "email",
     required: true,
     unique: true,
     validation: [
-      { type: 'required', message: 'Email is required' },
-      { type: 'email', message: 'Invalid email format' }
-    ]
+      { type: "required", message: "Email is required" },
+      { type: "email", message: "Invalid email format" },
+    ],
   },
   {
-    key: 'role',
-    label: 'User Role',
-    type: 'string',
+    key: "role",
+    label: "User Role",
+    type: "string",
     required: true,
-    defaultValue: 'user',
+    defaultValue: "user",
     validation: [
       {
-        type: 'custom',
-        message: 'Role must be admin, manager, user, or viewer',
-        validator: (value) => ['admin', 'manager', 'user', 'viewer'].includes(value)
-      }
-    ]
+        type: "custom",
+        message: "Role must be admin, manager, user, or viewer",
+        validator: (value) =>
+          ["admin", "manager", "user", "viewer"].includes(value),
+      },
+    ],
   },
   {
-    key: 'department',
-    label: 'Department',
-    type: 'string'
+    key: "department",
+    label: "Department",
+    type: "string",
   },
   {
-    key: 'active',
-    label: 'Active Status',
-    type: 'boolean',
-    defaultValue: true
+    key: "active",
+    label: "Active Status",
+    type: "boolean",
+    defaultValue: true,
   },
   {
-    key: 'createdAt',
-    label: 'Creation Date',
-    type: 'date',
-    defaultValue: () => new Date().toISOString()
-  }
+    key: "createdAt",
+    label: "Creation Date",
+    type: "date",
+    defaultValue: () => new Date().toISOString(),
+  },
 ];
 
 // Example users with permissions
 const ExampleUsers: UserImportPermissions[] = [
   {
-    userId: '1',
-    username: 'admin',
-    email: 'admin@example.com',
-    role: 'admin',
+    userId: "1",
+    username: "admin",
+    email: "admin@example.com",
+    role: "admin",
     permissions: {
       canImport: true,
       canValidate: true,
       canPreview: true,
       maxFileSize: 100 * 1024 * 1024, // 100MB
       maxRows: 100000,
-      allowedFormats: ['csv', 'json', 'excel', 'xml'],
-      requireApproval: false
+      allowedFormats: ["csv", "json", "excel", "xml"],
+      requireApproval: false,
     },
-    lastImport: '2024-01-15T10:30:00Z',
-    importCount: 25
+    lastImport: "2024-01-15T10:30:00Z",
+    importCount: 25,
   },
   {
-    userId: '2',
-    username: 'manager',
-    email: 'manager@example.com',
-    role: 'manager',
+    userId: "2",
+    username: "manager",
+    email: "manager@example.com",
+    role: "manager",
     permissions: {
       canImport: true,
       canValidate: true,
       canPreview: true,
       maxFileSize: 50 * 1024 * 1024, // 50MB
       maxRows: 50000,
-      allowedFormats: ['csv', 'json', 'excel'],
-      requireApproval: false
+      allowedFormats: ["csv", "json", "excel"],
+      requireApproval: false,
     },
-    lastImport: '2024-01-20T14:15:00Z',
-    importCount: 12
+    lastImport: "2024-01-20T14:15:00Z",
+    importCount: 12,
   },
   {
-    userId: '3',
-    username: 'john.doe',
-    email: 'john.doe@example.com',
-    role: 'user',
+    userId: "3",
+    username: "john.doe",
+    email: "john.doe@example.com",
+    role: "user",
     permissions: {
       canImport: true,
       canValidate: true,
       canPreview: true,
       maxFileSize: 10 * 1024 * 1024, // 10MB
       maxRows: 10000,
-      allowedFormats: ['csv', 'json'],
-      requireApproval: true
+      allowedFormats: ["csv", "json"],
+      requireApproval: true,
     },
-    lastImport: '2024-01-18T09:45:00Z',
-    importCount: 5
+    lastImport: "2024-01-18T09:45:00Z",
+    importCount: 5,
   },
   {
-    userId: '4',
-    username: 'viewer',
-    email: 'viewer@example.com',
-    role: 'viewer',
+    userId: "4",
+    username: "viewer",
+    email: "viewer@example.com",
+    role: "viewer",
     permissions: {
       canImport: false,
       canValidate: false,
       canPreview: true,
       maxFileSize: 0,
       maxRows: 0,
-      requireApproval: false
+      requireApproval: false,
     },
-    importCount: 0
-  }
+    importCount: 0,
+  },
 ];
 
 // Example 1: Basic DataImport Component
 export function BasicImportExample() {
-  const handleImport = async (data: Record<string, any>[], options: ImportOptions) => {
+  const handleImport = async (
+    data: Record<string, any>[],
+    _options: ImportOptions,
+  ) => {
     // Simulate API call
 
     return new Promise<any>((resolve) => {
       setTimeout(() => {
         resolve({
-          status: 'success',
+          status: "success",
           importedRows: data.length,
-          message: `Successfully imported ${data.length} users`
+          message: `Successfully imported ${data.length} users`,
         });
       }, 2000);
     });
   };
 
-  const handleValidate = async (data: Record<string, any>[], mappings: any[]) => {
+  const handleValidate = async (
+    data: Record<string, any>[],
+    _mappings: any[],
+  ) => {
     // Simulate validation
 
     return new Promise<any>((resolve) => {
       setTimeout(() => {
-        const errors = data.filter(row => !row.email || !row.name).map((row, index) => ({
-          row: index + 1,
-          message: 'Missing required fields',
-          severity: 'error' as const,
-          field: 'email'
-        }));
+        const errors = data
+          .filter((row) => !row.email || !row.name)
+          .map((_row, index) => ({
+            row: index + 1,
+            message: "Missing required fields",
+            severity: "error" as const,
+            field: "email",
+          }));
 
         resolve({
           isValid: errors.length === 0,
@@ -175,7 +181,7 @@ export function BasicImportExample() {
           validRows: data.length - errors.length,
           errorRows: errors.length,
           errors,
-          warnings: []
+          warnings: [],
         });
       }, 1000);
     });
@@ -185,7 +191,8 @@ export function BasicImportExample() {
     <div className="space-y-4">
       <h3 className="text-lg font-medium">Basic User Import</h3>
       <p className="text-gray-600 dark:text-gray-400">
-        Full-featured import dialog with field mapping, validation, and progress tracking.
+        Full-featured import dialog with field mapping, validation, and progress
+        tracking.
       </p>
 
       <DataImport
@@ -195,7 +202,7 @@ export function BasicImportExample() {
         onValidate={handleValidate}
         maxFileSize={50 * 1024 * 1024} // 50MB
         maxRows={10000}
-        allowedFormats={['csv', 'json', 'excel']}
+        allowedFormats={["csv", "json", "excel"]}
         showPreview={true}
         requireValidation={true}
       />
@@ -205,7 +212,6 @@ export function BasicImportExample() {
 
 // Example 2: DataTable Integration
 export function DataTableImportExample() {
-
   return (
     <div className="space-y-4">
       <h3 className="text-lg font-medium">DataTable Import</h3>
@@ -228,7 +234,6 @@ export function DataTableImportExample() {
 
 // Example 3: Simple Import Buttons
 export function SimpleImportExample() {
-
   return (
     <div className="space-y-4">
       <h3 className="text-lg font-medium">Simple Import Buttons</h3>
@@ -267,14 +272,14 @@ export function SimpleImportExample() {
 export function PermissionManagementExample() {
   const [users, setUsers] = useState<UserImportPermissions[]>(ExampleUsers);
 
-  const handleUpdatePermissions = async (userId: string, permissions: ImportPermission) => {
-
-    setUsers(prev =>
-      prev.map(user =>
-        user.userId === userId
-          ? { ...user, permissions }
-          : user
-      )
+  const handleUpdatePermissions = async (
+    userId: string,
+    permissions: ImportPermission,
+  ) => {
+    setUsers((prev) =>
+      prev.map((user) =>
+        user.userId === userId ? { ...user, permissions } : user,
+      ),
     );
 
     return Promise.resolve();
@@ -283,26 +288,26 @@ export function PermissionManagementExample() {
   const handleAddUser = () => {
     const newUser: UserImportPermissions = {
       userId: Date.now().toString(),
-      username: 'new.user',
-      email: 'new.user@example.com',
-      role: 'user',
+      username: "new.user",
+      email: "new.user@example.com",
+      role: "user",
       permissions: {
         canImport: true,
         canValidate: true,
         canPreview: true,
         maxFileSize: 10 * 1024 * 1024,
         maxRows: 10000,
-        allowedFormats: ['csv', 'json'],
-        requireApproval: true
+        allowedFormats: ["csv", "json"],
+        requireApproval: true,
       },
-      importCount: 0
+      importCount: 0,
     };
 
-    setUsers(prev => [...prev, newUser]);
+    setUsers((prev) => [...prev, newUser]);
   };
 
   const handleRemoveUser = (userId: string) => {
-    setUsers(prev => prev.filter(user => user.userId !== userId));
+    setUsers((prev) => prev.filter((user) => user.userId !== userId));
   };
 
   return (
@@ -318,8 +323,8 @@ export function PermissionManagementExample() {
         onUpdatePermissions={handleUpdatePermissions}
         onAddUser={handleAddUser}
         onRemoveUser={handleRemoveUser}
-        availableFormats={['csv', 'json', 'excel', 'xml']}
-        availableTables={['users', 'products', 'orders', 'customers']}
+        availableFormats={["csv", "json", "excel", "xml"]}
+        availableTables={["users", "products", "orders", "customers"]}
       />
     </div>
   );
@@ -339,11 +344,11 @@ export function ImportHookExample() {
     parseFile,
     validateData,
     startImport,
-    clearState
+    clearState,
   } = useDataImport({
     columns: UserImportColumns,
     maxFileSize: 10 * 1024 * 1024,
-    maxRows: 5000
+    maxRows: 5000,
   });
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -376,18 +381,15 @@ export function ImportHookExample() {
           )}
         </div>
 
-        {isParsing && (
-          <p className="text-blue-600">Parsing file...</p>
-        )}
+        {isParsing && <p className="text-blue-600">Parsing file...</p>}
 
-        {parseError && (
-          <p className="text-red-600">Error: {parseError}</p>
-        )}
+        {parseError && <p className="text-red-600">Error: {parseError}</p>}
 
         {parsedData && (
           <div className="space-y-2">
             <p className="text-green-600">
-              File parsed successfully! Found {parsedData.totalRows} rows with columns: {parsedData.headers.join(', ')}
+              File parsed successfully! Found {parsedData.totalRows} rows with
+              columns: {parsedData.headers.join(", ")}
             </p>
 
             {fieldMappings.length > 0 && (
@@ -401,16 +403,18 @@ export function ImportHookExample() {
 
                 {validationResults && (
                   <button
-                    onClick={() => startImport({
-                      format: 'csv',
-                      hasHeaders: true,
-                      skipEmptyRows: true,
-                      onDuplicate: 'skip'
-                    })}
+                    onClick={() =>
+                      startImport({
+                        format: "csv",
+                        hasHeaders: true,
+                        skipEmptyRows: true,
+                        onDuplicate: "skip",
+                      })
+                    }
                     disabled={!validationResults.isValid || isImporting}
                     className="px-3 py-1 bg-green-600 text-white rounded disabled:opacity-50"
                   >
-                    {isImporting ? 'Importing...' : 'Start Import'}
+                    {isImporting ? "Importing..." : "Start Import"}
                   </button>
                 )}
               </div>
@@ -445,7 +449,8 @@ export function DataImportShowcase() {
       <div>
         <h1 className="text-2xl font-bold mb-2">Data Import Components</h1>
         <p className="text-gray-600 dark:text-gray-400">
-          Comprehensive data import system with file parsing, field mapping, validation, and permission management.
+          Comprehensive data import system with file parsing, field mapping,
+          validation, and permission management.
         </p>
       </div>
 
@@ -465,7 +470,9 @@ export function DataImportShowcase() {
             <ul className="space-y-1">
               <li>• CSV - Comma-separated values with custom delimiters</li>
               <li>• JSON - JavaScript Object Notation with nested objects</li>
-              <li>• Excel - Microsoft Excel (.xlsx/.xls) with multiple sheets</li>
+              <li>
+                • Excel - Microsoft Excel (.xlsx/.xls) with multiple sheets
+              </li>
               <li>• XML - Extensible Markup Language with attributes</li>
             </ul>
           </div>

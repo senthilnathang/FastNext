@@ -1,35 +1,35 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { Search, Mic, X, Filter, History, TrendingUp } from "lucide-react"
+import { Filter, History, Mic, Search, TrendingUp, X } from "lucide-react";
+import * as React from "react";
 
-import { cn } from "@/shared/utils"
-import { Input } from "../ui/input"
-import { Button } from "../ui/button"
-import { Card, CardContent } from "../ui/card"
-import { Badge } from "../ui/badge"
+import { cn } from "@/shared/utils";
+import { Badge } from "../ui/badge";
+import { Button } from "../ui/button";
+import { Card, CardContent } from "../ui/card";
+import { Input } from "../ui/input";
 
 interface MobileSearchProps {
-  value: string
-  onChange: (value: string) => void
-  onSubmit?: (value: string) => void
-  placeholder?: string
-  suggestions?: string[]
-  recentSearches?: string[]
-  popularSearches?: string[]
-  enableVoiceSearch?: boolean
-  enableFilters?: boolean
-  filterCount?: number
-  onFiltersClick?: () => void
-  className?: string
-  compact?: boolean
+  value: string;
+  onChange: (value: string) => void;
+  onSubmit?: (value: string) => void;
+  placeholder?: string;
+  suggestions?: string[];
+  recentSearches?: string[];
+  popularSearches?: string[];
+  enableVoiceSearch?: boolean;
+  enableFilters?: boolean;
+  filterCount?: number;
+  onFiltersClick?: () => void;
+  className?: string;
+  compact?: boolean;
 }
 
 interface VoiceSearchState {
-  isListening: boolean
-  isSupported: boolean
-  transcript: string
-  error: string | null
+  isListening: boolean;
+  isSupported: boolean;
+  transcript: string;
+  error: string | null;
 }
 
 export function MobileSearch({
@@ -45,105 +45,120 @@ export function MobileSearch({
   filterCount = 0,
   onFiltersClick,
   className,
-  compact = false
+  compact = false,
 }: MobileSearchProps) {
-  const [isExpanded, setIsExpanded] = React.useState(false)
+  const [isExpanded, setIsExpanded] = React.useState(false);
   const [voiceSearch, setVoiceSearch] = React.useState<VoiceSearchState>({
     isListening: false,
     isSupported: false,
-    transcript: '',
-    error: null
-  })
+    transcript: "",
+    error: null,
+  });
 
-  const inputRef = React.useRef<HTMLInputElement>(null)
-  const recognitionRef = React.useRef<any>(null)
+  const inputRef = React.useRef<HTMLInputElement>(null);
+  const recognitionRef = React.useRef<any>(null);
 
   // Initialize speech recognition
   React.useEffect(() => {
-    if (typeof window !== 'undefined' && 'webkitSpeechRecognition' in window) {
-      const SpeechRecognition = (window as any).webkitSpeechRecognition || (window as any).SpeechRecognition
+    if (typeof window !== "undefined" && "webkitSpeechRecognition" in window) {
+      const SpeechRecognition =
+        (window as any).webkitSpeechRecognition ||
+        (window as any).SpeechRecognition;
       if (SpeechRecognition) {
-        recognitionRef.current = new SpeechRecognition()
-        recognitionRef.current.continuous = false
-        recognitionRef.current.interimResults = true
-        recognitionRef.current.lang = 'en-US'
+        recognitionRef.current = new SpeechRecognition();
+        recognitionRef.current.continuous = false;
+        recognitionRef.current.interimResults = true;
+        recognitionRef.current.lang = "en-US";
 
         recognitionRef.current.onstart = () => {
-          setVoiceSearch(prev => ({ ...prev, isListening: true, error: null }))
-        }
+          setVoiceSearch((prev) => ({
+            ...prev,
+            isListening: true,
+            error: null,
+          }));
+        };
 
         recognitionRef.current.onresult = (event: any) => {
           const transcript = Array.from(event.results)
             .map((result: any) => result[0])
             .map((result: any) => result.transcript)
-            .join('')
+            .join("");
 
-          setVoiceSearch(prev => ({ ...prev, transcript }))
-          onChange(transcript)
-        }
+          setVoiceSearch((prev) => ({ ...prev, transcript }));
+          onChange(transcript);
+        };
 
         recognitionRef.current.onerror = (event: any) => {
-          setVoiceSearch(prev => ({
+          setVoiceSearch((prev) => ({
             ...prev,
             isListening: false,
-            error: `Voice search error: ${event.error}`
-          }))
-        }
+            error: `Voice search error: ${event.error}`,
+          }));
+        };
 
         recognitionRef.current.onend = () => {
-          setVoiceSearch(prev => ({ ...prev, isListening: false }))
-        }
+          setVoiceSearch((prev) => ({ ...prev, isListening: false }));
+        };
 
-        setVoiceSearch(prev => ({ ...prev, isSupported: true }))
+        setVoiceSearch((prev) => ({ ...prev, isSupported: true }));
       }
     }
 
     return () => {
       if (recognitionRef.current) {
-        recognitionRef.current.stop()
+        recognitionRef.current.stop();
       }
-    }
-  }, [onChange])
+    };
+  }, [onChange]);
 
   const startVoiceSearch = React.useCallback(() => {
     if (recognitionRef.current && !voiceSearch.isListening) {
-      recognitionRef.current.start()
+      recognitionRef.current.start();
     }
-  }, [voiceSearch.isListening])
+  }, [voiceSearch.isListening]);
 
   const stopVoiceSearch = React.useCallback(() => {
     if (recognitionRef.current && voiceSearch.isListening) {
-      recognitionRef.current.stop()
+      recognitionRef.current.stop();
     }
-  }, [voiceSearch.isListening])
+  }, [voiceSearch.isListening]);
 
-  const handleSubmit = React.useCallback((searchValue: string) => {
-    if (searchValue.trim()) {
-      onSubmit?.(searchValue.trim())
-      setIsExpanded(false)
-      inputRef.current?.blur()
-    }
-  }, [onSubmit])
+  const handleSubmit = React.useCallback(
+    (searchValue: string) => {
+      if (searchValue.trim()) {
+        onSubmit?.(searchValue.trim());
+        setIsExpanded(false);
+        inputRef.current?.blur();
+      }
+    },
+    [onSubmit],
+  );
 
-  const handleSuggestionClick = React.useCallback((suggestion: string) => {
-    onChange(suggestion)
-    handleSubmit(suggestion)
-  }, [onChange, handleSubmit])
+  const handleSuggestionClick = React.useCallback(
+    (suggestion: string) => {
+      onChange(suggestion);
+      handleSubmit(suggestion);
+    },
+    [onChange, handleSubmit],
+  );
 
-  const handleKeyDown = React.useCallback((e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      e.preventDefault()
-      handleSubmit(value)
-    } else if (e.key === 'Escape') {
-      setIsExpanded(false)
-      inputRef.current?.blur()
-    }
-  }, [value, handleSubmit])
+  const handleKeyDown = React.useCallback(
+    (e: React.KeyboardEvent) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        handleSubmit(value);
+      } else if (e.key === "Escape") {
+        setIsExpanded(false);
+        inputRef.current?.blur();
+      }
+    },
+    [value, handleSubmit],
+  );
 
   const clearSearch = React.useCallback(() => {
-    onChange('')
-    inputRef.current?.focus()
-  }, [onChange])
+    onChange("");
+    inputRef.current?.focus();
+  }, [onChange]);
 
   if (compact) {
     return (
@@ -177,7 +192,8 @@ export function MobileSearch({
             onClick={onFiltersClick}
             className={cn(
               "shrink-0",
-              filterCount > 0 && "border-blue-500 bg-blue-50 dark:bg-blue-900/20"
+              filterCount > 0 &&
+                "border-blue-500 bg-blue-50 dark:bg-blue-900/20",
             )}
           >
             <Filter className="h-4 w-4" />
@@ -189,7 +205,7 @@ export function MobileSearch({
           </Button>
         )}
       </div>
-    )
+    );
   }
 
   return (
@@ -213,17 +229,22 @@ export function MobileSearch({
             <Button
               variant="ghost"
               size="sm"
-              onClick={voiceSearch.isListening ? stopVoiceSearch : startVoiceSearch}
+              onClick={
+                voiceSearch.isListening ? stopVoiceSearch : startVoiceSearch
+              }
               className={cn(
                 "h-10 w-10 p-0 rounded-lg",
-                voiceSearch.isListening && "bg-red-500 text-white hover:bg-red-600"
+                voiceSearch.isListening &&
+                  "bg-red-500 text-white hover:bg-red-600",
               )}
               disabled={voiceSearch.error !== null}
             >
-              <Mic className={cn(
-                "h-4 w-4",
-                voiceSearch.isListening && "animate-pulse"
-              )} />
+              <Mic
+                className={cn(
+                  "h-4 w-4",
+                  voiceSearch.isListening && "animate-pulse",
+                )}
+              />
             </Button>
           )}
 
@@ -247,7 +268,7 @@ export function MobileSearch({
               onClick={onFiltersClick}
               className={cn(
                 "h-10 w-10 p-0 rounded-lg",
-                filterCount > 0 && "bg-blue-100 dark:bg-blue-900/30"
+                filterCount > 0 && "bg-blue-100 dark:bg-blue-900/30",
               )}
             >
               <Filter className="h-4 w-4" />
@@ -270,8 +291,14 @@ export function MobileSearch({
               <span className="text-sm font-medium">Listening...</span>
               <div className="flex space-x-1">
                 <div className="w-1 h-4 bg-red-500 animate-pulse rounded-full" />
-                <div className="w-1 h-4 bg-red-500 animate-pulse rounded-full" style={{ animationDelay: '0.1s' }} />
-                <div className="w-1 h-4 bg-red-500 animate-pulse rounded-full" style={{ animationDelay: '0.2s' }} />
+                <div
+                  className="w-1 h-4 bg-red-500 animate-pulse rounded-full"
+                  style={{ animationDelay: "0.1s" }}
+                />
+                <div
+                  className="w-1 h-4 bg-red-500 animate-pulse rounded-full"
+                  style={{ animationDelay: "0.2s" }}
+                />
               </div>
             </div>
           </CardContent>
@@ -282,11 +309,15 @@ export function MobileSearch({
       {voiceSearch.error && (
         <Card className="border-red-200 bg-red-50 dark:bg-red-900/20">
           <CardContent className="p-3">
-            <p className="text-sm text-red-700 dark:text-red-300">{voiceSearch.error}</p>
+            <p className="text-sm text-red-700 dark:text-red-300">
+              {voiceSearch.error}
+            </p>
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => setVoiceSearch(prev => ({ ...prev, error: null }))}
+              onClick={() =>
+                setVoiceSearch((prev) => ({ ...prev, error: null }))
+              }
               className="mt-2 text-red-600 dark:text-red-400"
             >
               Dismiss
@@ -382,7 +413,7 @@ export function MobileSearch({
         />
       )}
     </div>
-  )
+  );
 }
 
-export default MobileSearch
+export default MobileSearch;

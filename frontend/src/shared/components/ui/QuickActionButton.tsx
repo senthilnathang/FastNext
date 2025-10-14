@@ -1,15 +1,17 @@
-'use client';
+"use client";
 
-import React, { useState } from 'react';
-import { Zap } from 'lucide-react';
-import { Button } from './button';
-import QuickActionsMenu from './QuickActionsMenu';
+import { Zap } from "lucide-react";
+import { useState } from "react";
+import { Button } from "./button";
+import QuickActionsMenu from "./QuickActionsMenu";
 
 interface QuickActionButtonProps {
   className?: string;
 }
 
-export default function QuickActionButton({ className = '' }: QuickActionButtonProps) {
+export default function QuickActionButton({
+  className = "",
+}: QuickActionButtonProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   return (

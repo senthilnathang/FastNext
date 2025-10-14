@@ -1,18 +1,25 @@
-import type { Meta, StoryObj } from '@storybook/nextjs'
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from './card'
-import { Button } from './button'
+import type { Meta, StoryObj } from "@storybook/nextjs";
+import { Button } from "./button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "./card";
 
 const meta: Meta<typeof Card> = {
-  title: 'UI/Card',
+  title: "UI/Card",
   component: Card,
   parameters: {
-    layout: 'centered',
+    layout: "centered",
   },
-  tags: ['autodocs'],
-}
+  tags: ["autodocs"],
+};
 
-export default meta
-type Story = StoryObj<typeof meta>
+export default meta;
+type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   render: () => (
@@ -29,7 +36,7 @@ export const Default: Story = {
       </CardFooter>
     </Card>
   ),
-}
+};
 
 export const WithoutFooter: Story = {
   render: () => (
@@ -43,7 +50,7 @@ export const WithoutFooter: Story = {
       </CardContent>
     </Card>
   ),
-}
+};
 
 export const WithoutDescription: Story = {
   render: () => (
@@ -60,7 +67,7 @@ export const WithoutDescription: Story = {
       </CardFooter>
     </Card>
   ),
-}
+};
 
 export const ProductCard: Story = {
   render: () => (
@@ -86,12 +93,14 @@ export const ProductCard: Story = {
         </div>
       </CardContent>
       <CardFooter className="flex gap-2">
-        <Button variant="outline" className="flex-1">Add to Cart</Button>
+        <Button variant="outline" className="flex-1">
+          Add to Cart
+        </Button>
         <Button className="flex-1">Buy Now</Button>
       </CardFooter>
     </Card>
   ),
-}
+};
 
 export const StatisticsCard: Story = {
   render: () => (
@@ -107,7 +116,7 @@ export const StatisticsCard: Story = {
       </CardContent>
     </Card>
   ),
-}
+};
 
 export const NotificationCard: Story = {
   render: () => (
@@ -120,31 +129,46 @@ export const NotificationCard: Story = {
         <CardDescription>2 minutes ago</CardDescription>
       </CardHeader>
       <CardContent>
-        <p className="text-sm">You have a new message from John Doe regarding the project update.</p>
+        <p className="text-sm">
+          You have a new message from John Doe regarding the project update.
+        </p>
       </CardContent>
       <CardFooter className="pt-2">
-        <Button variant="ghost" size="sm">Mark as Read</Button>
-        <Button variant="ghost" size="sm">View Details</Button>
+        <Button variant="ghost" size="sm">
+          Mark as Read
+        </Button>
+        <Button variant="ghost" size="sm">
+          View Details
+        </Button>
       </CardFooter>
     </Card>
   ),
-}
+};
 
 export const FormCard: Story = {
   render: () => (
     <Card className="w-[400px]">
       <CardHeader>
         <CardTitle>Create Account</CardTitle>
-        <CardDescription>Enter your details to create a new account</CardDescription>
+        <CardDescription>
+          Enter your details to create a new account
+        </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="space-y-2">
           <label className="text-sm font-medium">Email</label>
-          <input className="w-full p-2 border rounded" placeholder="Enter your email" />
+          <input
+            className="w-full p-2 border rounded"
+            placeholder="Enter your email"
+          />
         </div>
         <div className="space-y-2">
           <label className="text-sm font-medium">Password</label>
-          <input type="password" className="w-full p-2 border rounded" placeholder="Enter your password" />
+          <input
+            type="password"
+            className="w-full p-2 border rounded"
+            placeholder="Enter your password"
+          />
         </div>
       </CardContent>
       <CardFooter className="flex justify-between">
@@ -153,7 +177,7 @@ export const FormCard: Story = {
       </CardFooter>
     </Card>
   ),
-}
+};
 
 export const ImageCard: Story = {
   render: () => (
@@ -165,16 +189,19 @@ export const ImageCard: Story = {
       </CardHeader>
       <CardContent>
         <p className="text-sm text-muted-foreground">
-          This image showcases the beauty of natural landscapes with vibrant colors and composition.
+          This image showcases the beauty of natural landscapes with vibrant
+          colors and composition.
         </p>
       </CardContent>
       <CardFooter>
-        <Button variant="outline" size="sm">View Full Size</Button>
+        <Button variant="outline" size="sm">
+          View Full Size
+        </Button>
         <Button size="sm">Download</Button>
       </CardFooter>
     </Card>
   ),
-}
+};
 
 export const MultipleCards: Story = {
   render: () => (
@@ -217,4 +244,4 @@ export const MultipleCards: Story = {
       </Card>
     </div>
   ),
-}
+};

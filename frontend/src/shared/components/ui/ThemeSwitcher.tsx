@@ -1,12 +1,11 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { Monitor, Moon, Sun, Check } from "lucide-react"
-import { useTheme } from "next-themes"
-import { motion, AnimatePresence } from "framer-motion"
-
-import { cn } from "@/shared/utils"
-import { Button } from "@/shared/components/ui/button"
+import { AnimatePresence, motion } from "framer-motion";
+import { Check, Monitor, Moon, Sun } from "lucide-react";
+import { useTheme } from "next-themes";
+import * as React from "react";
+import { Badge } from "@/shared/components/ui/badge";
+import { Button } from "@/shared/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -14,53 +13,63 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/shared/components/ui/dropdown-menu"
-import { Badge } from "@/shared/components/ui/badge"
-import { Separator } from "@/shared/components/ui/separator"
-
-import { useColorScheme, type ColorScheme } from "@/shared/providers/EnhancedThemeProvider"
+} from "@/shared/components/ui/dropdown-menu";
+import { Separator } from "@/shared/components/ui/separator";
+import {
+  type ColorScheme,
+  useColorScheme,
+} from "@/shared/providers/EnhancedThemeProvider";
+import { cn } from "@/shared/utils";
 
 const themes = [
   {
-    name: 'light',
-    label: 'Light',
+    name: "light",
+    label: "Light",
     icon: Sun,
-    description: 'Clean and bright interface',
+    description: "Clean and bright interface",
   },
   {
-    name: 'dark',
-    label: 'Dark',
+    name: "dark",
+    label: "Dark",
     icon: Moon,
-    description: 'Easy on the eyes',
+    description: "Easy on the eyes",
   },
   {
-    name: 'system',
-    label: 'System',
+    name: "system",
+    label: "System",
     icon: Monitor,
-    description: 'Follow system preference',
+    description: "Follow system preference",
   },
-] as const
+] as const;
 
 interface ThemeSwitcherProps {
-  variant?: 'dropdown' | 'inline' | 'compact'
-  showColorSchemes?: boolean
-  className?: string
+  variant?: "dropdown" | "inline" | "compact";
+  showColorSchemes?: boolean;
+  className?: string;
 }
 
 interface ColorSchemePreviewProps {
-  scheme: ColorScheme
-  isSelected: boolean
-  onClick: () => void
-  currentTheme: string | undefined
+  scheme: ColorScheme;
+  isSelected: boolean;
+  onClick: () => void;
+  currentTheme: string | undefined;
 }
 
-function ColorSchemePreview({ scheme, isSelected, onClick, currentTheme }: ColorSchemePreviewProps) {
-  const { availableSchemes } = useColorScheme()
-  const schemeConfig = availableSchemes.find(s => s.id === scheme)
+function ColorSchemePreview({
+  scheme,
+  isSelected,
+  onClick,
+  currentTheme,
+}: ColorSchemePreviewProps) {
+  const { availableSchemes } = useColorScheme();
+  const schemeConfig = availableSchemes.find((s) => s.id === scheme);
 
-  if (!schemeConfig) return null
+  if (!schemeConfig) return null;
 
-  const previewColor = currentTheme === 'dark' ? schemeConfig.preview.dark : schemeConfig.preview.light
+  const previewColor =
+    currentTheme === "dark"
+      ? schemeConfig.preview.dark
+      : schemeConfig.preview.light;
 
   return (
     <motion.button
@@ -70,7 +79,7 @@ function ColorSchemePreview({ scheme, isSelected, onClick, currentTheme }: Color
         "hover:scale-105 focus:outline-none focus:ring-2 focus:ring-primary/20",
         isSelected
           ? "border-primary bg-primary/5"
-          : "border-border hover:border-border/60"
+          : "border-border hover:border-border/60",
       )}
       whileHover={{ scale: 1.05 }}
       whileTap={{ scale: 0.95 }}
@@ -93,17 +102,23 @@ function ColorSchemePreview({ scheme, isSelected, onClick, currentTheme }: Color
         </motion.div>
       )}
     </motion.button>
-  )
+  );
 }
 
-function InlineThemeSwitcher({ showColorSchemes = true, className }: { showColorSchemes?: boolean; className?: string }) {
-  const { theme, setTheme } = useTheme()
-  const { colorScheme, setColorScheme, availableSchemes } = useColorScheme()
-  const [mounted, setMounted] = React.useState(false)
+function InlineThemeSwitcher({
+  showColorSchemes = true,
+  className,
+}: {
+  showColorSchemes?: boolean;
+  className?: string;
+}) {
+  const { theme, setTheme } = useTheme();
+  const { colorScheme, setColorScheme, availableSchemes } = useColorScheme();
+  const [mounted, setMounted] = React.useState(false);
 
   React.useEffect(() => {
-    setMounted(true)
-  }, [])
+    setMounted(true);
+  }, []);
 
   if (!mounted) {
     return (
@@ -111,10 +126,10 @@ function InlineThemeSwitcher({ showColorSchemes = true, className }: { showColor
         <div className="h-12 bg-muted rounded-lg" />
         <div className="h-24 bg-muted rounded-lg" />
       </div>
-    )
+    );
   }
 
-  const isDarkMode = theme === 'dark'
+  const isDarkMode = theme === "dark";
 
   return (
     <div className={cn("space-y-6", className)}>
@@ -128,8 +143,8 @@ function InlineThemeSwitcher({ showColorSchemes = true, className }: { showColor
         </div>
         <div className="grid grid-cols-3 gap-2">
           {themes.map((themeOption) => {
-            const Icon = themeOption.icon
-            const isSelected = theme === themeOption.name
+            const Icon = themeOption.icon;
+            const isSelected = theme === themeOption.name;
 
             return (
               <motion.button
@@ -140,7 +155,7 @@ function InlineThemeSwitcher({ showColorSchemes = true, className }: { showColor
                   "hover:scale-105 focus:outline-none focus:ring-2 focus:ring-primary/20",
                   isSelected
                     ? "border-primary bg-primary/5 text-primary"
-                    : "border-border hover:border-border/60"
+                    : "border-border hover:border-border/60",
                 )}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
@@ -148,7 +163,7 @@ function InlineThemeSwitcher({ showColorSchemes = true, className }: { showColor
                 <Icon className="w-4 h-4" />
                 <span className="text-xs font-medium">{themeOption.label}</span>
               </motion.button>
-            )
+            );
           })}
         </div>
       </div>
@@ -163,7 +178,7 @@ function InlineThemeSwitcher({ showColorSchemes = true, className }: { showColor
               <h4 className="text-sm font-medium">Color Scheme</h4>
               {!isDarkMode ? (
                 <Badge variant="secondary" className="text-xs">
-                  {availableSchemes.find(s => s.id === colorScheme)?.name}
+                  {availableSchemes.find((s) => s.id === colorScheme)?.name}
                 </Badge>
               ) : (
                 <Badge variant="outline" className="text-xs">
@@ -197,29 +212,39 @@ function InlineThemeSwitcher({ showColorSchemes = true, className }: { showColor
         </>
       )}
     </div>
-  )
+  );
 }
 
-function DropdownThemeSwitcher({ showColorSchemes = true, className }: { showColorSchemes?: boolean; className?: string }) {
-  const { theme, setTheme } = useTheme()
-  const { colorScheme, setColorScheme, availableSchemes } = useColorScheme()
-  const [mounted, setMounted] = React.useState(false)
+function DropdownThemeSwitcher({
+  showColorSchemes = true,
+  className,
+}: {
+  showColorSchemes?: boolean;
+  className?: string;
+}) {
+  const { theme, setTheme } = useTheme();
+  const { colorScheme, setColorScheme, availableSchemes } = useColorScheme();
+  const [mounted, setMounted] = React.useState(false);
 
   React.useEffect(() => {
-    setMounted(true)
-  }, [])
+    setMounted(true);
+  }, []);
 
   if (!mounted) {
     return (
-      <Button variant="ghost" size="sm" className={cn("w-8 h-8 p-0", className)}>
+      <Button
+        variant="ghost"
+        size="sm"
+        className={cn("w-8 h-8 p-0", className)}
+      >
         <div className="w-4 h-4 bg-muted rounded animate-pulse" />
       </Button>
-    )
+    );
   }
 
-  const currentTheme = themes.find(t => t.name === theme)
-  const Icon = currentTheme?.icon || Monitor
-  const isDarkMode = theme === 'dark'
+  const currentTheme = themes.find((t) => t.name === theme);
+  const Icon = currentTheme?.icon || Monitor;
+  const isDarkMode = theme === "dark";
 
   return (
     <DropdownMenu>
@@ -236,8 +261,8 @@ function DropdownThemeSwitcher({ showColorSchemes = true, className }: { showCol
       <DropdownMenuContent align="end" className="w-56">
         <DropdownMenuLabel className="text-xs">Appearance</DropdownMenuLabel>
         {themes.map((themeOption) => {
-          const Icon = themeOption.icon
-          const isSelected = theme === themeOption.name
+          const Icon = themeOption.icon;
+          const isSelected = theme === themeOption.name;
 
           return (
             <DropdownMenuItem
@@ -251,16 +276,20 @@ function DropdownThemeSwitcher({ showColorSchemes = true, className }: { showCol
                   <span>{themeOption.label}</span>
                   {isSelected && <Check className="h-3 w-3" />}
                 </div>
-                <p className="text-xs text-muted-foreground">{themeOption.description}</p>
+                <p className="text-xs text-muted-foreground">
+                  {themeOption.description}
+                </p>
               </div>
             </DropdownMenuItem>
-          )
+          );
         })}
 
         {showColorSchemes && (
           <>
             <DropdownMenuSeparator />
-            <DropdownMenuLabel className="text-xs">Color Scheme</DropdownMenuLabel>
+            <DropdownMenuLabel className="text-xs">
+              Color Scheme
+            </DropdownMenuLabel>
             <div className="p-2">
               {!isDarkMode ? (
                 <>
@@ -295,37 +324,41 @@ function DropdownThemeSwitcher({ showColorSchemes = true, className }: { showCol
         )}
       </DropdownMenuContent>
     </DropdownMenu>
-  )
+  );
 }
 
 function CompactThemeSwitcher({ className }: { className?: string }) {
-  const { theme, setTheme } = useTheme()
-  const [mounted, setMounted] = React.useState(false)
+  const { theme, setTheme } = useTheme();
+  const [mounted, setMounted] = React.useState(false);
 
   React.useEffect(() => {
-    setMounted(true)
-  }, [])
+    setMounted(true);
+  }, []);
 
   if (!mounted) {
     return (
-      <Button variant="ghost" size="sm" className={cn("w-8 h-8 p-0", className)}>
+      <Button
+        variant="ghost"
+        size="sm"
+        className={cn("w-8 h-8 p-0", className)}
+      >
         <div className="w-4 h-4 bg-muted rounded animate-pulse" />
       </Button>
-    )
+    );
   }
 
-  const currentTheme = themes.find(t => t.name === theme)
-  const Icon = currentTheme?.icon || Monitor
+  const currentTheme = themes.find((t) => t.name === theme);
+  const Icon = currentTheme?.icon || Monitor;
 
   const handleToggle = () => {
-    if (theme === 'light') {
-      setTheme('dark')
-    } else if (theme === 'dark') {
-      setTheme('system')
+    if (theme === "light") {
+      setTheme("dark");
+    } else if (theme === "dark") {
+      setTheme("system");
     } else {
-      setTheme('light')
+      setTheme("light");
     }
-  }
+  };
 
   return (
     <Button
@@ -347,23 +380,32 @@ function CompactThemeSwitcher({ className }: { className?: string }) {
       </AnimatePresence>
       <span className="sr-only">Toggle theme</span>
     </Button>
-  )
+  );
 }
 
 export function ThemeSwitcher({
-  variant = 'dropdown',
+  variant = "dropdown",
   showColorSchemes = true,
-  className
+  className,
 }: ThemeSwitcherProps) {
   switch (variant) {
-    case 'inline':
-      return <InlineThemeSwitcher showColorSchemes={showColorSchemes} className={className} />
-    case 'compact':
-      return <CompactThemeSwitcher className={className} />
-    case 'dropdown':
+    case "inline":
+      return (
+        <InlineThemeSwitcher
+          showColorSchemes={showColorSchemes}
+          className={className}
+        />
+      );
+    case "compact":
+      return <CompactThemeSwitcher className={className} />;
     default:
-      return <DropdownThemeSwitcher showColorSchemes={showColorSchemes} className={className} />
+      return (
+        <DropdownThemeSwitcher
+          showColorSchemes={showColorSchemes}
+          className={className}
+        />
+      );
   }
 }
 
-export default ThemeSwitcher
+export default ThemeSwitcher;

@@ -1,67 +1,73 @@
-"use client"
+"use client";
 
-import React from 'react'
-import Link from 'next/link'
-import { usePathname } from 'next/navigation'
-import { ChevronRight, Home } from 'lucide-react'
-import { cn } from '@/shared/utils'
+import { ChevronRight, Home } from "lucide-react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import React from "react";
+import { cn } from "@/shared/utils";
 
 interface BreadcrumbItem {
-  label: string
-  href: string
-  icon?: React.ComponentType<{ className?: string }>
+  label: string;
+  href: string;
+  icon?: React.ComponentType<{ className?: string }>;
 }
 
 interface BreadcrumbProps {
-  className?: string
-  customItems?: BreadcrumbItem[]
+  className?: string;
+  customItems?: BreadcrumbItem[];
 }
 
-export default function Breadcrumb({ className, customItems }: BreadcrumbProps) {
-  const pathname = usePathname()
+export default function Breadcrumb({
+  className,
+  customItems,
+}: BreadcrumbProps) {
+  const pathname = usePathname();
 
   const generateBreadcrumbs = (): BreadcrumbItem[] => {
-    if (customItems) return customItems
+    if (customItems) return customItems;
 
-    const pathSegments = pathname.split('/').filter(Boolean)
+    const pathSegments = pathname.split("/").filter(Boolean);
     const breadcrumbs: BreadcrumbItem[] = [
       {
-        label: 'Home',
-        href: '/dashboard',
-        icon: Home
-      }
-    ]
+        label: "Home",
+        href: "/dashboard",
+        icon: Home,
+      },
+    ];
 
-    let currentPath = ''
+    let currentPath = "";
     pathSegments.forEach((segment) => {
-      currentPath += `/${segment}`
+      currentPath += `/${segment}`;
 
       const label = segment
-        .split('-')
-        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-        .join(' ')
+        .split("-")
+        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(" ");
 
       breadcrumbs.push({
         label,
-        href: currentPath
-      })
-    })
+        href: currentPath,
+      });
+    });
 
-    return breadcrumbs
-  }
+    return breadcrumbs;
+  };
 
-  const breadcrumbs = generateBreadcrumbs()
+  const breadcrumbs = generateBreadcrumbs();
 
   return (
-    <nav className={cn('flex items-center space-x-1 text-xs text-gray-500 dark:text-gray-400', className)}>
+    <nav
+      className={cn(
+        "flex items-center space-x-1 text-xs text-gray-500 dark:text-gray-400",
+        className,
+      )}
+    >
       {breadcrumbs.map((item, index) => {
-        const isLast = index === breadcrumbs.length - 1
+        const isLast = index === breadcrumbs.length - 1;
 
         return (
           <React.Fragment key={`${item.href}-${index}`}>
-            {index > 0 && (
-              <ChevronRight className="w-3 h-3 mx-0.5" />
-            )}
+            {index > 0 && <ChevronRight className="w-3 h-3 mx-0.5" />}
 
             {isLast ? (
               <span className="flex items-center text-gray-900 dark:text-white font-medium">
@@ -78,8 +84,8 @@ export default function Breadcrumb({ className, customItems }: BreadcrumbProps) 
               </Link>
             )}
           </React.Fragment>
-        )
+        );
       })}
     </nav>
-  )
+  );
 }

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from "react";
 
 interface DataImportExportConfig {
   max_file_size_mb: number;
@@ -19,7 +19,7 @@ interface DataImportExportConfig {
 
 const defaultConfig: DataImportExportConfig = {
   max_file_size_mb: 100,
-  allowed_formats: ['csv', 'json', 'xlsx'],
+  allowed_formats: ["csv", "json", "xlsx"],
   batch_size: 1000,
   timeout_seconds: 300,
   enable_validation: true,
@@ -27,11 +27,11 @@ const defaultConfig: DataImportExportConfig = {
   require_approval: false,
   notify_on_completion: true,
   retention_days: 30,
-  compression_level: 'medium',
+  compression_level: "medium",
   encryption_enabled: false,
   parallel_processing: true,
   max_concurrent_jobs: 5,
-  memory_limit_mb: 512
+  memory_limit_mb: 512,
 };
 
 export function useDataImportExportConfig() {
@@ -41,31 +41,34 @@ export function useDataImportExportConfig() {
 
   useEffect(() => {
     loadConfiguration();
-  }, []);
+  }, [loadConfiguration]);
 
   const loadConfiguration = async () => {
     setLoading(true);
     setError(null);
 
     try {
-      const token = localStorage.getItem('access_token');
+      const token = localStorage.getItem("access_token");
       if (!token) {
-        console.warn('No access token found, using default configuration');
+        console.warn("No access token found, using default configuration");
         setConfig(defaultConfig);
         return;
       }
 
-      const response = await fetch('/api/v1/config/data-import-export/current', {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
+      const response = await fetch(
+        "/api/v1/config/data-import-export/current",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        },
+      );
 
       if (!response.ok) {
         if (response.status === 404) {
           // Configuration not found, use defaults
-          console.warn('Configuration not found, using default configuration');
+          console.warn("Configuration not found, using default configuration");
           setConfig(defaultConfig);
           return;
         }
@@ -79,8 +82,10 @@ export function useDataImportExportConfig() {
         setConfig(defaultConfig);
       }
     } catch (error) {
-      console.error('Error loading configuration:', error);
-      setError(error instanceof Error ? error.message : 'Failed to load configuration');
+      console.error("Error loading configuration:", error);
+      setError(
+        error instanceof Error ? error.message : "Failed to load configuration",
+      );
       // Fall back to default configuration
       setConfig(defaultConfig);
     } finally {
@@ -98,12 +103,13 @@ export function useDataImportExportConfig() {
     error,
     refreshConfig,
     // Helper methods for common checks
-    isFormatAllowed: (format: string) => config.allowed_formats.includes(format.toLowerCase()),
+    isFormatAllowed: (format: string) =>
+      config.allowed_formats.includes(format.toLowerCase()),
     getMaxFileSize: () => config.max_file_size_mb,
     getBatchSize: () => config.batch_size,
     shouldValidate: () => config.enable_validation,
     requiresApproval: () => config.require_approval,
     shouldNotify: () => config.notify_on_completion,
-    shouldAuditLog: () => config.enable_audit_log
+    shouldAuditLog: () => config.enable_audit_log,
   };
 }

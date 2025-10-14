@@ -1,8 +1,10 @@
-"use client"
+"use client";
 
-import React from 'react'
-import { Bell, Search, User, Settings, LogOut } from 'lucide-react'
-import { Button } from '../ui/button'
+import { Bell, LogOut, Search, Settings, User } from "lucide-react";
+import { useAuth } from "@/modules/auth";
+import Breadcrumb from "../navigation/Breadcrumb";
+import SidebarToggle from "../navigation/SidebarToggle";
+import { Button } from "../ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,28 +12,28 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '../ui/dropdown-menu'
-import { EnhancedThemeToggle } from '../ui/EnhancedThemeToggle'
-import Breadcrumb from '../navigation/Breadcrumb'
-import QuickActionButton from '../ui/QuickActionButton'
-import SidebarToggle from '../navigation/SidebarToggle'
-import { useAuth } from '@/modules/auth'
+} from "../ui/dropdown-menu";
+import { EnhancedThemeToggle } from "../ui/EnhancedThemeToggle";
+import QuickActionButton from "../ui/QuickActionButton";
 
 interface HeaderProps {
   sidebarCollapsed?: boolean;
   onToggleSidebar?: () => void;
 }
 
-export default function Header({ sidebarCollapsed, onToggleSidebar }: HeaderProps = {}) {
-  const { user, logout } = useAuth()
+export default function Header({
+  sidebarCollapsed,
+  onToggleSidebar,
+}: HeaderProps = {}) {
+  const { user, logout } = useAuth();
 
   const handleLogout = async () => {
     try {
-      await logout()
+      await logout();
     } catch (error) {
-      console.error('Logout failed:', error)
+      console.error("Logout failed:", error);
     }
-  }
+  };
 
   return (
     <div className="bg-background border-b border-border">
@@ -57,7 +59,12 @@ export default function Header({ sidebarCollapsed, onToggleSidebar }: HeaderProp
               className="pl-8 pr-3 py-1.5 w-48 lg:w-64 text-sm border border-input bg-background text-foreground placeholder:text-muted-foreground rounded-md focus:ring-1 focus:ring-ring focus:border-transparent transition-colors"
             />
           </div>
-          <Button variant="ghost" size="sm" className="sm:hidden p-1.5" title="Search">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="sm:hidden p-1.5"
+            title="Search"
+          >
             <Search className="w-4 h-4" />
           </Button>
         </div>
@@ -67,7 +74,12 @@ export default function Header({ sidebarCollapsed, onToggleSidebar }: HeaderProp
             <QuickActionButton />
           </div>
 
-          <Button variant="ghost" size="sm" title="Notifications" className="p-1.5 relative">
+          <Button
+            variant="ghost"
+            size="sm"
+            title="Notifications"
+            className="p-1.5 relative"
+          >
             <Bell className="w-4 h-4" />
             <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-red-500 rounded-full"></span>
           </Button>
@@ -76,13 +88,16 @@ export default function Header({ sidebarCollapsed, onToggleSidebar }: HeaderProp
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="flex items-center space-x-2 px-2 py-1.5 h-8">
+              <Button
+                variant="ghost"
+                className="flex items-center space-x-2 px-2 py-1.5 h-8"
+              >
                 <div className="w-6 h-6 bg-gradient-to-br from-brand-primary to-brand-secondary rounded-full flex items-center justify-center">
                   <User className="w-3.5 h-3.5 text-white" />
                 </div>
                 <div className="text-left hidden sm:block">
                   <div className="text-xs font-medium text-foreground">
-                    {user?.full_name || user?.username || 'User'}
+                    {user?.full_name || user?.username || "User"}
                   </div>
                 </div>
               </Button>
@@ -94,8 +109,12 @@ export default function Header({ sidebarCollapsed, onToggleSidebar }: HeaderProp
                     <User className="w-4 h-4 text-white" />
                   </div>
                   <div>
-                    <div className="text-sm font-medium text-foreground">{user?.full_name || user?.username || 'User'}</div>
-                    <div className="text-xs text-muted-foreground">{user?.email || 'user@example.com'}</div>
+                    <div className="text-sm font-medium text-foreground">
+                      {user?.full_name || user?.username || "User"}
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      {user?.email || "user@example.com"}
+                    </div>
                   </div>
                 </div>
               </DropdownMenuLabel>
@@ -125,5 +144,5 @@ export default function Header({ sidebarCollapsed, onToggleSidebar }: HeaderProp
         <Breadcrumb />
       </div>
     </div>
-  )
+  );
 }

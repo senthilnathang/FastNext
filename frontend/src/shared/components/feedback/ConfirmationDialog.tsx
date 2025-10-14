@@ -1,7 +1,7 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { AlertTriangle, Trash2, Shield, UserX } from "lucide-react"
+import { AlertTriangle, Shield, Trash2, UserX } from "lucide-react";
+import * as React from "react";
 
 import {
   AlertDialog,
@@ -12,19 +12,19 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/shared/components/ui/alert-dialog"
+} from "@/shared/components/ui/alert-dialog";
 
 export interface ConfirmationDialogProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  title: string
-  description: string
-  confirmText?: string
-  cancelText?: string
-  variant?: 'default' | 'destructive' | 'warning'
-  icon?: 'delete' | 'warning' | 'shield' | 'user'
-  onConfirm: () => void
-  isLoading?: boolean
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  title: string;
+  description: string;
+  confirmText?: string;
+  cancelText?: string;
+  variant?: "default" | "destructive" | "warning";
+  icon?: "delete" | "warning" | "shield" | "user";
+  onConfirm: () => void;
+  isLoading?: boolean;
 }
 
 const icons = {
@@ -32,13 +32,13 @@ const icons = {
   warning: AlertTriangle,
   shield: Shield,
   user: UserX,
-}
+};
 
 const variantStyles = {
   default: "bg-blue-600 hover:bg-blue-700",
   destructive: "bg-red-600 hover:bg-red-700",
   warning: "bg-orange-600 hover:bg-orange-700",
-}
+};
 
 export function ConfirmationDialog({
   open,
@@ -47,28 +47,32 @@ export function ConfirmationDialog({
   description,
   confirmText = "Confirm",
   cancelText = "Cancel",
-  variant = 'default',
-  icon = 'warning',
+  variant = "default",
+  icon = "warning",
   onConfirm,
   isLoading = false,
 }: ConfirmationDialogProps) {
-  const Icon = icons[icon]
+  const Icon = icons[icon];
 
   const handleConfirm = () => {
-    onConfirm()
-    onOpenChange(false)
-  }
+    onConfirm();
+    onOpenChange(false);
+  };
 
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent>
         <AlertDialogHeader>
           <div className="flex items-center gap-3">
-            <div className={`p-2 rounded-full ${
-              variant === 'destructive' ? 'bg-red-100 text-red-600' :
-              variant === 'warning' ? 'bg-orange-100 text-orange-600' :
-              'bg-blue-100 text-blue-600'
-            }`}>
+            <div
+              className={`p-2 rounded-full ${
+                variant === "destructive"
+                  ? "bg-red-100 text-red-600"
+                  : variant === "warning"
+                    ? "bg-orange-100 text-orange-600"
+                    : "bg-blue-100 text-blue-600"
+              }`}
+            >
               <Icon className="w-5 h-5" />
             </div>
             <AlertDialogTitle>{title}</AlertDialogTitle>
@@ -91,30 +95,32 @@ export function ConfirmationDialog({
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
-  )
+  );
 }
 
 // Predefined confirmation dialogs for common actions
 export const useConfirmationDialog = () => {
   const [dialog, setDialog] = React.useState<{
-    open: boolean
-    props: Omit<ConfirmationDialogProps, 'open' | 'onOpenChange'>
+    open: boolean;
+    props: Omit<ConfirmationDialogProps, "open" | "onOpenChange">;
   }>({
     open: false,
     props: {
       title: "",
       description: "",
       onConfirm: () => {},
-    }
-  })
+    },
+  });
 
-  const showDialog = (props: Omit<ConfirmationDialogProps, 'open' | 'onOpenChange'>) => {
-    setDialog({ open: true, props })
-  }
+  const showDialog = (
+    props: Omit<ConfirmationDialogProps, "open" | "onOpenChange">,
+  ) => {
+    setDialog({ open: true, props });
+  };
 
   const hideDialog = () => {
-    setDialog(prev => ({ ...prev, open: false }))
-  }
+    setDialog((prev) => ({ ...prev, open: false }));
+  };
 
   const confirmDelete = (itemName: string, onConfirm: () => void) => {
     showDialog({
@@ -124,8 +130,8 @@ export const useConfirmationDialog = () => {
       variant: "destructive",
       icon: "delete",
       onConfirm,
-    })
-  }
+    });
+  };
 
   const confirmUserDelete = (username: string, onConfirm: () => void) => {
     showDialog({
@@ -135,41 +141,53 @@ export const useConfirmationDialog = () => {
       variant: "destructive",
       icon: "user",
       onConfirm,
-    })
-  }
+    });
+  };
 
-  const confirmStatusToggle = (username: string, isActive: boolean, onConfirm: () => void) => {
+  const confirmStatusToggle = (
+    username: string,
+    isActive: boolean,
+    onConfirm: () => void,
+  ) => {
     showDialog({
-      title: `${isActive ? 'Deactivate' : 'Activate'} User`,
-      description: `Are you sure you want to ${isActive ? 'deactivate' : 'activate'} user "${username}"? This will ${isActive ? 'revoke' : 'restore'} their access to the system.`,
-      confirmText: isActive ? 'Deactivate' : 'Activate',
-      variant: isActive ? 'warning' : 'default',
+      title: `${isActive ? "Deactivate" : "Activate"} User`,
+      description: `Are you sure you want to ${isActive ? "deactivate" : "activate"} user "${username}"? This will ${isActive ? "revoke" : "restore"} their access to the system.`,
+      confirmText: isActive ? "Deactivate" : "Activate",
+      variant: isActive ? "warning" : "default",
       icon: "shield",
       onConfirm,
-    })
-  }
+    });
+  };
 
-  const confirmRoleDelete = (roleName: string, userCount: number, onConfirm: () => void) => {
+  const confirmRoleDelete = (
+    roleName: string,
+    userCount: number,
+    onConfirm: () => void,
+  ) => {
     showDialog({
       title: "Delete Role",
-      description: `Are you sure you want to delete role "${roleName}"? ${userCount > 0 ? `This role is assigned to ${userCount} user(s). They will lose these permissions.` : 'This action cannot be undone.'}`,
+      description: `Are you sure you want to delete role "${roleName}"? ${userCount > 0 ? `This role is assigned to ${userCount} user(s). They will lose these permissions.` : "This action cannot be undone."}`,
       confirmText: "Delete Role",
       variant: "destructive",
       icon: "delete",
       onConfirm,
-    })
-  }
+    });
+  };
 
-  const confirmBulkDelete = (itemType: string, count: number, onConfirm: () => void) => {
+  const confirmBulkDelete = (
+    itemType: string,
+    count: number,
+    onConfirm: () => void,
+  ) => {
     showDialog({
-      title: `Delete ${count} ${itemType}${count > 1 ? 's' : ''}`,
-      description: `Are you sure you want to delete ${count} selected ${itemType}${count > 1 ? 's' : ''}? This action cannot be undone.`,
-      confirmText: `Delete ${count} ${itemType}${count > 1 ? 's' : ''}`,
+      title: `Delete ${count} ${itemType}${count > 1 ? "s" : ""}`,
+      description: `Are you sure you want to delete ${count} selected ${itemType}${count > 1 ? "s" : ""}? This action cannot be undone.`,
+      confirmText: `Delete ${count} ${itemType}${count > 1 ? "s" : ""}`,
       variant: "destructive",
       icon: "delete",
       onConfirm,
-    })
-  }
+    });
+  };
 
   const confirmBulkAction = (
     actionName: string,
@@ -177,17 +195,22 @@ export const useConfirmationDialog = () => {
     count: number,
     description: string,
     onConfirm: () => void,
-    variant: 'default' | 'destructive' | 'warning' = 'default'
+    variant: "default" | "destructive" | "warning" = "default",
   ) => {
     showDialog({
-      title: `${actionName} ${count} ${itemType}${count > 1 ? 's' : ''}`,
+      title: `${actionName} ${count} ${itemType}${count > 1 ? "s" : ""}`,
       description,
-      confirmText: `${actionName} ${count} ${itemType}${count > 1 ? 's' : ''}`,
+      confirmText: `${actionName} ${count} ${itemType}${count > 1 ? "s" : ""}`,
       variant,
-      icon: variant === 'destructive' ? 'delete' : variant === 'warning' ? 'warning' : 'shield',
+      icon:
+        variant === "destructive"
+          ? "delete"
+          : variant === "warning"
+            ? "warning"
+            : "shield",
       onConfirm,
-    })
-  }
+    });
+  };
 
   const ConfirmationDialogComponent = () => (
     <ConfirmationDialog
@@ -195,7 +218,7 @@ export const useConfirmationDialog = () => {
       onOpenChange={hideDialog}
       {...dialog.props}
     />
-  )
+  );
 
   return {
     showDialog,
@@ -207,5 +230,5 @@ export const useConfirmationDialog = () => {
     confirmBulkDelete,
     confirmBulkAction,
     ConfirmationDialog: ConfirmationDialogComponent,
-  }
-}
+  };
+};

@@ -1,122 +1,134 @@
-import type { Meta, StoryObj } from '@storybook/nextjs'
-import { Input } from './input'
+import type { Meta, StoryObj } from "@storybook/nextjs";
+import { Input } from "./input";
 
 const meta: Meta<typeof Input> = {
-  title: 'UI/Input',
+  title: "UI/Input",
   component: Input,
   parameters: {
-    layout: 'centered',
+    layout: "centered",
   },
-  tags: ['autodocs'],
+  tags: ["autodocs"],
   argTypes: {
     type: {
-      control: { type: 'select' },
-      options: ['text', 'email', 'password', 'number', 'tel', 'url', 'search', 'file'],
+      control: { type: "select" },
+      options: [
+        "text",
+        "email",
+        "password",
+        "number",
+        "tel",
+        "url",
+        "search",
+        "file",
+      ],
     },
     disabled: {
-      control: { type: 'boolean' },
+      control: { type: "boolean" },
     },
     required: {
-      control: { type: 'boolean' },
+      control: { type: "boolean" },
     },
     readOnly: {
-      control: { type: 'boolean' },
+      control: { type: "boolean" },
     },
     error: {
-      control: { type: 'boolean' },
+      control: { type: "boolean" },
     },
   },
-}
+};
 
-export default meta
-type Story = StoryObj<typeof meta>
+export default meta;
+type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   args: {
-    placeholder: 'Enter text...',
+    placeholder: "Enter text...",
   },
-}
+};
 
 export const WithValue: Story = {
   args: {
-    defaultValue: 'Default value',
-    placeholder: 'Enter text...',
+    defaultValue: "Default value",
+    placeholder: "Enter text...",
   },
-}
+};
 
 export const Email: Story = {
   args: {
-    type: 'email',
-    placeholder: 'Enter your email...',
+    type: "email",
+    placeholder: "Enter your email...",
   },
-}
+};
 
 export const Password: Story = {
   args: {
-    type: 'password',
-    placeholder: 'Enter your password...',
+    type: "password",
+    placeholder: "Enter your password...",
   },
-}
+};
 
 export const Number: Story = {
   args: {
-    type: 'number',
-    placeholder: 'Enter a number...',
+    type: "number",
+    placeholder: "Enter a number...",
   },
-}
+};
 
 export const Search: Story = {
   args: {
-    type: 'search',
-    placeholder: 'Search...',
+    type: "search",
+    placeholder: "Search...",
   },
-}
+};
 
 export const Disabled: Story = {
   args: {
-    placeholder: 'Disabled input',
+    placeholder: "Disabled input",
     disabled: true,
   },
-}
+};
 
 export const ReadOnly: Story = {
   args: {
-    value: 'Read only value',
+    value: "Read only value",
     readOnly: true,
   },
-}
+};
 
 export const Required: Story = {
   args: {
-    placeholder: 'Required field',
+    placeholder: "Required field",
     required: true,
   },
-}
+};
 
 export const WithError: Story = {
   args: {
-    placeholder: 'Input with error',
+    placeholder: "Input with error",
     error: true,
-    className: 'border-red-500 focus-visible:ring-red-500',
+    className: "border-red-500 focus-visible:ring-red-500",
   },
-}
+};
 
 export const File: Story = {
   args: {
-    type: 'file',
+    type: "file",
   },
-}
+};
 
 export const WithLabel: Story = {
   render: () => (
     <div className="w-full max-w-sm space-y-2">
-      <label htmlFor="email" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+      <label
+        htmlFor="email"
+        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+      >
         Email
       </label>
       <Input type="email" id="email" placeholder="Enter your email" />
     </div>
   ),
-}
+};
 
 export const FormExample: Story = {
   render: () => (
@@ -147,7 +159,7 @@ export const FormExample: Story = {
       </div>
     </div>
   ),
-}
+};
 
 export const Sizes: Story = {
   render: () => (
@@ -166,7 +178,7 @@ export const Sizes: Story = {
       </div>
     </div>
   ),
-}
+};
 
 export const WithIcons: Story = {
   render: () => (
@@ -174,8 +186,18 @@ export const WithIcons: Story = {
       <div className="space-y-2">
         <label className="text-sm font-medium">Search with icon</label>
         <div className="relative">
-          <svg className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          <svg
+            className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+            />
           </svg>
           <Input placeholder="Search..." className="pl-10" />
         </div>
@@ -183,34 +205,53 @@ export const WithIcons: Story = {
       <div className="space-y-2">
         <label className="text-sm font-medium">Email with icon</label>
         <div className="relative">
-          <svg className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
+          <svg
+            className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207"
+            />
           </svg>
           <Input type="email" placeholder="Enter email" className="pl-10" />
         </div>
       </div>
     </div>
   ),
-}
+};
 
 export const ValidationStates: Story = {
   render: () => (
     <div className="w-full max-w-sm space-y-4">
       <div className="space-y-2">
         <label className="text-sm font-medium">Valid Input</label>
-        <Input placeholder="Valid input" className="border-green-500 focus-visible:ring-green-500" />
+        <Input
+          placeholder="Valid input"
+          className="border-green-500 focus-visible:ring-green-500"
+        />
         <p className="text-xs text-green-600">✓ Looks good!</p>
       </div>
       <div className="space-y-2">
         <label className="text-sm font-medium">Invalid Input</label>
-        <Input placeholder="Invalid input" className="border-red-500 focus-visible:ring-red-500" />
+        <Input
+          placeholder="Invalid input"
+          className="border-red-500 focus-visible:ring-red-500"
+        />
         <p className="text-xs text-red-600">✗ This field is required</p>
       </div>
       <div className="space-y-2">
         <label className="text-sm font-medium">Warning Input</label>
-        <Input placeholder="Warning input" className="border-yellow-500 focus-visible:ring-yellow-500" />
+        <Input
+          placeholder="Warning input"
+          className="border-yellow-500 focus-visible:ring-yellow-500"
+        />
         <p className="text-xs text-yellow-600">⚠ Please check this field</p>
       </div>
     </div>
   ),
-}
+};

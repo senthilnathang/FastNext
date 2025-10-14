@@ -1,21 +1,22 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
 import {
-  User,
-  Lock,
-  Shield,
   Activity,
-  Plus,
-  Download,
-  Settings,
   ChevronRight,
-  X
-} from 'lucide-react';
-import { Button } from './button';
-import { Card } from './card';
-import { API_CONFIG, getApiUrl } from '@/shared/services/api/config';
+  Download,
+  Lock,
+  Plus,
+  Settings,
+  Shield,
+  User,
+  X,
+} from "lucide-react";
+import { useRouter } from "next/navigation";
+import type React from "react";
+import { useEffect, useState } from "react";
+import { API_CONFIG, getApiUrl } from "@/shared/services/api/config";
+import { Button } from "./button";
+import { Card } from "./card";
 
 interface QuickAction {
   id: string;
@@ -35,35 +36,44 @@ interface QuickActionsMenuProps {
   onActionSelect?: (action: QuickAction) => void;
 }
 
-const iconMap: { [key: string]: React.ComponentType<{ className?: string }> } = {
-  user: User,
-  lock: Lock,
-  shield: Shield,
-  activity: Activity,
-  plus: Plus,
-  download: Download,
-  settings: Settings,
-};
+const iconMap: { [key: string]: React.ComponentType<{ className?: string }> } =
+  {
+    user: User,
+    lock: Lock,
+    shield: Shield,
+    activity: Activity,
+    plus: Plus,
+    download: Download,
+    settings: Settings,
+  };
 
 const categoryNames: { [key: string]: string } = {
-  profile: 'Profile Management',
-  security: 'Security & Privacy',
-  monitoring: 'Activity & Monitoring',
-  project: 'Project Management',
-  data: 'Data Management',
-  general: 'General Actions'
+  profile: "Profile Management",
+  security: "Security & Privacy",
+  monitoring: "Activity & Monitoring",
+  project: "Project Management",
+  data: "Data Management",
+  general: "General Actions",
 };
 
 const categoryColors: { [key: string]: string } = {
-  profile: 'bg-blue-50 border-blue-200 dark:bg-blue-900/20 dark:border-blue-800',
-  security: 'bg-red-50 border-red-200 dark:bg-red-900/20 dark:border-red-800',
-  monitoring: 'bg-green-50 border-green-200 dark:bg-green-900/20 dark:border-green-800',
-  project: 'bg-purple-50 border-purple-200 dark:bg-purple-900/20 dark:border-purple-800',
-  data: 'bg-yellow-50 border-yellow-200 dark:bg-yellow-900/20 dark:border-yellow-800',
-  general: 'bg-gray-50 border-gray-200 dark:bg-gray-900/20 dark:border-gray-800'
+  profile:
+    "bg-blue-50 border-blue-200 dark:bg-blue-900/20 dark:border-blue-800",
+  security: "bg-red-50 border-red-200 dark:bg-red-900/20 dark:border-red-800",
+  monitoring:
+    "bg-green-50 border-green-200 dark:bg-green-900/20 dark:border-green-800",
+  project:
+    "bg-purple-50 border-purple-200 dark:bg-purple-900/20 dark:border-purple-800",
+  data: "bg-yellow-50 border-yellow-200 dark:bg-yellow-900/20 dark:border-yellow-800",
+  general:
+    "bg-gray-50 border-gray-200 dark:bg-gray-900/20 dark:border-gray-800",
 };
 
-export default function QuickActionsMenu({ isOpen, onClose, onActionSelect }: QuickActionsMenuProps) {
+export default function QuickActionsMenu({
+  isOpen,
+  onClose,
+  onActionSelect,
+}: QuickActionsMenuProps) {
   const [quickActions, setQuickActions] = useState<QuickAction[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -73,29 +83,32 @@ export default function QuickActionsMenu({ isOpen, onClose, onActionSelect }: Qu
     if (isOpen) {
       fetchQuickActions();
     }
-  }, [isOpen]);
+  }, [isOpen, fetchQuickActions]);
 
   const fetchQuickActions = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('access_token');
+      const token = localStorage.getItem("access_token");
 
-      const response = await fetch(getApiUrl(API_CONFIG.ENDPOINTS.PROFILE.QUICK_ACTIONS), {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
+      const response = await fetch(
+        getApiUrl(API_CONFIG.ENDPOINTS.PROFILE.QUICK_ACTIONS),
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
         },
-      });
+      );
 
       if (!response.ok) {
-        throw new Error('Failed to fetch quick actions');
+        throw new Error("Failed to fetch quick actions");
       }
 
       const actions = await response.json();
       setQuickActions(actions);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
-      console.error('Error fetching quick actions:', err);
+      setError(err instanceof Error ? err.message : "An error occurred");
+      console.error("Error fetching quick actions:", err);
     } finally {
       setLoading(false);
     }
@@ -103,32 +116,34 @@ export default function QuickActionsMenu({ isOpen, onClose, onActionSelect }: Qu
 
   const handleActionClick = async (action: QuickAction) => {
     if (action.requires_confirmation) {
-      const confirmed = window.confirm(`Are you sure you want to ${action.title.toLowerCase()}?`);
+      const confirmed = window.confirm(
+        `Are you sure you want to ${action.title.toLowerCase()}?`,
+      );
       if (!confirmed) return;
     }
 
     try {
-      if (action.action_type === 'navigate') {
+      if (action.action_type === "navigate") {
         router.push(action.endpoint);
         onClose();
-      } else if (action.action_type === 'modal') {
+      } else if (action.action_type === "modal") {
         if (onActionSelect) {
           onActionSelect(action);
         }
         onClose();
-      } else if (action.action_type === 'api') {
+      } else if (action.action_type === "api") {
         // Handle direct API calls
-        const token = localStorage.getItem('access_token');
+        const token = localStorage.getItem("access_token");
         const response = await fetch(action.endpoint, {
           method: action.method,
           headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
           },
         });
 
         if (!response.ok) {
-          throw new Error('Action failed');
+          throw new Error("Action failed");
         }
 
         // Show success message or handle response
@@ -136,19 +151,22 @@ export default function QuickActionsMenu({ isOpen, onClose, onActionSelect }: Qu
         onClose();
       }
     } catch (err) {
-      console.error('Error executing action:', err);
+      console.error("Error executing action:", err);
       alert(`Failed to ${action.title.toLowerCase()}. Please try again.`);
     }
   };
 
-  const groupedActions = quickActions.reduce((acc, action) => {
-    const category = action.category || 'general';
-    if (!acc[category]) {
-      acc[category] = [];
-    }
-    acc[category].push(action);
-    return acc;
-  }, {} as { [key: string]: QuickAction[] });
+  const groupedActions = quickActions.reduce(
+    (acc, action) => {
+      const category = action.category || "general";
+      if (!acc[category]) {
+        acc[category] = [];
+      }
+      acc[category].push(action);
+      return acc;
+    },
+    {} as { [key: string]: QuickAction[] },
+  );
 
   const getIcon = (iconName: string) => {
     const IconComponent = iconMap[iconName] || Settings;
@@ -183,7 +201,9 @@ export default function QuickActionsMenu({ isOpen, onClose, onActionSelect }: Qu
           {loading ? (
             <div className="flex items-center justify-center py-8">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-              <span className="ml-2 text-gray-600 dark:text-gray-300">Loading actions...</span>
+              <span className="ml-2 text-gray-600 dark:text-gray-300">
+                Loading actions...
+              </span>
             </div>
           ) : error ? (
             <div className="text-center py-8">

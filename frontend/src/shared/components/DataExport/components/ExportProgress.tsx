@@ -1,26 +1,25 @@
-'use client';
+"use client";
 
-import React from 'react';
-import { Button } from '@/shared/components/ui/button';
-import { Progress } from '@/shared/components/ui/progress';
-import { Badge } from '@/shared/components/ui/badge';
+import {
+  AlertTriangle,
+  CheckCircle,
+  Clock,
+  Download,
+  Loader2,
+  X,
+  XCircle,
+} from "lucide-react";
+import { Badge } from "@/shared/components/ui/badge";
+import { Button } from "@/shared/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/shared/components/ui/card';
-import {
-  CheckCircle,
-  XCircle,
-  Clock,
-  Download,
-  X,
-  AlertTriangle,
-  Loader2
-} from 'lucide-react';
-import { ExportJob } from '../types';
+} from "@/shared/components/ui/card";
+import { Progress } from "@/shared/components/ui/progress";
+import type { ExportJob } from "../types";
 
 interface ExportProgressProps {
   jobs: ExportJob[];
@@ -32,44 +31,44 @@ interface ExportProgressProps {
   className?: string;
 }
 
-const getStatusIcon = (status: ExportJob['status']) => {
+const getStatusIcon = (status: ExportJob["status"]) => {
   switch (status) {
-    case 'pending':
+    case "pending":
       return <Clock className="h-4 w-4 text-yellow-500" />;
-    case 'in_progress':
+    case "in_progress":
       return <Loader2 className="h-4 w-4 text-blue-500 animate-spin" />;
-    case 'completed':
+    case "completed":
       return <CheckCircle className="h-4 w-4 text-green-500" />;
-    case 'failed':
+    case "failed":
       return <XCircle className="h-4 w-4 text-red-500" />;
-    case 'cancelled':
+    case "cancelled":
       return <X className="h-4 w-4 text-gray-500" />;
     default:
       return <Clock className="h-4 w-4 text-gray-500" />;
   }
 };
 
-const getStatusColor = (status: ExportJob['status']) => {
+const getStatusColor = (status: ExportJob["status"]) => {
   switch (status) {
-    case 'pending':
-      return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300';
-    case 'in_progress':
-      return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300';
-    case 'completed':
-      return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300';
-    case 'failed':
-      return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300';
-    case 'cancelled':
-      return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300';
+    case "pending":
+      return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300";
+    case "in_progress":
+      return "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300";
+    case "completed":
+      return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300";
+    case "failed":
+      return "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300";
+    case "cancelled":
+      return "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300";
     default:
-      return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300';
+      return "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300";
   }
 };
 
 const formatFileSize = (bytes?: number) => {
-  if (!bytes) return 'Unknown';
+  if (!bytes) return "Unknown";
 
-  const units = ['B', 'KB', 'MB', 'GB'];
+  const units = ["B", "KB", "MB", "GB"];
   let size = bytes;
   let unitIndex = 0;
 
@@ -86,7 +85,7 @@ const formatDuration = (start: string, end?: string) => {
   const endTime = end ? new Date(end) : new Date();
   const duration = endTime.getTime() - startTime.getTime();
 
-  if (duration < 1000) return '< 1s';
+  if (duration < 1000) return "< 1s";
   if (duration < 60000) return `${Math.round(duration / 1000)}s`;
   if (duration < 3600000) return `${Math.round(duration / 60000)}m`;
 
@@ -100,19 +99,24 @@ export function ExportProgress({
   onDownload,
   onCancel,
   onClearCompleted,
-  className
+  className,
 }: ExportProgressProps) {
-  const completedJobs = jobs.filter(job => ['completed', 'failed', 'cancelled'].includes(job.status));
-  const activeJobs = jobs.filter(job => ['pending', 'in_progress'].includes(job.status));
+  const completedJobs = jobs.filter((job) =>
+    ["completed", "failed", "cancelled"].includes(job.status),
+  );
+  const activeJobs = jobs.filter((job) =>
+    ["pending", "in_progress"].includes(job.status),
+  );
 
   if (jobs.length === 0 && !isExporting) {
     return null;
   }
 
   const renderJobItem = (job: ExportJob) => {
-    const isActive = job.status === 'in_progress';
-    const canDownload = job.status === 'completed' && (job.downloadUrl || job.id);
-    const canCancel = ['pending', 'in_progress'].includes(job.status);
+    const isActive = job.status === "in_progress";
+    const canDownload =
+      job.status === "completed" && (job.downloadUrl || job.id);
+    const canCancel = ["pending", "in_progress"].includes(job.status);
 
     return (
       <div
@@ -126,14 +130,15 @@ export function ExportProgress({
               <div className="font-medium">Export Job</div>
               <div className="text-sm text-gray-500">
                 Started {formatDuration(job.createdAt)}
-                {job.completedAt && ` • Completed in ${formatDuration(job.createdAt, job.completedAt)}`}
+                {job.completedAt &&
+                  ` • Completed in ${formatDuration(job.createdAt, job.completedAt)}`}
               </div>
             </div>
           </div>
 
           <div className="flex items-center space-x-2">
             <Badge className={getStatusColor(job.status)}>
-              {job.status.replace('_', ' ')}
+              {job.status.replace("_", " ")}
             </Badge>
 
             {canDownload && (
@@ -169,8 +174,7 @@ export function ExportProgress({
               <span>
                 {job.processedRows && job.totalRows
                   ? `${job.processedRows.toLocaleString()} / ${job.totalRows.toLocaleString()} rows`
-                  : `${job.progress}% complete`
-                }
+                  : `${job.progress}% complete`}
               </span>
               {job.estimatedSize && (
                 <span>~{formatFileSize(job.estimatedSize)}</span>
@@ -185,18 +189,14 @@ export function ExportProgress({
             {job.totalRows && (
               <span>{job.totalRows.toLocaleString()} rows</span>
             )}
-            {job.actualSize && (
-              <span>{formatFileSize(job.actualSize)}</span>
-            )}
+            {job.actualSize && <span>{formatFileSize(job.actualSize)}</span>}
           </div>
 
-          <div className="text-xs text-gray-500">
-            ID: {job.id.slice(-8)}
-          </div>
+          <div className="text-xs text-gray-500">ID: {job.id.slice(-8)}</div>
         </div>
 
         {/* Error message */}
-        {job.status === 'failed' && job.error && (
+        {job.status === "failed" && job.error && (
           <div className="flex items-start space-x-2 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded">
             <AlertTriangle className="h-4 w-4 text-red-500 mt-0.5 flex-shrink-0" />
             <div className="text-sm text-red-700 dark:text-red-300">
@@ -242,8 +242,7 @@ export function ExportProgress({
                 <span className="text-gray-600 dark:text-gray-400">
                   {currentJob.processedRows && currentJob.totalRows
                     ? `${currentJob.processedRows.toLocaleString()} / ${currentJob.totalRows.toLocaleString()} rows processed`
-                    : `${currentJob.progress}% complete`
-                  }
+                    : `${currentJob.progress}% complete`}
                 </span>
 
                 {currentJob.estimatedSize && (
@@ -275,11 +274,7 @@ export function ExportProgress({
               </div>
 
               {completedJobs.length > 0 && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={onClearCompleted}
-                >
+                <Button variant="outline" size="sm" onClick={onClearCompleted}>
                   Clear Completed
                 </Button>
               )}
@@ -301,7 +296,7 @@ export function ExportProgress({
 export function ExportProgressIndicator({
   isExporting,
   progress,
-  className
+  className,
 }: {
   isExporting: boolean;
   progress: number;

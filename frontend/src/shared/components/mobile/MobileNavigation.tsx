@@ -1,88 +1,94 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from 'react'
-import { usePathname } from 'next/navigation'
-import Link from 'next/link'
 import {
-  Home,
-  Users,
-  Settings,
-  Menu,
-  X,
-  Database,
-  Workflow,
   BarChart3,
-  FileText,
   Bell,
-  Search
-} from 'lucide-react'
-
-import { cn } from '@/shared/utils'
-import { Button } from '@/shared/components/ui/button'
-import { Badge } from '@/shared/components/ui/badge'
-import { Sheet, SheetContent, SheetTrigger } from '@/shared/components/ui/sheet'
-import { Separator } from '@/shared/components/ui/separator'
+  Database,
+  FileText,
+  Home,
+  Menu,
+  Search,
+  Settings,
+  Users,
+  Workflow,
+  X,
+} from "lucide-react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
+import { Badge } from "@/shared/components/ui/badge";
+import { Button } from "@/shared/components/ui/button";
+import { Separator } from "@/shared/components/ui/separator";
+import {
+  Sheet,
+  SheetContent,
+  SheetTrigger,
+} from "@/shared/components/ui/sheet";
+import { cn } from "@/shared/utils";
 
 interface NavigationItem {
-  name: string
-  href: string
-  icon: React.ComponentType<{ className?: string }>
-  badge?: number
-  description?: string
+  name: string;
+  href: string;
+  icon: React.ComponentType<{ className?: string }>;
+  badge?: number;
+  description?: string;
 }
 
 const navigationItems: NavigationItem[] = [
   {
-    name: 'Dashboard',
-    href: '/dashboard',
+    name: "Dashboard",
+    href: "/dashboard",
     icon: Home,
-    description: 'Overview and analytics'
+    description: "Overview and analytics",
   },
   {
-    name: 'Users',
-    href: '/admin/users',
+    name: "Users",
+    href: "/admin/users",
     icon: Users,
-    description: 'User management'
+    description: "User management",
   },
   {
-    name: 'Data Import',
-    href: '/admin/data-import',
+    name: "Data Import",
+    href: "/admin/data-import",
     icon: Database,
-    description: 'Import and export data'
+    description: "Import and export data",
   },
   {
-    name: 'Workflows',
-    href: '/workflows',
+    name: "Workflows",
+    href: "/workflows",
     icon: Workflow,
-    description: 'Workflow management'
+    description: "Workflow management",
   },
   {
-    name: 'Analytics',
-    href: '/analytics',
+    name: "Analytics",
+    href: "/analytics",
     icon: BarChart3,
-    description: 'Reports and insights'
+    description: "Reports and insights",
   },
   {
-    name: 'Settings',
-    href: '/settings',
+    name: "Settings",
+    href: "/settings",
     icon: Settings,
-    description: 'App configuration'
-  }
-]
+    description: "App configuration",
+  },
+];
 
 interface MobileNavigationProps {
-  className?: string
-  notificationCount?: number
+  className?: string;
+  notificationCount?: number;
 }
 
-export function MobileNavigation({ className, notificationCount = 0 }: MobileNavigationProps) {
-  const [isOpen, setIsOpen] = useState(false)
-  const pathname = usePathname()
+export function MobileNavigation({
+  className,
+  notificationCount = 0,
+}: MobileNavigationProps) {
+  const [isOpen, setIsOpen] = useState(false);
+  const pathname = usePathname();
 
   // Close navigation when route changes
   useEffect(() => {
-    setIsOpen(false)
-  }, [pathname])
+    setIsOpen(false);
+  }, []);
 
   return (
     <div className={cn("lg:hidden", className)}>
@@ -95,7 +101,7 @@ export function MobileNavigation({ className, notificationCount = 0 }: MobileNav
                 variant="destructive"
                 className="absolute -top-2 -right-2 h-5 w-5 rounded-full p-0 text-xs"
               >
-                {notificationCount > 99 ? '99+' : notificationCount}
+                {notificationCount > 99 ? "99+" : notificationCount}
               </Badge>
             )}
           </Button>
@@ -108,7 +114,9 @@ export function MobileNavigation({ className, notificationCount = 0 }: MobileNav
               <div className="flex items-center justify-between">
                 <div>
                   <h2 className="text-lg font-semibold">FastNext</h2>
-                  <p className="text-sm text-muted-foreground">Admin Dashboard</p>
+                  <p className="text-sm text-muted-foreground">
+                    Admin Dashboard
+                  </p>
                 </div>
                 <Button
                   variant="ghost"
@@ -137,8 +145,10 @@ export function MobileNavigation({ className, notificationCount = 0 }: MobileNav
             <nav className="flex-1 overflow-y-auto p-4">
               <ul className="space-y-2">
                 {navigationItems.map((item) => {
-                  const Icon = item.icon
-                  const isActive = pathname === item.href || pathname.startsWith(item.href + '/')
+                  const Icon = item.icon;
+                  const isActive =
+                    pathname === item.href ||
+                    pathname.startsWith(`${item.href}/`);
 
                   return (
                     <li key={item.href}>
@@ -148,7 +158,7 @@ export function MobileNavigation({ className, notificationCount = 0 }: MobileNav
                           "flex items-center space-x-3 px-3 py-3 rounded-lg text-sm font-medium transition-colors",
                           isActive
                             ? "bg-primary text-primary-foreground"
-                            : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                            : "text-muted-foreground hover:text-foreground hover:bg-muted",
                         )}
                       >
                         <Icon className="h-5 w-5 flex-shrink-0" />
@@ -156,7 +166,10 @@ export function MobileNavigation({ className, notificationCount = 0 }: MobileNav
                           <div className="flex items-center justify-between">
                             <span className="truncate">{item.name}</span>
                             {item.badge && item.badge > 0 && (
-                              <Badge variant="secondary" className="ml-2 text-xs">
+                              <Badge
+                                variant="secondary"
+                                className="ml-2 text-xs"
+                              >
                                 {item.badge}
                               </Badge>
                             )}
@@ -169,7 +182,7 @@ export function MobileNavigation({ className, notificationCount = 0 }: MobileNav
                         </div>
                       </Link>
                     </li>
-                  )
+                  );
                 })}
               </ul>
             </nav>
@@ -203,41 +216,46 @@ export function MobileNavigation({ className, notificationCount = 0 }: MobileNav
         </SheetContent>
       </Sheet>
     </div>
-  )
+  );
 }
 
 // Bottom tab navigation for mobile
 interface BottomTab {
-  name: string
-  href: string
-  icon: React.ComponentType<{ className?: string }>
-  badge?: number
+  name: string;
+  href: string;
+  icon: React.ComponentType<{ className?: string }>;
+  badge?: number;
 }
 
 const bottomTabs: BottomTab[] = [
-  { name: 'Home', href: '/dashboard', icon: Home },
-  { name: 'Users', href: '/admin/users', icon: Users },
-  { name: 'Data', href: '/admin/data-import', icon: Database },
-  { name: 'Workflows', href: '/workflows', icon: Workflow },
-  { name: 'Settings', href: '/settings', icon: Settings }
-]
+  { name: "Home", href: "/dashboard", icon: Home },
+  { name: "Users", href: "/admin/users", icon: Users },
+  { name: "Data", href: "/admin/data-import", icon: Database },
+  { name: "Workflows", href: "/workflows", icon: Workflow },
+  { name: "Settings", href: "/settings", icon: Settings },
+];
 
 interface MobileBottomNavigationProps {
-  className?: string
+  className?: string;
 }
 
-export function MobileBottomNavigation({ className }: MobileBottomNavigationProps) {
-  const pathname = usePathname()
+export function MobileBottomNavigation({
+  className,
+}: MobileBottomNavigationProps) {
+  const pathname = usePathname();
 
   return (
-    <div className={cn(
-      "lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-background border-t",
-      className
-    )}>
+    <div
+      className={cn(
+        "lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-background border-t",
+        className,
+      )}
+    >
       <nav className="flex justify-around items-center h-16 px-2">
         {bottomTabs.map((tab) => {
-          const Icon = tab.icon
-          const isActive = pathname === tab.href || pathname.startsWith(tab.href + '/')
+          const Icon = tab.icon;
+          const isActive =
+            pathname === tab.href || pathname.startsWith(`${tab.href}/`);
 
           return (
             <Link
@@ -247,7 +265,7 @@ export function MobileBottomNavigation({ className }: MobileBottomNavigationProp
                 "flex flex-col items-center justify-center space-y-1 px-2 py-1 rounded-lg min-w-0 flex-1 transition-colors",
                 isActive
                   ? "text-primary"
-                  : "text-muted-foreground hover:text-foreground"
+                  : "text-muted-foreground hover:text-foreground",
               )}
             >
               <div className="relative">
@@ -257,7 +275,7 @@ export function MobileBottomNavigation({ className }: MobileBottomNavigationProp
                     variant="destructive"
                     className="absolute -top-2 -right-2 h-4 w-4 rounded-full p-0 text-xs flex items-center justify-center"
                   >
-                    {tab.badge > 9 ? '9+' : tab.badge}
+                    {tab.badge > 9 ? "9+" : tab.badge}
                   </Badge>
                 )}
               </div>
@@ -265,11 +283,11 @@ export function MobileBottomNavigation({ className }: MobileBottomNavigationProp
                 {tab.name}
               </span>
             </Link>
-          )
+          );
         })}
       </nav>
     </div>
-  )
+  );
 }
 
-export default MobileNavigation
+export default MobileNavigation;

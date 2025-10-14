@@ -1,10 +1,10 @@
-'use client'
+"use client";
 
-import { NuqsAdapter } from 'nuqs/adapters/next/app'
-import { Suspense } from 'react'
+import { NuqsAdapter } from "nuqs/adapters/next/app";
+import { Suspense } from "react";
 
 interface NuqsProviderProps {
-  children: React.ReactNode
+  children: React.ReactNode;
 }
 
 /**
@@ -14,9 +14,7 @@ interface NuqsProviderProps {
 export function NuqsProvider({ children }: NuqsProviderProps) {
   return (
     <NuqsAdapter>
-      <Suspense fallback={<div>Loading...</div>}>
-        {children}
-      </Suspense>
+      <Suspense fallback={<div>Loading...</div>}>{children}</Suspense>
     </NuqsAdapter>
-  )
+  );
 }

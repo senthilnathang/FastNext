@@ -1,26 +1,21 @@
-'use client'
+"use client";
 
-import { lazy, Suspense, memo, ComponentType } from 'react'
-import { Skeleton } from '@/shared/components/ui/skeleton'
+import { type ComponentType, lazy, memo, Suspense } from "react";
+import { Skeleton } from "@/shared/components/ui/skeleton";
 
 // Generic lazy loading wrapper with error boundary
 interface LazyWrapperProps {
-  children: React.ReactNode
-  fallback?: React.ReactNode
+  children: React.ReactNode;
+  fallback?: React.ReactNode;
 }
 
-const LazyWrapper = memo(({
-  children,
-  fallback = <ComponentSkeleton />
-}: LazyWrapperProps) => {
-  return (
-    <Suspense fallback={fallback}>
-      {children}
-    </Suspense>
-  )
-})
+const LazyWrapper = memo(
+  ({ children, fallback = <ComponentSkeleton /> }: LazyWrapperProps) => {
+    return <Suspense fallback={fallback}>{children}</Suspense>;
+  },
+);
 
-LazyWrapper.displayName = 'LazyWrapper'
+LazyWrapper.displayName = "LazyWrapper";
 
 // Default component skeleton
 const ComponentSkeleton = memo(() => (
@@ -36,20 +31,20 @@ const ComponentSkeleton = memo(() => (
       <Skeleton className="h-10 w-20" />
     </div>
   </div>
-))
+));
 
-ComponentSkeleton.displayName = 'ComponentSkeleton'
+ComponentSkeleton.displayName = "ComponentSkeleton";
 
 // Enhanced lazy loading with preloading support
 export function createLazyComponent<T extends ComponentType<any>>(
   importFn: () => Promise<{ default: T }>,
   options: {
-    fallback?: React.ReactNode
-    preload?: boolean
-    chunkName?: string
-  } = {}
+    fallback?: React.ReactNode;
+    preload?: boolean;
+    chunkName?: string;
+  } = {},
 ): ComponentType<React.ComponentProps<T>> {
-  const LazyComponent = lazy(importFn)
+  const LazyComponent = lazy(importFn);
 
   // Preload if specified
   if (options.preload) {
@@ -57,78 +52,84 @@ export function createLazyComponent<T extends ComponentType<any>>(
     setTimeout(() => {
       importFn().catch(() => {
         // Ignore preload errors
-      })
-    }, 100)
+      });
+    }, 100);
   }
 
   const WrappedComponent = memo((props: React.ComponentProps<T>) => (
     <LazyWrapper fallback={options.fallback}>
       <LazyComponent {...props} />
     </LazyWrapper>
-  ))
+  ));
 
-  WrappedComponent.displayName = `Lazy(${options.chunkName || 'Component'})`
+  WrappedComponent.displayName = `Lazy(${options.chunkName || "Component"})`;
 
   // Add preload method to component
-  ;(WrappedComponent as any).preload = importFn
+  (WrappedComponent as any).preload = importFn;
 
-  return WrappedComponent
+  return WrappedComponent;
 }
 
 // Lazy load modules based on user interaction
 export function createInteractiveLazyComponent<T extends ComponentType<any>>(
   importFn: () => Promise<{ default: T }>,
-  trigger: 'hover' | 'click' | 'focus' = 'hover',
+  trigger: "hover" | "click" | "focus" = "hover",
   options: {
-    fallback?: React.ReactNode
-    delay?: number
-  } = {}
+    fallback?: React.ReactNode;
+    delay?: number;
+  } = {},
 ): ComponentType<React.ComponentProps<T> & { onTrigger?: () => void }> {
-  let preloaded = false
+  let preloaded = false;
 
   const preload = () => {
     if (!preloaded) {
-      preloaded = true
+      preloaded = true;
       importFn().catch(() => {
-        preloaded = false // Reset on error
-      })
+        preloaded = false; // Reset on error
+      });
     }
-  }
+  };
 
-  const LazyComponent = lazy(importFn)
+  const LazyComponent = lazy(importFn);
 
-  const InteractiveLazyComponent = memo((props: React.ComponentProps<T> & { onTrigger?: () => void }) => {
-    const { onTrigger, ...componentProps } = props
+  const InteractiveLazyComponent = memo(
+    (props: React.ComponentProps<T> & { onTrigger?: () => void }) => {
+      const { onTrigger, ...componentProps } = props;
 
-    const handleTrigger = () => {
-      preload()
-      onTrigger?.()
-    }
+      const handleTrigger = () => {
+        preload();
+        onTrigger?.();
+      };
 
-    const triggerProps = {
-      [trigger === 'hover' ? 'onMouseEnter' : trigger === 'click' ? 'onClick' : 'onFocus']: handleTrigger
-    }
+      const triggerProps = {
+        [trigger === "hover"
+          ? "onMouseEnter"
+          : trigger === "click"
+            ? "onClick"
+            : "onFocus"]: handleTrigger,
+      };
 
-    return (
-      <div {...triggerProps}>
-        <LazyWrapper fallback={options.fallback}>
-          <LazyComponent {...componentProps as React.ComponentProps<T>} />
-        </LazyWrapper>
-      </div>
-    )
-  })
+      return (
+        <div {...triggerProps}>
+          <LazyWrapper fallback={options.fallback}>
+            <LazyComponent {...(componentProps as React.ComponentProps<T>)} />
+          </LazyWrapper>
+        </div>
+      );
+    },
+  );
 
-  InteractiveLazyComponent.displayName = 'InteractiveLazyComponent'
+  InteractiveLazyComponent.displayName = "InteractiveLazyComponent";
 
-  return InteractiveLazyComponent
+  return InteractiveLazyComponent;
 }
 
 // Route-based code splitting helper
 export function createRouteLazyComponent<T extends ComponentType<any>>(
   importFn: () => Promise<{ default: T }>,
-  routePath: string
+  routePath: string,
 ): ComponentType<React.ComponentProps<T>> {
-  const LazyComponent = lazy(importFn)
+  const LazyComponent = lazy(importFn);
 
   const RouteLazyComponent = memo((props: React.ComponentProps<T>) => (
     <LazyWrapper
@@ -143,34 +144,34 @@ export function createRouteLazyComponent<T extends ComponentType<any>>(
     >
       <LazyComponent {...props} />
     </LazyWrapper>
-  ))
+  ));
 
-  RouteLazyComponent.displayName = 'RouteLazyComponent'
+  RouteLazyComponent.displayName = "RouteLazyComponent";
 
-  return RouteLazyComponent
+  return RouteLazyComponent;
 }
 
 // Lazy load with viewport intersection
 export function createViewportLazyComponent<T extends ComponentType<any>>(
   importFn: () => Promise<{ default: T }>,
   options: {
-    rootMargin?: string
-    threshold?: number
-    fallback?: React.ReactNode
-    placeholder?: React.ReactNode
-  } = {}
+    rootMargin?: string;
+    threshold?: number;
+    fallback?: React.ReactNode;
+    placeholder?: React.ReactNode;
+  } = {},
 ): ComponentType<React.ComponentProps<T>> {
-  const LazyComponent = lazy(importFn)
+  const LazyComponent = lazy(importFn);
 
   const ViewportLazyComponent = memo((props: React.ComponentProps<T>) => (
     <LazyWrapper fallback={options.fallback}>
       <LazyComponent {...props} />
     </LazyWrapper>
-  ))
+  ));
 
-  ViewportLazyComponent.displayName = 'ViewportLazyComponent'
+  ViewportLazyComponent.displayName = "ViewportLazyComponent";
 
-  return ViewportLazyComponent
+  return ViewportLazyComponent;
 }
 
 // Bundle splitting strategies
@@ -178,58 +179,61 @@ export const bundleStrategies = {
   // Feature-based splitting
   byFeature: <T extends ComponentType<any>>(
     featureName: string,
-    importFn: () => Promise<{ default: T }>
-  ) => createLazyComponent(importFn, {
-    chunkName: `feature-${featureName}`,
-    fallback: <ComponentSkeleton />
-  }),
+    importFn: () => Promise<{ default: T }>,
+  ) =>
+    createLazyComponent(importFn, {
+      chunkName: `feature-${featureName}`,
+      fallback: <ComponentSkeleton />,
+    }),
 
   // Route-based splitting
   byRoute: <T extends ComponentType<any>>(
     routeName: string,
-    importFn: () => Promise<{ default: T }>
+    importFn: () => Promise<{ default: T }>,
   ) => createRouteLazyComponent(importFn, routeName),
 
   // Library-based splitting (for heavy dependencies)
   byLibrary: <T extends ComponentType<any>>(
     libraryName: string,
-    importFn: () => Promise<{ default: T }>
-  ) => createLazyComponent(importFn, {
-    chunkName: `lib-${libraryName}`,
-    preload: false, // Heavy libraries shouldn't preload
-    fallback: (
-      <div className="flex items-center justify-center p-8">
-        <div className="text-center space-y-2">
-          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="text-sm text-gray-600">Loading {libraryName}...</p>
+    importFn: () => Promise<{ default: T }>,
+  ) =>
+    createLazyComponent(importFn, {
+      chunkName: `lib-${libraryName}`,
+      preload: false, // Heavy libraries shouldn't preload
+      fallback: (
+        <div className="flex items-center justify-center p-8">
+          <div className="text-center space-y-2">
+            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mx-auto"></div>
+            <p className="text-sm text-gray-600">Loading {libraryName}...</p>
+          </div>
         </div>
-      </div>
-    )
-  }),
+      ),
+    }),
 
   // User interaction based
   onInteraction: <T extends ComponentType<any>>(
     importFn: () => Promise<{ default: T }>,
-    trigger: 'hover' | 'click' | 'focus' = 'hover'
+    trigger: "hover" | "click" | "focus" = "hover",
   ) => createInteractiveLazyComponent(importFn, trigger),
 
   // Viewport intersection based
   onVisible: <T extends ComponentType<any>>(
     importFn: () => Promise<{ default: T }>,
     options?: {
-      rootMargin?: string
-      threshold?: number
-    }
-  ) => createViewportLazyComponent(importFn, options)
-}
+      rootMargin?: string;
+      threshold?: number;
+    },
+  ) => createViewportLazyComponent(importFn, options),
+};
 
 // Pre-built lazy components for common heavy dependencies
 
 // Charts and data visualization
-export const LazyChart = bundleStrategies.byLibrary(
-  'charts',
-  () => import('@/shared/components/data-visualization/analytics-dashboard').then(m => ({ default: m.AnalyticsDashboard }))
-)
+export const LazyChart = bundleStrategies.byLibrary("charts", () =>
+  import("@/shared/components/data-visualization/analytics-dashboard").then(
+    (m) => ({ default: m.AnalyticsDashboard }),
+  ),
+);
 
 // Rich text editor (commented out - component doesn't exist yet)
 // export const LazyEditor = bundleStrategies.onInteraction(
@@ -257,59 +261,62 @@ export const LazyChart = bundleStrategies.byLibrary(
 // Resource monitoring
 export const lazyLoadingStats = {
   getLoadedChunks: (): string[] => {
-    if (typeof window !== 'undefined' && (window as any).__webpack_require__) {
-      return Object.keys(((window as any).__webpack_require__ as any).cache || {})
+    if (typeof window !== "undefined" && (window as any).__webpack_require__) {
+      return Object.keys(
+        ((window as any).__webpack_require__ as any).cache || {},
+      );
     }
-    return []
+    return [];
   },
 
   preloadCriticalChunks: async (chunkNames: string[]) => {
     const preloadPromises = chunkNames.map(async (chunkName) => {
       try {
         // This would need to be implemented based on your bundler
-        await import(/* webpackChunkName: "[request]" */ `@/shared/components/${chunkName}`)
+        await import(
+          /* webpackChunkName: "[request]" */ `@/shared/components/${chunkName}`
+        );
       } catch (error) {
-        console.warn(`Failed to preload chunk: ${chunkName}`, error)
+        console.warn(`Failed to preload chunk: ${chunkName}`, error);
       }
-    })
+    });
 
-    await Promise.allSettled(preloadPromises)
+    await Promise.allSettled(preloadPromises);
   },
 
   measureChunkLoadTime: (chunkName: string) => {
-    const startTime = performance.now()
+    const startTime = performance.now();
 
     return () => {
-      const endTime = performance.now()
-      const loadTime = endTime - startTime
-
+      const endTime = performance.now();
+      const loadTime = endTime - startTime;
 
       // Send to analytics if available
-      if (typeof window !== 'undefined' && (window as any).gtag) {
-        (window as any).gtag('event', 'chunk_loaded', {
+      if (typeof window !== "undefined" && (window as any).gtag) {
+        (window as any).gtag("event", "chunk_loaded", {
           chunk_name: chunkName,
           load_time: Math.round(loadTime),
-        })
+        });
       }
-    }
-  }
-}
+    };
+  },
+};
 
 // Export utility types
 export type LazyComponentOptions = {
-  fallback?: React.ReactNode
-  preload?: boolean
-  chunkName?: string
-}
+  fallback?: React.ReactNode;
+  preload?: boolean;
+  chunkName?: string;
+};
 
 export type InteractiveLazyOptions = {
-  fallback?: React.ReactNode
-  delay?: number
-}
+  fallback?: React.ReactNode;
+  delay?: number;
+};
 
 export type ViewportLazyOptions = {
-  rootMargin?: string
-  threshold?: number
-  fallback?: React.ReactNode
-  placeholder?: React.ReactNode
-}
+  rootMargin?: string;
+  threshold?: number;
+  fallback?: React.ReactNode;
+  placeholder?: React.ReactNode;
+};

@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import {
   ArrowDown,
@@ -8,8 +8,8 @@ import {
   Eye,
   TrendingUp,
   Users,
-} from 'lucide-react';
-import { forwardRef, useMemo } from 'react';
+} from "lucide-react";
+import { forwardRef, useMemo } from "react";
 import {
   Area,
   AreaChart,
@@ -26,17 +26,23 @@ import {
   Tooltip,
   XAxis,
   YAxis,
-} from 'recharts';
+} from "recharts";
 
-import { cn } from '@/shared/utils';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
+import { cn } from "@/shared/utils";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "../ui/card";
 
 export interface KpiData {
   title: string;
   value: number | string;
   change?: number;
-  changeType?: 'increase' | 'decrease' | 'neutral';
-  format?: 'currency' | 'percentage' | 'number' | 'compact';
+  changeType?: "increase" | "decrease" | "neutral";
+  format?: "currency" | "percentage" | "number" | "compact";
   icon?: React.ReactNode;
   description?: string;
 }
@@ -51,7 +57,7 @@ export interface AnalyticsDashboardProps {
   /** Main chart data */
   chartData?: ChartData[];
   /** Chart type for main visualization */
-  chartType?: 'area' | 'bar' | 'line' | 'pie';
+  chartType?: "area" | "bar" | "line" | "pie";
   /** Data key for X-axis */
   xAxisKey?: string;
   /** Data keys for Y-axis */
@@ -71,41 +77,40 @@ export interface AnalyticsDashboardProps {
   /** Custom class name */
   className?: string;
   /** Card layout - grid or flex */
-  layout?: 'grid' | 'flex';
+  layout?: "grid" | "flex";
   /** Show trend indicators */
   showTrends?: boolean;
 }
 
 // Default colors
 const defaultColors = [
-  'hsl(var(--primary))',
-  'hsl(var(--secondary))',
-  'hsl(var(--accent))',
-  '#8884d8',
-  '#82ca9d',
-  '#ffc658',
-  '#ff7300',
-  '#00ff00',
+  "hsl(var(--primary))",
+  "hsl(var(--secondary))",
+  "hsl(var(--accent))",
+  "#8884d8",
+  "#82ca9d",
+  "#ffc658",
+  "#ff7300",
+  "#00ff00",
 ];
 
 // Utility functions for formatting
 const formatters = {
   currency: (value: number) =>
-    new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
+    new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
     }).format(value),
   percentage: (value: number) =>
-    new Intl.NumberFormat('en-US', {
-      style: 'percent',
+    new Intl.NumberFormat("en-US", {
+      style: "percent",
       minimumFractionDigits: 1,
       maximumFractionDigits: 2,
     }).format(value),
-  number: (value: number) =>
-    new Intl.NumberFormat('en-US').format(value),
+  number: (value: number) => new Intl.NumberFormat("en-US").format(value),
   compactNumber: (value: number) =>
-    new Intl.NumberFormat('en-US', {
-      notation: 'compact',
+    new Intl.NumberFormat("en-US", {
+      notation: "compact",
       maximumFractionDigits: 1,
     }).format(value),
 };
@@ -119,14 +124,14 @@ function KpiCard({
   showTrends?: boolean;
 }) {
   const formatValue = (value: number | string, format?: string) => {
-    if (typeof value === 'string') return value;
+    if (typeof value === "string") return value;
 
     switch (format) {
-      case 'currency':
+      case "currency":
         return formatters.currency(value);
-      case 'percentage':
+      case "percentage":
         return formatters.percentage(value);
-      case 'compact':
+      case "compact":
         return formatters.compactNumber(value);
       default:
         return formatters.number(value);
@@ -135,9 +140,9 @@ function KpiCard({
 
   const getChangeIcon = (changeType?: string) => {
     switch (changeType) {
-      case 'increase':
+      case "increase":
         return <ArrowUp className="h-4 w-4 text-green-600" />;
-      case 'decrease':
+      case "decrease":
         return <ArrowDown className="h-4 w-4 text-red-600" />;
       default:
         return null;
@@ -146,12 +151,12 @@ function KpiCard({
 
   const getChangeColor = (changeType?: string) => {
     switch (changeType) {
-      case 'increase':
-        return 'text-green-600';
-      case 'decrease':
-        return 'text-red-600';
+      case "increase":
+        return "text-green-600";
+      case "decrease":
+        return "text-red-600";
       default:
-        return 'text-muted-foreground';
+        return "text-muted-foreground";
     }
   };
 
@@ -170,7 +175,7 @@ function KpiCard({
         {showTrends && kpi.change !== undefined && (
           <div className="flex items-center text-xs mt-1">
             {getChangeIcon(kpi.changeType)}
-            <span className={cn('ml-1', getChangeColor(kpi.changeType))}>
+            <span className={cn("ml-1", getChangeColor(kpi.changeType))}>
               {formatters.percentage(Math.abs(kpi.change))} from last period
             </span>
           </div>
@@ -212,7 +217,7 @@ function ChartComponent({
 
   const renderChart = () => {
     switch (type) {
-      case 'area':
+      case "area":
         return (
           <AreaChart {...commonProps}>
             {showGrid && <CartesianGrid strokeDasharray="3 3" />}
@@ -234,7 +239,7 @@ function ChartComponent({
           </AreaChart>
         );
 
-      case 'bar':
+      case "bar":
         return (
           <BarChart {...commonProps}>
             {showGrid && <CartesianGrid strokeDasharray="3 3" />}
@@ -252,7 +257,7 @@ function ChartComponent({
           </BarChart>
         );
 
-      case 'line':
+      case "line":
         return (
           <LineChart {...commonProps}>
             {showGrid && <CartesianGrid strokeDasharray="3 3" />}
@@ -272,7 +277,7 @@ function ChartComponent({
           </LineChart>
         );
 
-      case 'pie': {
+      case "pie": {
         const pieData = data.map((item, index) => ({
           ...item,
           fill: colors[index % colors.length],
@@ -303,7 +308,9 @@ function ChartComponent({
         return (
           <div className="flex items-center justify-center h-full">
             <div className="text-center">
-              <div className="text-muted-foreground mb-2">Invalid chart type</div>
+              <div className="text-muted-foreground mb-2">
+                Invalid chart type
+              </div>
               <div className="text-sm text-muted-foreground">
                 Please select a valid chart type: area, bar, line, or pie
               </div>
@@ -325,9 +332,9 @@ const AnalyticsDashboard = forwardRef<HTMLDivElement, AnalyticsDashboardProps>(
     {
       kpis = [],
       chartData = [],
-      chartType = 'area',
-      xAxisKey = 'date',
-      yAxisKeys = ['value'],
+      chartType = "area",
+      xAxisKey = "date",
+      yAxisKeys = ["value"],
       chartHeight = 300,
       showLegend = true,
       showGrid = true,
@@ -335,66 +342,66 @@ const AnalyticsDashboard = forwardRef<HTMLDivElement, AnalyticsDashboardProps>(
       loading = false,
       error,
       className,
-      layout = 'grid',
+      layout = "grid",
       showTrends = true,
       ...props
     },
-    ref
+    ref,
   ) => {
     // Default KPI data if none provided
     const defaultKpis: KpiData[] = useMemo(
       () => [
         {
-          title: 'Total Users',
+          title: "Total Users",
           value: 2540,
           change: 0.12,
-          changeType: 'increase' as const,
-          format: 'compact' as const,
+          changeType: "increase" as const,
+          format: "compact" as const,
           icon: <Users className="h-4 w-4" />,
-          description: 'Active users this month',
+          description: "Active users this month",
         },
         {
-          title: 'Revenue',
+          title: "Revenue",
           value: 45200,
           change: 0.08,
-          changeType: 'increase' as const,
-          format: 'currency' as const,
+          changeType: "increase" as const,
+          format: "currency" as const,
           icon: <DollarSign className="h-4 w-4" />,
-          description: 'Monthly recurring revenue',
+          description: "Monthly recurring revenue",
         },
         {
-          title: 'Conversion Rate',
+          title: "Conversion Rate",
           value: 0.032,
           change: -0.004,
-          changeType: 'decrease' as const,
-          format: 'percentage' as const,
+          changeType: "decrease" as const,
+          format: "percentage" as const,
           icon: <BarChart3 className="h-4 w-4" />,
-          description: 'Visitor to customer conversion',
+          description: "Visitor to customer conversion",
         },
         {
-          title: 'Page Views',
+          title: "Page Views",
           value: 125000,
           change: 0.15,
-          changeType: 'increase' as const,
-          format: 'compact' as const,
+          changeType: "increase" as const,
+          format: "compact" as const,
           icon: <Eye className="h-4 w-4" />,
-          description: 'Total page views this week',
+          description: "Total page views this week",
         },
       ],
-      []
+      [],
     );
 
     // Default chart data if none provided
     const defaultChartData = useMemo(
       () => [
-        { date: '2024-01', users: 1200, revenue: 35000, views: 95000 },
-        { date: '2024-02', users: 1350, revenue: 38000, views: 105000 },
-        { date: '2024-03', users: 1580, revenue: 42000, views: 115000 },
-        { date: '2024-04', users: 1820, revenue: 39000, views: 108000 },
-        { date: '2024-05', users: 2100, revenue: 45000, views: 125000 },
-        { date: '2024-06', users: 2540, revenue: 45200, views: 125000 },
+        { date: "2024-01", users: 1200, revenue: 35000, views: 95000 },
+        { date: "2024-02", users: 1350, revenue: 38000, views: 105000 },
+        { date: "2024-03", users: 1580, revenue: 42000, views: 115000 },
+        { date: "2024-04", users: 1820, revenue: 39000, views: 108000 },
+        { date: "2024-05", users: 2100, revenue: 45000, views: 125000 },
+        { date: "2024-06", users: 2540, revenue: 45200, views: 125000 },
       ],
-      []
+      [],
     );
 
     const displayKpis = kpis.length > 0 ? kpis : defaultKpis;
@@ -403,7 +410,7 @@ const AnalyticsDashboard = forwardRef<HTMLDivElement, AnalyticsDashboardProps>(
 
     if (loading) {
       return (
-        <div ref={ref} className={cn('space-y-6', className)} {...props}>
+        <div ref={ref} className={cn("space-y-6", className)} {...props}>
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             {Array.from({ length: 4 }).map((_, index) => (
               <Card key={index}>
@@ -431,7 +438,7 @@ const AnalyticsDashboard = forwardRef<HTMLDivElement, AnalyticsDashboardProps>(
 
     if (error) {
       return (
-        <div ref={ref} className={cn('space-y-6', className)} {...props}>
+        <div ref={ref} className={cn("space-y-6", className)} {...props}>
           <Card>
             <CardContent className="p-6">
               <div className="text-center">
@@ -447,12 +454,12 @@ const AnalyticsDashboard = forwardRef<HTMLDivElement, AnalyticsDashboardProps>(
     }
 
     const kpiGridClasses =
-      layout === 'grid'
-        ? 'grid gap-4 md:grid-cols-2 lg:grid-cols-4'
-        : 'flex flex-wrap gap-4';
+      layout === "grid"
+        ? "grid gap-4 md:grid-cols-2 lg:grid-cols-4"
+        : "flex flex-wrap gap-4";
 
     return (
-      <div ref={ref} className={cn('space-y-6', className)} {...props}>
+      <div ref={ref} className={cn("space-y-6", className)} {...props}>
         {/* KPI Cards */}
         {displayKpis.length > 0 && (
           <div className={kpiGridClasses}>
@@ -490,9 +497,9 @@ const AnalyticsDashboard = forwardRef<HTMLDivElement, AnalyticsDashboardProps>(
         )}
       </div>
     );
-  }
+  },
 );
 
-AnalyticsDashboard.displayName = 'AnalyticsDashboard';
+AnalyticsDashboard.displayName = "AnalyticsDashboard";
 
 export { AnalyticsDashboard };

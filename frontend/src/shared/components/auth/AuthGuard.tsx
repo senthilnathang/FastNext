@@ -1,13 +1,19 @@
-'use client';
+"use client";
 
-import React, { useEffect, useState } from 'react';
-import { useRouter, usePathname } from 'next/navigation';
-import { useAuth } from '@/modules/auth';
-import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card';
-import { Button } from '@/shared/components/ui/button';
-import { Skeleton } from '@/shared/components/ui/skeleton';
-import { Alert, AlertDescription } from '@/shared/components/ui/alert';
-import { Shield, Lock, LogIn, AlertTriangle } from 'lucide-react';
+import { AlertTriangle, Lock, LogIn, Shield } from "lucide-react";
+import { usePathname, useRouter } from "next/navigation";
+import type React from "react";
+import { useEffect, useState } from "react";
+import { useAuth } from "@/modules/auth";
+import { Alert, AlertDescription } from "@/shared/components/ui/alert";
+import { Button } from "@/shared/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/shared/components/ui/card";
+import { Skeleton } from "@/shared/components/ui/skeleton";
 
 interface AuthGuardProps {
   children: React.ReactNode;
@@ -20,31 +26,43 @@ interface AuthGuardProps {
 
 // Routes that should always be accessible without authentication
 const PUBLIC_ROUTES = [
-  '/',           // Landing page
-  '/login',      // Login page
-  '/register',   // Registration page
-  '/api-docs',   // API documentation
+  "/", // Landing page
+  "/login", // Login page
+  "/register", // Registration page
+  "/api-docs", // API documentation
 ];
 
 // Routes that require specific roles or permissions
-const ROLE_PROTECTED_ROUTES: Record<string, { roles?: string[]; permissions?: string[] }> = {
-  '/admin': { roles: ['admin', 'superuser'] },
-  '/admin/users': { roles: ['admin', 'superuser'], permissions: ['user.manage'] },
-  '/admin/roles': { roles: ['admin', 'superuser'], permissions: ['role.manage'] },
-  '/admin/permissions': { roles: ['admin', 'superuser'], permissions: ['permission.manage'] },
-  '/admin/data-import': { roles: ['admin', 'superuser'] },
-  '/admin/data-export': { roles: ['admin', 'superuser'] },
-  '/configuration/data-import-export': { roles: ['admin', 'superuser'] },
-  '/configuration/permissions': { roles: ['admin', 'superuser'] },
-  '/configuration': { roles: ['admin', 'superuser'] },
-  '/settings': { permissions: ['profile.edit'] },
+const ROLE_PROTECTED_ROUTES: Record<
+  string,
+  { roles?: string[]; permissions?: string[] }
+> = {
+  "/admin": { roles: ["admin", "superuser"] },
+  "/admin/users": {
+    roles: ["admin", "superuser"],
+    permissions: ["user.manage"],
+  },
+  "/admin/roles": {
+    roles: ["admin", "superuser"],
+    permissions: ["role.manage"],
+  },
+  "/admin/permissions": {
+    roles: ["admin", "superuser"],
+    permissions: ["permission.manage"],
+  },
+  "/admin/data-import": { roles: ["admin", "superuser"] },
+  "/admin/data-export": { roles: ["admin", "superuser"] },
+  "/configuration/data-import-export": { roles: ["admin", "superuser"] },
+  "/configuration/permissions": { roles: ["admin", "superuser"] },
+  "/configuration": { roles: ["admin", "superuser"] },
+  "/settings": { permissions: ["profile.edit"] },
 };
 
 /**
  * Determines if a route should be publicly accessible
  */
 const isPublicRoute = (pathname: string): boolean => {
-  return PUBLIC_ROUTES.includes(pathname) || pathname.startsWith('/api/');
+  return PUBLIC_ROUTES.includes(pathname) || pathname.startsWith("/api/");
 };
 
 /**
@@ -57,7 +75,9 @@ const getRouteRequirements = (pathname: string) => {
   }
 
   // Check for parent path matches (e.g., /admin/users-simple matches /admin/users)
-  const sortedRoutes = Object.keys(ROLE_PROTECTED_ROUTES).sort((a, b) => b.length - a.length);
+  const sortedRoutes = Object.keys(ROLE_PROTECTED_ROUTES).sort(
+    (a, b) => b.length - a.length,
+  );
   for (const route of sortedRoutes) {
     if (pathname.startsWith(route)) {
       return ROLE_PROTECTED_ROUTES[route];
@@ -70,21 +90,33 @@ const getRouteRequirements = (pathname: string) => {
 /**
  * Checks if user has required roles
  */
-const hasRequiredRoles = (userRoles: string[] = [], requiredRoles: string[] = [], isSuperuser: boolean = false): boolean => {
+const hasRequiredRoles = (
+  userRoles: string[] = [],
+  requiredRoles: string[] = [],
+  isSuperuser: boolean = false,
+): boolean => {
   // Superusers bypass all role checks
   if (isSuperuser) return true;
   if (requiredRoles.length === 0) return true;
-  return requiredRoles.some(role => userRoles.includes(role) || role === 'superuser');
+  return requiredRoles.some(
+    (role) => userRoles.includes(role) || role === "superuser",
+  );
 };
 
 /**
  * Checks if user has required permissions
  */
-const hasRequiredPermissions = (userPermissions: string[] = [], requiredPermissions: string[] = [], isSuperuser: boolean = false): boolean => {
+const hasRequiredPermissions = (
+  userPermissions: string[] = [],
+  requiredPermissions: string[] = [],
+  isSuperuser: boolean = false,
+): boolean => {
   // Superusers bypass all permission checks
   if (isSuperuser) return true;
   if (requiredPermissions.length === 0) return true;
-  return requiredPermissions.every(permission => userPermissions.includes(permission));
+  return requiredPermissions.every((permission) =>
+    userPermissions.includes(permission),
+  );
 };
 
 /**
@@ -117,33 +149,34 @@ const AuthLoadingComponent = () => (
  * Unauthorized access component
  */
 const UnauthorizedComponent = ({
-  reason = 'authentication',
+  reason = "authentication",
   onLogin,
-  pathname
+  pathname,
 }: {
-  reason?: 'authentication' | 'roles' | 'permissions';
+  reason?: "authentication" | "roles" | "permissions";
   onLogin: () => void;
   pathname: string;
 }) => {
   const messages = {
     authentication: {
-      title: 'Authentication Required',
-      description: 'Please log in to access this page.',
+      title: "Authentication Required",
+      description: "Please log in to access this page.",
       icon: <LogIn className="w-6 h-6 text-blue-500" />,
-      action: 'Log In'
+      action: "Log In",
     },
     roles: {
-      title: 'Insufficient Role Permissions',
-      description: 'You do not have the required role to access this page.',
+      title: "Insufficient Role Permissions",
+      description: "You do not have the required role to access this page.",
       icon: <Lock className="w-6 h-6 text-orange-500" />,
-      action: 'Contact Administrator'
+      action: "Contact Administrator",
     },
     permissions: {
-      title: 'Access Denied',
-      description: 'You do not have the required permissions to access this page.',
+      title: "Access Denied",
+      description:
+        "You do not have the required permissions to access this page.",
       icon: <AlertTriangle className="w-6 h-6 text-red-500" />,
-      action: 'Request Access'
-    }
+      action: "Request Access",
+    },
   };
 
   const message = messages[reason];
@@ -160,9 +193,7 @@ const UnauthorizedComponent = ({
         <CardContent className="space-y-4">
           <Alert>
             <AlertTriangle className="h-4 w-4" />
-            <AlertDescription>
-              {message.description}
-            </AlertDescription>
+            <AlertDescription>{message.description}</AlertDescription>
           </Alert>
 
           <div className="text-sm text-muted-foreground">
@@ -170,7 +201,7 @@ const UnauthorizedComponent = ({
           </div>
 
           <div className="flex gap-2">
-            {reason === 'authentication' && (
+            {reason === "authentication" && (
               <Button onClick={onLogin} className="flex-1">
                 <LogIn className="w-4 h-4 mr-2" />
                 {message.action}
@@ -179,13 +210,13 @@ const UnauthorizedComponent = ({
             <Button
               variant="outline"
               onClick={() => window.history.back()}
-              className={reason === 'authentication' ? 'flex-1' : 'w-full'}
+              className={reason === "authentication" ? "flex-1" : "w-full"}
             >
               Go Back
             </Button>
           </div>
 
-          {reason !== 'authentication' && (
+          {reason !== "authentication" && (
             <div className="text-xs text-center text-muted-foreground">
               Contact your administrator if you believe this is an error
             </div>
@@ -211,10 +242,10 @@ const UnauthorizedComponent = ({
 export default function AuthGuard({
   children,
   requireAuth = true,
-  redirectTo = '/login',
+  redirectTo = "/login",
   fallback,
   allowedRoles = [],
-  requiredPermissions = []
+  requiredPermissions = [],
 }: AuthGuardProps) {
   const { user, isLoading, isAuthenticated } = useAuth();
   const router = useRouter();
@@ -223,8 +254,13 @@ export default function AuthGuard({
 
   // Store current path for redirect after login
   useEffect(() => {
-    if (!isAuthenticated && pathname !== '/login' && pathname !== '/register' && pathname !== '/') {
-      sessionStorage.setItem('redirectAfterLogin', pathname);
+    if (
+      !isAuthenticated &&
+      pathname !== "/login" &&
+      pathname !== "/register" &&
+      pathname !== "/"
+    ) {
+      sessionStorage.setItem("redirectAfterLogin", pathname);
     }
   }, [pathname, isAuthenticated]);
 
@@ -245,18 +281,34 @@ export default function AuthGuard({
 
       // Check if authentication is required
       if (requireAuth && !isAuthenticated) {
-        router.push(`${redirectTo}?reason=authentication&redirect=${encodeURIComponent(pathname)}`);
+        router.push(
+          `${redirectTo}?reason=authentication&redirect=${encodeURIComponent(pathname)}`,
+        );
         return;
       }
 
       // Check role and permission requirements
       if (isAuthenticated && user) {
         const routeRequirements = getRouteRequirements(pathname);
-        const combinedRoles = [...allowedRoles, ...(routeRequirements.roles || [])];
-        const combinedPermissions = [...requiredPermissions, ...(routeRequirements.permissions || [])];
+        const combinedRoles = [
+          ...allowedRoles,
+          ...(routeRequirements.roles || []),
+        ];
+        const combinedPermissions = [
+          ...requiredPermissions,
+          ...(routeRequirements.permissions || []),
+        ];
 
-        const hasRoles = hasRequiredRoles(user.roles, combinedRoles, user.is_superuser);
-        const hasPermissions = hasRequiredPermissions(user.permissions, combinedPermissions, user.is_superuser);
+        const hasRoles = hasRequiredRoles(
+          user.roles,
+          combinedRoles,
+          user.is_superuser,
+        );
+        const hasPermissions = hasRequiredPermissions(
+          user.permissions,
+          combinedPermissions,
+          user.is_superuser,
+        );
 
         if (!hasRoles || !hasPermissions) {
           // Don't redirect, just show unauthorized component
@@ -264,7 +316,18 @@ export default function AuthGuard({
         }
       }
     }
-  }, [hasCheckedAuth, isLoading, isAuthenticated, user, pathname, requireAuth, redirectTo, router, allowedRoles, requiredPermissions]);
+  }, [
+    hasCheckedAuth,
+    isLoading,
+    isAuthenticated,
+    user,
+    pathname,
+    requireAuth,
+    redirectTo,
+    router,
+    allowedRoles,
+    requiredPermissions,
+  ]);
 
   // Show loading state while checking authentication
   if (isLoading || !hasCheckedAuth) {
@@ -281,7 +344,9 @@ export default function AuthGuard({
     return (
       <UnauthorizedComponent
         reason="authentication"
-        onLogin={() => router.push(`${redirectTo}?redirect=${encodeURIComponent(pathname)}`)}
+        onLogin={() =>
+          router.push(`${redirectTo}?redirect=${encodeURIComponent(pathname)}`)
+        }
         pathname={pathname}
       />
     );
@@ -291,10 +356,21 @@ export default function AuthGuard({
   if (isAuthenticated && user) {
     const routeRequirements = getRouteRequirements(pathname);
     const combinedRoles = [...allowedRoles, ...(routeRequirements.roles || [])];
-    const combinedPermissions = [...requiredPermissions, ...(routeRequirements.permissions || [])];
+    const combinedPermissions = [
+      ...requiredPermissions,
+      ...(routeRequirements.permissions || []),
+    ];
 
-    const hasRoles = hasRequiredRoles(user.roles, combinedRoles, user.is_superuser);
-    const hasPermissions = hasRequiredPermissions(user.permissions, combinedPermissions, user.is_superuser);
+    const hasRoles = hasRequiredRoles(
+      user.roles,
+      combinedRoles,
+      user.is_superuser,
+    );
+    const hasPermissions = hasRequiredPermissions(
+      user.permissions,
+      combinedPermissions,
+      user.is_superuser,
+    );
 
     if (!hasRoles) {
       return (
@@ -326,7 +402,7 @@ export default function AuthGuard({
  */
 export function withAuthGuard<P extends object>(
   Component: React.ComponentType<P>,
-  options?: Omit<AuthGuardProps, 'children'>
+  options?: Omit<AuthGuardProps, "children">,
 ) {
   return function AuthGuardedComponent(props: P) {
     return (
@@ -348,11 +424,25 @@ export function useAuthGuard(requirements?: {
   const pathname = usePathname();
 
   const routeRequirements = getRouteRequirements(pathname);
-  const combinedRoles = [...(requirements?.roles || []), ...(routeRequirements.roles || [])];
-  const combinedPermissions = [...(requirements?.permissions || []), ...(routeRequirements.permissions || [])];
+  const combinedRoles = [
+    ...(requirements?.roles || []),
+    ...(routeRequirements.roles || []),
+  ];
+  const combinedPermissions = [
+    ...(requirements?.permissions || []),
+    ...(routeRequirements.permissions || []),
+  ];
 
-  const hasRoles = hasRequiredRoles(user?.roles, combinedRoles, user?.is_superuser);
-  const hasPermissions = hasRequiredPermissions(user?.permissions, combinedPermissions, user?.is_superuser);
+  const hasRoles = hasRequiredRoles(
+    user?.roles,
+    combinedRoles,
+    user?.is_superuser,
+  );
+  const hasPermissions = hasRequiredPermissions(
+    user?.permissions,
+    combinedPermissions,
+    user?.is_superuser,
+  );
 
   return {
     isAuthenticated,

@@ -1,22 +1,31 @@
-'use client';
+"use client";
 
-import { useState, useCallback, useRef } from 'react';
-import { parseFile, createPreview } from '../utils/parseUtils';
-import { validateImportData, createFieldMappings } from '../utils/validationUtils';
+import { useCallback, useRef, useState } from "react";
 import type {
-  ImportOptions,
-  ImportJob,
-  ImportPreview,
-  ImportFieldMapping,
   ImportColumn,
+  ImportFieldMapping,
+  ImportJob,
+  ImportOptions,
+  ImportPreview,
   ImportValidationResult,
-  ParsedData
-} from '../types';
+  ParsedData,
+} from "../types";
+import { createPreview, parseFile } from "../utils/parseUtils";
+import {
+  createFieldMappings,
+  validateImportData,
+} from "../utils/validationUtils";
 
 interface UseDataImportProps {
   columns: ImportColumn[];
-  onImport?: (data: Record<string, any>[], options: ImportOptions) => Promise<any>;
-  onValidate?: (data: Record<string, any>[], mappings: ImportFieldMapping[]) => Promise<ImportValidationResult>;
+  onImport?: (
+    data: Record<string, any>[],
+    options: ImportOptions,
+  ) => Promise<any>;
+  onValidate?: (
+    data: Record<string, any>[],
+    mappings: ImportFieldMapping[],
+  ) => Promise<ImportValidationResult>;
   maxFileSize?: number;
   maxRows?: number;
   allowedFormats?: string[];
@@ -69,7 +78,7 @@ export function useDataImport({
   onValidate,
   maxFileSize = 10 * 1024 * 1024, // 10MB default
   maxRows = 10000,
-  allowedFormats = ['csv', 'json', 'excel', 'xml']
+  allowedFormats = ["csv", "json", "excel", "xml"],
 }: UseDataImportProps): UseDataImportReturn {
   // File state
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -88,7 +97,8 @@ export function useDataImport({
 
   // Validation state
   const [isValidating, setIsValidating] = useState(false);
-  const [validationResults, setValidationResults] = useState<ImportValidationResult | null>(null);
+  const [validationResults, setValidationResults] =
+    useState<ImportValidationResult | null>(null);
   const [validationError, setValidationError] = useState<string | null>(null);
 
   // Import state
@@ -101,47 +111,54 @@ export function useDataImport({
   const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const activeJobIds = useRef<Set<string>>(new Set());
 
-  const parseFileAction = useCallback(async (file: File, options: Partial<ImportOptions> = {}) => {
-    if (!file) return;
+  const parseFileAction = useCallback(
+    async (file: File, options: Partial<ImportOptions> = {}) => {
+      if (!file) return;
 
-    setIsParsing(true);
-    setParseError(null);
-    setParsedData(null);
-    setPreview(null);
-    setValidationResults(null);
+      setIsParsing(true);
+      setParseError(null);
+      setParsedData(null);
+      setPreview(null);
+      setValidationResults(null);
 
-    try {
-      // Validate file size
-      if (file.size > maxFileSize) {
-        throw new Error(`File size (${(file.size / 1024 / 1024).toFixed(1)}MB) exceeds maximum allowed size (${(maxFileSize / 1024 / 1024).toFixed(1)}MB)`);
+      try {
+        // Validate file size
+        if (file.size > maxFileSize) {
+          throw new Error(
+            `File size (${(file.size / 1024 / 1024).toFixed(1)}MB) exceeds maximum allowed size (${(maxFileSize / 1024 / 1024).toFixed(1)}MB)`,
+          );
+        }
+
+        // Validate file format
+        const extension = file.name.toLowerCase().split(".").pop();
+        if (!allowedFormats.includes(extension || "")) {
+          throw new Error(
+            `File format .${extension} is not supported. Allowed formats: ${allowedFormats.join(", ")}`,
+          );
+        }
+
+        // Parse the file
+        const parsed = await parseFile(file, {
+          ...options,
+          maxRows,
+        });
+
+        setParsedData(parsed);
+
+        // Generate automatic field mappings
+        const autoMappings = createFieldMappings(parsed.headers, columns);
+        setFieldMappings(autoMappings);
+      } catch (error) {
+        const errorMessage =
+          error instanceof Error ? error.message : "Failed to parse file";
+        setParseError(errorMessage);
+        console.error("File parsing failed:", error);
+      } finally {
+        setIsParsing(false);
       }
-
-      // Validate file format
-      const extension = file.name.toLowerCase().split('.').pop();
-      if (!allowedFormats.includes(extension || '')) {
-        throw new Error(`File format .${extension} is not supported. Allowed formats: ${allowedFormats.join(', ')}`);
-      }
-
-      // Parse the file
-      const parsed = await parseFile(file, {
-        ...options,
-        maxRows
-      });
-
-      setParsedData(parsed);
-
-      // Generate automatic field mappings
-      const autoMappings = createFieldMappings(parsed.headers, columns);
-      setFieldMappings(autoMappings);
-
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Failed to parse file';
-      setParseError(errorMessage);
-      console.error('File parsing failed:', error);
-    } finally {
-      setIsParsing(false);
-    }
-  }, [maxFileSize, maxRows, allowedFormats, columns]);
+    },
+    [maxFileSize, maxRows, allowedFormats, columns],
+  );
 
   const generatePreviewAction = useCallback(async () => {
     if (!selectedFile || !parsedData) return;
@@ -152,218 +169,236 @@ export function useDataImport({
       const previewData = createPreview(selectedFile, parsedData);
       setPreview(previewData);
     } catch (error) {
-      console.error('Preview generation failed:', error);
+      console.error("Preview generation failed:", error);
     } finally {
       setIsGeneratingPreview(false);
     }
   }, [selectedFile, parsedData]);
 
-  const validateDataAction = useCallback(async (mappings: ImportFieldMapping[] = fieldMappings) => {
-    if (!parsedData || mappings.length === 0) return;
+  const validateDataAction = useCallback(
+    async (mappings: ImportFieldMapping[] = fieldMappings) => {
+      if (!parsedData || mappings.length === 0) return;
 
-    setIsValidating(true);
-    setValidationError(null);
+      setIsValidating(true);
+      setValidationError(null);
 
-    try {
-      let results: ImportValidationResult;
+      try {
+        let results: ImportValidationResult;
 
-      if (onValidate) {
-        // Use custom validation if provided
-        results = await onValidate(parsedData.rows, mappings);
-      } else {
-        // Use built-in validation
-        results = validateImportData(parsedData.rows, columns, mappings);
+        if (onValidate) {
+          // Use custom validation if provided
+          results = await onValidate(parsedData.rows, mappings);
+        } else {
+          // Use built-in validation
+          results = validateImportData(parsedData.rows, columns, mappings);
+        }
+
+        setValidationResults(results);
+      } catch (error) {
+        const errorMessage =
+          error instanceof Error ? error.message : "Validation failed";
+        setValidationError(errorMessage);
+        console.error("Data validation failed:", error);
+      } finally {
+        setIsValidating(false);
       }
+    },
+    [parsedData, fieldMappings, columns, onValidate],
+  );
 
-      setValidationResults(results);
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Validation failed';
-      setValidationError(errorMessage);
-      console.error('Data validation failed:', error);
-    } finally {
-      setIsValidating(false);
-    }
-  }, [parsedData, fieldMappings, columns, onValidate]);
+  const pollJobStatus = useCallback(
+    async (jobId: string) => {
+      try {
+        // In a real implementation, this would call an API endpoint
+        // For now, we'll simulate polling
+        const response = await fetch(`/api/v1/import/status/${jobId}`);
+        if (!response.ok) throw new Error("Failed to fetch job status");
 
-  const pollJobStatus = useCallback(async (jobId: string) => {
-    try {
-      // In a real implementation, this would call an API endpoint
-      // For now, we'll simulate polling
-      const response = await fetch(`/api/v1/import/status/${jobId}`);
-      if (!response.ok) throw new Error('Failed to fetch job status');
+        const job: ImportJob = await response.json();
 
-      const job: ImportJob = await response.json();
+        setImportJobs((prev) => prev.map((j) => (j.id === jobId ? job : j)));
 
-      setImportJobs(prev =>
-        prev.map(j => j.id === jobId ? job : j)
-      );
+        if (currentJob?.id === jobId) {
+          setCurrentJob(job);
+          setImportProgress(job.progress);
+        }
 
-      if (currentJob?.id === jobId) {
-        setCurrentJob(job);
-        setImportProgress(job.progress);
-      }
+        // Stop polling if job is completed, failed, or cancelled
+        if (["completed", "failed", "cancelled"].includes(job.status)) {
+          activeJobIds.current.delete(jobId);
 
-      // Stop polling if job is completed, failed, or cancelled
-      if (['completed', 'failed', 'cancelled'].includes(job.status)) {
+          if (currentJob?.id === jobId) {
+            setIsImporting(false);
+            if (job.status === "failed") {
+              setImportError(job.errors?.[0]?.message || "Import failed");
+            } else if (job.status === "completed") {
+              setImportError(null);
+            }
+          }
+        }
+      } catch (error) {
+        console.error("Failed to poll job status:", error);
         activeJobIds.current.delete(jobId);
 
         if (currentJob?.id === jobId) {
           setIsImporting(false);
-          if (job.status === 'failed') {
-            setImportError(job.errors?.[0]?.message || 'Import failed');
-          } else if (job.status === 'completed') {
-            setImportError(null);
-          }
+          setImportError("Failed to track import progress");
         }
       }
+    },
+    [currentJob],
+  );
 
-    } catch (error) {
-      console.error('Failed to poll job status:', error);
-      activeJobIds.current.delete(jobId);
+  const startPolling = useCallback(
+    (jobId: string) => {
+      activeJobIds.current.add(jobId);
 
-      if (currentJob?.id === jobId) {
-        setIsImporting(false);
-        setImportError('Failed to track import progress');
-      }
-    }
-  }, [currentJob]);
-
-  const startPolling = useCallback((jobId: string) => {
-    activeJobIds.current.add(jobId);
-
-    const poll = async () => {
-      if (activeJobIds.current.has(jobId)) {
-        await pollJobStatus(jobId);
-
+      const poll = async () => {
         if (activeJobIds.current.has(jobId)) {
-          pollingIntervalRef.current = setTimeout(poll, 2000);
-        }
-      }
-    };
+          await pollJobStatus(jobId);
 
-    poll();
-  }, [pollJobStatus]);
-
-  const startImportAction = useCallback(async (options: ImportOptions) => {
-    if (!parsedData || !onImport) {
-      throw new Error('No data to import or import handler not provided');
-    }
-
-    setIsImporting(true);
-    setImportError(null);
-    setImportProgress(0);
-
-    try {
-      // Apply field mappings to transform data
-      const mappedData = parsedData.rows.map(row => {
-        const mappedRow: Record<string, any> = {};
-        fieldMappings.forEach(mapping => {
-          if (mapping.targetColumn && mapping.targetColumn !== mapping.sourceColumn) {
-            mappedRow[mapping.targetColumn] = row[mapping.sourceColumn];
+          if (activeJobIds.current.has(jobId)) {
+            pollingIntervalRef.current = setTimeout(poll, 2000);
           }
+        }
+      };
+
+      poll();
+    },
+    [pollJobStatus],
+  );
+
+  const startImportAction = useCallback(
+    async (options: ImportOptions) => {
+      if (!parsedData || !onImport) {
+        throw new Error("No data to import or import handler not provided");
+      }
+
+      setIsImporting(true);
+      setImportError(null);
+      setImportProgress(0);
+
+      try {
+        // Apply field mappings to transform data
+        const mappedData = parsedData.rows.map((row) => {
+          const mappedRow: Record<string, any> = {};
+          fieldMappings.forEach((mapping) => {
+            if (
+              mapping.targetColumn &&
+              mapping.targetColumn !== mapping.sourceColumn
+            ) {
+              mappedRow[mapping.targetColumn] = row[mapping.sourceColumn];
+            }
+          });
+          return mappedRow;
         });
-        return mappedRow;
-      });
 
-      const response = await onImport(mappedData, options);
+        const response = await onImport(mappedData, options);
 
-      if (response.jobId) {
-        // Background job - start polling
-        const newJob: ImportJob = {
-          id: response.jobId,
-          status: 'pending',
-          progress: 0,
-          createdAt: new Date().toISOString(),
-          fileName: selectedFile?.name,
-          fileSize: selectedFile?.size,
-          totalRows: parsedData.totalRows
-        };
+        if (response.jobId) {
+          // Background job - start polling
+          const newJob: ImportJob = {
+            id: response.jobId,
+            status: "pending",
+            progress: 0,
+            createdAt: new Date().toISOString(),
+            fileName: selectedFile?.name,
+            fileSize: selectedFile?.size,
+            totalRows: parsedData.totalRows,
+          };
 
-        setImportJobs(prev => [newJob, ...prev]);
-        setCurrentJob(newJob);
-        startPolling(response.jobId);
-      } else {
-        // Direct import completed
+          setImportJobs((prev) => [newJob, ...prev]);
+          setCurrentJob(newJob);
+          startPolling(response.jobId);
+        } else {
+          // Direct import completed
+          setIsImporting(false);
+          setImportProgress(100);
+
+          // Create a completed job entry
+          const completedJob: ImportJob = {
+            id: Date.now().toString(),
+            status: "completed",
+            progress: 100,
+            createdAt: new Date().toISOString(),
+            completedAt: new Date().toISOString(),
+            fileName: selectedFile?.name,
+            fileSize: selectedFile?.size,
+            totalRows: parsedData.totalRows,
+            validRows: response.importedRows || parsedData.totalRows,
+            errorRows: 0,
+          };
+
+          setImportJobs((prev) => [completedJob, ...prev]);
+        }
+      } catch (error) {
         setIsImporting(false);
-        setImportProgress(100);
-
-        // Create a completed job entry
-        const completedJob: ImportJob = {
-          id: Date.now().toString(),
-          status: 'completed',
-          progress: 100,
-          createdAt: new Date().toISOString(),
-          completedAt: new Date().toISOString(),
-          fileName: selectedFile?.name,
-          fileSize: selectedFile?.size,
-          totalRows: parsedData.totalRows,
-          validRows: response.importedRows || parsedData.totalRows,
-          errorRows: 0
-        };
-
-        setImportJobs(prev => [completedJob, ...prev]);
+        const errorMessage =
+          error instanceof Error ? error.message : "Import failed";
+        setImportError(errorMessage);
+        console.error("Import failed:", error);
+        throw error;
       }
+    },
+    [parsedData, fieldMappings, onImport, selectedFile, startPolling],
+  );
 
-    } catch (error) {
-      setIsImporting(false);
-      const errorMessage = error instanceof Error ? error.message : 'Import failed';
-      setImportError(errorMessage);
-      console.error('Import failed:', error);
-      throw error;
-    }
-  }, [parsedData, fieldMappings, onImport, selectedFile, startPolling]);
+  const cancelImportAction = useCallback(
+    async (jobId: string) => {
+      try {
+        const response = await fetch(`/api/v1/import/cancel/${jobId}`, {
+          method: "POST",
+        });
 
-  const cancelImportAction = useCallback(async (jobId: string) => {
-    try {
-      const response = await fetch(`/api/v1/import/cancel/${jobId}`, {
-        method: 'POST'
-      });
+        if (!response.ok) throw new Error("Failed to cancel import");
 
-      if (!response.ok) throw new Error('Failed to cancel import');
+        activeJobIds.current.delete(jobId);
 
-      activeJobIds.current.delete(jobId);
+        setImportJobs((prev) =>
+          prev.map((job) =>
+            job.id === jobId ? { ...job, status: "cancelled" as const } : job,
+          ),
+        );
 
-      setImportJobs(prev =>
-        prev.map(job =>
-          job.id === jobId
-            ? { ...job, status: 'cancelled' as const }
-            : job
-        )
-      );
-
-      if (currentJob?.id === jobId) {
-        setCurrentJob(null);
-        setIsImporting(false);
-        setImportProgress(0);
+        if (currentJob?.id === jobId) {
+          setCurrentJob(null);
+          setIsImporting(false);
+          setImportProgress(0);
+        }
+      } catch (error) {
+        console.error("Failed to cancel import:", error);
+        throw error;
       }
+    },
+    [currentJob],
+  );
 
-    } catch (error) {
-      console.error('Failed to cancel import:', error);
-      throw error;
-    }
-  }, [currentJob]);
+  const retryImportAction = useCallback(
+    async (jobId: string) => {
+      const job = importJobs.find((j) => j.id === jobId);
+      if (!job || !parsedData || !onImport) return;
 
-  const retryImportAction = useCallback(async (jobId: string) => {
-    const job = importJobs.find(j => j.id === jobId);
-    if (!job || !parsedData || !onImport) return;
+      // Remove the failed job and start a new one
+      setImportJobs((prev) => prev.filter((j) => j.id !== jobId));
 
-    // Remove the failed job and start a new one
-    setImportJobs(prev => prev.filter(j => j.id !== jobId));
+      // Start a new import with the same data
+      const options: ImportOptions = {
+        format: "csv", // This should be stored from the original import
+        hasHeaders: true,
+        skipEmptyRows: true,
+        onDuplicate: "skip",
+      };
 
-    // Start a new import with the same data
-    const options: ImportOptions = {
-      format: 'csv', // This should be stored from the original import
-      hasHeaders: true,
-      skipEmptyRows: true,
-      onDuplicate: 'skip'
-    };
-
-    await startImportAction(options);
-  }, [importJobs, parsedData, onImport, startImportAction]);
+      await startImportAction(options);
+    },
+    [importJobs, parsedData, onImport, startImportAction],
+  );
 
   const clearCompletedJobsAction = useCallback(() => {
-    setImportJobs(prev =>
-      prev.filter(job => !['completed', 'failed', 'cancelled'].includes(job.status))
+    setImportJobs((prev) =>
+      prev.filter(
+        (job) => !["completed", "failed", "cancelled"].includes(job.status),
+      ),
     );
   }, []);
 
@@ -423,6 +458,6 @@ export function useDataImport({
     cancelImport: cancelImportAction,
     clearState,
     retryImport: retryImportAction,
-    clearCompletedJobs: clearCompletedJobsAction
+    clearCompletedJobs: clearCompletedJobsAction,
   };
 }

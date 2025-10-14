@@ -1,70 +1,87 @@
-'use client'
+"use client";
 
-import React, { useState } from 'react'
-import { Button } from '@/shared/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card'
-import { Badge } from '@/shared/components/ui/badge'
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/shared/components/ui/dropdown-menu'
-import { useGenericPermissions } from '@/modules/admin/hooks/useGenericPermissions'
-import { Plus, MoreHorizontal, Edit, Trash2, Eye } from 'lucide-react'
+import { Edit, Eye, MoreHorizontal, Plus, Trash2 } from "lucide-react";
+import type React from "react";
+import { useState } from "react";
+import { useGenericPermissions } from "@/modules/admin/hooks/useGenericPermissions";
+import { Badge } from "@/shared/components/ui/badge";
+import { Button } from "@/shared/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/shared/components/ui/card";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/shared/components/ui/dropdown-menu";
 
 export interface KanbanColumn {
-  id: string
-  title: string
-  color?: string
-  limit?: number
+  id: string;
+  title: string;
+  color?: string;
+  limit?: number;
 }
 
 export interface KanbanItem<T = any> {
-  id: number
-  status: string
-  title: string
-  description?: string
-  data: T
+  id: number;
+  status: string;
+  title: string;
+  description?: string;
+  data: T;
 }
 
 export interface GenericKanbanViewProps<T = any> {
   // Data and API
-  items: KanbanItem<T>[]
-  columns: KanbanColumn[]
-  loading?: boolean
-  error?: string | null
+  items: KanbanItem<T>[];
+  columns: KanbanColumn[];
+  loading?: boolean;
+  error?: string | null;
 
   // Permissions
-  resourceName: string
-  projectId?: number
+  resourceName: string;
+  projectId?: number;
 
   // CRUD operations
-  onCreateClick?: (columnId: string) => void
-  onEditClick?: (item: KanbanItem<T>) => void
-  onDeleteClick?: (item: KanbanItem<T>) => void
-  onViewClick?: (item: KanbanItem<T>) => void
-  onRefresh?: () => void
-  onMoveItem?: (itemId: number, newStatus: string) => void
+  onCreateClick?: (columnId: string) => void;
+  onEditClick?: (item: KanbanItem<T>) => void;
+  onDeleteClick?: (item: KanbanItem<T>) => void;
+  onViewClick?: (item: KanbanItem<T>) => void;
+  onRefresh?: () => void;
+  onMoveItem?: (itemId: number, newStatus: string) => void;
 
   // UI customization
-  title?: string
-  subtitle?: string
-  createButtonText?: string
-  emptyStateTitle?: string
-  emptyStateDescription?: string
+  title?: string;
+  subtitle?: string;
+  createButtonText?: string;
+  emptyStateTitle?: string;
+  emptyStateDescription?: string;
 
   // Card rendering
-  renderCard?: (item: KanbanItem<T>) => React.ReactNode
+  renderCard?: (item: KanbanItem<T>) => React.ReactNode;
   cardFields?: Array<{
-    key: keyof T | string
-    label: string
-    render?: (value: unknown, item: KanbanItem<T>) => React.ReactNode
-  }>
+    key: keyof T | string;
+    label: string;
+    render?: (value: unknown, item: KanbanItem<T>) => React.ReactNode;
+  }>;
 
   // Custom actions
   customActions?: Array<{
-    label: string
-    icon?: React.ReactNode
-    action: (item: KanbanItem<T>) => void
-    requiresPermission?: string
-    variant?: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link'
-  }>
+    label: string;
+    icon?: React.ReactNode;
+    action: (item: KanbanItem<T>) => void;
+    requiresPermission?: string;
+    variant?:
+      | "default"
+      | "destructive"
+      | "outline"
+      | "secondary"
+      | "ghost"
+      | "link";
+  }>;
 }
 
 export function GenericKanbanView<T>({
@@ -82,50 +99,50 @@ export function GenericKanbanView<T>({
   onMoveItem,
   title,
   subtitle,
-  createButtonText = 'Create New',
+  createButtonText = "Create New",
   // emptyStateTitle = 'No items found',
-  emptyStateDescription = 'Get started by creating your first item',
+  emptyStateDescription = "Get started by creating your first item",
   renderCard,
   cardFields = [],
-  customActions = []
+  customActions = [],
 }: GenericKanbanViewProps<T>) {
-  const [draggedItem, setDraggedItem] = useState<KanbanItem<T> | null>(null)
-  const [dragOverColumn, setDragOverColumn] = useState<string | null>(null)
+  const [draggedItem, setDraggedItem] = useState<KanbanItem<T> | null>(null);
+  const [dragOverColumn, setDragOverColumn] = useState<string | null>(null);
 
-  const permissions = useGenericPermissions(resourceName)
+  const permissions = useGenericPermissions(resourceName);
 
   const getColumnItems = (columnId: string) => {
-    return items.filter(item => item.status === columnId)
-  }
+    return items.filter((item) => item.status === columnId);
+  };
 
   const handleDragStart = (e: React.DragEvent, item: KanbanItem<T>) => {
     if (!permissions.checkUpdate(resourceName, item.id, projectId)) {
-      e.preventDefault()
-      return
+      e.preventDefault();
+      return;
     }
-    setDraggedItem(item)
-    e.dataTransfer.effectAllowed = 'move'
-  }
+    setDraggedItem(item);
+    e.dataTransfer.effectAllowed = "move";
+  };
 
   const handleDragOver = (e: React.DragEvent, columnId: string) => {
-    e.preventDefault()
-    e.dataTransfer.dropEffect = 'move'
-    setDragOverColumn(columnId)
-  }
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
+    setDragOverColumn(columnId);
+  };
 
   const handleDragLeave = () => {
-    setDragOverColumn(null)
-  }
+    setDragOverColumn(null);
+  };
 
   const handleDrop = (e: React.DragEvent, columnId: string) => {
-    e.preventDefault()
-    setDragOverColumn(null)
+    e.preventDefault();
+    setDragOverColumn(null);
 
     if (draggedItem && draggedItem.status !== columnId) {
-      onMoveItem?.(draggedItem.id, columnId)
+      onMoveItem?.(draggedItem.id, columnId);
     }
-    setDraggedItem(null)
-  }
+    setDraggedItem(null);
+  };
 
   const renderDefaultCard = (item: KanbanItem<T>) => {
     return (
@@ -146,23 +163,29 @@ export function GenericKanbanView<T>({
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                {permissions.checkRead(resourceName, item.id, projectId) && onViewClick && (
-                  <DropdownMenuItem onClick={() => onViewClick(item)}>
-                    <Eye className="h-3 w-3 mr-2" />
-                    View
-                  </DropdownMenuItem>
-                )}
-                {permissions.checkUpdate(resourceName, item.id, projectId) && onEditClick && (
-                  <DropdownMenuItem onClick={() => onEditClick(item)}>
-                    <Edit className="h-3 w-3 mr-2" />
-                    Edit
-                  </DropdownMenuItem>
-                )}
+                {permissions.checkRead(resourceName, item.id, projectId) &&
+                  onViewClick && (
+                    <DropdownMenuItem onClick={() => onViewClick(item)}>
+                      <Eye className="h-3 w-3 mr-2" />
+                      View
+                    </DropdownMenuItem>
+                  )}
+                {permissions.checkUpdate(resourceName, item.id, projectId) &&
+                  onEditClick && (
+                    <DropdownMenuItem onClick={() => onEditClick(item)}>
+                      <Edit className="h-3 w-3 mr-2" />
+                      Edit
+                    </DropdownMenuItem>
+                  )}
                 {customActions.map((action, actionIndex) => {
-                  const hasPermission = !action.requiresPermission ||
-                    permissions.hasPermission({ action: action.requiresPermission, resource: resourceName })
+                  const hasPermission =
+                    !action.requiresPermission ||
+                    permissions.hasPermission({
+                      action: action.requiresPermission,
+                      resource: resourceName,
+                    });
 
-                  if (!hasPermission) return null
+                  if (!hasPermission) return null;
 
                   return (
                     <DropdownMenuItem
@@ -172,17 +195,18 @@ export function GenericKanbanView<T>({
                       {action.icon}
                       {action.label}
                     </DropdownMenuItem>
-                  )
+                  );
                 })}
-                {permissions.checkDelete(resourceName, item.id, projectId) && onDeleteClick && (
-                  <DropdownMenuItem
-                    onClick={() => onDeleteClick(item)}
-                    className="text-destructive"
-                  >
-                    <Trash2 className="h-3 w-3 mr-2" />
-                    Delete
-                  </DropdownMenuItem>
-                )}
+                {permissions.checkDelete(resourceName, item.id, projectId) &&
+                  onDeleteClick && (
+                    <DropdownMenuItem
+                      onClick={() => onDeleteClick(item)}
+                      className="text-destructive"
+                    >
+                      <Trash2 className="h-3 w-3 mr-2" />
+                      Delete
+                    </DropdownMenuItem>
+                  )}
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
@@ -197,24 +221,28 @@ export function GenericKanbanView<T>({
           <CardContent className="pt-0">
             <div className="space-y-1">
               {cardFields.map((field, index) => {
-                const value = item.data[field.key as keyof T]
+                const value = item.data[field.key as keyof T];
                 return (
                   <div key={index} className="flex justify-between text-xs">
-                    <span className="text-muted-foreground">{field.label}:</span>
+                    <span className="text-muted-foreground">
+                      {field.label}:
+                    </span>
                     <span>
-                      {field.render ? field.render(value, item) : String(value || '-')}
+                      {field.render
+                        ? field.render(value, item)
+                        : String(value || "-")}
                     </span>
                   </div>
-                )
+                );
               })}
             </div>
           </CardContent>
         )}
       </Card>
-    )
-  }
+    );
+  };
 
-  const canCreate = permissions.checkCreate(resourceName, projectId)
+  const canCreate = permissions.checkCreate(resourceName, projectId);
 
   if (error) {
     return (
@@ -231,7 +259,7 @@ export function GenericKanbanView<T>({
           </div>
         </CardContent>
       </Card>
-    )
+    );
   }
 
   return (
@@ -262,14 +290,15 @@ export function GenericKanbanView<T>({
       ) : (
         <div className="flex gap-4 overflow-x-auto pb-4">
           {columns.map((column) => {
-            const columnItems = getColumnItems(column.id)
-            const isOverLimit = column.limit && columnItems.length >= column.limit
+            const columnItems = getColumnItems(column.id);
+            const isOverLimit =
+              column.limit && columnItems.length >= column.limit;
 
             return (
               <div
                 key={column.id}
                 className={`flex-shrink-0 w-80 bg-muted/50 rounded-lg p-4 ${
-                  dragOverColumn === column.id ? 'bg-muted' : ''
+                  dragOverColumn === column.id ? "bg-muted" : ""
                 }`}
                 onDragOver={(e) => handleDragOver(e, column.id)}
                 onDragLeave={handleDragLeave}
@@ -298,7 +327,9 @@ export function GenericKanbanView<T>({
                 <div className="space-y-3 min-h-[200px]">
                   {columnItems.length === 0 ? (
                     <div className="text-center py-8">
-                      <p className="text-sm text-muted-foreground">{emptyStateDescription}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {emptyStateDescription}
+                      </p>
                       {canCreate && onCreateClick && (
                         <Button
                           size="sm"
@@ -314,7 +345,9 @@ export function GenericKanbanView<T>({
                   ) : (
                     columnItems.map((item) => (
                       <div key={item.id}>
-                        {renderCard ? renderCard(item) : renderDefaultCard(item)}
+                        {renderCard
+                          ? renderCard(item)
+                          : renderDefaultCard(item)}
                       </div>
                     ))
                   )}
@@ -326,10 +359,10 @@ export function GenericKanbanView<T>({
                   </div>
                 )}
               </div>
-            )
+            );
           })}
         </div>
       )}
     </div>
-  )
+  );
 }

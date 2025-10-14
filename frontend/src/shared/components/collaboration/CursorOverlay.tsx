@@ -2,8 +2,9 @@
  * CursorOverlay component for displaying real-time collaborative cursors
  */
 
-import React, { useEffect, useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { AnimatePresence, motion } from "framer-motion";
+import type React from "react";
+import { useEffect, useState } from "react";
 
 interface CursorPosition {
   x: number;
@@ -25,18 +26,28 @@ export const CursorOverlay: React.FC<CursorOverlayProps> = ({
   documentId,
   currentUserId,
   containerRef,
-  className = ''
+  className = "",
 }) => {
-  const [cursors, setCursors] = useState<Map<string, CursorPosition>>(new Map());
+  const [cursors, setCursors] = useState<Map<string, CursorPosition>>(
+    new Map(),
+  );
 
   // Generate consistent colors for users
   const getUserColor = (userId: string): string => {
     const colors = [
-      '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7',
-      '#DDA0DD', '#98D8C8', '#F7DC6F', '#BB8FCE', '#85C1E9'
+      "#FF6B6B",
+      "#4ECDC4",
+      "#45B7D1",
+      "#96CEB4",
+      "#FFEAA7",
+      "#DDA0DD",
+      "#98D8C8",
+      "#F7DC6F",
+      "#BB8FCE",
+      "#85C1E9",
     ];
-    const hash = userId.split('').reduce((a, b) => {
-      a = ((a << 5) - a) + b.charCodeAt(0);
+    const hash = userId.split("").reduce((a, b) => {
+      a = (a << 5) - a + b.charCodeAt(0);
       return a & a;
     }, 0);
     return colors[Math.abs(hash) % colors.length];
@@ -46,10 +57,11 @@ export const CursorOverlay: React.FC<CursorOverlayProps> = ({
   useEffect(() => {
     const cleanup = setInterval(() => {
       const now = Date.now();
-      setCursors(prev => {
+      setCursors((prev) => {
         const newCursors = new Map(prev);
         for (const [userId, cursor] of newCursors) {
-          if (now - cursor.timestamp > 30000) { // 30 seconds
+          if (now - cursor.timestamp > 30000) {
+            // 30 seconds
             newCursors.delete(userId);
           }
         }
@@ -64,7 +76,7 @@ export const CursorOverlay: React.FC<CursorOverlayProps> = ({
   useEffect(() => {
     if (!documentId) return;
 
-    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
     const wsUrl = `${protocol}//${window.location.host}/api/v1/collaboration/documents/${documentId}`;
 
     const ws = new WebSocket(wsUrl);
@@ -73,20 +85,20 @@ export const CursorOverlay: React.FC<CursorOverlayProps> = ({
       try {
         const data = JSON.parse(event.data);
 
-        if (data.type === 'cursor_update' && data.user_id !== currentUserId) {
+        if (data.type === "cursor_update" && data.user_id !== currentUserId) {
           const cursor: CursorPosition = {
             x: data.position?.x || 0,
             y: data.position?.y || 0,
             userId: data.user_id,
             userName: data.user_name || `User ${data.user_id.slice(-4)}`,
             color: getUserColor(data.user_id),
-            timestamp: Date.now()
+            timestamp: Date.now(),
           };
 
-          setCursors(prev => new Map(prev.set(data.user_id, cursor)));
+          setCursors((prev) => new Map(prev.set(data.user_id, cursor)));
         }
       } catch (error) {
-        console.error('Error parsing cursor update:', error);
+        console.error("Error parsing cursor update:", error);
       }
     };
 
@@ -98,37 +110,37 @@ export const CursorOverlay: React.FC<CursorOverlayProps> = ({
     return () => {
       ws.close();
     };
-  }, [documentId, currentUserId]);
+  }, [documentId, currentUserId, getUserColor]);
 
   // Track current user's cursor position
   useEffect(() => {
     if (!containerRef.current) return;
 
     const handleMouseMove = (e: MouseEvent) => {
-      const rect = containerRef.current!.getBoundingClientRect();
+      const rect = containerRef.current?.getBoundingClientRect();
       const x = e.clientX - rect.left;
       const y = e.clientY - rect.top;
 
       // Send cursor position to server
-      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-      const wsUrl = `${protocol}//${window.location.host}/api/v1/collaboration/documents/${documentId}`;
+      const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+      const _wsUrl = `${protocol}//${window.location.host}/api/v1/collaboration/documents/${documentId}`;
 
       // For now, we'll use a simple approach - in production you'd maintain a persistent connection
       fetch(`/api/v1/collaboration/documents/${documentId}/cursor`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           position: { x, y },
-          timestamp: Date.now()
-        })
+          timestamp: Date.now(),
+        }),
       }).catch(console.error);
     };
 
     const container = containerRef.current;
-    container.addEventListener('mousemove', handleMouseMove);
+    container.addEventListener("mousemove", handleMouseMove);
 
     return () => {
-      container.removeEventListener('mousemove', handleMouseMove);
+      container.removeEventListener("mousemove", handleMouseMove);
     };
   }, [documentId, containerRef]);
 
@@ -142,7 +154,7 @@ export const CursorOverlay: React.FC<CursorOverlayProps> = ({
             style={{
               left: cursor.x,
               top: cursor.y,
-              transform: 'translate(-2px, -2px)'
+              transform: "translate(-2px, -2px)",
             }}
             initial={{ opacity: 0, scale: 0 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -153,10 +165,10 @@ export const CursorOverlay: React.FC<CursorOverlayProps> = ({
             <div
               className="w-0 h-0"
               style={{
-                borderLeft: '6px solid transparent',
-                borderRight: '6px solid transparent',
+                borderLeft: "6px solid transparent",
+                borderRight: "6px solid transparent",
                 borderBottom: `12px solid ${cursor.color}`,
-                filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.3))'
+                filter: "drop-shadow(0 1px 2px rgba(0,0,0,0.3))",
               }}
             />
 
@@ -165,7 +177,7 @@ export const CursorOverlay: React.FC<CursorOverlayProps> = ({
               className="absolute top-3 left-1/2 transform -translate-x-1/2 px-2 py-1 rounded text-xs font-medium text-white whitespace-nowrap"
               style={{
                 backgroundColor: cursor.color,
-                boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
+                boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
               }}
             >
               {cursor.userName}

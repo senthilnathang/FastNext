@@ -1,31 +1,30 @@
-'use client'
+"use client";
 
-import * as React from "react"
-import { DropdownMenuTrigger } from "@radix-ui/react-dropdown-menu"
-import { Settings2 } from "lucide-react"
-import { Button } from "@/shared/components/ui/button"
+import { DropdownMenuTrigger } from "@radix-ui/react-dropdown-menu";
+import { Settings2 } from "lucide-react";
+import { Button } from "@/shared/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuLabel,
   DropdownMenuSeparator,
-} from "@/shared/components/ui/dropdown-menu"
+} from "@/shared/components/ui/dropdown-menu";
 
 export interface ColumnVisibility {
-  [key: string]: boolean
+  [key: string]: boolean;
 }
 
 export interface ColumnDefinition {
-  id: string
-  label: string
-  canHide?: boolean
+  id: string;
+  label: string;
+  canHide?: boolean;
 }
 
 interface ColumnSelectorProps {
-  columns: ColumnDefinition[]
-  columnVisibility: ColumnVisibility
-  onColumnVisibilityChange: (columnVisibility: ColumnVisibility) => void
+  columns: ColumnDefinition[];
+  columnVisibility: ColumnVisibility;
+  onColumnVisibilityChange: (columnVisibility: ColumnVisibility) => void;
 }
 
 export function ColumnSelector({
@@ -33,14 +32,14 @@ export function ColumnSelector({
   columnVisibility,
   onColumnVisibilityChange,
 }: ColumnSelectorProps) {
-  const hideableColumns = columns.filter(column => column.canHide !== false)
+  const hideableColumns = columns.filter((column) => column.canHide !== false);
 
   const handleColumnToggle = (columnId: string, isVisible: boolean) => {
     onColumnVisibilityChange({
       ...columnVisibility,
       [columnId]: isVisible,
-    })
-  }
+    });
+  };
 
   return (
     <DropdownMenu>
@@ -71,5 +70,5 @@ export function ColumnSelector({
         ))}
       </DropdownMenuContent>
     </DropdownMenu>
-  )
+  );
 }

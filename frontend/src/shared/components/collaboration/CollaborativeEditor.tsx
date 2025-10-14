@@ -2,12 +2,13 @@
  * CollaborativeEditor component demonstrating real-time collaboration features
  */
 
-import React, { useRef, useState, useEffect } from 'react';
-import { CursorOverlay, UserPresence } from './';
-import { Card } from '../ui/card';
-import { Button } from '../ui/button';
-import { Textarea } from '../ui/textarea';
-import { Users, Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff, Users } from "lucide-react";
+import type React from "react";
+import { useEffect, useRef, useState } from "react";
+import { Button } from "../ui/button";
+import { Card } from "../ui/card";
+import { Textarea } from "../ui/textarea";
+import { CursorOverlay, UserPresence } from "./";
 
 interface CollaborativeEditorProps {
   documentId: string;
@@ -18,9 +19,9 @@ interface CollaborativeEditorProps {
 
 export const CollaborativeEditor: React.FC<CollaborativeEditorProps> = ({
   documentId,
-  initialContent = '',
+  initialContent = "",
   currentUserId,
-  className = ''
+  className = "",
 }) => {
   const [content, setContent] = useState(initialContent);
   const [showPresence, setShowPresence] = useState(true);
@@ -32,7 +33,7 @@ export const CollaborativeEditor: React.FC<CollaborativeEditorProps> = ({
   useEffect(() => {
     if (!documentId) return;
 
-    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
     const wsUrl = `${protocol}//${window.location.host}/api/v1/collaboration/documents/${documentId}`;
 
     const ws = new WebSocket(wsUrl);
@@ -41,22 +42,26 @@ export const CollaborativeEditor: React.FC<CollaborativeEditorProps> = ({
       try {
         const data = JSON.parse(event.data);
 
-        if (data.type === 'content_change' && data.user_id !== currentUserId) {
+        if (data.type === "content_change" && data.user_id !== currentUserId) {
           // Apply the operation to the content
           // For now, just replace the entire content (simplified)
-          if (data.operation?.type === 'insert') {
+          if (data.operation?.type === "insert") {
             const pos = data.operation.position || 0;
-            const newContent = content.slice(0, pos) + (data.operation.content || '') + content.slice(pos);
+            const newContent =
+              content.slice(0, pos) +
+              (data.operation.content || "") +
+              content.slice(pos);
             setContent(newContent);
-          } else if (data.operation?.type === 'delete') {
+          } else if (data.operation?.type === "delete") {
             const start = data.operation.position || 0;
             const length = data.operation.length || 0;
-            const newContent = content.slice(0, start) + content.slice(start + length);
+            const newContent =
+              content.slice(0, start) + content.slice(start + length);
             setContent(newContent);
           }
         }
       } catch (error) {
-        console.error('Error processing content change:', error);
+        console.error("Error processing content change:", error);
       }
     };
 
@@ -70,18 +75,18 @@ export const CollaborativeEditor: React.FC<CollaborativeEditorProps> = ({
     setContent(newContent);
 
     // Send content change to server
-    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const wsUrl = `${protocol}//${window.location.host}/api/v1/collaboration/documents/${documentId}`;
+    const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+    const _wsUrl = `${protocol}//${window.location.host}/api/v1/collaboration/documents/${documentId}`;
 
     // For simplicity, send the entire content change
     // In a real implementation, you'd send operational transforms
     fetch(`/api/v1/collaboration/documents/${documentId}/content`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         content: newContent,
-        timestamp: Date.now()
-      })
+        timestamp: Date.now(),
+      }),
     }).catch(console.error);
   };
 
@@ -106,7 +111,11 @@ export const CollaborativeEditor: React.FC<CollaborativeEditorProps> = ({
                 size="sm"
                 onClick={() => setShowCursors(!showCursors)}
               >
-                {showCursors ? <Eye className="w-4 h-4 mr-2" /> : <EyeOff className="w-4 h-4 mr-2" />}
+                {showCursors ? (
+                  <Eye className="w-4 h-4 mr-2" />
+                ) : (
+                  <EyeOff className="w-4 h-4 mr-2" />
+                )}
                 Cursors
               </Button>
             </div>

@@ -1,166 +1,166 @@
 export interface User {
-  id: number
-  email: string
-  username: string
-  full_name?: string
-  bio?: string
-  location?: string
-  website?: string
-  avatar_url?: string
-  is_active: boolean
-  is_verified: boolean
-  created_at: string
-  updated_at?: string
-  last_login_at?: string
+  id: number;
+  email: string;
+  username: string;
+  full_name?: string;
+  bio?: string;
+  location?: string;
+  website?: string;
+  avatar_url?: string;
+  is_active: boolean;
+  is_verified: boolean;
+  created_at: string;
+  updated_at?: string;
+  last_login_at?: string;
 }
 
 export interface Project {
-  id?: number
-  name: string
-  description?: string
-  user_id?: number
-  is_public?: boolean
-  settings?: Record<string, unknown>
-  start_date?: string
-  end_date?: string
-  created_at?: string
-  updated_at?: string
+  id?: number;
+  name: string;
+  description?: string;
+  user_id?: number;
+  is_public?: boolean;
+  settings?: Record<string, unknown>;
+  start_date?: string;
+  end_date?: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface Page {
-  id: number
-  name: string
-  slug: string
-  project_id: number
-  layout: unknown[]
-  meta_data: Record<string, unknown>
-  is_home: boolean
-  order_index: number
-  created_at: string
-  updated_at?: string
+  id: number;
+  name: string;
+  slug: string;
+  project_id: number;
+  layout: unknown[];
+  meta_data: Record<string, unknown>;
+  is_home: boolean;
+  order_index: number;
+  created_at: string;
+  updated_at?: string;
 }
 
 export enum ComponentType {
-  LAYOUT = 'layout',
-  TEXT = 'text',
-  IMAGE = 'image',
-  BUTTON = 'button',
-  FORM = 'form',
-  NAVIGATION = 'navigation',
-  CUSTOM = 'custom',
+  LAYOUT = "layout",
+  TEXT = "text",
+  IMAGE = "image",
+  BUTTON = "button",
+  FORM = "form",
+  NAVIGATION = "navigation",
+  CUSTOM = "custom",
 }
 
 export interface Component {
-  id: number
-  name: string
-  type: ComponentType
-  category: string
-  description?: string
-  project_id?: number
-  schema: Record<string, unknown>
-  default_props: Record<string, unknown>
-  template?: string
-  styles: Record<string, unknown>
-  is_global: boolean
-  is_published: boolean
-  version: string
-  created_at: string
-  updated_at?: string
+  id: number;
+  name: string;
+  type: ComponentType;
+  category: string;
+  description?: string;
+  project_id?: number;
+  schema: Record<string, unknown>;
+  default_props: Record<string, unknown>;
+  template?: string;
+  styles: Record<string, unknown>;
+  is_global: boolean;
+  is_published: boolean;
+  version: string;
+  created_at: string;
+  updated_at?: string;
 }
 
 export interface ComponentInstance {
-  id: number
-  component_id: number
-  page_id: number
-  props: Record<string, unknown>
-  position: Record<string, unknown>
-  parent_id?: number
-  order_index: number
-  created_at: string
-  updated_at?: string
-  component?: Component
+  id: number;
+  component_id: number;
+  page_id: number;
+  props: Record<string, unknown>;
+  position: Record<string, unknown>;
+  parent_id?: number;
+  order_index: number;
+  created_at: string;
+  updated_at?: string;
+  component?: Component;
 }
 
 export interface Asset {
-  id: number
-  name: string
-  original_name: string
-  file_path: string
-  file_url: string
-  mime_type: string
-  file_size: number
-  user_id: number
-  project_id?: number
-  is_public: boolean
-  created_at: string
-  updated_at?: string
+  id: number;
+  name: string;
+  original_name: string;
+  file_path: string;
+  file_url: string;
+  mime_type: string;
+  file_size: number;
+  user_id: number;
+  project_id?: number;
+  is_public: boolean;
+  created_at: string;
+  updated_at?: string;
 }
 
 // API Request/Response types
 export interface CreateProjectRequest {
-  name: string
-  description?: string
-  is_public?: boolean
-  settings?: Record<string, unknown>
-  start_date?: string
-  end_date?: string
+  name: string;
+  description?: string;
+  is_public?: boolean;
+  settings?: Record<string, unknown>;
+  start_date?: string;
+  end_date?: string;
 }
 
 export interface UpdateProjectRequest {
-  name?: string
-  description?: string
-  is_public?: boolean
-  settings?: Record<string, unknown>
-  start_date?: string
-  end_date?: string
+  name?: string;
+  description?: string;
+  is_public?: boolean;
+  settings?: Record<string, unknown>;
+  start_date?: string;
+  end_date?: string;
 }
 
 export interface CreatePageRequest {
-  name: string
-  slug: string
-  project_id: number
-  layout?: unknown[]
-  meta_data?: Record<string, unknown>
-  is_home?: boolean
-  order_index?: number
+  name: string;
+  slug: string;
+  project_id: number;
+  layout?: unknown[];
+  meta_data?: Record<string, unknown>;
+  is_home?: boolean;
+  order_index?: number;
 }
 
 export interface UpdatePageRequest {
-  name?: string
-  slug?: string
-  layout?: unknown[]
-  meta_data?: Record<string, unknown>
-  is_home?: boolean
-  order_index?: number
+  name?: string;
+  slug?: string;
+  layout?: unknown[];
+  meta_data?: Record<string, unknown>;
+  is_home?: boolean;
+  order_index?: number;
 }
 
 export interface CreateComponentRequest {
-  name: string
-  type: ComponentType
-  category?: string
-  description?: string
-  project_id?: number
-  schema?: Record<string, unknown>
-  default_props?: Record<string, unknown>
-  template?: string
-  styles?: Record<string, unknown>
-  is_global?: boolean
-  is_published?: boolean
-  version?: string
+  name: string;
+  type: ComponentType;
+  category?: string;
+  description?: string;
+  project_id?: number;
+  schema?: Record<string, unknown>;
+  default_props?: Record<string, unknown>;
+  template?: string;
+  styles?: Record<string, unknown>;
+  is_global?: boolean;
+  is_published?: boolean;
+  version?: string;
 }
 
 export interface CreateComponentInstanceRequest {
-  component_id: number
-  page_id: number
-  props?: Record<string, unknown>
-  position?: Record<string, unknown>
-  parent_id?: number
-  order_index?: number
+  component_id: number;
+  page_id: number;
+  props?: Record<string, unknown>;
+  position?: Record<string, unknown>;
+  parent_id?: number;
+  order_index?: number;
 }
 
 export interface UpdateComponentInstanceRequest {
-  props?: Record<string, unknown>
-  position?: Record<string, unknown>
-  parent_id?: number
-  order_index?: number
+  props?: Record<string, unknown>;
+  position?: Record<string, unknown>;
+  parent_id?: number;
+  order_index?: number;
 }

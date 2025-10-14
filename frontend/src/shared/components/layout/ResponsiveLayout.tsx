@@ -1,56 +1,66 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from 'react'
-import { usePathname } from 'next/navigation'
-import { cn } from '@/shared/utils'
-import { MobileNavigation, MobileBottomNavigation } from '../mobile/MobileNavigation'
-import { PWAInstallPrompt } from '../ui/PWAInstallPrompt'
-import { useServiceWorker, useOfflineQueue } from '@/shared/hooks/useServiceWorker'
-import { Alert, AlertDescription } from '../ui/alert'
-import { Badge } from '../ui/badge'
-import { Button } from '../ui/button'
-import { WifiOff, RefreshCw } from 'lucide-react'
+import { RefreshCw, WifiOff } from "lucide-react";
+import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
+import {
+  useOfflineQueue,
+  useServiceWorker,
+} from "@/shared/hooks/useServiceWorker";
+import { cn } from "@/shared/utils";
+import {
+  MobileBottomNavigation,
+  MobileNavigation,
+} from "../mobile/MobileNavigation";
+import { Alert, AlertDescription } from "../ui/alert";
+import { Badge } from "../ui/badge";
+import { Button } from "../ui/button";
+import { PWAInstallPrompt } from "../ui/PWAInstallPrompt";
 
 interface ResponsiveLayoutProps {
-  children: React.ReactNode
-  className?: string
-  showBottomNav?: boolean
-  showPWAPrompt?: boolean
+  children: React.ReactNode;
+  className?: string;
+  showBottomNav?: boolean;
+  showPWAPrompt?: boolean;
 }
 
 export function ResponsiveLayout({
   children,
   className,
   showBottomNav = true,
-  showPWAPrompt = true
+  showPWAPrompt = true,
 }: ResponsiveLayoutProps) {
-  const pathname = usePathname()
-  const [isMobile, setIsMobile] = useState(false)
-  const [notificationCount, setNotificationCount] = useState(0)
+  const pathname = usePathname();
+  const [isMobile, setIsMobile] = useState(false);
+  const [notificationCount, setNotificationCount] = useState(0);
 
-  const { isOnline, isUpdateAvailable, skipWaiting } = useServiceWorker()
-  const { queuedRequests: offlineRequests, forceSync, isProcessing } = useOfflineQueue()
+  const { isOnline, isUpdateAvailable, skipWaiting } = useServiceWorker();
+  const {
+    queuedRequests: offlineRequests,
+    forceSync,
+    isProcessing,
+  } = useOfflineQueue();
 
   // Detect mobile viewport
   useEffect(() => {
     const checkMobile = () => {
-      setIsMobile(window.innerWidth < 1024) // lg breakpoint
-    }
+      setIsMobile(window.innerWidth < 1024); // lg breakpoint
+    };
 
-    checkMobile()
-    window.addEventListener('resize', checkMobile)
-    return () => window.removeEventListener('resize', checkMobile)
-  }, [])
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
 
   // Simulate notification count (in real app, get from context/API)
   useEffect(() => {
-    setNotificationCount(Math.floor(Math.random() * 5))
-  }, [pathname])
+    setNotificationCount(Math.floor(Math.random() * 5));
+  }, []);
 
   // Don't show bottom nav on certain pages
-  const hideBottomNav = ['/login', '/register', '/offline'].some(route =>
-    pathname.startsWith(route)
-  )
+  const hideBottomNav = ["/login", "/register", "/offline"].some((route) =>
+    pathname.startsWith(route),
+  );
 
   return (
     <div className="min-h-screen bg-background">
@@ -76,7 +86,9 @@ export function ResponsiveLayout({
         <Alert className="rounded-none border-x-0 border-t-0 border-yellow-200 bg-yellow-50">
           <WifiOff className="h-4 w-4" />
           <AlertDescription className="flex items-center justify-between w-full">
-            <span>You&apos;re currently offline. Some features may be limited.</span>
+            <span>
+              You&apos;re currently offline. Some features may be limited.
+            </span>
             {offlineRequests > 0 && (
               <div className="flex items-center space-x-2">
                 <Badge variant="secondary">{offlineRequests} queued</Badge>
@@ -89,7 +101,7 @@ export function ResponsiveLayout({
                   {isProcessing ? (
                     <RefreshCw className="h-3 w-3 animate-spin" />
                   ) : (
-                    'Sync'
+                    "Sync"
                   )}
                 </Button>
               </div>
@@ -119,12 +131,14 @@ export function ResponsiveLayout({
       )}
 
       {/* Main Content */}
-      <main className={cn(
-        "flex-1",
-        // Add bottom padding on mobile when bottom nav is shown
-        isMobile && showBottomNav && !hideBottomNav && "pb-20",
-        className
-      )}>
+      <main
+        className={cn(
+          "flex-1",
+          // Add bottom padding on mobile when bottom nav is shown
+          isMobile && showBottomNav && !hideBottomNav && "pb-20",
+          className,
+        )}
+      >
         {children}
       </main>
 
@@ -140,46 +154,48 @@ export function ResponsiveLayout({
         </div>
       )}
     </div>
-  )
+  );
 }
 
 // Hook to check if we're in mobile layout
 export function useIsMobile() {
-  const [isMobile, setIsMobile] = useState(false)
+  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
     const checkMobile = () => {
-      setIsMobile(window.innerWidth < 1024)
-    }
+      setIsMobile(window.innerWidth < 1024);
+    };
 
-    checkMobile()
-    window.addEventListener('resize', checkMobile)
-    return () => window.removeEventListener('resize', checkMobile)
-  }, [])
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
 
-  return isMobile
+  return isMobile;
 }
 
 // Hook for responsive breakpoints
 export function useBreakpoint() {
-  const [breakpoint, setBreakpoint] = useState<'sm' | 'md' | 'lg' | 'xl' | '2xl'>('lg')
+  const [breakpoint, setBreakpoint] = useState<
+    "sm" | "md" | "lg" | "xl" | "2xl"
+  >("lg");
 
   useEffect(() => {
     const updateBreakpoint = () => {
-      const width = window.innerWidth
-      if (width < 640) setBreakpoint('sm')
-      else if (width < 768) setBreakpoint('md')
-      else if (width < 1024) setBreakpoint('lg')
-      else if (width < 1280) setBreakpoint('xl')
-      else setBreakpoint('2xl')
-    }
+      const width = window.innerWidth;
+      if (width < 640) setBreakpoint("sm");
+      else if (width < 768) setBreakpoint("md");
+      else if (width < 1024) setBreakpoint("lg");
+      else if (width < 1280) setBreakpoint("xl");
+      else setBreakpoint("2xl");
+    };
 
-    updateBreakpoint()
-    window.addEventListener('resize', updateBreakpoint)
-    return () => window.removeEventListener('resize', updateBreakpoint)
-  }, [])
+    updateBreakpoint();
+    window.addEventListener("resize", updateBreakpoint);
+    return () => window.removeEventListener("resize", updateBreakpoint);
+  }, []);
 
-  return breakpoint
+  return breakpoint;
 }
 
-export default ResponsiveLayout
+export default ResponsiveLayout;

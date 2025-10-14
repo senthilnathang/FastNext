@@ -1,11 +1,11 @@
-'use client';
+"use client";
 
 import {
   type Column,
   flexRender,
   type Table as ReactTable,
   type Row,
-} from '@tanstack/react-table';
+} from "@tanstack/react-table";
 import {
   ArrowDownIcon,
   ArrowUpDownIcon,
@@ -19,12 +19,12 @@ import {
   PlusCircleIcon,
   Settings2Icon,
   X,
-} from 'lucide-react';
-import type * as React from 'react';
+} from "lucide-react";
+import type * as React from "react";
 
-import { cn } from '@/shared/utils';
-import { Badge } from '../ui/badge';
-import { Button } from '../ui/button';
+import { cn } from "@/shared/utils";
+import { Badge } from "../ui/badge";
+import { Button } from "../ui/button";
 import {
   Command,
   CommandEmpty,
@@ -33,7 +33,7 @@ import {
   CommandItem,
   CommandList,
   CommandSeparator,
-} from '../ui/command';
+} from "../ui/command";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -42,17 +42,17 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '../ui/dropdown-menu';
-import { Input } from '../ui/input';
-import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
+} from "../ui/dropdown-menu";
+import { Input } from "../ui/input";
+import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '../ui/select';
-import { Separator } from '../ui/separator';
+} from "../ui/select";
+import { Separator } from "../ui/separator";
 import {
   Table,
   TableBody,
@@ -61,7 +61,7 @@ import {
   TableHeader,
   type TableProps,
   TableRow,
-} from '../ui/table';
+} from "../ui/table";
 
 export type DataTableProps<TData> = TableProps & {
   table: ReactTable<TData>;
@@ -97,7 +97,7 @@ function EnhancedDataTable<TData>({
   const helperColumns = table
     .getAllColumns()
     .filter(
-      (c) => (c.id === 'select' || c.id === 'actions') && c.getIsVisible()
+      (c) => (c.id === "select" || c.id === "actions") && c.getIsVisible(),
     ).length;
 
   const flexColumns = visibleColumns - helperColumns;
@@ -123,7 +123,8 @@ function EnhancedDataTable<TData>({
           {showRowSelectionCount && hasSelection && (
             <div className="flex items-center space-x-2">
               <div className="text-sm text-muted-foreground">
-                {selectedRows.length} of {table.getFilteredRowModel().rows.length} row(s) selected
+                {selectedRows.length} of{" "}
+                {table.getFilteredRowModel().rows.length} row(s) selected
               </div>
               <Button
                 variant="ghost"
@@ -144,7 +145,11 @@ function EnhancedDataTable<TData>({
       {/* Table Container */}
       <div className="rounded-md border">
         <Table {...other}>
-          <TableHeader className={cn(fixedHeader && 'sticky top-0 z-20 bg-background shadow-sm')}>
+          <TableHeader
+            className={cn(
+              fixedHeader && "sticky top-0 z-20 bg-background shadow-sm",
+            )}
+          >
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => (
@@ -165,7 +170,7 @@ function EnhancedDataTable<TData>({
                       ? null
                       : flexRender(
                           header.column.columnDef.header,
-                          header.getContext()
+                          header.getContext(),
                         )}
                   </TableHead>
                 ))}
@@ -177,10 +182,10 @@ function EnhancedDataTable<TData>({
               table.getRowModel().rows.map((row) => (
                 <TableRow
                   key={row.id}
-                  data-state={row.getIsSelected() && 'selected'}
+                  data-state={row.getIsSelected() && "selected"}
                   className={cn(
-                    onRowClicked && 'cursor-pointer hover:bg-muted/50',
-                    row.getIsSelected() && 'bg-muted/50'
+                    onRowClicked && "cursor-pointer hover:bg-muted/50",
+                    row.getIsSelected() && "bg-muted/50",
                   )}
                   onClick={() => {
                     onRowClicked?.(row);
@@ -188,7 +193,10 @@ function EnhancedDataTable<TData>({
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext(),
+                      )}
                     </TableCell>
                   ))}
                 </TableRow>
@@ -201,7 +209,9 @@ function EnhancedDataTable<TData>({
                 >
                   <div className="flex flex-col items-center justify-center space-y-2 text-muted-foreground">
                     <div className="text-lg">No results found</div>
-                    <div className="text-sm">Try adjusting your search or filters</div>
+                    <div className="text-sm">
+                      Try adjusting your search or filters
+                    </div>
                   </div>
                 </TableCell>
               </TableRow>
@@ -232,7 +242,7 @@ function EnhancedDataTableColumnHeader<TData, TValue>({
   }
 
   return (
-    <div className={cn('flex items-center space-x-2', className)}>
+    <div className={cn("flex items-center space-x-2", className)}>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button
@@ -241,9 +251,9 @@ function EnhancedDataTableColumnHeader<TData, TValue>({
             className="-ml-3 h-8 text-sm data-[state=open]:bg-accent"
           >
             <span>{title}</span>
-            {column.getIsSorted() === 'desc' ? (
+            {column.getIsSorted() === "desc" ? (
               <ArrowDownIcon className="ml-2 h-4 w-4" />
-            ) : column.getIsSorted() === 'asc' ? (
+            ) : column.getIsSorted() === "asc" ? (
               <ArrowUpIcon className="ml-2 h-4 w-4" />
             ) : (
               <ArrowUpDownIcon className="ml-2 h-4 w-4" />
@@ -314,7 +324,7 @@ function EnhancedDataTableColumnOptionsHeader<TData>({
           .getAllColumns()
           .filter(
             (column) =>
-              typeof column.accessorFn !== 'undefined' && column.getCanHide()
+              typeof column.accessorFn !== "undefined" && column.getCanHide(),
           )
           .map((column) => (
             <DropdownMenuCheckboxItem
@@ -365,7 +375,9 @@ function EnhancedDataTablePagination<TData>({
               }}
             >
               <SelectTrigger className="h-8 w-[70px]">
-                <SelectValue placeholder={table.getState().pagination.pageSize} />
+                <SelectValue
+                  placeholder={table.getState().pagination.pageSize}
+                />
               </SelectTrigger>
               <SelectContent side="top">
                 {pageSizeOptions.map((pageSize) => (
@@ -445,14 +457,14 @@ function EnhancedDataTableBulkActions<TData>({
   }
 
   return (
-    <div className={cn(
-      "fixed bottom-4 left-1/2 z-50 flex h-16 max-w-md -translate-x-1/2 items-center justify-between rounded-lg border bg-background px-6 py-3 shadow-lg animate-in slide-in-from-bottom-2",
-      className
-    )}>
+    <div
+      className={cn(
+        "fixed bottom-4 left-1/2 z-50 flex h-16 max-w-md -translate-x-1/2 items-center justify-between rounded-lg border bg-background px-6 py-3 shadow-lg animate-in slide-in-from-bottom-2",
+        className,
+      )}
+    >
       <div className="flex items-center space-x-2">
-        <p className="text-sm font-semibold">
-          {selectedRows.length} selected
-        </p>
+        <p className="text-sm font-semibold">{selectedRows.length} selected</p>
         <Button
           variant="ghost"
           size="sm"
@@ -462,9 +474,7 @@ function EnhancedDataTableBulkActions<TData>({
           <X className="h-4 w-4" />
         </Button>
       </div>
-      <div className="flex items-center space-x-2">
-        {children}
-      </div>
+      <div className="flex items-center space-x-2">{children}</div>
     </div>
   );
 }
@@ -561,7 +571,7 @@ function EnhancedDataTableFilter({
                         "mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-primary",
                         isSelected
                           ? "bg-primary text-primary-foreground"
-                          : "opacity-50 [&_svg]:invisible"
+                          : "opacity-50 [&_svg]:invisible",
                       )}
                     >
                       <CheckIcon className="h-4 w-4" />

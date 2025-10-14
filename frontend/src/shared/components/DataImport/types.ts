@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
 export interface ImportColumn {
   key: string;
   label: string;
-  type: 'string' | 'number' | 'date' | 'boolean' | 'object' | 'email' | 'url';
+  type: "string" | "number" | "date" | "boolean" | "object" | "email" | "url";
   required?: boolean;
   unique?: boolean;
   validation?: ImportValidationRule[];
@@ -13,7 +13,7 @@ export interface ImportColumn {
 }
 
 export interface ImportValidationRule {
-  type: 'required' | 'email' | 'url' | 'min' | 'max' | 'pattern' | 'custom';
+  type: "required" | "email" | "url" | "min" | "max" | "pattern" | "custom";
   value?: any;
   message: string;
   validator?: (value: any, row: Record<string, any>) => boolean | string;
@@ -35,16 +35,23 @@ export interface ImportOptions {
   skipEmptyRows?: boolean;
   skipFirstRows?: number;
   maxRows?: number;
-  onDuplicate?: 'skip' | 'update' | 'error';
+  onDuplicate?: "skip" | "update" | "error";
   validateOnly?: boolean;
   batchSize?: number;
 }
 
-export type ImportFormat = 'csv' | 'json' | 'excel' | 'xml';
+export type ImportFormat = "csv" | "json" | "excel" | "xml";
 
 export interface ImportJob {
   id: string;
-  status: 'pending' | 'parsing' | 'validating' | 'importing' | 'completed' | 'failed' | 'cancelled';
+  status:
+    | "pending"
+    | "parsing"
+    | "validating"
+    | "importing"
+    | "completed"
+    | "failed"
+    | "cancelled";
   progress: number;
   totalRows?: number;
   processedRows?: number;
@@ -65,7 +72,7 @@ export interface ImportError {
   column?: string;
   field?: string;
   message: string;
-  severity: 'error' | 'warning';
+  severity: "error" | "warning";
   value?: any;
 }
 
@@ -91,7 +98,7 @@ export interface DuplicateInfo {
   rows: number[];
   field: string;
   value: any;
-  action: 'skip' | 'update' | 'import';
+  action: "skip" | "update" | "import";
 }
 
 export interface ImportPreview {
@@ -137,8 +144,14 @@ export interface ImportResponse {
 export interface ImportComponentProps {
   tableName?: string;
   columns: ImportColumn[];
-  onImport?: (data: Record<string, any>[], options: ImportOptions) => Promise<ImportResponse>;
-  onValidate?: (data: Record<string, any>[], mappings: ImportFieldMapping[]) => Promise<ImportValidationResult>;
+  onImport?: (
+    data: Record<string, any>[],
+    options: ImportOptions,
+  ) => Promise<ImportResponse>;
+  onValidate?: (
+    data: Record<string, any>[],
+    mappings: ImportFieldMapping[],
+  ) => Promise<ImportValidationResult>;
   maxFileSize?: number;
   maxRows?: number;
   allowedFormats?: ImportFormat[];

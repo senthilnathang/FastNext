@@ -1,39 +1,39 @@
-'use client';
+"use client";
 
-import React, { useState, useMemo } from 'react';
-import { Button } from '@/shared/components/ui/button';
-import { Checkbox } from '@/shared/components/ui/checkbox';
-import { Input } from '@/shared/components/ui/input';
-import { Label } from '@/shared/components/ui/label';
 import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from '@/shared/components/ui/collapsible';
+  Calendar,
+  CheckSquare,
+  ChevronDown,
+  ChevronRight,
+  Eye,
+  EyeOff,
+  FileText,
+  Hash,
+  Search,
+  Square,
+  ToggleLeft,
+  Type,
+} from "lucide-react";
+import { useMemo, useState } from "react";
+import { Badge } from "@/shared/components/ui/badge";
+import { Button } from "@/shared/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/shared/components/ui/card';
-import { Badge } from '@/shared/components/ui/badge';
-import { Separator } from '@/shared/components/ui/separator';
+} from "@/shared/components/ui/card";
+import { Checkbox } from "@/shared/components/ui/checkbox";
 import {
-  Search,
-  ChevronDown,
-  ChevronRight,
-  CheckSquare,
-  Square,
-  Eye,
-  EyeOff,
-  Type,
-  Hash,
-  Calendar,
-  ToggleLeft,
-  FileText
-} from 'lucide-react';
-import { ExportColumn } from '../types';
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/shared/components/ui/collapsible";
+import { Input } from "@/shared/components/ui/input";
+import { Label } from "@/shared/components/ui/label";
+import { Separator } from "@/shared/components/ui/separator";
+import type { ExportColumn } from "../types";
 
 interface FieldSelectorProps {
   columns: ExportColumn[];
@@ -42,37 +42,37 @@ interface FieldSelectorProps {
   className?: string;
 }
 
-const getTypeIcon = (type: ExportColumn['type']) => {
+const getTypeIcon = (type: ExportColumn["type"]) => {
   switch (type) {
-    case 'string':
+    case "string":
       return <Type className="h-3 w-3" />;
-    case 'number':
+    case "number":
       return <Hash className="h-3 w-3" />;
-    case 'date':
+    case "date":
       return <Calendar className="h-3 w-3" />;
-    case 'boolean':
+    case "boolean":
       return <ToggleLeft className="h-3 w-3" />;
-    case 'object':
+    case "object":
       return <FileText className="h-3 w-3" />;
     default:
       return <Type className="h-3 w-3" />;
   }
 };
 
-const getTypeColor = (type: ExportColumn['type']) => {
+const getTypeColor = (type: ExportColumn["type"]) => {
   switch (type) {
-    case 'string':
-      return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300';
-    case 'number':
-      return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300';
-    case 'date':
-      return 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300';
-    case 'boolean':
-      return 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300';
-    case 'object':
-      return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300';
+    case "string":
+      return "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300";
+    case "number":
+      return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300";
+    case "date":
+      return "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300";
+    case "boolean":
+      return "bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300";
+    case "object":
+      return "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300";
     default:
-      return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300';
+      return "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300";
   }
 };
 
@@ -80,17 +80,20 @@ export function FieldSelector({
   columns,
   selectedColumns,
   onSelectionChange,
-  className
+  className,
 }: FieldSelectorProps) {
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
   const [groupByType, setGroupByType] = useState(false);
-  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set(['all']));
+  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(
+    new Set(["all"]),
+  );
 
   const filteredColumns = useMemo(() => {
-    return columns.filter(column =>
-      column.label.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      column.key.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      column.description?.toLowerCase().includes(searchTerm.toLowerCase())
+    return columns.filter(
+      (column) =>
+        column.label.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        column.key.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        column.description?.toLowerCase().includes(searchTerm.toLowerCase()),
     );
   }, [columns, searchTerm]);
 
@@ -99,14 +102,17 @@ export function FieldSelector({
       return { all: filteredColumns };
     }
 
-    return filteredColumns.reduce((groups, column) => {
-      const type = column.type || 'string';
-      if (!groups[type]) {
-        groups[type] = [];
-      }
-      groups[type].push(column);
-      return groups;
-    }, {} as Record<string, ExportColumn[]>);
+    return filteredColumns.reduce(
+      (groups, column) => {
+        const type = column.type || "string";
+        if (!groups[type]) {
+          groups[type] = [];
+        }
+        groups[type].push(column);
+        return groups;
+      },
+      {} as Record<string, ExportColumn[]>,
+    );
   }, [filteredColumns, groupByType]);
 
   const selectedCount = selectedColumns.length;
@@ -117,29 +123,33 @@ export function FieldSelector({
     if (isAllSelected) {
       onSelectionChange([]);
     } else {
-      onSelectionChange(columns.map(col => col.key));
+      onSelectionChange(columns.map((col) => col.key));
     }
   };
 
   const handleColumnToggle = (columnKey: string) => {
     if (selectedColumns.includes(columnKey)) {
-      onSelectionChange(selectedColumns.filter(key => key !== columnKey));
+      onSelectionChange(selectedColumns.filter((key) => key !== columnKey));
     } else {
       onSelectionChange([...selectedColumns, columnKey]);
     }
   };
 
   const handleGroupToggle = (groupColumns: ExportColumn[]) => {
-    const groupKeys = groupColumns.map(col => col.key);
-    const allGroupSelected = groupKeys.every(key => selectedColumns.includes(key));
+    const groupKeys = groupColumns.map((col) => col.key);
+    const allGroupSelected = groupKeys.every((key) =>
+      selectedColumns.includes(key),
+    );
 
     if (allGroupSelected) {
       // Deselect all in group
-      onSelectionChange(selectedColumns.filter(key => !groupKeys.includes(key)));
+      onSelectionChange(
+        selectedColumns.filter((key) => !groupKeys.includes(key)),
+      );
     } else {
       // Select all in group
       const newSelection = [...selectedColumns];
-      groupKeys.forEach(key => {
+      groupKeys.forEach((key) => {
         if (!newSelection.includes(key)) {
           newSelection.push(key);
         }
@@ -187,7 +197,10 @@ export function FieldSelector({
               </Badge>
             )}
 
-            <Badge variant="secondary" className={`text-xs ${getTypeColor(column.type)}`}>
+            <Badge
+              variant="secondary"
+              className={`text-xs ${getTypeColor(column.type)}`}
+            >
               <div className="flex items-center space-x-1">
                 {getTypeIcon(column.type)}
                 <span>{column.type}</span>
@@ -196,9 +209,7 @@ export function FieldSelector({
           </div>
 
           {column.key !== column.label && (
-            <div className="text-xs text-gray-500 mt-1">
-              {column.key}
-            </div>
+            <div className="text-xs text-gray-500 mt-1">{column.key}</div>
           )}
 
           {column.description && (
@@ -215,7 +226,11 @@ export function FieldSelector({
         </div>
 
         <div className="flex items-center text-gray-400">
-          {isSelected ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
+          {isSelected ? (
+            <Eye className="h-4 w-4" />
+          ) : (
+            <EyeOff className="h-4 w-4" />
+          )}
         </div>
       </div>
     );
@@ -223,13 +238,14 @@ export function FieldSelector({
 
   const renderGroup = (groupName: string, groupColumns: ExportColumn[]) => {
     const isExpanded = expandedGroups.has(groupName);
-    const groupSelectedCount = groupColumns.filter(col =>
-      selectedColumns.includes(col.key)
+    const groupSelectedCount = groupColumns.filter((col) =>
+      selectedColumns.includes(col.key),
     ).length;
     const isGroupAllSelected = groupSelectedCount === groupColumns.length;
-    const isGroupPartiallySelected = groupSelectedCount > 0 && groupSelectedCount < groupColumns.length;
+    const isGroupPartiallySelected =
+      groupSelectedCount > 0 && groupSelectedCount < groupColumns.length;
 
-    if (groupByType && groupName !== 'all') {
+    if (groupByType && groupName !== "all") {
       return (
         <div key={groupName} className="space-y-2">
           <Collapsible>
@@ -267,7 +283,7 @@ export function FieldSelector({
                 </div>
 
                 <div className="flex items-center space-x-2">
-                  {getTypeIcon(groupName as ExportColumn['type'])}
+                  {getTypeIcon(groupName as ExportColumn["type"])}
                   <span className="font-medium capitalize">{groupName}</span>
                   <Badge variant="outline">
                     {groupSelectedCount}/{groupColumns.length}
@@ -298,7 +314,8 @@ export function FieldSelector({
           <div>
             <CardTitle className="text-lg">Field Selection</CardTitle>
             <CardDescription>
-              Choose which fields to include in your export ({selectedCount}/{totalCount} selected)
+              Choose which fields to include in your export ({selectedCount}/
+              {totalCount} selected)
             </CardDescription>
           </div>
 
@@ -308,7 +325,7 @@ export function FieldSelector({
               size="sm"
               onClick={() => setGroupByType(!groupByType)}
             >
-              {groupByType ? 'Ungroup' : 'Group by Type'}
+              {groupByType ? "Ungroup" : "Group by Type"}
             </Button>
           </div>
         </div>
@@ -353,7 +370,7 @@ export function FieldSelector({
         ) : (
           <div className="space-y-3 max-h-96 overflow-y-auto">
             {Object.entries(groupedColumns).map(([groupName, groupColumns]) =>
-              renderGroup(groupName, groupColumns)
+              renderGroup(groupName, groupColumns),
             )}
           </div>
         )}
@@ -362,12 +379,16 @@ export function FieldSelector({
           <>
             <Separator className="my-4" />
             <div className="flex items-center justify-between text-sm text-gray-600 dark:text-gray-400">
-              <span>{selectedCount} field{selectedCount !== 1 ? 's' : ''} selected</span>
+              <span>
+                {selectedCount} field{selectedCount !== 1 ? "s" : ""} selected
+              </span>
               {selectedCount < totalCount && (
                 <Button
                   variant="link"
                   size="sm"
-                  onClick={() => onSelectionChange(columns.map(col => col.key))}
+                  onClick={() =>
+                    onSelectionChange(columns.map((col) => col.key))
+                  }
                   className="h-auto p-0 text-xs"
                 >
                   Select remaining {totalCount - selectedCount}

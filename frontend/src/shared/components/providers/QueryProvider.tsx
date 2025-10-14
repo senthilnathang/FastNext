@@ -1,13 +1,13 @@
-"use client"
+"use client";
 
-import React from 'react'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
-import { apiUtils, type ApiError } from '@/shared/services/api/client'
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import type React from "react";
+import { type ApiError, apiUtils } from "@/shared/services/api/client";
 
 // Global error handler for React Query
 const handleGlobalError = (error: Error | ApiError) => {
-  console.error('[Query Error]', error)
+  console.error("[Query Error]", error);
 
   // You could integrate with error tracking service here
   // e.g., Sentry.captureException(error)
@@ -15,9 +15,9 @@ const handleGlobalError = (error: Error | ApiError) => {
   // Show user-friendly error messages for API errors
   if (apiUtils.isApiError(error)) {
     // You could show a toast notification here
-    console.error('API Error:', apiUtils.getErrorMessage(error))
+    console.error("API Error:", apiUtils.getErrorMessage(error));
   }
-}
+};
 
 // Create query client with enhanced configuration
 const queryClient = new QueryClient({
@@ -30,22 +30,27 @@ const queryClient = new QueryClient({
       // Error handling
       retry: (failureCount, error) => {
         // Don't retry on 4xx errors (client errors)
-        if (apiUtils.isApiError(error) && error.status && error.status >= 400 && error.status < 500) {
-          return false
+        if (
+          apiUtils.isApiError(error) &&
+          error.status &&
+          error.status >= 400 &&
+          error.status < 500
+        ) {
+          return false;
         }
 
         // Retry network/timeout errors up to 2 times
         if (apiUtils.isNetworkError(error) || apiUtils.isTimeoutError(error)) {
-          return failureCount < 2
+          return failureCount < 2;
         }
 
         // Retry server errors once
         if (apiUtils.isApiError(error) && error.status && error.status >= 500) {
-          return failureCount < 1
+          return failureCount < 1;
         }
 
         // Default retry behavior for other errors
-        return failureCount < 1
+        return failureCount < 1;
       },
 
       retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000), // Exponential backoff
@@ -64,14 +69,13 @@ const queryClient = new QueryClient({
       onError: handleGlobalError,
 
       // Network error handling
-      networkMode: 'online', // Only run when online
+      networkMode: "online", // Only run when online
     },
   },
-
-})
+});
 
 interface QueryProviderProps {
-  children: React.ReactNode
+  children: React.ReactNode;
 }
 
 export default function QueryProvider({ children }: QueryProviderProps) {
@@ -79,14 +83,12 @@ export default function QueryProvider({ children }: QueryProviderProps) {
     <QueryClientProvider client={queryClient}>
       {children}
       {/* Show React Query DevTools in development */}
-      {process.env.NODE_ENV === 'development' && (
-        <ReactQueryDevtools
-          initialIsOpen={false}
-        />
+      {process.env.NODE_ENV === "development" && (
+        <ReactQueryDevtools initialIsOpen={false} />
       )}
     </QueryClientProvider>
-  )
+  );
 }
 
 // Export query client for use in other files (e.g., SSR, prefetching)
-export { queryClient }
+export { queryClient };

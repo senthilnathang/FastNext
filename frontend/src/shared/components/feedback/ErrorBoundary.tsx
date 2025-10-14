@@ -1,43 +1,46 @@
-"use client"
+"use client";
 
-import React from 'react'
-import { apiUtils } from '@/shared/services/api/client'
+import React from "react";
+import { apiUtils } from "@/shared/services/api/client";
 
 interface ErrorBoundaryState {
-  hasError: boolean
-  error?: Error
+  hasError: boolean;
+  error?: Error;
 }
 
 interface ErrorBoundaryProps {
-  children: React.ReactNode
-  fallback?: (error: Error, resetError: () => void) => React.ReactNode
+  children: React.ReactNode;
+  fallback?: (error: Error, resetError: () => void) => React.ReactNode;
 }
 
-export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
+export class ErrorBoundary extends React.Component<
+  ErrorBoundaryProps,
+  ErrorBoundaryState
+> {
   constructor(props: ErrorBoundaryProps) {
-    super(props)
-    this.state = { hasError: false }
+    super(props);
+    this.state = { hasError: false };
   }
 
   static getDerivedStateFromError(error: Error): ErrorBoundaryState {
-    return { hasError: true, error }
+    return { hasError: true, error };
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error('ErrorBoundary caught an error:', error, errorInfo)
+    console.error("ErrorBoundary caught an error:", error, errorInfo);
 
     // You could send this to an error reporting service
     // e.g., Sentry.captureException(error, { contexts: { react: errorInfo } })
   }
 
   resetError = () => {
-    this.setState({ hasError: false, error: undefined })
-  }
+    this.setState({ hasError: false, error: undefined });
+  };
 
   render() {
     if (this.state.hasError && this.state.error) {
       if (this.props.fallback) {
-        return this.props.fallback(this.state.error, this.resetError)
+        return this.props.fallback(this.state.error, this.resetError);
       }
 
       return (
@@ -45,22 +48,22 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
           error={this.state.error}
           resetError={this.resetError}
         />
-      )
+      );
     }
 
-    return this.props.children
+    return this.props.children;
   }
 }
 
 interface ErrorFallbackProps {
-  error: Error
-  resetError: () => void
+  error: Error;
+  resetError: () => void;
 }
 
 function DefaultErrorFallback({ error, resetError }: ErrorFallbackProps) {
   const errorMessage = apiUtils.isApiError(error)
     ? apiUtils.getErrorMessage(error)
-    : error.message || 'An unexpected error occurred'
+    : error.message || "An unexpected error occurred";
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
@@ -84,9 +87,7 @@ function DefaultErrorFallback({ error, resetError }: ErrorFallbackProps) {
           <h2 className="mt-6 text-3xl font-extrabold text-gray-900">
             Something went wrong
           </h2>
-          <p className="mt-2 text-sm text-gray-600">
-            {errorMessage}
-          </p>
+          <p className="mt-2 text-sm text-gray-600">{errorMessage}</p>
           <div className="mt-6">
             <button
               onClick={resetError}
@@ -95,7 +96,7 @@ function DefaultErrorFallback({ error, resetError }: ErrorFallbackProps) {
               Try again
             </button>
           </div>
-          {process.env.NODE_ENV === 'development' && (
+          {process.env.NODE_ENV === "development" && (
             <details className="mt-4 text-left">
               <summary className="cursor-pointer text-sm text-gray-500 hover:text-gray-700">
                 Error details (development only)
@@ -108,13 +109,13 @@ function DefaultErrorFallback({ error, resetError }: ErrorFallbackProps) {
         </div>
       </div>
     </div>
-  )
+  );
 }
 
 // Hook version for functional components
 export function useErrorHandler() {
   return (error: Error) => {
-    console.error('Handled error:', error)
+    console.error("Handled error:", error);
 
     // You could integrate with error tracking here
     // e.g., Sentry.captureException(error)
@@ -122,7 +123,7 @@ export function useErrorHandler() {
     // Show user-friendly error message
     if (apiUtils.isApiError(error)) {
       // You could show a toast notification here
-      console.error('API Error:', apiUtils.getErrorMessage(error))
+      console.error("API Error:", apiUtils.getErrorMessage(error));
     }
-  }
+  };
 }

@@ -11,129 +11,141 @@
  * - Page components with routing
  */
 
-import { writeFileSync, mkdirSync, existsSync, readFileSync } from 'fs'
-import { join } from 'path'
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { join } from "node:path";
 
 export interface FieldDefinition {
-  name: string
-  type: 'string' | 'number' | 'boolean' | 'date' | 'email' | 'url' | 'text' | 'select' | 'multiselect'
-  required?: boolean
-  label?: string
-  placeholder?: string
-  options?: string[] // For select/multiselect types
+  name: string;
+  type:
+    | "string"
+    | "number"
+    | "boolean"
+    | "date"
+    | "email"
+    | "url"
+    | "text"
+    | "select"
+    | "multiselect";
+  required?: boolean;
+  label?: string;
+  placeholder?: string;
+  options?: string[]; // For select/multiselect types
   validation?: {
-    min?: number
-    max?: number
-    pattern?: string
-    message?: string
-  }
-  displayInList?: boolean // Show in DataTable
-  searchable?: boolean // Allow searching by this field
-  sortable?: boolean // Allow sorting by this field
-  filterType?: 'text' | 'select' | 'date' | 'boolean' // Filter type in DataTable
+    min?: number;
+    max?: number;
+    pattern?: string;
+    message?: string;
+  };
+  displayInList?: boolean; // Show in DataTable
+  searchable?: boolean; // Allow searching by this field
+  sortable?: boolean; // Allow sorting by this field
+  filterType?: "text" | "select" | "date" | "boolean"; // Filter type in DataTable
 }
 
 export interface ModelDefinition {
-  name: string // e.g., "Product", "Category", "Order"
-  pluralName?: string // e.g., "Products", "Categories", "Orders"
-  description?: string
-  tableName?: string // Database table name (snake_case)
-  icon?: string // Lucide icon name
-  module?: string // Which module permissions it needs
-  fields: FieldDefinition[]
-  hasTimestamps?: boolean // created_at, updated_at
-  hasStatus?: boolean // is_active field
+  name: string; // e.g., "Product", "Category", "Order"
+  pluralName?: string; // e.g., "Products", "Categories", "Orders"
+  description?: string;
+  tableName?: string; // Database table name (snake_case)
+  icon?: string; // Lucide icon name
+  module?: string; // Which module permissions it needs
+  fields: FieldDefinition[];
+  hasTimestamps?: boolean; // created_at, updated_at
+  hasStatus?: boolean; // is_active field
   relationships?: {
-    belongsTo?: string[] // Foreign key relationships
-    hasMany?: string[] // One-to-many relationships
-  }
+    belongsTo?: string[]; // Foreign key relationships
+    hasMany?: string[]; // One-to-many relationships
+  };
 }
 
 export class ScaffoldGenerator {
-  private basePath: string
-  private model: ModelDefinition
+  private basePath: string;
+  private model: ModelDefinition;
 
-  constructor(model: ModelDefinition, basePath = '/home/sen/FastNext/frontend/src') {
-    this.model = model
-    this.basePath = basePath
+  constructor(
+    model: ModelDefinition,
+    basePath = "/home/sen/FastNext/frontend/src",
+  ) {
+    this.model = model;
+    this.basePath = basePath;
 
     // Set defaults
     if (!this.model.pluralName) {
-      this.model.pluralName = this.model.name + 's'
+      this.model.pluralName = `${this.model.name}s`;
     }
     if (!this.model.tableName) {
-      this.model.tableName = this.camelToSnake(this.model.pluralName.toLowerCase())
+      this.model.tableName = this.camelToSnake(
+        this.model.pluralName.toLowerCase(),
+      );
     }
     if (!this.model.icon) {
-      this.model.icon = 'FileText'
+      this.model.icon = "FileText";
     }
     if (this.model.hasTimestamps === undefined) {
-      this.model.hasTimestamps = true
+      this.model.hasTimestamps = true;
     }
     if (this.model.hasStatus === undefined) {
-      this.model.hasStatus = true
+      this.model.hasStatus = true;
     }
   }
 
   // Utility methods
   private camelToSnake(str: string): string {
-    return str.replace(/[A-Z]/g, letter => `_${letter.toLowerCase()}`)
-  }
-
-  private snakeToCamel(str: string): string {
-    return str.replace(/([-_][a-z])/g, group =>
-      group.toUpperCase().replace('-', '').replace('_', '')
-    )
+    return str.replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`);
   }
 
   private capitalize(str: string): string {
-    return str.charAt(0).toUpperCase() + str.slice(1)
+    return str.charAt(0).toUpperCase() + str.slice(1);
   }
 
   private lowercaseFirst(str: string): string {
-    return str.charAt(0).toLowerCase() + str.slice(1)
+    return str.charAt(0).toLowerCase() + str.slice(1);
   }
 
   // Generate TypeScript interfaces
   generateTypes(): string {
-    const modelName = this.model.name
-    const fields = this.model.fields
+    const modelName = this.model.name;
+    const fields = this.model.fields;
 
-    const interfaceFields = fields.map(field => {
-      const optional = field.required ? '' : '?'
-      let type: string
+    const interfaceFields = fields
+      .map((field) => {
+        const optional = field.required ? "" : "?";
+        let type: string;
 
-      switch (field.type) {
-        case 'number':
-          type = 'number'
-          break
-        case 'boolean':
-          type = 'boolean'
-          break
-        case 'date':
-          type = 'string' // ISO string format
-          break
-        case 'select':
-          type = field.options ? `'${field.options.join("' | '")}'` : 'string'
-          break
-        case 'multiselect':
-          type = 'string[]'
-          break
-        default:
-          type = 'string'
-      }
+        switch (field.type) {
+          case "number":
+            type = "number";
+            break;
+          case "boolean":
+            type = "boolean";
+            break;
+          case "date":
+            type = "string"; // ISO string format
+            break;
+          case "select":
+            type = field.options
+              ? `'${field.options.join("' | '")}'`
+              : "string";
+            break;
+          case "multiselect":
+            type = "string[]";
+            break;
+          default:
+            type = "string";
+        }
 
-      return `  ${field.name}${optional}: ${type}`
-    }).join('\n')
+        return `  ${field.name}${optional}: ${type}`;
+      })
+      .join("\n");
 
     // Add standard fields
-    let standardFields = '  id: number'
+    let standardFields = "  id: number";
     if (this.model.hasTimestamps) {
-      standardFields += '\n  created_at: string'
-      standardFields += '\n  updated_at?: string'
+      standardFields += "\n  created_at: string";
+      standardFields += "\n  updated_at?: string";
     }
     if (this.model.hasStatus) {
-      standardFields += '\n  is_active: boolean'
+      standardFields += "\n  is_active: boolean";
     }
 
     const template = `import { apiClient } from './client'
@@ -146,50 +158,96 @@ ${interfaceFields}
 }
 
 export interface Create${modelName}Request {
-${fields.filter(f => f.required).map(f => {
-  let type: string
-  switch (f.type) {
-    case 'number': type = 'number'; break
-    case 'boolean': type = 'boolean'; break
-    case 'date': type = 'string'; break
-    case 'multiselect': type = 'string[]'; break
-    case 'select': type = f.options ? `'${f.options.join("' | '")}'` : 'string'; break
-    default: type = 'string'
-  }
-  return `  ${f.name}: ${type}`
-}).join('\n')}${fields.filter(f => !f.required).map(f => {
-  let type: string
-  switch (f.type) {
-    case 'number': type = 'number'; break
-    case 'boolean': type = 'boolean'; break
-    case 'date': type = 'string'; break
-    case 'multiselect': type = 'string[]'; break
-    case 'select': type = f.options ? `'${f.options.join("' | '")}'` : 'string'; break
-    default: type = 'string'
-  }
-  return `  ${f.name}?: ${type}`
-}).join('\n')}${this.model.hasStatus ? '\n  is_active?: boolean' : ''}
+${fields
+  .filter((f) => f.required)
+  .map((f) => {
+    let type: string;
+    switch (f.type) {
+      case "number":
+        type = "number";
+        break;
+      case "boolean":
+        type = "boolean";
+        break;
+      case "date":
+        type = "string";
+        break;
+      case "multiselect":
+        type = "string[]";
+        break;
+      case "select":
+        type = f.options ? `'${f.options.join("' | '")}'` : "string";
+        break;
+      default:
+        type = "string";
+    }
+    return `  ${f.name}: ${type}`;
+  })
+  .join("\n")}${fields
+  .filter((f) => !f.required)
+  .map((f) => {
+    let type: string;
+    switch (f.type) {
+      case "number":
+        type = "number";
+        break;
+      case "boolean":
+        type = "boolean";
+        break;
+      case "date":
+        type = "string";
+        break;
+      case "multiselect":
+        type = "string[]";
+        break;
+      case "select":
+        type = f.options ? `'${f.options.join("' | '")}'` : "string";
+        break;
+      default:
+        type = "string";
+    }
+    return `  ${f.name}?: ${type}`;
+  })
+  .join("\n")}${this.model.hasStatus ? "\n  is_active?: boolean" : ""}
 }
 
 export interface Update${modelName}Request {
-${fields.map(f => {
-  let type: string
-  switch (f.type) {
-    case 'number': type = 'number'; break
-    case 'boolean': type = 'boolean'; break
-    case 'date': type = 'string'; break
-    case 'multiselect': type = 'string[]'; break
-    case 'select': type = f.options ? `'${f.options.join("' | '")}'` : 'string'; break
-    default: type = 'string'
-  }
-  return `  ${f.name}?: ${type}`
-}).join('\n')}${this.model.hasStatus ? '\n  is_active?: boolean' : ''}
+${fields
+  .map((f) => {
+    let type: string;
+    switch (f.type) {
+      case "number":
+        type = "number";
+        break;
+      case "boolean":
+        type = "boolean";
+        break;
+      case "date":
+        type = "string";
+        break;
+      case "multiselect":
+        type = "string[]";
+        break;
+      case "select":
+        type = f.options ? `'${f.options.join("' | '")}'` : "string";
+        break;
+      default:
+        type = "string";
+    }
+    return `  ${f.name}?: ${type}`;
+  })
+  .join("\n")}${this.model.hasStatus ? "\n  is_active?: boolean" : ""}
 }
 
 export interface ${modelName}ListParams {
   skip?: number
   limit?: number
-  search?: string${this.model.hasStatus ? '\n  is_active?: boolean' : ''}${fields.filter(f => f.filterType).map(f => `\n  ${f.name}?: ${f.type === 'boolean' ? 'boolean' : 'string'}`).join('')}
+  search?: string${this.model.hasStatus ? "\n  is_active?: boolean" : ""}${fields
+    .filter((f) => f.filterType)
+    .map(
+      (f) => `\n  ${f.name}?: ${f.type === "boolean" ? "boolean" : "string"}`,
+    )
+    .join("")}
 }
 
 export interface ${modelName}ListResponse {
@@ -207,9 +265,18 @@ export const ${this.lowercaseFirst(this.model.pluralName!)}Api = {
 
     if (params?.skip !== undefined) searchParams.set('skip', params.skip.toString())
     if (params?.limit !== undefined) searchParams.set('limit', params.limit.toString())
-    if (params?.search) searchParams.set('search', params.search)${this.model.hasStatus ? `
-    if (params?.is_active !== undefined) searchParams.set('is_active', params.is_active.toString())` : ''}${fields.filter(f => f.filterType).map(f => `
-    if (params?.${f.name}) searchParams.set('${f.name}', params.${f.name}.toString())`).join('')}
+    if (params?.search) searchParams.set('search', params.search)${
+      this.model.hasStatus
+        ? `
+    if (params?.is_active !== undefined) searchParams.set('is_active', params.is_active.toString())`
+        : ""
+    }${fields
+      .filter((f) => f.filterType)
+      .map(
+        (f) => `
+    if (params?.${f.name}) searchParams.set('${f.name}', params.${f.name}.toString())`,
+      )
+      .join("")}
 
     const url = \`\${API_CONFIG.BASE_URL}/${this.model.tableName}\${searchParams.toString() ? '?' + searchParams.toString() : ''}\`
     return apiClient.get<${modelName}ListResponse>(url)
@@ -233,64 +300,65 @@ export const ${this.lowercaseFirst(this.model.pluralName!)}Api = {
   // Delete item
   delete${modelName}: async (id: number): Promise<void> => {
     return apiClient.delete(\`\${API_CONFIG.BASE_URL}/${this.model.tableName}/\${id}\`)
-  },${this.model.hasStatus ? `
+  },${
+    this.model.hasStatus
+      ? `
 
   // Toggle active status
   toggle${modelName}Status: async (id: number): Promise<${modelName}> => {
     return apiClient.patch<${modelName}>(\`\${API_CONFIG.BASE_URL}/${this.model.tableName}/\${id}/toggle-status\`)
-  },` : ''}
+  },`
+      : ""
+  }
 }
-`
+`;
 
-    return template
+    return template;
   }
 
   // Generate all scaffolded files
   generateAll(): void {
-
     try {
       // 1. Generate API types
-      this.generateAPIFile()
+      this.generateAPIFile();
 
       // 2. Generate hooks
-      this.generateHooksFile()
+      this.generateHooksFile();
 
       // 3. Generate DataTable component
-      this.generateDataTableComponent()
+      this.generateDataTableComponent();
 
       // 4. Generate form components
-      this.generateFormComponents()
+      this.generateFormComponents();
 
       // 5. Generate page components
-      this.generatePageComponents()
+      this.generatePageComponents();
 
       // 6. Update navigation menu
-      this.updateNavigationMenu()
-
-
+      this.updateNavigationMenu();
     } catch (error) {
-      console.error(`❌ Error generating scaffolding:`, error)
-      throw error
+      console.error(`❌ Error generating scaffolding:`, error);
+      throw error;
     }
   }
 
   private generateAPIFile(): void {
-    const content = this.generateTypes()
-    const dir = join(this.basePath, 'shared/services/api')
-    const filePath = join(dir, `${this.model.name.toLowerCase()}.ts`)
+    const content = this.generateTypes();
+    const dir = join(this.basePath, "shared/services/api");
+    const filePath = join(dir, `${this.model.name.toLowerCase()}.ts`);
 
     if (!existsSync(dir)) {
-      mkdirSync(dir, { recursive: true })
+      mkdirSync(dir, { recursive: true });
     }
 
-    writeFileSync(filePath, content)
+    writeFileSync(filePath, content);
   }
 
   private generateHooksFile(): void {
-    const modelName = this.model.name
-    const pluralName = this.model.pluralName!
-    const lowercasePlural = pluralName.toLowerCase()
-    const lowercaseModel = modelName.toLowerCase()
+    const modelName = this.model.name;
+    const pluralName = this.model.pluralName!;
+    const lowercasePlural = pluralName.toLowerCase();
+    const lowercaseModel = modelName.toLowerCase();
 
     const content = `import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import {
@@ -361,7 +429,9 @@ export const useDelete${modelName} = () => {
       queryClient.invalidateQueries({ queryKey: ${lowercaseModel}Keys.lists() })
     },
   })
-}${this.model.hasStatus ? `
+}${
+      this.model.hasStatus
+        ? `
 
 export const useToggle${modelName}Status = () => {
   const queryClient = useQueryClient()
@@ -373,27 +443,33 @@ export const useToggle${modelName}Status = () => {
       queryClient.invalidateQueries({ queryKey: ${lowercaseModel}Keys.detail(data.id) })
     },
   })
-}` : ''}
-`
+}`
+        : ""
+    }
+`;
 
-    const dir = join(this.basePath, `modules/${lowercaseModel}/hooks`)
-    const filePath = join(dir, `use${pluralName}.ts`)
+    const dir = join(this.basePath, `modules/${lowercaseModel}/hooks`);
+    const filePath = join(dir, `use${pluralName}.ts`);
 
     if (!existsSync(dir)) {
-      mkdirSync(dir, { recursive: true })
+      mkdirSync(dir, { recursive: true });
     }
 
-    writeFileSync(filePath, content)
+    writeFileSync(filePath, content);
   }
 
   private generateDataTableComponent(): void {
-    const modelName = this.model.name
-    const pluralName = this.model.pluralName!
-    const lowercaseModel = modelName.toLowerCase()
+    const modelName = this.model.name;
+    const pluralName = this.model.pluralName!;
+    const lowercaseModel = modelName.toLowerCase();
 
     // Generate column definitions based on fields
-    const visibleFields = this.model.fields.filter(f => f.displayInList !== false)
-    const columns = visibleFields.map(field => this.generateColumnDefinition(field)).join(',\n    ')
+    const visibleFields = this.model.fields.filter(
+      (f) => f.displayInList !== false,
+    );
+    const columns = visibleFields
+      .map((field) => this.generateColumnDefinition(field))
+      .join(",\n    ");
 
     const content = `'use client'
 
@@ -417,7 +493,7 @@ import type { ExportOptions } from '../types'
 
 // Define the ${modelName} type for DataTable
 export interface ${modelName} {
-  id: number${this.model.fields.map(f => `\n  ${f.name}: ${this.getTypeScriptType(f)}`).join('')}${this.model.hasTimestamps ? '\n  created_at: string\n  updated_at?: string' : ''}${this.model.hasStatus ? '\n  is_active: boolean' : ''}
+  id: number${this.model.fields.map((f) => `\n  ${f.name}: ${this.getTypeScriptType(f)}`).join("")}${this.model.hasTimestamps ? "\n  created_at: string\n  updated_at?: string" : ""}${this.model.hasStatus ? "\n  is_active: boolean" : ""}
 }
 
 interface ${pluralName}DataTableProps {
@@ -425,7 +501,7 @@ interface ${pluralName}DataTableProps {
   onEdit${modelName}?: (${lowercaseModel}: ${modelName}) => void
   onDelete${modelName}?: (${lowercaseModel}: ${modelName}) => void
   onView${modelName}?: (${lowercaseModel}: ${modelName}) => void
-  onAdd${modelName}?: () => void${this.model.hasStatus ? `\n  onToggleStatus?: (${lowercaseModel}: ${modelName}) => void` : ''}
+  onAdd${modelName}?: () => void${this.model.hasStatus ? `\n  onToggleStatus?: (${lowercaseModel}: ${modelName}) => void` : ""}
   isLoading?: boolean
 }
 
@@ -434,7 +510,7 @@ export function ${pluralName}DataTable({
   onEdit${modelName},
   onDelete${modelName},
   onView${modelName},
-  onAdd${modelName},${this.model.hasStatus ? `\n  onToggleStatus,` : ''}
+  onAdd${modelName},${this.model.hasStatus ? `\n  onToggleStatus,` : ""}
   isLoading = false,
 }: ${pluralName}DataTableProps) {
   const [selected${pluralName}, setSelected${pluralName}] = React.useState<${modelName}[]>([])
@@ -442,7 +518,7 @@ export function ${pluralName}DataTable({
 
   // Define columns
   const columns: ColumnDef<${modelName}>[] = [
-    ${columns}${this.model.hasTimestamps ? ',\n    ' + this.generateTimestampColumns() : ''}${this.model.hasStatus ? ',\n    ' + this.generateStatusColumn() : ''},
+    ${columns}${this.model.hasTimestamps ? `,\n    ${this.generateTimestampColumns()}` : ""}${this.model.hasStatus ? `,\n    ${this.generateStatusColumn()}` : ""},
     {
       id: 'actions',
       enableHiding: false,
@@ -476,13 +552,17 @@ export function ${pluralName}DataTable({
                   <Pencil className="mr-2 h-4 w-4" />
                   Edit ${lowercaseModel}
                 </DropdownMenuItem>
-              )}${this.model.hasStatus ? `
+              )}${
+                this.model.hasStatus
+                  ? `
               {onToggleStatus && (
                 <DropdownMenuItem onClick={() => onToggleStatus(${lowercaseModel})}>
                   <${this.model.icon} className="mr-2 h-4 w-4" />
                   {${lowercaseModel}.is_active ? 'Deactivate' : 'Activate'}
                 </DropdownMenuItem>
-              )}` : ''}
+              )}`
+                  : ""
+              }
               {onDelete${modelName} && (
                 <DropdownMenuItem
                   onClick={() => onDelete${modelName}(${lowercaseModel})}
@@ -501,13 +581,13 @@ export function ${pluralName}DataTable({
 
   // Column definitions for column selector
   const columnDefinitions = [
-    { id: 'id', label: 'ID' },${visibleFields.map(f => `\n    { id: '${f.name}', label: '${f.label || this.capitalize(f.name)}' },`).join('')}${this.model.hasTimestamps ? '\n    { id: \'created_at\', label: \'Created\' },\n    { id: \'updated_at\', label: \'Last Modified\' },' : ''}${this.model.hasStatus ? '\n    { id: \'is_active\', label: \'Status\' },' : ''}
+    { id: 'id', label: 'ID' },${visibleFields.map((f) => `\n    { id: '${f.name}', label: '${f.label || this.capitalize(f.name)}' },`).join("")}${this.model.hasTimestamps ? "\n    { id: 'created_at', label: 'Created' },\n    { id: 'updated_at', label: 'Last Modified' }," : ""}${this.model.hasStatus ? "\n    { id: 'is_active', label: 'Status' }," : ""}
     { id: 'actions', label: 'Actions', canHide: false },
   ]
 
   // Export functionality
   const exportColumns = [
-    { id: 'id', label: 'ID', accessor: 'id' },${this.model.fields.map(f => `\n    { id: '${f.name}', label: '${f.label || this.capitalize(f.name)}', accessor: '${f.name}' },`).join('')}${this.model.hasTimestamps ? '\n    { id: \'created_at\', label: \'Created Date\', accessor: \'created_at\' },\n    { id: \'updated_at\', label: \'Last Modified\', accessor: \'updated_at\' },' : ''}${this.model.hasStatus ? '\n    { id: \'is_active\', label: \'Active\', accessor: \'is_active\' },' : ''}
+    { id: 'id', label: 'ID', accessor: 'id' },${this.model.fields.map((f) => `\n    { id: '${f.name}', label: '${f.label || this.capitalize(f.name)}', accessor: '${f.name}' },`).join("")}${this.model.hasTimestamps ? "\n    { id: 'created_at', label: 'Created Date', accessor: 'created_at' },\n    { id: 'updated_at', label: 'Last Modified', accessor: 'updated_at' }," : ""}${this.model.hasStatus ? "\n    { id: 'is_active', label: 'Active', accessor: 'is_active' }," : ""}
   ]
 
   const { exportData } = useDataTableExport({
@@ -540,7 +620,10 @@ export function ${pluralName}DataTable({
       <DataTable
         columns={columns}
         data={${lowercaseModel}s}
-        searchableColumns={[${this.model.fields.filter(f => f.searchable).map(f => `'${f.name}'`).join(', ')}]}
+        searchableColumns={[${this.model.fields
+          .filter((f) => f.searchable)
+          .map((f) => `'${f.name}'`)
+          .join(", ")}]}
         enableRowSelection={true}
         enableSorting={true}
         enableFiltering={true}
@@ -575,11 +658,15 @@ export function ${pluralName}DataTableExample() {
 
   const handleAdd${modelName} = () => {
     // TODO: Implement add functionality
-  }${this.model.hasStatus ? `
+  }${
+    this.model.hasStatus
+      ? `
 
   const handleToggleStatus = (${lowercaseModel}: ${modelName}) => {
     // TODO: Implement status toggle
-  }` : ''}
+  }`
+      : ""
+  }
 
   return (
     <div className="container mx-auto py-10">
@@ -596,26 +683,26 @@ export function ${pluralName}DataTableExample() {
         onEdit${modelName}={handleEdit${modelName}}
         onDelete${modelName}={handleDelete${modelName}}
         onView${modelName}={handleView${modelName}}
-        onAdd${modelName}={handleAdd${modelName}}${this.model.hasStatus ? `\n        onToggleStatus={handleToggleStatus}` : ''}
+        onAdd${modelName}={handleAdd${modelName}}${this.model.hasStatus ? `\n        onToggleStatus={handleToggleStatus}` : ""}
       />
     </div>
   )
 }
-`
+`;
 
-    const dir = join(this.basePath, 'shared/components/data-table')
-    const filePath = join(dir, `${pluralName}DataTable.tsx`)
+    const dir = join(this.basePath, "shared/components/data-table");
+    const filePath = join(dir, `${pluralName}DataTable.tsx`);
 
     if (!existsSync(dir)) {
-      mkdirSync(dir, { recursive: true })
+      mkdirSync(dir, { recursive: true });
     }
 
-    writeFileSync(filePath, content)
+    writeFileSync(filePath, content);
   }
 
   private generateFormComponents(): void {
-    const modelName = this.model.name
-    const lowercaseModel = modelName.toLowerCase()
+    const modelName = this.model.name;
+    const lowercaseModel = modelName.toLowerCase();
     // Generate form content based on model fields
 
     const content = `'use client'
@@ -655,7 +742,7 @@ import {
 
 import {
   useCreate${modelName},
-  useUpdate${modelName}${this.model.hasStatus ? `, useToggle${modelName}Status` : ''}
+  useUpdate${modelName}${this.model.hasStatus ? `, useToggle${modelName}Status` : ""}
 } from '@/modules/${lowercaseModel}/hooks/use${this.model.pluralName}'
 import type { ${modelName} } from '@/shared/services/api/${lowercaseModel}'
 
@@ -844,44 +931,43 @@ export function ${modelName}EditDialog({
     </Dialog>
   )
 }
-`
+`;
 
-    const dir = join(this.basePath, `modules/${lowercaseModel}/components`)
-    const filePath = join(dir, `${modelName}Form.tsx`)
+    const dir = join(this.basePath, `modules/${lowercaseModel}/components`);
+    const filePath = join(dir, `${modelName}Form.tsx`);
 
     if (!existsSync(dir)) {
-      mkdirSync(dir, { recursive: true })
+      mkdirSync(dir, { recursive: true });
     }
 
-    writeFileSync(filePath, content)
+    writeFileSync(filePath, content);
   }
 
   private generatePageComponents(): void {
-    const modelName = this.model.name
+    const _modelName = this.model.name;
     // Generate page components for the model
 
     // Generate list page
-    this.generateListPage()
+    this.generateListPage();
 
     // Generate create page
-    this.generateCreatePage()
+    this.generateCreatePage();
 
     // Generate edit page
-    this.generateEditPage()
+    this.generateEditPage();
 
     // Generate view page (details)
-    this.generateViewPage()
-
+    this.generateViewPage();
   }
 
   private generateListPage(): void {
-    const modelName = this.model.name
-    const pluralName = this.model.pluralName!
-    const lowercaseModel = modelName.toLowerCase()
-    const lowercasePlural = pluralName.toLowerCase()
+    const modelName = this.model.name;
+    const pluralName = this.model.pluralName!;
+    const lowercaseModel = modelName.toLowerCase();
+    const lowercasePlural = pluralName.toLowerCase();
 
-    const searchableFields = this.model.fields.filter(f => f.searchable)
-    const filterableFields = this.model.fields.filter(f => f.filterType)
+    const searchableFields = this.model.fields.filter((f) => f.searchable);
+    const filterableFields = this.model.fields.filter((f) => f.filterType);
 
     const content = `'use client'
 
@@ -901,7 +987,7 @@ import { useAdvancedSearch } from '@/shared/hooks/useAdvancedSearch'
 
 import {
   use${pluralName},
-  useDelete${modelName}${this.model.hasStatus ? `, useToggle${modelName}Status` : ''}
+  useDelete${modelName}${this.model.hasStatus ? `, useToggle${modelName}Status` : ""}
 } from '@/modules/${lowercaseModel}/hooks/use${pluralName}'
 import { apiUtils } from '@/shared/services/api/client'
 import type { ${modelName} } from '@/shared/services/api/${lowercaseModel}'
@@ -934,7 +1020,7 @@ const ${pluralName}Page: React.FC<${pluralName}PageProps> = () => {
     }
   })
 
-  const delete${modelName}Mutation = useDelete${modelName}()${this.model.hasStatus ? `\n  const toggleStatusMutation = useToggle${modelName}Status()` : ''}
+  const delete${modelName}Mutation = useDelete${modelName}()${this.model.hasStatus ? `\n  const toggleStatusMutation = useToggle${modelName}Status()` : ""}
 
   const handle${modelName}Edit = React.useCallback((${lowercaseModel}: ${modelName}) => {
     setEditing${modelName}(${lowercaseModel})
@@ -953,7 +1039,9 @@ const ${pluralName}Page: React.FC<${pluralName}PageProps> = () => {
 
   const handleAdd${modelName} = React.useCallback(() => {
     setIsCreateDialogOpen(true)
-  }, [])${this.model.hasStatus ? `
+  }, [])${
+    this.model.hasStatus
+      ? `
 
   const handleToggleStatus = React.useCallback(async (${lowercaseModel}: ${modelName}) => {
     try {
@@ -961,7 +1049,9 @@ const ${pluralName}Page: React.FC<${pluralName}PageProps> = () => {
     } catch (error) {
       console.error('Failed to toggle ${lowercaseModel} status:', error)
     }
-  }, [toggleStatusMutation])` : ''}
+  }, [toggleStatusMutation])`
+      : ""
+  }
 
   const ${lowercasePlural} = React.useMemo(() => ${lowercasePlural}Data?.items || [], [${lowercasePlural}Data])
 
@@ -971,7 +1061,7 @@ const ${pluralName}Page: React.FC<${pluralName}PageProps> = () => {
     return ${lowercasePlural}.filter(${lowercaseModel} => {
       if (searchState.query) {
         const query = searchState.query.toLowerCase()
-        const searchableFields = [${searchableFields.map(f => `${lowercaseModel}.${f.name}`).join(', ')}]
+        const searchableFields = [${searchableFields.map((f) => `${lowercaseModel}.${f.name}`).join(", ")}]
         if (!searchableFields.some(field =>
           field && field.toString().toLowerCase().includes(query)
         )) {
@@ -982,10 +1072,14 @@ const ${pluralName}Page: React.FC<${pluralName}PageProps> = () => {
       for (const filter of searchState.filters) {
         if (filter.value === undefined || filter.value === '') continue
 
-        switch (filter.field) {${filterableFields.map(f => this.generateFilterCase(f)).join('')}${this.model.hasStatus ? `
+        switch (filter.field) {${filterableFields.map((f) => this.generateFilterCase(f)).join("")}${
+          this.model.hasStatus
+            ? `
           case 'is_active':
             if (${lowercaseModel}.is_active !== (filter.value === 'true')) return false
-            break` : ''}
+            break`
+            : ""
+        }
         }
       }
 
@@ -1068,7 +1162,7 @@ const ${pluralName}Page: React.FC<${pluralName}PageProps> = () => {
             onEdit${modelName}={handle${modelName}Edit}
             onDelete${modelName}={handle${modelName}Delete}
             onView${modelName}={handle${modelName}View}
-            onAdd${modelName}={handleAdd${modelName}}${this.model.hasStatus ? `\n            onToggleStatus={handleToggleStatus}` : ''}
+            onAdd${modelName}={handleAdd${modelName}}${this.model.hasStatus ? `\n            onToggleStatus={handleToggleStatus}` : ""}
             isLoading={${lowercasePlural}Loading}
           />
         )}
@@ -1089,22 +1183,22 @@ const ${pluralName}Page: React.FC<${pluralName}PageProps> = () => {
 }
 
 export default ${pluralName}Page
-`
+`;
 
-    const dir = join(this.basePath, `app/${lowercasePlural}`)
-    const filePath = join(dir, 'page.tsx')
+    const dir = join(this.basePath, `app/${lowercasePlural}`);
+    const filePath = join(dir, "page.tsx");
 
     if (!existsSync(dir)) {
-      mkdirSync(dir, { recursive: true })
+      mkdirSync(dir, { recursive: true });
     }
 
-    writeFileSync(filePath, content)
+    writeFileSync(filePath, content);
   }
 
   private generateCreatePage(): void {
-    const modelName = this.model.name
-    const lowercaseModel = modelName.toLowerCase()
-    const lowercasePlural = this.model.pluralName!.toLowerCase()
+    const modelName = this.model.name;
+    const lowercaseModel = modelName.toLowerCase();
+    const lowercasePlural = this.model.pluralName?.toLowerCase();
 
     const content = `'use client'
 
@@ -1163,22 +1257,22 @@ export default function Create${modelName}Page() {
     </div>
   )
 }
-`
+`;
 
-    const dir = join(this.basePath, `app/${lowercasePlural}/create`)
-    const filePath = join(dir, 'page.tsx')
+    const dir = join(this.basePath, `app/${lowercasePlural}/create`);
+    const filePath = join(dir, "page.tsx");
 
     if (!existsSync(dir)) {
-      mkdirSync(dir, { recursive: true })
+      mkdirSync(dir, { recursive: true });
     }
 
-    writeFileSync(filePath, content)
+    writeFileSync(filePath, content);
   }
 
   private generateEditPage(): void {
-    const modelName = this.model.name
-    const lowercaseModel = modelName.toLowerCase()
-    const lowercasePlural = this.model.pluralName!.toLowerCase()
+    const modelName = this.model.name;
+    const lowercaseModel = modelName.toLowerCase();
+    const lowercasePlural = this.model.pluralName?.toLowerCase();
 
     const content = `'use client'
 
@@ -1274,22 +1368,22 @@ export default function Edit${modelName}Page() {
     </div>
   )
 }
-`
+`;
 
-    const dir = join(this.basePath, `app/${lowercasePlural}/[id]/edit`)
-    const filePath = join(dir, 'page.tsx')
+    const dir = join(this.basePath, `app/${lowercasePlural}/[id]/edit`);
+    const filePath = join(dir, "page.tsx");
 
     if (!existsSync(dir)) {
-      mkdirSync(dir, { recursive: true })
+      mkdirSync(dir, { recursive: true });
     }
 
-    writeFileSync(filePath, content)
+    writeFileSync(filePath, content);
   }
 
   private generateViewPage(): void {
-    const modelName = this.model.name
-    const lowercaseModel = modelName.toLowerCase()
-    const lowercasePlural = this.model.pluralName!.toLowerCase()
+    const modelName = this.model.name;
+    const lowercaseModel = modelName.toLowerCase();
+    const lowercasePlural = this.model.pluralName?.toLowerCase();
 
     const content = `'use client'
 
@@ -1407,7 +1501,9 @@ export default function View${modelName}Page() {
               <CardTitle>Basic Information</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              ${this.generateViewFields()}${this.model.hasTimestamps ? `
+              ${this.generateViewFields()}${
+                this.model.hasTimestamps
+                  ? `
               <div>
                 <label className="text-sm font-medium text-muted-foreground">Created At</label>
                 <p className="text-sm">
@@ -1422,7 +1518,11 @@ export default function View${modelName}Page() {
                     {new Date(${lowercaseModel}.updated_at).toLocaleString()}
                   </p>
                 </div>
-              )}` : ''}${this.model.hasStatus ? `
+              )}`
+                  : ""
+              }${
+                this.model.hasStatus
+                  ? `
 
               <div>
                 <label className="text-sm font-medium text-muted-foreground">Status</label>
@@ -1431,7 +1531,9 @@ export default function View${modelName}Page() {
                     {${lowercaseModel}.is_active ? 'Active' : 'Inactive'}
                   </Badge>
                 </div>
-              </div>` : ''}
+              </div>`
+                  : ""
+              }
             </CardContent>
           </Card>
 
@@ -1453,39 +1555,40 @@ export default function View${modelName}Page() {
     </div>
   )
 }
-`
+`;
 
-    const dir = join(this.basePath, `app/${lowercasePlural}/[id]`)
-    const filePath = join(dir, 'page.tsx')
+    const dir = join(this.basePath, `app/${lowercasePlural}/[id]`);
+    const filePath = join(dir, "page.tsx");
 
     if (!existsSync(dir)) {
-      mkdirSync(dir, { recursive: true })
+      mkdirSync(dir, { recursive: true });
     }
 
-    writeFileSync(filePath, content)
+    writeFileSync(filePath, content);
   }
 
   private generateSearchFilters(): string {
     let filters = this.model.fields
-      .filter(f => f.filterType)
-      .map(field => {
+      .filter((f) => f.filterType)
+      .map((field) => {
         let filterDef = `
     {
       id: '${field.name}',
       field: '${field.name}',
       label: '${field.label || this.capitalize(field.name)}',
-      type: '${field.filterType}'`
+      type: '${field.filterType}'`;
 
-        if (field.type === 'select' && field.options) {
+        if (field.type === "select" && field.options) {
           filterDef += `,
       options: [
-        ${field.options.map(opt => `{ value: '${opt}', label: '${opt}' }`).join(',\n        ')}
-      ]`
+        ${field.options.map((opt) => `{ value: '${opt}', label: '${opt}' }`).join(",\n        ")}
+      ]`;
         }
 
-        filterDef += '\n    },'
-        return filterDef
-      }).join('')
+        filterDef += "\n    },";
+        return filterDef;
+      })
+      .join("");
 
     if (this.model.hasStatus) {
       filters += `
@@ -1498,7 +1601,7 @@ export default function View${modelName}Page() {
         { value: 'true', label: 'Active' },
         { value: 'false', label: 'Inactive' }
       ]
-    },`
+    },`;
     }
 
     if (this.model.hasTimestamps) {
@@ -1508,42 +1611,44 @@ export default function View${modelName}Page() {
       field: 'created_at',
       label: 'Created Date',
       type: 'daterange'
-    },`
+    },`;
     }
 
-    return filters
+    return filters;
   }
 
   private generateSortOptions(): string {
     const sortFields = this.model.fields
-      .filter(f => f.sortable !== false)
-      .map(field => `
-    { field: '${field.name}', label: '${field.label || this.capitalize(field.name)}' },`)
-      .join('')
+      .filter((f) => f.sortable !== false)
+      .map(
+        (field) => `
+    { field: '${field.name}', label: '${field.label || this.capitalize(field.name)}' },`,
+      )
+      .join("");
 
-    let additionalSorts = ''
+    let additionalSorts = "";
     if (this.model.hasTimestamps) {
       additionalSorts += `
     { field: 'created_at', label: 'Created Date' },
-    { field: 'updated_at', label: 'Last Modified' },`
+    { field: 'updated_at', label: 'Last Modified' },`;
     }
 
-    return sortFields + additionalSorts
+    return sortFields + additionalSorts;
   }
 
   private generateFilterCase(field: FieldDefinition): string {
     switch (field.type) {
-      case 'boolean':
+      case "boolean":
         return `
           case '${field.name}':
             if (${this.lowercaseFirst(this.model.name)}.${field.name} !== filter.value) return false
-            break`
-      case 'select':
+            break`;
+      case "select":
         return `
           case '${field.name}':
             if (${this.lowercaseFirst(this.model.name)}.${field.name} !== filter.value) return false
-            break`
-      case 'date':
+            break`;
+      case "date":
         return `
           case '${field.name}':
             if (filter.value?.from) {
@@ -1552,41 +1657,42 @@ export default function View${modelName}Page() {
               const toDate = filter.value.to ? new Date(filter.value.to) : new Date()
               if (fieldDate < fromDate || fieldDate > toDate) return false
             }
-            break`
+            break`;
       default:
         return `
           case '${field.name}':
             if (!${this.lowercaseFirst(this.model.name)}.${field.name}.toString().toLowerCase().includes(filter.value.toLowerCase())) return false
-            break`
+            break`;
     }
   }
 
   private generateViewFields(): string {
-    return this.model.fields.map(field => {
-      const label = field.label || this.capitalize(field.name)
-      let valueDisplay = `{${this.lowercaseFirst(this.model.name)}.${field.name}}`
+    return this.model.fields
+      .map((field) => {
+        const label = field.label || this.capitalize(field.name);
+        let valueDisplay = `{${this.lowercaseFirst(this.model.name)}.${field.name}}`;
 
-      switch (field.type) {
-        case 'boolean':
-          valueDisplay = `
+        switch (field.type) {
+          case "boolean":
+            valueDisplay = `
                   <Badge variant={${this.lowercaseFirst(this.model.name)}.${field.name} ? 'default' : 'secondary'}>
                     {${this.lowercaseFirst(this.model.name)}.${field.name} ? 'Yes' : 'No'}
-                  </Badge>`
-          break
-        case 'date':
-          valueDisplay = `{new Date(${this.lowercaseFirst(this.model.name)}.${field.name}).toLocaleDateString()}`
-          break
-        case 'email':
-          valueDisplay = `
+                  </Badge>`;
+            break;
+          case "date":
+            valueDisplay = `{new Date(${this.lowercaseFirst(this.model.name)}.${field.name}).toLocaleDateString()}`;
+            break;
+          case "email":
+            valueDisplay = `
                   <a
                     href={\`mailto:\${${this.lowercaseFirst(this.model.name)}.${field.name}}\`}
                     className="text-blue-600 hover:underline"
                   >
                     {${this.lowercaseFirst(this.model.name)}.${field.name}}
-                  </a>`
-          break
-        case 'url':
-          valueDisplay = `
+                  </a>`;
+            break;
+          case "url":
+            valueDisplay = `
                   <a
                     href={${this.lowercaseFirst(this.model.name)}.${field.name}}
                     target="_blank"
@@ -1594,180 +1700,195 @@ export default function View${modelName}Page() {
                     className="text-blue-600 hover:underline"
                   >
                     {${this.lowercaseFirst(this.model.name)}.${field.name}}
-                  </a>`
-          break
-        case 'multiselect':
-          valueDisplay = `
+                  </a>`;
+            break;
+          case "multiselect":
+            valueDisplay = `
                   <div className="flex flex-wrap gap-1">
                     {${this.lowercaseFirst(this.model.name)}.${field.name}.map((item, index) => (
                       <Badge key={index} variant="outline" className="text-xs">
                         {item}
                       </Badge>
                     ))}
-                  </div>`
-          break
-        case 'select':
-          valueDisplay = `
+                  </div>`;
+            break;
+          case "select":
+            valueDisplay = `
                   <Badge variant="outline">
                     {${this.lowercaseFirst(this.model.name)}.${field.name}}
-                  </Badge>`
-          break
-      }
+                  </Badge>`;
+            break;
+        }
 
-      return `
+        return `
               <div>
                 <label className="text-sm font-medium text-muted-foreground">${label}</label>
                 <div className="mt-1">
                   ${valueDisplay}
                 </div>
-              </div>`
-    }).join('')
+              </div>`;
+      })
+      .join("");
   }
 
   private updateNavigationMenu(): void {
-    const pluralName = this.model.pluralName!
-    const lowercasePlural = pluralName.toLowerCase()
+    const pluralName = this.model.pluralName!;
+    const lowercasePlural = pluralName.toLowerCase();
 
     // Read the current menu config
-    const menuConfigPath = join(this.basePath, 'shared/components/navigation/menuConfig.ts')
+    const menuConfigPath = join(
+      this.basePath,
+      "shared/components/navigation/menuConfig.ts",
+    );
 
     if (!existsSync(menuConfigPath)) {
-      console.warn('menuConfig.ts not found, skipping navigation menu update')
-      return
+      console.warn("menuConfig.ts not found, skipping navigation menu update");
+      return;
     }
 
-    let content = readFileSync(menuConfigPath, 'utf-8')
+    let content = readFileSync(menuConfigPath, "utf-8");
 
     // Check if the icon is already imported
-    const iconName = this.model.icon!
-    const iconImportPattern = new RegExp(`\\b${iconName}\\b`)
+    const iconName = this.model.icon!;
+    const iconImportPattern = new RegExp(`\\b${iconName}\\b`);
 
     if (!iconImportPattern.test(content)) {
       // Add the icon import
-      const importMatch = content.match(/(import\s*\{[^}]+\}\s*from\s*['"]lucide-react['"];?)/)
+      const importMatch = content.match(
+        /(import\s*\{[^}]+\}\s*from\s*['"]lucide-react['"];?)/,
+      );
       if (importMatch) {
-        const existingImports = importMatch[1]
+        const existingImports = importMatch[1];
         const updatedImports = existingImports.replace(
           /(\{[^}]+)(}\s*from\s*['"]lucide-react['"];?)/,
-          `$1,\n  ${iconName}$2`
-        )
-        content = content.replace(importMatch[1], updatedImports)
+          `$1,\n  ${iconName}$2`,
+        );
+        content = content.replace(importMatch[1], updatedImports);
       }
     }
 
     // Check if the menu item already exists
-    const menuItemPattern = new RegExp(`title:\\s*['"]${pluralName}['"]`)
+    const menuItemPattern = new RegExp(`title:\\s*['"]${pluralName}['"]`);
     if (menuItemPattern.test(content)) {
-      return
+      return;
     }
 
     // Find where to insert the new menu item
     // Look for the Administration section or add before Settings
 
     // Try to find Administration section first
-    const adminSectionMatch = content.match(/(\s*){\s*title:\s*['"]Administration['"][\s\S]*?children:\s*\[[\s\S]*?\],?\s*},/)
+    const adminSectionMatch = content.match(
+      /(\s*){\s*title:\s*['"]Administration['"][\s\S]*?children:\s*\[[\s\S]*?\],?\s*},/,
+    );
 
-    if (adminSectionMatch && this.model.module === 'administration') {
+    if (adminSectionMatch && this.model.module === "administration") {
       // Add to Administration section
-      const adminSection = adminSectionMatch[0]
-      const childrenMatch = adminSection.match(/(children:\s*\[[\s\S]*?)(],?\s*})/)
+      const adminSection = adminSectionMatch[0];
+      const childrenMatch = adminSection.match(
+        /(children:\s*\[[\s\S]*?)(],?\s*})/,
+      );
 
       if (childrenMatch) {
         const newChild = `      {
         title: '${pluralName}',
-        href: '/${this.model.module || 'admin'}/${lowercasePlural}',
+        href: '/${this.model.module || "admin"}/${lowercasePlural}',
         icon: ${iconName},
-        requiredPermission: '${this.model.module || 'admin'}.${lowercasePlural}',
-      },`
+        requiredPermission: '${this.model.module || "admin"}.${lowercasePlural}',
+      },`;
 
-        const updatedChildren = childrenMatch[1] + '\n' + newChild + '\n    ' + childrenMatch[2]
+        const updatedChildren = `${childrenMatch[1]}\n${newChild}\n    ${childrenMatch[2]}`;
         const updatedAdminSection = adminSection.replace(
           /children:\s*\[[\s\S]*?\],?\s*}/,
-          updatedChildren
-        )
+          updatedChildren,
+        );
 
-        content = content.replace(adminSection, updatedAdminSection)
-        writeFileSync(menuConfigPath, content)
-        return
+        content = content.replace(adminSection, updatedAdminSection);
+        writeFileSync(menuConfigPath, content);
+        return;
       }
     }
 
     // If not adding to admin section, add as a top-level item
-    const settingsItemMatch = content.match(/(\s*{\s*title:\s*['"]Settings['"][\s\S]*?},)/)
+    const settingsItemMatch = content.match(
+      /(\s*{\s*title:\s*['"]Settings['"][\s\S]*?},)/,
+    );
     if (settingsItemMatch) {
       const newMenuItem = `  {
     title: '${pluralName}',
     href: '/${lowercasePlural}',
-    icon: ${iconName},${this.model.module ? `\n    module: '${this.model.module}',` : ''}
-  },`
+    icon: ${iconName},${this.model.module ? `\n    module: '${this.model.module}',` : ""}
+  },`;
 
-      content = content.replace(settingsItemMatch[1], newMenuItem + '\n' + settingsItemMatch[1])
-      writeFileSync(menuConfigPath, content)
-      return
+      content = content.replace(
+        settingsItemMatch[1],
+        `${newMenuItem}\n${settingsItemMatch[1]}`,
+      );
+      writeFileSync(menuConfigPath, content);
+      return;
     }
 
     // Fallback: add before the last item
-    const lastItemMatch = content.match(/(\s*},\s*];?\s*)$/)
+    const lastItemMatch = content.match(/(\s*},\s*];?\s*)$/);
     if (lastItemMatch) {
       const newMenuItem = `  {
     title: '${pluralName}',
     href: '/${lowercasePlural}',
-    icon: ${iconName},${this.model.module ? `\n    module: '${this.model.module}',` : ''}
-  },`
+    icon: ${iconName},${this.model.module ? `\n    module: '${this.model.module}',` : ""}
+  },`;
 
-      content = content.replace(lastItemMatch[1], ',\n' + newMenuItem + '\n];')
-      writeFileSync(menuConfigPath, content)
+      content = content.replace(lastItemMatch[1], `,\n${newMenuItem}\n];`);
+      writeFileSync(menuConfigPath, content);
     } else {
-      console.warn('Could not find insertion point in menuConfig.ts')
+      console.warn("Could not find insertion point in menuConfig.ts");
     }
   }
 
   // Helper methods for DataTable generation
   private getTypeScriptType(field: FieldDefinition): string {
     switch (field.type) {
-      case 'number':
-        return 'number'
-      case 'boolean':
-        return 'boolean'
-      case 'date':
-        return 'string'
-      case 'select':
-        return field.options ? `'${field.options.join("' | '")}'` : 'string'
-      case 'multiselect':
-        return 'string[]'
+      case "number":
+        return "number";
+      case "boolean":
+        return "boolean";
+      case "date":
+        return "string";
+      case "select":
+        return field.options ? `'${field.options.join("' | '")}'` : "string";
+      case "multiselect":
+        return "string[]";
       default:
-        return 'string'
+        return "string";
     }
   }
 
   private generateColumnDefinition(field: FieldDefinition): string {
-    const sortable = field.sortable !== false
-    let cellRenderer = 'row.getValue(\'{{name}}\')'
+    const sortable = field.sortable !== false;
+    let cellRenderer = "row.getValue('{{name}}')";
 
     // Customize cell rendering based on field type
     switch (field.type) {
-      case 'boolean':
+      case "boolean":
         cellRenderer = `(
         <Badge variant={row.getValue('{{name}}') ? 'default' : 'secondary'}>
           {row.getValue('{{name}}') ? 'Yes' : 'No'}
         </Badge>
-      )`
-        break
-      case 'date':
+      )`;
+        break;
+      case "date":
         cellRenderer = `(
         <div className="text-sm">
           {new Date(row.getValue('{{name}}')).toLocaleDateString()}
         </div>
-      )`
-        break
-      case 'select':
+      )`;
+        break;
+      case "select":
         cellRenderer = `(
         <Badge variant="outline">
           {row.getValue('{{name}}')}
         </Badge>
-      )`
-        break
-      case 'multiselect':
+      )`;
+        break;
+      case "multiselect":
         cellRenderer = `(
         <div className="flex flex-wrap gap-1">
           {(row.getValue('{{name}}') as string[]).map((item, index) => (
@@ -1776,33 +1897,35 @@ export default function View${modelName}Page() {
             </Badge>
           ))}
         </div>
-      )`
-        break
-      case 'email':
+      )`;
+        break;
+      case "email":
         cellRenderer = `(
         <a href={\`mailto:\${row.getValue('{{name}}')}\`} className="text-blue-600 hover:underline">
           {row.getValue('{{name}}')}
         </a>
-      )`
-        break
-      case 'url':
+      )`;
+        break;
+      case "url":
         cellRenderer = `(
         <a href={row.getValue('{{name}}')} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
           {row.getValue('{{name}}')}
         </a>
-      )`
-        break
+      )`;
+        break;
       default:
         cellRenderer = `(
         <div className="font-medium">
           {row.getValue('{{name}}')}
         </div>
-      )`
+      )`;
     }
 
     return `{
       accessorKey: '${field.name}',
-      header: ${sortable ? `({ column }) => (
+      header: ${
+        sortable
+          ? `({ column }) => (
         <Button
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
@@ -1810,9 +1933,11 @@ export default function View${modelName}Page() {
           ${field.label || this.capitalize(field.name)}
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
-      )` : `'${field.label || this.capitalize(field.name)}'`},
+      )`
+          : `'${field.label || this.capitalize(field.name)}'`
+      },
       cell: ({ row }) => ${cellRenderer.replace(/{{name}}/g, field.name)},
-    }`
+    }`;
   }
 
   private generateTimestampColumns(): string {
@@ -1855,7 +1980,7 @@ export default function View${modelName}Page() {
           </div>
         )
       },
-    }`
+    }`;
   }
 
   private generateStatusColumn(): string {
@@ -1870,143 +1995,151 @@ export default function View${modelName}Page() {
           </Badge>
         )
       },
-    }`
+    }`;
   }
 
   private generateZodSchema(): string {
-    let schemaFields = this.model.fields.map(field => {
-      let zodType: string
+    let schemaFields = this.model.fields
+      .map((field) => {
+        let zodType: string;
 
-      switch (field.type) {
-        case 'number':
-          zodType = `z.number()`
-          if (field.validation?.min !== undefined) {
-            zodType += `.min(${field.validation.min})`
-          }
-          if (field.validation?.max !== undefined) {
-            zodType += `.max(${field.validation.max})`
-          }
-          break
-        case 'boolean':
-          zodType = `z.boolean()`
-          break
-        case 'date':
-          zodType = `z.string()`
-          break
-        case 'email':
-          zodType = `z.string().email('Invalid email address')`
-          break
-        case 'url':
-          zodType = `z.string().url('Invalid URL')`
-          break
-        case 'select':
-          zodType = field.options
-            ? `z.enum(['${field.options.join("', '")}'])`
-            : `z.string()`
-          break
-        case 'multiselect':
-          zodType = `z.array(z.string())`
-          break
-        case 'text':
-          zodType = `z.string()`
-          if (field.validation?.min !== undefined) {
-            zodType += `.min(${field.validation.min})`
-          }
-          if (field.validation?.max !== undefined) {
-            zodType += `.max(${field.validation.max})`
-          }
-          break
-        default:
-          zodType = `z.string()`
-          if (field.validation?.min !== undefined) {
-            zodType += `.min(${field.validation.min}, '${field.validation.message || `${field.label || field.name} must be at least ${field.validation.min} characters`}')`
-          }
-          if (field.validation?.pattern) {
-            zodType += `.regex(/${field.validation.pattern}/, '${field.validation.message || 'Invalid format'}')`
-          }
-      }
+        switch (field.type) {
+          case "number":
+            zodType = `z.number()`;
+            if (field.validation?.min !== undefined) {
+              zodType += `.min(${field.validation.min})`;
+            }
+            if (field.validation?.max !== undefined) {
+              zodType += `.max(${field.validation.max})`;
+            }
+            break;
+          case "boolean":
+            zodType = `z.boolean()`;
+            break;
+          case "date":
+            zodType = `z.string()`;
+            break;
+          case "email":
+            zodType = `z.string().email('Invalid email address')`;
+            break;
+          case "url":
+            zodType = `z.string().url('Invalid URL')`;
+            break;
+          case "select":
+            zodType = field.options
+              ? `z.enum(['${field.options.join("', '")}'])`
+              : `z.string()`;
+            break;
+          case "multiselect":
+            zodType = `z.array(z.string())`;
+            break;
+          case "text":
+            zodType = `z.string()`;
+            if (field.validation?.min !== undefined) {
+              zodType += `.min(${field.validation.min})`;
+            }
+            if (field.validation?.max !== undefined) {
+              zodType += `.max(${field.validation.max})`;
+            }
+            break;
+          default:
+            zodType = `z.string()`;
+            if (field.validation?.min !== undefined) {
+              zodType += `.min(${field.validation.min}, '${field.validation.message || `${field.label || field.name} must be at least ${field.validation.min} characters`}')`;
+            }
+            if (field.validation?.pattern) {
+              zodType += `.regex(/${field.validation.pattern}/, '${field.validation.message || "Invalid format"}')`;
+            }
+        }
 
-      if (!field.required) {
-        zodType += `.optional()`
-      }
+        if (!field.required) {
+          zodType += `.optional()`;
+        }
 
-      return `\n  ${field.name}: ${zodType},`
-    }).join('')
+        return `\n  ${field.name}: ${zodType},`;
+      })
+      .join("");
 
     // Add status field if enabled
     if (this.model.hasStatus) {
-      schemaFields += `\n  is_active: z.boolean().optional(),`
+      schemaFields += `\n  is_active: z.boolean().optional(),`;
     }
 
-    return schemaFields
+    return schemaFields;
   }
 
   private generateDefaultValues(): string {
-    let defaults = this.model.fields.map(field => {
-      let defaultValue: string
+    let defaults = this.model.fields
+      .map((field) => {
+        let defaultValue: string;
 
-      switch (field.type) {
-        case 'number':
-          defaultValue = '0'
-          break
-        case 'boolean':
-          defaultValue = 'false'
-          break
-        case 'multiselect':
-          defaultValue = '[]'
-          break
-        default:
-          defaultValue = "''"
-      }
+        switch (field.type) {
+          case "number":
+            defaultValue = "0";
+            break;
+          case "boolean":
+            defaultValue = "false";
+            break;
+          case "multiselect":
+            defaultValue = "[]";
+            break;
+          default:
+            defaultValue = "''";
+        }
 
-      return `\n      ${field.name}: ${defaultValue},`
-    }).join('')
+        return `\n      ${field.name}: ${defaultValue},`;
+      })
+      .join("");
 
     if (this.model.hasStatus) {
-      defaults += `\n      is_active: true,`
+      defaults += `\n      is_active: true,`;
     }
 
-    return `{${defaults}\n    }`
+    return `{${defaults}\n    }`;
   }
 
   private generateFormReset(): string {
-    let resetFields = this.model.fields.map(field => {
-      return `\n        ${field.name}: ${field.name}?.${field.name} || ${this.getDefaultValueForField(field)},`
-    }).join('')
+    let resetFields = this.model.fields
+      .map((field) => {
+        return `\n        ${field.name}: ${field.name}?.${field.name} || ${this.getDefaultValueForField(field)},`;
+      })
+      .join("");
 
     if (this.model.hasStatus) {
-      resetFields += `\n        is_active: ${this.lowercaseFirst(this.model.name)}?.is_active ?? true,`
+      resetFields += `\n        is_active: ${this.lowercaseFirst(this.model.name)}?.is_active ?? true,`;
     }
 
-    return resetFields
+    return resetFields;
   }
 
   private getDefaultValueForField(field: FieldDefinition): string {
     switch (field.type) {
-      case 'number':
-        return '0'
-      case 'boolean':
-        return 'false'
-      case 'multiselect':
-        return '[]'
+      case "number":
+        return "0";
+      case "boolean":
+        return "false";
+      case "multiselect":
+        return "[]";
       default:
-        return "''"
+        return "''";
     }
   }
 
   private generateFormFields(): string {
-    return this.model.fields.map(field => this.generateFormField(field)).join('\n\n          ')
+    return this.model.fields
+      .map((field) => this.generateFormField(field))
+      .join("\n\n          ");
   }
 
   private generateFormField(field: FieldDefinition): string {
-    const label = field.label || this.capitalize(field.name)
-    const placeholder = field.placeholder || `Enter ${label.toLowerCase()}...`
-    const required = field.required ? ' *' : ''
+    const label = field.label || this.capitalize(field.name);
+    const placeholder = field.placeholder || `Enter ${label.toLowerCase()}...`;
+    const required = field.required ? " *" : "";
 
-    let fieldComponent: string
+    let fieldComponent: string;
 
     switch (field.type) {
-      case 'text':
+      case "text":
         fieldComponent = `<FormControl>
                     <Textarea
                       {...field}
@@ -2014,9 +2147,9 @@ export default function View${modelName}Page() {
                       disabled={isSubmitting}
                       rows={3}
                     />
-                  </FormControl>`
-        break
-      case 'number':
+                  </FormControl>`;
+        break;
+      case "number":
         fieldComponent = `<FormControl>
                     <Input
                       {...field}
@@ -2025,9 +2158,9 @@ export default function View${modelName}Page() {
                       disabled={isSubmitting}
                       onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : 0)}
                     />
-                  </FormControl>`
-        break
-      case 'boolean':
+                  </FormControl>`;
+        break;
+      case "boolean":
         fieldComponent = `<FormControl>
                     <div className="flex items-center space-x-2">
                       <Switch
@@ -2037,18 +2170,18 @@ export default function View${modelName}Page() {
                       />
                       <span className="text-sm">{field.value ? 'Yes' : 'No'}</span>
                     </div>
-                  </FormControl>`
-        break
-      case 'date':
+                  </FormControl>`;
+        break;
+      case "date":
         fieldComponent = `<FormControl>
                     <Input
                       {...field}
                       type="date"
                       disabled={isSubmitting}
                     />
-                  </FormControl>`
-        break
-      case 'email':
+                  </FormControl>`;
+        break;
+      case "email":
         fieldComponent = `<FormControl>
                     <Input
                       {...field}
@@ -2056,9 +2189,9 @@ export default function View${modelName}Page() {
                       placeholder="${placeholder}"
                       disabled={isSubmitting}
                     />
-                  </FormControl>`
-        break
-      case 'url':
+                  </FormControl>`;
+        break;
+      case "url":
         fieldComponent = `<FormControl>
                     <Input
                       {...field}
@@ -2066,10 +2199,10 @@ export default function View${modelName}Page() {
                       placeholder="${placeholder}"
                       disabled={isSubmitting}
                     />
-                  </FormControl>`
-        break
-      case 'select':
-        const options = field.options || ['Option 1', 'Option 2', 'Option 3']
+                  </FormControl>`;
+        break;
+      case "select": {
+        const options = field.options || ["Option 1", "Option 2", "Option 3"];
         fieldComponent = `<Select
                     onValueChange={field.onChange}
                     defaultValue={field.value}
@@ -2081,14 +2214,19 @@ export default function View${modelName}Page() {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      ${options.map(option => `<SelectItem value="${option}">${option}</SelectItem>`).join('\n                      ')}
+                      ${options.map((option) => `<SelectItem value="${option}">${option}</SelectItem>`).join("\n                      ")}
                     </SelectContent>
-                  </Select>`
-        break
-      case 'multiselect':
-        const multiselectOptions = field.options || ['Option 1', 'Option 2', 'Option 3']
+                  </Select>`;
+        break;
+      }
+      case "multiselect": {
+        const multiselectOptions = field.options || [
+          "Option 1",
+          "Option 2",
+          "Option 3",
+        ];
         fieldComponent = `<div className="space-y-2">
-                    {[${multiselectOptions.map(option => `'${option}'`).join(', ')}].map((option) => (
+                    {[${multiselectOptions.map((option) => `'${option}'`).join(", ")}].map((option) => (
                       <div key={option} className="flex items-center space-x-2">
                         <Checkbox
                           id={\`\${field.name}-\${option}\`}
@@ -2110,8 +2248,9 @@ export default function View${modelName}Page() {
                           {option}
                         </label>
                       </div>
-                    ))}</div>`
-        break
+                    ))}</div>`;
+        break;
+      }
       default:
         fieldComponent = `<FormControl>
                     <Input
@@ -2119,7 +2258,7 @@ export default function View${modelName}Page() {
                       placeholder="${placeholder}"
                       disabled={isSubmitting}
                     />
-                  </FormControl>`
+                  </FormControl>`;
     }
 
     return `<FormField
@@ -2129,18 +2268,22 @@ export default function View${modelName}Page() {
               <FormItem>
                 <FormLabel>${label}${required}</FormLabel>
                 ${fieldComponent}
-                ${field.validation?.message ? `<FormDescription>
+                ${
+                  field.validation?.message
+                    ? `<FormDescription>
                   ${field.validation.message}
-                </FormDescription>` : ''}
+                </FormDescription>`
+                    : ""
+                }
                 <FormMessage />
               </FormItem>
             )}
-          />`
+          />`;
   }
 }
 
 // Export for CLI usage
 export function generateModel(model: ModelDefinition): void {
-  const generator = new ScaffoldGenerator(model)
-  generator.generateAll()
+  const generator = new ScaffoldGenerator(model);
+  generator.generateAll();
 }

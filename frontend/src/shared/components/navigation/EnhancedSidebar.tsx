@@ -1,25 +1,30 @@
-'use client';
+"use client";
 
-import React, { useState, useCallback, useEffect } from 'react';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { cn } from '@/shared/utils';
-import { useUserRole } from '@/modules/admin/hooks/useUserRole';
-import { useAuth } from '@/modules/auth';
-import { Button } from '../ui/button';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
 import {
   ChevronDown,
   ChevronRight,
-  X,
   LogOut,
-  User,
-  PanelLeftClose,
   PanelLeft,
-  Settings
-} from 'lucide-react';
-import { MenuItem, menuItems } from './menuConfig';
-import { filterMenuItems } from './menuUtils';
+  PanelLeftClose,
+  Settings,
+  User,
+  X,
+} from "lucide-react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { useCallback, useEffect, useState } from "react";
+import { useUserRole } from "@/modules/admin/hooks/useUserRole";
+import { useAuth } from "@/modules/auth";
+import { cn } from "@/shared/utils";
+import { Button } from "../ui/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "../ui/tooltip";
+import { type MenuItem, menuItems } from "./menuConfig";
+import { filterMenuItems } from "./menuUtils";
 
 interface SidebarItemProps {
   item: MenuItem;
@@ -36,16 +41,21 @@ function SidebarItem({
   expandedItems,
   onToggleExpanded,
   isCollapsed = false,
-  isHovered = false
+  isHovered = false,
 }: SidebarItemProps) {
   const pathname = usePathname();
   const hasChildren = item.children && item.children.length > 0;
   const isExpanded = expandedItems.includes(item.title);
-  const isActive = item.href ?
-    pathname === item.href || pathname.startsWith(item.href) : false;
-  const hasActiveChild = hasChildren && item.children?.some(child =>
-    child.href && (pathname === child.href || pathname.startsWith(child.href))
-  );
+  const isActive = item.href
+    ? pathname === item.href || pathname.startsWith(item.href)
+    : false;
+  const hasActiveChild =
+    hasChildren &&
+    item.children?.some(
+      (child) =>
+        child.href &&
+        (pathname === child.href || pathname.startsWith(child.href)),
+    );
 
   const handleToggle = () => {
     if (hasChildren) {
@@ -78,28 +88,26 @@ function SidebarItem({
   );
 
   const itemClasses = cn(
-    'flex items-center w-full text-sm font-medium rounded-lg transition-all duration-200',
-    'hover:bg-gray-100 dark:hover:bg-gray-800/50 hover:scale-[1.02]',
-    'focus:outline-none focus:ring-2 focus:ring-blue-500/20',
+    "flex items-center w-full text-sm font-medium rounded-lg transition-all duration-200",
+    "hover:bg-gray-100 dark:hover:bg-gray-800/50 hover:scale-[1.02]",
+    "focus:outline-none focus:ring-2 focus:ring-blue-500/20",
     {
-      'bg-blue-50 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300 shadow-sm': isActive || hasActiveChild,
-      'text-gray-700 dark:text-gray-300': !isActive && !hasActiveChild,
-      'px-3 py-2.5': showText,
-      'px-2 py-2 justify-center': !showText,
-      'pl-6': level > 0 && showText
-    }
+      "bg-blue-50 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300 shadow-sm":
+        isActive || hasActiveChild,
+      "text-gray-700 dark:text-gray-300": !isActive && !hasActiveChild,
+      "px-3 py-2.5": showText,
+      "px-2 py-2 justify-center": !showText,
+      "pl-6": level > 0 && showText,
+    },
   );
 
   const renderItem = () => {
     const content = hasChildren ? (
-      <button
-        onClick={handleToggle}
-        className={itemClasses}
-      >
+      <button onClick={handleToggle} className={itemClasses}>
         <ItemContent />
       </button>
     ) : (
-      <Link href={item.href || '#'} className={itemClasses}>
+      <Link href={item.href || "#"} className={itemClasses}>
         <ItemContent />
       </Link>
     );
@@ -107,9 +115,7 @@ function SidebarItem({
     if (isCollapsed && !isHovered) {
       return (
         <Tooltip>
-          <TooltipTrigger asChild>
-            {content}
-          </TooltipTrigger>
+          <TooltipTrigger asChild>{content}</TooltipTrigger>
           <TooltipContent side="right" sideOffset={8} className="font-medium">
             <p>{item.title}</p>
           </TooltipContent>
@@ -156,36 +162,42 @@ export default function EnhancedSidebar({
   onClose,
   showCloseButton = false,
   isCollapsed = false,
-  onToggleCollapse
+  onToggleCollapse,
 }: EnhancedSidebarProps) {
   const { canAccessModule, hasPermission } = useUserRole();
   const { user, logout } = useAuth();
-  const [expandedItems, setExpandedItems] = useState<string[]>(['Settings', 'Administration']);
+  const [expandedItems, setExpandedItems] = useState<string[]>([
+    "Settings",
+    "Administration",
+  ]);
   const [isHovered, setIsHovered] = useState(false);
   const [hoverTimer, setHoverTimer] = useState<NodeJS.Timeout | null>(null);
 
   // Load expanded items from localStorage
   useEffect(() => {
-    const saved = localStorage.getItem('sidebar-expanded-items');
+    const saved = localStorage.getItem("sidebar-expanded-items");
     if (saved) {
       try {
         setExpandedItems(JSON.parse(saved));
       } catch (error) {
-        console.error('Error loading sidebar state:', error);
+        console.error("Error loading sidebar state:", error);
       }
     }
   }, []);
 
   // Save expanded items to localStorage
   useEffect(() => {
-    localStorage.setItem('sidebar-expanded-items', JSON.stringify(expandedItems));
+    localStorage.setItem(
+      "sidebar-expanded-items",
+      JSON.stringify(expandedItems),
+    );
   }, [expandedItems]);
 
   const handleToggleExpanded = useCallback((itemTitle: string) => {
-    setExpandedItems(prev =>
+    setExpandedItems((prev) =>
       prev.includes(itemTitle)
-        ? prev.filter(item => item !== itemTitle)
-        : [...prev, itemTitle]
+        ? prev.filter((item) => item !== itemTitle)
+        : [...prev, itemTitle],
     );
   }, []);
 
@@ -211,29 +223,31 @@ export default function EnhancedSidebar({
 
   const filteredMenuItems = filterMenuItems(menuItems, {
     canAccessModule,
-    hasPermission
+    hasPermission,
   });
 
-  const sidebarWidth = isCollapsed ? (isHovered ? 'w-64' : 'w-16') : 'w-64';
+  const sidebarWidth = isCollapsed ? (isHovered ? "w-64" : "w-16") : "w-64";
 
   return (
     <TooltipProvider>
       <div
         className={cn(
-          'bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 flex flex-col h-full',
-          'transition-all duration-300 ease-in-out transform',
-          'hover:shadow-lg dark:hover:shadow-gray-900/20',
+          "bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 flex flex-col h-full",
+          "transition-all duration-300 ease-in-out transform",
+          "hover:shadow-lg dark:hover:shadow-gray-900/20",
           sidebarWidth,
-          className
+          className,
         )}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
       >
         {/* Logo Section */}
-        <div className={cn(
-          'border-b border-gray-200 dark:border-gray-800 flex items-center justify-between transition-all duration-300',
-          isCollapsed && !isHovered ? 'p-3' : 'p-6'
-        )}>
+        <div
+          className={cn(
+            "border-b border-gray-200 dark:border-gray-800 flex items-center justify-between transition-all duration-300",
+            isCollapsed && !isHovered ? "p-3" : "p-6",
+          )}
+        >
           <div className="flex items-center space-x-3 min-w-0">
             <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg flex-shrink-0">
               <span className="text-white font-bold text-lg">FN</span>
@@ -256,9 +270,9 @@ export default function EnhancedSidebar({
               onClick={onToggleCollapse}
               className={cn(
                 "hidden lg:flex p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-200",
-                "hover:scale-110 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                "hover:scale-110 focus:outline-none focus:ring-2 focus:ring-blue-500/20",
               )}
-              title={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+              title={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
             >
               {isCollapsed ? (
                 <PanelLeft className="h-4 w-4" />
@@ -280,10 +294,12 @@ export default function EnhancedSidebar({
         </div>
 
         {/* Navigation */}
-        <nav className={cn(
-          'flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600',
-          isCollapsed && !isHovered ? 'p-2' : 'p-4'
-        )}>
+        <nav
+          className={cn(
+            "flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600",
+            isCollapsed && !isHovered ? "p-2" : "p-4",
+          )}
+        >
           <div className="space-y-1">
             {filteredMenuItems.map((item) => (
               <SidebarItem
@@ -302,7 +318,10 @@ export default function EnhancedSidebar({
             <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-800">
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Link href="/settings" className="flex items-center justify-center p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                  <Link
+                    href="/settings"
+                    className="flex items-center justify-center p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                  >
                     <Settings className="h-5 w-5" />
                   </Link>
                 </TooltipTrigger>
@@ -316,14 +335,18 @@ export default function EnhancedSidebar({
 
         {/* User Section */}
         {user && (
-          <div className={cn(
-            'border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 transition-all duration-300',
-            isCollapsed && !isHovered ? 'p-2' : 'p-4'
-          )}>
-            <div className={cn(
-              'flex items-center mb-3 transition-all duration-200',
-              isCollapsed && !isHovered ? 'justify-center' : 'space-x-3'
-            )}>
+          <div
+            className={cn(
+              "border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 transition-all duration-300",
+              isCollapsed && !isHovered ? "p-2" : "p-4",
+            )}
+          >
+            <div
+              className={cn(
+                "flex items-center mb-3 transition-all duration-200",
+                isCollapsed && !isHovered ? "justify-center" : "space-x-3",
+              )}
+            >
               <div className="w-8 h-8 bg-gradient-to-br from-blue-100 to-blue-200 dark:bg-gradient-to-br dark:from-blue-900 dark:to-blue-800 rounded-full flex items-center justify-center flex-shrink-0 shadow-sm">
                 <User className="h-4 w-4 text-blue-600 dark:text-blue-400" />
               </div>
@@ -339,7 +362,7 @@ export default function EnhancedSidebar({
               )}
             </div>
 
-            {(!isCollapsed || isHovered) ? (
+            {!isCollapsed || isHovered ? (
               <Button
                 variant="outline"
                 size="sm"

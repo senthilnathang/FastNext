@@ -1,44 +1,44 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect } from 'react';
-import { Moon, Sun, Monitor, Palette, Check } from 'lucide-react';
-import { Button } from '@/shared/components/ui/button';
+import { Check, Monitor, Moon, Palette, Sun } from "lucide-react";
+import { useTheme } from "next-themes";
+import { useEffect, useState } from "react";
+import { Button } from "@/shared/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuTrigger,
-  DropdownMenuSeparator,
   DropdownMenuLabel,
-} from '@/shared/components/ui/dropdown-menu';
-import { useTheme } from 'next-themes';
-import { cn } from '@/shared/utils';
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/shared/components/ui/dropdown-menu";
+import { cn } from "@/shared/utils";
 
 const themes = [
   {
-    name: 'light',
-    label: 'Light',
+    name: "light",
+    label: "Light",
     icon: Sun,
-    description: 'Light and clean interface',
-    preview: 'bg-white border-gray-200'
+    description: "Light and clean interface",
+    preview: "bg-white border-gray-200",
   },
   {
-    name: 'dark',
-    label: 'Dark',
+    name: "dark",
+    label: "Dark",
     icon: Moon,
-    description: 'Dark mode for low-light environments',
-    preview: 'bg-gray-900 border-gray-700'
+    description: "Dark mode for low-light environments",
+    preview: "bg-gray-900 border-gray-700",
   },
   {
-    name: 'system',
-    label: 'System',
+    name: "system",
+    label: "System",
     icon: Monitor,
-    description: 'Adapts to your system preference',
-    preview: 'bg-gradient-to-r from-white to-gray-900 border-gray-400'
-  }
+    description: "Adapts to your system preference",
+    preview: "bg-gradient-to-r from-white to-gray-900 border-gray-400",
+  },
 ] as const;
 
 interface ThemePreviewProps {
-  theme: typeof themes[number];
+  theme: (typeof themes)[number];
   isActive: boolean;
   onClick: () => void;
 }
@@ -50,29 +50,37 @@ function ThemePreview({ theme, isActive, onClick }: ThemePreviewProps) {
     <button
       onClick={onClick}
       className={cn(
-        'group relative w-full p-3 rounded-lg border-2 transition-all duration-200',
-        'hover:scale-[1.02] hover:shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500/20',
+        "group relative w-full p-3 rounded-lg border-2 transition-all duration-200",
+        "hover:scale-[1.02] hover:shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500/20",
         isActive
-          ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 shadow-sm'
-          : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
+          ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20 shadow-sm"
+          : "border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600",
       )}
     >
       <div className="flex items-center space-x-3">
-        <div className={cn(
-          'w-8 h-8 rounded-md flex items-center justify-center transition-colors',
-          theme.preview
-        )}>
-          <Icon className={cn(
-            'h-4 w-4 transition-colors',
-            isActive ? 'text-blue-600' : 'text-gray-600 dark:text-gray-400'
-          )} />
+        <div
+          className={cn(
+            "w-8 h-8 rounded-md flex items-center justify-center transition-colors",
+            theme.preview,
+          )}
+        >
+          <Icon
+            className={cn(
+              "h-4 w-4 transition-colors",
+              isActive ? "text-blue-600" : "text-gray-600 dark:text-gray-400",
+            )}
+          />
         </div>
         <div className="flex-1 text-left">
           <div className="flex items-center justify-between">
-            <span className={cn(
-              'font-medium transition-colors',
-              isActive ? 'text-blue-700 dark:text-blue-300' : 'text-gray-900 dark:text-white'
-            )}>
+            <span
+              className={cn(
+                "font-medium transition-colors",
+                isActive
+                  ? "text-blue-700 dark:text-blue-300"
+                  : "text-gray-900 dark:text-white",
+              )}
+            >
               {theme.label}
             </span>
             {isActive && (
@@ -104,7 +112,7 @@ export function EnhancedThemeToggle() {
     );
   }
 
-  const currentTheme = themes.find(t => t.name === theme) || themes[0];
+  const currentTheme = themes.find((t) => t.name === theme) || themes[0];
 
   return (
     <DropdownMenu>
@@ -115,7 +123,7 @@ export function EnhancedThemeToggle() {
           className={cn(
             "h-8 w-8 px-0 transition-all duration-200",
             "hover:bg-gray-100 dark:hover:bg-gray-800",
-            "focus:ring-2 focus:ring-blue-500/20"
+            "focus:ring-2 focus:ring-blue-500/20",
           )}
         >
           <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
@@ -146,7 +154,7 @@ export function EnhancedThemeToggle() {
         <div className="px-2 py-1.5">
           <p className="text-xs text-gray-500 dark:text-gray-400">
             Current: <span className="font-medium">{currentTheme.label}</span>
-            {theme === 'system' && resolvedTheme && (
+            {theme === "system" && resolvedTheme && (
               <span className="ml-1">({resolvedTheme})</span>
             )}
           </p>
@@ -173,27 +181,31 @@ export function CompactThemeToggle() {
   }
 
   const toggleTheme = () => {
-    if (theme === 'light') {
-      setTheme('dark');
-    } else if (theme === 'dark') {
-      setTheme('system');
+    if (theme === "light") {
+      setTheme("dark");
+    } else if (theme === "dark") {
+      setTheme("system");
     } else {
-      setTheme('light');
+      setTheme("light");
     }
   };
 
   const getIcon = () => {
-    if (theme === 'system') {
+    if (theme === "system") {
       return <Monitor className="h-5 w-5" />;
     }
-    return resolvedTheme === 'dark' ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />;
+    return resolvedTheme === "dark" ? (
+      <Moon className="h-5 w-5" />
+    ) : (
+      <Sun className="h-5 w-5" />
+    );
   };
 
   const getTooltip = () => {
-    if (theme === 'system') {
+    if (theme === "system") {
       return `System (${resolvedTheme})`;
     }
-    return theme === 'dark' ? 'Dark mode' : 'Light mode';
+    return theme === "dark" ? "Dark mode" : "Light mode";
   };
 
   return (
@@ -204,7 +216,7 @@ export function CompactThemeToggle() {
       title={getTooltip()}
       className={cn(
         "transition-all duration-200 hover:scale-110",
-        "focus:ring-2 focus:ring-blue-500/20"
+        "focus:ring-2 focus:ring-blue-500/20",
       )}
     >
       <div className="transition-transform duration-300 hover:rotate-12">
@@ -226,14 +238,14 @@ export function ThemeIndicator() {
 
   if (!mounted) return null;
 
-  const currentTheme = themes.find(t => t.name === theme) || themes[0];
+  const currentTheme = themes.find((t) => t.name === theme) || themes[0];
   const Icon = currentTheme.icon;
 
   return (
     <div className="flex items-center space-x-1.5 text-xs text-gray-500 dark:text-gray-400">
       <Icon className="h-3 w-3" />
       <span className="capitalize">
-        {theme === 'system' ? `System (${resolvedTheme})` : theme}
+        {theme === "system" ? `System (${resolvedTheme})` : theme}
       </span>
     </div>
   );

@@ -1,151 +1,186 @@
-import type { Meta, StoryObj } from '@storybook/nextjs'
-import { Button } from './button'
+import type { Meta, StoryObj } from "@storybook/nextjs";
+import { Button } from "./button";
 
 const meta: Meta<typeof Button> = {
-  title: 'UI/Button',
+  title: "UI/Button",
   component: Button,
   parameters: {
-    layout: 'centered',
+    layout: "centered",
   },
-  tags: ['autodocs'],
+  tags: ["autodocs"],
   argTypes: {
     variant: {
-      control: { type: 'select' },
-      options: ['default', 'destructive', 'outline', 'secondary', 'ghost', 'link', 'success', 'warning', 'info'],
+      control: { type: "select" },
+      options: [
+        "default",
+        "destructive",
+        "outline",
+        "secondary",
+        "ghost",
+        "link",
+        "success",
+        "warning",
+        "info",
+      ],
     },
     size: {
-      control: { type: 'select' },
-      options: ['default', 'sm', 'lg', 'icon', 'icon-sm', 'icon-lg'],
+      control: { type: "select" },
+      options: ["default", "sm", "lg", "icon", "icon-sm", "icon-lg"],
     },
     asChild: {
-      control: { type: 'boolean' },
+      control: { type: "boolean" },
     },
     disabled: {
-      control: { type: 'boolean' },
+      control: { type: "boolean" },
     },
   },
-}
+};
 
-export default meta
-type Story = StoryObj<typeof meta>
+export default meta;
+type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   args: {
-    children: 'Button',
+    children: "Button",
   },
-}
+};
 
 export const Secondary: Story = {
   args: {
-    variant: 'secondary',
-    children: 'Secondary',
+    variant: "secondary",
+    children: "Secondary",
   },
-}
+};
 
 export const Destructive: Story = {
   args: {
-    variant: 'destructive',
-    children: 'Destructive',
+    variant: "destructive",
+    children: "Destructive",
   },
-}
+};
 
 export const Outline: Story = {
   args: {
-    variant: 'outline',
-    children: 'Outline',
+    variant: "outline",
+    children: "Outline",
   },
-}
+};
 
 export const Ghost: Story = {
   args: {
-    variant: 'ghost',
-    children: 'Ghost',
+    variant: "ghost",
+    children: "Ghost",
   },
-}
+};
 
 export const Link: Story = {
   args: {
-    variant: 'link',
-    children: 'Link',
+    variant: "link",
+    children: "Link",
   },
-}
+};
 
 export const Success: Story = {
   args: {
-    variant: 'success',
-    children: 'Success',
+    variant: "success",
+    children: "Success",
   },
-}
+};
 
 export const Warning: Story = {
   args: {
-    variant: 'warning',
-    children: 'Warning',
+    variant: "warning",
+    children: "Warning",
   },
-}
+};
 
 export const Info: Story = {
   args: {
-    variant: 'info',
-    children: 'Info',
+    variant: "info",
+    children: "Info",
   },
-}
+};
 
 export const Small: Story = {
   args: {
-    size: 'sm',
-    children: 'Small',
+    size: "sm",
+    children: "Small",
   },
-}
+};
 
 export const Large: Story = {
   args: {
-    size: 'lg',
-    children: 'Large',
+    size: "lg",
+    children: "Large",
   },
-}
+};
 
 export const Icon: Story = {
   args: {
-    size: 'icon',
-    children: '🚀',
+    size: "icon",
+    children: "🚀",
   },
-}
+};
 
 export const Disabled: Story = {
   args: {
     disabled: true,
-    children: 'Disabled',
+    children: "Disabled",
   },
-}
+};
 
 export const WithIcon: Story = {
   args: {
     children: (
       <>
-        <svg className="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+        <svg
+          className="mr-2 h-4 w-4"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M12 4v16m8-8H4"
+          />
         </svg>
         With Icon
       </>
     ),
   },
-}
+};
 
 export const Loading: Story = {
   args: {
     disabled: true,
     children: (
       <>
-        <svg className="mr-2 h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
-          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-          <path className="opacity-75" fill="currentColor" d="m4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        <svg
+          className="mr-2 h-4 w-4 animate-spin"
+          fill="none"
+          viewBox="0 0 24 24"
+        >
+          <circle
+            className="opacity-25"
+            cx="12"
+            cy="12"
+            r="10"
+            stroke="currentColor"
+            strokeWidth="4"
+          ></circle>
+          <path
+            className="opacity-75"
+            fill="currentColor"
+            d="m4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+          ></path>
         </svg>
         Loading...
       </>
     ),
   },
-}
+};
 
 export const AllVariants: Story = {
   render: () => (
@@ -165,7 +200,7 @@ export const AllVariants: Story = {
       </div>
     </div>
   ),
-}
+};
 
 export const AllSizes: Story = {
   render: () => (
@@ -176,4 +211,4 @@ export const AllSizes: Story = {
       <Button size="icon">🚀</Button>
     </div>
   ),
-}
+};

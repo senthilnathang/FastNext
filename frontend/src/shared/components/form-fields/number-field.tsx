@@ -1,29 +1,28 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { Minus, Plus } from "lucide-react"
-
-import { cn } from '@/shared/utils'
-import { Button } from "@/shared/components/ui/button"
-import { Input } from "@/shared/components/ui/input"
-import { Label } from "@/shared/components/ui/label"
+import { Minus, Plus } from "lucide-react";
+import * as React from "react";
+import { Button } from "@/shared/components/ui/button";
+import { Input } from "@/shared/components/ui/input";
+import { Label } from "@/shared/components/ui/label";
+import { cn } from "@/shared/utils";
 
 interface NumberFieldProps {
-  value?: number
-  onChange?: (value: number | undefined) => void
-  label?: string
-  placeholder?: string
-  required?: boolean
-  disabled?: boolean
-  className?: string
-  error?: string
-  id?: string
-  min?: number
-  max?: number
-  step?: number
-  type?: "integer" | "float"
-  showControls?: boolean
-  precision?: number
+  value?: number;
+  onChange?: (value: number | undefined) => void;
+  label?: string;
+  placeholder?: string;
+  required?: boolean;
+  disabled?: boolean;
+  className?: string;
+  error?: string;
+  id?: string;
+  min?: number;
+  max?: number;
+  step?: number;
+  type?: "integer" | "float";
+  showControls?: boolean;
+  precision?: number;
 }
 
 export function NumberField({
@@ -43,59 +42,59 @@ export function NumberField({
   showControls = true,
   precision = 2,
 }: NumberFieldProps) {
-  const [inputValue, setInputValue] = React.useState("")
+  const [inputValue, setInputValue] = React.useState("");
 
   React.useEffect(() => {
     if (value !== undefined) {
-      setInputValue(value.toString())
+      setInputValue(value.toString());
     } else {
-      setInputValue("")
+      setInputValue("");
     }
-  }, [value])
+  }, [value]);
 
   const parseValue = (val: string): number | undefined => {
-    if (!val.trim()) return undefined
+    if (!val.trim()) return undefined;
 
-    const parsed = type === "integer" ? parseInt(val, 10) : parseFloat(val)
+    const parsed = type === "integer" ? parseInt(val, 10) : parseFloat(val);
 
-    if (isNaN(parsed)) return undefined
+    if (Number.isNaN(parsed)) return undefined;
 
     // Apply min/max constraints
-    if (min !== undefined && parsed < min) return min
-    if (max !== undefined && parsed > max) return max
+    if (min !== undefined && parsed < min) return min;
+    if (max !== undefined && parsed > max) return max;
 
     // Apply precision for float
     if (type === "float" && precision !== undefined) {
-      return Number(parsed.toFixed(precision))
+      return Number(parsed.toFixed(precision));
     }
 
-    return parsed
-  }
+    return parsed;
+  };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newValue = e.target.value
-    setInputValue(newValue)
+    const newValue = e.target.value;
+    setInputValue(newValue);
 
-    const parsed = parseValue(newValue)
-    onChange?.(parsed)
-  }
+    const parsed = parseValue(newValue);
+    onChange?.(parsed);
+  };
 
   const handleIncrement = () => {
-    const currentValue = value ?? 0
-    const newValue = currentValue + step
-    const constrainedValue = parseValue(newValue.toString())
-    onChange?.(constrainedValue)
-  }
+    const currentValue = value ?? 0;
+    const newValue = currentValue + step;
+    const constrainedValue = parseValue(newValue.toString());
+    onChange?.(constrainedValue);
+  };
 
   const handleDecrement = () => {
-    const currentValue = value ?? 0
-    const newValue = currentValue - step
-    const constrainedValue = parseValue(newValue.toString())
-    onChange?.(constrainedValue)
-  }
+    const currentValue = value ?? 0;
+    const newValue = currentValue - step;
+    const constrainedValue = parseValue(newValue.toString());
+    onChange?.(constrainedValue);
+  };
 
-  const canIncrement = !disabled && (max === undefined || (value ?? 0) < max)
-  const canDecrement = !disabled && (min === undefined || (value ?? 0) > min)
+  const canIncrement = !disabled && (max === undefined || (value ?? 0) < max);
+  const canDecrement = !disabled && (min === undefined || (value ?? 0) > min);
 
   return (
     <div className={cn("space-y-2", className)}>
@@ -118,7 +117,7 @@ export function NumberField({
           step={step}
           className={cn(
             showControls && "pr-16",
-            error && "border-red-500 focus:border-red-500 focus:ring-red-500"
+            error && "border-red-500 focus:border-red-500 focus:ring-red-500",
           )}
         />
 
@@ -156,9 +155,7 @@ export function NumberField({
         </div>
       )}
 
-      {error && (
-        <p className="text-sm text-red-500">{error}</p>
-      )}
+      {error && <p className="text-sm text-red-500">{error}</p>}
     </div>
-  )
+  );
 }

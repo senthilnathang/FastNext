@@ -1,21 +1,44 @@
-'use client';
+"use client";
 
-import React, { useState, useMemo } from 'react';
-import { Button } from '@/shared/components/ui/button';
-import { Input } from '@/shared/components/ui/input';
-import { Label } from '@/shared/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/components/ui/select';
-import { Switch } from '@/shared/components/ui/switch';
-import { Checkbox } from '@/shared/components/ui/checkbox';
+import {
+  AlertTriangle,
+  ArrowRight,
+  Calendar,
+  CheckCircle,
+  FileText,
+  Hash,
+  Link,
+  Mail,
+  Plus,
+  RotateCcw,
+  Search,
+  ToggleLeft,
+  Trash2,
+  Type,
+  X,
+} from "lucide-react";
+import { useMemo, useState } from "react";
+import { Badge } from "@/shared/components/ui/badge";
+import { Button } from "@/shared/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/shared/components/ui/card';
-import { Badge } from '@/shared/components/ui/badge';
-import { Separator } from '@/shared/components/ui/separator';
+} from "@/shared/components/ui/card";
+import { Checkbox } from "@/shared/components/ui/checkbox";
+import { Input } from "@/shared/components/ui/input";
+import { Label } from "@/shared/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/shared/components/ui/select";
+import { Separator } from "@/shared/components/ui/separator";
+import { Switch } from "@/shared/components/ui/switch";
 import {
   Table,
   TableBody,
@@ -23,26 +46,9 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/shared/components/ui/table';
-import {
-  ArrowRight,
-  Search,
-  RotateCcw,
-  CheckCircle,
-  AlertTriangle,
-  X,
-  Plus,
-  Trash2,
-  Type,
-  Hash,
-  Calendar,
-  ToggleLeft,
-  Mail,
-  Link,
-  FileText
-} from 'lucide-react';
+} from "@/shared/components/ui/table";
 
-import type { ImportColumn, ImportFieldMapping } from '../types';
+import type { ImportColumn, ImportFieldMapping } from "../types";
 
 interface FieldMapperProps {
   sourceHeaders: string[];
@@ -53,45 +59,45 @@ interface FieldMapperProps {
   className?: string;
 }
 
-const getTypeIcon = (type: ImportColumn['type']) => {
+const getTypeIcon = (type: ImportColumn["type"]) => {
   switch (type) {
-    case 'string':
+    case "string":
       return <Type className="h-3 w-3" />;
-    case 'number':
+    case "number":
       return <Hash className="h-3 w-3" />;
-    case 'date':
+    case "date":
       return <Calendar className="h-3 w-3" />;
-    case 'boolean':
+    case "boolean":
       return <ToggleLeft className="h-3 w-3" />;
-    case 'email':
+    case "email":
       return <Mail className="h-3 w-3" />;
-    case 'url':
+    case "url":
       return <Link className="h-3 w-3" />;
-    case 'object':
+    case "object":
       return <FileText className="h-3 w-3" />;
     default:
       return <Type className="h-3 w-3" />;
   }
 };
 
-const getTypeColor = (type: ImportColumn['type']) => {
+const getTypeColor = (type: ImportColumn["type"]) => {
   switch (type) {
-    case 'string':
-      return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300';
-    case 'number':
-      return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300';
-    case 'date':
-      return 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300';
-    case 'boolean':
-      return 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300';
-    case 'email':
-      return 'bg-pink-100 text-pink-800 dark:bg-pink-900 dark:text-pink-300';
-    case 'url':
-      return 'bg-cyan-100 text-cyan-800 dark:bg-cyan-900 dark:text-cyan-300';
-    case 'object':
-      return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300';
+    case "string":
+      return "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300";
+    case "number":
+      return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300";
+    case "date":
+      return "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300";
+    case "boolean":
+      return "bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300";
+    case "email":
+      return "bg-pink-100 text-pink-800 dark:bg-pink-900 dark:text-pink-300";
+    case "url":
+      return "bg-cyan-100 text-cyan-800 dark:bg-cyan-900 dark:text-cyan-300";
+    case "object":
+      return "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300";
     default:
-      return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300';
+      return "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300";
   }
 };
 
@@ -101,9 +107,9 @@ export function FieldMapper({
   mappings,
   sampleData = [],
   onMappingsChange,
-  className
+  className,
 }: FieldMapperProps) {
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
   const [showUnmapped, setShowUnmapped] = useState(false);
   const [showSampleData, setShowSampleData] = useState(true);
 
@@ -111,25 +117,34 @@ export function FieldMapper({
     let filtered = mappings;
 
     if (searchTerm) {
-      filtered = filtered.filter(mapping =>
-        mapping.sourceColumn.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        mapping.targetColumn.toLowerCase().includes(searchTerm.toLowerCase())
+      filtered = filtered.filter(
+        (mapping) =>
+          mapping.sourceColumn
+            .toLowerCase()
+            .includes(searchTerm.toLowerCase()) ||
+          mapping.targetColumn.toLowerCase().includes(searchTerm.toLowerCase()),
       );
     }
 
     if (showUnmapped) {
-      filtered = filtered.filter(mapping => !mapping.targetColumn || mapping.targetColumn === mapping.sourceColumn);
+      filtered = filtered.filter(
+        (mapping) =>
+          !mapping.targetColumn ||
+          mapping.targetColumn === mapping.sourceColumn,
+      );
     }
 
     return filtered;
   }, [mappings, searchTerm, showUnmapped]);
 
   const mappingStats = useMemo(() => {
-    const mapped = mappings.filter(m => m.targetColumn && m.targetColumn !== m.sourceColumn).length;
+    const mapped = mappings.filter(
+      (m) => m.targetColumn && m.targetColumn !== m.sourceColumn,
+    ).length;
     const unmapped = mappings.length - mapped;
-    const requiredTargets = targetColumns.filter(col => col.required);
-    const mappedRequired = requiredTargets.filter(col =>
-      mappings.some(m => m.targetColumn === col.key)
+    const requiredTargets = targetColumns.filter((col) => col.required);
+    const mappedRequired = requiredTargets.filter((col) =>
+      mappings.some((m) => m.targetColumn === col.key),
     ).length;
 
     return {
@@ -137,58 +152,63 @@ export function FieldMapper({
       unmapped,
       total: mappings.length,
       requiredTargets: requiredTargets.length,
-      mappedRequired
+      mappedRequired,
     };
   }, [mappings, targetColumns]);
 
-  const handleMappingChange = (sourceColumn: string, field: keyof ImportFieldMapping, value: any) => {
-    const newMappings = mappings.map(mapping =>
+  const handleMappingChange = (
+    sourceColumn: string,
+    field: keyof ImportFieldMapping,
+    value: any,
+  ) => {
+    const newMappings = mappings.map((mapping) =>
       mapping.sourceColumn === sourceColumn
         ? { ...mapping, [field]: value }
-        : mapping
+        : mapping,
     );
     onMappingsChange(newMappings);
   };
 
   const handleAddMapping = () => {
-    const unmappedHeaders = sourceHeaders.filter(header =>
-      !mappings.some(m => m.sourceColumn === header)
+    const unmappedHeaders = sourceHeaders.filter(
+      (header) => !mappings.some((m) => m.sourceColumn === header),
     );
 
     if (unmappedHeaders.length > 0) {
       const newMapping: ImportFieldMapping = {
         sourceColumn: unmappedHeaders[0],
         targetColumn: unmappedHeaders[0],
-        skipEmpty: true
+        skipEmpty: true,
       };
       onMappingsChange([...mappings, newMapping]);
     }
   };
 
   const handleRemoveMapping = (sourceColumn: string) => {
-    const newMappings = mappings.filter(m => m.sourceColumn !== sourceColumn);
+    const newMappings = mappings.filter((m) => m.sourceColumn !== sourceColumn);
     onMappingsChange(newMappings);
   };
 
   const handleAutoMap = () => {
-    const newMappings = sourceHeaders.map(sourceHeader => {
+    const newMappings = sourceHeaders.map((sourceHeader) => {
       // Try to find exact match first
-      let targetColumn = targetColumns.find(col =>
-        col.key === sourceHeader || col.label === sourceHeader
+      let targetColumn = targetColumns.find(
+        (col) => col.key === sourceHeader || col.label === sourceHeader,
       );
 
       // If no exact match, try case-insensitive match
       if (!targetColumn) {
-        targetColumn = targetColumns.find(col =>
-          col.key.toLowerCase() === sourceHeader.toLowerCase() ||
-          col.label.toLowerCase() === sourceHeader.toLowerCase()
+        targetColumn = targetColumns.find(
+          (col) =>
+            col.key.toLowerCase() === sourceHeader.toLowerCase() ||
+            col.label.toLowerCase() === sourceHeader.toLowerCase(),
         );
       }
 
       return {
         sourceColumn: sourceHeader,
         targetColumn: targetColumn ? targetColumn.key : sourceHeader,
-        skipEmpty: true
+        skipEmpty: true,
       };
     });
 
@@ -196,24 +216,28 @@ export function FieldMapper({
   };
 
   const handleClearMappings = () => {
-    const clearedMappings = mappings.map(mapping => ({
+    const clearedMappings = mappings.map((mapping) => ({
       ...mapping,
-      targetColumn: mapping.sourceColumn
+      targetColumn: mapping.sourceColumn,
     }));
     onMappingsChange(clearedMappings);
   };
 
   const getTargetColumn = (targetKey: string) => {
-    return targetColumns.find(col => col.key === targetKey);
+    return targetColumns.find((col) => col.key === targetKey);
   };
 
   const renderMappingRow = (mapping: ImportFieldMapping) => {
     const targetColumn = getTargetColumn(mapping.targetColumn);
-    const isMapped = mapping.targetColumn && mapping.targetColumn !== mapping.sourceColumn;
+    const isMapped =
+      mapping.targetColumn && mapping.targetColumn !== mapping.sourceColumn;
     const sampleValue = sampleData[0]?.[mapping.sourceColumn];
 
     return (
-      <TableRow key={mapping.sourceColumn} className="hover:bg-gray-50 dark:hover:bg-gray-800">
+      <TableRow
+        key={mapping.sourceColumn}
+        className="hover:bg-gray-50 dark:hover:bg-gray-800"
+      >
         {/* Source Column */}
         <TableCell className="font-medium">
           <div className="flex items-center space-x-2">
@@ -233,14 +257,18 @@ export function FieldMapper({
 
         {/* Arrow */}
         <TableCell className="w-12 text-center">
-          <ArrowRight className={`h-4 w-4 ${isMapped ? 'text-green-500' : 'text-gray-400'}`} />
+          <ArrowRight
+            className={`h-4 w-4 ${isMapped ? "text-green-500" : "text-gray-400"}`}
+          />
         </TableCell>
 
         {/* Target Column */}
         <TableCell>
           <Select
             value={mapping.targetColumn}
-            onValueChange={(value) => handleMappingChange(mapping.sourceColumn, 'targetColumn', value)}
+            onValueChange={(value) =>
+              handleMappingChange(mapping.sourceColumn, "targetColumn", value)
+            }
           >
             <SelectTrigger className="w-full">
               <SelectValue placeholder="Select target column" />
@@ -252,7 +280,7 @@ export function FieldMapper({
                   <span>No mapping</span>
                 </div>
               </SelectItem>
-              {targetColumns.map(column => (
+              {targetColumns.map((column) => (
                 <SelectItem key={column.key} value={column.key}>
                   <div className="flex items-center space-x-2">
                     {getTypeIcon(column.type)}
@@ -270,7 +298,10 @@ export function FieldMapper({
 
           {targetColumn && (
             <div className="flex items-center space-x-2 mt-1">
-              <Badge variant="secondary" className={`text-xs ${getTypeColor(targetColumn.type)}`}>
+              <Badge
+                variant="secondary"
+                className={`text-xs ${getTypeColor(targetColumn.type)}`}
+              >
                 <div className="flex items-center space-x-1">
                   {getTypeIcon(targetColumn.type)}
                   <span>{targetColumn.type}</span>
@@ -293,8 +324,14 @@ export function FieldMapper({
         {/* Transform */}
         <TableCell>
           <Select
-            value={mapping.transform || ''}
-            onValueChange={(value) => handleMappingChange(mapping.sourceColumn, 'transform', value || undefined)}
+            value={mapping.transform || ""}
+            onValueChange={(value) =>
+              handleMappingChange(
+                mapping.sourceColumn,
+                "transform",
+                value || undefined,
+              )
+            }
           >
             <SelectTrigger className="w-full">
               <SelectValue placeholder="No transform" />
@@ -318,7 +355,7 @@ export function FieldMapper({
               id={`skip-empty-${mapping.sourceColumn}`}
               checked={mapping.skipEmpty || false}
               onCheckedChange={(checked) =>
-                handleMappingChange(mapping.sourceColumn, 'skipEmpty', checked)
+                handleMappingChange(mapping.sourceColumn, "skipEmpty", checked)
               }
             />
             <Label
@@ -359,7 +396,8 @@ export function FieldMapper({
           <div className="flex items-center space-x-2">
             {mappingStats.mappedRequired < mappingStats.requiredTargets && (
               <Badge variant="destructive" className="text-xs">
-                Missing required: {mappingStats.requiredTargets - mappingStats.mappedRequired}
+                Missing required:{" "}
+                {mappingStats.requiredTargets - mappingStats.mappedRequired}
               </Badge>
             )}
             <Badge variant="outline" className="text-xs">
@@ -405,20 +443,12 @@ export function FieldMapper({
           </div>
 
           <div className="flex items-center space-x-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleAutoMap}
-            >
+            <Button variant="outline" size="sm" onClick={handleAutoMap}>
               <CheckCircle className="h-4 w-4 mr-2" />
               Auto Map
             </Button>
 
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleClearMappings}
-            >
+            <Button variant="outline" size="sm" onClick={handleClearMappings}>
               <RotateCcw className="h-4 w-4 mr-2" />
               Clear
             </Button>
@@ -440,26 +470,42 @@ export function FieldMapper({
         {/* Mapping Statistics */}
         <div className="grid grid-cols-4 gap-4 mb-6">
           <div className="text-center">
-            <div className="text-2xl font-bold text-green-600">{mappingStats.mapped}</div>
-            <div className="text-sm text-gray-600 dark:text-gray-400">Mapped</div>
+            <div className="text-2xl font-bold text-green-600">
+              {mappingStats.mapped}
+            </div>
+            <div className="text-sm text-gray-600 dark:text-gray-400">
+              Mapped
+            </div>
           </div>
           <div className="text-center">
-            <div className="text-2xl font-bold text-yellow-600">{mappingStats.unmapped}</div>
-            <div className="text-sm text-gray-600 dark:text-gray-400">Unmapped</div>
+            <div className="text-2xl font-bold text-yellow-600">
+              {mappingStats.unmapped}
+            </div>
+            <div className="text-sm text-gray-600 dark:text-gray-400">
+              Unmapped
+            </div>
           </div>
           <div className="text-center">
-            <div className="text-2xl font-bold text-blue-600">{mappingStats.total}</div>
-            <div className="text-sm text-gray-600 dark:text-gray-400">Total Columns</div>
+            <div className="text-2xl font-bold text-blue-600">
+              {mappingStats.total}
+            </div>
+            <div className="text-sm text-gray-600 dark:text-gray-400">
+              Total Columns
+            </div>
           </div>
           <div className="text-center">
-            <div className={`text-2xl font-bold ${
-              mappingStats.mappedRequired === mappingStats.requiredTargets
-                ? 'text-green-600'
-                : 'text-red-600'
-            }`}>
+            <div
+              className={`text-2xl font-bold ${
+                mappingStats.mappedRequired === mappingStats.requiredTargets
+                  ? "text-green-600"
+                  : "text-red-600"
+              }`}
+            >
               {mappingStats.mappedRequired}/{mappingStats.requiredTargets}
             </div>
-            <div className="text-sm text-gray-600 dark:text-gray-400">Required Fields</div>
+            <div className="text-sm text-gray-600 dark:text-gray-400">
+              Required Fields
+            </div>
           </div>
         </div>
 
@@ -481,11 +527,13 @@ export function FieldMapper({
             <TableBody>
               {filteredMappings.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center py-8 text-gray-500">
+                  <TableCell
+                    colSpan={6}
+                    className="text-center py-8 text-gray-500"
+                  >
                     {searchTerm || showUnmapped
-                      ? 'No mappings found matching your criteria'
-                      : 'No field mappings defined'
-                    }
+                      ? "No mappings found matching your criteria"
+                      : "No field mappings defined"}
                   </TableCell>
                 </TableRow>
               ) : (
@@ -509,15 +557,20 @@ export function FieldMapper({
                 </div>
                 <div className="mt-2 flex flex-wrap gap-2">
                   {targetColumns
-                    .filter(col =>
-                      col.required && !mappings.some(m => m.targetColumn === col.key)
+                    .filter(
+                      (col) =>
+                        col.required &&
+                        !mappings.some((m) => m.targetColumn === col.key),
                     )
-                    .map(col => (
-                      <Badge key={col.key} variant="destructive" className="text-xs">
+                    .map((col) => (
+                      <Badge
+                        key={col.key}
+                        variant="destructive"
+                        className="text-xs"
+                      >
                         {col.label}
                       </Badge>
-                    ))
-                  }
+                    ))}
                 </div>
               </div>
             </div>
@@ -527,9 +580,11 @@ export function FieldMapper({
         {/* Help Text */}
         <div className="mt-4 text-sm text-gray-600 dark:text-gray-400">
           <p>
-            <strong>Auto Map:</strong> Automatically matches columns by name similarity.
+            <strong>Auto Map:</strong> Automatically matches columns by name
+            similarity.
             <br />
-            <strong>Transform:</strong> Apply data transformations during import.
+            <strong>Transform:</strong> Apply data transformations during
+            import.
             <br />
             <strong>Skip Empty:</strong> Skip rows where this field is empty.
           </p>

@@ -1,20 +1,35 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from 'react';
-import { Bell, X, Check, CheckCheck, Trash2, Settings, ExternalLink } from 'lucide-react';
-import { Button } from '../ui/button';
-import { Badge } from '../ui/badge';
-import { ScrollArea } from '../ui/scroll-area';
-import { Separator } from '../ui/separator';
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '../ui/sheet';
-import { useAuth } from '@/modules/auth';
-import { cn } from '@/shared/utils';
+import {
+  Bell,
+  Check,
+  CheckCheck,
+  ExternalLink,
+  Settings,
+  Trash2,
+  X,
+} from "lucide-react";
+import type React from "react";
+import { useCallback, useEffect, useState } from "react";
+import { useAuth } from "@/modules/auth";
+import { cn } from "@/shared/utils";
+import { Badge } from "../ui/badge";
+import { Button } from "../ui/button";
+import { ScrollArea } from "../ui/scroll-area";
+import { Separator } from "../ui/separator";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "../ui/sheet";
 
 interface Notification {
   id: number;
   title: string;
   message: string;
-  type: 'info' | 'success' | 'warning' | 'error' | 'system';
+  type: "info" | "success" | "warning" | "error" | "system";
   channels: string[];
   is_read: boolean;
   is_sent: boolean;
@@ -35,7 +50,7 @@ interface NotificationCenterProps {
 function NotificationItem({
   notification,
   onMarkAsRead,
-  onDelete
+  onDelete,
 }: {
   notification: Notification;
   onMarkAsRead: (id: number) => void;
@@ -43,45 +58,64 @@ function NotificationItem({
 }) {
   const getTypeColor = (type: string) => {
     switch (type) {
-      case 'success': return 'text-green-600 dark:text-green-400';
-      case 'warning': return 'text-yellow-600 dark:text-yellow-400';
-      case 'error': return 'text-red-600 dark:text-red-400';
-      case 'system': return 'text-blue-600 dark:text-blue-400';
-      default: return 'text-gray-600 dark:text-gray-400';
+      case "success":
+        return "text-green-600 dark:text-green-400";
+      case "warning":
+        return "text-yellow-600 dark:text-yellow-400";
+      case "error":
+        return "text-red-600 dark:text-red-400";
+      case "system":
+        return "text-blue-600 dark:text-blue-400";
+      default:
+        return "text-gray-600 dark:text-gray-400";
     }
   };
 
   const getTypeIcon = (type: string) => {
     switch (type) {
-      case 'success': return '✓';
-      case 'warning': return '⚠';
-      case 'error': return '✕';
-      case 'system': return 'ℹ';
-      default: return '•';
+      case "success":
+        return "✓";
+      case "warning":
+        return "⚠";
+      case "error":
+        return "✕";
+      case "system":
+        return "ℹ";
+      default:
+        return "•";
     }
   };
 
   const handleActionClick = () => {
     if (notification.action_url) {
-      window.open(notification.action_url, '_blank');
+      window.open(notification.action_url, "_blank");
     }
   };
 
   return (
-    <div className={cn(
-      "p-4 border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors",
-      !notification.is_read && "bg-blue-50 dark:bg-blue-900/20"
-    )}>
+    <div
+      className={cn(
+        "p-4 border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors",
+        !notification.is_read && "bg-blue-50 dark:bg-blue-900/20",
+      )}
+    >
       <div className="flex items-start justify-between">
         <div className="flex-1 min-w-0">
           <div className="flex items-center space-x-2 mb-1">
-            <span className={cn("text-sm font-medium", getTypeColor(notification.type))}>
+            <span
+              className={cn(
+                "text-sm font-medium",
+                getTypeColor(notification.type),
+              )}
+            >
               {getTypeIcon(notification.type)}
             </span>
-            <h4 className={cn(
-              "text-sm font-medium truncate",
-              !notification.is_read && "font-semibold"
-            )}>
+            <h4
+              className={cn(
+                "text-sm font-medium truncate",
+                !notification.is_read && "font-semibold",
+              )}
+            >
               {notification.title}
             </h4>
             {!notification.is_read && (
@@ -93,7 +127,7 @@ function NotificationItem({
           </p>
           <div className="flex items-center justify-between">
             <span className="text-xs text-gray-500 dark:text-gray-500">
-              {new Date(notification.created_at).toLocaleDateString()} at{' '}
+              {new Date(notification.created_at).toLocaleDateString()} at{" "}
               {new Date(notification.created_at).toLocaleTimeString()}
             </span>
             <div className="flex items-center space-x-1">
@@ -135,7 +169,12 @@ function NotificationItem({
   );
 }
 
-export function NotificationCenter({ trigger, className, open: externalOpen, onOpenChange }: NotificationCenterProps) {
+export function NotificationCenter({
+  trigger,
+  className,
+  open: externalOpen,
+  onOpenChange,
+}: NotificationCenterProps) {
   const { user } = useAuth();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -151,62 +190,67 @@ export function NotificationCenter({ trigger, className, open: externalOpen, onO
 
     setLoading(true);
     try {
-      const response = await fetch('/api/v1/notifications/');
+      const response = await fetch("/api/v1/notifications/");
       if (response.ok) {
         const data = await response.json();
         setNotifications(data.notifications);
       }
     } catch (error) {
-      console.error('Failed to fetch notifications:', error);
+      console.error("Failed to fetch notifications:", error);
     } finally {
       setLoading(false);
     }
-  }, [user, setLoading, setNotifications]);
+  }, [user]);
 
   // Fetch unread count
   const fetchUnreadCount = useCallback(async () => {
     if (!user) return;
 
     try {
-      const response = await fetch('/api/v1/notifications/unread-count');
+      const response = await fetch("/api/v1/notifications/unread-count");
       if (response.ok) {
         const data = await response.json();
         setUnreadCount(data.unread_count);
       }
     } catch (error) {
-      console.error('Failed to fetch unread count:', error);
+      console.error("Failed to fetch unread count:", error);
     }
-  }, [user, setUnreadCount]);
+  }, [user]);
 
   // Mark as read
   const markAsRead = async (notificationId: number) => {
     try {
-      const response = await fetch(`/api/v1/notifications/${notificationId}/read`, {
-        method: 'PUT',
-      });
+      const response = await fetch(
+        `/api/v1/notifications/${notificationId}/read`,
+        {
+          method: "PUT",
+        },
+      );
       if (response.ok) {
-        setNotifications(prev =>
-          prev.map(n => n.id === notificationId ? { ...n, is_read: true } : n)
+        setNotifications((prev) =>
+          prev.map((n) =>
+            n.id === notificationId ? { ...n, is_read: true } : n,
+          ),
         );
-        setUnreadCount(prev => Math.max(0, prev - 1));
+        setUnreadCount((prev) => Math.max(0, prev - 1));
       }
     } catch (error) {
-      console.error('Failed to mark notification as read:', error);
+      console.error("Failed to mark notification as read:", error);
     }
   };
 
   // Mark all as read
   const markAllAsRead = async () => {
     try {
-      const response = await fetch('/api/v1/notifications/mark-all-read', {
-        method: 'PUT',
+      const response = await fetch("/api/v1/notifications/mark-all-read", {
+        method: "PUT",
       });
       if (response.ok) {
-        setNotifications(prev => prev.map(n => ({ ...n, is_read: true })));
+        setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true })));
         setUnreadCount(0);
       }
     } catch (error) {
-      console.error('Failed to mark all notifications as read:', error);
+      console.error("Failed to mark all notifications as read:", error);
     }
   };
 
@@ -214,18 +258,20 @@ export function NotificationCenter({ trigger, className, open: externalOpen, onO
   const deleteNotification = async (notificationId: number) => {
     try {
       const response = await fetch(`/api/v1/notifications/${notificationId}`, {
-        method: 'DELETE',
+        method: "DELETE",
       });
       if (response.ok) {
-        setNotifications(prev => prev.filter(n => n.id !== notificationId));
+        setNotifications((prev) => prev.filter((n) => n.id !== notificationId));
         // Update unread count if deleted notification was unread
-        const deletedNotification = notifications.find(n => n.id === notificationId);
+        const deletedNotification = notifications.find(
+          (n) => n.id === notificationId,
+        );
         if (deletedNotification && !deletedNotification.is_read) {
-          setUnreadCount(prev => Math.max(0, prev - 1));
+          setUnreadCount((prev) => Math.max(0, prev - 1));
         }
       }
     } catch (error) {
-      console.error('Failed to delete notification:', error);
+      console.error("Failed to delete notification:", error);
     }
   };
 
@@ -263,7 +309,7 @@ export function NotificationCenter({ trigger, className, open: externalOpen, onO
                 variant="destructive"
                 className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs"
               >
-                {unreadCount > 99 ? '99+' : unreadCount}
+                {unreadCount > 99 ? "99+" : unreadCount}
               </Badge>
             )}
           </Button>
@@ -319,7 +365,8 @@ export function NotificationCenter({ trigger, className, open: externalOpen, onO
                 No notifications
               </h3>
               <p className="text-sm text-gray-500 dark:text-gray-400">
-                You&apos;re all caught up! We&apos;ll notify you when there&apos;s something new.
+                You&apos;re all caught up! We&apos;ll notify you when
+                there&apos;s something new.
               </p>
             </div>
           ) : (
@@ -345,7 +392,7 @@ export function NotificationCenter({ trigger, className, open: externalOpen, onO
                 className="w-full"
                 onClick={() => {
                   // Navigate to settings notifications tab
-                  window.location.href = '/settings?tab=notifications';
+                  window.location.href = "/settings?tab=notifications";
                   setIsOpen(false);
                 }}
               >

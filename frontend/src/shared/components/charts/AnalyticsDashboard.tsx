@@ -1,153 +1,166 @@
-'use client'
+"use client";
 
+import { TrendingUp } from "lucide-react";
 /**
  * Analytics Dashboard Component
  * Migrated from Recharts to ECharts
  * Complete dashboard with KPIs and multiple chart types
  */
-import React, { useMemo } from 'react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/components/ui/card'
+import type React from "react";
+import { useMemo } from "react";
 import {
-  LineChart,
-  BarChart,
   AreaChart,
+  BarChart,
+  LineChart,
   PieChart,
-  StatCard
-} from '@/shared/components/charts'
+  StatCard,
+} from "@/shared/components/charts";
 import {
-  TrendingUp
-} from 'lucide-react'
-import { cn } from '@/shared/lib/utils'
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/shared/components/ui/card";
+import { cn } from "@/shared/lib/utils";
 
 export interface KpiData {
-  title: string
-  value: number | string
-  change?: number
-  changeType?: 'increase' | 'decrease' | 'neutral'
-  format?: 'currency' | 'percentage' | 'number' | 'compact'
-  icon?: React.ReactNode
-  description?: string
-  chartData?: number[]
+  title: string;
+  value: number | string;
+  change?: number;
+  changeType?: "increase" | "decrease" | "neutral";
+  format?: "currency" | "percentage" | "number" | "compact";
+  icon?: React.ReactNode;
+  description?: string;
+  chartData?: number[];
 }
 
 export interface ChartData {
-  [key: string]: any
+  [key: string]: any;
 }
 
 export interface AnalyticsDashboardProps {
   /** KPI cards data */
-  kpis?: KpiData[]
+  kpis?: KpiData[];
   /** Main chart data */
-  chartData?: ChartData[]
+  chartData?: ChartData[];
   /** Chart type for main visualization */
-  chartType?: 'area' | 'bar' | 'line' | 'pie'
+  chartType?: "area" | "bar" | "line" | "pie";
   /** Data key for X-axis */
-  xAxisKey?: string
+  xAxisKey?: string;
   /** Data keys for Y-axis (series) */
-  yAxisKeys?: string[]
+  yAxisKeys?: string[];
   /** Chart height */
-  chartHeight?: number
+  chartHeight?: number;
   /** Show legend */
-  showLegend?: boolean
+  showLegend?: boolean;
   /** Chart title */
-  chartTitle?: string
+  chartTitle?: string;
   /** Chart description */
-  chartDescription?: string
+  chartDescription?: string;
   /** Color scheme */
-  colors?: string[]
+  colors?: string[];
   /** Loading state */
-  loading?: boolean
+  loading?: boolean;
   /** Error state */
-  error?: string
+  error?: string;
   /** Custom class name */
-  className?: string
+  className?: string;
   /** Card layout - grid or flex */
-  layout?: 'grid' | 'flex'
+  layout?: "grid" | "flex";
   /** Show trend indicators */
-  showTrends?: boolean
+  showTrends?: boolean;
 }
 
 // Default colors
 const defaultColors = [
-  '#3b82f6', // blue
-  '#10b981', // green
-  '#f59e0b', // amber
-  '#ef4444', // red
-  '#8b5cf6', // violet
-  '#ec4899', // pink
-  '#06b6d4', // cyan
-  '#f97316'  // orange
-]
+  "#3b82f6", // blue
+  "#10b981", // green
+  "#f59e0b", // amber
+  "#ef4444", // red
+  "#8b5cf6", // violet
+  "#ec4899", // pink
+  "#06b6d4", // cyan
+  "#f97316", // orange
+];
 
 // Utility functions for formatting
 const formatters = {
   currency: (value: number) =>
-    new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD'
+    new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
     }).format(value),
   percentage: (value: number) =>
-    new Intl.NumberFormat('en-US', {
-      style: 'percent',
+    new Intl.NumberFormat("en-US", {
+      style: "percent",
       minimumFractionDigits: 1,
-      maximumFractionDigits: 1
+      maximumFractionDigits: 1,
     }).format(value / 100),
-  number: (value: number) =>
-    new Intl.NumberFormat('en-US').format(value),
+  number: (value: number) => new Intl.NumberFormat("en-US").format(value),
   compact: (value: number) =>
-    new Intl.NumberFormat('en-US', {
-      notation: 'compact',
-      compactDisplay: 'short'
-    }).format(value)
-}
+    new Intl.NumberFormat("en-US", {
+      notation: "compact",
+      compactDisplay: "short",
+    }).format(value),
+};
 
-const formatValue = (value: number | string, format?: KpiData['format']): string => {
-  if (typeof value === 'string') return value
-  if (!format || format === 'number') return formatters.number(value)
-  return formatters[format](value)
-}
+const formatValue = (
+  value: number | string,
+  format?: KpiData["format"],
+): string => {
+  if (typeof value === "string") return value;
+  if (!format || format === "number") return formatters.number(value);
+  return formatters[format](value);
+};
 
 export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
   kpis = [],
   chartData = [],
-  chartType = 'area',
-  xAxisKey = 'name',
-  yAxisKeys = ['value'],
+  chartType = "area",
+  xAxisKey = "name",
+  yAxisKeys = ["value"],
   chartHeight = 400,
   showLegend = true,
-  chartTitle = 'Analytics Overview',
+  chartTitle = "Analytics Overview",
   chartDescription,
   colors = defaultColors,
   loading = false,
   error,
   className,
-  layout = 'grid',
-  showTrends = true
+  layout = "grid",
+  showTrends = true,
 }) => {
   // Prepare chart data
-  const xAxisData = useMemo(() =>
-    chartData.map(item => item[xAxisKey]),
-    [chartData, xAxisKey]
-  )
+  const xAxisData = useMemo(
+    () => chartData.map((item) => item[xAxisKey]),
+    [chartData, xAxisKey],
+  );
 
-  const seriesData = useMemo(() =>
-    yAxisKeys.map((key, index) => ({
-      name: key.charAt(0).toUpperCase() + key.slice(1).replace(/([A-Z])/g, ' $1').trim(),
-      data: chartData.map(item => item[key] || 0),
-      color: colors[index % colors.length]
-    })),
-    [chartData, yAxisKeys, colors]
-  )
+  const seriesData = useMemo(
+    () =>
+      yAxisKeys.map((key, index) => ({
+        name:
+          key.charAt(0).toUpperCase() +
+          key
+            .slice(1)
+            .replace(/([A-Z])/g, " $1")
+            .trim(),
+        data: chartData.map((item) => item[key] || 0),
+        color: colors[index % colors.length],
+      })),
+    [chartData, yAxisKeys, colors],
+  );
 
   // For pie chart, prepare different data structure
   const pieData = useMemo(() => {
-    if (chartType !== 'pie') return []
+    if (chartType !== "pie") return [];
     return chartData.map((item, index) => ({
       name: item[xAxisKey],
       value: item[yAxisKeys[0]] || 0,
-      color: colors[index % colors.length]
-    }))
-  }, [chartType, chartData, xAxisKey, yAxisKeys, colors])
+      color: colors[index % colors.length],
+    }));
+  }, [chartType, chartData, xAxisKey, yAxisKeys, colors]);
 
   if (error) {
     return (
@@ -158,18 +171,24 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
           </div>
         </CardContent>
       </Card>
-    )
+    );
   }
 
   return (
-    <div className={cn('space-y-6', className)}>
+    <div className={cn("space-y-6", className)}>
       {/* KPI Cards */}
       {kpis.length > 0 && (
-        <div className={cn(
-          layout === 'grid' ? 'grid gap-4 md:grid-cols-2 lg:grid-cols-4' : 'flex flex-wrap gap-4'
-        )}>
+        <div
+          className={cn(
+            layout === "grid"
+              ? "grid gap-4 md:grid-cols-2 lg:grid-cols-4"
+              : "flex flex-wrap gap-4",
+          )}
+        >
           {kpis.map((kpi, index) => {
-            const IconComponent = kpi.icon || <TrendingUp className="h-4 w-4" />
+            const IconComponent = kpi.icon || (
+              <TrendingUp className="h-4 w-4" />
+            );
 
             return (
               <StatCard
@@ -183,7 +202,7 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
                 chartType="area"
                 color={colors[index % colors.length]}
               />
-            )
+            );
           })}
         </div>
       )}
@@ -193,11 +212,13 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
         <Card>
           <CardHeader>
             <CardTitle>{chartTitle}</CardTitle>
-            {chartDescription && <CardDescription>{chartDescription}</CardDescription>}
+            {chartDescription && (
+              <CardDescription>{chartDescription}</CardDescription>
+            )}
           </CardHeader>
           <CardContent>
             <div style={{ height: chartHeight }}>
-              {chartType === 'area' && (
+              {chartType === "area" && (
                 <AreaChart
                   data={seriesData}
                   xAxisData={xAxisData}
@@ -207,7 +228,7 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
                   className="h-full"
                 />
               )}
-              {chartType === 'line' && (
+              {chartType === "line" && (
                 <LineChart
                   data={seriesData}
                   xAxisData={xAxisData}
@@ -217,7 +238,7 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
                   className="h-full"
                 />
               )}
-              {chartType === 'bar' && (
+              {chartType === "bar" && (
                 <BarChart
                   data={seriesData}
                   xAxisData={xAxisData}
@@ -226,7 +247,7 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
                   className="h-full"
                 />
               )}
-              {chartType === 'pie' && (
+              {chartType === "pie" && (
                 <PieChart
                   data={pieData}
                   legend={showLegend}
@@ -239,7 +260,7 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
         </Card>
       )}
     </div>
-  )
-}
+  );
+};
 
-AnalyticsDashboard.displayName = 'AnalyticsDashboard'
+AnalyticsDashboard.displayName = "AnalyticsDashboard";

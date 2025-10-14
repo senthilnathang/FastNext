@@ -1,44 +1,49 @@
-'use client'
+"use client";
 
-import React from 'react'
-import { Button } from '@/shared/components/ui/button'
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/shared/components/ui/dropdown-menu'
-import { Badge } from '@/shared/components/ui/badge'
-import { Group, X } from 'lucide-react'
+import { Group, X } from "lucide-react";
+import type React from "react";
+import { Badge } from "@/shared/components/ui/badge";
+import { Button } from "@/shared/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/shared/components/ui/dropdown-menu";
 
 export interface GroupOption {
-  key: string
-  label: string
-  icon?: React.ReactNode
+  key: string;
+  label: string;
+  icon?: React.ReactNode;
 }
 
 export interface GroupControlProps {
-  options: GroupOption[]
-  value?: string
-  onChange: (field: string) => void
-  placeholder?: string
-  className?: string
-  allowClear?: boolean
+  options: GroupOption[];
+  value?: string;
+  onChange: (field: string) => void;
+  placeholder?: string;
+  className?: string;
+  allowClear?: boolean;
 }
 
 export function GroupControl({
   options,
   value,
   onChange,
-  placeholder = 'Group by...',
+  placeholder = "Group by...",
   className,
-  allowClear = true
+  allowClear = true,
 }: GroupControlProps) {
-  const selectedOption = options.find(option => option.key === value)
+  const selectedOption = options.find((option) => option.key === value);
 
   const handleGroupChange = (field: string) => {
-    onChange(field)
-  }
+    onChange(field);
+  };
 
   const handleClear = (e: React.MouseEvent) => {
-    e.stopPropagation()
-    onChange('')
-  }
+    e.stopPropagation();
+    onChange("");
+  };
 
   return (
     <DropdownMenu>
@@ -50,9 +55,7 @@ export function GroupControl({
           </span>
           {value && (
             <div className="flex items-center ml-2">
-              <Badge variant="secondary">
-                Grouped
-              </Badge>
+              <Badge variant="secondary">Grouped</Badge>
               {allowClear && (
                 <span
                   className="inline-flex items-center justify-center h-auto p-1 ml-1 rounded hover:bg-destructive hover:text-destructive-foreground cursor-pointer"
@@ -70,7 +73,7 @@ export function GroupControl({
           <DropdownMenuItem
             key={option.key}
             onClick={() => handleGroupChange(option.key)}
-            className={value === option.key ? 'bg-accent' : ''}
+            className={value === option.key ? "bg-accent" : ""}
           >
             <div className="flex items-center space-x-2">
               {option.icon}
@@ -79,13 +82,14 @@ export function GroupControl({
           </DropdownMenuItem>
         ))}
         {value && allowClear && (
-          <>
-            <DropdownMenuItem onClick={() => onChange('')} className="text-muted-foreground">
-              Clear grouping
-            </DropdownMenuItem>
-          </>
+          <DropdownMenuItem
+            onClick={() => onChange("")}
+            className="text-muted-foreground"
+          >
+            Clear grouping
+          </DropdownMenuItem>
         )}
       </DropdownMenuContent>
     </DropdownMenu>
-  )
+  );
 }

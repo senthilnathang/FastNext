@@ -1,15 +1,31 @@
 // Views Components Index
-export { GenericFormView } from './GenericFormView';
-export { GenericKanbanView } from './GenericKanbanView';
-export { GenericListView } from './GenericListView';
-export { ViewManager } from './ViewManager';
-export { CommonFormViewManager, createFormViewConfig } from './CommonFormViewManager';
-export { KanbanView } from './KanbanView';
-export { GanttView } from './GanttView';
-export { CalendarView } from './CalendarView';
-export type { ViewType, Column, ViewConfig, ViewManagerProps } from './ViewManager';
-export type { FormViewConfig, CommonFormViewManagerProps } from './CommonFormViewManager';
-export type { FormField, FormSection, GenericFormViewProps } from './GenericFormView';
-export type { KanbanColumn, KanbanCard, KanbanViewProps } from './KanbanView';
-export type { GanttItem, GanttViewProps } from './GanttView';
-export type { CalendarItem, CalendarViewProps } from './CalendarView';
+
+export type { CalendarItem, CalendarViewProps } from "./CalendarView";
+export { CalendarView } from "./CalendarView";
+export type {
+  CommonFormViewManagerProps,
+  FormViewConfig,
+} from "./CommonFormViewManager";
+export {
+  CommonFormViewManager,
+  createFormViewConfig,
+} from "./CommonFormViewManager";
+export type { GanttItem, GanttViewProps } from "./GanttView";
+export { GanttView } from "./GanttView";
+export type {
+  FormField,
+  FormSection,
+  GenericFormViewProps,
+} from "./GenericFormView";
+export { GenericFormView } from "./GenericFormView";
+export { GenericKanbanView } from "./GenericKanbanView";
+export { GenericListView } from "./GenericListView";
+export type { KanbanCard, KanbanColumn, KanbanViewProps } from "./KanbanView";
+export { KanbanView } from "./KanbanView";
+export type {
+  Column,
+  ViewConfig,
+  ViewManagerProps,
+  ViewType,
+} from "./ViewManager";
+export { ViewManager } from "./ViewManager";

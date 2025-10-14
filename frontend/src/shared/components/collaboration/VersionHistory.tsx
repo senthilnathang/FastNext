@@ -2,13 +2,14 @@
  * VersionHistory component for displaying and managing document versions
  */
 
-import React, { useEffect, useState } from 'react';
-import { formatDistanceToNow } from 'date-fns';
-import { Card } from '../ui/card';
-import { Button } from '../ui/button';
-import { Badge } from '../ui/badge';
-import { ScrollArea } from '../ui/scroll-area';
-import { History, RotateCcw, Eye, Download } from 'lucide-react';
+import { formatDistanceToNow } from "date-fns";
+import { Eye, History, RotateCcw } from "lucide-react";
+import type React from "react";
+import { useEffect, useState } from "react";
+import { Badge } from "../ui/badge";
+import { Button } from "../ui/button";
+import { Card } from "../ui/card";
+import { ScrollArea } from "../ui/scroll-area";
 
 interface Version {
   version_id: string;
@@ -29,7 +30,7 @@ export const VersionHistory: React.FC<VersionHistoryProps> = ({
   documentId,
   onVersionSelect,
   onRevert,
-  className = ''
+  className = "",
 }) => {
   const [versions, setVersions] = useState<Version[]>([]);
   const [loading, setLoading] = useState(true);
@@ -37,17 +38,19 @@ export const VersionHistory: React.FC<VersionHistoryProps> = ({
 
   useEffect(() => {
     fetchVersions();
-  }, [documentId]);
+  }, [fetchVersions]);
 
   const fetchVersions = async () => {
     try {
-      const response = await fetch(`/api/v1/collaboration/documents/${documentId}/versions`);
+      const response = await fetch(
+        `/api/v1/collaboration/documents/${documentId}/versions`,
+      );
       if (response.ok) {
         const data = await response.json();
         setVersions(data.versions);
       }
     } catch (error) {
-      console.error('Error fetching versions:', error);
+      console.error("Error fetching versions:", error);
     } finally {
       setLoading(false);
     }
@@ -57,26 +60,35 @@ export const VersionHistory: React.FC<VersionHistoryProps> = ({
     setSelectedVersion(versionId);
     if (onVersionSelect) {
       try {
-        const response = await fetch(`/api/v1/collaboration/documents/${documentId}/versions/${versionId}`);
+        const response = await fetch(
+          `/api/v1/collaboration/documents/${documentId}/versions/${versionId}`,
+        );
         if (response.ok) {
           const data = await response.json();
           onVersionSelect(data.content);
         }
       } catch (error) {
-        console.error('Error fetching version:', error);
+        console.error("Error fetching version:", error);
       }
     }
   };
 
   const handleRevert = async (versionId: string) => {
-    if (!confirm('Are you sure you want to revert to this version? This will create a new version.')) {
+    if (
+      !confirm(
+        "Are you sure you want to revert to this version? This will create a new version.",
+      )
+    ) {
       return;
     }
 
     try {
-      const response = await fetch(`/api/v1/collaboration/documents/${documentId}/versions/${versionId}/revert`, {
-        method: 'POST'
-      });
+      const response = await fetch(
+        `/api/v1/collaboration/documents/${documentId}/versions/${versionId}/revert`,
+        {
+          method: "POST",
+        },
+      );
 
       if (response.ok) {
         const data = await response.json();
@@ -87,28 +99,28 @@ export const VersionHistory: React.FC<VersionHistoryProps> = ({
         fetchVersions();
       }
     } catch (error) {
-      console.error('Error reverting version:', error);
+      console.error("Error reverting version:", error);
     }
   };
 
   const getVersionType = (version: Version) => {
-    if (version.metadata?.type === 'revert') {
-      return 'revert';
+    if (version.metadata?.type === "revert") {
+      return "revert";
     }
     if (version.metadata?.conflict_resolved) {
-      return 'conflict';
+      return "conflict";
     }
-    return 'edit';
+    return "edit";
   };
 
   const getVersionBadgeColor = (type: string) => {
     switch (type) {
-      case 'revert':
-        return 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200';
-      case 'conflict':
-        return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200';
+      case "revert":
+        return "bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200";
+      case "conflict":
+        return "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200";
       default:
-        return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200';
+        return "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200";
     }
   };
 
@@ -150,8 +162,8 @@ export const VersionHistory: React.FC<VersionHistoryProps> = ({
                   key={version.version_id}
                   className={`p-3 rounded-lg border transition-colors ${
                     isSelected
-                      ? 'border-primary bg-primary/5'
-                      : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
+                      ? "border-primary bg-primary/5"
+                      : "border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600"
                   }`}
                 >
                   <div className="flex items-start justify-between">
@@ -164,7 +176,9 @@ export const VersionHistory: React.FC<VersionHistoryProps> = ({
                           {versionType}
                         </Badge>
                         <span className="text-xs text-gray-500 dark:text-gray-400">
-                          {formatDistanceToNow(new Date(version.created_at), { addSuffix: true })}
+                          {formatDistanceToNow(new Date(version.created_at), {
+                            addSuffix: true,
+                          })}
                         </span>
                       </div>
 
@@ -174,7 +188,8 @@ export const VersionHistory: React.FC<VersionHistoryProps> = ({
 
                       {version.metadata?.reverted_from && (
                         <p className="text-xs text-orange-600 dark:text-orange-400 mt-1">
-                          Reverted from version {version.metadata.reverted_from.slice(-8)}
+                          Reverted from version{" "}
+                          {version.metadata.reverted_from.slice(-8)}
                         </p>
                       )}
                     </div>

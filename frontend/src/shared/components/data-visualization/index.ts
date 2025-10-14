@@ -1,4 +1,13 @@
 // Data Visualization Components Index
+
+export { AnalyticsDashboard } from "./analytics-dashboard";
+export { default as CompactTable } from "./CompactTable";
+export {
+  QuickActionsWidget,
+  RecentStatsWidget,
+  SystemStatusWidget,
+} from "./DashboardWidgets";
+export { EnhancedListView } from "./EnhancedListView";
 export {
   EnhancedDataTable,
   EnhancedDataTableBulkActions,
@@ -7,13 +16,9 @@ export {
   EnhancedDataTableFilter,
   EnhancedDataTablePagination,
   EnhancedDataTableToolbar,
-} from './enhanced-data-table';
-export { default as VirtualizedTable } from './VirtualizedTable';
-export { default as CompactTable } from './CompactTable';
-export { default as MobileTable } from './MobileTable';
-export { KanbanBoard } from './kanban-board';
-export { ListView } from './list-view';
-export { EnhancedListView } from './EnhancedListView';
-export { AnalyticsDashboard } from './analytics-dashboard';
-export { QuickActionsWidget, SystemStatusWidget, RecentStatsWidget } from './DashboardWidgets';
-export { default as ResponsiveDashboard } from './ResponsiveDashboard';
+} from "./enhanced-data-table";
+export { KanbanBoard } from "./kanban-board";
+export { ListView } from "./list-view";
+export { default as MobileTable } from "./MobileTable";
+export { default as ResponsiveDashboard } from "./ResponsiveDashboard";
+export { default as VirtualizedTable } from "./VirtualizedTable";

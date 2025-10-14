@@ -1,19 +1,19 @@
-'use client';
+"use client";
 
-import { CheckIcon, ChevronsUpDownIcon, XIcon } from 'lucide-react';
-import * as React from 'react';
+import { CheckIcon, ChevronsUpDownIcon, XIcon } from "lucide-react";
+import * as React from "react";
 
-import { cn } from '@/shared/utils/utils';
-import { Badge } from './badge';
-import { Button } from './button';
+import { cn } from "@/shared/utils/utils";
+import { Badge } from "./badge";
+import { Button } from "./button";
 import {
   Command,
   CommandEmpty,
   CommandGroup,
   CommandInput,
   CommandItem,
-} from './command';
-import { Popover, PopoverContent, PopoverTrigger } from './popover';
+} from "./command";
+import { Popover, PopoverContent, PopoverTrigger } from "./popover";
 
 export type OptionType = {
   label: string;
@@ -33,7 +33,7 @@ function MultiSelect({
   selected,
   onChange,
   className,
-  placeholder = 'Select items...',
+  placeholder = "Select items...",
   ...props
 }: MultiSelectProps): React.JSX.Element {
   const [open, setOpen] = React.useState(false);
@@ -42,7 +42,7 @@ function MultiSelect({
     (item: string) => {
       onChange((prev) => prev.filter((i) => i !== item));
     },
-    [onChange]
+    [onChange],
   );
 
   const handleSelect = React.useCallback(
@@ -50,10 +50,10 @@ function MultiSelect({
       onChange((prev) =>
         prev.includes(value)
           ? prev.filter((item) => item !== value)
-          : [...prev, value]
+          : [...prev, value],
       );
     },
-    [onChange]
+    [onChange],
   );
 
   return (
@@ -64,9 +64,9 @@ function MultiSelect({
           role="combobox"
           aria-expanded={open}
           className={cn(
-            'w-full justify-between',
-            selected.length > 0 && 'h-auto',
-            className
+            "w-full justify-between",
+            selected.length > 0 && "h-auto",
+            className,
           )}
         >
           <div className="flex flex-wrap items-center gap-1">
@@ -104,10 +104,10 @@ function MultiSelect({
               >
                 <CheckIcon
                   className={cn(
-                    ' size-4',
+                    " size-4",
                     selected.includes(option.value)
-                      ? 'opacity-100'
-                      : 'opacity-0'
+                      ? "opacity-100"
+                      : "opacity-0",
                   )}
                 />
                 {option.label}

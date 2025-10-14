@@ -1,20 +1,46 @@
-'use client';
+"use client";
 
-import React, { useState, useMemo } from 'react';
-import { Button } from '@/shared/components/ui/button';
-import { Input } from '@/shared/components/ui/input';
-import { Label } from '@/shared/components/ui/label';
-import { Switch } from '@/shared/components/ui/switch';
-import { Checkbox } from '@/shared/components/ui/checkbox';
+import {
+  Crown,
+  Edit,
+  Eye,
+  FileCheck,
+  Plus,
+  Search,
+  Shield,
+  Trash2,
+  Upload,
+  User,
+} from "lucide-react";
+import { useMemo, useState } from "react";
+import { Badge } from "@/shared/components/ui/badge";
+import { Button } from "@/shared/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/shared/components/ui/card';
-import { Badge } from '@/shared/components/ui/badge';
-import { Separator } from '@/shared/components/ui/separator';
+} from "@/shared/components/ui/card";
+import { Checkbox } from "@/shared/components/ui/checkbox";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/shared/components/ui/dialog";
+import { Input } from "@/shared/components/ui/input";
+import { Label } from "@/shared/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/shared/components/ui/select";
+import { Separator } from "@/shared/components/ui/separator";
+import { Switch } from "@/shared/components/ui/switch";
 import {
   Table,
   TableBody,
@@ -22,40 +48,21 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/shared/components/ui/table';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from '@/shared/components/ui/dialog';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/shared/components/ui/select';
-import {
-  Shield,
-  User,
-  Edit,
-  Trash2,
-  Plus,
-  Search,
-  Crown,
-  Eye,
-  Upload,
-  FileCheck
-} from 'lucide-react';
+} from "@/shared/components/ui/table";
 
-import type { UserImportPermissions, ImportPermission, ImportFormat } from '../types';
+import type {
+  ImportFormat,
+  ImportPermission,
+  UserImportPermissions,
+} from "../types";
 
 interface PermissionManagerProps {
   users: UserImportPermissions[];
   currentUser?: UserImportPermissions;
-  onUpdatePermissions: (userId: string, permissions: ImportPermission) => Promise<void>;
+  onUpdatePermissions: (
+    userId: string,
+    permissions: ImportPermission,
+  ) => Promise<void>;
   onAddUser?: () => void;
   onRemoveUser?: (userId: string) => void;
   availableFormats?: ImportFormat[];
@@ -70,7 +77,7 @@ const rolePermissionDefaults: Record<string, Partial<ImportPermission>> = {
     canPreview: true,
     maxFileSize: 100 * 1024 * 1024, // 100MB
     maxRows: 100000,
-    requireApproval: false
+    requireApproval: false,
   },
   manager: {
     canImport: true,
@@ -78,7 +85,7 @@ const rolePermissionDefaults: Record<string, Partial<ImportPermission>> = {
     canPreview: true,
     maxFileSize: 50 * 1024 * 1024, // 50MB
     maxRows: 50000,
-    requireApproval: false
+    requireApproval: false,
   },
   user: {
     canImport: true,
@@ -86,7 +93,7 @@ const rolePermissionDefaults: Record<string, Partial<ImportPermission>> = {
     canPreview: true,
     maxFileSize: 10 * 1024 * 1024, // 10MB
     maxRows: 10000,
-    requireApproval: true
+    requireApproval: true,
   },
   viewer: {
     canImport: false,
@@ -94,8 +101,8 @@ const rolePermissionDefaults: Record<string, Partial<ImportPermission>> = {
     canPreview: true,
     maxFileSize: 0,
     maxRows: 0,
-    requireApproval: false
-  }
+    requireApproval: false,
+  },
 };
 
 export function PermissionManager({
@@ -104,43 +111,48 @@ export function PermissionManager({
   onUpdatePermissions,
   onAddUser,
   onRemoveUser,
-  availableFormats = ['csv', 'json', 'excel', 'xml'],
+  availableFormats = ["csv", "json", "excel", "xml"],
   availableTables = [],
-  className
+  className,
 }: PermissionManagerProps) {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedRole, setSelectedRole] = useState<string>('');
-  const [editingUser, setEditingUser] = useState<UserImportPermissions | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedRole, setSelectedRole] = useState<string>("");
+  const [editingUser, setEditingUser] = useState<UserImportPermissions | null>(
+    null,
+  );
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
   const filteredUsers = useMemo(() => {
     let filtered = users;
 
     if (searchTerm) {
-      filtered = filtered.filter(user =>
-        user.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        user.role.toLowerCase().includes(searchTerm.toLowerCase())
+      filtered = filtered.filter(
+        (user) =>
+          user.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          user.role.toLowerCase().includes(searchTerm.toLowerCase()),
       );
     }
 
     if (selectedRole) {
-      filtered = filtered.filter(user => user.role === selectedRole);
+      filtered = filtered.filter((user) => user.role === selectedRole);
     }
 
     return filtered;
   }, [users, searchTerm, selectedRole]);
 
   const permissionStats = useMemo(() => {
-    const canImport = users.filter(u => u.permissions.canImport).length;
-    const requireApproval = users.filter(u => u.permissions.requireApproval).length;
+    const canImport = users.filter((u) => u.permissions.canImport).length;
+    const requireApproval = users.filter(
+      (u) => u.permissions.requireApproval,
+    ).length;
     const totalUsers = users.length;
 
     return {
       canImport,
       requireApproval,
       totalUsers,
-      cannotImport: totalUsers - canImport
+      cannotImport: totalUsers - canImport,
     };
   }, [users]);
 
@@ -157,7 +169,7 @@ export function PermissionManager({
       setIsEditDialogOpen(false);
       setEditingUser(null);
     } catch (error) {
-      console.error('Failed to update permissions:', error);
+      console.error("Failed to update permissions:", error);
     }
   };
 
@@ -170,16 +182,16 @@ export function PermissionManager({
         ...editingUser,
         permissions: {
           ...editingUser.permissions,
-          ...defaults
-        }
+          ...defaults,
+        },
       });
     }
   };
 
   const formatFileSize = (bytes: number) => {
-    if (bytes === 0) return '0 B';
+    if (bytes === 0) return "0 B";
 
-    const units = ['B', 'KB', 'MB', 'GB'];
+    const units = ["B", "KB", "MB", "GB"];
     let size = bytes;
     let unitIndex = 0;
 
@@ -193,11 +205,11 @@ export function PermissionManager({
 
   const getRoleIcon = (role: string) => {
     switch (role.toLowerCase()) {
-      case 'admin':
+      case "admin":
         return <Crown className="h-4 w-4 text-yellow-600" />;
-      case 'manager':
+      case "manager":
         return <Shield className="h-4 w-4 text-blue-600" />;
-      case 'user':
+      case "user":
         return <User className="h-4 w-4 text-green-600" />;
       default:
         return <Eye className="h-4 w-4 text-gray-600" />;
@@ -212,7 +224,7 @@ export function PermissionManager({
         <Badge key="import" variant="default" className="text-xs">
           <Upload className="h-3 w-3 mr-1" />
           Import
-        </Badge>
+        </Badge>,
       );
     }
 
@@ -221,7 +233,7 @@ export function PermissionManager({
         <Badge key="validate" variant="secondary" className="text-xs">
           <FileCheck className="h-3 w-3 mr-1" />
           Validate
-        </Badge>
+        </Badge>,
       );
     }
 
@@ -230,7 +242,7 @@ export function PermissionManager({
         <Badge key="preview" variant="outline" className="text-xs">
           <Eye className="h-3 w-3 mr-1" />
           Preview
-        </Badge>
+        </Badge>,
       );
     }
 
@@ -238,7 +250,7 @@ export function PermissionManager({
       badges.push(
         <Badge key="approval" variant="destructive" className="text-xs">
           Requires Approval
-        </Badge>
+        </Badge>,
       );
     }
 
@@ -249,7 +261,10 @@ export function PermissionManager({
     const isCurrentUser = currentUser?.userId === user.userId;
 
     return (
-      <TableRow key={user.userId} className={isCurrentUser ? 'bg-blue-50 dark:bg-blue-900/20' : ''}>
+      <TableRow
+        key={user.userId}
+        className={isCurrentUser ? "bg-blue-50 dark:bg-blue-900/20" : ""}
+      >
         <TableCell>
           <div className="flex items-center space-x-3">
             <div className="flex items-center space-x-2">
@@ -281,19 +296,25 @@ export function PermissionManager({
 
         <TableCell>
           <div className="text-sm text-gray-600">
-            {user.permissions.maxFileSize ? formatFileSize(user.permissions.maxFileSize) : 'No limit'}
+            {user.permissions.maxFileSize
+              ? formatFileSize(user.permissions.maxFileSize)
+              : "No limit"}
           </div>
         </TableCell>
 
         <TableCell>
           <div className="text-sm text-gray-600">
-            {user.permissions.maxRows ? user.permissions.maxRows.toLocaleString() : 'No limit'}
+            {user.permissions.maxRows
+              ? user.permissions.maxRows.toLocaleString()
+              : "No limit"}
           </div>
         </TableCell>
 
         <TableCell>
           <div className="text-sm text-gray-600">
-            {user.lastImport ? new Date(user.lastImport).toLocaleDateString() : 'Never'}
+            {user.lastImport
+              ? new Date(user.lastImport).toLocaleDateString()
+              : "Never"}
           </div>
         </TableCell>
 
@@ -346,20 +367,36 @@ export function PermissionManager({
         {/* Permission Statistics */}
         <div className="grid grid-cols-4 gap-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
           <div className="text-center">
-            <div className="text-2xl font-bold text-green-600">{permissionStats.canImport}</div>
-            <div className="text-sm text-gray-600 dark:text-gray-400">Can Import</div>
+            <div className="text-2xl font-bold text-green-600">
+              {permissionStats.canImport}
+            </div>
+            <div className="text-sm text-gray-600 dark:text-gray-400">
+              Can Import
+            </div>
           </div>
           <div className="text-center">
-            <div className="text-2xl font-bold text-red-600">{permissionStats.cannotImport}</div>
-            <div className="text-sm text-gray-600 dark:text-gray-400">Cannot Import</div>
+            <div className="text-2xl font-bold text-red-600">
+              {permissionStats.cannotImport}
+            </div>
+            <div className="text-sm text-gray-600 dark:text-gray-400">
+              Cannot Import
+            </div>
           </div>
           <div className="text-center">
-            <div className="text-2xl font-bold text-yellow-600">{permissionStats.requireApproval}</div>
-            <div className="text-sm text-gray-600 dark:text-gray-400">Need Approval</div>
+            <div className="text-2xl font-bold text-yellow-600">
+              {permissionStats.requireApproval}
+            </div>
+            <div className="text-sm text-gray-600 dark:text-gray-400">
+              Need Approval
+            </div>
           </div>
           <div className="text-center">
-            <div className="text-2xl font-bold text-blue-600">{permissionStats.totalUsers}</div>
-            <div className="text-sm text-gray-600 dark:text-gray-400">Total Users</div>
+            <div className="text-2xl font-bold text-blue-600">
+              {permissionStats.totalUsers}
+            </div>
+            <div className="text-sm text-gray-600 dark:text-gray-400">
+              Total Users
+            </div>
           </div>
         </div>
 
@@ -407,7 +444,10 @@ export function PermissionManager({
             <TableBody>
               {filteredUsers.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center py-8 text-gray-500">
+                  <TableCell
+                    colSpan={7}
+                    className="text-center py-8 text-gray-500"
+                  >
                     No users found matching your criteria
                   </TableCell>
                 </TableRow>
@@ -461,9 +501,11 @@ function PermissionEditor({
   onCancel,
   onApplyRoleDefaults,
   availableFormats,
-  availableTables
+  availableTables,
 }: PermissionEditorProps) {
-  const [permissions, setPermissions] = useState<ImportPermission>(user.permissions);
+  const [permissions, setPermissions] = useState<ImportPermission>(
+    user.permissions,
+  );
 
   const handleSave = () => {
     onSave(permissions);
@@ -471,11 +513,11 @@ function PermissionEditor({
 
   const updatePermission = <K extends keyof ImportPermission>(
     key: K,
-    value: ImportPermission[K]
+    value: ImportPermission[K],
   ) => {
-    setPermissions(prev => ({
+    setPermissions((prev) => ({
       ...prev,
-      [key]: value
+      [key]: value,
     }));
   };
 
@@ -485,7 +527,7 @@ function PermissionEditor({
       <div className="space-y-3">
         <Label className="text-sm font-medium">Apply Role Template</Label>
         <div className="flex space-x-2">
-          {Object.keys(rolePermissionDefaults).map(role => (
+          {Object.keys(rolePermissionDefaults).map((role) => (
             <Button
               key={role}
               variant="outline"
@@ -509,7 +551,9 @@ function PermissionEditor({
           <Switch
             id="canImport"
             checked={permissions.canImport}
-            onCheckedChange={(checked) => updatePermission('canImport', checked)}
+            onCheckedChange={(checked) =>
+              updatePermission("canImport", checked)
+            }
           />
           <Label htmlFor="canImport">Can import data</Label>
         </div>
@@ -518,7 +562,9 @@ function PermissionEditor({
           <Switch
             id="canValidate"
             checked={permissions.canValidate}
-            onCheckedChange={(checked) => updatePermission('canValidate', checked)}
+            onCheckedChange={(checked) =>
+              updatePermission("canValidate", checked)
+            }
           />
           <Label htmlFor="canValidate">Can validate data before import</Label>
         </div>
@@ -527,7 +573,9 @@ function PermissionEditor({
           <Switch
             id="canPreview"
             checked={permissions.canPreview}
-            onCheckedChange={(checked) => updatePermission('canPreview', checked)}
+            onCheckedChange={(checked) =>
+              updatePermission("canPreview", checked)
+            }
           />
           <Label htmlFor="canPreview">Can preview import data</Label>
         </div>
@@ -536,9 +584,13 @@ function PermissionEditor({
           <Switch
             id="requireApproval"
             checked={permissions.requireApproval}
-            onCheckedChange={(checked) => updatePermission('requireApproval', checked)}
+            onCheckedChange={(checked) =>
+              updatePermission("requireApproval", checked)
+            }
           />
-          <Label htmlFor="requireApproval">Require approval before import</Label>
+          <Label htmlFor="requireApproval">
+            Require approval before import
+          </Label>
         </div>
       </div>
 
@@ -553,10 +605,17 @@ function PermissionEditor({
           <Input
             id="maxFileSize"
             type="number"
-            value={permissions.maxFileSize ? Math.round(permissions.maxFileSize / 1024 / 1024) : ''}
+            value={
+              permissions.maxFileSize
+                ? Math.round(permissions.maxFileSize / 1024 / 1024)
+                : ""
+            }
             onChange={(e) => {
-              const mb = parseInt(e.target.value);
-              updatePermission('maxFileSize', mb > 0 ? mb * 1024 * 1024 : undefined);
+              const mb = parseInt(e.target.value, 10);
+              updatePermission(
+                "maxFileSize",
+                mb > 0 ? mb * 1024 * 1024 : undefined,
+              );
             }}
             placeholder="No limit"
           />
@@ -567,10 +626,10 @@ function PermissionEditor({
           <Input
             id="maxRows"
             type="number"
-            value={permissions.maxRows || ''}
+            value={permissions.maxRows || ""}
             onChange={(e) => {
-              const rows = parseInt(e.target.value);
-              updatePermission('maxRows', rows > 0 ? rows : undefined);
+              const rows = parseInt(e.target.value, 10);
+              updatePermission("maxRows", rows > 0 ? rows : undefined);
             }}
             placeholder="No limit"
           />
@@ -583,20 +642,28 @@ function PermissionEditor({
       <div className="space-y-4">
         <h4 className="font-medium">Allowed File Formats</h4>
         <div className="grid grid-cols-2 gap-3">
-          {availableFormats.map(format => (
+          {availableFormats.map((format) => (
             <div key={format} className="flex items-center space-x-2">
               <Checkbox
                 id={`format-${format}`}
-                checked={!permissions.allowedFormats || permissions.allowedFormats.includes(format)}
+                checked={
+                  !permissions.allowedFormats ||
+                  permissions.allowedFormats.includes(format)
+                }
                 onCheckedChange={(checked) => {
                   if (checked) {
-                    const current = permissions.allowedFormats || availableFormats;
+                    const current =
+                      permissions.allowedFormats || availableFormats;
                     if (!current.includes(format)) {
-                      updatePermission('allowedFormats', [...current, format]);
+                      updatePermission("allowedFormats", [...current, format]);
                     }
                   } else {
-                    const current = permissions.allowedFormats || availableFormats;
-                    updatePermission('allowedFormats', current.filter(f => f !== format));
+                    const current =
+                      permissions.allowedFormats || availableFormats;
+                    updatePermission(
+                      "allowedFormats",
+                      current.filter((f) => f !== format),
+                    );
                   }
                 }}
               />
@@ -615,20 +682,31 @@ function PermissionEditor({
           <div className="space-y-4">
             <h4 className="font-medium">Allowed Tables</h4>
             <div className="grid grid-cols-2 gap-3 max-h-32 overflow-y-auto">
-              {availableTables.map(table => (
+              {availableTables.map((table) => (
                 <div key={table} className="flex items-center space-x-2">
                   <Checkbox
                     id={`table-${table}`}
-                    checked={!permissions.allowedTables || permissions.allowedTables.includes(table)}
+                    checked={
+                      !permissions.allowedTables ||
+                      permissions.allowedTables.includes(table)
+                    }
                     onCheckedChange={(checked) => {
                       if (checked) {
-                        const current = permissions.allowedTables || availableTables;
+                        const current =
+                          permissions.allowedTables || availableTables;
                         if (!current.includes(table)) {
-                          updatePermission('allowedTables', [...current, table]);
+                          updatePermission("allowedTables", [
+                            ...current,
+                            table,
+                          ]);
                         }
                       } else {
-                        const current = permissions.allowedTables || availableTables;
-                        updatePermission('allowedTables', current.filter(t => t !== table));
+                        const current =
+                          permissions.allowedTables || availableTables;
+                        updatePermission(
+                          "allowedTables",
+                          current.filter((t) => t !== table),
+                        );
                       }
                     }}
                   />
@@ -647,9 +725,7 @@ function PermissionEditor({
         <Button variant="outline" onClick={onCancel}>
           Cancel
         </Button>
-        <Button onClick={handleSave}>
-          Save Permissions
-        </Button>
+        <Button onClick={handleSave}>Save Permissions</Button>
       </div>
     </div>
   );

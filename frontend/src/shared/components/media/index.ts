@@ -1,2 +1,2 @@
 // Media Components Index
-export { default as OptimizedImage } from './OptimizedImage';
+export { default as OptimizedImage } from "./OptimizedImage";

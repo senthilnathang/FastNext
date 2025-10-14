@@ -1,153 +1,166 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { Download, X, Smartphone, Monitor } from "lucide-react"
-
-import { cn } from "@/shared/utils"
-import { Button } from "@/shared/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/components/ui/card"
-import { Badge } from "@/shared/components/ui/badge"
+import { Download, Monitor, Smartphone, X } from "lucide-react";
+import * as React from "react";
+import { Badge } from "@/shared/components/ui/badge";
+import { Button } from "@/shared/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/shared/components/ui/card";
+import { cn } from "@/shared/utils";
 
 interface BeforeInstallPromptEvent extends Event {
-  readonly platforms: string[]
+  readonly platforms: string[];
   readonly userChoice: Promise<{
-    outcome: 'accepted' | 'dismissed'
-    platform: string
-  }>
-  prompt(): Promise<void>
+    outcome: "accepted" | "dismissed";
+    platform: string;
+  }>;
+  prompt(): Promise<void>;
 }
 
 interface PWAInstallPromptProps {
-  className?: string
-  hideAfterInstall?: boolean
-  showBadge?: boolean
-  compact?: boolean
+  className?: string;
+  hideAfterInstall?: boolean;
+  showBadge?: boolean;
+  compact?: boolean;
 }
 
 export function PWAInstallPrompt({
   className,
   hideAfterInstall = true,
   showBadge = true,
-  compact = false
+  compact = false,
 }: PWAInstallPromptProps) {
-  const [deferredPrompt, setDeferredPrompt] = React.useState<BeforeInstallPromptEvent | null>(null)
-  const [isInstallable, setIsInstallable] = React.useState(false)
-  const [isInstalled, setIsInstalled] = React.useState(false)
-  const [isVisible, setIsVisible] = React.useState(false)
-  const [platform, setPlatform] = React.useState<'desktop' | 'mobile' | 'unknown'>('unknown')
+  const [deferredPrompt, setDeferredPrompt] =
+    React.useState<BeforeInstallPromptEvent | null>(null);
+  const [isInstallable, setIsInstallable] = React.useState(false);
+  const [isInstalled, setIsInstalled] = React.useState(false);
+  const [isVisible, setIsVisible] = React.useState(false);
+  const [platform, setPlatform] = React.useState<
+    "desktop" | "mobile" | "unknown"
+  >("unknown");
 
   // Detect platform
   React.useEffect(() => {
-    const userAgent = navigator.userAgent.toLowerCase()
-    if (/android|iphone|ipad|ipod|blackberry|iemobile|opera mini/.test(userAgent)) {
-      setPlatform('mobile')
+    const userAgent = navigator.userAgent.toLowerCase();
+    if (
+      /android|iphone|ipad|ipod|blackberry|iemobile|opera mini/.test(userAgent)
+    ) {
+      setPlatform("mobile");
     } else {
-      setPlatform('desktop')
+      setPlatform("desktop");
     }
-  }, [])
+  }, []);
 
   // Listen for beforeinstallprompt event
   React.useEffect(() => {
     const handler = (e: Event) => {
-      e.preventDefault()
-      const installEvent = e as BeforeInstallPromptEvent
-      setDeferredPrompt(installEvent)
-      setIsInstallable(true)
+      e.preventDefault();
+      const installEvent = e as BeforeInstallPromptEvent;
+      setDeferredPrompt(installEvent);
+      setIsInstallable(true);
 
       // Show prompt after a delay if not dismissed
       setTimeout(() => {
-        const dismissed = localStorage.getItem('pwa-install-dismissed')
+        const dismissed = localStorage.getItem("pwa-install-dismissed");
         if (!dismissed) {
-          setIsVisible(true)
+          setIsVisible(true);
         }
-      }, 3000)
-    }
+      }, 3000);
+    };
 
-    window.addEventListener('beforeinstallprompt', handler)
+    window.addEventListener("beforeinstallprompt", handler);
 
     return () => {
-      window.removeEventListener('beforeinstallprompt', handler)
-    }
-  }, [])
+      window.removeEventListener("beforeinstallprompt", handler);
+    };
+  }, []);
 
   // Listen for app installed event
   React.useEffect(() => {
     const handler = () => {
-      setIsInstalled(true)
-      setIsVisible(false)
-      setDeferredPrompt(null)
-    }
+      setIsInstalled(true);
+      setIsVisible(false);
+      setDeferredPrompt(null);
+    };
 
-    window.addEventListener('appinstalled', handler)
+    window.addEventListener("appinstalled", handler);
 
     return () => {
-      window.removeEventListener('appinstalled', handler)
-    }
-  }, [])
+      window.removeEventListener("appinstalled", handler);
+    };
+  }, []);
 
   // Check if already installed
   React.useEffect(() => {
     const checkInstalled = () => {
       // Check if running in standalone mode
-      if (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) {
-        setIsInstalled(true)
-        return
+      if (window.matchMedia?.("(display-mode: standalone)").matches) {
+        setIsInstalled(true);
+        return;
       }
 
       // Check if running as PWA on mobile
       if ((window.navigator as any).standalone === true) {
-        setIsInstalled(true)
-        return
+        setIsInstalled(true);
+        return;
       }
 
       // Check for related applications
-      if ('getInstalledRelatedApps' in navigator) {
+      if ("getInstalledRelatedApps" in navigator) {
         (navigator as any).getInstalledRelatedApps().then((apps: any[]) => {
           if (apps.length > 0) {
-            setIsInstalled(true)
+            setIsInstalled(true);
           }
-        })
+        });
       }
-    }
+    };
 
-    checkInstalled()
-  }, [])
+    checkInstalled();
+  }, []);
 
   const handleInstall = async () => {
-    if (!deferredPrompt) return
+    if (!deferredPrompt) return;
 
     try {
-      await deferredPrompt.prompt()
-      const choiceResult = await deferredPrompt.userChoice
+      await deferredPrompt.prompt();
+      const choiceResult = await deferredPrompt.userChoice;
 
-      if (choiceResult.outcome === 'accepted') {
-        setIsVisible(false)
+      if (choiceResult.outcome === "accepted") {
+        setIsVisible(false);
       } else {
-        handleDismiss()
+        handleDismiss();
       }
 
-      setDeferredPrompt(null)
+      setDeferredPrompt(null);
     } catch (error) {
-      console.error('Error showing install prompt:', error)
+      console.error("Error showing install prompt:", error);
     }
-  }
+  };
 
   const handleDismiss = () => {
-    setIsVisible(false)
-    localStorage.setItem('pwa-install-dismissed', 'true')
+    setIsVisible(false);
+    localStorage.setItem("pwa-install-dismissed", "true");
 
     // Clear dismissal after 7 days
-    setTimeout(() => {
-      localStorage.removeItem('pwa-install-dismissed')
-    }, 7 * 24 * 60 * 60 * 1000)
-  }
+    setTimeout(
+      () => {
+        localStorage.removeItem("pwa-install-dismissed");
+      },
+      7 * 24 * 60 * 60 * 1000,
+    );
+  };
 
   // Don't show if not installable, already installed, or explicitly hidden
   if (!isInstallable || (isInstalled && hideAfterInstall) || !isVisible) {
-    return null
+    return null;
   }
 
-  const PlatformIcon = platform === 'mobile' ? Smartphone : Monitor
+  const PlatformIcon = platform === "mobile" ? Smartphone : Monitor;
 
   if (compact) {
     return (
@@ -167,7 +180,7 @@ export function PWAInstallPrompt({
           </Badge>
         )}
       </div>
-    )
+    );
   }
 
   return (
@@ -181,7 +194,8 @@ export function PWAInstallPrompt({
             <div>
               <CardTitle className="text-lg">Install FastNext</CardTitle>
               <CardDescription>
-                Get quick access from your {platform === 'mobile' ? 'home screen' : 'desktop'}
+                Get quick access from your{" "}
+                {platform === "mobile" ? "home screen" : "desktop"}
               </CardDescription>
             </div>
           </div>
@@ -242,61 +256,62 @@ export function PWAInstallPrompt({
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }
 
 // Hook for PWA installation state
 export function usePWAInstall() {
-  const [isInstallable, setIsInstallable] = React.useState(false)
-  const [isInstalled, setIsInstalled] = React.useState(false)
-  const [deferredPrompt, setDeferredPrompt] = React.useState<BeforeInstallPromptEvent | null>(null)
+  const [isInstallable, setIsInstallable] = React.useState(false);
+  const [isInstalled, setIsInstalled] = React.useState(false);
+  const [deferredPrompt, setDeferredPrompt] =
+    React.useState<BeforeInstallPromptEvent | null>(null);
 
   React.useEffect(() => {
     const handler = (e: Event) => {
-      e.preventDefault()
-      const installEvent = e as BeforeInstallPromptEvent
-      setDeferredPrompt(installEvent)
-      setIsInstallable(true)
-    }
+      e.preventDefault();
+      const installEvent = e as BeforeInstallPromptEvent;
+      setDeferredPrompt(installEvent);
+      setIsInstallable(true);
+    };
 
     const installedHandler = () => {
-      setIsInstalled(true)
-      setDeferredPrompt(null)
-    }
+      setIsInstalled(true);
+      setDeferredPrompt(null);
+    };
 
-    window.addEventListener('beforeinstallprompt', handler)
-    window.addEventListener('appinstalled', installedHandler)
+    window.addEventListener("beforeinstallprompt", handler);
+    window.addEventListener("appinstalled", installedHandler);
 
     // Check if already installed
-    if (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) {
-      setIsInstalled(true)
+    if (window.matchMedia?.("(display-mode: standalone)").matches) {
+      setIsInstalled(true);
     }
 
     return () => {
-      window.removeEventListener('beforeinstallprompt', handler)
-      window.removeEventListener('appinstalled', installedHandler)
-    }
-  }, [])
+      window.removeEventListener("beforeinstallprompt", handler);
+      window.removeEventListener("appinstalled", installedHandler);
+    };
+  }, []);
 
   const install = React.useCallback(async () => {
-    if (!deferredPrompt) return false
+    if (!deferredPrompt) return false;
 
     try {
-      await deferredPrompt.prompt()
-      const choiceResult = await deferredPrompt.userChoice
-      setDeferredPrompt(null)
-      return choiceResult.outcome === 'accepted'
+      await deferredPrompt.prompt();
+      const choiceResult = await deferredPrompt.userChoice;
+      setDeferredPrompt(null);
+      return choiceResult.outcome === "accepted";
     } catch (error) {
-      console.error('Error installing PWA:', error)
-      return false
+      console.error("Error installing PWA:", error);
+      return false;
     }
-  }, [deferredPrompt])
+  }, [deferredPrompt]);
 
   return {
     isInstallable,
     isInstalled,
-    install
-  }
+    install,
+  };
 }
 
-export default PWAInstallPrompt
+export default PWAInstallPrompt;

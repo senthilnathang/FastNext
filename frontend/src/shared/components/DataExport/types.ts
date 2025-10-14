@@ -1,7 +1,7 @@
 export interface ExportColumn {
   key: string;
   label: string;
-  type: 'string' | 'number' | 'date' | 'boolean' | 'object';
+  type: "string" | "number" | "date" | "boolean" | "object";
   required?: boolean;
   format?: string;
   description?: string;
@@ -9,12 +9,21 @@ export interface ExportColumn {
 
 export interface ExportFilter {
   column: string;
-  operator: 'equals' | 'contains' | 'starts_with' | 'ends_with' | 'greater_than' | 'less_than' | 'between' | 'in' | 'not_in';
+  operator:
+    | "equals"
+    | "contains"
+    | "starts_with"
+    | "ends_with"
+    | "greater_than"
+    | "less_than"
+    | "between"
+    | "in"
+    | "not_in";
   value: any;
   label?: string;
 }
 
-export type ExportFormat = 'csv' | 'json' | 'excel' | 'xml' | 'yaml';
+export type ExportFormat = "csv" | "json" | "excel" | "xml" | "yaml";
 
 export interface ExportOptions {
   format: ExportFormat;
@@ -34,7 +43,7 @@ export interface ExportOptions {
 
 export interface ExportJob {
   id: string;
-  status: 'pending' | 'in_progress' | 'completed' | 'failed' | 'cancelled';
+  status: "pending" | "in_progress" | "completed" | "failed" | "cancelled";
   progress: number;
   totalRows?: number;
   processedRows?: number;
@@ -58,9 +67,9 @@ export interface DataTableColumn {
   key: string;
   title: string;
   dataIndex: string;
-  type?: 'string' | 'number' | 'date' | 'boolean' | 'object';
+  type?: "string" | "number" | "date" | "boolean" | "object";
   width?: number;
-  fixed?: 'left' | 'right';
+  fixed?: "left" | "right";
   sortable?: boolean;
   filterable?: boolean;
   exportable?: boolean;

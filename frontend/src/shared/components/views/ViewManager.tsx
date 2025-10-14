@@ -1,175 +1,209 @@
-'use client'
+"use client";
 
-import React, { useState, useCallback, useMemo } from 'react'
-import { Button } from '@/shared/components/ui/button'
-import { Input } from '@/shared/components/ui/input'
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator, DropdownMenuCheckboxItem } from '@/shared/components/ui/dropdown-menu'
-import { Badge } from '@/shared/components/ui/badge'
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/shared/components/ui/sheet'
-import { SortControl, GroupControl } from '@/shared/components/ui'
-import type { SortOption, GroupOption } from '@/shared/components/ui'
 import {
+  DragDropContext,
+  Draggable,
+  Droppable,
+  type DropResult,
+} from "@hello-pangea/dnd";
+import {
+  BarChart3,
+  Calendar,
+  Columns,
+  Download,
+  Eye,
+  EyeOff,
+  Filter,
+  GripVertical,
+  Kanban,
   LayoutGrid,
   List,
-  Kanban,
-  Calendar,
-  BarChart3,
   Search,
-  Filter,
   SortAsc,
   SortDesc,
-  Download,
   Upload,
-  Columns,
-  GripVertical,
-  Eye,
-  EyeOff
-} from 'lucide-react'
-import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd'
-import { KanbanView, KanbanColumn } from './KanbanView'
-import { GanttView } from './GanttView'
-import { CalendarView } from './CalendarView'
+} from "lucide-react";
+import React, { useCallback, useMemo, useState } from "react";
+import type { GroupOption, SortOption } from "@/shared/components/ui";
+import { GroupControl, SortControl } from "@/shared/components/ui";
+import { Badge } from "@/shared/components/ui/badge";
+import { Button } from "@/shared/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/shared/components/ui/dropdown-menu";
+import { Input } from "@/shared/components/ui/input";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/shared/components/ui/sheet";
+import { CalendarView } from "./CalendarView";
+import { GanttView } from "./GanttView";
+import { type KanbanColumn, KanbanView } from "./KanbanView";
 
-export type ViewType = 'card' | 'list' | 'kanban' | 'gantt' | 'calendar' | 'cohort'
+export type ViewType =
+  | "card"
+  | "list"
+  | "kanban"
+  | "gantt"
+  | "calendar"
+  | "cohort";
 
 export interface Column<T = any> {
-  id: string
-  key: keyof T | string
-  label: string
-  render?: (value: unknown, row: T) => React.ReactNode
-  sortable?: boolean
-  filterable?: boolean
-  searchable?: boolean
-  width?: string
-  visible?: boolean
-  pinned?: boolean
-  type?: 'text' | 'number' | 'date' | 'boolean' | 'select' | 'custom'
-  filterOptions?: Array<{ label: string; value: any }>
+  id: string;
+  key: keyof T | string;
+  label: string;
+  render?: (value: unknown, row: T) => React.ReactNode;
+  sortable?: boolean;
+  filterable?: boolean;
+  searchable?: boolean;
+  width?: string;
+  visible?: boolean;
+  pinned?: boolean;
+  type?: "text" | "number" | "date" | "boolean" | "select" | "custom";
+  filterOptions?: Array<{ label: string; value: any }>;
 }
 
 export interface ViewConfig {
-  id: string
-  name: string
-  type: ViewType
-  columns: Column[]
-  filters: Record<string, any>
-  sortBy?: string
-  sortOrder?: 'asc' | 'desc'
-  groupBy?: string
-  pageSize?: number
+  id: string;
+  name: string;
+  type: ViewType;
+  columns: Column[];
+  filters: Record<string, any>;
+  sortBy?: string;
+  sortOrder?: "asc" | "desc";
+  groupBy?: string;
+  pageSize?: number;
 }
 
 export interface ViewManagerProps<T = any> {
   // Data
-  data: T[]
-  columns: Column<T>[]
-  loading?: boolean
-  error?: string | null
+  data: T[];
+  columns: Column<T>[];
+  loading?: boolean;
+  error?: string | null;
 
   // Views
-  views: ViewConfig[]
-  activeView?: string
-  onViewChange?: (viewId: string) => void
+  views: ViewConfig[];
+  activeView?: string;
+  onViewChange?: (viewId: string) => void;
 
   // Search & Filtering
-  searchQuery?: string
-  onSearchChange?: (query: string) => void
-  filters?: Record<string, any>
-  onFiltersChange?: (filters: Record<string, any>) => void
+  searchQuery?: string;
+  onSearchChange?: (query: string) => void;
+  filters?: Record<string, any>;
+  onFiltersChange?: (filters: Record<string, any>) => void;
 
   // Sorting
-  sortBy?: string
-  sortOrder?: 'asc' | 'desc'
-  onSortChange?: (field: string, order: 'asc' | 'desc') => void
-  sortOptions?: SortOption[]
+  sortBy?: string;
+  sortOrder?: "asc" | "desc";
+  onSortChange?: (field: string, order: "asc" | "desc") => void;
+  sortOptions?: SortOption[];
 
   // Grouping
-  groupBy?: string
-  onGroupChange?: (field: string) => void
-  groupOptions?: GroupOption[]
+  groupBy?: string;
+  onGroupChange?: (field: string) => void;
+  groupOptions?: GroupOption[];
 
   // Export/Import
-  onExport?: (format: 'csv' | 'json' | 'excel') => void
-  onImport?: (file: File) => void
+  onExport?: (format: "csv" | "json" | "excel") => void;
+  onImport?: (file: File) => void;
 
   // CRUD operations
-  onCreateClick?: (columnId?: string) => void
-  onEditClick?: (item: T) => void
-  onDeleteClick?: (item: T) => void
-  onViewClick?: (item: T) => void
+  onCreateClick?: (columnId?: string) => void;
+  onEditClick?: (item: T) => void;
+  onDeleteClick?: (item: T) => void;
+  onViewClick?: (item: T) => void;
 
   // Selection
-  selectable?: boolean
-  selectedItems?: T[]
-  onSelectionChange?: (items: T[]) => void
+  selectable?: boolean;
+  selectedItems?: T[];
+  onSelectionChange?: (items: T[]) => void;
 
   // Bulk actions
   bulkActions?: Array<{
-    label: string
-    icon?: React.ReactNode
-    action: (items: T[]) => void
-  }>
+    label: string;
+    icon?: React.ReactNode;
+    action: (items: T[]) => void;
+  }>;
 
   // Customization
-  title?: string
-  subtitle?: string
-  showToolbar?: boolean
-  showSearch?: boolean
-  showFilters?: boolean
-  showExport?: boolean
-  showImport?: boolean
-  showColumnSelector?: boolean
-  showViewSelector?: boolean
+  title?: string;
+  subtitle?: string;
+  showToolbar?: boolean;
+  showSearch?: boolean;
+  showFilters?: boolean;
+  showExport?: boolean;
+  showImport?: boolean;
+  showColumnSelector?: boolean;
+  showViewSelector?: boolean;
 
   // Kanban-specific props
-  kanbanColumns?: KanbanColumn[]
-  onMoveCard?: (cardId: string | number, sourceColumnId: string, targetColumnId: string) => void
-  enableQuickAdd?: boolean
-  onQuickAdd?: (columnId: string, title: string) => void
-  kanbanGroupByField?: keyof T | string
-  kanbanCardTitleField?: keyof T | string
-  kanbanCardDescriptionField?: keyof T | string
+  kanbanColumns?: KanbanColumn[];
+  onMoveCard?: (
+    cardId: string | number,
+    sourceColumnId: string,
+    targetColumnId: string,
+  ) => void;
+  enableQuickAdd?: boolean;
+  onQuickAdd?: (columnId: string, title: string) => void;
+  kanbanGroupByField?: keyof T | string;
+  kanbanCardTitleField?: keyof T | string;
+  kanbanCardDescriptionField?: keyof T | string;
   kanbanCardFields?: Array<{
-    key: keyof T | string
-    label: string
-    render?: (value: unknown, item: T) => React.ReactNode
-    type?: 'text' | 'badge' | 'date' | 'avatar' | 'priority'
-  }>
+    key: keyof T | string;
+    label: string;
+    render?: (value: unknown, item: T) => React.ReactNode;
+    type?: "text" | "badge" | "date" | "avatar" | "priority";
+  }>;
 
   // Gantt-specific props
-  ganttIdField?: keyof T | string
-  ganttTitleField?: keyof T | string
-  ganttStartDateField?: keyof T | string
-  ganttEndDateField?: keyof T | string
-  ganttProgressField?: keyof T | string
-  ganttStatusField?: keyof T | string
-  ganttPriorityField?: keyof T | string
-  onUpdateDates?: (itemId: string | number, startDate: Date, endDate: Date) => void
-  onUpdateProgress?: (itemId: string | number, progress: number) => void
-  ganttViewMode?: 'days' | 'weeks' | 'months'
-  showWeekends?: boolean
-  showProgress?: boolean
-  showDependencies?: boolean
-  allowResize?: boolean
-  allowMove?: boolean
+  ganttIdField?: keyof T | string;
+  ganttTitleField?: keyof T | string;
+  ganttStartDateField?: keyof T | string;
+  ganttEndDateField?: keyof T | string;
+  ganttProgressField?: keyof T | string;
+  ganttStatusField?: keyof T | string;
+  ganttPriorityField?: keyof T | string;
+  onUpdateDates?: (
+    itemId: string | number,
+    startDate: Date,
+    endDate: Date,
+  ) => void;
+  onUpdateProgress?: (itemId: string | number, progress: number) => void;
+  ganttViewMode?: "days" | "weeks" | "months";
+  showWeekends?: boolean;
+  showProgress?: boolean;
+  showDependencies?: boolean;
+  allowResize?: boolean;
+  allowMove?: boolean;
 
   // Calendar-specific props
-  calendarIdField?: keyof T | string
-  calendarTitleField?: keyof T | string
-  calendarDateField?: keyof T | string
-  calendarDescriptionField?: keyof T | string
-  calendarStatusField?: keyof T | string
-  calendarPriorityField?: keyof T | string
-  onDateChange?: (itemId: string | number, newDate: Date) => void
-  calendarView?: 'month' | 'week'
-  calendarShowWeekends?: boolean
-  calendarShowToday?: boolean
-  calendarAllowDragDrop?: boolean
-  calendarEnableQuickAdd?: boolean
-  onCalendarQuickAdd?: (date: Date, title: string) => void
+  calendarIdField?: keyof T | string;
+  calendarTitleField?: keyof T | string;
+  calendarDateField?: keyof T | string;
+  calendarDescriptionField?: keyof T | string;
+  calendarStatusField?: keyof T | string;
+  calendarPriorityField?: keyof T | string;
+  onDateChange?: (itemId: string | number, newDate: Date) => void;
+  calendarView?: "month" | "week";
+  calendarShowWeekends?: boolean;
+  calendarShowToday?: boolean;
+  calendarAllowDragDrop?: boolean;
+  calendarEnableQuickAdd?: boolean;
+  onCalendarQuickAdd?: (date: Date, title: string) => void;
 }
 
-export const ViewManager = React.memo(function ViewManager<T extends { id: number | string }>({
+export const ViewManager = React.memo(function ViewManager<
+  T extends { id: number | string },
+>({
   data,
   columns: initialColumns,
   loading = false,
@@ -177,12 +211,12 @@ export const ViewManager = React.memo(function ViewManager<T extends { id: numbe
   views,
   activeView,
   onViewChange,
-  searchQuery = '',
+  searchQuery = "",
   onSearchChange,
   filters = {},
   onFiltersChange,
   sortBy,
-  sortOrder = 'asc',
+  sortOrder = "asc",
   onSortChange,
   sortOptions = [],
   groupBy,
@@ -224,7 +258,7 @@ export const ViewManager = React.memo(function ViewManager<T extends { id: numbe
   ganttPriorityField,
   onUpdateDates,
   onUpdateProgress,
-  ganttViewMode = 'weeks',
+  ganttViewMode = "weeks",
   showWeekends = false,
   showProgress = true,
   showDependencies = false,
@@ -237,146 +271,187 @@ export const ViewManager = React.memo(function ViewManager<T extends { id: numbe
   calendarStatusField,
   calendarPriorityField,
   onDateChange,
-  calendarView = 'month',
+  calendarView = "month",
   calendarShowWeekends = true,
   calendarShowToday = true,
   calendarAllowDragDrop = true,
   calendarEnableQuickAdd = false,
-  onCalendarQuickAdd
+  onCalendarQuickAdd,
 }: ViewManagerProps<T>) {
-  const [localSearchQuery, setLocalSearchQuery] = useState(searchQuery)
-  const [columnOrder, setColumnOrder] = useState<string[]>(initialColumns.map(col => col.id))
+  const [localSearchQuery, setLocalSearchQuery] = useState(searchQuery);
+  const [columnOrder, setColumnOrder] = useState<string[]>(
+    initialColumns.map((col) => col.id),
+  );
   const [visibleColumns, setVisibleColumns] = useState<Set<string>>(
-    new Set(initialColumns.filter(col => col.visible !== false).map(col => col.id))
-  )
-  const [showColumnManager, setShowColumnManager] = useState(false)
-  const [showFilterPanel, setShowFilterPanel] = useState(false)
+    new Set(
+      initialColumns
+        .filter((col) => col.visible !== false)
+        .map((col) => col.id),
+    ),
+  );
+  const [showColumnManager, setShowColumnManager] = useState(false);
+  const [showFilterPanel, setShowFilterPanel] = useState(false);
 
-  const currentView = views.find(v => v.id === activeView)
-  const currentViewType = currentView?.type || 'list'
+  const currentView = views.find((v) => v.id === activeView);
+  const currentViewType = currentView?.type || "list";
 
   // Ordered and visible columns
   const orderedColumns = useMemo(() => {
     return columnOrder
-      .map(id => initialColumns.find(col => col.id === id))
-      .filter((col): col is Column<T> => col !== undefined && visibleColumns.has(col.id))
-  }, [columnOrder, initialColumns, visibleColumns])
+      .map((id) => initialColumns.find((col) => col.id === id))
+      .filter(
+        (col): col is Column<T> =>
+          col !== undefined && visibleColumns.has(col.id),
+      );
+  }, [columnOrder, initialColumns, visibleColumns]);
 
   // Filtered and sorted data
   const processedData = useMemo(() => {
-    let result = [...data]
+    let result = [...data];
 
     // Apply search
     if (localSearchQuery) {
-      const searchableColumns = orderedColumns.filter(col => col.searchable !== false)
-      result = result.filter(item =>
-        searchableColumns.some(col => {
-          const value = item[col.key as keyof T]
-          return String(value || '').toLowerCase().includes(localSearchQuery.toLowerCase())
-        })
-      )
+      const searchableColumns = orderedColumns.filter(
+        (col) => col.searchable !== false,
+      );
+      result = result.filter((item) =>
+        searchableColumns.some((col) => {
+          const value = item[col.key as keyof T];
+          return String(value || "")
+            .toLowerCase()
+            .includes(localSearchQuery.toLowerCase());
+        }),
+      );
     }
 
     // Apply filters
     Object.entries(filters).forEach(([key, value]) => {
-      if (value !== undefined && value !== null && value !== '') {
-        result = result.filter(item => {
-          const itemValue = item[key as keyof T]
+      if (value !== undefined && value !== null && value !== "") {
+        result = result.filter((item) => {
+          const itemValue = item[key as keyof T];
           if (Array.isArray(value)) {
-            return value.includes(itemValue)
+            return value.includes(itemValue);
           }
-          return itemValue === value
-        })
+          return itemValue === value;
+        });
       }
-    })
+    });
 
     // Apply sorting
     if (sortBy) {
       result.sort((a, b) => {
-        const aValue = a[sortBy as keyof T]
-        const bValue = b[sortBy as keyof T]
+        const aValue = a[sortBy as keyof T];
+        const bValue = b[sortBy as keyof T];
 
-        const comparison = String(aValue || '').localeCompare(String(bValue || ''))
-        return sortOrder === 'asc' ? comparison : -comparison
-      })
+        const comparison = String(aValue || "").localeCompare(
+          String(bValue || ""),
+        );
+        return sortOrder === "asc" ? comparison : -comparison;
+      });
     }
 
-    return result
-  }, [data, localSearchQuery, filters, sortBy, sortOrder, orderedColumns])
+    return result;
+  }, [data, localSearchQuery, filters, sortBy, sortOrder, orderedColumns]);
 
-  const handleSearchChange = useCallback((value: string) => {
-    setLocalSearchQuery(value)
-    onSearchChange?.(value)
-  }, [onSearchChange])
+  const handleSearchChange = useCallback(
+    (value: string) => {
+      setLocalSearchQuery(value);
+      onSearchChange?.(value);
+    },
+    [onSearchChange],
+  );
 
-  const handleSortChange = useCallback((field: string) => {
-    const newOrder = sortBy === field && sortOrder === 'asc' ? 'desc' : 'asc'
-    onSortChange?.(field, newOrder)
-  }, [sortBy, sortOrder, onSortChange])
+  const handleSortChange = useCallback(
+    (field: string) => {
+      const newOrder = sortBy === field && sortOrder === "asc" ? "desc" : "asc";
+      onSortChange?.(field, newOrder);
+    },
+    [sortBy, sortOrder, onSortChange],
+  );
 
-  const handleColumnReorder = useCallback((result: DropResult) => {
-    if (!result.destination) return
+  const handleColumnReorder = useCallback(
+    (result: DropResult) => {
+      if (!result.destination) return;
 
-    const newOrder = Array.from(columnOrder)
-    const [reorderedColumn] = newOrder.splice(result.source.index, 1)
-    newOrder.splice(result.destination.index, 0, reorderedColumn)
+      const newOrder = Array.from(columnOrder);
+      const [reorderedColumn] = newOrder.splice(result.source.index, 1);
+      newOrder.splice(result.destination.index, 0, reorderedColumn);
 
-    setColumnOrder(newOrder)
-  }, [columnOrder])
+      setColumnOrder(newOrder);
+    },
+    [columnOrder],
+  );
 
-  const handleColumnVisibilityChange = useCallback((columnId: string, visible: boolean) => {
-    const newVisible = new Set(visibleColumns)
-    if (visible) {
-      newVisible.add(columnId)
-    } else {
-      newVisible.delete(columnId)
-    }
-    setVisibleColumns(newVisible)
-  }, [visibleColumns])
+  const handleColumnVisibilityChange = useCallback(
+    (columnId: string, visible: boolean) => {
+      const newVisible = new Set(visibleColumns);
+      if (visible) {
+        newVisible.add(columnId);
+      } else {
+        newVisible.delete(columnId);
+      }
+      setVisibleColumns(newVisible);
+    },
+    [visibleColumns],
+  );
 
-  const handleExport = useCallback((format: 'csv' | 'json' | 'excel') => {
-    onExport?.(format)
-  }, [onExport])
+  const handleExport = useCallback(
+    (format: "csv" | "json" | "excel") => {
+      onExport?.(format);
+    },
+    [onExport],
+  );
 
-  const handleImport = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0]
-    if (file && onImport) {
-      onImport(file)
-    }
-  }, [onImport])
+  const handleImport = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      const file = event.target.files?.[0];
+      if (file && onImport) {
+        onImport(file);
+      }
+    },
+    [onImport],
+  );
 
   const renderViewSelector = () => (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="outline" size="sm">
-          {currentViewType === 'card' && <LayoutGrid className="h-4 w-4 mr-2" />}
-          {currentViewType === 'list' && <List className="h-4 w-4 mr-2" />}
-          {currentViewType === 'kanban' && <Kanban className="h-4 w-4 mr-2" />}
-          {currentViewType === 'gantt' && <BarChart3 className="h-4 w-4 mr-2" />}
-          {currentViewType === 'calendar' && <Calendar className="h-4 w-4 mr-2" />}
-          {currentViewType === 'cohort' && <BarChart3 className="h-4 w-4 mr-2" />}
-          {currentView?.name || 'Select View'}
+          {currentViewType === "card" && (
+            <LayoutGrid className="h-4 w-4 mr-2" />
+          )}
+          {currentViewType === "list" && <List className="h-4 w-4 mr-2" />}
+          {currentViewType === "kanban" && <Kanban className="h-4 w-4 mr-2" />}
+          {currentViewType === "gantt" && (
+            <BarChart3 className="h-4 w-4 mr-2" />
+          )}
+          {currentViewType === "calendar" && (
+            <Calendar className="h-4 w-4 mr-2" />
+          )}
+          {currentViewType === "cohort" && (
+            <BarChart3 className="h-4 w-4 mr-2" />
+          )}
+          {currentView?.name || "Select View"}
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent>
-        {views.map(view => (
+        {views.map((view) => (
           <DropdownMenuItem
             key={view.id}
             onClick={() => view.id && onViewChange?.(view.id)}
-            className={activeView === view.id ? 'bg-accent' : ''}
+            className={activeView === view.id ? "bg-accent" : ""}
           >
-            {view.type === 'card' && <LayoutGrid className="h-4 w-4 mr-2" />}
-            {view.type === 'list' && <List className="h-4 w-4 mr-2" />}
-            {view.type === 'kanban' && <Kanban className="h-4 w-4 mr-2" />}
-            {view.type === 'gantt' && <BarChart3 className="h-4 w-4 mr-2" />}
-            {view.type === 'calendar' && <Calendar className="h-4 w-4 mr-2" />}
-            {view.type === 'cohort' && <BarChart3 className="h-4 w-4 mr-2" />}
+            {view.type === "card" && <LayoutGrid className="h-4 w-4 mr-2" />}
+            {view.type === "list" && <List className="h-4 w-4 mr-2" />}
+            {view.type === "kanban" && <Kanban className="h-4 w-4 mr-2" />}
+            {view.type === "gantt" && <BarChart3 className="h-4 w-4 mr-2" />}
+            {view.type === "calendar" && <Calendar className="h-4 w-4 mr-2" />}
+            {view.type === "cohort" && <BarChart3 className="h-4 w-4 mr-2" />}
             {view.name}
           </DropdownMenuItem>
         ))}
       </DropdownMenuContent>
     </DropdownMenu>
-  )
+  );
 
   const renderColumnManager = () => (
     <Sheet open={showColumnManager} onOpenChange={setShowColumnManager}>
@@ -394,13 +469,23 @@ export const ViewManager = React.memo(function ViewManager<T extends { id: numbe
           <DragDropContext onDragEnd={handleColumnReorder}>
             <Droppable droppableId="columns">
               {(provided) => (
-                <div {...provided.droppableProps} ref={provided.innerRef} className="space-y-2">
+                <div
+                  {...provided.droppableProps}
+                  ref={provided.innerRef}
+                  className="space-y-2"
+                >
                   {columnOrder.map((columnId, index) => {
-                    const column = initialColumns.find(col => col.id === columnId)
-                    if (!column) return null
+                    const column = initialColumns.find(
+                      (col) => col.id === columnId,
+                    );
+                    if (!column) return null;
 
                     return (
-                      <Draggable key={columnId} draggableId={columnId} index={index}>
+                      <Draggable
+                        key={columnId}
+                        draggableId={columnId}
+                        index={index}
+                      >
                         {(provided) => (
                           <div
                             ref={provided.innerRef}
@@ -411,12 +496,19 @@ export const ViewManager = React.memo(function ViewManager<T extends { id: numbe
                               <div {...provided.dragHandleProps}>
                                 <GripVertical className="h-4 w-4 text-muted-foreground" />
                               </div>
-                              <span className="font-medium">{column.label}</span>
+                              <span className="font-medium">
+                                {column.label}
+                              </span>
                             </div>
                             <Button
                               variant="ghost"
                               size="sm"
-                              onClick={() => handleColumnVisibilityChange(columnId, !visibleColumns.has(columnId))}
+                              onClick={() =>
+                                handleColumnVisibilityChange(
+                                  columnId,
+                                  !visibleColumns.has(columnId),
+                                )
+                              }
                             >
                               {visibleColumns.has(columnId) ? (
                                 <Eye className="h-4 w-4" />
@@ -427,7 +519,7 @@ export const ViewManager = React.memo(function ViewManager<T extends { id: numbe
                           </div>
                         )}
                       </Draggable>
-                    )
+                    );
                   })}
                   {provided.placeholder}
                 </div>
@@ -437,7 +529,7 @@ export const ViewManager = React.memo(function ViewManager<T extends { id: numbe
         </div>
       </SheetContent>
     </Sheet>
-  )
+  );
 
   const renderFilterPanel = () => (
     <DropdownMenu open={showFilterPanel} onOpenChange={setShowFilterPanel}>
@@ -455,27 +547,34 @@ export const ViewManager = React.memo(function ViewManager<T extends { id: numbe
       <DropdownMenuContent className="w-80 p-4">
         <div className="space-y-4">
           {orderedColumns
-            .filter(col => col.filterable !== false)
-            .map(column => (
+            .filter((col) => col.filterable !== false)
+            .map((column) => (
               <div key={column.id} className="space-y-2">
                 <label className="text-sm font-medium">{column.label}</label>
-                {column.type === 'select' && column.filterOptions ? (
+                {column.type === "select" && column.filterOptions ? (
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="outline" className="w-full justify-start">
-                        {filters[column.key as string] || 'Select value...'}
+                      <Button
+                        variant="outline"
+                        className="w-full justify-start"
+                      >
+                        {filters[column.key as string] || "Select value..."}
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent>
-                      {column.filterOptions.map(option => (
+                      {column.filterOptions.map((option) => (
                         <DropdownMenuCheckboxItem
                           key={option.value}
-                          checked={filters[column.key as string] === option.value}
+                          checked={
+                            filters[column.key as string] === option.value
+                          }
                           onCheckedChange={(checked) => {
                             onFiltersChange?.({
                               ...filters,
-                              [column.key as string]: checked ? option.value : undefined
-                            })
+                              [column.key as string]: checked
+                                ? option.value
+                                : undefined,
+                            });
                           }}
                         >
                           {option.label}
@@ -486,12 +585,12 @@ export const ViewManager = React.memo(function ViewManager<T extends { id: numbe
                 ) : (
                   <Input
                     placeholder={`Filter by ${column.label.toLowerCase()}...`}
-                    value={filters[column.key as string] || ''}
+                    value={filters[column.key as string] || ""}
                     onChange={(e) => {
                       onFiltersChange?.({
                         ...filters,
-                        [column.key as string]: e.target.value || undefined
-                      })
+                        [column.key as string]: e.target.value || undefined,
+                      });
                     }}
                   />
                 )}
@@ -508,7 +607,7 @@ export const ViewManager = React.memo(function ViewManager<T extends { id: numbe
         </div>
       </DropdownMenuContent>
     </DropdownMenu>
-  )
+  );
 
   const renderExportImport = () => (
     <div className="flex items-center space-x-2">
@@ -521,13 +620,13 @@ export const ViewManager = React.memo(function ViewManager<T extends { id: numbe
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent>
-            <DropdownMenuItem onClick={() => handleExport('csv')}>
+            <DropdownMenuItem onClick={() => handleExport("csv")}>
               Export as CSV
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => handleExport('json')}>
+            <DropdownMenuItem onClick={() => handleExport("json")}>
               Export as JSON
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => handleExport('excel')}>
+            <DropdownMenuItem onClick={() => handleExport("excel")}>
               Export as Excel
             </DropdownMenuItem>
           </DropdownMenuContent>
@@ -552,7 +651,7 @@ export const ViewManager = React.memo(function ViewManager<T extends { id: numbe
         </div>
       )}
     </div>
-  )
+  );
 
   const renderToolbar = () => (
     <div className="flex items-center justify-between space-x-4 mb-6">
@@ -619,19 +718,17 @@ export const ViewManager = React.memo(function ViewManager<T extends { id: numbe
         )}
 
         {onCreateClick && (
-          <Button onClick={() => onCreateClick()}>
-            Create New
-          </Button>
+          <Button onClick={() => onCreateClick()}>Create New</Button>
         )}
       </div>
     </div>
-  )
+  );
 
   const renderCardView = () => (
     <div
       className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
       role="grid"
-      aria-label={`${title || 'Data'} cards`}
+      aria-label={`${title || "Data"} cards`}
     >
       {processedData.map((item, index) => (
         <div
@@ -641,7 +738,7 @@ export const ViewManager = React.memo(function ViewManager<T extends { id: numbe
           tabIndex={0}
           aria-label={`Item ${index + 1} of ${processedData.length}`}
           onKeyDown={(e) => {
-            if (e.key === 'Enter' || e.key === ' ') {
+            if (e.key === "Enter" || e.key === " ") {
               e.preventDefault();
               onViewClick?.(item);
             }
@@ -649,8 +746,14 @@ export const ViewManager = React.memo(function ViewManager<T extends { id: numbe
         >
           {orderedColumns.slice(0, 3).map((column) => (
             <div key={column.id} className="mb-2">
-              <span className="text-sm font-medium text-muted-foreground">{column.label}: </span>
-              <span>{column.render ? column.render(item[column.key as keyof T], item) : String(item[column.key as keyof T] || '-')}</span>
+              <span className="text-sm font-medium text-muted-foreground">
+                {column.label}:{" "}
+              </span>
+              <span>
+                {column.render
+                  ? column.render(item[column.key as keyof T], item)
+                  : String(item[column.key as keyof T] || "-")}
+              </span>
             </div>
           ))}
           <div className="flex justify-end space-x-2 mt-4">
@@ -678,15 +781,14 @@ export const ViewManager = React.memo(function ViewManager<T extends { id: numbe
         </div>
       ))}
     </div>
-  )
+  );
 
   const renderListView = () => (
     <div className="bg-background border rounded-lg overflow-hidden">
       <div className="overflow-x-auto">
         <table
           className="w-full"
-          role="table"
-          aria-label={`${title || 'Data'} table with ${processedData.length} rows`}
+          aria-label={`${title || "Data"} table with ${processedData.length} rows`}
         >
           <thead className="bg-muted/50">
             <tr>
@@ -694,9 +796,14 @@ export const ViewManager = React.memo(function ViewManager<T extends { id: numbe
                 <th className="w-12 p-4" scope="col">
                   <input
                     type="checkbox"
-                    checked={selectedItems.length === processedData.length && processedData.length > 0}
+                    checked={
+                      selectedItems.length === processedData.length &&
+                      processedData.length > 0
+                    }
                     onChange={(e) => {
-                      onSelectionChange?.(e.target.checked ? processedData : [])
+                      onSelectionChange?.(
+                        e.target.checked ? processedData : [],
+                      );
                     }}
                     aria-label="Select all rows"
                   />
@@ -709,8 +816,12 @@ export const ViewManager = React.memo(function ViewManager<T extends { id: numbe
                   scope="col"
                   aria-sort={
                     sortBy === column.key
-                      ? sortOrder === 'asc' ? 'ascending' : 'descending'
-                      : column.sortable !== false ? 'none' : undefined
+                      ? sortOrder === "asc"
+                        ? "ascending"
+                        : "descending"
+                      : column.sortable !== false
+                        ? "none"
+                        : undefined
                   }
                 >
                   <div className="flex items-center space-x-2">
@@ -723,12 +834,18 @@ export const ViewManager = React.memo(function ViewManager<T extends { id: numbe
                         className="h-auto p-0"
                         aria-label={`Sort by ${column.label} ${
                           sortBy === column.key
-                            ? sortOrder === 'asc' ? 'descending' : 'ascending'
-                            : 'ascending'
+                            ? sortOrder === "asc"
+                              ? "descending"
+                              : "ascending"
+                            : "ascending"
                         }`}
                       >
                         {sortBy === column.key ? (
-                          sortOrder === 'asc' ? <SortAsc className="h-4 w-4" /> : <SortDesc className="h-4 w-4" />
+                          sortOrder === "asc" ? (
+                            <SortAsc className="h-4 w-4" />
+                          ) : (
+                            <SortDesc className="h-4 w-4" />
+                          )
                         ) : (
                           <SortAsc className="h-4 w-4 opacity-50" />
                         )}
@@ -737,7 +854,9 @@ export const ViewManager = React.memo(function ViewManager<T extends { id: numbe
                   </div>
                 </th>
               ))}
-              <th className="w-32 p-4 font-medium" scope="col">Actions</th>
+              <th className="w-32 p-4 font-medium" scope="col">
+                Actions
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -747,12 +866,16 @@ export const ViewManager = React.memo(function ViewManager<T extends { id: numbe
                   <td className="p-4">
                     <input
                       type="checkbox"
-                      checked={selectedItems.some(selected => selected.id === item.id)}
+                      checked={selectedItems.some(
+                        (selected) => selected.id === item.id,
+                      )}
                       onChange={(e) => {
                         const newSelection = e.target.checked
                           ? [...selectedItems, item]
-                          : selectedItems.filter(selected => selected.id !== item.id)
-                        onSelectionChange?.(newSelection)
+                          : selectedItems.filter(
+                              (selected) => selected.id !== item.id,
+                            );
+                        onSelectionChange?.(newSelection);
                       }}
                       aria-label={`Select row ${item.id}`}
                     />
@@ -760,23 +883,37 @@ export const ViewManager = React.memo(function ViewManager<T extends { id: numbe
                 )}
                 {orderedColumns.map((column) => (
                   <td key={column.id} className="p-4">
-                    {column.render ? column.render(item[column.key as keyof T], item) : String(item[column.key as keyof T] || '-')}
+                    {column.render
+                      ? column.render(item[column.key as keyof T], item)
+                      : String(item[column.key as keyof T] || "-")}
                   </td>
                 ))}
                 <td className="p-4">
                   <div className="flex space-x-2">
                     {onViewClick && (
-                      <Button variant="outline" size="sm" onClick={() => onViewClick(item)}>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => onViewClick(item)}
+                      >
                         View
                       </Button>
                     )}
                     {onEditClick && (
-                      <Button variant="outline" size="sm" onClick={() => onEditClick(item)}>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => onEditClick(item)}
+                      >
                         Edit
                       </Button>
                     )}
                     {onDeleteClick && (
-                      <Button variant="destructive" size="sm" onClick={() => onDeleteClick(item)}>
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        onClick={() => onDeleteClick(item)}
+                      >
                         Delete
                       </Button>
                     )}
@@ -788,26 +925,35 @@ export const ViewManager = React.memo(function ViewManager<T extends { id: numbe
         </table>
       </div>
     </div>
-  )
+  );
 
   const renderKanbanView = () => {
     // Default groupBy field if not specified
-    const groupByField = kanbanGroupByField || groupBy || 'status'
+    const groupByField = kanbanGroupByField || groupBy || "status";
 
     // Default card title field if not specified
-    const cardTitleField = kanbanCardTitleField || 'name' || 'title'
+    const cardTitleField = kanbanCardTitleField || "name" || "title";
 
     // Use provided kanban columns or auto-generate from data
-    let columns = [...kanbanColumns]
+    let columns = [...kanbanColumns];
 
     // Auto-generate columns if none provided and we have a groupBy field
     if (columns.length === 0 && groupByField) {
-      const uniqueGroups = [...new Set(processedData.map(item => String(item[groupByField as keyof T] || 'Unknown')))]
-      columns = uniqueGroups.map(group => ({
+      const uniqueGroups = [
+        ...new Set(
+          processedData.map((item) =>
+            String(item[groupByField as keyof T] || "Unknown"),
+          ),
+        ),
+      ];
+      columns = uniqueGroups.map((group) => ({
         id: group,
-        title: group.charAt(0).toUpperCase() + group.slice(1).replace(/_/g, ' '),
-        count: processedData.filter(item => String(item[groupByField as keyof T]) === group).length
-      }))
+        title:
+          group.charAt(0).toUpperCase() + group.slice(1).replace(/_/g, " "),
+        count: processedData.filter(
+          (item) => String(item[groupByField as keyof T]) === group,
+        ).length,
+      }));
     }
 
     return (
@@ -832,38 +978,41 @@ export const ViewManager = React.memo(function ViewManager<T extends { id: numbe
         canDelete={true}
         canMove={true}
       />
-    )
-  }
+    );
+  };
 
   const renderGanttView = () => {
     // Default field mappings if not specified
-    const idField = ganttIdField || 'id'
-    const titleField = ganttTitleField || 'title' || 'name'
-    const startDateField = ganttStartDateField || 'start_date' || 'startDate'
-    const endDateField = ganttEndDateField || 'end_date' || 'endDate'
+    const idField = ganttIdField || "id";
+    const titleField = ganttTitleField || "title" || "name";
+    const startDateField = ganttStartDateField || "start_date" || "startDate";
+    const endDateField = ganttEndDateField || "end_date" || "endDate";
 
     // Validate that required date fields exist in data
-    const hasRequiredFields = processedData.length === 0 || (
-      processedData.some(item =>
-        item[startDateField as keyof T] &&
-        item[endDateField as keyof T]
-      )
-    )
+    const hasRequiredFields =
+      processedData.length === 0 ||
+      processedData.some(
+        (item) =>
+          item[startDateField as keyof T] && item[endDateField as keyof T],
+      );
 
     if (!hasRequiredFields) {
       return (
         <div className="flex items-center justify-center h-64">
           <div className="text-center">
-            <h3 className="text-lg font-semibold mb-2">Gantt chart unavailable</h3>
+            <h3 className="text-lg font-semibold mb-2">
+              Gantt chart unavailable
+            </h3>
             <p className="text-muted-foreground">
-              Data must include start and end date fields to display as Gantt chart.
+              Data must include start and end date fields to display as Gantt
+              chart.
             </p>
             <p className="text-sm text-muted-foreground mt-1">
               Configure ganttStartDateField and ganttEndDateField props.
             </p>
           </div>
         </div>
-      )
+      );
     }
 
     return (
@@ -894,27 +1043,27 @@ export const ViewManager = React.memo(function ViewManager<T extends { id: numbe
         canEdit={true}
         canDelete={true}
       />
-    )
-  }
+    );
+  };
 
   const renderCalendarView = () => {
     // Default field mappings if not specified
-    const idField = calendarIdField || 'id'
-    const titleField = calendarTitleField || 'title' || 'name'
-    const dateField = calendarDateField || 'created_at' || 'date'
+    const idField = calendarIdField || "id";
+    const titleField = calendarTitleField || "title" || "name";
+    const dateField = calendarDateField || "created_at" || "date";
 
     // Validate that required date field exists in data
-    const hasRequiredFields = processedData.length === 0 || (
-      processedData.some(item =>
-        item[dateField as keyof T]
-      )
-    )
+    const hasRequiredFields =
+      processedData.length === 0 ||
+      processedData.some((item) => item[dateField as keyof T]);
 
     if (!hasRequiredFields) {
       return (
         <div className="flex items-center justify-center h-64">
           <div className="text-center">
-            <h3 className="text-lg font-semibold mb-2">Calendar view unavailable</h3>
+            <h3 className="text-lg font-semibold mb-2">
+              Calendar view unavailable
+            </h3>
             <p className="text-muted-foreground">
               Data must include a date field to display as calendar.
             </p>
@@ -923,7 +1072,7 @@ export const ViewManager = React.memo(function ViewManager<T extends { id: numbe
             </p>
           </div>
         </div>
-      )
+      );
     }
 
     return (
@@ -952,8 +1101,8 @@ export const ViewManager = React.memo(function ViewManager<T extends { id: numbe
         canEdit={true}
         canDelete={true}
       />
-    )
-  }
+    );
+  };
 
   const renderCurrentView = () => {
     if (loading) {
@@ -964,7 +1113,7 @@ export const ViewManager = React.memo(function ViewManager<T extends { id: numbe
             <p className="mt-2 text-sm text-muted-foreground">Loading...</p>
           </div>
         </div>
-      )
+      );
     }
 
     if (error) {
@@ -975,7 +1124,7 @@ export const ViewManager = React.memo(function ViewManager<T extends { id: numbe
             <p className="text-sm text-muted-foreground">{error}</p>
           </div>
         </div>
-      )
+      );
     }
 
     if (processedData.length === 0) {
@@ -985,35 +1134,38 @@ export const ViewManager = React.memo(function ViewManager<T extends { id: numbe
             <h3 className="text-lg font-semibold mb-2">No data found</h3>
             <p className="text-muted-foreground mb-4">
               {localSearchQuery || Object.keys(filters).length > 0
-                ? 'No items match your search criteria'
-                : 'Get started by creating your first item'
-              }
+                ? "No items match your search criteria"
+                : "Get started by creating your first item"}
             </p>
             {onCreateClick && (
               <Button onClick={() => onCreateClick()}>Create New</Button>
             )}
           </div>
         </div>
-      )
+      );
     }
 
     switch (currentViewType) {
-      case 'card':
-        return renderCardView()
-      case 'list':
-        return renderListView()
-      case 'kanban':
-        return renderKanbanView()
-      case 'gantt':
-        return renderGanttView()
-      case 'calendar':
-        return renderCalendarView()
-      case 'cohort':
-        return <div className="text-center py-8 text-muted-foreground">Cohort view coming soon...</div>
+      case "card":
+        return renderCardView();
+      case "list":
+        return renderListView();
+      case "kanban":
+        return renderKanbanView();
+      case "gantt":
+        return renderGanttView();
+      case "calendar":
+        return renderCalendarView();
+      case "cohort":
+        return (
+          <div className="text-center py-8 text-muted-foreground">
+            Cohort view coming soon...
+          </div>
+        );
       default:
-        return renderListView()
+        return renderListView();
     }
-  }
+  };
 
   return (
     <div className="space-y-6">
@@ -1031,8 +1183,8 @@ export const ViewManager = React.memo(function ViewManager<T extends { id: numbe
       {/* Content */}
       {renderCurrentView()}
     </div>
-  )
-})
+  );
+});
 
 // Re-export KanbanColumn for use in pages
-export type { KanbanColumn } from './KanbanView'
+export type { KanbanColumn } from "./KanbanView";

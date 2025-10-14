@@ -1,55 +1,71 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { formatDistanceToNow } from "date-fns"
+import { formatDistanceToNow } from "date-fns";
 import {
-  User,
-  Edit,
-  Trash2,
-  Shield,
-  Key,
-  UserPlus,
-  UserMinus,
-  Settings,
-  Eye,
-  Clock,
+  Activity,
   ChevronRight,
-  Activity
-} from "lucide-react"
-
-import { cn } from "@/shared/utils"
-import { Card, CardContent, CardHeader, CardTitle } from "@/shared/components/ui/card"
-import { Badge } from "@/shared/components/ui/badge"
-import { Button } from "@/shared/components/ui/button"
+  Clock,
+  Edit,
+  Eye,
+  Key,
+  Settings,
+  Shield,
+  Trash2,
+  User,
+  UserMinus,
+  UserPlus,
+} from "lucide-react";
+import * as React from "react";
+import { Badge } from "@/shared/components/ui/badge";
+import { Button } from "@/shared/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/shared/components/ui/card";
+import { cn } from "@/shared/utils";
 
 export interface ActivityItem {
-  id: string
-  type: 'user_created' | 'user_updated' | 'user_deleted' | 'role_created' | 'role_updated' | 'role_deleted' |
-        'permission_created' | 'permission_updated' | 'permission_deleted' | 'login' | 'logout' | 'profile_updated' | 'settings_changed'
+  id: string;
+  type:
+    | "user_created"
+    | "user_updated"
+    | "user_deleted"
+    | "role_created"
+    | "role_updated"
+    | "role_deleted"
+    | "permission_created"
+    | "permission_updated"
+    | "permission_deleted"
+    | "login"
+    | "logout"
+    | "profile_updated"
+    | "settings_changed";
   actor: {
-    id: number
-    name: string
-    username: string
-    avatar_url?: string
-  }
+    id: number;
+    name: string;
+    username: string;
+    avatar_url?: string;
+  };
   target?: {
-    id: number
-    name: string
-    type: 'user' | 'role' | 'permission' | 'setting'
-  }
-  description: string
-  metadata?: Record<string, any>
-  timestamp: string
-  severity: 'low' | 'medium' | 'high'
+    id: number;
+    name: string;
+    type: "user" | "role" | "permission" | "setting";
+  };
+  description: string;
+  metadata?: Record<string, any>;
+  timestamp: string;
+  severity: "low" | "medium" | "high";
 }
 
 interface ActivityFeedProps {
-  activities?: ActivityItem[]
-  loading?: boolean
-  showHeader?: boolean
-  maxItems?: number
-  className?: string
-  compact?: boolean
+  activities?: ActivityItem[];
+  loading?: boolean;
+  showHeader?: boolean;
+  maxItems?: number;
+  className?: string;
+  compact?: boolean;
 }
 
 const activityIcons = {
@@ -66,7 +82,7 @@ const activityIcons = {
   logout: User,
   profile_updated: Settings,
   settings_changed: Settings,
-} as const
+} as const;
 
 const activityColors = {
   user_created: "text-green-600 bg-green-100 dark:bg-green-900/20",
@@ -82,71 +98,87 @@ const activityColors = {
   logout: "text-gray-600 bg-gray-100 dark:bg-gray-900/20",
   profile_updated: "text-blue-600 bg-blue-100 dark:bg-blue-900/20",
   settings_changed: "text-blue-600 bg-blue-100 dark:bg-blue-900/20",
-} as const
+} as const;
 
 const severityColors = {
   low: "border-l-gray-300",
   medium: "border-l-yellow-400",
-  high: "border-l-red-400"
-} as const
+  high: "border-l-red-400",
+} as const;
 
-function ActivityIcon({ type, className }: { type: ActivityItem['type']; className?: string }) {
-  const Icon = activityIcons[type] || Activity
-  const colorClass = activityColors[type] || "text-gray-600 bg-gray-100"
+function ActivityIcon({
+  type,
+  className,
+}: {
+  type: ActivityItem["type"];
+  className?: string;
+}) {
+  const Icon = activityIcons[type] || Activity;
+  const colorClass = activityColors[type] || "text-gray-600 bg-gray-100";
 
   return (
-    <div className={cn(
-      "flex h-8 w-8 items-center justify-center rounded-full",
-      colorClass,
-      className
-    )}>
+    <div
+      className={cn(
+        "flex h-8 w-8 items-center justify-center rounded-full",
+        colorClass,
+        className,
+      )}
+    >
       <Icon className="h-4 w-4" />
     </div>
-  )
+  );
 }
 
 function ActivityItemComponent({
   activity,
-  compact = false
+  compact = false,
 }: {
-  activity: ActivityItem
-  compact?: boolean
+  activity: ActivityItem;
+  compact?: boolean;
 }) {
   return (
-    <div className={cn(
-      "flex items-start space-x-3 border-l-2 pl-4 py-3",
-      severityColors[activity.severity]
-    )}>
+    <div
+      className={cn(
+        "flex items-start space-x-3 border-l-2 pl-4 py-3",
+        severityColors[activity.severity],
+      )}
+    >
       <ActivityIcon type={activity.type} />
 
       <div className="flex-1 min-w-0">
         <div className="flex items-center space-x-2">
-          <p className={cn(
-            "font-medium text-gray-900 dark:text-white",
-            compact ? "text-sm" : "text-sm"
-          )}>
+          <p
+            className={cn(
+              "font-medium text-gray-900 dark:text-white",
+              compact ? "text-sm" : "text-sm",
+            )}
+          >
             {activity.actor.name}
           </p>
-          {activity.severity === 'high' && (
+          {activity.severity === "high" && (
             <Badge variant="destructive" className="text-xs">
               High Priority
             </Badge>
           )}
         </div>
 
-        <p className={cn(
-          "text-gray-600 dark:text-gray-400 mt-1",
-          compact ? "text-xs" : "text-sm"
-        )}>
+        <p
+          className={cn(
+            "text-gray-600 dark:text-gray-400 mt-1",
+            compact ? "text-xs" : "text-sm",
+          )}
+        >
           {activity.description}
         </p>
 
         {activity.target && (
           <div className="flex items-center space-x-1 mt-1">
-            <span className={cn(
-              "text-gray-500 dark:text-gray-500",
-              compact ? "text-xs" : "text-xs"
-            )}>
+            <span
+              className={cn(
+                "text-gray-500 dark:text-gray-500",
+                compact ? "text-xs" : "text-xs",
+              )}
+            >
               Target:
             </span>
             <Badge variant="outline" className="text-xs">
@@ -157,22 +189,30 @@ function ActivityItemComponent({
 
         <div className="flex items-center space-x-2 mt-2">
           <Clock className="h-3 w-3 text-gray-400" />
-          <span className={cn(
-            "text-gray-500 dark:text-gray-500",
-            compact ? "text-xs" : "text-xs"
-          )}>
-            {formatDistanceToNow(new Date(activity.timestamp), { addSuffix: true })}
+          <span
+            className={cn(
+              "text-gray-500 dark:text-gray-500",
+              compact ? "text-xs" : "text-xs",
+            )}
+          >
+            {formatDistanceToNow(new Date(activity.timestamp), {
+              addSuffix: true,
+            })}
           </span>
         </div>
       </div>
 
       {!compact && (
-        <Button variant="ghost" size="sm" className="opacity-0 group-hover:opacity-100 transition-opacity">
+        <Button
+          variant="ghost"
+          size="sm"
+          className="opacity-0 group-hover:opacity-100 transition-opacity"
+        >
           <Eye className="h-4 w-4" />
         </Button>
       )}
     </div>
-  )
+  );
 }
 
 // Mock data generator for demo
@@ -182,69 +222,71 @@ function generateMockActivities(): ActivityItem[] {
     { id: 2, name: "Jane Smith", username: "jane", avatar_url: undefined },
     { id: 3, name: "Admin User", username: "admin", avatar_url: undefined },
     { id: 4, name: "Bob Wilson", username: "bob", avatar_url: undefined },
-  ]
+  ];
 
-  const activities: Omit<ActivityItem, 'id' | 'timestamp'>[] = [
+  const activities: Omit<ActivityItem, "id" | "timestamp">[] = [
     {
-      type: 'user_created',
+      type: "user_created",
       actor: actors[2],
-      target: { id: 10, name: "Sarah Connor", type: 'user' },
+      target: { id: 10, name: "Sarah Connor", type: "user" },
       description: "Created a new user account",
-      severity: 'medium'
+      severity: "medium",
     },
     {
-      type: 'role_updated',
+      type: "role_updated",
       actor: actors[2],
-      target: { id: 5, name: "Moderator", type: 'role' },
+      target: { id: 5, name: "Moderator", type: "role" },
       description: "Updated role permissions",
-      severity: 'high'
+      severity: "high",
     },
     {
-      type: 'login',
+      type: "login",
       actor: actors[0],
       description: "Logged into the system",
-      severity: 'low'
+      severity: "low",
     },
     {
-      type: 'permission_created',
+      type: "permission_created",
       actor: actors[2],
-      target: { id: 15, name: "Export Data", type: 'permission' },
+      target: { id: 15, name: "Export Data", type: "permission" },
       description: "Created new permission for data export",
-      severity: 'medium'
+      severity: "medium",
     },
     {
-      type: 'user_deleted',
+      type: "user_deleted",
       actor: actors[2],
-      target: { id: 8, name: "Inactive User", type: 'user' },
+      target: { id: 8, name: "Inactive User", type: "user" },
       description: "Removed inactive user account",
-      severity: 'high'
+      severity: "high",
     },
     {
-      type: 'profile_updated',
+      type: "profile_updated",
       actor: actors[1],
       description: "Updated profile information",
-      severity: 'low'
+      severity: "low",
     },
     {
-      type: 'role_created',
+      type: "role_created",
       actor: actors[2],
-      target: { id: 6, name: "Content Editor", type: 'role' },
+      target: { id: 6, name: "Content Editor", type: "role" },
       description: "Created new role for content management",
-      severity: 'medium'
+      severity: "medium",
     },
     {
-      type: 'login',
+      type: "login",
       actor: actors[3],
       description: "Logged into the system",
-      severity: 'low'
-    }
-  ]
+      severity: "low",
+    },
+  ];
 
   return activities.map((activity, index) => ({
     ...activity,
     id: `activity-${index}`,
-    timestamp: new Date(Date.now() - Math.random() * 86400000 * 7).toISOString() // Last 7 days
-  }))
+    timestamp: new Date(
+      Date.now() - Math.random() * 86400000 * 7,
+    ).toISOString(), // Last 7 days
+  }));
 }
 
 export function ActivityFeed({
@@ -253,21 +295,25 @@ export function ActivityFeed({
   showHeader = true,
   maxItems = 10,
   className,
-  compact = false
+  compact = false,
 }: ActivityFeedProps) {
-  const [isExpanded, setIsExpanded] = React.useState(false)
+  const [isExpanded, setIsExpanded] = React.useState(false);
 
   // Use mock data if no activities provided
-  const mockActivities = React.useMemo(() => generateMockActivities(), [])
-  const displayActivities = activities || mockActivities
+  const mockActivities = React.useMemo(() => generateMockActivities(), []);
+  const displayActivities = activities || mockActivities;
 
   // Sort by timestamp (newest first)
-  const sortedActivities = React.useMemo(() =>
-    [...displayActivities]
-      .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
-      .slice(0, isExpanded ? displayActivities.length : maxItems),
-    [displayActivities, isExpanded, maxItems]
-  )
+  const sortedActivities = React.useMemo(
+    () =>
+      [...displayActivities]
+        .sort(
+          (a, b) =>
+            new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime(),
+        )
+        .slice(0, isExpanded ? displayActivities.length : maxItems),
+    [displayActivities, isExpanded, maxItems],
+  );
 
   if (loading) {
     return (
@@ -292,7 +338,7 @@ export function ActivityFeed({
           ))}
         </CardContent>
       </Card>
-    )
+    );
   }
 
   return (
@@ -304,9 +350,7 @@ export function ActivityFeed({
               <Activity className="h-5 w-5 mr-2" />
               Recent Activity
             </CardTitle>
-            <Badge variant="secondary">
-              {displayActivities.length} events
-            </Badge>
+            <Badge variant="secondary">{displayActivities.length} events</Badge>
           </div>
         </CardHeader>
       )}
@@ -327,7 +371,10 @@ export function ActivityFeed({
             <div className="space-y-1">
               {sortedActivities.map((activity) => (
                 <div key={activity.id} className="group">
-                  <ActivityItemComponent activity={activity} compact={compact} />
+                  <ActivityItemComponent
+                    activity={activity}
+                    compact={compact}
+                  />
                 </div>
               ))}
             </div>
@@ -341,7 +388,7 @@ export function ActivityFeed({
                   className="w-full"
                 >
                   {isExpanded ? (
-                    <>Show Less</>
+                    "Show Less"
                   ) : (
                     <>
                       Show {displayActivities.length - maxItems} More
@@ -355,7 +402,7 @@ export function ActivityFeed({
         )}
       </CardContent>
     </Card>
-  )
+  );
 }
 
-export default ActivityFeed
+export default ActivityFeed;

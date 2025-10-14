@@ -1,29 +1,28 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { CalendarDays } from "lucide-react"
-import { format } from "date-fns"
-
-import { cn } from '@/shared/utils'
-import { Button } from "@/shared/components/ui/button"
-import { Input } from "@/shared/components/ui/input"
-import { Label } from "@/shared/components/ui/label"
+import { format } from "date-fns";
+import { CalendarDays } from "lucide-react";
+import * as React from "react";
+import { Button } from "@/shared/components/ui/button";
+import { Input } from "@/shared/components/ui/input";
+import { Label } from "@/shared/components/ui/label";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/shared/components/ui/popover"
+} from "@/shared/components/ui/popover";
+import { cn } from "@/shared/utils";
 
 interface DateFieldProps {
-  value?: Date
-  onChange?: (date: Date | undefined) => void
-  label?: string
-  placeholder?: string
-  required?: boolean
-  disabled?: boolean
-  className?: string
-  error?: string
-  id?: string
+  value?: Date;
+  onChange?: (date: Date | undefined) => void;
+  label?: string;
+  placeholder?: string;
+  required?: boolean;
+  disabled?: boolean;
+  className?: string;
+  error?: string;
+  id?: string;
 }
 
 export function DateField({
@@ -37,32 +36,32 @@ export function DateField({
   error,
   id,
 }: DateFieldProps) {
-  const [open, setOpen] = React.useState(false)
+  const [open, setOpen] = React.useState(false);
   const [inputValue, setInputValue] = React.useState(
-    value ? format(value, "yyyy-MM-dd") : ""
-  )
+    value ? format(value, "yyyy-MM-dd") : "",
+  );
 
   React.useEffect(() => {
     if (value) {
-      setInputValue(format(value, "yyyy-MM-dd"))
+      setInputValue(format(value, "yyyy-MM-dd"));
     } else {
-      setInputValue("")
+      setInputValue("");
     }
-  }, [value])
+  }, [value]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newValue = e.target.value
-    setInputValue(newValue)
+    const newValue = e.target.value;
+    setInputValue(newValue);
 
     if (newValue) {
-      const date = new Date(newValue)
-      if (!isNaN(date.getTime())) {
-        onChange?.(date)
+      const date = new Date(newValue);
+      if (!Number.isNaN(date.getTime())) {
+        onChange?.(date);
       }
     } else {
-      onChange?.(undefined)
+      onChange?.(undefined);
     }
-  }
+  };
 
   // Calendar selection handler for future use
   // const handleCalendarSelect = (date: Date | undefined) => {
@@ -88,7 +87,7 @@ export function DateField({
           disabled={disabled}
           className={cn(
             "pr-10",
-            error && "border-red-500 focus:border-red-500 focus:ring-red-500"
+            error && "border-red-500 focus:border-red-500 focus:ring-red-500",
           )}
         />
         <Popover open={open} onOpenChange={setOpen}>
@@ -124,12 +123,12 @@ export function DateField({
                     size="sm"
                     onClick={() => {
                       if (inputValue) {
-                        const date = new Date(inputValue)
-                        if (!isNaN(date.getTime())) {
-                          onChange?.(date)
+                        const date = new Date(inputValue);
+                        if (!Number.isNaN(date.getTime())) {
+                          onChange?.(date);
                         }
                       }
-                      setOpen(false)
+                      setOpen(false);
                     }}
                   >
                     Select
@@ -140,9 +139,7 @@ export function DateField({
           </PopoverContent>
         </Popover>
       </div>
-      {error && (
-        <p className="text-sm text-red-500">{error}</p>
-      )}
+      {error && <p className="text-sm text-red-500">{error}</p>}
     </div>
-  )
+  );
 }
