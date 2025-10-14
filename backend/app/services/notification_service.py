@@ -7,6 +7,8 @@ from app.models.notification import Notification, NotificationChannel, Notificat
 from app.models.user import User
 from sqlalchemy import and_, desc
 from sqlalchemy.orm import Session
+import emails
+from emails.template import JinjaTemplate
 
 
 class NotificationService:
@@ -121,13 +123,84 @@ class NotificationService:
         return result > 0
 
     def send_email_notification(self, notification: Notification) -> bool:
-        """Send email notification (placeholder for email service integration)"""
-        # TODO: Integrate with email service (SendGrid, AWS SES, etc.)
-        # For now, just mark as sent
-        notification.is_sent = True
-        notification.sent_at = datetime.utcnow()
-        self.db.commit()
-        return True
+        """Send email notification using emails library"""
+        try:
+            # Get user email
+            user = self.db.query(User).filter(User.id == notification.user_id).first()
+            if not user or not user.email:
+                return False
+
+            # Create email message
+            message = emails.Message(
+                subject=notification.title,
+                html=self._render_email_template(notification),
+                mail_from=(settings.SMTP_FROM_NAME, settings.SMTP_FROM_EMAIL)
+            )
+
+            # SMTP configuration
+            smtp_config = {
+                'host': settings.SMTP_HOST,
+                'port': settings.SMTP_PORT,
+                'tls': settings.SMTP_TLS,
+                'ssl': settings.SMTP_SSL,
+                'user': settings.SMTP_USER,
+                'password': settings.SMTP_PASSWORD
+            }
+
+            # Send email
+            response = message.send(to=user.email, smtp=smtp_config)
+
+            if response.status_code == 250:  # SMTP success
+                notification.is_sent = True
+                notification.sent_at = datetime.utcnow()
+                self.db.commit()
+                return True
+
+            return False
+
+        except Exception as e:
+            # Log error but don't fail - notification will be retried
+            print(f"Email sending failed: {e}")
+            return False
+
+    def _render_email_template(self, notification: Notification) -> str:
+        """Render email HTML template"""
+        template = """
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="utf-8">
+            <style>
+                body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background-color: #f5f5f5; }
+                .container { max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 8px; }
+                .header { border-bottom: 2px solid #007bff; padding-bottom: 20px; margin-bottom: 20px; }
+                .title { color: #333; font-size: 24px; margin: 0; }
+                .message { color: #666; font-size: 16px; line-height: 1.6; margin: 20px 0; }
+                .action-button { display: inline-block; background: #007bff; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; margin: 20px 0; }
+                .footer { margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee; color: #999; font-size: 12px; }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <div class="header">
+                    <h1 class="title">{{ notification.title }}</h1>
+                </div>
+                <div class="message">
+                    {{ notification.message }}
+                </div>
+                {% if notification.action_url %}
+                <a href="{{ notification.action_url }}" class="action-button">Take Action</a>
+                {% endif %}
+                <div class="footer">
+                    <p>This notification was sent by FastNext Framework.</p>
+                    <p>You can manage your notification preferences in your account settings.</p>
+                </div>
+            </div>
+        </body>
+        </html>
+        """
+
+        return JinjaTemplate(template).render(notification=notification)
 
     def send_push_notification(self, notification: Notification) -> bool:
         """Send push notification (placeholder for push service integration)"""

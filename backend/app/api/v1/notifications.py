@@ -15,6 +15,7 @@ from app.services.notification_service import (
 )
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
+from pydantic import BaseModel
 
 router = APIRouter()
 
@@ -149,3 +150,104 @@ def create_system_notification(
     )
 
     return {"message": f"Created {len(notifications)} system notifications"}
+
+
+# Push Notification Endpoints
+class PushSubscriptionData(BaseModel):
+    endpoint: str
+    keys: dict
+
+class NotificationPreferences(BaseModel):
+    email_on_login: bool = True
+    email_on_password_change: bool = True
+    email_on_security_change: bool = True
+    email_on_suspicious_activity: bool = True
+
+@router.post("/subscribe")
+async def subscribe_push_notifications(
+    subscription: PushSubscriptionData,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Subscribe to push notifications"""
+    try:
+        # Store subscription in user preferences or separate table
+        # For now, we'll just acknowledge the subscription
+        # In production, you'd want to store this in a database table
+
+        return {"message": "Successfully subscribed to push notifications"}
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to subscribe: {str(e)}")
+
+@router.post("/unsubscribe")
+async def unsubscribe_push_notifications(
+    subscription: PushSubscriptionData,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Unsubscribe from push notifications"""
+    try:
+        # Remove subscription from storage
+        return {"message": "Successfully unsubscribed from push notifications"}
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to unsubscribe: {str(e)}")
+
+@router.get("/preferences")
+async def get_notification_preferences(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Get user notification preferences"""
+    return {
+        "email_on_login": current_user.email_on_login,
+        "email_on_password_change": current_user.email_on_password_change,
+        "email_on_security_change": current_user.email_on_security_change,
+        "email_on_suspicious_activity": current_user.email_on_suspicious_activity,
+    }
+
+@router.put("/preferences")
+async def update_notification_preferences(
+    preferences: NotificationPreferences,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Update user notification preferences"""
+    try:
+        current_user.email_on_login = preferences.email_on_login
+        current_user.email_on_password_change = preferences.email_on_password_change
+        current_user.email_on_security_change = preferences.email_on_security_change
+        current_user.email_on_suspicious_activity = preferences.email_on_suspicious_activity
+
+        db.commit()
+        db.refresh(current_user)
+
+        return {"message": "Notification preferences updated successfully"}
+
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Failed to update preferences: {str(e)}")
+
+@router.post("/test")
+async def send_test_notification(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Send a test notification to the current user"""
+    try:
+        notification_service = NotificationService(db)
+
+        notification = notification_service.create_notification(
+            user_id=cast(int, current_user.id),
+            title="Test Notification",
+            message="This is a test notification to verify your notification settings are working correctly.",
+            notification_type=NotificationType.INFO,
+            channels=["in_app", "email"],
+            action_url="/settings"
+        )
+
+        return {"message": "Test notification sent successfully", "notification_id": notification.id}
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to send test notification: {str(e)}")

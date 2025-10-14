@@ -65,6 +65,16 @@ class Settings(BaseSettings):
                     f"redis://{self.REDIS_HOST}:{self.REDIS_PORT}/{self.REDIS_DB}"
                 )
 
+    # SMTP Configuration for Email Notifications
+    SMTP_HOST: str = config("SMTP_HOST", default="smtp.gmail.com")
+    SMTP_PORT: int = config("SMTP_PORT", default=587, cast=int)
+    SMTP_TLS: bool = config("SMTP_TLS", default=True, cast=bool)
+    SMTP_SSL: bool = config("SMTP_SSL", default=False, cast=bool)
+    SMTP_USER: Optional[str] = config("SMTP_USER", default=None)
+    SMTP_PASSWORD: Optional[str] = config("SMTP_PASSWORD", default=None)
+    SMTP_FROM_EMAIL: str = config("SMTP_FROM_EMAIL", default="noreply@fastnext.com")
+    SMTP_FROM_NAME: str = config("SMTP_FROM_NAME", default="FastNext Framework")
+
     # OAuth2 Social Authentication
     GOOGLE_CLIENT_ID: Optional[str] = config("GOOGLE_CLIENT_ID", default=None)
     GOOGLE_CLIENT_SECRET: Optional[str] = config("GOOGLE_CLIENT_SECRET", default=None)

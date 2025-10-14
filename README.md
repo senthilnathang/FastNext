@@ -7,6 +7,7 @@ A comprehensive, production-ready full-stack web application framework built wit
 ### 🎯 Frontend (Next.js 15)
 - **Modern React Architecture**: App Router with TypeScript and Server Components
 - **Advanced UI Components**: Radix UI + Tailwind CSS + shadcn/ui
+- **Theme System**: Dark mode with multiple color schemes and system preference detection
 - **Universal ViewManager**: Multi-view data display (List, Card, Kanban, Gantt, Cohort) with advanced filtering
 - **State Management**: TanStack Query + tRPC for type-safe APIs
 - **Authentication**: Secure JWT-based authentication with auto-refresh
