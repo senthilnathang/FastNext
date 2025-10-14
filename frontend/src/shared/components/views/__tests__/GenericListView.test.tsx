@@ -13,6 +13,53 @@ jest.mock('@/modules/admin/hooks/useGenericPermissions', () => ({
   }),
 }))
 
+// Mock dropdown components
+jest.mock('@/shared/components/ui/dropdown-menu', () => ({
+  DropdownMenu: ({ children }: any) => {
+    // Extract the trigger and content from children
+    const childrenArray = React.Children.toArray(children)
+    const trigger = childrenArray.find((child: any) =>
+      child && React.isValidElement(child) && child.type && child.type.name === 'DropdownMenuTrigger'
+    )
+    const content = childrenArray.find((child: any) =>
+      child && React.isValidElement(child) && child.type && child.type.name === 'DropdownMenuContent'
+    )
+
+    console.log('DropdownMenu mock called', { trigger: !!trigger, content: !!content })
+
+    return (
+      <div data-testid="dropdown-menu">
+        {trigger}
+        {/* Always render content for testing */}
+        {content && React.cloneElement(content as React.ReactElement, {
+          style: { display: 'block', position: 'static', visibility: 'visible' }
+        })}
+      </div>
+    )
+  },
+  DropdownMenuContent: ({ children, align, ...props }: any) => (
+    <div data-testid="dropdown-content" data-align={align} {...props}>
+      {children}
+    </div>
+  ),
+  DropdownMenuItem: ({ children, onClick, className }: any) => (
+    <div data-testid="dropdown-item" onClick={onClick} className={className}>
+      {children}
+    </div>
+  ),
+  DropdownMenuTrigger: ({ children, asChild, ...props }: any) => {
+    if (asChild && React.isValidElement(children)) {
+      return React.cloneElement(children as React.ReactElement, {
+        ...props,
+        'data-testid': 'dropdown-trigger',
+        'aria-haspopup': 'menu',
+        'data-state': 'open' // Always open for testing
+      })
+    }
+    return <div data-testid="dropdown-trigger" {...props}>{children}</div>
+  },
+}))
+
 // Mock UI components
 jest.mock('@/shared/components/ui', () => ({
   Button: ({ children, onClick, disabled, variant, size, ...props }: any) => (
@@ -49,18 +96,45 @@ jest.mock('@/shared/components/ui', () => ({
       {...props}
     />
   ),
-  DropdownMenu: ({ children }: any) => <div data-testid="dropdown-menu">{children}</div>,
-  DropdownMenuContent: ({ children, align }: any) => <div data-testid="dropdown-content" data-align={align}>{children}</div>,
+  DropdownMenu: ({ children }: any) => {
+    // Extract the trigger and content from children
+    const childrenArray = React.Children.toArray(children)
+    const trigger = childrenArray.find((child: any) =>
+      child && React.isValidElement(child) && child.type && child.type.name === 'DropdownMenuTrigger'
+    )
+    const content = childrenArray.find((child: any) =>
+      child && React.isValidElement(child) && child.type && child.type.name === 'DropdownMenuContent'
+    )
+
+    console.log('DropdownMenu mock called', { trigger: !!trigger, content: !!content })
+
+    return (
+      <div data-testid="dropdown-menu">
+        {trigger}
+        {/* Always render content for testing */}
+        {content && React.cloneElement(content as React.ReactElement, {
+          style: { display: 'block', position: 'static', visibility: 'visible' }
+        })}
+      </div>
+    )
+  },
+  DropdownMenuContent: ({ children, align, ...props }: any) => (
+    <div data-testid="dropdown-content" data-align={align} {...props}>
+      {children}
+    </div>
+  ),
   DropdownMenuItem: ({ children, onClick, className }: any) => (
-    <div data-testid="dropdown-item" onClick={onClick} className={className}>{children}</div>
+    <div data-testid="dropdown-item" onClick={onClick} className={className}>
+      {children}
+    </div>
   ),
   DropdownMenuTrigger: ({ children, asChild, ...props }: any) => {
-    if (asChild) {
-      return React.cloneElement(children, {
+    if (asChild && React.isValidElement(children)) {
+      return React.cloneElement(children as React.ReactElement, {
         ...props,
         'data-testid': 'dropdown-trigger',
         'aria-haspopup': 'menu',
-        'data-state': 'closed'
+        'data-state': 'open' // Always open for testing
       })
     }
     return <div data-testid="dropdown-trigger" {...props}>{children}</div>
@@ -75,13 +149,13 @@ jest.mock('@/shared/components/ui', () => ({
 
 // Mock icons
 jest.mock('lucide-react', () => ({
-  Plus: () => <span data-testid="plus-icon">Plus</span>,
-  Search: () => <span data-testid="search-icon">Search</span>,
-  MoreHorizontal: () => <span data-testid="more-icon">More</span>,
-  Eye: () => <span data-testid="eye-icon">Eye</span>,
-  Edit: () => <span data-testid="edit-icon">Edit</span>,
-  Trash2: () => <span data-testid="trash-icon">Trash</span>,
-  RefreshCw: () => <span data-testid="refresh-icon">Refresh</span>,
+  Plus: () => <span data-testid="plus-icon" />,
+  Search: () => <span data-testid="search-icon" />,
+  MoreHorizontal: () => <span data-testid="more-icon" />,
+  Eye: () => <span data-testid="eye-icon" />,
+  Edit: () => <span data-testid="edit-icon" />,
+  Trash2: () => <span data-testid="trash-icon" />,
+  RefreshCw: () => <span data-testid="refresh-icon" />,
 }))
 
 // Test data
@@ -243,25 +317,115 @@ const defaultProps = {
     expect(mockOnRefresh).toHaveBeenCalledTimes(1)
   })
 
-  it.skip('shows action menu for each item with view/edit/delete options', () => {
-    // TODO: Fix dropdown menu mocking
-  })
+    it('shows action menu for each item with view/edit/delete options', () => {
+      const mockOnViewClick = jest.fn()
+      const mockOnEditClick = jest.fn()
+      const mockOnDeleteClick = jest.fn()
 
-  it.skip('calls onViewClick when view action is clicked', () => {
-    // TODO: Fix dropdown menu mocking
-  })
+      render(
+        <GenericListView<TestItem>
+          {...defaultProps}
+          onViewClick={mockOnViewClick}
+          onEditClick={mockOnEditClick}
+          onDeleteClick={mockOnDeleteClick}
+        />
+      )
 
-  it.skip('calls onEditClick when edit action is clicked', () => {
-    // TODO: Fix dropdown menu mocking
-  })
+      // Check that dropdown menus are present (one for each item)
+      const dropdownMenus = screen.getAllByTestId('dropdown-menu')
+      expect(dropdownMenus).toHaveLength(mockItems.length)
 
-  it.skip('calls onDeleteClick when delete action is clicked', () => {
-    // TODO: Fix dropdown menu mocking
-  })
+      // Check that dropdown content is visible (one for each item)
+      const dropdownContents = screen.getAllByTestId('dropdown-content')
+      expect(dropdownContents).toHaveLength(mockItems.length)
 
-  it.skip('shows custom actions when provided', () => {
-    // TODO: Fix dropdown menu mocking
-  })
+      // Check that action items are present (view, edit, delete per item)
+      const dropdownItems = screen.getAllByTestId('dropdown-item')
+      expect(dropdownItems).toHaveLength(mockItems.length * 3) // 3 actions per item
+
+      // Check that action text is visible (multiple instances)
+      expect(screen.getAllByText('View')).toHaveLength(mockItems.length)
+      expect(screen.getAllByText('Edit')).toHaveLength(mockItems.length)
+      expect(screen.getAllByText('Delete')).toHaveLength(mockItems.length)
+    })
+
+   it('calls onViewClick when view action is clicked', () => {
+     const mockOnViewClick = jest.fn()
+
+     render(
+       <GenericListView<TestItem>
+         {...defaultProps}
+         onViewClick={mockOnViewClick}
+       />
+     )
+
+     const viewButtons = screen.getAllByTestId('dropdown-item')
+     // View button is the first item in each dropdown (index 0, 3, 6, etc.)
+     fireEvent.click(viewButtons[0])
+
+     expect(mockOnViewClick).toHaveBeenCalledWith(mockItems[0])
+   })
+
+    it('calls onEditClick when edit action is clicked', () => {
+      const mockOnEditClick = jest.fn()
+
+      render(
+        <GenericListView<TestItem>
+          {...defaultProps}
+          onEditClick={mockOnEditClick}
+        />
+      )
+
+      const editButtons = screen.getAllByTestId('dropdown-item')
+      // Since only edit buttons are rendered (no view/delete handlers provided), index 0 is the first item's edit button
+      fireEvent.click(editButtons[0])
+
+      expect(mockOnEditClick).toHaveBeenCalledWith(mockItems[0])
+    })
+
+    it('calls onDeleteClick when delete action is clicked', () => {
+      const mockOnDeleteClick = jest.fn()
+
+      render(
+        <GenericListView<TestItem>
+          {...defaultProps}
+          onDeleteClick={mockOnDeleteClick}
+        />
+      )
+
+      const deleteButtons = screen.getAllByTestId('dropdown-item')
+      // Since only delete buttons are rendered (no view/edit handlers provided), index 0 is the first item's delete button
+      fireEvent.click(deleteButtons[0])
+
+      expect(mockOnDeleteClick).toHaveBeenCalledWith(mockItems[0])
+    })
+
+    it('shows custom actions when provided', () => {
+      const mockCustomAction = jest.fn()
+      const customActions = [
+        {
+          label: 'Custom Action',
+          action: mockCustomAction,
+        },
+      ]
+
+      render(
+        <GenericListView<TestItem>
+          {...defaultProps}
+          onViewClick={jest.fn()}
+          onEditClick={jest.fn()}
+          onDeleteClick={jest.fn()}
+          customActions={customActions}
+        />
+      )
+
+      // Check that custom action is present in addition to default actions
+      const dropdownItems = screen.getAllByTestId('dropdown-item')
+      expect(dropdownItems).toHaveLength(mockItems.length * 4) // view, edit, delete, custom per item
+
+      // Check that custom action text is present
+      expect(screen.getAllByText('Custom Action')).toHaveLength(mockItems.length)
+    })
 
   it('shows empty state when no items are provided', () => {
     render(
@@ -363,9 +527,50 @@ const defaultProps = {
     expect(bulkActionButton).toBeInTheDocument()
   })
 
-  it.skip('calls bulk action when bulk action button is clicked', () => {
-    // TODO: Fix dropdown menu mocking for bulk actions
-  })
+   it('calls bulk action when bulk action button is clicked', () => {
+      const mockBulkAction = jest.fn()
+      const mockOnSelectionChange = jest.fn()
+
+      const bulkActions = [
+        {
+          label: 'Delete Selected',
+          action: mockBulkAction,
+        },
+      ]
+
+      const { rerender } = render(
+        <GenericListView<TestItem>
+          {...defaultProps}
+          selectable={true}
+          selectedItems={[]}
+          onSelectionChange={mockOnSelectionChange}
+          bulkActions={bulkActions}
+        />
+      )
+
+      const checkboxes = screen.getAllByRole('checkbox')
+
+      // Select first item (skip the select all checkbox at index 0)
+      fireEvent.click(checkboxes[1])
+
+      // Mock the parent updating selectedItems based on onSelectionChange
+      rerender(
+        <GenericListView<TestItem>
+          {...defaultProps}
+          selectable={true}
+          selectedItems={[mockItems[0]]}
+          onSelectionChange={mockOnSelectionChange}
+          bulkActions={bulkActions}
+        />
+      )
+
+      // The bulk actions are rendered as dropdown items in the search/filter area
+      const bulkActionItems = screen.getAllByTestId('dropdown-item')
+      // The bulk action should be the only dropdown item (since it's in the bulk actions dropdown)
+      fireEvent.click(bulkActionItems[0])
+
+      expect(mockBulkAction).toHaveBeenCalledWith([mockItems[0]])
+    })
 
   it('shows pagination when pagination prop is provided', () => {
     const mockOnPageChange = jest.fn()
