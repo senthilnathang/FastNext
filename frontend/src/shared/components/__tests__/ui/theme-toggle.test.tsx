@@ -1,8 +1,23 @@
 // Mock next-themes
+const mockSetTheme = jest.fn((theme: string) => {
+  localStorage.setItem('theme', theme);
+  // Apply theme class to document
+  if (theme === 'dark') {
+    document.documentElement.classList.add('dark');
+    document.documentElement.classList.remove('light');
+  } else if (theme === 'light') {
+    document.documentElement.classList.add('light');
+    document.documentElement.classList.remove('dark');
+  } else {
+    document.documentElement.classList.remove('dark', 'light');
+  }
+});
+
 jest.mock('next-themes', () => ({
   useTheme: () => ({
     theme: 'system',
-    setTheme: jest.fn(),
+    setTheme: mockSetTheme,
+    resolvedTheme: 'light',
     themes: ['light', 'dark', 'system'],
   }),
 }));
@@ -74,11 +89,7 @@ describe('ThemeToggle', () => {
   });
 
   it('switches to light theme when light option is clicked', async () => {
-    render(
-      <TestWrapper>
-        <ThemeToggle />
-      </TestWrapper>
-    );
+    render(<ThemeToggle />);
 
     const triggerButton = screen.getByRole('button');
     fireEvent.click(triggerButton);
@@ -95,11 +106,7 @@ describe('ThemeToggle', () => {
   });
 
   it('switches to dark theme when dark option is clicked', async () => {
-    render(
-      <TestWrapper>
-        <ThemeToggle />
-      </TestWrapper>
-    );
+    render(<ThemeToggle />);
 
     const triggerButton = screen.getByRole('button');
     fireEvent.click(triggerButton);
@@ -116,11 +123,7 @@ describe('ThemeToggle', () => {
   });
 
   it('switches to system theme when system option is clicked', async () => {
-    render(
-      <TestWrapper>
-        <ThemeToggle />
-      </TestWrapper>
-    );
+    render(<ThemeToggle />);
 
     const triggerButton = screen.getByRole('button');
     fireEvent.click(triggerButton);
@@ -138,11 +141,7 @@ describe('ThemeToggle', () => {
   it('loads theme from localStorage on mount', () => {
     localStorageMock.getItem.mockReturnValue('dark');
 
-    render(
-      <TestWrapper>
-        <ThemeToggle />
-      </TestWrapper>
-    );
+    render(<ThemeToggle />);
 
     expect(localStorageMock.getItem).toHaveBeenCalledWith('theme');
   });
@@ -154,11 +153,7 @@ describe('ThemeToggle', () => {
       return null;
     });
 
-    render(
-      <TestWrapper>
-        <ThemeToggle />
-      </TestWrapper>
-    );
+    render(<ThemeToggle />);
 
     expect(localStorageMock.getItem).toHaveBeenCalledWith('userPreferences');
   });
@@ -172,11 +167,7 @@ describe('SimpleThemeToggle', () => {
   });
 
   it('renders simple theme toggle button', () => {
-    render(
-      <TestWrapper>
-        <SimpleThemeToggle />
-      </TestWrapper>
-    );
+    render(<SimpleThemeToggle />);
 
     const button = screen.getByRole('button');
     expect(button).toBeInTheDocument();
@@ -185,11 +176,7 @@ describe('SimpleThemeToggle', () => {
   it('displays sun icon for light theme', async () => {
     localStorageMock.getItem.mockReturnValue('light');
 
-    render(
-      <TestWrapper>
-        <SimpleThemeToggle />
-      </TestWrapper>
-    );
+    render(<SimpleThemeToggle />);
 
     const button = screen.getByRole('button');
     expect(button).toBeInTheDocument();
@@ -200,11 +187,7 @@ describe('SimpleThemeToggle', () => {
   it('displays moon icon for dark theme', async () => {
     localStorageMock.getItem.mockReturnValue('dark');
 
-    render(
-      <TestWrapper>
-        <SimpleThemeToggle />
-      </TestWrapper>
-    );
+    render(<SimpleThemeToggle />);
 
     await waitFor(() => {
       const button = screen.getByRole('button');
@@ -215,11 +198,7 @@ describe('SimpleThemeToggle', () => {
   it('displays monitor icon for system theme', async () => {
     localStorageMock.getItem.mockReturnValue('system');
 
-    render(
-      <TestWrapper>
-        <SimpleThemeToggle />
-      </TestWrapper>
-    );
+    render(<SimpleThemeToggle />);
 
     await waitFor(() => {
       const button = screen.getByRole('button');
@@ -228,11 +207,7 @@ describe('SimpleThemeToggle', () => {
   });
 
   it('cycles through themes when clicked', async () => {
-    render(
-      <TestWrapper>
-        <SimpleThemeToggle />
-      </TestWrapper>
-    );
+    render(<SimpleThemeToggle />);
 
     const button = screen.getByRole('button');
 
@@ -264,11 +239,7 @@ describe('Theme Context Integration', () => {
   });
 
   it('applies theme class to document element', async () => {
-    render(
-      <TestWrapper>
-        <ThemeToggle />
-      </TestWrapper>
-    );
+    render(<ThemeToggle />);
 
     const triggerButton = screen.getByRole('button');
     fireEvent.click(triggerButton);
@@ -301,11 +272,7 @@ describe('Theme Context Integration', () => {
       value: mockMatchMedia,
     });
 
-    render(
-      <TestWrapper>
-        <ThemeToggle />
-      </TestWrapper>
-    );
+    render(<ThemeToggle />);
 
     const triggerButton = screen.getByRole('button');
     fireEvent.click(triggerButton);
@@ -325,14 +292,10 @@ describe('Theme Context Integration', () => {
 
     const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
 
-    render(
-      <TestWrapper>
-        <ThemeToggle />
-      </TestWrapper>
-    );
+    render(<ThemeToggle />);
 
     expect(consoleSpy).toHaveBeenCalledWith('Error loading theme:', expect.any(Error));
-    
+
     consoleSpy.mockRestore();
   });
 });
