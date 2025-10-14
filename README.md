@@ -188,7 +188,7 @@ Frontend Architecture
 
 ```bash
 # Clone the repository
-git clone <repository-url>
+git clone https://github.com/fastnext/fastnext-framework.git
 cd FastNext
 
 # Start all services with production configuration
@@ -449,7 +449,7 @@ FastNext includes an enterprise-grade event logging and activity monitoring syst
 - **Real-time Monitoring**: Auto-refresh dashboard with configurable intervals
 - **Export Functions**: One-click export in JSON/CSV formats
 
-For detailed documentation, see [Event Logging System Guide](docs/features/EVENT_LOGGING_SYSTEM.md).
+For detailed documentation, see [Event Logging System Guide](docs/features/event-logging-system.md).
 
 ## 📊 Data Import/Export System
 
@@ -864,9 +864,9 @@ uvicorn app.main:app --workers 4               # Multi-worker testing
 ```bash
 # Production (.env.local)
 NODE_ENV=production
-NEXT_PUBLIC_API_URL=https://api.yourdomain.com
+NEXT_PUBLIC_API_URL=https://api.fastnext.dev
 NEXT_PUBLIC_ENVIRONMENT=production
-NEXT_PUBLIC_DOMAIN=yourdomain.com
+NEXT_PUBLIC_DOMAIN=fastnext.dev
 NEXT_PUBLIC_SENTRY_DSN=https://your-sentry-dsn
 NEXT_PUBLIC_ENABLE_ANALYTICS=true
 SECURITY_HEADERS_ENABLED=true
@@ -890,7 +890,7 @@ REDIS_HOST=your-redis-host
 REDIS_PASSWORD=your-redis-password
 
 # Security
-CORS_ORIGINS=https://yourdomain.com
+CORS_ORIGINS=https://fastnext.dev
 ENABLE_GZIP_COMPRESSION=true
 WORKERS=4
 ```
@@ -993,12 +993,12 @@ shared_preload_libraries = 'pg_stat_statements'
 #### Application Monitoring
 ```bash
 # Health check endpoints
-curl https://api.yourdomain.com/api/health
-curl https://yourdomain.com/api/health
+curl https://api.fastnext.dev/api/health
+curl https://fastnext.dev/api/health
 
 # Security monitoring
-curl https://api.yourdomain.com/api/monitoring/security-events
-curl https://api.yourdomain.com/api/monitoring/security-alerts
+curl https://api.fastnext.dev/api/monitoring/security-events
+curl https://api.fastnext.dev/api/monitoring/security-alerts
 ```
 
 #### Performance Monitoring
@@ -1009,7 +1009,7 @@ npm run security:full             # Security audit
 
 # Backend performance
 python -m pytest tests/ --benchmark-only
-curl https://api.yourdomain.com/metrics
+curl https://api.fastnext.dev/metrics
 ```
 
 ### 🔄 CI/CD Pipeline
@@ -1055,7 +1055,7 @@ jobs:
 - **ViewManager Component**: `frontend/docs/ViewManager.md` - Universal data visualization component
 - **Database Schema**: `backend/docs/DEVELOPMENT.md`
 - **Security Guide**: `backend/docs/SECURITY.md`
-- **Workflow System**: `docs/WORKFLOW_SYSTEM.md`
+- **Workflow System**: `docs/workflow-system.md`
 
 ### 🎨 Component Documentation
 - **Storybook**: `http://localhost:6006` (Component library)
@@ -1151,10 +1151,10 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🆘 Support & Community
 
-- **Issues**: [GitHub Issues](https://github.com/yourusername/fastnext/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/yourusername/fastnext/discussions)
-- **Security**: security@yourdomain.com
-- **Documentation**: [Project Wiki](https://github.com/yourusername/fastnext/wiki)
+- **Issues**: [GitHub Issues](https://github.com/fastnext/fastnext-framework/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/fastnext/fastnext-framework/discussions)
+- **Security**: security@fastnext.dev
+- **Documentation**: [Project Wiki](https://github.com/fastnext/fastnext-framework/wiki)
 
 ---
 
@@ -1162,6 +1162,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 **FastNext Framework** - Production-ready full-stack development with enterprise security
 
-[⭐ Star this project](https://github.com/yourusername/fastnext) • [🐛 Report Bug](https://github.com/yourusername/fastnext/issues) • [✨ Request Feature](https://github.com/yourusername/fastnext/issues)
+[⭐ Star this project](https://github.com/fastnext/fastnext-framework) • [🐛 Report Bug](https://github.com/fastnext/fastnext-framework/issues) • [✨ Request Feature](https://github.com/fastnext/fastnext-framework/issues)
 
 </div>

@@ -13,6 +13,10 @@ class PermissionCategory(str, enum.Enum):
     USER = "user"
     SYSTEM = "system"
     PRODUCT = "product"
+    WORKFLOW_TYPE = "workflow_type"
+    WORKFLOW_TEMPLATE = "workflow_template"
+    WORKFLOW_INSTANCE = "workflow_instance"
+    WORKFLOW_STATE = "workflow_state"
 
 
 class PermissionAction(str, enum.Enum):

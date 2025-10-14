@@ -291,6 +291,10 @@ class PermissionService:
             "audit_trail",
             "project_member",
             "system",
+            "workflow_type",
+            "workflow_template",
+            "workflow_instance",
+            "workflow_state",
         ]
 
         actions = ["create", "read", "update", "delete", "manage"]
