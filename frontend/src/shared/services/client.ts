@@ -49,6 +49,7 @@ apiClient.interceptors.request.use(
       requestId: Math.random().toString(36).substring(7)
     }
 
+    console.log('[API Request]', {
       requestId: config.metadata.requestId,
       headers: config.headers,
       data: config.data
@@ -68,6 +69,7 @@ apiClient.interceptors.response.use(
     const config = response.config as ExtendedAxiosRequestConfig
     const duration = Date.now() - (config.metadata?.startTime || 0)
 
+    console.log('[API Response]', {
       requestId: config.metadata?.requestId,
       duration: `${duration}ms`,
       status: response.status

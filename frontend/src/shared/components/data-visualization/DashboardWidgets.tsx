@@ -96,6 +96,7 @@ const defaultQuickActions: QuickAction[] = [
     title: 'Export Data',
     description: 'Download system reports',
     icon: Download,
+    action: () => window.location.href = '/admin/export',
     variant: 'secondary'
   },
   {
@@ -111,6 +112,7 @@ const defaultQuickActions: QuickAction[] = [
     title: 'View Analytics',
     description: 'Check system analytics',
     icon: BarChart3,
+    action: () => window.location.href = '/analytics',
     variant: 'secondary'
   }
 ]

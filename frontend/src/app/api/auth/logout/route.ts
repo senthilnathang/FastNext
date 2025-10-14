@@ -31,12 +31,13 @@ export async function POST(request: NextRequest) {
       await blacklistTokens(authToken, refreshToken);
     }
 
-    // Log security event - using authentication_failure type for logout tracking
-    // Note: Consider adding 'user_logout' to SecurityEventType enum if needed
+    // Log user logout for audit purposes
+    console.log('User logout', {
       userId: userId || 'unknown',
       clientIP: getClientIP(request),
       hasAuthToken: !!authToken,
-      hasRefreshToken: !!refreshToken
+      hasRefreshToken: !!refreshToken,
+      timestamp: new Date().toISOString()
     });
 
     return response;

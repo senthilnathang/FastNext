@@ -229,7 +229,7 @@ export const validateFormAccessibility = (form: HTMLFormElement): string[] => {
 };
 
 // Heading structure validation
-export const validateHeadingStructure = (container: Element = document): string[] => {
+export const validateHeadingStructure = (container: Document | Element = document): string[] => {
   const issues: string[] = [];
   const headings = container.querySelectorAll('h1, h2, h3, h4, h5, h6');
 

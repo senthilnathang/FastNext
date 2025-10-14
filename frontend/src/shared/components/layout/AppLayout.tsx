@@ -149,7 +149,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
         items={menuItems.slice(0, 5).map(item => ({
           id: item.title.toLowerCase().replace(/\s+/g, '-'),
           label: item.title,
-          icon: item.icon,
+          icon: item.icon as any,
           href: item.href,
           disabled: false
         }))}

@@ -322,17 +322,19 @@ export default function ComponentsDemoPage() {
               searchable
               sortable
               selectable
-              actions={[
-                {
-                  key: "edit",
-                  label: "Edit",
-                },
-                {
-                  key: "delete",
-                  label: "Delete",
-                  variant: "destructive"
-                }
-              ]}
+               actions={[
+                 {
+                   key: "edit",
+                   label: "Edit",
+                   onClick: (item) => console.log("Edit", item),
+                 },
+                 {
+                   key: "delete",
+                   label: "Delete",
+                   variant: "destructive",
+                   onClick: (item) => console.log("Delete", item),
+                 }
+               ]}
               pagination={{
                 page: 1,
                 pageSize: 10,

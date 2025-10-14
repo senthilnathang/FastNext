@@ -101,6 +101,7 @@ export async function POST(request: NextRequest) {
 
     // Log successful login (for audit purposes)
     // Note: Successful logins are typically logged separately from security events
+    console.log('User login successful', {
       userId: authResult.user.id,
       email: email.substring(0, 3) + '***',
       clientIP,

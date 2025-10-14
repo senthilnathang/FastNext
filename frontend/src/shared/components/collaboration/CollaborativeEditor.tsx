@@ -141,7 +141,7 @@ export const CollaborativeEditor: React.FC<CollaborativeEditorProps> = ({
                 <CursorOverlay
                   documentId={documentId}
                   currentUserId={currentUserId}
-                  containerRef={containerRef}
+                  containerRef={containerRef as React.RefObject<HTMLElement>}
                 />
               )}
             </div>
