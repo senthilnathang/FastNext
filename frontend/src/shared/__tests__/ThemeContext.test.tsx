@@ -236,19 +236,13 @@ describe('ThemeContext', () => {
   });
 
   it('listens to system theme changes', async () => {
-    let mediaQueryCallback: ((e: MediaQueryListEvent) => void) | null = null;
-    
     const mockMatchMedia = jest.fn().mockImplementation(query => ({
       matches: false,  // Start with light mode
       media: query,
       onchange: null,
       addListener: jest.fn(),
       removeListener: jest.fn(),
-      addEventListener: jest.fn().mockImplementation((event, callback) => {
-        if (event === 'change') {
-          mediaQueryCallback = callback;
-        }
-      }),
+      addEventListener: jest.fn(),
       removeEventListener: jest.fn(),
       dispatchEvent: jest.fn(),
     }));
