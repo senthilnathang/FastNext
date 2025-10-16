@@ -27,7 +27,7 @@ class ProductBase(BaseModel):
     )
     sku: str = Field(..., description="Stock Keeping Unit", example="HDPH-001-BLK")
     stock_quantity: int = Field(0, description="Current stock quantity", example=150)
-    is_featured: Optional[bool] = Field(
+    is_featured: bool = Field(
         False, description="Whether this product is featured"
     )
     launch_date: Optional[date] = Field(None, description="Product launch date")
@@ -45,7 +45,7 @@ class ProductBase(BaseModel):
         None, description="Product support email", example="support@example.com"
     )
     category_id: Optional[int] = Field(None, description="Category foreign key")
-    owner_id: int = Field(..., description="Product owner (user)")
+    owner_id: int = Field(..., description="Product owner (user) - auto-set by system")
 
 
 class ProductCreate(ProductBase):
@@ -87,9 +87,16 @@ class ProductCreate(ProductBase):
         None, description="Product support email", example="support@example.com"
     )
     category_id: Optional[int] = Field(None, description="Category foreign key")
+    owner_id: Optional[int] = Field(None, description="Product owner (user) - auto-set by system")
+    created_at: datetime
+    updated_at: Optional[datetime] = None
+    is_deleted: bool = False
+    deleted_at: Optional[datetime] = None
+
+    model_config = {"from_attributes": True}
 
 
-class ProductUpdate(BaseModel):
+class ProductUpdate(ProductBase):
     """Schema for updating Product"""
 
     name: Optional[str] = Field(
@@ -193,3 +200,6 @@ class ProductListResponse(BaseModel):
     total: int
     skip: int
     limit: int
+    deleted_at: Optional[datetime] = None
+
+    model_config = {"from_attributes": True}

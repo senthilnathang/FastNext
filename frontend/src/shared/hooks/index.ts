@@ -1,6 +1,8 @@
 // Centralized hooks exports
 export * from "./useApiQuery";
 export * from "./useURLState";
+export * from "./useCrudNotifications";
+export * from "./useCrudOperations";
 
 // Note: Other hooks have been moved to their respective modules:
 // - useAuth -> @/modules/auth

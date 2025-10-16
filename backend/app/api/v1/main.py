@@ -47,6 +47,7 @@ v1_router.include_router(auth_routes.router, prefix="/auth", tags=["v1-auth"])
 v1_router.include_router(users.router, prefix="/users", tags=["v1-users"])
 v1_router.include_router(profile.router, prefix="/profile", tags=["v1-profile"])
 v1_router.include_router(security.router, prefix="/security", tags=["v1-security"])
+v1_router.include_router(notifications.router, prefix="/notifications", tags=["v1-notifications"])
 
 # Admin & Permissions
 v1_router.include_router(roles.router, prefix="/roles", tags=["v1-roles"])

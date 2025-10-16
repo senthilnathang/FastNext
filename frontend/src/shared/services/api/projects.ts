@@ -30,16 +30,8 @@ export const projectsApi = {
     const response = await apiClient.get(API_CONFIG.ENDPOINTS.PROJECTS, {
       params,
     });
-    // Backend returns array directly, adapt to expected format
-    const items = Array.isArray(response.data)
-      ? response.data
-      : response.data.items || [];
-    return {
-      items,
-      total: items.length,
-      skip: params?.skip || 0,
-      limit: params?.limit || 100,
-    };
+    // Backend returns ListResponse format
+    return response.data;
   },
 
   // Get single project by ID

@@ -1,6 +1,6 @@
 // API Configuration
 export const API_CONFIG = {
-  API_BASE_URL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000",
+  API_BASE_URL: process.env.NEXT_PUBLIC_API_URL || "", // Use empty string for relative URLs
   TIMEOUT: 30000,
 
   ENDPOINTS: {
