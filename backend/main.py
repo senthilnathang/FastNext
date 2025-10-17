@@ -418,13 +418,20 @@ def _setup_middleware(app: FastAPI):
         start_time = time.time()
         request_id = f"req_{int(start_time * 1000000)}"
 
+        # Ensure request_id is a string
+        request_id = str(request_id)
+
         # Add request ID for tracing
         request.state.request_id = request_id
 
         response = await call_next(request)
 
         process_time = time.time() - start_time
-        response.headers["X-Process-Time"] = f"{process_time:.4f}"
+
+        # Ensure header values are strings
+        process_time_str = f"{process_time:.4f}"
+
+        response.headers["X-Process-Time"] = process_time_str
         response.headers["X-Request-ID"] = request_id
 
         # Log slow requests for optimization
@@ -432,6 +439,48 @@ def _setup_middleware(app: FastAPI):
             logger.warning(
                 f"Slow request: {request.method} {request.url.path} took {process_time:.2f}s"
             )
+
+        return response
+
+    # Header sanitization middleware (runs last to fix bytes header issue)
+    @app.middleware("http")
+    async def header_sanitization(request: Request, call_next):
+        response = await call_next(request)
+
+        # Sanitize headers by creating new MutableHeaders
+        if hasattr(response, 'headers'):
+            try:
+                # Get current headers as dict
+                current_headers = dict(response.headers)
+                logger.debug(f"Sanitizing headers for {request.url.path}, headers: {list(current_headers.keys())}")
+
+                # Create sanitized headers dict
+                sanitized_headers = {}
+                for key, value in current_headers.items():
+                    try:
+                        # Ensure key and value are strings (Starlette expects strings)
+                        if isinstance(key, bytes):
+                            str_key = key.decode('utf-8')
+                        else:
+                            str_key = str(key)
+
+                        if isinstance(value, bytes):
+                            str_value = value.decode('utf-8')
+                        else:
+                            str_value = str(value)
+
+                        sanitized_headers[str_key] = str_value
+                    except (UnicodeDecodeError, AttributeError):
+                        # Skip headers that can't be decoded
+                        continue
+
+                # Create new MutableHeaders
+                from starlette.datastructures import MutableHeaders
+                response.headers = MutableHeaders(sanitized_headers)
+                logger.debug(f"Sanitized headers for {request.url.path}, final headers: {list(sanitized_headers.keys())}")
+            except Exception as e:
+                # If sanitization fails, log and continue
+                logger.warning(f"Header sanitization failed for {request.url.path}: {e}")
 
         return response
 
