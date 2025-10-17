@@ -1,53 +1,130 @@
 /**
+ * Upgrade Verification Tests
+ *
  * Test cases to verify frontend package upgrades work correctly
+ * and that core functionality remains intact after dependency updates.
  */
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 
-// Test React upgrade
+// Test React upgrade compatibility
 describe('React Upgrade Verification', () => {
-  test('React renders components correctly', () => {
-    const TestComponent = () => <div data-testid="test">React Test</div>;
+  describe('Component Rendering', () => {
+    test('renders basic components correctly', () => {
+      const TestComponent = () => <div data-testid="test">React Test</div>;
 
-    render(<TestComponent />);
-    expect(screen.getByTestId('test')).toBeInTheDocument();
-    expect(screen.getByText('React Test')).toBeInTheDocument();
-  });
+      render(<TestComponent />);
 
-  test('React hooks work correctly', () => {
-    const TestHook = () => {
-      const [count, setCount] = React.useState(0);
+      expect(screen.getByTestId('test')).toBeInTheDocument();
+      expect(screen.getByText('React Test')).toBeInTheDocument();
+    });
 
-      return (
-        <div>
-          <span data-testid="count">{count}</span>
-          <button
-            data-testid="increment"
-            onClick={() => setCount(c => c + 1)}
-          >
-            Increment
-          </button>
-        </div>
+    test('handles component props correctly', () => {
+      interface TestProps {
+        message: string;
+      }
+
+      const TestComponent = ({ message }: TestProps) => (
+        <div data-testid="props-test">{message}</div>
       );
-    };
 
-    render(<TestHook />);
-    expect(screen.getByTestId('count')).toHaveTextContent('0');
+      render(<TestComponent message="Props work!" />);
+
+      expect(screen.getByTestId('props-test')).toHaveTextContent('Props work!');
+    });
   });
 
-  test('React context works correctly', () => {
-    const TestContext = React.createContext('default');
+  describe('React Hooks', () => {
+    test('useState works correctly', () => {
+      const TestHook = () => {
+        const [count, setCount] = React.useState<number>(0);
 
-    const Provider = ({ children }: { children: React.ReactNode }) => (
-      <TestContext.Provider value="updated">{children}</TestContext.Provider>
-    );
+        return (
+          <div>
+            <span data-testid="count">{count}</span>
+            <button
+              data-testid="increment"
+              onClick={() => setCount(prev => prev + 1)}
+            >
+              Increment
+            </button>
+          </div>
+        );
+      };
 
-    const Consumer = () => {
-      const value = React.useContext(TestContext);
-      return <div data-testid="context-value">{value}</div>;
-    };
+      render(<TestHook />);
 
-    render(
+      const countElement = screen.getByTestId('count');
+      const buttonElement = screen.getByTestId('increment');
+
+      expect(countElement).toHaveTextContent('0');
+
+      // Test state update
+      buttonElement.click();
+      expect(countElement).toHaveTextContent('1');
+    });
+
+    test('useEffect works correctly', () => {
+      const TestEffect = () => {
+        const [mounted, setMounted] = React.useState<boolean>(false);
+
+        React.useEffect(() => {
+          setMounted(true);
+        }, []);
+
+        return <div data-testid="effect-test">{mounted ? 'Mounted' : 'Not mounted'}</div>;
+      };
+
+      render(<TestEffect />);
+
+      expect(screen.getByTestId('effect-test')).toHaveTextContent('Mounted');
+    });
+  });
+
+  describe('React Context', () => {
+    test('context provider and consumer work correctly', () => {
+      interface TestContextValue {
+        value: string;
+        updateValue: (newValue: string) => void;
+      }
+
+      const TestContext = React.createContext<TestContextValue>({
+        value: 'default',
+        updateValue: () => {}
+      });
+
+      const Provider = ({ children }: { children: React.ReactNode }) => {
+        const [value, setValue] = React.useState<string>('initial');
+
+        const contextValue: TestContextValue = {
+          value,
+          updateValue: setValue
+        };
+
+        return (
+          <TestContext.Provider value={contextValue}>
+            {children}
+          </TestContext.Provider>
+        );
+      };
+
+      const Consumer = () => {
+        const { value, updateValue } = React.useContext(TestContext);
+        return (
+          <div>
+            <div data-testid="context-value">{value}</div>
+            <button
+              data-testid="update-context"
+              onClick={() => updateValue('updated')}
+            >
+              Update
+            </button>
+          </div>
+        );
+      };
+
+      render(
       <Provider>
         <Consumer />
       </Provider>

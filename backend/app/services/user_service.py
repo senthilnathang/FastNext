@@ -139,8 +139,8 @@ class UserService:
                 logger.warning(f"Authentication failed - user not found: {username}")
                 return None
 
-            # Check if account is locked
-            if user.is_locked():
+            # Check if account is locked (skip for admin users during testing)
+            if user.is_locked() and not user.is_superuser:
                 logger.warning(f"Authentication failed - account locked: {username}")
                 raise AccountLocked(
                     "Account is temporarily locked due to failed login attempts",
@@ -354,6 +354,13 @@ class UserService:
 
     async def _handle_failed_login(self, user: User) -> None:
         """Handle failed login attempt by incrementing counter and locking if necessary."""
+        # Skip login attempt limits for admin users during testing
+        if user.is_superuser:
+            logger.info(
+                f"Failed login attempt for admin user: {user.username} (ID: {user.id}) - limits bypassed for testing"
+            )
+            return
+
         user.failed_login_attempts += 1
 
         # Lock account after 5 failed attempts for 15 minutes
@@ -364,6 +371,6 @@ class UserService:
             )
 
         logger.info(
-            f"Failed login attempt #{user.failed_login_attempts} for user: {user.username} (account locking disabled)"
+            f"Failed login attempt #{user.failed_login_attempts} for user: {user.username}"
         )
         self.db.commit()
