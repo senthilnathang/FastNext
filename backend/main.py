@@ -447,39 +447,69 @@ def _setup_middleware(app: FastAPI):
     async def header_sanitization(request: Request, call_next):
         response = await call_next(request)
 
-        # Sanitize headers by creating new MutableHeaders
+        # Sanitize headers using ASGI interface if available
         if hasattr(response, 'headers'):
             try:
-                # Get current headers as dict
-                current_headers = dict(response.headers)
-                logger.debug(f"Sanitizing headers for {request.url.path}, headers: {list(current_headers.keys())}")
+                response_class_name = response.__class__.__name__
+                if response_class_name.startswith('_Streaming') or 'Streaming' in response_class_name:
+                    logger.debug(f"Skipping header sanitization for streaming response: {response_class_name}")
+                    return response
 
-                # Create sanitized headers dict
-                sanitized_headers = {}
-                for key, value in current_headers.items():
+                # Try different sanitization approaches
+                if hasattr(response, 'init_headers') and callable(response.init_headers):
+                    # For responses that allow header initialization
+                    current_headers = dict(response.headers)
+                    sanitized_headers = {}
+
+                    for key, value in current_headers.items():
+                        try:
+                            if isinstance(key, bytes):
+                                str_key = key.decode('utf-8', errors='ignore')
+                            elif isinstance(key, str):
+                                str_key = key
+                            else:
+                                str_key = str(key)
+
+                            if isinstance(value, bytes):
+                                str_value = value.decode('utf-8', errors='ignore')
+                            elif isinstance(value, str):
+                                str_value = value
+                            else:
+                                str_value = str(value)
+
+                            sanitized_headers[str_key] = str_value
+                        except (UnicodeDecodeError, AttributeError, TypeError):
+                            continue
+
+                    # Try to reinitialize headers
                     try:
-                        # Ensure key and value are strings (Starlette expects strings)
-                        if isinstance(key, bytes):
-                            str_key = key.decode('utf-8')
-                        else:
-                            str_key = str(key)
+                        from starlette.datastructures import MutableHeaders
+                        response.headers = MutableHeaders(sanitized_headers)
+                        logger.debug(f"Sanitized headers for {request.url.path}")
+                    except (AttributeError, TypeError):
+                        logger.debug(f"Could not set headers for {response_class_name}")
+                else:
+                    # For other response types, try to modify raw headers
+                    if hasattr(response.headers, '_list'):
+                        raw_headers = response.headers._list
+                        if isinstance(raw_headers, list):
+                            sanitized_raw = []
+                            for item in raw_headers:
+                                if isinstance(item, tuple) and len(item) == 2:
+                                    key_bytes, value_bytes = item
+                                    try:
+                                        # Ensure both are bytes
+                                        if isinstance(key_bytes, str):
+                                            key_bytes = key_bytes.encode('utf-8')
+                                        if isinstance(value_bytes, str):
+                                            value_bytes = value_bytes.encode('utf-8')
+                                        sanitized_raw.append((key_bytes, value_bytes))
+                                    except (UnicodeEncodeError, AttributeError):
+                                        continue
+                            response.headers._list = sanitized_raw
+                            logger.debug(f"Sanitized raw headers for {request.url.path}")
 
-                        if isinstance(value, bytes):
-                            str_value = value.decode('utf-8')
-                        else:
-                            str_value = str(value)
-
-                        sanitized_headers[str_key] = str_value
-                    except (UnicodeDecodeError, AttributeError):
-                        # Skip headers that can't be decoded
-                        continue
-
-                # Create new MutableHeaders
-                from starlette.datastructures import MutableHeaders
-                response.headers = MutableHeaders(sanitized_headers)
-                logger.debug(f"Sanitized headers for {request.url.path}, final headers: {list(sanitized_headers.keys())}")
             except Exception as e:
-                # If sanitization fails, log and continue
                 logger.warning(f"Header sanitization failed for {request.url.path}: {e}")
 
         return response

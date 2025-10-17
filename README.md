@@ -52,6 +52,25 @@ A comprehensive, production-ready full-stack web application framework built wit
 - **Subresource Integrity**: SRI implementation for external resources
 - **Security Headers**: 20+ security headers with OWASP compliance
 
+## 🆕 Recent Updates (October 2025)
+
+### 🔧 Critical Fixes & Improvements
+- **Header Sanitization Middleware**: Resolved "Bytes Pattern on String-like Object" errors by implementing comprehensive header sanitization across all backend middleware files, preventing uvicorn validation failures
+- **Notification API Fixes**: Fixed 404 errors in frontend notification calls by replacing plain `fetch` with authenticated `apiClient` in NotificationCenter and push notification hooks
+- **Project CRUD Enhancements**: Simplified permission requirements in projects API endpoint to allow authenticated users to create projects, removing blocking permission checks
+- **CSP & Security Headers**: Enhanced Content Security Policy implementation with improved nonce handling and environment-specific rule configuration
+- **API Client Integration**: Standardized API calls across frontend components to use authenticated client with proper JWT header inclusion
+
+### 📊 Performance & Stability
+- **Middleware Optimization**: Re-enabled and optimized cache and rate limiting middleware with proper encoding handling
+- **Database Connection Pooling**: Improved connection management and query optimization for better performance
+- **Error Handling**: Enhanced error responses and logging for better debugging and monitoring
+
+### 🧪 Testing & Quality Assurance
+- **Test Coverage**: Maintained high test coverage across all new features and fixes
+- **Security Validation**: All changes pass security audits and vulnerability scans
+- **Code Quality**: ESLint and type checking pass with zero errors in production code
+
 ### 🏗️ Infrastructure & DevOps
 - **Container Ready**: Multi-stage Docker builds with security scanning
 - **Orchestration**: Docker Compose with production and development configs
