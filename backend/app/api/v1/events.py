@@ -514,7 +514,7 @@ async def get_logs_from_file(
 @router.get("/events/export")
 async def export_events(
     request: Request,
-    format: str = Query("json", regex="^(json|csv)$", description="Export format"),
+    format: str = Query("json", pattern="^(json|csv)$", description="Export format"),
     level: Optional[ActivityLevel] = Query(None, description="Filter by level"),
     category: Optional[EventCategory] = Query(None, description="Filter by category"),
     start_date: Optional[datetime] = Query(None, description="Start date"),

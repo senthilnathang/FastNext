@@ -475,10 +475,37 @@ function generateRequestId(): string {
 
 function getSecurityHeaders(request: NextRequest): Record<string, string> {
   const isHTTPS = request.nextUrl.protocol === 'https:';
+  const isDevelopment = process.env.NODE_ENV === 'development';
+  const nonce = generateCSPNonce();
+
+  // CSP directives with nonce support
+  const cspDirectives = [
+    "default-src 'self'",
+    `script-src 'self' 'nonce-${nonce}' 'strict-dynamic' ${isDevelopment ? "'unsafe-eval'" : ''}`,
+    `style-src 'self' 'nonce-${nonce}' 'unsafe-inline'`,
+    "img-src 'self' data: https: blob:",
+    "font-src 'self' https://fonts.gstatic.com",
+    "connect-src 'self' ws://localhost:* http://localhost:8000",
+    "media-src 'self' https: blob:",
+    "object-src 'none'",
+    "frame-src 'none'",
+    "base-uri 'self'",
+    "form-action 'self'",
+    "worker-src 'self' blob:",
+    "manifest-src 'self'",
+    "child-src 'self' blob:",
+    "prefetch-src 'self'",
+    ...(isHTTPS ? ["upgrade-insecure-requests"] : [])
+  ];
+
+  const csp = cspDirectives.filter(Boolean).join('; ');
 
   return {
-    // CSP Nonce for dynamic content
-    'X-CSP-Nonce': generateCSPNonce(),
+    // Content Security Policy with nonce
+    'Content-Security-Policy': csp,
+
+    // CSP Nonce for dynamic content (backward compatibility)
+    'X-CSP-Nonce': nonce,
 
     // Security headers
     'X-Content-Type-Options': 'nosniff',

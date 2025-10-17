@@ -88,10 +88,6 @@ class ProductCreate(ProductBase):
     )
     category_id: Optional[int] = Field(None, description="Category foreign key")
     owner_id: Optional[int] = Field(None, description="Product owner (user) - auto-set by system")
-    created_at: datetime
-    updated_at: Optional[datetime] = None
-    is_deleted: bool = False
-    deleted_at: Optional[datetime] = None
 
     model_config = {"from_attributes": True}
 

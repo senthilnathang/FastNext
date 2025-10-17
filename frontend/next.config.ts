@@ -43,57 +43,14 @@ const nextConfig: NextConfig = {
     const isDev = process.env.NODE_ENV === 'development';
     const isProd = process.env.NODE_ENV === 'production';
 
-    // Skip CSP if disabled via environment variable
-    const skipCSP = process.env.SKIP_CSP === 'true';
-
-    // Content Security Policy with environment-specific rules
-    const cspDirectives = skipCSP ? [] : [
-      "default-src 'self'",
-      // Script sources - more restrictive in production
-      `script-src 'self' ${isDev ? "'unsafe-inline' 'unsafe-eval'" : "'unsafe-inline'"}`,
-      // Style sources
-      `style-src 'self' 'unsafe-inline'`,
-      // Font sources
-      "font-src 'self' data:",
-      // Image sources
-      "img-src 'self' data: https: blob:",
-      // Media sources
-      "media-src 'self' https: blob:",
-      // Object sources - completely blocked
-      "object-src 'none'",
-      // Base URI - only self
-      "base-uri 'self'",
-      // Form actions - only self
-      "form-action 'self'",
-      // Frame ancestors - none (prevents clickjacking)
-      "frame-ancestors 'none'",
-      // Frame sources - none (prevents embedding iframes)
-      "frame-src 'none'",
-      // Connect sources - API and monitoring
-      `connect-src 'self' ${isDev ? 'ws://localhost:* http://localhost:8000' : ''}`,
-      // Worker sources
-      "worker-src 'self' blob:",
-      // Manifest sources
-      "manifest-src 'self'",
-      // Child sources (for workers)
-      "child-src 'self' blob:",
-      // Prefetch sources
-      "prefetch-src 'self'",
-      // Upgrade insecure requests in production
-      ...(isProd ? ["upgrade-insecure-requests"] : [])
-    ];
-
-    const csp = cspDirectives.filter(Boolean).join('; ');
+    // CSP is now handled dynamically in middleware.ts with nonce support
+    // This static CSP has been moved to middleware for proper nonce integration
 
     return [
       {
         source: '/(.*)',
         headers: [
-          // Content Security Policy (conditionally added)
-          ...(skipCSP ? [] : [{
-            key: 'Content-Security-Policy',
-            value: csp,
-          }]),
+          // CSP is now handled in middleware.ts with nonce support
           // Trusted Types (for browsers that support it)
           {
             key: 'Trusted-Types',
