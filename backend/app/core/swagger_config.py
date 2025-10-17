@@ -19,8 +19,7 @@ def customize_swagger_ui(app: FastAPI) -> None:
     <!DOCTYPE html>
     <html>
     <head>
-        <link type="text/css" rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5/swagger-ui.css">
-        <link rel="shortcut icon" href="https://fastapi.tiangolo.com/img/favicon.png">
+        <link rel="shortcut icon" href="/favicon.ico">
         <title>{title} - Interactive API Documentation</title>
         <style>
             /* Custom styling to match Next.js theme */
@@ -209,7 +208,7 @@ def customize_swagger_ui(app: FastAPI) -> None:
             🟢 API Connected
         </div>
         <div id="swagger-ui"></div>
-        <script src="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5/swagger-ui-bundle.js"></script>
+        <!-- Swagger UI script will be loaded by FastAPI -->
         <script>
             const ui = SwaggerUIBundle({{
                 url: '{openapi_url}',

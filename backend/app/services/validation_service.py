@@ -447,30 +447,30 @@ def PasswordField(**kwargs) -> str:
 
 def UsernameField(**kwargs) -> str:
     """Username field with format validation"""
-    return Field(min_length=3, max_length=50, regex=r"^[a-zA-Z0-9_-]+$", **kwargs)
+    return Field(min_length=3, max_length=50, pattern=r"^[a-zA-Z0-9_-]+$", **kwargs)
 
 
 def SlugField(**kwargs) -> str:
     """Slug field with format validation"""
-    return Field(regex=r"^[a-z0-9-]+$", **kwargs)
+    return Field(pattern=r"^[a-z0-9-]+$", **kwargs)
 
 
 def ColorField(**kwargs) -> str:
     """Hex color field with format validation"""
-    return Field(regex=r"^#[0-9A-Fa-f]{6}$", **kwargs)
+    return Field(pattern=r"^#[0-9A-Fa-f]{6}$", **kwargs)
 
 
 def UuidField(**kwargs) -> str:
     """UUID field with format validation"""
     return Field(
-        regex=r"^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+        pattern=r"^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
         **kwargs,
     )
 
 
 def PhoneField(**kwargs) -> str:
     """Phone number field with format validation"""
-    return Field(regex=r"^\+?[1-9]\d{1,14}$", **kwargs)
+    return Field(pattern=r"^\+?[1-9]\d{1,14}$", **kwargs)
 
 
 def CronField(**kwargs) -> str:

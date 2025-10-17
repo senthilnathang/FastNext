@@ -150,11 +150,11 @@ async function authenticateUser(
     const mockUsers = [
       {
         id: '1',
-        email: 'admin@example.com',
-        password: 'admin123', // In reality, this would be hashed
-        name: 'Admin User',
+        email: 'admin@fastnext.com',
+        password: 'Admin@FastNext2025!', // Secure password matching backend
+        name: 'FastNext Administrator',
         roles: ['admin', 'user'],
-        permissions: ['read', 'write', 'delete', 'admin']
+        permissions: ['read', 'write', 'delete', 'admin', 'system_manage', 'user_manage', 'project_manage']
       },
       {
         id: '2',

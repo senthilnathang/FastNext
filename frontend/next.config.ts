@@ -43,17 +43,20 @@ const nextConfig: NextConfig = {
     const isDev = process.env.NODE_ENV === 'development';
     const isProd = process.env.NODE_ENV === 'production';
 
+    // Skip CSP if disabled via environment variable
+    const skipCSP = process.env.SKIP_CSP === 'true';
+
     // Content Security Policy with environment-specific rules
-    const cspDirectives = [
+    const cspDirectives = skipCSP ? [] : [
       "default-src 'self'",
       // Script sources - more restrictive in production
-      `script-src 'self' ${isDev ? "'unsafe-inline' 'unsafe-eval'" : "'unsafe-inline'"} https://cdn.jsdelivr.net https://unpkg.com https://vercel.live https://va.vercel-scripts.com`,
+      `script-src 'self' ${isDev ? "'unsafe-inline' 'unsafe-eval'" : "'unsafe-inline'"}`,
       // Style sources
-      `style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net`,
+      `style-src 'self' 'unsafe-inline'`,
       // Font sources
-      "font-src 'self' https://fonts.gstatic.com data:",
-      // Image sources - allow common CDNs
-      "img-src 'self' data: https: blob: https://*.vercel.app https://*.vercel.com",
+      "font-src 'self' data:",
+      // Image sources
+      "img-src 'self' data: https: blob:",
       // Media sources
       "media-src 'self' https: blob:",
       // Object sources - completely blocked
@@ -67,7 +70,7 @@ const nextConfig: NextConfig = {
       // Frame sources - none (prevents embedding iframes)
       "frame-src 'none'",
       // Connect sources - API and monitoring
-      `connect-src 'self' https://vercel.live wss://vercel.live https://vitals.vercel-insights.com ${isDev ? 'ws://localhost:* http://localhost:8000' : ''}`,
+      `connect-src 'self' ${isDev ? 'ws://localhost:* http://localhost:8000' : ''}`,
       // Worker sources
       "worker-src 'self' blob:",
       // Manifest sources
@@ -86,11 +89,11 @@ const nextConfig: NextConfig = {
       {
         source: '/(.*)',
         headers: [
-          // Content Security Policy
-          {
+          // Content Security Policy (conditionally added)
+          ...(skipCSP ? [] : [{
             key: 'Content-Security-Policy',
             value: csp,
-          },
+          }]),
           // Trusted Types (for browsers that support it)
           {
             key: 'Trusted-Types',

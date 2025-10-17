@@ -3,7 +3,7 @@ from typing import Any, Dict, List, Optional
 
 from app.models.enums import ProductCategory
 from app.schemas.base import BaseResponseModel
-from pydantic import BaseModel, EmailStr, Field, HttpUrl, validator
+from pydantic import BaseModel, EmailStr, Field, HttpUrl
 
 
 class ProductBase(BaseModel):
@@ -36,12 +36,12 @@ class ProductBase(BaseModel):
         description="Product specifications as JSON",
         example={"weight": "250g", "battery_life": "30 hours", "wireless": True},
     )
-    website_url: Optional[HttpUrl] = Field(
+    website_url: Optional[str] = Field(
         None,
         description="Product website URL",
         example="https://example.com/products/premium-headphones",
     )
-    support_email: Optional[EmailStr] = Field(
+    support_email: Optional[str] = Field(
         None, description="Product support email", example="support@example.com"
     )
     category_id: Optional[int] = Field(None, description="Category foreign key")
@@ -121,7 +121,8 @@ class ProductUpdate(ProductBase):
         None,
         description="Stock Keeping Unit",
         example="HDPH-001-BLK",
-        pattern=r"^[A-Z]{2,4}-\d{3}-[A-Z]{3}$",
+        min_length=3,
+        max_length=50,
     )
     stock_quantity: Optional[int] = Field(
         None, description="Current stock quantity", example=150

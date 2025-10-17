@@ -23,10 +23,61 @@ from app.schemas.security_setting import (
 )
 from app.utils.activity_logger import log_activity, log_security_event
 from app.utils.audit_logger import log_audit_trail
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.orm import Session
 
 router = APIRouter()
+
+
+@router.post("/violations")
+async def report_security_violation(
+    request: Request,
+    db: Session = Depends(get_db),
+) -> Any:
+    """Report security violations from frontend"""
+    try:
+        # Get client data
+        client_ip = request.client.host if request.client else "unknown"
+        user_agent = request.headers.get("user-agent", "unknown")
+
+        # Parse request body
+        body = await request.json()
+        violation_type = body.get("type", "unknown")
+        details = body.get("details", {})
+        timestamp = body.get("timestamp")
+        reported_user_agent = body.get("userAgent", user_agent)
+        url = body.get("url", "")
+
+        # Log the security violation
+        log_security_event(
+            db=db,
+            user_id=None,  # No authenticated user for violations
+            event_type=f"frontend_{violation_type}",
+            description=f"Security violation reported from frontend: {violation_type}",
+            level=ActivityLevel.WARNING,
+            extra_data={
+                "violation_type": violation_type,
+                "details": details,
+                "client_ip": client_ip,
+                "user_agent": reported_user_agent,
+                "url": url,
+                "timestamp": timestamp,
+                "source": "frontend"
+            },
+        )
+
+        # In production, you might want to:
+        # - Send alerts to security team
+        # - Store in dedicated security violations table
+        # - Trigger automated responses
+
+        return {"status": "reported", "message": "Security violation logged"}
+
+    except Exception as e:
+        # Log the error but don't expose it to frontend
+        print(f"Error processing security violation: {str(e)}")
+        # Still return success to avoid leaking information
+        return {"status": "reported", "message": "Security violation logged"}
 
 
 @router.get("/settings", response_model=SecuritySettingResponse)

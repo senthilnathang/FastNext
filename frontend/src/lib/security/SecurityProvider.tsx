@@ -231,9 +231,7 @@ function checkMixedContent(): void {
 
 function validateMessageOrigin(event: MessageEvent): void {
   const allowedOrigins = [
-    window.location.origin,
-    'https://vercel.com',
-    'https://vercel.app'
+    window.location.origin
   ];
 
   if (!allowedOrigins.includes(event.origin)) {

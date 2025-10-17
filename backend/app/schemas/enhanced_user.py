@@ -270,9 +270,9 @@ class UserSearchRequest(BaseModel):
     limit: int = Field(10, ge=1, le=100, description="Items per page")
     sort_by: Optional[str] = Field(
         "created_at",
-        regex=r"^(created_at|updated_at|last_login|email|username|full_name)$",
+        pattern=r"^(created_at|updated_at|last_login|email|username|full_name)$",
     )
-    sort_order: Optional[str] = Field("desc", regex=r"^(asc|desc)$")
+    sort_order: Optional[str] = Field("desc", pattern=r"^(asc|desc)$")
 
     @root_validator
     def validate_date_range(cls, values):

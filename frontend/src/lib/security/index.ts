@@ -70,8 +70,8 @@ export const SECURITY_CONSTANTS = {
   CSP_DIRECTIVES: {
     DEFAULT_SRC: "'self'",
     SCRIPT_SRC: "'self' 'unsafe-inline'",
-    STYLE_SRC: "'self' 'unsafe-inline' https://fonts.googleapis.com",
-    FONT_SRC: "'self' https://fonts.gstatic.com data:",
+    STYLE_SRC: "'self' 'unsafe-inline'",
+    FONT_SRC: "'self' data:",
     IMG_SRC: "'self' data: https: blob:",
     CONNECT_SRC: "'self'",
     OBJECT_SRC: "'none'",

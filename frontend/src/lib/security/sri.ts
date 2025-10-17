@@ -9,47 +9,7 @@ interface SRIResource {
 
 // Pre-computed SRI hashes for common CDN resources
 export const SRI_HASHES: Record<string, SRIResource> = {
-  // React CDN
-  'react@18.2.0': {
-    url: 'https://unpkg.com/react@18.2.0/umd/react.production.min.js',
-    integrity: 'sha384-/bQdsTh/da6pkI1MST/rWKFNjaCP5gBSY4sEBT38Q/9RBh9AH40zEOg7Hlq2THRZ',
-    crossorigin: 'anonymous'
-  },
-
-  // React DOM CDN
-  'react-dom@18.2.0': {
-    url: 'https://unpkg.com/react-dom@18.2.0/umd/react-dom.production.min.js',
-    integrity: 'sha384-IdxLT7DZVu9qjH+G+cLEWF4lAL7m1aKQq8Ag1FJKZq1ug9h7Y6lk3GVh4ePT5h2',
-    crossorigin: 'anonymous'
-  },
-
-  // Tailwind CSS CDN
-  'tailwindcss@3.3.0': {
-    url: 'https://cdn.tailwindcss.com/3.3.0',
-    integrity: 'sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM',
-    crossorigin: 'anonymous'
-  },
-
-  // Font Awesome
-  'fontawesome@6.4.0': {
-    url: 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css',
-    integrity: 'sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==',
-    crossorigin: 'anonymous'
-  },
-
-  // Bootstrap CSS
-  'bootstrap@5.3.0': {
-    url: 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css',
-    integrity: 'sha384-9ndCyUa3bOa+TfYEkgfTGdFe0SN9xaTYvUj7MG7EwA8h0VkO0w3b9s9D0W7M6rG',
-    crossorigin: 'anonymous'
-  },
-
-  // jQuery
-  'jquery@3.7.0': {
-    url: 'https://code.jquery.com/jquery-3.7.0.min.js',
-    integrity: 'sha384-NXgwF8Kv9SSAr+jemKKcbvQp1eKtESZfR4k8YxGGMfNT3xJrKTLcJKkzjD1jBY2',
-    crossorigin: 'anonymous'
-  }
+  // No external CDN resources - all assets should be self-hosted
 };
 
 // Generate SRI hash for a given content

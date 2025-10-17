@@ -2,6 +2,7 @@ from .activity_log import ActivityAction, ActivityLevel, ActivityLog
 from .asset import Asset
 from .audit_trail import AuditTrail
 from .component import Component
+from .notification import Notification, NotificationChannel, NotificationType
 from .data_import_export import (
     DataFormat,
     ExportAuditLog,
