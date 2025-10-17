@@ -391,7 +391,7 @@ export default function SystemMonitoringPageECharts() {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <StatCard
           title="CPU Usage"
-          value={`${currentMetrics.cpu.usage.toFixed(1)}%`}
+          value={`${Math.round(currentMetrics.cpu.usage)}%`}
           change={currentMetrics.cpu.usage > 70 ? -5.2 : 2.1}
           changeLabel="vs last hour"
           icon={<Cpu className="h-4 w-4" />}
@@ -401,7 +401,7 @@ export default function SystemMonitoringPageECharts() {
         />
         <StatCard
           title="Memory Usage"
-          value={`${currentMetrics.memory.usage.toFixed(1)}%`}
+          value={`${Math.round(currentMetrics.memory.usage)}%`}
           change={currentMetrics.memory.usage > 80 ? -8.3 : 1.5}
           changeLabel="vs last hour"
           icon={<MemoryStick className="h-4 w-4" />}
@@ -411,7 +411,7 @@ export default function SystemMonitoringPageECharts() {
         />
         <StatCard
           title="Disk Usage"
-          value={`${currentMetrics.disk.usage.toFixed(1)}%`}
+          value={`${Math.round(currentMetrics.disk.usage)}%`}
           change={0.3}
           changeLabel="vs last hour"
           icon={<HardDrive className="h-4 w-4" />}
@@ -421,7 +421,7 @@ export default function SystemMonitoringPageECharts() {
         />
         <StatCard
           title="Network Traffic"
-          value={`${(currentMetrics.network.bytesIn / 1000000).toFixed(2)} MB/s`}
+          value={`${(currentMetrics.network.bytesIn / 1000000).toFixed(1)} MB/s`}
           change={12.5}
           changeLabel="vs last hour"
           icon={<Network className="h-4 w-4" />}
@@ -475,7 +475,7 @@ export default function SystemMonitoringPageECharts() {
 
             <ChartCard
               title="Memory Usage"
-              description={`${currentMetrics.memory.used.toFixed(1)} GB / ${currentMetrics.memory.total} GB`}
+              description={`${Math.round(currentMetrics.memory.used)} GB / ${Math.round(currentMetrics.memory.total)} GB`}
             >
               <div className="h-[200px] w-full">
                 <GaugeChart
@@ -497,7 +497,7 @@ export default function SystemMonitoringPageECharts() {
 
             <ChartCard
               title="Disk Usage"
-              description={`${currentMetrics.disk.used.toFixed(0)} GB / ${currentMetrics.disk.total} GB`}
+              description={`${Math.round(currentMetrics.disk.used)} GB / ${Math.round(currentMetrics.disk.total)} GB`}
             >
               <div className="h-[200px] w-full">
                 <GaugeChart
@@ -620,11 +620,11 @@ export default function SystemMonitoringPageECharts() {
                     </div>
                     <div className="flex items-center justify-between text-sm">
                       <span className="text-muted-foreground">Uptime</span>
-                      <span className="font-medium">{service.uptime}%</span>
+                      <span className="font-medium">{Math.round(service.uptime)}%</span>
                     </div>
                     <div className="flex items-center justify-between text-sm">
                       <span className="text-muted-foreground">Response Time</span>
-                      <span className="font-medium">{service.responseTime}ms</span>
+                      <span className="font-medium">{Math.round(service.responseTime)}ms</span>
                     </div>
                     {service.version && (
                       <div className="flex items-center justify-between text-sm">

@@ -74,14 +74,21 @@ class CacheMiddleware:
                     if isinstance(cached_headers, dict):
                         for k, v in cached_headers.items():
                             # Ensure header values are strings, not bytes
-                            key = str(k)
-                            value = str(v)
+                            key = k.decode("utf-8") if isinstance(k, bytes) else str(k)
+                            value = v.decode("utf-8") if isinstance(v, bytes) else str(v)
                             response_headers[key] = value
 
                     # Add cache headers (ensure string values)
                     response_headers.update(
                         {"X-Cache": "HIT", "X-Cache-Key": cache_key[:16] + "..."}
                     )
+
+                    # Ensure all response headers are strings
+                    final_headers = {}
+                    for k, v in response_headers.items():
+                        key = k.decode("utf-8") if isinstance(k, bytes) else str(k)
+                        value = v.decode("utf-8") if isinstance(v, bytes) else str(v)
+                        final_headers[key] = value
 
                     if isinstance(content, dict) and content.get("_binary_content"):
                         import base64
@@ -92,13 +99,13 @@ class CacheMiddleware:
                         response = Response(
                             content=binary_data,
                             status_code=cached_response["status_code"],
-                            headers=response_headers,
+                            headers=final_headers,
                         )
                     else:
                         response = JSONResponse(
                             content=content,
                             status_code=cached_response["status_code"],
-                            headers=response_headers,
+                            headers=final_headers,
                         )
                     await response(scope, receive, send)
                     return

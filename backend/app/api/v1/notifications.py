@@ -1,6 +1,7 @@
 from typing import List, Optional, cast
 
-from app.api.deps import get_current_user, get_db
+from app.api.deps import get_db
+from app.auth.deps import get_current_user
 from app.models.notification import Notification, NotificationType
 from app.models.user import User
 from app.schemas.notification import (

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/modules/auth';
+import { apiClient } from '@/shared/services/api/client';
 
 interface PushSubscriptionData {
   endpoint: string;
@@ -104,31 +105,11 @@ export function usePushNotifications() {
       }
     };
 
-    const response = await fetch('/api/notifications/subscribe', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(subscriptionData)
-    });
-
-    if (!response.ok) {
-      throw new Error('Failed to send subscription to backend');
-    }
+    await apiClient.post('/api/v1/notifications/subscribe', subscriptionData);
   };
 
   const removeSubscriptionFromBackend = async () => {
-    const response = await fetch('/api/notifications/unsubscribe', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ endpoint: subscription?.endpoint })
-    });
-
-    if (!response.ok) {
-      console.error('Failed to remove subscription from backend');
-    }
+    await apiClient.post('/api/v1/notifications/unsubscribe', { endpoint: subscription?.endpoint });
   };
 
   return {

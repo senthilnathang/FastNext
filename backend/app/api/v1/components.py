@@ -30,34 +30,43 @@ def read_components(
     is_global: bool = None,
     current_user: User = Depends(get_current_active_user),
 ) -> Any:
-    query = db.query(Component)
+    try:
+        query = db.query(Component)
 
-    if project_id is not None:
-        # Verify user owns the project
-        project = (
-            db.query(Project)
-            .filter(Project.id == project_id, Project.user_id == current_user.id)
-            .first()
-        )
-        if not project:
-            raise HTTPException(status_code=404, detail="Project not found")
-        query = query.filter(Component.project_id == project_id)
+        if project_id is not None:
+            # Verify user owns the project
+            project = (
+                db.query(Project)
+                .filter(Project.id == project_id, Project.user_id == current_user.id)
+                .first()
+            )
+            if not project:
+                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Project not found")
+            query = query.filter(Component.project_id == project_id)
 
-    if is_global is not None:
-        query = query.filter(Component.is_global == is_global)
+        if is_global is not None:
+            query = query.filter(Component.is_global == is_global)
 
-    # Show global components or user's components
-    query = query.filter(
-        (Component.is_global == True)
-        | (
-            Component.project_id.in_(
-                db.query(Project.id).filter(Project.user_id == current_user.id)
+        # Show global components or user's components
+        query = query.filter(
+            (Component.is_global == True)
+            | (
+                Component.project_id.in_(
+                    db.query(Project.id).filter(Project.user_id == current_user.id)
+                )
             )
         )
-    )
 
-    components = query.all()
-    return components
+        components = query.all()
+        return components
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to retrieve components",
+        )
 
 
 @router.post("", response_model=ComponentSchema)
@@ -68,23 +77,33 @@ def create_component(
     component_in: ComponentCreate,
     current_user: User = Depends(get_current_active_user),
 ) -> Any:
-    if component_in.project_id:
-        project = (
-            db.query(Project)
-            .filter(
-                Project.id == component_in.project_id,
-                Project.user_id == current_user.id,
+    try:
+        if component_in.project_id:
+            project = (
+                db.query(Project)
+                .filter(
+                    Project.id == component_in.project_id,
+                    Project.user_id == current_user.id,
+                )
+                .first()
             )
-            .first()
-        )
-        if not project:
-            raise HTTPException(status_code=404, detail="Project not found")
+            if not project:
+                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Project not found")
 
-    component = Component(**component_in.dict())
-    db.add(component)
-    db.commit()
-    db.refresh(component)
-    return component
+        component = Component(**component_in.dict())
+        db.add(component)
+        db.commit()
+        db.refresh(component)
+        return component
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to create component",
+        )
 
 
 @router.get("/{component_id}", response_model=ComponentSchema)
@@ -94,23 +113,32 @@ def read_component(
     component_id: int,
     current_user: User = Depends(get_current_active_user),
 ) -> Any:
-    component = db.query(Component).filter(Component.id == component_id).first()
-    if not component:
-        raise HTTPException(status_code=404, detail="Component not found")
+    try:
+        component = db.query(Component).filter(Component.id == component_id).first()
+        if not component:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Component not found")
 
-    # Check if user has access (global or owns the project)
-    if not component.is_global and component.project_id:
-        project = (
-            db.query(Project)
-            .filter(
-                Project.id == component.project_id, Project.user_id == current_user.id
+        # Check if user has access (global or owns the project)
+        if not component.is_global and component.project_id:
+            project = (
+                db.query(Project)
+                .filter(
+                    Project.id == component.project_id, Project.user_id == current_user.id
+                )
+                .first()
             )
-            .first()
-        )
-        if not project:
-            raise HTTPException(status_code=403, detail="Access denied")
+            if not project:
+                raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access denied")
 
-    return component
+        return component
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to retrieve component",
+        )
 
 
 @router.put("/{component_id}", response_model=ComponentSchema)
@@ -121,30 +149,40 @@ def update_component(
     component_in: ComponentUpdate,
     current_user: User = Depends(get_current_active_user),
 ) -> Any:
-    component = db.query(Component).filter(Component.id == component_id).first()
-    if not component:
-        raise HTTPException(status_code=404, detail="Component not found")
+    try:
+        component = db.query(Component).filter(Component.id == component_id).first()
+        if not component:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Component not found")
 
-    # Check if user owns the project (can't edit global components)
-    if component.is_global or not component.project_id:
-        raise HTTPException(status_code=403, detail="Cannot edit global components")
+        # Check if user owns the project (can't edit global components)
+        if component.is_global or not component.project_id:
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Cannot edit global components")
 
-    project = (
-        db.query(Project)
-        .filter(Project.id == component.project_id, Project.user_id == current_user.id)
-        .first()
-    )
-    if not project:
-        raise HTTPException(status_code=403, detail="Access denied")
+        project = (
+            db.query(Project)
+            .filter(Project.id == component.project_id, Project.user_id == current_user.id)
+            .first()
+        )
+        if not project:
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access denied")
 
-    component_data = component_in.dict(exclude_unset=True)
-    for field, value in component_data.items():
-        setattr(component, field, value)
+        component_data = component_in.dict(exclude_unset=True)
+        for field, value in component_data.items():
+            setattr(component, field, value)
 
-    db.add(component)
-    db.commit()
-    db.refresh(component)
-    return component
+        db.add(component)
+        db.commit()
+        db.refresh(component)
+        return component
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to update component",
+        )
 
 
 # Component Instance CRUD
@@ -155,23 +193,32 @@ def read_page_component_instances(
     page_id: int,
     current_user: User = Depends(get_current_active_user),
 ) -> Any:
-    # Verify user owns the project
-    page = (
-        db.query(Page)
-        .join(Project)
-        .filter(Page.id == page_id, Project.user_id == current_user.id)
-        .first()
-    )
-    if not page:
-        raise HTTPException(status_code=404, detail="Page not found")
+    try:
+        # Verify user owns the project
+        page = (
+            db.query(Page)
+            .join(Project)
+            .filter(Page.id == page_id, Project.user_id == current_user.id)
+            .first()
+        )
+        if not page:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Page not found")
 
-    instances = (
-        db.query(ComponentInstance)
-        .filter(ComponentInstance.page_id == page_id)
-        .order_by(ComponentInstance.order_index)
-        .all()
-    )
-    return instances
+        instances = (
+            db.query(ComponentInstance)
+            .filter(ComponentInstance.page_id == page_id)
+            .order_by(ComponentInstance.order_index)
+            .all()
+        )
+        return instances
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to retrieve component instances",
+        )
 
 
 @router.post("/instances/", response_model=ComponentInstanceSchema)
@@ -181,28 +228,38 @@ def create_component_instance(
     instance_in: ComponentInstanceCreate,
     current_user: User = Depends(get_current_active_user),
 ) -> Any:
-    # Verify user owns the project
-    page = (
-        db.query(Page)
-        .join(Project)
-        .filter(Page.id == instance_in.page_id, Project.user_id == current_user.id)
-        .first()
-    )
-    if not page:
-        raise HTTPException(status_code=404, detail="Page not found")
+    try:
+        # Verify user owns the project
+        page = (
+            db.query(Page)
+            .join(Project)
+            .filter(Page.id == instance_in.page_id, Project.user_id == current_user.id)
+            .first()
+        )
+        if not page:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Page not found")
 
-    # Verify component exists and user has access
-    component = (
-        db.query(Component).filter(Component.id == instance_in.component_id).first()
-    )
-    if not component:
-        raise HTTPException(status_code=404, detail="Component not found")
+        # Verify component exists and user has access
+        component = (
+            db.query(Component).filter(Component.id == instance_in.component_id).first()
+        )
+        if not component:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Component not found")
 
-    instance = ComponentInstance(**instance_in.dict())
-    db.add(instance)
-    db.commit()
-    db.refresh(instance)
-    return instance
+        instance = ComponentInstance(**instance_in.dict())
+        db.add(instance)
+        db.commit()
+        db.refresh(instance)
+        return instance
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to create component instance",
+        )
 
 
 @router.put("/instances/{instance_id}", response_model=ComponentInstanceSchema)
@@ -213,24 +270,34 @@ def update_component_instance(
     instance_in: ComponentInstanceUpdate,
     current_user: User = Depends(get_current_active_user),
 ) -> Any:
-    instance = (
-        db.query(ComponentInstance)
-        .join(Page)
-        .join(Project)
-        .filter(ComponentInstance.id == instance_id, Project.user_id == current_user.id)
-        .first()
-    )
-    if not instance:
-        raise HTTPException(status_code=404, detail="Component instance not found")
+    try:
+        instance = (
+            db.query(ComponentInstance)
+            .join(Page)
+            .join(Project)
+            .filter(ComponentInstance.id == instance_id, Project.user_id == current_user.id)
+            .first()
+        )
+        if not instance:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Component instance not found")
 
-    instance_data = instance_in.dict(exclude_unset=True)
-    for field, value in instance_data.items():
-        setattr(instance, field, value)
+        instance_data = instance_in.dict(exclude_unset=True)
+        for field, value in instance_data.items():
+            setattr(instance, field, value)
 
-    db.add(instance)
-    db.commit()
-    db.refresh(instance)
-    return instance
+        db.add(instance)
+        db.commit()
+        db.refresh(instance)
+        return instance
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to update component instance",
+        )
 
 
 @router.delete("/instances/{instance_id}")
@@ -240,16 +307,26 @@ def delete_component_instance(
     instance_id: int,
     current_user: User = Depends(get_current_active_user),
 ) -> Any:
-    instance = (
-        db.query(ComponentInstance)
-        .join(Page)
-        .join(Project)
-        .filter(ComponentInstance.id == instance_id, Project.user_id == current_user.id)
-        .first()
-    )
-    if not instance:
-        raise HTTPException(status_code=404, detail="Component instance not found")
+    try:
+        instance = (
+            db.query(ComponentInstance)
+            .join(Page)
+            .join(Project)
+            .filter(ComponentInstance.id == instance_id, Project.user_id == current_user.id)
+            .first()
+        )
+        if not instance:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Component instance not found")
 
-    db.delete(instance)
-    db.commit()
-    return {"message": "Component instance deleted successfully"}
+        db.delete(instance)
+        db.commit()
+        return {"message": "Component instance deleted successfully"}
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to delete component instance",
+        )

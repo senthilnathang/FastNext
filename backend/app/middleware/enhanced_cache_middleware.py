@@ -183,11 +183,21 @@ class EnhancedCacheMiddleware:
         status_code = cached_data.get("status_code", 200)
         cached_headers = cached_data.get("headers", {})
 
+        # Ensure all cached headers are strings (handle bytes from JSON deserialization)
+        processed_headers = {}
+        if isinstance(cached_headers, dict):
+            for k, v in cached_headers.items():
+                key = k.decode("utf-8") if isinstance(k, bytes) else str(k)
+                value = v.decode("utf-8") if isinstance(v, bytes) else str(v)
+                processed_headers[key] = value
+        else:
+            processed_headers = cached_headers
+
         # Generate cache control headers
         cache_headers = get_cache_control_headers(policy)
 
         # Merge headers
-        response_headers = {**cached_headers, **cache_headers}
+        response_headers = {**processed_headers, **cache_headers}
 
         # Add cache status headers
         response_headers.update(
@@ -200,17 +210,24 @@ class EnhancedCacheMiddleware:
             }
         )
 
+        # Ensure all response headers are strings (uvicorn requires string headers)
+        final_headers = {}
+        for k, v in response_headers.items():
+            key = k.decode("utf-8") if isinstance(k, bytes) else str(k)
+            value = v.decode("utf-8") if isinstance(v, bytes) else str(v)
+            final_headers[key] = value
+
         # Handle binary content
         if isinstance(content, dict) and content.get("_binary_content"):
             import base64
 
             binary_data = base64.b64decode(content["_data"])
             response = Response(
-                content=binary_data, status_code=status_code, headers=response_headers
+                content=binary_data, status_code=status_code, headers=final_headers
             )
         else:
             response = JSONResponse(
-                content=content, status_code=status_code, headers=response_headers
+                content=content, status_code=status_code, headers=final_headers
             )
 
         await response(scope, receive, send)

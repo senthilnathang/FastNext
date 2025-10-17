@@ -299,6 +299,10 @@ class ValidationMiddleware(BaseHTTPMiddleware):
         """Validate query parameters"""
         try:
             for param_name, param_value in request.query_params.items():
+                # Ensure param_value is a string
+                if isinstance(param_value, bytes):
+                    param_value = param_value.decode('utf-8', errors='ignore')
+
                 # Validate parameter length
                 if len(param_value) > self.max_lengths["query_param"]:
                     await self._log_validation_error(
@@ -535,12 +539,18 @@ class ValidationMiddleware(BaseHTTPMiddleware):
 
     def _contains_malicious_patterns(self, content: str) -> bool:
         """Check if content contains malicious patterns"""
+        # Ensure content is a string
+        if isinstance(content, bytes):
+            content = content.decode('utf-8', errors='ignore')
         content_lower = content.lower()
 
         # Check XSS patterns
         for pattern in self.xss_patterns:
-            if re.search(pattern, content_lower, re.IGNORECASE):
-                return True
+            try:
+                if re.search(pattern, content_lower, re.IGNORECASE):
+                    return True
+            except (TypeError, re.error):
+                continue
 
         # Check SQL injection patterns
         if self._contains_sql_patterns(content):
@@ -548,23 +558,36 @@ class ValidationMiddleware(BaseHTTPMiddleware):
 
         # Check path traversal patterns
         for pattern in self.path_traversal_patterns:
-            if re.search(pattern, content_lower, re.IGNORECASE):
-                return True
+            try:
+                if re.search(pattern, content_lower, re.IGNORECASE):
+                    return True
+            except (TypeError, re.error):
+                continue
 
         # Check command injection patterns
         for pattern in self.command_patterns:
-            if re.search(pattern, content, re.IGNORECASE):
-                return True
+            try:
+                if re.search(pattern, content, re.IGNORECASE):
+                    return True
+            except (TypeError, re.error):
+                continue
 
         return False
 
     def _contains_sql_patterns(self, content: str) -> bool:
         """Check for SQL injection patterns"""
+        # Ensure content is a string
+        if isinstance(content, bytes):
+            content = content.decode('utf-8', errors='ignore')
         content_lower = content.lower()
 
         for pattern in self.sql_patterns:
-            if re.search(pattern, content_lower, re.IGNORECASE):
-                return True
+            try:
+                if re.search(pattern, content_lower, re.IGNORECASE):
+                    return True
+            except (TypeError, re.error):
+                # Skip invalid patterns
+                continue
 
         return False
 

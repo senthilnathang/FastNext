@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 from app.auth.deps import get_current_active_user
 from app.db.session import get_db
@@ -23,7 +23,7 @@ def read_projects(
     db: Session = Depends(get_db),
     skip: int = 0,
     limit: int = 100,
-    search: str = None,
+    search: Optional[str] = None,
     current_user: User = Depends(get_current_active_user),
 ) -> Any:
     """Get projects user owns or has access to"""
