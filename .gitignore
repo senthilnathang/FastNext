@@ -11,6 +11,24 @@ pnpm-debug.log*
 out/
 build/
 dist/
+frontend/.next/
+frontend/out/
+frontend/build/
+frontend/dist/
+.next/
+out/
+build/
+dist/
+*.tsbuildinfo
+next-env.d.ts
+frontend/*.tsbuildinfo
+frontend/next-env.d.ts
+.vercel/
+frontend/.vercel/
+.swc/
+frontend/.swc/
+.turbo/
+frontend/.turbo/
 
 # Nuxt.js
 .nuxt/
