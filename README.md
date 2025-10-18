@@ -207,7 +207,7 @@ Frontend Architecture
 
 ```bash
 # Clone the repository
-git clone https://github.com/fastnext/fastnext-framework.git
+git clone https://github.com/senthilnathang/FastNext.git
 cd FastNext
 
 # Start all services with production configuration
@@ -1170,10 +1170,10 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🆘 Support & Community
 
-- **Issues**: [GitHub Issues](https://github.com/fastnext/fastnext-framework/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/fastnext/fastnext-framework/discussions)
+- **Issues**: [GitHub Issues](https://github.com/senthilnathang/FastNext/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/senthilnathang/FastNext/discussions)
 - **Security**: security@fastnext.dev
-- **Documentation**: [Project Wiki](https://github.com/fastnext/fastnext-framework/wiki)
+- **Documentation**: [Project Wiki](https://github.com/senthilnathang/FastNext/wiki)
 
 ---
 
@@ -1181,6 +1181,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 **FastNext Framework** - Production-ready full-stack development with enterprise security
 
-[⭐ Star this project](https://github.com/fastnext/fastnext-framework) • [🐛 Report Bug](https://github.com/fastnext/fastnext-framework/issues) • [✨ Request Feature](https://github.com/fastnext/fastnext-framework/issues)
+[⭐ Star this project](https://github.com/senthilnathang/FastNext) • [🐛 Report Bug](https://github.com/senthilnathang/FastNext/issues) • [✨ Request Feature](https://github.com/senthilnathang/FastNext/issues)
 
 </div>

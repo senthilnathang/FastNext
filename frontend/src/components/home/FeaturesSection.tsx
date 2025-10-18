@@ -13,7 +13,7 @@ export function FeaturesSection() {
             Everything you need to build secure, scalable applications with
             modern best practices built-in.
             <a
-              href="https://github.com/fastnext/fastnext-framework"
+              href="https://github.com/senthilnathang/FastNext"
               className="text-blue-600 hover:text-blue-700 ml-2"
               target="_blank"
               rel="noopener noreferrer"

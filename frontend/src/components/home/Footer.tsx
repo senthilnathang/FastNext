@@ -17,7 +17,7 @@ export function Footer() {
             </p>
             <div className="flex space-x-4">
               <a
-                href="https://github.com/fastnext/fastnext-framework"
+                href="https://github.com/senthilnathang/FastNext"
                 className="text-gray-400 hover:text-white"
                 target="_blank"
                 rel="noopener noreferrer"
@@ -56,7 +56,7 @@ export function Footer() {
             <ul className="space-y-2 text-gray-400">
               <li>
                 <a
-                  href="https://github.com/fastnext/fastnext-framework"
+                href="https://github.com/senthilnathang/FastNext"
                   className="hover:text-white"
                   target="_blank"
                   rel="noopener noreferrer"
@@ -112,7 +112,7 @@ export function Footer() {
               </li>
               <li>
                 <a
-                  href="https://github.com/fastnext/fastnext-framework/tree/main/examples"
+                  href="https://github.com/senthilnathang/FastNext/tree/main/examples"
                   className="hover:text-white"
                   target="_blank"
                   rel="noopener noreferrer"
