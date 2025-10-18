@@ -25,7 +25,7 @@ export function TechStackSection() {
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <span className="text-gray-700 dark:text-gray-300">
-                  Next.js 15
+                  Next.js 16
                 </span>
                 <span className="text-green-600 font-medium">App Router</span>
               </div>

@@ -15,21 +15,17 @@ export function HeroSection() {
             </div>
           </div>
 
-          <h1 className="text-5xl md:text-7xl font-bold text-gray-900 dark:text-white mb-6">
-            Production-Ready
-            <span className="block text-blue-600">Full-Stack Development</span>
-          </h1>
+           <h1 className="text-5xl md:text-7xl font-bold text-gray-900 dark:text-white mb-6">
+             Frontend
+             <span className="block text-blue-600">Next.js 16 App Router</span>
+           </h1>
 
-          <p className="text-xl text-gray-600 dark:text-gray-300 mb-8 max-w-3xl mx-auto">
-            FastNext Framework is a comprehensive production-ready full-stack
-            development platform that combines Next.js 15 for the frontend,
-            FastAPI for the backend, PostgreSQL for data persistence, and Redis
-            for caching and real-time features. It includes enterprise-grade
-            security with OWASP compliance, advanced workflow automation with
-            visual builders, multi-view data management (List, Card, Kanban,
-            Gantt, Calendar), and built-in internationalization support for 20+
-            languages. Deploy from prototype to production in minutes, not
-            months, with Docker support and comprehensive API documentation.
+           <p className="text-xl text-gray-600 dark:text-gray-300 mb-8 max-w-3xl mx-auto">
+            Experience the future of web development with Next.js 16 App Router, Biome linting,
+            and ECharts visualization. FastNext combines cutting-edge technologies
+            with enterprise-grade features to deliver lightning-fast performance,
+            automated workflows, and seamless scalability. Built with React 19,
+            Turbopack bundling, and React Compiler for optimal development experience.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
@@ -40,7 +36,7 @@ export function HeroSection() {
               🚀 Get Started
             </Link>
             <a
-              href="https://docs.fastnext.dev"
+              href="https://github.com/senthilnathang/FastNext/tree/main/docs"
               target="_blank"
               rel="noopener noreferrer"
               className="border-2 border-gray-300 dark:border-gray-600 hover:border-blue-500 text-gray-700 dark:text-gray-300 hover:text-blue-600 px-8 py-4 rounded-lg font-semibold text-lg transition-colors"
@@ -48,7 +44,7 @@ export function HeroSection() {
               📚 View Documentation
             </a>
             <a
-              href="https://github.com/fastnext/fastnext-framework"
+              href="https://github.com/senthilnathang/FastNext"
               target="_blank"
               rel="noopener noreferrer"
               className="border-2 border-gray-300 dark:border-gray-600 hover:border-gray-500 text-gray-700 dark:text-gray-300 hover:text-gray-600 px-8 py-4 rounded-lg font-semibold text-lg transition-colors"
@@ -65,33 +61,33 @@ export function HeroSection() {
             </a>
           </div>
 
-          {/* Key Benefits */}
-          <div className="flex flex-wrap justify-center gap-6 text-sm font-medium text-gray-600 dark:text-gray-400">
-            <div className="flex items-center gap-2">
-              <span className="text-green-500">✓</span>
-              Enterprise Security
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="text-blue-500">⚡</span>
-              50k+ req/sec Performance
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="text-purple-500">🔄</span>
-              Visual Workflow Engine
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="text-orange-500">🎯</span>
-              Universal ViewManager
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="text-red-500">🛡️</span>
-              OWASP Compliant
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="text-indigo-500">🌍</span>
-              20+ Languages
-            </div>
-          </div>
+           {/* Tech Stack Highlights */}
+           <div className="flex flex-wrap justify-center gap-6 text-sm font-medium text-gray-600 dark:text-gray-400">
+             <div className="flex items-center gap-2">
+               <span className="text-blue-500">⚡</span>
+               Next.js 16 App Router
+             </div>
+             <div className="flex items-center gap-2">
+               <span className="text-green-500">🎯</span>
+               Biome Linting
+             </div>
+             <div className="flex items-center gap-2">
+               <span className="text-purple-500">📊</span>
+               ECharts Visualization
+             </div>
+             <div className="flex items-center gap-2">
+               <span className="text-orange-500">⚛️</span>
+               React 19 + Compiler
+             </div>
+             <div className="flex items-center gap-2">
+               <span className="text-red-500">🛡️</span>
+               Enterprise Security
+             </div>
+             <div className="flex items-center gap-2">
+               <span className="text-indigo-500">🔄</span>
+               Visual Workflow Engine
+             </div>
+           </div>
         </div>
       </div>
     </section>
