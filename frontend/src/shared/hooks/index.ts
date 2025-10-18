@@ -2,7 +2,15 @@
 export * from "./useApiQuery";
 export * from "./useCrudNotifications";
 export * from "./useCrudOperations";
-export * from "./useURLState";
+export {
+  useTabState,
+  useSearchState,
+  usePaginationState,
+  useSortState,
+  useViewModeState,
+  useBooleanFilterState,
+  useStringLiteralState,
+} from "./useURLState";
 
 // Note: Other hooks have been moved to their respective modules:
 // - useAuth -> @/modules/auth

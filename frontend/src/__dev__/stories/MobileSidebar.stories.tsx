@@ -100,7 +100,7 @@ const SidebarStory = ({ children, ...props }: any) => {
 };
 
 export const Default: Story = {
-  render: (args) => (
+  render: (args: Omit<React.ComponentProps<typeof MobileSidebar>, 'isOpen' | 'onOpenChange' | 'children'>) => (
     <SidebarStory {...args}>
       <NavigationContent />
     </SidebarStory>
@@ -115,7 +115,7 @@ export const Default: Story = {
 };
 
 export const RightSide: Story = {
-  render: (args) => (
+  render: (args: Omit<React.ComponentProps<typeof MobileSidebar>, 'isOpen' | 'onOpenChange' | 'children'>) => (
     <SidebarStory {...args}>
       <NavigationContent />
     </SidebarStory>
@@ -130,7 +130,7 @@ export const RightSide: Story = {
 };
 
 export const WideWidth: Story = {
-  render: (args) => (
+  render: (args: Omit<React.ComponentProps<typeof MobileSidebar>, 'isOpen' | 'onOpenChange' | 'children'>) => (
     <SidebarStory {...args}>
       <NavigationContent />
     </SidebarStory>
@@ -145,7 +145,7 @@ export const WideWidth: Story = {
 };
 
 export const NoSwipeGestures: Story = {
-  render: (args) => (
+  render: (args: Omit<React.ComponentProps<typeof MobileSidebar>, 'isOpen' | 'onOpenChange' | 'children'>) => (
     <SidebarStory {...args}>
       <NavigationContent />
     </SidebarStory>
@@ -160,7 +160,7 @@ export const NoSwipeGestures: Story = {
 };
 
 export const NoCloseButton: Story = {
-  render: (args) => (
+  render: (args: Omit<React.ComponentProps<typeof MobileSidebar>, 'isOpen' | 'onOpenChange' | 'children'>) => (
     <SidebarStory {...args}>
       <NavigationContent />
     </SidebarStory>
@@ -175,7 +175,7 @@ export const NoCloseButton: Story = {
 };
 
 export const CustomTrigger: Story = {
-  render: (args) => {
+  render: (args: Omit<React.ComponentProps<typeof MobileSidebar>, 'isOpen' | 'onOpenChange' | 'triggerButton'>) => {
     const [isOpen, setIsOpen] = useState(false);
 
     return (

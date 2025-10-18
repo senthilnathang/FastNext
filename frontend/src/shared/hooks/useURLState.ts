@@ -8,13 +8,20 @@ import { useState, useCallback } from "react";
 // Simple state-based replacement for useQueryState
 function useQueryState<T>(
   key: string,
-  parser: { withDefault: (defaultValue: T) => any }
-): [T, (value: T | null) => void] {
-  const defaultValue = parser.withDefault ? parser.withDefault : (() => null);
+  parser: { withDefault: () => T }
+): [T, (value: T | null | ((prev: T) => T | null)) => void] {
+  const defaultValue = parser.withDefault();
   const [state, setState] = useState<T>(defaultValue);
 
-  const setValue = useCallback((value: T | null) => {
-    setState(value ?? defaultValue);
+  const setValue = useCallback((value: T | null | ((prev: T) => T | null)) => {
+    if (typeof value === 'function') {
+      setState((prev) => {
+        const newValue = (value as (prev: T) => T | null)(prev);
+        return newValue ?? defaultValue;
+      });
+    } else {
+      setState(value ?? defaultValue);
+    }
   }, [defaultValue]);
 
   return [state, setValue];
@@ -158,8 +165,8 @@ export function useJSONState<T extends Record<string, any>>(
  * TODO: Currently using local state, will use URL state when nuqs supports Next.js 16
  */
 export function useDateRangeState() {
-  const [startDate, setStartDate] = useQueryState("startDate", { withDefault: () => null });
-  const [endDate, setEndDate] = useQueryState("endDate", { withDefault: () => null });
+  const [startDate, setStartDate] = useQueryState<string | null>("startDate", { withDefault: () => null });
+  const [endDate, setEndDate] = useQueryState<string | null>("endDate", { withDefault: () => null });
 
   return {
     startDate,
@@ -180,11 +187,20 @@ export function useDateRangeState() {
 export function useTabState<T extends readonly string[]>(
   tabs: T,
   defaultTab: T[number],
-) {
-  return useQueryState(
+): [T[number], (value: string) => void] {
+  const [state, setState] = useQueryState(
     "tab",
     { withDefault: () => defaultTab },
   );
+
+  const setTabValue = useCallback((value: string) => {
+    // Only set the value if it's a valid tab
+    if (tabs.includes(value as T[number])) {
+      setState(value as T[number]);
+    }
+  }, [tabs, setState]);
+
+  return [state, setTabValue];
 }
 
 /**

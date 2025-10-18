@@ -41,7 +41,7 @@ const meta: Meta<typeof DashboardLayout> = {
     },
   },
   decorators: [
-    (Story) => (
+    (Story: React.ComponentType) => (
       <AuthContext.Provider value={mockAuthContextValue}>
         <div style={{ height: "100vh" }}>
           <Story />
@@ -218,7 +218,7 @@ export const DarkMode: Story = {
     },
   },
   decorators: [
-    (Story) => (
+    (Story: React.ComponentType) => (
       <AuthContext.Provider value={mockAuthContextValue}>
         <div className="dark" style={{ height: "100vh" }}>
           <Story />

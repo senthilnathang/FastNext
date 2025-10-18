@@ -75,6 +75,7 @@
     "react-day-picker": "^9.11.0",
     "react-dom": "19.2.0",
     "react-hook-form": "^7.63.0",
+    "react-is": "^19.2.0",
     "react-window": "^2.1.1",
     "react-window-infinite-loader": "^2.0.0",
     "reactflow": "^11.11.4",

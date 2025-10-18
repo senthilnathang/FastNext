@@ -121,7 +121,7 @@ const meta: Meta<typeof GraphQLDemo> = {
   },
   tags: ["autodocs"],
   decorators: [
-    (Story) => (
+    (Story: React.ComponentType) => (
       <MockedProvider mocks={mocks} addTypename={false}>
         <div className="min-h-screen bg-background p-6">
           <Story />
@@ -138,7 +138,7 @@ export const Default: Story = {};
 
 export const WithLoadingState: Story = {
   decorators: [
-    (Story) => (
+    (Story: React.ComponentType) => (
       <MockedProvider mocks={[]} addTypename={false}>
         <div className="min-h-screen bg-background p-6">
           <Story />
@@ -150,7 +150,7 @@ export const WithLoadingState: Story = {
 
 export const WithErrorState: Story = {
   decorators: [
-    (Story) => {
+    (Story: React.ComponentType) => {
       const errorMocks = [
         {
           request: {
@@ -174,7 +174,7 @@ export const WithErrorState: Story = {
 
 export const WithEmptyData: Story = {
   decorators: [
-    (Story) => {
+    (Story: React.ComponentType) => {
       const emptyMocks = [
         {
           request: {

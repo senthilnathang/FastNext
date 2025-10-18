@@ -41,7 +41,7 @@ const meta: Meta<typeof Breadcrumb> = {
     },
   },
   decorators: [
-    (Story) => (
+    (Story: React.ComponentType) => (
       <div style={{ padding: "20px", width: "600px" }}>
         <Story />
       </div>
@@ -149,7 +149,7 @@ export const DarkMode: Story = {
     },
   },
   decorators: [
-    (Story) => (
+    (Story: React.ComponentType) => (
       <div className="dark" style={{ padding: "20px", width: "600px" }}>
         <Story />
       </div>

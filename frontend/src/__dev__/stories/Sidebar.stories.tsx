@@ -74,7 +74,7 @@ const meta: Meta<typeof Sidebar> = {
     },
   },
   decorators: [
-    (Story, context) => {
+    (Story: React.ComponentType, context: { parameters: { authContext?: any } }) => {
       const authValue = context.parameters.authContext || mockAuthContextValue;
       return (
         <AuthContext.Provider value={authValue}>

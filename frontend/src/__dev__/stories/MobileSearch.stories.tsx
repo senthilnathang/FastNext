@@ -63,7 +63,7 @@ const SearchStory = ({ onSubmit, ...props }: any) => {
 };
 
 export const Default: Story = {
-  render: (args) => <SearchStory {...args} />,
+  render: (args: Omit<React.ComponentProps<typeof MobileSearch>, 'value' | 'onChange' | 'onSubmit'>) => <SearchStory {...args} />,
   args: {
     placeholder: "Search...",
     enableVoiceSearch: true,
@@ -81,7 +81,7 @@ export const Default: Story = {
 };
 
 export const WithSuggestions: Story = {
-  render: (args) => <SearchStory {...args} />,
+  render: (args: Omit<React.ComponentProps<typeof MobileSearch>, 'value' | 'onChange' | 'onSubmit'>) => <SearchStory {...args} />,
   args: {
     placeholder: "Search documentation...",
     enableVoiceSearch: true,
@@ -100,7 +100,7 @@ export const WithSuggestions: Story = {
 };
 
 export const CompactMode: Story = {
-  render: (args) => <SearchStory {...args} />,
+  render: (args: Omit<React.ComponentProps<typeof MobileSearch>, 'value' | 'onChange' | 'onSubmit'>) => <SearchStory {...args} />,
   args: {
     placeholder: "Quick search...",
     enableVoiceSearch: false,
@@ -111,7 +111,7 @@ export const CompactMode: Story = {
 };
 
 export const WithFilters: Story = {
-  render: (args) => <SearchStory {...args} />,
+  render: (args: Omit<React.ComponentProps<typeof MobileSearch>, 'value' | 'onChange' | 'onSubmit'>) => <SearchStory {...args} />,
   args: {
     placeholder: "Search with filters...",
     enableVoiceSearch: true,
@@ -124,7 +124,7 @@ export const WithFilters: Story = {
 };
 
 export const VoiceSearchOnly: Story = {
-  render: (args) => <SearchStory {...args} />,
+  render: (args: Omit<React.ComponentProps<typeof MobileSearch>, 'value' | 'onChange' | 'onSubmit'>) => <SearchStory {...args} />,
   args: {
     placeholder: "Try voice search...",
     enableVoiceSearch: true,
@@ -139,7 +139,7 @@ export const VoiceSearchOnly: Story = {
 };
 
 export const NoVoiceSearch: Story = {
-  render: (args) => <SearchStory {...args} />,
+  render: (args: Omit<React.ComponentProps<typeof MobileSearch>, 'value' | 'onChange' | 'onSubmit'>) => <SearchStory {...args} />,
   args: {
     placeholder: "Text search only...",
     enableVoiceSearch: false,
@@ -151,7 +151,7 @@ export const NoVoiceSearch: Story = {
 };
 
 export const LongSuggestions: Story = {
-  render: (args) => <SearchStory {...args} />,
+  render: (args: Omit<React.ComponentProps<typeof MobileSearch>, 'value' | 'onChange' | 'onSubmit'>) => <SearchStory {...args} />,
   args: {
     placeholder: "Search for anything...",
     enableVoiceSearch: true,

@@ -129,7 +129,7 @@ const NavigationStory = ({ items, ...props }: any) => {
 };
 
 export const Default: Story = {
-  render: (args) => <NavigationStory {...args} items={basicItems} />,
+  render: (args: Omit<React.ComponentProps<typeof BottomNavigation>, 'items'>) => <NavigationStory {...args} items={basicItems} />,
   args: {
     showLabels: true,
     maxVisibleItems: 5,
@@ -138,7 +138,7 @@ export const Default: Story = {
 };
 
 export const WithBadges: Story = {
-  render: (args) => <NavigationStory {...args} items={shoppingItems} />,
+  render: (args: Omit<React.ComponentProps<typeof BottomNavigation>, 'items'>) => <NavigationStory {...args} items={shoppingItems} />,
   args: {
     showLabels: true,
     maxVisibleItems: 5,
@@ -147,7 +147,7 @@ export const WithBadges: Story = {
 };
 
 export const WithOverflow: Story = {
-  render: (args) => <NavigationStory {...args} items={extendedItems} />,
+  render: (args: Omit<React.ComponentProps<typeof BottomNavigation>, 'items'>) => <NavigationStory {...args} items={extendedItems} />,
   args: {
     showLabels: true,
     maxVisibleItems: 4,
@@ -156,7 +156,7 @@ export const WithOverflow: Story = {
 };
 
 export const NoLabels: Story = {
-  render: (args) => <NavigationStory {...args} items={basicItems} />,
+  render: (args: Omit<React.ComponentProps<typeof BottomNavigation>, 'items'>) => <NavigationStory {...args} items={basicItems} />,
   args: {
     showLabels: false,
     maxVisibleItems: 5,
@@ -165,7 +165,7 @@ export const NoLabels: Story = {
 };
 
 export const CompactOverflow: Story = {
-  render: (args) => <NavigationStory {...args} items={extendedItems} />,
+  render: (args: Omit<React.ComponentProps<typeof BottomNavigation>, 'items'>) => <NavigationStory {...args} items={extendedItems} />,
   args: {
     showLabels: true,
     maxVisibleItems: 3,
@@ -174,7 +174,7 @@ export const CompactOverflow: Story = {
 };
 
 export const ManyItems: Story = {
-  render: (args) => {
+  render: (args: Omit<React.ComponentProps<typeof BottomNavigation>, 'items'>) => {
     const manyItems = [
       { id: "home", label: "Home", icon: Home },
       { id: "users", label: "Users", icon: Users, badge: 15 },

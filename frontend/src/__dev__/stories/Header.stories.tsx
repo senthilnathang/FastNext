@@ -45,7 +45,7 @@ const meta: Meta<HeaderProps> = {
     },
   },
   decorators: [
-    (Story) => (
+    (Story: React.ComponentType) => (
       <div style={{ minHeight: "200px" }}>
         <Story />
       </div>
@@ -88,7 +88,7 @@ export const DarkMode: Story = {
     },
   },
   decorators: [
-    (Story) => (
+    (Story: React.ComponentType) => (
       <div className="dark" style={{ minHeight: "200px" }}>
         <Story />
       </div>
