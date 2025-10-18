@@ -84,7 +84,6 @@ export function useOptimizedCallback<T extends (...args: any[]) => any>(
     return deps.some(
       (dep, index) => !Object.is(dep, previousDeps.current[index]),
     );
-     
   }, [deps, deepCompare, deepEqual]);
 
   // Update callback if dependencies changed

@@ -1,100 +1,112 @@
-'use client';
+"use client";
 
-import React, { useState } from 'react';
-import { Card } from '@/shared/components/ui/card';
-import { Button } from '@/shared/components/ui/button';
-import { Badge } from '@/shared/components/ui/badge';
 import {
-  Palette,
-  Sidebar,
-  Mouse,
-  Keyboard,
-  Zap,
   Eye,
-  Settings,
-  Moon,
-  Sun,
+  Keyboard,
   Monitor,
+  Moon,
+  Mouse,
+  Palette,
   PanelLeft,
-  RotateCcw
-} from 'lucide-react';
-import { EnhancedThemeToggle, CompactThemeToggle, ThemeIndicator } from '@/shared/components/ui/EnhancedThemeToggle';
-import { cn } from '@/shared/utils';
+  RotateCcw,
+  Settings,
+  Sidebar,
+  Sun,
+  Zap,
+} from "lucide-react";
+import React, { useState } from "react";
+import { Badge } from "@/shared/components/ui/badge";
+import { Button } from "@/shared/components/ui/button";
+import { Card } from "@/shared/components/ui/card";
+import {
+  CompactThemeToggle,
+  EnhancedThemeToggle,
+  ThemeIndicator,
+} from "@/shared/components/ui/EnhancedThemeToggle";
+import { cn } from "@/shared/utils";
 
 export default function EnhancedDemoPage() {
-  const [activeDemo, setActiveDemo] = useState<string>('overview');
+  const [activeDemo, setActiveDemo] = useState<string>("overview");
 
   const features = [
     {
-      id: 'sidebar',
-      title: 'Enhanced Sidebar',
-      description: 'Hover-to-expand functionality with smooth animations',
+      id: "sidebar",
+      title: "Enhanced Sidebar",
+      description: "Hover-to-expand functionality with smooth animations",
       icon: Sidebar,
-      color: 'bg-blue-500',
+      color: "bg-blue-500",
       highlights: [
-        'Hover to expand when collapsed',
-        'Persistent state in localStorage',
-        'Keyboard shortcuts (Ctrl+B)',
-        'Smooth transitions and animations',
-        'Tooltip support for collapsed items'
-      ]
+        "Hover to expand when collapsed",
+        "Persistent state in localStorage",
+        "Keyboard shortcuts (Ctrl+B)",
+        "Smooth transitions and animations",
+        "Tooltip support for collapsed items",
+      ],
     },
     {
-      id: 'theme',
-      title: 'Advanced Theme Switcher',
-      description: 'Rich theme selection with previews and animations',
+      id: "theme",
+      title: "Advanced Theme Switcher",
+      description: "Rich theme selection with previews and animations",
       icon: Palette,
-      color: 'bg-purple-500',
+      color: "bg-purple-500",
       highlights: [
-        'Visual theme previews',
-        'System preference detection',
-        'Smooth color transitions',
-        'Multiple toggle variants',
-        'Theme indicator in status bar'
-      ]
+        "Visual theme previews",
+        "System preference detection",
+        "Smooth color transitions",
+        "Multiple toggle variants",
+        "Theme indicator in status bar",
+      ],
     },
     {
-      id: 'interactions',
-      title: 'Enhanced Interactions',
-      description: 'Improved user experience with micro-interactions',
+      id: "interactions",
+      title: "Enhanced Interactions",
+      description: "Improved user experience with micro-interactions",
       icon: Mouse,
-      color: 'bg-green-500',
+      color: "bg-green-500",
       highlights: [
-        'Hover effects and scale transforms',
-        'Focus states with ring indicators',
-        'Loading states and skeletons',
-        'Accessibility improvements',
-        'Touch-friendly mobile design'
-      ]
+        "Hover effects and scale transforms",
+        "Focus states with ring indicators",
+        "Loading states and skeletons",
+        "Accessibility improvements",
+        "Touch-friendly mobile design",
+      ],
     },
     {
-      id: 'shortcuts',
-      title: 'Keyboard Shortcuts',
-      description: 'Power user features for quick navigation',
+      id: "shortcuts",
+      title: "Keyboard Shortcuts",
+      description: "Power user features for quick navigation",
       icon: Keyboard,
-      color: 'bg-orange-500',
+      color: "bg-orange-500",
       highlights: [
-        'Ctrl+B: Toggle sidebar',
-        'F11: Toggle fullscreen',
-        'Esc: Close mobile sidebar',
-        'Tab navigation support',
-        'Screen reader compatibility'
-      ]
-    }
+        "Ctrl+B: Toggle sidebar",
+        "F11: Toggle fullscreen",
+        "Esc: Close mobile sidebar",
+        "Tab navigation support",
+        "Screen reader compatibility",
+      ],
+    },
   ];
 
   const demoSections = [
     {
-      id: 'overview',
-      title: 'Features Overview',
+      id: "overview",
+      title: "Features Overview",
       content: (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {features.map((feature) => {
             const Icon = feature.icon;
             return (
-              <Card key={feature.id} className="p-6 hover:shadow-lg transition-all duration-200 group">
+              <Card
+                key={feature.id}
+                className="p-6 hover:shadow-lg transition-all duration-200 group"
+              >
                 <div className="flex items-start space-x-4">
-                  <div className={cn('w-12 h-12 rounded-xl flex items-center justify-center text-white shadow-lg', feature.color)}>
+                  <div
+                    className={cn(
+                      "w-12 h-12 rounded-xl flex items-center justify-center text-white shadow-lg",
+                      feature.color,
+                    )}
+                  >
                     <Icon className="h-6 w-6" />
                   </div>
                   <div className="flex-1">
@@ -106,9 +118,14 @@ export default function EnhancedDemoPage() {
                     </p>
                     <div className="space-y-2">
                       {feature.highlights.map((highlight, index) => (
-                        <div key={index} className="flex items-center space-x-2 text-sm">
+                        <div
+                          key={index}
+                          className="flex items-center space-x-2 text-sm"
+                        >
                           <div className="w-1.5 h-1.5 bg-green-500 rounded-full"></div>
-                          <span className="text-gray-700 dark:text-gray-300">{highlight}</span>
+                          <span className="text-gray-700 dark:text-gray-300">
+                            {highlight}
+                          </span>
                         </div>
                       ))}
                     </div>
@@ -118,11 +135,11 @@ export default function EnhancedDemoPage() {
             );
           })}
         </div>
-      )
+      ),
     },
     {
-      id: 'theme-demo',
-      title: 'Theme Switcher Demo',
+      id: "theme-demo",
+      title: "Theme Switcher Demo",
       content: (
         <div className="space-y-8">
           <Card className="p-6">
@@ -133,7 +150,9 @@ export default function EnhancedDemoPage() {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="space-y-3">
-                <h4 className="font-medium text-sm text-gray-700 dark:text-gray-300">Enhanced Dropdown</h4>
+                <h4 className="font-medium text-sm text-gray-700 dark:text-gray-300">
+                  Enhanced Dropdown
+                </h4>
                 <div className="flex items-center justify-center p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                   <EnhancedThemeToggle />
                 </div>
@@ -143,7 +162,9 @@ export default function EnhancedDemoPage() {
               </div>
 
               <div className="space-y-3">
-                <h4 className="font-medium text-sm text-gray-700 dark:text-gray-300">Compact Toggle</h4>
+                <h4 className="font-medium text-sm text-gray-700 dark:text-gray-300">
+                  Compact Toggle
+                </h4>
                 <div className="flex items-center justify-center p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                   <CompactThemeToggle />
                 </div>
@@ -153,7 +174,9 @@ export default function EnhancedDemoPage() {
               </div>
 
               <div className="space-y-3">
-                <h4 className="font-medium text-sm text-gray-700 dark:text-gray-300">Theme Indicator</h4>
+                <h4 className="font-medium text-sm text-gray-700 dark:text-gray-300">
+                  Theme Indicator
+                </h4>
                 <div className="flex items-center justify-center p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                   <ThemeIndicator />
                 </div>
@@ -165,7 +188,9 @@ export default function EnhancedDemoPage() {
           </Card>
 
           <Card className="p-6">
-            <h3 className="text-lg font-semibold mb-4">Theme Switching Benefits</h3>
+            <h3 className="text-lg font-semibold mb-4">
+              Theme Switching Benefits
+            </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Badge variant="secondary" className="w-fit">
@@ -206,11 +231,11 @@ export default function EnhancedDemoPage() {
             </div>
           </Card>
         </div>
-      )
+      ),
     },
     {
-      id: 'sidebar-demo',
-      title: 'Sidebar Features Demo',
+      id: "sidebar-demo",
+      title: "Sidebar Features Demo",
       content: (
         <div className="space-y-8">
           <Card className="p-6">
@@ -272,11 +297,11 @@ export default function EnhancedDemoPage() {
             </div>
           </Card>
         </div>
-      )
+      ),
     },
     {
-      id: 'animations',
-      title: 'Animations & Transitions',
+      id: "animations",
+      title: "Animations & Transitions",
       content: (
         <div className="space-y-8">
           <Card className="p-6">
@@ -290,10 +315,16 @@ export default function EnhancedDemoPage() {
                 <Button className="transition-all duration-200 hover:scale-105 hover:shadow-lg">
                   Hover Scale Effect
                 </Button>
-                <Button variant="outline" className="transition-all duration-300 hover:bg-blue-50 dark:hover:bg-blue-900/20">
+                <Button
+                  variant="outline"
+                  className="transition-all duration-300 hover:bg-blue-50 dark:hover:bg-blue-900/20"
+                >
                   Color Transition
                 </Button>
-                <Button variant="ghost" className="transition-all duration-200 hover:rotate-1">
+                <Button
+                  variant="ghost"
+                  className="transition-all duration-200 hover:rotate-1"
+                >
                   Rotation Effect
                 </Button>
               </div>
@@ -311,19 +342,18 @@ export default function EnhancedDemoPage() {
             </div>
           </Card>
         </div>
-      )
-    }
+      ),
+    },
   ];
 
   return (
     <div className="space-y-6">
-
       {/* Navigation */}
       <div className="flex flex-wrap gap-2 justify-center">
         {demoSections.map((section) => (
           <Button
             key={section.id}
-            variant={activeDemo === section.id ? 'default' : 'outline'}
+            variant={activeDemo === section.id ? "default" : "outline"}
             onClick={() => setActiveDemo(section.id)}
             className="transition-all duration-200"
           >
@@ -334,7 +364,7 @@ export default function EnhancedDemoPage() {
 
       {/* Content */}
       <div className="min-h-[500px]">
-        {demoSections.find(section => section.id === activeDemo)?.content}
+        {demoSections.find((section) => section.id === activeDemo)?.content}
       </div>
 
       {/* Instructions */}
@@ -348,10 +378,15 @@ export default function EnhancedDemoPage() {
               Try the Enhanced Features
             </h3>
             <div className="space-y-1 text-sm text-blue-800 dark:text-blue-200">
-              <div>• Collapse the sidebar and hover over it to see the expansion effect</div>
+              <div>
+                • Collapse the sidebar and hover over it to see the expansion
+                effect
+              </div>
               <div>• Use Ctrl+B to quickly toggle the sidebar</div>
               <div>• Try the enhanced theme switcher in the header</div>
-              <div>• Check out the status bar at the bottom for theme indicators</div>
+              <div>
+                • Check out the status bar at the bottom for theme indicators
+              </div>
             </div>
           </div>
         </div>

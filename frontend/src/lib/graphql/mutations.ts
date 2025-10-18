@@ -2,8 +2,13 @@
  * GraphQL Mutations
  * Centralized GraphQL mutations for the application
  */
-import { gql } from '@apollo/client';
-import { USER_FRAGMENT, PROJECT_FRAGMENT, PAGE_FRAGMENT, COMPONENT_FRAGMENT } from './queries';
+import { gql } from "@apollo/client";
+import {
+  COMPONENT_FRAGMENT,
+  PAGE_FRAGMENT,
+  PROJECT_FRAGMENT,
+  USER_FRAGMENT,
+} from "./queries";
 
 // User mutations
 export const CREATE_USER = gql`

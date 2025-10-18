@@ -1,31 +1,41 @@
-import * as React from "react"
-import { Calendar, Clock, User, Shield, Activity, MapPin, Server, AlertTriangle, Copy, ExternalLink } from "lucide-react"
-
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
+  Activity,
+  AlertTriangle,
+  Calendar,
+  Clock,
+  Copy,
+  ExternalLink,
+  MapPin,
+  Server,
+  Shield,
+  User,
+} from "lucide-react";
+import type * as React from "react";
+import { toast } from "sonner";
+import {
   Badge,
+  Button,
   Card,
   CardContent,
   CardHeader,
   CardTitle,
-  Button,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  ScrollArea,
   Tabs,
   TabsContent,
   TabsList,
   TabsTrigger,
-  ScrollArea
-} from "@/shared/components"
-import { toast } from "sonner"
-import type { EventResponse } from "../types/events"
+} from "@/shared/components";
+import type { EventResponse } from "../types/events";
 
 interface EventDetailDialogProps {
-  event: EventResponse | null
-  open: boolean
-  onOpenChange: (open: boolean) => void
+  event: EventResponse | null;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
 }
 
 export const EventDetailDialog: React.FC<EventDetailDialogProps> = ({
@@ -33,60 +43,79 @@ export const EventDetailDialog: React.FC<EventDetailDialogProps> = ({
   open,
   onOpenChange,
 }) => {
-  if (!event) return null
+  if (!event) return null;
 
   // Helper functions
   const getLevelConfig = (level: string) => {
     const configs = {
-      debug: { color: 'bg-gray-500', variant: 'secondary' as const, icon: '🔍' },
-      info: { color: 'bg-blue-500', variant: 'default' as const, icon: 'ℹ️' },
-      warning: { color: 'bg-yellow-500', variant: 'destructive' as const, icon: '⚠️' },
-      error: { color: 'bg-red-500', variant: 'destructive' as const, icon: '❌' },
-      critical: { color: 'bg-red-800', variant: 'destructive' as const, icon: '🚨' }
-    }
-    return configs[level as keyof typeof configs] || configs.info
-  }
+      debug: {
+        color: "bg-gray-500",
+        variant: "secondary" as const,
+        icon: "🔍",
+      },
+      info: { color: "bg-blue-500", variant: "default" as const, icon: "ℹ️" },
+      warning: {
+        color: "bg-yellow-500",
+        variant: "destructive" as const,
+        icon: "⚠️",
+      },
+      error: {
+        color: "bg-red-500",
+        variant: "destructive" as const,
+        icon: "❌",
+      },
+      critical: {
+        color: "bg-red-800",
+        variant: "destructive" as const,
+        icon: "🚨",
+      },
+    };
+    return configs[level as keyof typeof configs] || configs.info;
+  };
 
   const getCategoryIcon = (category: string) => {
     const icons = {
-      authentication: '🔐',
-      authorization: '🛡️',
-      user_management: '👥',
-      data_management: '📊',
-      system_management: '⚙️',
-      security: '🚨',
-      workflow: '🔄',
-      api: '🌐',
-      file_management: '📁',
-      configuration: '⚙️'
-    }
-    return icons[category as keyof typeof icons] || '📋'
-  }
+      authentication: "🔐",
+      authorization: "🛡️",
+      user_management: "👥",
+      data_management: "📊",
+      system_management: "⚙️",
+      security: "🚨",
+      workflow: "🔄",
+      api: "🌐",
+      file_management: "📁",
+      configuration: "⚙️",
+    };
+    return icons[category as keyof typeof icons] || "📋";
+  };
 
   const copyToClipboard = (text: string, label: string) => {
-    navigator.clipboard.writeText(text).then(() => {
-      toast.success(`${label} copied to clipboard`)
-    }).catch(() => {
-      toast.error(`Failed to copy ${label}`)
-    })
-  }
+    navigator.clipboard
+      .writeText(text)
+      .then(() => {
+        toast.success(`${label} copied to clipboard`);
+      })
+      .catch(() => {
+        toast.error(`Failed to copy ${label}`);
+      });
+  };
 
   const formatTimestamp = (timestamp: string) => {
-    const date = new Date(timestamp)
+    const date = new Date(timestamp);
     return {
       date: date.toLocaleDateString(),
       time: date.toLocaleTimeString(),
-      iso: date.toISOString()
-    }
-  }
+      iso: date.toISOString(),
+    };
+  };
 
   const formatJson = (obj: any) => {
-    if (!obj) return 'null'
-    return JSON.stringify(obj, null, 2)
-  }
+    if (!obj) return "null";
+    return JSON.stringify(obj, null, 2);
+  };
 
-  const timestamp = formatTimestamp(event.timestamp)
-  const levelConfig = getLevelConfig(event.level)
+  const timestamp = formatTimestamp(event.timestamp);
+  const levelConfig = getLevelConfig(event.level);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -100,7 +129,7 @@ export const EventDetailDialog: React.FC<EventDetailDialogProps> = ({
             </Badge>
           </DialogTitle>
           <DialogDescription>
-            Event ID: {event.eventId || 'N/A'}
+            Event ID: {event.eventId || "N/A"}
             {event.correlationId && (
               <span className="ml-4">
                 Correlation ID: {event.correlationId}
@@ -130,7 +159,9 @@ export const EventDetailDialog: React.FC<EventDetailDialogProps> = ({
                 <CardContent className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="text-sm font-medium text-muted-foreground">Timestamp</label>
+                      <label className="text-sm font-medium text-muted-foreground">
+                        Timestamp
+                      </label>
                       <div className="flex items-center gap-2 mt-1">
                         <Calendar className="h-4 w-4 text-muted-foreground" />
                         <span>{timestamp.date}</span>
@@ -139,7 +170,9 @@ export const EventDetailDialog: React.FC<EventDetailDialogProps> = ({
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => copyToClipboard(timestamp.iso, 'Timestamp')}
+                          onClick={() =>
+                            copyToClipboard(timestamp.iso, "Timestamp")
+                          }
                         >
                           <Copy className="h-3 w-3" />
                         </Button>
@@ -147,34 +180,49 @@ export const EventDetailDialog: React.FC<EventDetailDialogProps> = ({
                     </div>
 
                     <div>
-                      <label className="text-sm font-medium text-muted-foreground">Category & Action</label>
+                      <label className="text-sm font-medium text-muted-foreground">
+                        Category & Action
+                      </label>
                       <div className="flex items-center gap-2 mt-1">
                         <Badge variant="outline" className="capitalize">
-                          {event.category.replace('_', ' ')}
+                          {event.category.replace("_", " ")}
                         </Badge>
                         <Badge variant="secondary" className="capitalize">
-                          {event.action.replace('_', ' ')}
+                          {event.action.replace("_", " ")}
                         </Badge>
                       </div>
                     </div>
                   </div>
 
                   <div>
-                    <label className="text-sm font-medium text-muted-foreground">Description</label>
+                    <label className="text-sm font-medium text-muted-foreground">
+                      Description
+                    </label>
                     <p className="mt-1 text-sm bg-muted p-3 rounded-md">
                       {event.description}
                     </p>
                   </div>
 
                   {/* Risk Assessment */}
-                  {(event.riskScore !== null || event.affectedUsersCount !== null) && (
+                  {(event.riskScore !== null ||
+                    event.affectedUsersCount !== null) && (
                     <div className="grid grid-cols-2 gap-4">
                       {event.riskScore !== null && (
                         <div>
-                          <label className="text-sm font-medium text-muted-foreground">Risk Score</label>
+                          <label className="text-sm font-medium text-muted-foreground">
+                            Risk Score
+                          </label>
                           <div className="flex items-center gap-2 mt-1">
                             <AlertTriangle className="h-4 w-4 text-orange-500" />
-                            <Badge variant={event.riskScore > 70 ? "destructive" : event.riskScore > 30 ? "secondary" : "default"}>
+                            <Badge
+                              variant={
+                                event.riskScore > 70
+                                  ? "destructive"
+                                  : event.riskScore > 30
+                                    ? "secondary"
+                                    : "default"
+                              }
+                            >
                               {event.riskScore}/100
                             </Badge>
                           </div>
@@ -183,7 +231,9 @@ export const EventDetailDialog: React.FC<EventDetailDialogProps> = ({
 
                       {event.affectedUsersCount !== null && (
                         <div>
-                          <label className="text-sm font-medium text-muted-foreground">Affected Users</label>
+                          <label className="text-sm font-medium text-muted-foreground">
+                            Affected Users
+                          </label>
                           <div className="flex items-center gap-2 mt-1">
                             <User className="h-4 w-4 text-muted-foreground" />
                             <span>{event.affectedUsersCount}</span>
@@ -207,26 +257,37 @@ export const EventDetailDialog: React.FC<EventDetailDialogProps> = ({
                   <CardContent>
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <label className="text-sm font-medium text-muted-foreground">Username</label>
+                        <label className="text-sm font-medium text-muted-foreground">
+                          Username
+                        </label>
                         <div className="flex items-center gap-2 mt-1">
                           <span>{event.user.username}</span>
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => copyToClipboard(event.user!.username, 'Username')}
+                            onClick={() =>
+                              copyToClipboard(event.user!.username, "Username")
+                            }
                           >
                             <Copy className="h-3 w-3" />
                           </Button>
                         </div>
                       </div>
                       <div>
-                        <label className="text-sm font-medium text-muted-foreground">User ID</label>
+                        <label className="text-sm font-medium text-muted-foreground">
+                          User ID
+                        </label>
                         <div className="flex items-center gap-2 mt-1">
                           <span>{event.user.id}</span>
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => copyToClipboard(event.user!.id.toString(), 'User ID')}
+                            onClick={() =>
+                              copyToClipboard(
+                                event.user!.id.toString(),
+                                "User ID",
+                              )
+                            }
                           >
                             <Copy className="h-3 w-3" />
                           </Button>
@@ -248,7 +309,9 @@ export const EventDetailDialog: React.FC<EventDetailDialogProps> = ({
                 <CardContent>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="text-sm font-medium text-muted-foreground">Type</label>
+                      <label className="text-sm font-medium text-muted-foreground">
+                        Type
+                      </label>
                       <div className="mt-1">
                         <Badge variant="outline">{event.entity.type}</Badge>
                       </div>
@@ -256,17 +319,21 @@ export const EventDetailDialog: React.FC<EventDetailDialogProps> = ({
                     {(event.entity.id || event.entity.name) && (
                       <div>
                         <label className="text-sm font-medium text-muted-foreground">
-                          {event.entity.name ? 'Name' : 'ID'}
+                          {event.entity.name ? "Name" : "ID"}
                         </label>
                         <div className="flex items-center gap-2 mt-1">
-                          <span className="truncate">{event.entity.name || event.entity.id}</span>
+                          <span className="truncate">
+                            {event.entity.name || event.entity.id}
+                          </span>
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => copyToClipboard(
-                              event.entity.name || event.entity.id || '',
-                              event.entity.name ? 'Entity Name' : 'Entity ID'
-                            )}
+                            onClick={() =>
+                              copyToClipboard(
+                                event.entity.name || event.entity.id || "",
+                                event.entity.name ? "Entity Name" : "Entity ID",
+                              )
+                            }
                           >
                             <Copy className="h-3 w-3" />
                           </Button>
@@ -280,68 +347,86 @@ export const EventDetailDialog: React.FC<EventDetailDialogProps> = ({
               {/* Location & System */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* Location Information */}
-                {event.location && (event.location.country || event.location.city) && (
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
-                        <MapPin className="h-4 w-4" />
-                        Location
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-2">
-                        {event.location.country && (
-                          <div>
-                            <label className="text-sm font-medium text-muted-foreground">Country</label>
-                            <div className="mt-1">{event.location.country}</div>
-                          </div>
-                        )}
-                        {event.location.city && (
-                          <div>
-                            <label className="text-sm font-medium text-muted-foreground">City</label>
-                            <div className="mt-1">{event.location.city}</div>
-                          </div>
-                        )}
-                      </div>
-                    </CardContent>
-                  </Card>
-                )}
+                {event.location &&
+                  (event.location.country || event.location.city) && (
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <MapPin className="h-4 w-4" />
+                          Location
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-2">
+                          {event.location.country && (
+                            <div>
+                              <label className="text-sm font-medium text-muted-foreground">
+                                Country
+                              </label>
+                              <div className="mt-1">
+                                {event.location.country}
+                              </div>
+                            </div>
+                          )}
+                          {event.location.city && (
+                            <div>
+                              <label className="text-sm font-medium text-muted-foreground">
+                                City
+                              </label>
+                              <div className="mt-1">{event.location.city}</div>
+                            </div>
+                          )}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
 
                 {/* System Information */}
-                {event.system && (event.system.server || event.system.environment || event.system.version) && (
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
-                        <Server className="h-4 w-4" />
-                        System
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-2">
-                        {event.system.server && (
-                          <div>
-                            <label className="text-sm font-medium text-muted-foreground">Server</label>
-                            <div className="mt-1">{event.system.server}</div>
-                          </div>
-                        )}
-                        {event.system.environment && (
-                          <div>
-                            <label className="text-sm font-medium text-muted-foreground">Environment</label>
-                            <div className="mt-1">
-                              <Badge variant="outline">{event.system.environment}</Badge>
+                {event.system &&
+                  (event.system.server ||
+                    event.system.environment ||
+                    event.system.version) && (
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Server className="h-4 w-4" />
+                          System
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-2">
+                          {event.system.server && (
+                            <div>
+                              <label className="text-sm font-medium text-muted-foreground">
+                                Server
+                              </label>
+                              <div className="mt-1">{event.system.server}</div>
                             </div>
-                          </div>
-                        )}
-                        {event.system.version && (
-                          <div>
-                            <label className="text-sm font-medium text-muted-foreground">Version</label>
-                            <div className="mt-1">{event.system.version}</div>
-                          </div>
-                        )}
-                      </div>
-                    </CardContent>
-                  </Card>
-                )}
+                          )}
+                          {event.system.environment && (
+                            <div>
+                              <label className="text-sm font-medium text-muted-foreground">
+                                Environment
+                              </label>
+                              <div className="mt-1">
+                                <Badge variant="outline">
+                                  {event.system.environment}
+                                </Badge>
+                              </div>
+                            </div>
+                          )}
+                          {event.system.version && (
+                            <div>
+                              <label className="text-sm font-medium text-muted-foreground">
+                                Version
+                              </label>
+                              <div className="mt-1">{event.system.version}</div>
+                            </div>
+                          )}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
               </div>
 
               {/* Tags */}
@@ -376,17 +461,29 @@ export const EventDetailDialog: React.FC<EventDetailDialogProps> = ({
                     <div className="grid grid-cols-2 gap-4">
                       {event.request.method && (
                         <div>
-                          <label className="text-sm font-medium text-muted-foreground">Method</label>
+                          <label className="text-sm font-medium text-muted-foreground">
+                            Method
+                          </label>
                           <div className="mt-1">
-                            <Badge variant="outline">{event.request.method}</Badge>
+                            <Badge variant="outline">
+                              {event.request.method}
+                            </Badge>
                           </div>
                         </div>
                       )}
                       {event.request.statusCode && (
                         <div>
-                          <label className="text-sm font-medium text-muted-foreground">Status Code</label>
+                          <label className="text-sm font-medium text-muted-foreground">
+                            Status Code
+                          </label>
                           <div className="mt-1">
-                            <Badge variant={event.request.statusCode >= 400 ? "destructive" : "default"}>
+                            <Badge
+                              variant={
+                                event.request.statusCode >= 400
+                                  ? "destructive"
+                                  : "default"
+                              }
+                            >
                               {event.request.statusCode}
                             </Badge>
                           </div>
@@ -396,7 +493,9 @@ export const EventDetailDialog: React.FC<EventDetailDialogProps> = ({
 
                     {event.request.path && (
                       <div>
-                        <label className="text-sm font-medium text-muted-foreground">Path</label>
+                        <label className="text-sm font-medium text-muted-foreground">
+                          Path
+                        </label>
                         <div className="flex items-center gap-2 mt-1">
                           <code className="bg-muted px-2 py-1 rounded text-sm">
                             {event.request.path}
@@ -404,7 +503,12 @@ export const EventDetailDialog: React.FC<EventDetailDialogProps> = ({
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => copyToClipboard(event.request!.path!, 'Request Path')}
+                            onClick={() =>
+                              copyToClipboard(
+                                event.request!.path!,
+                                "Request Path",
+                              )
+                            }
                           >
                             <Copy className="h-3 w-3" />
                           </Button>
@@ -415,7 +519,9 @@ export const EventDetailDialog: React.FC<EventDetailDialogProps> = ({
                     <div className="grid grid-cols-2 gap-4">
                       {event.request.ip && (
                         <div>
-                          <label className="text-sm font-medium text-muted-foreground">IP Address</label>
+                          <label className="text-sm font-medium text-muted-foreground">
+                            IP Address
+                          </label>
                           <div className="flex items-center gap-2 mt-1">
                             <code className="bg-muted px-2 py-1 rounded text-sm">
                               {event.request.ip}
@@ -423,7 +529,12 @@ export const EventDetailDialog: React.FC<EventDetailDialogProps> = ({
                             <Button
                               variant="ghost"
                               size="sm"
-                              onClick={() => copyToClipboard(event.request!.ip!, 'IP Address')}
+                              onClick={() =>
+                                copyToClipboard(
+                                  event.request!.ip!,
+                                  "IP Address",
+                                )
+                              }
                             >
                               <Copy className="h-3 w-3" />
                             </Button>
@@ -432,9 +543,13 @@ export const EventDetailDialog: React.FC<EventDetailDialogProps> = ({
                       )}
                       {event.request.responseTime && (
                         <div>
-                          <label className="text-sm font-medium text-muted-foreground">Response Time</label>
+                          <label className="text-sm font-medium text-muted-foreground">
+                            Response Time
+                          </label>
                           <div className="mt-1">
-                            <Badge variant="outline">{event.request.responseTime}ms</Badge>
+                            <Badge variant="outline">
+                              {event.request.responseTime}ms
+                            </Badge>
                           </div>
                         </div>
                       )}
@@ -442,7 +557,9 @@ export const EventDetailDialog: React.FC<EventDetailDialogProps> = ({
 
                     {event.request.userAgent && (
                       <div>
-                        <label className="text-sm font-medium text-muted-foreground">User Agent</label>
+                        <label className="text-sm font-medium text-muted-foreground">
+                          User Agent
+                        </label>
                         <div className="mt-1">
                           <code className="bg-muted px-2 py-1 rounded text-sm block truncate">
                             {event.request.userAgent}
@@ -486,7 +603,9 @@ export const EventDetailDialog: React.FC<EventDetailDialogProps> = ({
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => copyToClipboard(formatJson(event), 'Raw Event Data')}
+                      onClick={() =>
+                        copyToClipboard(formatJson(event), "Raw Event Data")
+                      }
                     >
                       <Copy className="h-3 w-3 mr-2" />
                       Copy All
@@ -504,5 +623,5 @@ export const EventDetailDialog: React.FC<EventDetailDialogProps> = ({
         </Tabs>
       </DialogContent>
     </Dialog>
-  )
-}
+  );
+};

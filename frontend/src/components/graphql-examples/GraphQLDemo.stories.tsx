@@ -1,7 +1,7 @@
-import type { Meta, StoryObj } from '@storybook/nextjs'
-import { GraphQLDemo } from './GraphQLDemo'
-import { MockedProvider } from '@apollo/client/testing'
-import { GET_USERS, GET_PROJECTS } from '@/lib/graphql/queries'
+import { MockedProvider } from "@apollo/client/testing";
+import type { Meta, StoryObj } from "@storybook/nextjs";
+import { GET_PROJECTS, GET_USERS } from "@/lib/graphql/queries";
+import { GraphQLDemo } from "./GraphQLDemo";
 
 const usersMock = {
   request: {
@@ -14,9 +14,9 @@ const usersMock = {
         edges: [
           {
             id: 1,
-            username: 'john_doe',
-            email: 'john@example.com',
-            full_name: 'John Doe',
+            username: "john_doe",
+            email: "john@example.com",
+            full_name: "John Doe",
             is_active: true,
             is_verified: true,
             is_superuser: false,
@@ -24,15 +24,15 @@ const usersMock = {
             bio: null,
             location: null,
             website: null,
-            created_at: '2024-01-01T00:00:00Z',
+            created_at: "2024-01-01T00:00:00Z",
             updated_at: null,
             last_login_at: null,
           },
           {
             id: 2,
-            username: 'jane_smith',
-            email: 'jane@example.com',
-            full_name: 'Jane Smith',
+            username: "jane_smith",
+            email: "jane@example.com",
+            full_name: "Jane Smith",
             is_active: true,
             is_verified: true,
             is_superuser: false,
@@ -40,7 +40,7 @@ const usersMock = {
             bio: null,
             location: null,
             website: null,
-            created_at: '2024-01-02T00:00:00Z',
+            created_at: "2024-01-02T00:00:00Z",
             updated_at: null,
             last_login_at: null,
           },
@@ -55,7 +55,7 @@ const usersMock = {
       },
     },
   },
-}
+};
 
 const projectsMock = {
   request: {
@@ -68,18 +68,18 @@ const projectsMock = {
         edges: [
           {
             id: 1,
-            name: 'FastNext Demo',
-            description: 'A demo project showcasing the FastNext framework',
+            name: "FastNext Demo",
+            description: "A demo project showcasing the FastNext framework",
             user_id: 1,
             is_public: true,
             settings: {},
-            created_at: '2024-01-01T00:00:00Z',
+            created_at: "2024-01-01T00:00:00Z",
             updated_at: null,
             owner: {
               id: 1,
-              username: 'john_doe',
-              email: 'john@example.com',
-              full_name: 'John Doe',
+              username: "john_doe",
+              email: "john@example.com",
+              full_name: "John Doe",
               is_active: true,
               is_verified: true,
               is_superuser: false,
@@ -87,7 +87,7 @@ const projectsMock = {
               bio: null,
               location: null,
               website: null,
-              created_at: '2024-01-01T00:00:00Z',
+              created_at: "2024-01-01T00:00:00Z",
               updated_at: null,
               last_login_at: null,
             },
@@ -103,22 +103,23 @@ const projectsMock = {
       },
     },
   },
-}
+};
 
-const mocks = [usersMock, projectsMock]
+const mocks = [usersMock, projectsMock];
 
 const meta: Meta<typeof GraphQLDemo> = {
-  title: 'Examples/GraphQLDemo',
+  title: "Examples/GraphQLDemo",
   component: GraphQLDemo,
   parameters: {
-    layout: 'fullscreen',
+    layout: "fullscreen",
     docs: {
       description: {
-        component: 'A comprehensive demo component showing GraphQL integration with Apollo Client. Includes tabs for testing queries, browsing users, and managing projects.',
+        component:
+          "A comprehensive demo component showing GraphQL integration with Apollo Client. Includes tabs for testing queries, browsing users, and managing projects.",
       },
     },
   },
-  tags: ['autodocs'],
+  tags: ["autodocs"],
   decorators: [
     (Story) => (
       <MockedProvider mocks={mocks} addTypename={false}>
@@ -128,12 +129,12 @@ const meta: Meta<typeof GraphQLDemo> = {
       </MockedProvider>
     ),
   ],
-}
+};
 
-export default meta
-type Story = StoryObj<typeof meta>
+export default meta;
+type Story = StoryObj<typeof meta>;
 
-export const Default: Story = {}
+export const Default: Story = {};
 
 export const WithLoadingState: Story = {
   decorators: [
@@ -145,7 +146,7 @@ export const WithLoadingState: Story = {
       </MockedProvider>
     ),
   ],
-}
+};
 
 export const WithErrorState: Story = {
   decorators: [
@@ -156,9 +157,9 @@ export const WithErrorState: Story = {
             query: GET_USERS,
             variables: { first: 10 },
           },
-          error: new Error('GraphQL Error: Failed to fetch users'),
+          error: new Error("GraphQL Error: Failed to fetch users"),
         },
-      ]
+      ];
 
       return (
         <MockedProvider mocks={errorMocks} addTypename={false}>
@@ -166,10 +167,10 @@ export const WithErrorState: Story = {
             <Story />
           </div>
         </MockedProvider>
-      )
+      );
     },
   ],
-}
+};
 
 export const WithEmptyData: Story = {
   decorators: [
@@ -215,7 +216,7 @@ export const WithEmptyData: Story = {
             },
           },
         },
-      ]
+      ];
 
       return (
         <MockedProvider mocks={emptyMocks} addTypename={false}>
@@ -223,7 +224,7 @@ export const WithEmptyData: Story = {
             <Story />
           </div>
         </MockedProvider>
-      )
+      );
     },
   ],
-}
+};

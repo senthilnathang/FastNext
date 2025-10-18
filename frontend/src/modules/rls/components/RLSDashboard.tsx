@@ -1,24 +1,24 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect, useCallback } from 'react';
-import { Card } from '@/shared/components/ui/card';
-import { Button } from '@/shared/components/ui/button';
-import { Input } from '@/shared/components/ui/input';
-import { Label } from '@/shared/components/ui/label';
 import {
-  Shield,
-  Users,
-  AlertTriangle,
-  CheckCircle,
   Activity,
-  Database,
-  TrendingUp,
-  Lock,
-  Settings,
+  AlertTriangle,
   BarChart3,
-  RefreshCw
-} from 'lucide-react';
-import { getApiUrl } from '@/shared/services/api/config';
+  CheckCircle,
+  Database,
+  Lock,
+  RefreshCw,
+  Settings,
+  Shield,
+  TrendingUp,
+  Users,
+} from "lucide-react";
+import React, { useCallback, useEffect, useState } from "react";
+import { Button } from "@/shared/components/ui/button";
+import { Card } from "@/shared/components/ui/card";
+import { Input } from "@/shared/components/ui/input";
+import { Label } from "@/shared/components/ui/label";
+import { getApiUrl } from "@/shared/services/api/config";
 
 // Types
 interface RLSStatistics {
@@ -74,13 +74,13 @@ export default function RLSDashboard() {
 
   // Access check testing
   const [testRequest, setTestRequest] = useState<AccessCheckRequest>({
-    entity_type: 'PROJECT',
-    action: 'SELECT'
+    entity_type: "PROJECT",
+    action: "SELECT",
   });
-  const [testResult, setTestResult] = useState<AccessCheckResponse | null>(null);
+  const [testResult, setTestResult] = useState<AccessCheckResponse | null>(
+    null,
+  );
   const [testLoading, setTestLoading] = useState(false);
-
-
 
   const fetchStatistics = async () => {
     try {
@@ -95,30 +95,32 @@ export default function RLSDashboard() {
         access_attempts_today: 89,
         access_denied_today: 7,
         top_entities: [
-          { entity_type: 'PROJECT', count: 45 },
-          { entity_type: 'USER', count: 32 },
-          { entity_type: 'COMPONENT', count: 23 }
+          { entity_type: "PROJECT", count: 45 },
+          { entity_type: "USER", count: 32 },
+          { entity_type: "COMPONENT", count: 23 },
         ],
         top_users: [
-          { user_id: 1, username: 'admin', count: 15 },
-          { user_id: 2, username: 'john_doe', count: 12 },
-          { user_id: 3, username: 'jane_smith', count: 8 }
+          { user_id: 1, username: "admin", count: 15 },
+          { user_id: 2, username: "john_doe", count: 12 },
+          { user_id: 3, username: "jane_smith", count: 8 },
         ],
         recent_violations: [
           {
             id: 1,
             user_id: 4,
-            entity_type: 'PROJECT',
-            action: 'DELETE',
-            denial_reason: 'Access denied: not owner',
-            created_at: new Date().toISOString()
-          }
-        ]
+            entity_type: "PROJECT",
+            action: "DELETE",
+            denial_reason: "Access denied: not owner",
+            created_at: new Date().toISOString(),
+          },
+        ],
       };
 
       setStatistics(mockStats);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load statistics');
+      setError(
+        err instanceof Error ? err.message : "Failed to load statistics",
+      );
     } finally {
       setLoading(false);
     }
@@ -126,16 +128,16 @@ export default function RLSDashboard() {
 
   const fetchAuditStats = useCallback(async () => {
     try {
-      const token = localStorage.getItem('access_token');
+      const token = localStorage.getItem("access_token");
 
       const response = await fetch(
-        `${getApiUrl('/api/v1/rls/audit-logs/stats')}?days=${selectedPeriod}`,
+        `${getApiUrl("/api/v1/rls/audit-logs/stats")}?days=${selectedPeriod}`,
         {
           headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
           },
-        }
+        },
       );
 
       if (response.ok) {
@@ -150,19 +152,19 @@ export default function RLSDashboard() {
           denied_count: 14,
           success_rate: 91.0,
           top_denied_reasons: [
-            { reason: 'INSUFFICIENT_PERMISSIONS', count: 8 },
-            { reason: 'POLICY_VIOLATION', count: 6 }
+            { reason: "INSUFFICIENT_PERMISSIONS", count: 8 },
+            { reason: "POLICY_VIOLATION", count: 6 },
           ],
           entity_type_stats: [
-            { entity_type: 'USER', count: 89 },
-            { entity_type: 'COMPONENT', count: 45 },
-            { entity_type: 'DATA', count: 22 }
-          ]
+            { entity_type: "USER", count: 89 },
+            { entity_type: "COMPONENT", count: 45 },
+            { entity_type: "DATA", count: 22 },
+          ],
         };
         setAuditStats(mockAuditStats);
       }
     } catch (err) {
-      console.error('Failed to fetch audit stats:', err);
+      console.error("Failed to fetch audit stats:", err);
     }
   }, [selectedPeriod]);
 
@@ -180,13 +182,13 @@ export default function RLSDashboard() {
     setTestResult(null);
 
     try {
-      const token = localStorage.getItem('access_token');
+      const token = localStorage.getItem("access_token");
 
-      const response = await fetch(getApiUrl('/api/v1/rls/check-access'), {
-        method: 'POST',
+      const response = await fetch(getApiUrl("/api/v1/rls/check-access"), {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(testRequest),
       });
@@ -198,16 +200,19 @@ export default function RLSDashboard() {
         // Mock response if endpoint doesn't exist
         const mockResult: AccessCheckResponse = {
           access_granted: Math.random() > 0.3,
-          denial_reason: Math.random() > 0.3 ? undefined : 'Access denied: insufficient permissions',
+          denial_reason:
+            Math.random() > 0.3
+              ? undefined
+              : "Access denied: insufficient permissions",
           entity_type: testRequest.entity_type,
           action: testRequest.action,
           entity_id: testRequest.entity_id,
-          checked_at: new Date().toISOString()
+          checked_at: new Date().toISOString(),
         };
         setTestResult(mockResult);
       }
     } catch {
-      setError('Failed to test access');
+      setError("Failed to test access");
     } finally {
       setTestLoading(false);
     }
@@ -217,7 +222,9 @@ export default function RLSDashboard() {
     return (
       <div className="flex items-center justify-center py-8">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-        <span className="ml-2 text-gray-600 dark:text-gray-300">Loading RLS dashboard...</span>
+        <span className="ml-2 text-gray-600 dark:text-gray-300">
+          Loading RLS dashboard...
+        </span>
       </div>
     );
   }
@@ -258,7 +265,9 @@ export default function RLSDashboard() {
           <Card className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Total Policies</p>
+                <p className="text-sm font-medium text-gray-600">
+                  Total Policies
+                </p>
                 <p className="text-2xl font-bold text-gray-900 dark:text-white">
                   {statistics.total_policies}
                 </p>
@@ -275,7 +284,9 @@ export default function RLSDashboard() {
           <Card className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Today&apos;s Access</p>
+                <p className="text-sm font-medium text-gray-600">
+                  Today&apos;s Access
+                </p>
                 <p className="text-2xl font-bold text-gray-900 dark:text-white">
                   {statistics.access_attempts_today}
                 </p>
@@ -292,27 +303,27 @@ export default function RLSDashboard() {
           <Card className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Success Rate</p>
+                <p className="text-sm font-medium text-gray-600">
+                  Success Rate
+                </p>
                 <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                  {auditStats ? auditStats.success_rate.toFixed(1) : '0.0'}%
+                  {auditStats ? auditStats.success_rate.toFixed(1) : "0.0"}%
                 </p>
               </div>
               <TrendingUp className="h-8 w-8 text-green-600" />
             </div>
             <div className="mt-2 flex items-center text-sm">
-              <span className="text-gray-600">
-                Last {selectedPeriod} days
-              </span>
+              <span className="text-gray-600">Last {selectedPeriod} days</span>
             </div>
           </Card>
 
           <Card className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Security Score</p>
-                <p className="text-2xl font-bold text-green-600">
-                  92
+                <p className="text-sm font-medium text-gray-600">
+                  Security Score
                 </p>
+                <p className="text-2xl font-bold text-green-600">92</p>
               </div>
               <Shield className="h-8 w-8 text-green-600" />
             </div>
@@ -364,16 +375,21 @@ export default function RLSDashboard() {
                   Top Denial Reasons
                 </h4>
                 <div className="space-y-2">
-                  {auditStats.top_denied_reasons.slice(0, 3).map((reason, index) => (
-                    <div key={index} className="flex justify-between items-center text-sm">
-                      <span className="text-gray-600 truncate">
-                        {reason.reason}
-                      </span>
-                      <span className="font-medium text-gray-900">
-                        {reason.count}
-                      </span>
-                    </div>
-                  ))}
+                  {auditStats.top_denied_reasons
+                    .slice(0, 3)
+                    .map((reason, index) => (
+                      <div
+                        key={index}
+                        className="flex justify-between items-center text-sm"
+                      >
+                        <span className="text-gray-600 truncate">
+                          {reason.reason}
+                        </span>
+                        <span className="font-medium text-gray-900">
+                          {reason.count}
+                        </span>
+                      </div>
+                    ))}
                 </div>
               </div>
 
@@ -382,16 +398,21 @@ export default function RLSDashboard() {
                   Entity Type Breakdown
                 </h4>
                 <div className="space-y-2">
-                  {auditStats.entity_type_stats.slice(0, 3).map((stat, index) => (
-                    <div key={index} className="flex justify-between items-center text-sm">
-                      <span className="text-gray-600">
-                        {stat.entity_type}
-                      </span>
-                      <span className="font-medium text-gray-900">
-                        {stat.count}
-                      </span>
-                    </div>
-                  ))}
+                  {auditStats.entity_type_stats
+                    .slice(0, 3)
+                    .map((stat, index) => (
+                      <div
+                        key={index}
+                        className="flex justify-between items-center text-sm"
+                      >
+                        <span className="text-gray-600">
+                          {stat.entity_type}
+                        </span>
+                        <span className="font-medium text-gray-900">
+                          {stat.count}
+                        </span>
+                      </div>
+                    ))}
                 </div>
               </div>
             </div>
@@ -411,10 +432,12 @@ export default function RLSDashboard() {
                 <select
                   id="entity_type"
                   value={testRequest.entity_type}
-                  onChange={(e) => setTestRequest({
-                    ...testRequest,
-                    entity_type: e.target.value
-                  })}
+                  onChange={(e) =>
+                    setTestRequest({
+                      ...testRequest,
+                      entity_type: e.target.value,
+                    })
+                  }
                   className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
                 >
                   <option value="PROJECT">Project</option>
@@ -430,10 +453,12 @@ export default function RLSDashboard() {
                 <select
                   id="action"
                   value={testRequest.action}
-                  onChange={(e) => setTestRequest({
-                    ...testRequest,
-                    action: e.target.value
-                  })}
+                  onChange={(e) =>
+                    setTestRequest({
+                      ...testRequest,
+                      action: e.target.value,
+                    })
+                  }
                   className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
                 >
                   <option value="SELECT">Read</option>
@@ -450,11 +475,15 @@ export default function RLSDashboard() {
                 id="entity_id"
                 type="number"
                 placeholder="Enter entity ID"
-                value={testRequest.entity_id || ''}
-                onChange={(e) => setTestRequest({
-                  ...testRequest,
-                  entity_id: e.target.value ? Number(e.target.value) : undefined
-                })}
+                value={testRequest.entity_id || ""}
+                onChange={(e) =>
+                  setTestRequest({
+                    ...testRequest,
+                    entity_id: e.target.value
+                      ? Number(e.target.value)
+                      : undefined,
+                  })
+                }
               />
             </div>
 
@@ -463,25 +492,33 @@ export default function RLSDashboard() {
               disabled={testLoading}
               className="w-full"
             >
-              {testLoading ? 'Testing...' : 'Test Access'}
+              {testLoading ? "Testing..." : "Test Access"}
             </Button>
 
             {testResult && (
-              <div className={`p-4 rounded-lg border ${
-                testResult.access_granted
-                  ? 'bg-green-50 border-green-200'
-                  : 'bg-red-50 border-red-200'
-              }`}>
+              <div
+                className={`p-4 rounded-lg border ${
+                  testResult.access_granted
+                    ? "bg-green-50 border-green-200"
+                    : "bg-red-50 border-red-200"
+                }`}
+              >
                 <div className="flex items-center space-x-2 mb-2">
                   {testResult.access_granted ? (
                     <CheckCircle className="h-5 w-5 text-green-600" />
                   ) : (
                     <Lock className="h-5 w-5 text-red-600" />
                   )}
-                  <span className={`font-medium ${
-                    testResult.access_granted ? 'text-green-700' : 'text-red-700'
-                  }`}>
-                    {testResult.access_granted ? 'Access Granted' : 'Access Denied'}
+                  <span
+                    className={`font-medium ${
+                      testResult.access_granted
+                        ? "text-green-700"
+                        : "text-red-700"
+                    }`}
+                  >
+                    {testResult.access_granted
+                      ? "Access Granted"
+                      : "Access Denied"}
                   </span>
                 </div>
 
@@ -510,12 +547,16 @@ export default function RLSDashboard() {
 
           <div className="space-y-3">
             {statistics.recent_violations.map((violation) => (
-              <div key={violation.id} className="flex items-center justify-between p-3 bg-red-50 rounded-lg">
+              <div
+                key={violation.id}
+                className="flex items-center justify-between p-3 bg-red-50 rounded-lg"
+              >
                 <div className="flex items-center space-x-3">
                   <AlertTriangle className="h-5 w-5 text-red-600" />
                   <div>
                     <p className="text-sm font-medium text-gray-900">
-                      User attempted {violation.action} on {violation.entity_type}
+                      User attempted {violation.action} on{" "}
+                      {violation.entity_type}
                     </p>
                     <p className="text-xs text-red-600">
                       {violation.denial_reason}

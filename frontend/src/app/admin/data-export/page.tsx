@@ -1,28 +1,41 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/components/ui/card';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/components/ui/select';
-import { Badge } from '@/shared/components/ui/badge';
-import { Alert, AlertDescription } from '@/shared/components/ui/alert';
-import { Skeleton } from '@/shared/components/ui/skeleton';
-import { Input } from '@/shared/components/ui/input';
-import { Label } from '@/shared/components/ui/label';
-import { Button } from '@/shared/components/ui/button';
-import { Checkbox } from '@/shared/components/ui/checkbox';
 import {
-  Database,
   AlertCircle,
-  Info,
   Columns,
-  Settings,
-  PlayCircle,
+  Database,
   FileDown,
-  Filter
-} from 'lucide-react';
-
-import { MultiStepWizard, WizardStep } from '@/shared/components/ui/multi-step-wizard';
-
+  Filter,
+  Info,
+  PlayCircle,
+  Settings,
+} from "lucide-react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { Alert, AlertDescription } from "@/shared/components/ui/alert";
+import { Badge } from "@/shared/components/ui/badge";
+import { Button } from "@/shared/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/shared/components/ui/card";
+import { Checkbox } from "@/shared/components/ui/checkbox";
+import { Input } from "@/shared/components/ui/input";
+import { Label } from "@/shared/components/ui/label";
+import {
+  MultiStepWizard,
+  type WizardStep,
+} from "@/shared/components/ui/multi-step-wizard";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/shared/components/ui/select";
+import { Skeleton } from "@/shared/components/ui/skeleton";
 
 interface TableInfo {
   table_name: string;
@@ -74,108 +87,115 @@ export default function DataExportPage() {
   // Data states
   const [availableTables, setAvailableTables] = useState<string[]>([]);
   const [tableSchema, setTableSchema] = useState<TableInfo | null>(null);
-  const [tablePermissions, setTablePermissions] = useState<TablePermissions | null>(null);
+  const [tablePermissions, setTablePermissions] =
+    useState<TablePermissions | null>(null);
   const [tableData, setTableData] = useState<TableData | null>(null);
 
   // Export wizard data
   const [exportData, setExportData] = useState<ExportData>({
-    selectedTable: '',
+    selectedTable: "",
     selectedColumns: [],
-    exportFormat: 'csv',
+    exportFormat: "csv",
     options: {},
     filters: [],
     rowLimit: 1000,
-    searchTerm: '',
+    searchTerm: "",
     previewData: [],
-    totalRows: 0
+    totalRows: 0,
   });
 
   const steps: WizardStep[] = [
     {
-      id: 'table-selection',
-      title: 'Choose Table',
-      description: 'Select the database table for export',
+      id: "table-selection",
+      title: "Choose Table",
+      description: "Select the database table for export",
       icon: <Database className="w-5 h-5" />,
-      isValid: !!exportData.selectedTable
+      isValid: !!exportData.selectedTable,
     },
     {
-      id: 'fields-format',
-      title: 'Fields & Format',
-      description: 'Select columns and export format',
+      id: "fields-format",
+      title: "Fields & Format",
+      description: "Select columns and export format",
       icon: <FileDown className="w-5 h-5" />,
-      isValid: exportData.selectedColumns.length > 0 && !!exportData.exportFormat
+      isValid:
+        exportData.selectedColumns.length > 0 && !!exportData.exportFormat,
     },
     {
-      id: 'filter-records',
-      title: 'Filter Records',
-      description: 'Filter and preview your data',
+      id: "filter-records",
+      title: "Filter Records",
+      description: "Filter and preview your data",
       icon: <Filter className="w-5 h-5" />,
-      isValid: true // Optional step
+      isValid: true, // Optional step
     },
     {
-      id: 'execute',
-      title: 'Execute Export',
-      description: 'Review and execute the export',
+      id: "execute",
+      title: "Execute Export",
+      description: "Review and execute the export",
       icon: <PlayCircle className="w-5 h-5" />,
-      isValid: true
-    }
+      isValid: true,
+    },
   ];
 
   const fetchAvailableTables = useCallback(async () => {
     setIsLoadingTables(true);
     try {
-      const token = localStorage.getItem('access_token');
+      const token = localStorage.getItem("access_token");
 
       if (!token) {
-        console.warn('No access token found - showing demo tables');
-        setAvailableTables(['users', 'products', 'orders', 'customers']);
+        console.warn("No access token found - showing demo tables");
+        setAvailableTables(["users", "products", "orders", "customers"]);
         setIsLoadingTables(false);
         return;
       }
 
-      const response = await fetch('/api/v1/data/tables/available', {
+      const response = await fetch("/api/v1/data/tables/available", {
         headers: {
-          'Authorization': `Bearer ${token}`
-        }
+          Authorization: `Bearer ${token}`,
+        },
       });
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.error(`Failed to fetch available tables (${response.status}):`, errorText);
+        console.error(
+          `Failed to fetch available tables (${response.status}):`,
+          errorText,
+        );
 
         // For auth errors, show demo tables
         if (response.status === 401 || response.status === 403) {
-          setAvailableTables(['users', 'products', 'orders', 'customers']);
+          setAvailableTables(["users", "products", "orders", "customers"]);
           return;
         }
 
-        throw new Error(`Failed to fetch available tables (${response.status})`);
+        throw new Error(
+          `Failed to fetch available tables (${response.status})`,
+        );
       }
 
       const data = await response.json();
       setAvailableTables(data.tables || []);
     } catch (err) {
-      console.error('Failed to load tables:', err);
-      setError(`Failed to load tables: ${err instanceof Error ? err.message : 'Unknown error'}`);
-       // Set fallback tables for demo
-       setAvailableTables(['users', 'products', 'orders', 'customers']);
-      } finally {
-        setIsLoadingTables(false);
-      }
-    }, []);
+      console.error("Failed to load tables:", err);
+      setError(
+        `Failed to load tables: ${err instanceof Error ? err.message : "Unknown error"}`,
+      );
+      // Set fallback tables for demo
+      setAvailableTables(["users", "products", "orders", "customers"]);
+    } finally {
+      setIsLoadingTables(false);
+    }
+  }, []);
 
   // Fetch available tables on component mount
   useEffect(() => {
     fetchAvailableTables();
   }, [fetchAvailableTables]);
 
-
-
   // Auto-select all columns when schema is loaded
   useEffect(() => {
     if (tableSchema && exportData.selectedColumns.length === 0) {
-      const allColumns = tableSchema.columns.map(col => col.name);
-      setExportData(prev => ({ ...prev, selectedColumns: allColumns }));
+      const allColumns = tableSchema.columns.map((col) => col.name);
+      setExportData((prev) => ({ ...prev, selectedColumns: allColumns }));
     }
   }, [tableSchema, exportData.selectedColumns.length]);
 
@@ -183,67 +203,204 @@ export default function DataExportPage() {
     // Demo schema data for fallback when authentication fails
     const demoSchemas: Record<string, TableInfo> = {
       users: {
-        table_name: 'users',
+        table_name: "users",
         columns: [
-          { name: 'id', type: 'integer', nullable: false, primary_key: true },
-          { name: 'email', type: 'varchar', nullable: false, primary_key: false },
-          { name: 'first_name', type: 'varchar', nullable: true, primary_key: false },
-          { name: 'last_name', type: 'varchar', nullable: true, primary_key: false },
-          { name: 'created_at', type: 'timestamp', nullable: false, primary_key: false },
-          { name: 'is_active', type: 'boolean', nullable: false, primary_key: false }
+          { name: "id", type: "integer", nullable: false, primary_key: true },
+          {
+            name: "email",
+            type: "varchar",
+            nullable: false,
+            primary_key: false,
+          },
+          {
+            name: "first_name",
+            type: "varchar",
+            nullable: true,
+            primary_key: false,
+          },
+          {
+            name: "last_name",
+            type: "varchar",
+            nullable: true,
+            primary_key: false,
+          },
+          {
+            name: "created_at",
+            type: "timestamp",
+            nullable: false,
+            primary_key: false,
+          },
+          {
+            name: "is_active",
+            type: "boolean",
+            nullable: false,
+            primary_key: false,
+          },
         ],
-        primary_keys: ['id'],
+        primary_keys: ["id"],
         sample_data: [
-          { id: 1, email: 'john@example.com', first_name: 'John', last_name: 'Doe', created_at: '2023-01-01', is_active: true },
-          { id: 2, email: 'jane@example.com', first_name: 'Jane', last_name: 'Smith', created_at: '2023-01-02', is_active: true }
-        ]
+          {
+            id: 1,
+            email: "john@example.com",
+            first_name: "John",
+            last_name: "Doe",
+            created_at: "2023-01-01",
+            is_active: true,
+          },
+          {
+            id: 2,
+            email: "jane@example.com",
+            first_name: "Jane",
+            last_name: "Smith",
+            created_at: "2023-01-02",
+            is_active: true,
+          },
+        ],
       },
       products: {
-        table_name: 'products',
+        table_name: "products",
         columns: [
-          { name: 'id', type: 'integer', nullable: false, primary_key: true },
-          { name: 'name', type: 'varchar', nullable: false, primary_key: false },
-          { name: 'price', type: 'decimal', nullable: false, primary_key: false },
-          { name: 'category', type: 'varchar', nullable: true, primary_key: false },
-          { name: 'in_stock', type: 'boolean', nullable: false, primary_key: false }
+          { name: "id", type: "integer", nullable: false, primary_key: true },
+          {
+            name: "name",
+            type: "varchar",
+            nullable: false,
+            primary_key: false,
+          },
+          {
+            name: "price",
+            type: "decimal",
+            nullable: false,
+            primary_key: false,
+          },
+          {
+            name: "category",
+            type: "varchar",
+            nullable: true,
+            primary_key: false,
+          },
+          {
+            name: "in_stock",
+            type: "boolean",
+            nullable: false,
+            primary_key: false,
+          },
         ],
-        primary_keys: ['id'],
+        primary_keys: ["id"],
         sample_data: [
-          { id: 1, name: 'Laptop', price: 999.99, category: 'Electronics', in_stock: true },
-          { id: 2, name: 'Book', price: 19.99, category: 'Education', in_stock: false }
-        ]
+          {
+            id: 1,
+            name: "Laptop",
+            price: 999.99,
+            category: "Electronics",
+            in_stock: true,
+          },
+          {
+            id: 2,
+            name: "Book",
+            price: 19.99,
+            category: "Education",
+            in_stock: false,
+          },
+        ],
       },
       orders: {
-        table_name: 'orders',
+        table_name: "orders",
         columns: [
-          { name: 'id', type: 'integer', nullable: false, primary_key: true },
-          { name: 'user_id', type: 'integer', nullable: false, primary_key: false },
-          { name: 'product_id', type: 'integer', nullable: false, primary_key: false },
-          { name: 'quantity', type: 'integer', nullable: false, primary_key: false },
-          { name: 'order_date', type: 'timestamp', nullable: false, primary_key: false },
-          { name: 'status', type: 'varchar', nullable: false, primary_key: false }
+          { name: "id", type: "integer", nullable: false, primary_key: true },
+          {
+            name: "user_id",
+            type: "integer",
+            nullable: false,
+            primary_key: false,
+          },
+          {
+            name: "product_id",
+            type: "integer",
+            nullable: false,
+            primary_key: false,
+          },
+          {
+            name: "quantity",
+            type: "integer",
+            nullable: false,
+            primary_key: false,
+          },
+          {
+            name: "order_date",
+            type: "timestamp",
+            nullable: false,
+            primary_key: false,
+          },
+          {
+            name: "status",
+            type: "varchar",
+            nullable: false,
+            primary_key: false,
+          },
         ],
-        primary_keys: ['id'],
+        primary_keys: ["id"],
         sample_data: [
-          { id: 1, user_id: 1, product_id: 1, quantity: 1, order_date: '2023-01-01', status: 'completed' },
-          { id: 2, user_id: 2, product_id: 2, quantity: 2, order_date: '2023-01-02', status: 'pending' }
-        ]
+          {
+            id: 1,
+            user_id: 1,
+            product_id: 1,
+            quantity: 1,
+            order_date: "2023-01-01",
+            status: "completed",
+          },
+          {
+            id: 2,
+            user_id: 2,
+            product_id: 2,
+            quantity: 2,
+            order_date: "2023-01-02",
+            status: "pending",
+          },
+        ],
       },
       customers: {
-        table_name: 'customers',
+        table_name: "customers",
         columns: [
-          { name: 'id', type: 'integer', nullable: false, primary_key: true },
-          { name: 'name', type: 'varchar', nullable: false, primary_key: false },
-          { name: 'email', type: 'varchar', nullable: false, primary_key: false },
-          { name: 'phone', type: 'varchar', nullable: true, primary_key: false },
-          { name: 'address', type: 'text', nullable: true, primary_key: false }
+          { name: "id", type: "integer", nullable: false, primary_key: true },
+          {
+            name: "name",
+            type: "varchar",
+            nullable: false,
+            primary_key: false,
+          },
+          {
+            name: "email",
+            type: "varchar",
+            nullable: false,
+            primary_key: false,
+          },
+          {
+            name: "phone",
+            type: "varchar",
+            nullable: true,
+            primary_key: false,
+          },
+          { name: "address", type: "text", nullable: true, primary_key: false },
         ],
-        primary_keys: ['id'],
+        primary_keys: ["id"],
         sample_data: [
-          { id: 1, name: 'John Doe', email: 'john@example.com', phone: '555-0101', address: '123 Main St' },
-          { id: 2, name: 'Jane Smith', email: 'jane@example.com', phone: '555-0102', address: '456 Oak Ave' }
-        ]
-      }
+          {
+            id: 1,
+            name: "John Doe",
+            email: "john@example.com",
+            phone: "555-0101",
+            address: "123 Main St",
+          },
+          {
+            id: 2,
+            name: "Jane Smith",
+            email: "jane@example.com",
+            phone: "555-0102",
+            address: "456 Oak Ave",
+          },
+        ],
+      },
     };
 
     return demoSchemas[tableName] || demoSchemas.users;
@@ -252,23 +409,26 @@ export default function DataExportPage() {
   const fetchTableSchema = useCallback(async (tableName: string) => {
     setIsLoading(true);
     try {
-      const token = localStorage.getItem('access_token');
+      const token = localStorage.getItem("access_token");
 
       if (!token) {
-        console.warn('No access token found - using demo schema');
+        console.warn("No access token found - using demo schema");
         setTableSchema(getDemoTableSchema(tableName));
         return;
       }
 
       const response = await fetch(`/api/v1/data/tables/${tableName}/schema`, {
         headers: {
-          'Authorization': `Bearer ${token}`
-        }
+          Authorization: `Bearer ${token}`,
+        },
       });
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.error(`Failed to fetch table schema (${response.status}):`, errorText);
+        console.error(
+          `Failed to fetch table schema (${response.status}):`,
+          errorText,
+        );
 
         // For auth errors, use demo schema
         if (response.status === 401 || response.status === 403) {
@@ -282,7 +442,7 @@ export default function DataExportPage() {
       const data = await response.json();
       setTableSchema(data);
     } catch (err) {
-      console.error('Failed to load table schema:', err);
+      console.error("Failed to load table schema:", err);
       setTableSchema(getDemoTableSchema(tableName));
     } finally {
       setIsLoading(false);
@@ -291,32 +451,38 @@ export default function DataExportPage() {
 
   const fetchTablePermissions = useCallback(async (tableName: string) => {
     try {
-      const token = localStorage.getItem('access_token');
+      const token = localStorage.getItem("access_token");
 
       if (!token) {
-        console.warn('No access token found - using default permissions');
+        console.warn("No access token found - using default permissions");
         setTablePermissions({
           table_name: tableName,
           export_permission: {
             can_export: true,
             can_preview: true,
             max_rows_per_export: 100000,
-            allowed_formats: ['csv', 'json', 'excel', 'xml'],
-            allowed_columns: []
-          }
+            allowed_formats: ["csv", "json", "excel", "xml"],
+            allowed_columns: [],
+          },
         });
         return;
       }
 
-      const response = await fetch(`/api/v1/data/tables/${tableName}/permissions`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
+      const response = await fetch(
+        `/api/v1/data/tables/${tableName}/permissions`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.error(`Failed to fetch table permissions (${response.status}):`, errorText);
+        console.error(
+          `Failed to fetch table permissions (${response.status}):`,
+          errorText,
+        );
 
         // For auth errors, use default permissions
         if (response.status === 401 || response.status === 403) {
@@ -326,112 +492,126 @@ export default function DataExportPage() {
               can_export: true,
               can_preview: true,
               max_rows_per_export: 100000,
-              allowed_formats: ['csv', 'json', 'excel', 'xml'],
-              allowed_columns: []
-            }
+              allowed_formats: ["csv", "json", "excel", "xml"],
+              allowed_columns: [],
+            },
           });
           return;
         }
 
-        throw new Error(`Failed to fetch table permissions (${response.status})`);
+        throw new Error(
+          `Failed to fetch table permissions (${response.status})`,
+        );
       }
 
       const data = await response.json();
       setTablePermissions(data);
     } catch (err) {
-      console.error('Failed to load table permissions:', err);
+      console.error("Failed to load table permissions:", err);
       setTablePermissions({
         table_name: tableName,
         export_permission: {
           can_export: true,
           can_preview: true,
           max_rows_per_export: 100000,
-          allowed_formats: ['csv', 'json', 'excel', 'xml'],
-          allowed_columns: []
-        }
+          allowed_formats: ["csv", "json", "excel", "xml"],
+          allowed_columns: [],
+        },
       });
     }
   }, []);
 
+  const fetchTableData = useCallback(
+    async (tableName: string, limit: number = 1000) => {
+      setIsLoading(true);
+      try {
+        const response = await fetch(
+          `/api/v1/data/tables/${tableName}/data?limit=${limit}`,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+            },
+          },
+        );
 
-
-  const fetchTableData = useCallback(async (tableName: string, limit: number = 1000) => {
-    setIsLoading(true);
-    try {
-      const response = await fetch(`/api/v1/data/tables/${tableName}/data?limit=${limit}`, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+        if (response.ok) {
+          const data = await response.json();
+          setTableData(data);
+          setExportData((prev) => ({
+            ...prev,
+            previewData: data.data || [],
+            totalRows: data.total_rows || 0,
+          }));
+        } else {
+          // If API endpoint fails, use sample data from schema as fallback
+          if (tableSchema?.sample_data) {
+            const fallbackData = {
+              rows: tableSchema.sample_data,
+              total_count: tableSchema.sample_data.length,
+            };
+            setTableData(fallbackData);
+            setExportData((prev) => ({
+              ...prev,
+              previewData: fallbackData.rows,
+              totalRows: fallbackData.total_count,
+            }));
+          }
         }
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setTableData(data);
-        setExportData(prev => ({
-          ...prev,
-          previewData: data.data || [],
-          totalRows: data.total_rows || 0
-        }));
-      } else {
-        // If API endpoint fails, use sample data from schema as fallback
+      } catch (err) {
+        console.warn("Could not fetch table data, using sample data:", err);
+        // Use sample data from schema as fallback
         if (tableSchema?.sample_data) {
           const fallbackData = {
             rows: tableSchema.sample_data,
-            total_count: tableSchema.sample_data.length
+            total_count: tableSchema.sample_data.length,
           };
           setTableData(fallbackData);
-          setExportData(prev => ({
+          setExportData((prev) => ({
             ...prev,
             previewData: fallbackData.rows,
-            totalRows: fallbackData.total_count
+            totalRows: fallbackData.total_count,
           }));
         }
+      } finally {
+        setIsLoading(false);
       }
-    } catch (err) {
-      console.warn('Could not fetch table data, using sample data:', err);
-      // Use sample data from schema as fallback
-      if (tableSchema?.sample_data) {
-        const fallbackData = {
-          rows: tableSchema.sample_data,
-          total_count: tableSchema.sample_data.length
-        };
-        setTableData(fallbackData);
-        setExportData(prev => ({
-          ...prev,
-          previewData: fallbackData.rows,
-          totalRows: fallbackData.total_count
-        }));
-      }
-    } finally {
-      setIsLoading(false);
-    }
-  }, [tableSchema]);
+    },
+    [tableSchema],
+  );
 
-  const mapSqlTypeToExportType = (sqlType: string): 'string' | 'number' | 'boolean' | 'object' | 'date' => {
+  const mapSqlTypeToExportType = (
+    sqlType: string,
+  ): "string" | "number" | "boolean" | "object" | "date" => {
     const type = sqlType.toLowerCase();
-    if (type.includes('int') || type.includes('serial')) return 'number';
-    if (type.includes('decimal') || type.includes('numeric') || type.includes('float') || type.includes('double')) return 'number';
-    if (type.includes('bool')) return 'boolean';
-    if (type.includes('date') || type.includes('time')) return 'date';
-    if (type.includes('json')) return 'object';
-    return 'string';
+    if (type.includes("int") || type.includes("serial")) return "number";
+    if (
+      type.includes("decimal") ||
+      type.includes("numeric") ||
+      type.includes("float") ||
+      type.includes("double")
+    )
+      return "number";
+    if (type.includes("bool")) return "boolean";
+    if (type.includes("date") || type.includes("time")) return "date";
+    if (type.includes("json")) return "object";
+    return "string";
   };
 
   const exportColumns = useMemo(() => {
     if (!tableSchema) return [];
 
-    const allColumns = tableSchema.columns.map(col => ({
+    const allColumns = tableSchema.columns.map((col) => ({
       key: col.name,
       label: col.name,
       type: mapSqlTypeToExportType(col.type),
       required: col.primary_key,
-      description: `${col.type}${col.nullable ? ' (nullable)' : ' (required)'}${col.primary_key ? ' (primary key)' : ''}`
+      description: `${col.type}${col.nullable ? " (nullable)" : " (required)"}${col.primary_key ? " (primary key)" : ""}`,
     }));
 
     // Filter by allowed columns if permissions specify them
     if (tablePermissions?.export_permission.allowed_columns?.length) {
-      return allColumns.filter(col =>
-        tablePermissions.export_permission.allowed_columns.includes(col.key)
+      return allColumns.filter((col) =>
+        tablePermissions.export_permission.allowed_columns.includes(col.key),
       );
     }
 
@@ -445,10 +625,12 @@ export default function DataExportPage() {
 
     // Apply search filter
     if (exportData.searchTerm) {
-      filtered = filtered.filter(row =>
-        Object.values(row).some(value =>
-          String(value).toLowerCase().includes(exportData.searchTerm.toLowerCase())
-        )
+      filtered = filtered.filter((row) =>
+        Object.values(row).some((value) =>
+          String(value)
+            .toLowerCase()
+            .includes(exportData.searchTerm.toLowerCase()),
+        ),
       );
     }
 
@@ -464,11 +646,11 @@ export default function DataExportPage() {
         table_name: exportData.selectedTable,
         export_format: exportData.exportFormat,
         selected_columns: exportData.selectedColumns,
-        filters: exportData.filters.map(filter => ({
-          column: filter.column || '',
-          operator: filter.operator || 'equals',
-          value: filter.value || '',
-          label: filter.label || ''
+        filters: exportData.filters.map((filter) => ({
+          column: filter.column || "",
+          operator: filter.operator || "equals",
+          value: filter.value || "",
+          label: filter.label || "",
         })),
         export_options: {
           format: exportData.exportFormat,
@@ -483,30 +665,31 @@ export default function DataExportPage() {
           freeze_headers: true,
           // Custom options for search and limit
           row_limit: exportData.rowLimit,
-          search_term: exportData.searchTerm
-        }
+          search_term: exportData.searchTerm,
+        },
       };
 
-      const token = localStorage.getItem('access_token');
+      const token = localStorage.getItem("access_token");
       if (!token) {
-        throw new Error('Authentication token not found - please log in again');
+        throw new Error("Authentication token not found - please log in again");
       }
 
-      const response = await fetch('/api/v1/data/export/create', {
-        method: 'POST',
+      const response = await fetch("/api/v1/data/export/create", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(exportRequest)
+        body: JSON.stringify(exportRequest),
       });
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        const errorMessage = errorData.detail || response.statusText || 'Export failed';
+        const errorMessage =
+          errorData.detail || response.statusText || "Export failed";
 
         if (response.status === 401) {
-          throw new Error('Authentication failed - please log in again');
+          throw new Error("Authentication failed - please log in again");
         } else if (response.status === 403) {
           throw new Error(`Access denied: ${errorMessage}`);
         } else if (response.status === 400) {
@@ -520,9 +703,10 @@ export default function DataExportPage() {
 
       // Start polling for export completion
       await pollExportStatus(result.job_id);
-
     } catch (error) {
-      setError(`Export failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      setError(
+        `Export failed: ${error instanceof Error ? error.message : "Unknown error"}`,
+      );
     } finally {
       setIsLoading(false);
     }
@@ -530,36 +714,38 @@ export default function DataExportPage() {
 
   const downloadExportFile = async (jobId: string) => {
     try {
-      const token = localStorage.getItem('access_token');
+      const token = localStorage.getItem("access_token");
       if (!token) {
-        throw new Error('Authentication token not found');
+        throw new Error("Authentication token not found");
       }
 
       // Fetch the file with proper authentication
       const response = await fetch(`/api/v1/data/export/${jobId}/download`, {
-        method: 'GET',
+        method: "GET",
         headers: {
-          'Authorization': `Bearer ${token}`
-        }
+          Authorization: `Bearer ${token}`,
+        },
       });
 
       if (!response.ok) {
         if (response.status === 401) {
-          throw new Error('Authentication failed - please log in again');
+          throw new Error("Authentication failed - please log in again");
         } else if (response.status === 403) {
-          throw new Error('Access denied - insufficient permissions');
+          throw new Error("Access denied - insufficient permissions");
         } else {
           throw new Error(`Download failed: ${response.statusText}`);
         }
       }
 
       // Get the filename from the response headers
-      const contentDisposition = response.headers.get('Content-Disposition');
+      const contentDisposition = response.headers.get("Content-Disposition");
       let filename = `export_${jobId}.csv`;
       if (contentDisposition) {
-        const filenameMatch = contentDisposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
+        const filenameMatch = contentDisposition.match(
+          /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/,
+        );
         if (filenameMatch) {
-          filename = filenameMatch[1].replace(/['"]/g, '');
+          filename = filenameMatch[1].replace(/['"]/g, "");
         }
       }
 
@@ -568,22 +754,23 @@ export default function DataExportPage() {
 
       // Create download link and trigger download in new tab
       const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
+      const link = document.createElement("a");
       link.href = url;
       link.download = filename;
-      link.target = '_blank'; // Open in new tab
+      link.target = "_blank"; // Open in new tab
 
       // Append to body, click, and remove
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
 
-       // Clean up the blob URL
-       window.URL.revokeObjectURL(url);
-
-     } catch (error) {
-      console.error('Download failed:', error);
-      setError(`Download failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      // Clean up the blob URL
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Download failed:", error);
+      setError(
+        `Download failed: ${error instanceof Error ? error.message : "Unknown error"}`,
+      );
     }
   };
 
@@ -595,29 +782,31 @@ export default function DataExportPage() {
       try {
         const response = await fetch(`/api/v1/data/export/${jobId}/status`, {
           headers: {
-            'Authorization': `Bearer ${localStorage.getItem('access_token')}`
-          }
+            Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+          },
         });
 
-        if (!response.ok) throw new Error('Failed to check export status');
+        if (!response.ok) throw new Error("Failed to check export status");
 
         const job = await response.json();
 
-        if (job.status === 'completed') {
+        if (job.status === "completed") {
           // Download the file in new tab with proper authentication
           await downloadExportFile(jobId);
-          alert('Export completed and download started!');
+          alert("Export completed and download started!");
           return;
-        } else if (job.status === 'failed') {
-          throw new Error(job.error_message || 'Export failed');
+        } else if (job.status === "failed") {
+          throw new Error(job.error_message || "Export failed");
         } else if (attempts < maxAttempts) {
           attempts++;
           setTimeout(poll, 2000); // Poll every 2 seconds
         } else {
-          throw new Error('Export timeout');
+          throw new Error("Export timeout");
         }
       } catch (error) {
-        setError(`Export monitoring failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        setError(
+          `Export monitoring failed: ${error instanceof Error ? error.message : "Unknown error"}`,
+        );
       }
     };
 
@@ -626,11 +815,18 @@ export default function DataExportPage() {
 
   const canGoNext = () => {
     switch (currentStep) {
-      case 0: return !!exportData.selectedTable;
-      case 1: return exportData.selectedColumns.length > 0 && !!exportData.exportFormat;
-      case 2: return true; // Filter step is optional
-      case 3: return true;
-      default: return false;
+      case 0:
+        return !!exportData.selectedTable;
+      case 1:
+        return (
+          exportData.selectedColumns.length > 0 && !!exportData.exportFormat
+        );
+      case 2:
+        return true; // Filter step is optional
+      case 3:
+        return true;
+      default:
+        return false;
     }
   };
 
@@ -679,13 +875,15 @@ export default function DataExportPage() {
           <div className="space-y-4">
             <Select
               value={exportData.selectedTable}
-              onValueChange={(value) => setExportData(prev => ({ ...prev, selectedTable: value }))}
+              onValueChange={(value) =>
+                setExportData((prev) => ({ ...prev, selectedTable: value }))
+              }
             >
               <SelectTrigger>
                 <SelectValue placeholder="Select a table to export data from..." />
               </SelectTrigger>
               <SelectContent>
-                {availableTables.map(table => (
+                {availableTables.map((table) => (
                   <SelectItem key={table} value={table}>
                     {table}
                   </SelectItem>
@@ -700,9 +898,16 @@ export default function DataExportPage() {
                   <span>Table Information</span>
                 </h4>
                 <div className="text-sm space-y-1">
-                  <p><strong>Columns:</strong> {tableSchema.columns.length}</p>
-                  <p><strong>Primary Keys:</strong> {tableSchema.primary_keys.join(', ')}</p>
-                  <p><strong>Available Data:</strong> {exportData.totalRows} rows</p>
+                  <p>
+                    <strong>Columns:</strong> {tableSchema.columns.length}
+                  </p>
+                  <p>
+                    <strong>Primary Keys:</strong>{" "}
+                    {tableSchema.primary_keys.join(", ")}
+                  </p>
+                  <p>
+                    <strong>Available Data:</strong> {exportData.totalRows} rows
+                  </p>
                 </div>
               </div>
             )}
@@ -714,9 +919,22 @@ export default function DataExportPage() {
                   <span>Export Permissions</span>
                 </h4>
                 <div className="text-sm space-y-1">
-                  <p><strong>Can Export:</strong> {tablePermissions.export_permission.can_export ? 'Yes' : 'No'}</p>
-                  <p><strong>Max Rows:</strong> {tablePermissions.export_permission.max_rows_per_export.toLocaleString()}</p>
-                  <p><strong>Allowed Formats:</strong> {tablePermissions.export_permission.allowed_formats.join(', ')}</p>
+                  <p>
+                    <strong>Can Export:</strong>{" "}
+                    {tablePermissions.export_permission.can_export
+                      ? "Yes"
+                      : "No"}
+                  </p>
+                  <p>
+                    <strong>Max Rows:</strong>{" "}
+                    {tablePermissions.export_permission.max_rows_per_export.toLocaleString()}
+                  </p>
+                  <p>
+                    <strong>Allowed Formats:</strong>{" "}
+                    {tablePermissions.export_permission.allowed_formats.join(
+                      ", ",
+                    )}
+                  </p>
                 </div>
               </div>
             )}
@@ -744,23 +962,28 @@ export default function DataExportPage() {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => setExportData(prev => ({
-                  ...prev,
-                  selectedColumns: exportColumns.map(col => col.key)
-                }))}
+                onClick={() =>
+                  setExportData((prev) => ({
+                    ...prev,
+                    selectedColumns: exportColumns.map((col) => col.key),
+                  }))
+                }
               >
                 Select All
               </Button>
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => setExportData(prev => ({ ...prev, selectedColumns: [] }))}
+                onClick={() =>
+                  setExportData((prev) => ({ ...prev, selectedColumns: [] }))
+                }
               >
                 Clear All
               </Button>
             </div>
             <div className="text-sm text-muted-foreground">
-              {exportData.selectedColumns.length} of {exportColumns.length} columns selected
+              {exportData.selectedColumns.length} of {exportColumns.length}{" "}
+              columns selected
             </div>
           </div>
 
@@ -772,21 +995,27 @@ export default function DataExportPage() {
                   checked={exportData.selectedColumns.includes(column.key)}
                   onCheckedChange={(checked) => {
                     if (checked) {
-                      setExportData(prev => ({
+                      setExportData((prev) => ({
                         ...prev,
-                        selectedColumns: [...prev.selectedColumns, column.key]
+                        selectedColumns: [...prev.selectedColumns, column.key],
                       }));
                     } else {
-                      setExportData(prev => ({
+                      setExportData((prev) => ({
                         ...prev,
-                        selectedColumns: prev.selectedColumns.filter(col => col !== column.key)
+                        selectedColumns: prev.selectedColumns.filter(
+                          (col) => col !== column.key,
+                        ),
                       }));
                     }
                   }}
                 />
                 <Label htmlFor={column.key} className="text-sm">
                   <span className="font-medium">{column.label}</span>
-                  {column.required && <Badge variant="outline" className="ml-2 text-xs">Required</Badge>}
+                  {column.required && (
+                    <Badge variant="outline" className="ml-2 text-xs">
+                      Required
+                    </Badge>
+                  )}
                 </Label>
               </div>
             ))}
@@ -809,16 +1038,24 @@ export default function DataExportPage() {
             <Label>File Format</Label>
             <Select
               value={exportData.exportFormat}
-              onValueChange={(value) => setExportData(prev => ({ ...prev, exportFormat: value }))}
+              onValueChange={(value) =>
+                setExportData((prev) => ({ ...prev, exportFormat: value }))
+              }
             >
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="csv">CSV (Comma Separated Values)</SelectItem>
-                <SelectItem value="json">JSON (JavaScript Object Notation)</SelectItem>
+                <SelectItem value="csv">
+                  CSV (Comma Separated Values)
+                </SelectItem>
+                <SelectItem value="json">
+                  JSON (JavaScript Object Notation)
+                </SelectItem>
                 <SelectItem value="excel">Excel (.xlsx)</SelectItem>
-                <SelectItem value="xml">XML (Extensible Markup Language)</SelectItem>
+                <SelectItem value="xml">
+                  XML (Extensible Markup Language)
+                </SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -831,9 +1068,9 @@ export default function DataExportPage() {
                   id="include-headers"
                   checked={exportData.options.includeHeaders !== false}
                   onCheckedChange={(checked) =>
-                    setExportData(prev => ({
+                    setExportData((prev) => ({
                       ...prev,
-                      options: { ...prev.options, includeHeaders: checked }
+                      options: { ...prev.options, includeHeaders: checked },
                     }))
                   }
                 />
@@ -844,9 +1081,9 @@ export default function DataExportPage() {
                   id="compress-file"
                   checked={exportData.options.compress || false}
                   onCheckedChange={(checked) =>
-                    setExportData(prev => ({
+                    setExportData((prev) => ({
                       ...prev,
-                      options: { ...prev.options, compress: checked }
+                      options: { ...prev.options, compress: checked },
                     }))
                   }
                 />
@@ -882,7 +1119,12 @@ export default function DataExportPage() {
                 id="search-term"
                 placeholder="Search across all columns..."
                 value={exportData.searchTerm}
-                onChange={(e) => setExportData(prev => ({ ...prev, searchTerm: e.target.value }))}
+                onChange={(e) =>
+                  setExportData((prev) => ({
+                    ...prev,
+                    searchTerm: e.target.value,
+                  }))
+                }
               />
             </div>
             <div className="space-y-2">
@@ -892,7 +1134,12 @@ export default function DataExportPage() {
                 type="number"
                 placeholder="Maximum rows to export..."
                 value={exportData.rowLimit}
-                onChange={(e) => setExportData(prev => ({ ...prev, rowLimit: parseInt(e.target.value) || 1000 }))}
+                onChange={(e) =>
+                  setExportData((prev) => ({
+                    ...prev,
+                    rowLimit: parseInt(e.target.value) || 1000,
+                  }))
+                }
               />
             </div>
           </div>
@@ -908,7 +1155,9 @@ export default function DataExportPage() {
                   {filteredData.length}
                 </div>
               </div>
-              <div className="text-sm font-medium text-blue-800 dark:text-blue-200">Filtered Rows</div>
+              <div className="text-sm font-medium text-blue-800 dark:text-blue-200">
+                Filtered Rows
+              </div>
             </div>
             <div className="p-6 bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-950 dark:to-emerald-950 rounded-xl border border-green-200 dark:border-green-800 shadow-sm">
               <div className="flex items-center justify-between mb-2">
@@ -919,7 +1168,9 @@ export default function DataExportPage() {
                   {exportData.selectedColumns.length}
                 </div>
               </div>
-              <div className="text-sm font-medium text-green-800 dark:text-green-200">Selected Columns</div>
+              <div className="text-sm font-medium text-green-800 dark:text-green-200">
+                Selected Columns
+              </div>
             </div>
             <div className="p-6 bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-950 dark:to-pink-950 rounded-xl border border-purple-200 dark:border-purple-800 shadow-sm">
               <div className="flex items-center justify-between mb-2">
@@ -930,7 +1181,9 @@ export default function DataExportPage() {
                   {exportData.exportFormat.toUpperCase()}
                 </div>
               </div>
-              <div className="text-sm font-medium text-purple-800 dark:text-purple-200">Export Format</div>
+              <div className="text-sm font-medium text-purple-800 dark:text-purple-200">
+                Export Format
+              </div>
             </div>
           </div>
 
@@ -943,7 +1196,10 @@ export default function DataExportPage() {
                   <thead className="bg-muted">
                     <tr>
                       {exportData.selectedColumns.map((column, index) => (
-                        <th key={index} className="px-3 py-2 text-left font-medium">
+                        <th
+                          key={index}
+                          className="px-3 py-2 text-left font-medium"
+                        >
                           {column}
                         </th>
                       ))}
@@ -954,7 +1210,7 @@ export default function DataExportPage() {
                       <tr key={index} className="border-t">
                         {exportData.selectedColumns.map((column, colIndex) => (
                           <td key={colIndex} className="px-3 py-2">
-                            {String(row[column] || '')}
+                            {String(row[column] || "")}
                           </td>
                         ))}
                       </tr>
@@ -1020,12 +1276,13 @@ export default function DataExportPage() {
         <Alert>
           <Info className="h-4 w-4" />
           <AlertDescription>
-            Click &quot;Complete Export&quot; to start exporting your data. The file will be downloaded automatically when ready.
+            Click &quot;Complete Export&quot; to start exporting your data. The
+            file will be downloaded automatically when ready.
           </AlertDescription>
         </Alert>
       </CardContent>
     </Card>
-   );
+  );
 
   // Fetch table schema when table is selected
   useEffect(() => {
@@ -1034,13 +1291,18 @@ export default function DataExportPage() {
       fetchTablePermissions(exportData.selectedTable);
       fetchTableData(exportData.selectedTable);
       // Auto-select all columns when table changes
-      setExportData(prev => ({ ...prev, selectedColumns: [] }));
+      setExportData((prev) => ({ ...prev, selectedColumns: [] }));
     } else {
       setTableSchema(null);
       setTablePermissions(null);
       setTableData(null);
     }
-  }, [exportData.selectedTable, fetchTableData, fetchTablePermissions, fetchTableSchema]);
+  }, [
+    exportData.selectedTable,
+    fetchTableData,
+    fetchTablePermissions,
+    fetchTableSchema,
+  ]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-green-50 dark:from-gray-900 dark:via-gray-800 dark:to-green-950 p-6">
@@ -1053,12 +1315,16 @@ export default function DataExportPage() {
             Data Export Wizard
           </h1>
           <p className="text-lg text-gray-600 dark:text-gray-400 mt-2 max-w-2xl mx-auto">
-            Export data from any table with guided steps, smart filtering, and multiple format options
+            Export data from any table with guided steps, smart filtering, and
+            multiple format options
           </p>
         </div>
 
         {error && (
-          <Alert variant="destructive" className="shadow-lg border-0 bg-red-50 dark:bg-red-950">
+          <Alert
+            variant="destructive"
+            className="shadow-lg border-0 bg-red-50 dark:bg-red-950"
+          >
             <AlertCircle className="h-5 w-5" />
             <AlertDescription className="text-red-800 dark:text-red-200 font-medium">
               {error}

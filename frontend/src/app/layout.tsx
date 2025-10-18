@@ -1,26 +1,27 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
-import { AuthProvider } from "@/modules/auth";
-import { EnhancedThemeProvider } from "@/shared/providers/EnhancedThemeProvider";
-import { NuqsProvider, ConditionalAppLayout } from "@/shared/components";
-import { TRPCProvider } from "@/lib/trpc/provider";
-import { SecurityProvider } from "@/lib/security/SecurityProvider";
-import { SessionTimeoutWarning } from "@/shared/components/SessionTimeoutWarning";
-import { GraphQLProvider } from "@/lib/graphql";
 import { Toaster } from "sonner";
+import { GraphQLProvider } from "@/lib/graphql";
+import { SecurityProvider } from "@/lib/security/SecurityProvider";
+import { TRPCProvider } from "@/lib/trpc/provider";
+import { AuthProvider } from "@/modules/auth";
+import { ConditionalAppLayout, NuqsProvider } from "@/shared/components";
 import { ServiceWorkerRegistration } from "@/shared/components/ServiceWorkerRegistration";
+import { SessionTimeoutWarning } from "@/shared/components/SessionTimeoutWarning";
+import { EnhancedThemeProvider } from "@/shared/providers/EnhancedThemeProvider";
 
 export const metadata: Metadata = {
   title: "FastNext Framework",
-  description: "Secure, comprehensive web application framework with enhanced authentication",
+  description:
+    "Secure, comprehensive web application framework with enhanced authentication",
   icons: {
-    icon: '/favicon.ico',
+    icon: "/favicon.ico",
   },
-  manifest: '/manifest.json',
+  manifest: "/manifest.json",
 };
 
 export const viewport: Viewport = {
-  themeColor: '#007bff',
+  themeColor: "#007bff",
 };
 
 export default function RootLayout({
@@ -43,13 +44,11 @@ export default function RootLayout({
                   defaultColorScheme="default"
                   colorSchemeStorageKey="color-scheme"
                 >
-                   <AuthProvider>
-                     <ConditionalAppLayout>
-                       {children}
-                     </ConditionalAppLayout>
-                     <SessionTimeoutWarning />
-                     <Toaster />
-                   </AuthProvider>
+                  <AuthProvider>
+                    <ConditionalAppLayout>{children}</ConditionalAppLayout>
+                    <SessionTimeoutWarning />
+                    <Toaster />
+                  </AuthProvider>
                 </EnhancedThemeProvider>
               </NuqsProvider>
             </TRPCProvider>

@@ -1,35 +1,50 @@
-'use client';
+"use client";
 
-import React, { memo, useState, useCallback } from 'react';
-import { Handle, Position, NodeProps } from 'reactflow';
-import { WorkflowNodeData } from '../types/reactflow';
-import { Workflow, Settings, ExternalLink, Play } from 'lucide-react';
-import { Button } from '@/shared/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/shared/components/ui/dialog';
-import { Input } from '@/shared/components/ui/input';
-import { Label } from '@/shared/components/ui/label';
-import { Textarea } from '@/shared/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/components/ui/select';
+import { ExternalLink, Play, Settings, Workflow } from "lucide-react";
+import React, { memo, useCallback, useState } from "react";
+import { Handle, type NodeProps, Position } from "reactflow";
+import { Button } from "@/shared/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/shared/components/ui/dialog";
+import { Input } from "@/shared/components/ui/input";
+import { Label } from "@/shared/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/shared/components/ui/select";
+import { Textarea } from "@/shared/components/ui/textarea";
+import type { WorkflowNodeData } from "../types/reactflow";
 
 interface SubWorkflowNodeData extends WorkflowNodeData {
   subWorkflowId: number;
   subWorkflowName: string;
   inputParameters: Record<string, any>;
   outputParameters: string[];
-  executionMode: 'synchronous' | 'asynchronous';
+  executionMode: "synchronous" | "asynchronous";
   timeout?: number;
-  onError: 'fail' | 'continue' | 'retry';
+  onError: "fail" | "continue" | "retry";
   retryCount?: number;
 }
 
-function SubWorkflowNode({ data, selected, id }: NodeProps<SubWorkflowNodeData>) {
+function SubWorkflowNode({
+  data,
+  selected,
+  id,
+}: NodeProps<SubWorkflowNodeData>) {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [editData, setEditData] = useState(data);
 
   const handleSave = useCallback(() => {
-    if (typeof window !== 'undefined') {
-      const event = new CustomEvent('updateNodeData', {
-        detail: { nodeId: id, newData: editData }
+    if (typeof window !== "undefined") {
+      const event = new CustomEvent("updateNodeData", {
+        detail: { nodeId: id, newData: editData },
       });
       window.dispatchEvent(event);
     }
@@ -37,21 +52,21 @@ function SubWorkflowNode({ data, selected, id }: NodeProps<SubWorkflowNodeData>)
   }, [id, editData]);
 
   const getModeColor = () => {
-    return data.executionMode === 'synchronous'
-      ? 'bg-blue-100 text-blue-700'
-      : 'bg-green-100 text-green-700';
+    return data.executionMode === "synchronous"
+      ? "bg-blue-100 text-blue-700"
+      : "bg-green-100 text-green-700";
   };
 
   const getErrorHandlingColor = () => {
     switch (data.onError) {
-      case 'fail':
-        return 'bg-red-100 text-red-700';
-      case 'continue':
-        return 'bg-yellow-100 text-yellow-700';
-      case 'retry':
-        return 'bg-orange-100 text-orange-700';
+      case "fail":
+        return "bg-red-100 text-red-700";
+      case "continue":
+        return "bg-yellow-100 text-yellow-700";
+      case "retry":
+        return "bg-orange-100 text-orange-700";
       default:
-        return 'bg-gray-100 text-gray-700';
+        return "bg-gray-100 text-gray-700";
     }
   };
 
@@ -59,7 +74,7 @@ function SubWorkflowNode({ data, selected, id }: NodeProps<SubWorkflowNodeData>)
     <div
       className={`
         px-3 py-2 shadow-md rounded-lg border-2 min-w-[160px] max-w-[220px]
-        ${selected ? 'border-indigo-500' : 'border-indigo-300'}
+        ${selected ? "border-indigo-500" : "border-indigo-300"}
         bg-indigo-50 transition-all duration-200 hover:shadow-lg
       `}
     >
@@ -76,10 +91,10 @@ function SubWorkflowNode({ data, selected, id }: NodeProps<SubWorkflowNodeData>)
         <Workflow size={14} className="text-indigo-600 flex-shrink-0" />
         <div className="flex-1 min-w-0">
           <div className="font-medium text-xs text-indigo-800 truncate">
-            {data.label || 'Sub Workflow'}
+            {data.label || "Sub Workflow"}
           </div>
           <div className="text-xs text-indigo-600 mt-1 truncate">
-            {data.subWorkflowName || 'Unnamed Workflow'}
+            {data.subWorkflowName || "Unnamed Workflow"}
           </div>
         </div>
         <div className="flex items-center space-x-1">
@@ -103,7 +118,7 @@ function SubWorkflowNode({ data, selected, id }: NodeProps<SubWorkflowNodeData>)
         {/* Execution mode and ID */}
         <div className="flex items-center justify-between">
           <span className={`px-1.5 py-0.5 text-xs rounded ${getModeColor()}`}>
-            {data.executionMode === 'synchronous' ? 'Sync' : 'Async'}
+            {data.executionMode === "synchronous" ? "Sync" : "Async"}
           </span>
           <span className="text-xs text-indigo-600">
             ID: {data.subWorkflowId}
@@ -112,10 +127,12 @@ function SubWorkflowNode({ data, selected, id }: NodeProps<SubWorkflowNodeData>)
 
         {/* Error handling */}
         <div className="flex items-center justify-between">
-          <span className={`px-1.5 py-0.5 text-xs rounded capitalize ${getErrorHandlingColor()}`}>
+          <span
+            className={`px-1.5 py-0.5 text-xs rounded capitalize ${getErrorHandlingColor()}`}
+          >
             {data.onError}
           </span>
-          {data.retryCount && data.onError === 'retry' && (
+          {data.retryCount && data.onError === "retry" && (
             <span className="text-xs text-indigo-600">
               Retry: {data.retryCount}x
             </span>
@@ -124,12 +141,8 @@ function SubWorkflowNode({ data, selected, id }: NodeProps<SubWorkflowNodeData>)
 
         {/* Parameters info */}
         <div className="flex items-center justify-between text-xs text-indigo-600">
-          <span>
-            In: {Object.keys(data.inputParameters || {}).length}
-          </span>
-          <span>
-            Out: {data.outputParameters?.length || 0}
-          </span>
+          <span>In: {Object.keys(data.inputParameters || {}).length}</span>
+          <span>Out: {data.outputParameters?.length || 0}</span>
         </div>
 
         {/* Timeout */}
@@ -147,7 +160,7 @@ function SubWorkflowNode({ data, selected, id }: NodeProps<SubWorkflowNodeData>)
         position={Position.Bottom}
         id="success"
         className="w-3 h-3 !bg-green-400 border-2 border-white"
-        style={{ bottom: -6, left: '30%' }}
+        style={{ bottom: -6, left: "30%" }}
       />
 
       {/* Error */}
@@ -156,17 +169,17 @@ function SubWorkflowNode({ data, selected, id }: NodeProps<SubWorkflowNodeData>)
         position={Position.Bottom}
         id="error"
         className="w-3 h-3 !bg-red-400 border-2 border-white"
-        style={{ bottom: -6, right: '30%' }}
+        style={{ bottom: -6, right: "30%" }}
       />
 
       {/* Data output (for synchronous workflows) */}
-      {data.executionMode === 'synchronous' && (
+      {data.executionMode === "synchronous" && (
         <Handle
           type="source"
           position={Position.Right}
           id="data"
           className="w-3 h-3 !bg-blue-400 border-2 border-white"
-          style={{ right: -6, top: '50%' }}
+          style={{ right: -6, top: "50%" }}
         />
       )}
 
@@ -186,8 +199,10 @@ function SubWorkflowNode({ data, selected, id }: NodeProps<SubWorkflowNodeData>)
               <Label htmlFor="label">Label</Label>
               <Input
                 id="label"
-                value={editData.label || ''}
-                onChange={(e) => setEditData({ ...editData, label: e.target.value })}
+                value={editData.label || ""}
+                onChange={(e) =>
+                  setEditData({ ...editData, label: e.target.value })
+                }
                 placeholder="Enter sub workflow label"
               />
             </div>
@@ -196,8 +211,10 @@ function SubWorkflowNode({ data, selected, id }: NodeProps<SubWorkflowNodeData>)
               <Label htmlFor="description">Description</Label>
               <Textarea
                 id="description"
-                value={editData.description || ''}
-                onChange={(e) => setEditData({ ...editData, description: e.target.value })}
+                value={editData.description || ""}
+                onChange={(e) =>
+                  setEditData({ ...editData, description: e.target.value })
+                }
                 placeholder="Enter sub workflow description"
               />
             </div>
@@ -207,8 +224,13 @@ function SubWorkflowNode({ data, selected, id }: NodeProps<SubWorkflowNodeData>)
               <Input
                 id="subWorkflowId"
                 type="number"
-                value={editData.subWorkflowId || ''}
-                onChange={(e) => setEditData({ ...editData, subWorkflowId: parseInt(e.target.value) || 0 })}
+                value={editData.subWorkflowId || ""}
+                onChange={(e) =>
+                  setEditData({
+                    ...editData,
+                    subWorkflowId: parseInt(e.target.value) || 0,
+                  })
+                }
                 placeholder="Enter sub workflow ID"
               />
             </div>
@@ -217,8 +239,10 @@ function SubWorkflowNode({ data, selected, id }: NodeProps<SubWorkflowNodeData>)
               <Label htmlFor="subWorkflowName">Sub Workflow Name</Label>
               <Input
                 id="subWorkflowName"
-                value={editData.subWorkflowName || ''}
-                onChange={(e) => setEditData({ ...editData, subWorkflowName: e.target.value })}
+                value={editData.subWorkflowName || ""}
+                onChange={(e) =>
+                  setEditData({ ...editData, subWorkflowName: e.target.value })
+                }
                 placeholder="Enter sub workflow name"
               />
             </div>
@@ -226,8 +250,10 @@ function SubWorkflowNode({ data, selected, id }: NodeProps<SubWorkflowNodeData>)
             <div className="space-y-2">
               <Label htmlFor="executionMode">Execution Mode</Label>
               <Select
-                value={editData.executionMode || 'synchronous'}
-                onValueChange={(value) => setEditData({ ...editData, executionMode: value as any })}
+                value={editData.executionMode || "synchronous"}
+                onValueChange={(value) =>
+                  setEditData({ ...editData, executionMode: value as any })
+                }
               >
                 <SelectTrigger>
                   <SelectValue />
@@ -242,8 +268,10 @@ function SubWorkflowNode({ data, selected, id }: NodeProps<SubWorkflowNodeData>)
             <div className="space-y-2">
               <Label htmlFor="onError">Error Handling</Label>
               <Select
-                value={editData.onError || 'fail'}
-                onValueChange={(value) => setEditData({ ...editData, onError: value as any })}
+                value={editData.onError || "fail"}
+                onValueChange={(value) =>
+                  setEditData({ ...editData, onError: value as any })
+                }
               >
                 <SelectTrigger>
                   <SelectValue />
@@ -256,14 +284,19 @@ function SubWorkflowNode({ data, selected, id }: NodeProps<SubWorkflowNodeData>)
               </Select>
             </div>
 
-            {editData.onError === 'retry' && (
+            {editData.onError === "retry" && (
               <div className="space-y-2">
                 <Label htmlFor="retryCount">Retry Count</Label>
                 <Input
                   id="retryCount"
                   type="number"
-                  value={editData.retryCount || ''}
-                  onChange={(e) => setEditData({ ...editData, retryCount: parseInt(e.target.value) || undefined })}
+                  value={editData.retryCount || ""}
+                  onChange={(e) =>
+                    setEditData({
+                      ...editData,
+                      retryCount: parseInt(e.target.value) || undefined,
+                    })
+                  }
                   placeholder="Enter retry count"
                 />
               </div>
@@ -274,19 +307,25 @@ function SubWorkflowNode({ data, selected, id }: NodeProps<SubWorkflowNodeData>)
               <Input
                 id="timeout"
                 type="number"
-                value={editData.timeout || ''}
-                onChange={(e) => setEditData({ ...editData, timeout: parseInt(e.target.value) || undefined })}
+                value={editData.timeout || ""}
+                onChange={(e) =>
+                  setEditData({
+                    ...editData,
+                    timeout: parseInt(e.target.value) || undefined,
+                  })
+                }
                 placeholder="Enter timeout in seconds"
               />
             </div>
 
             <div className="flex justify-end space-x-2">
-              <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
+              <Button
+                variant="outline"
+                onClick={() => setIsEditDialogOpen(false)}
+              >
                 Cancel
               </Button>
-              <Button onClick={handleSave}>
-                Save Changes
-              </Button>
+              <Button onClick={handleSave}>Save Changes</Button>
             </div>
           </div>
         </DialogContent>

@@ -2,21 +2,31 @@
  * UsersList Component
  * Example GraphQL implementation with users query
  */
-'use client';
+"use client";
 
-import React, { useState } from 'react';
-import { useUsers, usePagination } from '@/lib/graphql';
-import { Button } from '@/shared/components/ui/button';
-import { Input } from '@/shared/components/ui/input';
-import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card';
-import { Badge } from '@/shared/components/ui/badge';
-import { Avatar, AvatarFallback, AvatarImage } from '@/shared/components/ui/avatar';
-import { Spinner } from '@/shared/components/ui/spinner';
-import { Alert, AlertDescription } from '@/shared/components/ui/alert';
-import { Search, User, Mail, Calendar, ExternalLink } from 'lucide-react';
+import { Calendar, ExternalLink, Mail, Search, User } from "lucide-react";
+import type React from "react";
+import { useState } from "react";
+import { usePagination, useUsers } from "@/lib/graphql";
+import { Alert, AlertDescription } from "@/shared/components/ui/alert";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "@/shared/components/ui/avatar";
+import { Badge } from "@/shared/components/ui/badge";
+import { Button } from "@/shared/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/shared/components/ui/card";
+import { Input } from "@/shared/components/ui/input";
+import { Spinner } from "@/shared/components/ui/spinner";
 
 export function UsersList() {
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
   const { variables, reset } = usePagination();
 
   const { data, loading, error, fetchMore } = useUsers({
@@ -88,7 +98,7 @@ export function UsersList() {
                 type="button"
                 variant="ghost"
                 onClick={() => {
-                  setSearchTerm('');
+                  setSearchTerm("");
                   reset();
                 }}
               >
@@ -110,12 +120,18 @@ export function UsersList() {
                 <Card key={user.id} className="p-4">
                   <div className="flex items-start space-x-4">
                     <Avatar>
-                      <AvatarImage src={user.avatarUrl || undefined} alt={user.username} />
+                      <AvatarImage
+                        src={user.avatarUrl || undefined}
+                        alt={user.username}
+                      />
                       <AvatarFallback>
                         {user.fullName
-                          ? user.fullName.split(' ').map(n => n[0]).join('').toUpperCase()
-                          : user.username.substring(0, 2).toUpperCase()
-                        }
+                          ? user.fullName
+                              .split(" ")
+                              .map((n) => n[0])
+                              .join("")
+                              .toUpperCase()
+                          : user.username.substring(0, 2).toUpperCase()}
                       </AvatarFallback>
                     </Avatar>
 
@@ -156,22 +172,24 @@ export function UsersList() {
                         <div className="flex items-center gap-2">
                           <Calendar className="h-4 w-4" />
                           <span>
-                            Joined {new Date(user.createdAt).toLocaleDateString()}
+                            Joined{" "}
+                            {new Date(user.createdAt).toLocaleDateString()}
                           </span>
                           {user.lastLoginAt && (
                             <>
                               <span>•</span>
                               <span>
-                                Last login {new Date(user.lastLoginAt).toLocaleDateString()}
+                                Last login{" "}
+                                {new Date(
+                                  user.lastLoginAt,
+                                ).toLocaleDateString()}
                               </span>
                             </>
                           )}
                         </div>
                       </div>
 
-                      {user.bio && (
-                        <p className="text-sm">{user.bio}</p>
-                      )}
+                      {user.bio && <p className="text-sm">{user.bio}</p>}
 
                       {user.website && (
                         <a
@@ -202,7 +220,7 @@ export function UsersList() {
                         Loading...
                       </>
                     ) : (
-                      'Load More'
+                      "Load More"
                     )}
                   </Button>
                 </div>
@@ -215,7 +233,7 @@ export function UsersList() {
                   <Button
                     variant="ghost"
                     onClick={() => {
-                      setSearchTerm('');
+                      setSearchTerm("");
                       reset();
                     }}
                     className="mt-2"

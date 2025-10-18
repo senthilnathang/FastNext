@@ -1,38 +1,50 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import Image from "next/image"
-import { User, Mail, Calendar, MapPin } from "lucide-react"
+import { Calendar, Mail, MapPin, User } from "lucide-react";
+import Image from "next/image";
+import * as React from "react";
 
-import { InfiniteScrollList } from "@/shared/components"
-import { Card, CardContent } from "@/shared/components/ui/card"
-import { Badge } from "@/shared/components/ui/badge"
+import { InfiniteScrollList } from "@/shared/components";
+import { Badge } from "@/shared/components/ui/badge";
+import { Card, CardContent } from "@/shared/components/ui/card";
 
 interface UserItem {
-  id: number
-  name: string
-  email: string
-  avatar: string
-  role: string
-  location: string
-  joinDate: string
-  isOnline: boolean
+  id: number;
+  name: string;
+  email: string;
+  avatar: string;
+  role: string;
+  location: string;
+  joinDate: string;
+  isOnline: boolean;
 }
 
 // Mock API function to simulate fetching data
-async function fetchUsers(page: number, pageSize: number): Promise<{ data: UserItem[]; hasMore: boolean; total: number }> {
+async function fetchUsers(
+  page: number,
+  pageSize: number,
+): Promise<{ data: UserItem[]; hasMore: boolean; total: number }> {
   // Simulate network delay
-  await new Promise(resolve => setTimeout(resolve, 800))
+  await new Promise((resolve) => setTimeout(resolve, 800));
 
-  const startId = (page - 1) * pageSize + 1
-  const users: UserItem[] = []
+  const startId = (page - 1) * pageSize + 1;
+  const users: UserItem[] = [];
 
-  const roles = ['Admin', 'Editor', 'Viewer', 'Moderator', 'Contributor']
-  const locations = ['New York', 'London', 'Tokyo', 'Sydney', 'Berlin', 'Paris', 'Toronto', 'São Paulo']
+  const roles = ["Admin", "Editor", "Viewer", "Moderator", "Contributor"];
+  const locations = [
+    "New York",
+    "London",
+    "Tokyo",
+    "Sydney",
+    "Berlin",
+    "Paris",
+    "Toronto",
+    "São Paulo",
+  ];
 
   for (let i = 0; i < pageSize; i++) {
-    const id = startId + i
-    if (id > 500) break // Limit total to 500 users
+    const id = startId + i;
+    if (id > 500) break; // Limit total to 500 users
 
     users.push({
       id,
@@ -41,16 +53,18 @@ async function fetchUsers(page: number, pageSize: number): Promise<{ data: UserI
       avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${id}`,
       role: roles[Math.floor(Math.random() * roles.length)],
       location: locations[Math.floor(Math.random() * locations.length)],
-      joinDate: new Date(Date.now() - Math.random() * 365 * 24 * 60 * 60 * 1000).toISOString(),
-      isOnline: Math.random() > 0.3
-    })
+      joinDate: new Date(
+        Date.now() - Math.random() * 365 * 24 * 60 * 60 * 1000,
+      ).toISOString(),
+      isOnline: Math.random() > 0.3,
+    });
   }
 
   return {
     data: users,
     hasMore: startId + pageSize <= 500,
-    total: 500
-  }
+    total: 500,
+  };
 }
 
 function UserCard({ user }: { user: UserItem }) {
@@ -78,7 +92,10 @@ function UserCard({ user }: { user: UserItem }) {
               <h3 className="font-semibold text-gray-900 dark:text-white truncate">
                 {user.name}
               </h3>
-              <Badge variant={user.role === 'Admin' ? 'default' : 'secondary'} className="text-xs">
+              <Badge
+                variant={user.role === "Admin" ? "default" : "secondary"}
+                className="text-xs"
+              >
                 {user.role}
               </Badge>
               {user.isOnline && (
@@ -99,14 +116,16 @@ function UserCard({ user }: { user: UserItem }) {
               </div>
               <div className="flex items-center space-x-1">
                 <Calendar className="w-3 h-3" />
-                <span>Joined {new Date(user.joinDate).toLocaleDateString()}</span>
+                <span>
+                  Joined {new Date(user.joinDate).toLocaleDateString()}
+                </span>
               </div>
             </div>
           </div>
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }
 
 function EmptyState() {
@@ -120,23 +139,25 @@ function EmptyState() {
         Start by adding some users to see them here.
       </p>
     </div>
-  )
+  );
 }
 
 function ErrorState(error: string, retry: () => void) {
   return (
     <div className="text-center py-12">
       <div className="text-red-600 dark:text-red-400 mb-4">
-        <svg className="mx-auto h-12 w-12" fill="currentColor" viewBox="0 0 24 24">
-          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+        <svg
+          className="mx-auto h-12 w-12"
+          fill="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
         </svg>
       </div>
       <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
         Failed to load users
       </h3>
-      <p className="text-gray-500 dark:text-gray-400 mb-4">
-        {error}
-      </p>
+      <p className="text-gray-500 dark:text-gray-400 mb-4">{error}</p>
       <button
         onClick={retry}
         className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
@@ -144,7 +165,7 @@ function ErrorState(error: string, retry: () => void) {
         Try Again
       </button>
     </div>
-  )
+  );
 }
 
 export default function InfiniteScrollDemo() {
@@ -157,7 +178,8 @@ export default function InfiniteScrollDemo() {
             Infinite Scroll Demo
           </h1>
           <p className="text-gray-600 dark:text-gray-400 mt-2">
-            Demonstrating infinite scroll with 500 users. New users load automatically as you scroll.
+            Demonstrating infinite scroll with 500 users. New users load
+            automatically as you scroll.
           </p>
         </div>
 
@@ -166,9 +188,13 @@ export default function InfiniteScrollDemo() {
           <CardContent className="p-4">
             <div className="flex items-center space-x-3">
               <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-600">
-                <svg className="h-4 w-4 text-white" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M13 3l3.293 3.293-7 7-3.293-3.293z"/>
-                  <path d="M12 2l1.4 1.4L11.8 5 12 2z"/>
+                <svg
+                  className="h-4 w-4 text-white"
+                  fill="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path d="M13 3l3.293 3.293-7 7-3.293-3.293z" />
+                  <path d="M12 2l1.4 1.4L11.8 5 12 2z" />
                 </svg>
               </div>
               <div>
@@ -176,7 +202,8 @@ export default function InfiniteScrollDemo() {
                   Performance Optimized
                 </h3>
                 <p className="text-sm text-blue-700 dark:text-blue-300">
-                  Infinite scroll with automatic loading, error handling, and retry logic
+                  Infinite scroll with automatic loading, error handling, and
+                  retry logic
                 </p>
               </div>
             </div>
@@ -195,5 +222,5 @@ export default function InfiniteScrollDemo() {
         />
       </div>
     </div>
-  )
+  );
 }

@@ -1,12 +1,13 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { z } from "zod"
-import { Loader2, Eye, EyeOff } from "lucide-react"
-
-import { Button } from "@/shared/components/ui/button"
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
+import * as React from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { useRoles } from "@/modules/admin/hooks/useRoles";
+import { useCreateUser } from "@/modules/admin/hooks/useUsers";
+import { Button } from "@/shared/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -14,7 +15,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/shared/components/ui/dialog"
+} from "@/shared/components/ui/dialog";
 import {
   Form,
   FormControl,
@@ -23,19 +24,16 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/shared/components/ui/form"
-import { Input } from "@/shared/components/ui/input"
-import { Switch } from "@/shared/components/ui/switch"
+} from "@/shared/components/ui/form";
+import { Input } from "@/shared/components/ui/input";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/shared/components/ui/select"
-
-import { useCreateUser } from "@/modules/admin/hooks/useUsers"
-import { useRoles } from "@/modules/admin/hooks/useRoles"
+} from "@/shared/components/ui/select";
+import { Switch } from "@/shared/components/ui/switch";
 
 // Password validation
 const passwordSchema = z
@@ -44,38 +42,48 @@ const passwordSchema = z
   .regex(/[a-z]/, "Password must contain at least one lowercase letter")
   .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
   .regex(/[0-9]/, "Password must contain at least one number")
-  .regex(/[^a-zA-Z0-9]/, "Password must contain at least one special character")
+  .regex(
+    /[^a-zA-Z0-9]/,
+    "Password must contain at least one special character",
+  );
 
 // Validation schema
-const userCreateSchema = z.object({
-  email: z.string().email("Invalid email address"),
-  username: z.string().min(3, "Username must be at least 3 characters"),
-  full_name: z.string().optional(),
-  password: passwordSchema,
-  confirm_password: z.string(),
-  is_active: z.boolean(),
-  is_verified: z.boolean(),
-  is_superuser: z.boolean(),
-  role_id: z.number().optional(),
-  send_invitation: z.boolean(),
-}).refine((data) => data.password === data.confirm_password, {
-  message: "Passwords don't match",
-  path: ["confirm_password"],
-})
+const userCreateSchema = z
+  .object({
+    email: z.string().email("Invalid email address"),
+    username: z.string().min(3, "Username must be at least 3 characters"),
+    full_name: z.string().optional(),
+    password: passwordSchema,
+    confirm_password: z.string(),
+    is_active: z.boolean(),
+    is_verified: z.boolean(),
+    is_superuser: z.boolean(),
+    role_id: z.number().optional(),
+    send_invitation: z.boolean(),
+  })
+  .refine((data) => data.password === data.confirm_password, {
+    message: "Passwords don't match",
+    path: ["confirm_password"],
+  });
 
-type UserCreateFormData = z.infer<typeof userCreateSchema>
+type UserCreateFormData = z.infer<typeof userCreateSchema>;
 
 interface UserCreateDialogProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
 }
 
-export function UserCreateDialog({ open, onOpenChange }: UserCreateDialogProps) {
-  const [showPassword, setShowPassword] = React.useState(false)
-  const [showConfirmPassword, setShowConfirmPassword] = React.useState(false)
+export function UserCreateDialog({
+  open,
+  onOpenChange,
+}: UserCreateDialogProps) {
+  const [showPassword, setShowPassword] = React.useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = React.useState(false);
 
-  const { data: rolesData, isLoading: rolesLoading } = useRoles({ active_only: true })
-  const createUserMutation = useCreateUser()
+  const { data: rolesData, isLoading: rolesLoading } = useRoles({
+    active_only: true,
+  });
+  const createUserMutation = useCreateUser();
 
   const form = useForm<UserCreateFormData>({
     resolver: zodResolver(userCreateSchema),
@@ -91,7 +99,7 @@ export function UserCreateDialog({ open, onOpenChange }: UserCreateDialogProps) 
       role_id: undefined,
       send_invitation: true,
     },
-  })
+  });
 
   const onSubmit = async (data: UserCreateFormData) => {
     try {
@@ -105,42 +113,46 @@ export function UserCreateDialog({ open, onOpenChange }: UserCreateDialogProps) 
         is_superuser: data.is_superuser,
         role_id: data.role_id,
         send_invitation: data.send_invitation,
-      })
+      });
 
-      form.reset()
-      onOpenChange(false)
+      form.reset();
+      onOpenChange(false);
     } catch (error) {
       // Error is handled by the mutation
-      console.error("Failed to create user:", error)
+      console.error("Failed to create user:", error);
     }
-  }
+  };
 
-  const roles = rolesData?.items || []
-  const isSubmitting = createUserMutation.isPending
+  const roles = rolesData?.items || [];
+  const isSubmitting = createUserMutation.isPending;
 
   // Generate random password
   const generatePassword = () => {
-    const length = 12
-    const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*"
-    let password = ""
+    const length = 12;
+    const charset =
+      "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*";
+    let password = "";
 
     // Ensure at least one character from each required set
-    password += "abcdefghijklmnopqrstuvwxyz"[Math.floor(Math.random() * 26)]
-    password += "ABCDEFGHIJKLMNOPQRSTUVWXYZ"[Math.floor(Math.random() * 26)]
-    password += "0123456789"[Math.floor(Math.random() * 10)]
-    password += "!@#$%^&*"[Math.floor(Math.random() * 8)]
+    password += "abcdefghijklmnopqrstuvwxyz"[Math.floor(Math.random() * 26)];
+    password += "ABCDEFGHIJKLMNOPQRSTUVWXYZ"[Math.floor(Math.random() * 26)];
+    password += "0123456789"[Math.floor(Math.random() * 10)];
+    password += "!@#$%^&*"[Math.floor(Math.random() * 8)];
 
     // Fill the rest randomly
     for (let i = 4; i < length; i++) {
-      password += charset[Math.floor(Math.random() * charset.length)]
+      password += charset[Math.floor(Math.random() * charset.length)];
     }
 
     // Shuffle the password
-    const shuffled = password.split('').sort(() => Math.random() - 0.5).join('')
+    const shuffled = password
+      .split("")
+      .sort(() => Math.random() - 0.5)
+      .join("");
 
-    form.setValue('password', shuffled)
-    form.setValue('confirm_password', shuffled)
-  }
+    form.setValue("password", shuffled);
+    form.setValue("confirm_password", shuffled);
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -148,7 +160,8 @@ export function UserCreateDialog({ open, onOpenChange }: UserCreateDialogProps) 
         <DialogHeader>
           <DialogTitle>Create New User</DialogTitle>
           <DialogDescription>
-            Add a new user to the system. They will receive login credentials via email if invitation is enabled.
+            Add a new user to the system. They will receive login credentials
+            via email if invitation is enabled.
           </DialogDescription>
         </DialogHeader>
 
@@ -162,7 +175,12 @@ export function UserCreateDialog({ open, onOpenChange }: UserCreateDialogProps) 
                   <FormItem>
                     <FormLabel>Email *</FormLabel>
                     <FormControl>
-                      <Input {...field} type="email" placeholder="user@example.com" disabled={isSubmitting} />
+                      <Input
+                        {...field}
+                        type="email"
+                        placeholder="user@example.com"
+                        disabled={isSubmitting}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -176,7 +194,11 @@ export function UserCreateDialog({ open, onOpenChange }: UserCreateDialogProps) 
                   <FormItem>
                     <FormLabel>Username *</FormLabel>
                     <FormControl>
-                      <Input {...field} placeholder="username" disabled={isSubmitting} />
+                      <Input
+                        {...field}
+                        placeholder="username"
+                        disabled={isSubmitting}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -191,7 +213,11 @@ export function UserCreateDialog({ open, onOpenChange }: UserCreateDialogProps) 
                 <FormItem>
                   <FormLabel>Full Name</FormLabel>
                   <FormControl>
-                    <Input {...field} placeholder="John Doe" disabled={isSubmitting} />
+                    <Input
+                      {...field}
+                      placeholder="John Doe"
+                      disabled={isSubmitting}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -206,7 +232,9 @@ export function UserCreateDialog({ open, onOpenChange }: UserCreateDialogProps) 
                   <FormLabel>Role</FormLabel>
                   <Select
                     disabled={isSubmitting || rolesLoading}
-                    onValueChange={(value) => field.onChange(value ? parseInt(value) : undefined)}
+                    onValueChange={(value) =>
+                      field.onChange(value ? parseInt(value) : undefined)
+                    }
                     value={field.value?.toString()}
                   >
                     <FormControl>
@@ -216,13 +244,17 @@ export function UserCreateDialog({ open, onOpenChange }: UserCreateDialogProps) 
                     </FormControl>
                     <SelectContent>
                       <SelectItem value="none">No role assigned</SelectItem>
-                      {roles.map((role) => (
-                        role.id && (
-                          <SelectItem key={role.id} value={role.id.toString()}>
-                            {role.name} - {role.description}
-                          </SelectItem>
-                        )
-                      ))}
+                      {roles.map(
+                        (role) =>
+                          role.id && (
+                            <SelectItem
+                              key={role.id}
+                              value={role.id.toString()}
+                            >
+                              {role.name} - {role.description}
+                            </SelectItem>
+                          ),
+                      )}
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -297,7 +329,9 @@ export function UserCreateDialog({ open, onOpenChange }: UserCreateDialogProps) 
                             variant="ghost"
                             size="sm"
                             className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                            onClick={() =>
+                              setShowConfirmPassword(!showConfirmPassword)
+                            }
                             disabled={isSubmitting}
                           >
                             {showConfirmPassword ? (
@@ -325,7 +359,9 @@ export function UserCreateDialog({ open, onOpenChange }: UserCreateDialogProps) 
                   render={({ field }) => (
                     <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
                       <div className="space-y-0.5">
-                        <FormLabel className="text-base font-medium">Active</FormLabel>
+                        <FormLabel className="text-base font-medium">
+                          Active
+                        </FormLabel>
                         <FormDescription className="text-sm">
                           User can log in
                         </FormDescription>
@@ -347,7 +383,9 @@ export function UserCreateDialog({ open, onOpenChange }: UserCreateDialogProps) 
                   render={({ field }) => (
                     <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
                       <div className="space-y-0.5">
-                        <FormLabel className="text-base font-medium">Verified</FormLabel>
+                        <FormLabel className="text-base font-medium">
+                          Verified
+                        </FormLabel>
                         <FormDescription className="text-sm">
                           Email verified
                         </FormDescription>
@@ -370,7 +408,9 @@ export function UserCreateDialog({ open, onOpenChange }: UserCreateDialogProps) 
                 render={({ field }) => (
                   <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
                     <div className="space-y-0.5">
-                      <FormLabel className="text-base font-medium">Superuser</FormLabel>
+                      <FormLabel className="text-base font-medium">
+                        Superuser
+                      </FormLabel>
                       <FormDescription className="text-sm">
                         Grant full administrative access to all features
                       </FormDescription>
@@ -392,7 +432,9 @@ export function UserCreateDialog({ open, onOpenChange }: UserCreateDialogProps) 
                 render={({ field }) => (
                   <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
                     <div className="space-y-0.5">
-                      <FormLabel className="text-base font-medium">Send Invitation</FormLabel>
+                      <FormLabel className="text-base font-medium">
+                        Send Invitation
+                      </FormLabel>
                       <FormDescription className="text-sm">
                         Send login credentials via email
                       </FormDescription>
@@ -419,7 +461,9 @@ export function UserCreateDialog({ open, onOpenChange }: UserCreateDialogProps) 
                 Cancel
               </Button>
               <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {isSubmitting && (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                )}
                 {isSubmitting ? "Creating..." : "Create User"}
               </Button>
             </DialogFooter>
@@ -427,5 +471,5 @@ export function UserCreateDialog({ open, onOpenChange }: UserCreateDialogProps) 
         </Form>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

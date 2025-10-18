@@ -1,1 +1,1 @@
-export { default as ActivityLogViewer } from './ActivityLogViewer';
+export { default as ActivityLogViewer } from "./ActivityLogViewer";

@@ -6,7 +6,7 @@
 interface SecurityEvent {
   id: string;
   type: SecurityEventType;
-  severity: 'low' | 'medium' | 'high' | 'critical';
+  severity: "low" | "medium" | "high" | "critical";
   timestamp: string;
   source: string;
   details: Record<string, any>;
@@ -17,19 +17,19 @@ interface SecurityEvent {
 }
 
 type SecurityEventType =
-  | 'xss_attempt'
-  | 'sql_injection'
-  | 'csrf_attempt'
-  | 'rate_limit_exceeded'
-  | 'authentication_failure'
-  | 'authorization_failure'
-  | 'suspicious_request'
-  | 'malicious_upload'
-  | 'session_hijack'
-  | 'brute_force'
-  | 'csp_violation'
-  | 'cors_violation'
-  | 'security_misconfiguration';
+  | "xss_attempt"
+  | "sql_injection"
+  | "csrf_attempt"
+  | "rate_limit_exceeded"
+  | "authentication_failure"
+  | "authorization_failure"
+  | "suspicious_request"
+  | "malicious_upload"
+  | "session_hijack"
+  | "brute_force"
+  | "csp_violation"
+  | "cors_violation"
+  | "security_misconfiguration";
 
 interface SecurityAlert {
   id: string;
@@ -50,7 +50,10 @@ class SecurityMonitor {
   private eventBuffer = new Map<string, SecurityEvent[]>();
   private isEnabled = true;
   private maxEventHistory = 10000;
-  private alertThresholds: Record<SecurityEventType, { count: number; timeWindow: number }> = {
+  private alertThresholds: Record<
+    SecurityEventType,
+    { count: number; timeWindow: number }
+  > = {
     xss_attempt: { count: 5, timeWindow: 300000 }, // 5 attempts in 5 minutes
     sql_injection: { count: 3, timeWindow: 300000 }, // 3 attempts in 5 minutes
     csrf_attempt: { count: 10, timeWindow: 600000 }, // 10 attempts in 10 minutes
@@ -63,13 +66,14 @@ class SecurityMonitor {
     brute_force: { count: 20, timeWindow: 600000 }, // 20 attempts in 10 minutes
     csp_violation: { count: 50, timeWindow: 3600000 }, // 50 violations in 1 hour
     cors_violation: { count: 30, timeWindow: 1800000 }, // 30 violations in 30 minutes
-    security_misconfiguration: { count: 1, timeWindow: 60000 } // 1 misconfiguration in 1 minute
+    security_misconfiguration: { count: 1, timeWindow: 60000 }, // 1 misconfiguration in 1 minute
   };
 
   private constructor() {
     // Check if security monitoring should be disabled
-    const disableMonitoring = process.env.NODE_ENV === 'development' ||
-                              process.env.DISABLE_SECURITY_MONITORING === 'true';
+    const disableMonitoring =
+      process.env.NODE_ENV === "development" ||
+      process.env.DISABLE_SECURITY_MONITORING === "true";
 
     if (disableMonitoring) {
       this.isEnabled = false;
@@ -96,7 +100,6 @@ class SecurityMonitor {
     setInterval(() => {
       this.processAlerts();
     }, 60000); // Every minute
-
   }
 
   /**
@@ -105,8 +108,8 @@ class SecurityMonitor {
   logEvent(
     type: SecurityEventType,
     details: Record<string, any>,
-    severity: 'low' | 'medium' | 'high' | 'critical' = 'medium',
-    source: string = 'unknown'
+    severity: "low" | "medium" | "high" | "critical" = "medium",
+    source: string = "unknown",
   ): void {
     if (!this.isEnabled) return;
 
@@ -120,7 +123,7 @@ class SecurityMonitor {
       userAgent: this.getUserAgent(),
       clientIP: this.getClientIP(),
       userId: this.getCurrentUserId(),
-      sessionId: this.getSessionId()
+      sessionId: this.getSessionId(),
     };
 
     // Add to events history
@@ -137,7 +140,7 @@ class SecurityMonitor {
     this.sendToExternalMonitoring(event);
 
     // Process immediate alerts for critical events
-    if (severity === 'critical') {
+    if (severity === "critical") {
       this.processCriticalEvent(event);
     }
   }
@@ -155,15 +158,15 @@ class SecurityMonitor {
   }
 
   private getUserAgent(): string {
-    if (typeof window !== 'undefined') {
+    if (typeof window !== "undefined") {
       return window.navigator.userAgent;
     }
-    return 'server';
+    return "server";
   }
 
   private getClientIP(): string {
     // This would be set by middleware or extracted from headers
-    return 'unknown';
+    return "unknown";
   }
 
   private getCurrentUserId(): string | undefined {
@@ -178,57 +181,64 @@ class SecurityMonitor {
 
   private logEventToConsole(event: SecurityEvent): void {
     const logLevel = {
-      low: 'info',
-      medium: 'warn',
-      high: 'error',
-      critical: 'error'
+      low: "info",
+      medium: "warn",
+      high: "error",
+      critical: "error",
     }[event.severity];
 
     const message = `Security Event [${event.type}] ${event.severity.toUpperCase()}: ${JSON.stringify(event.details)}`;
 
-    console[logLevel as 'info' | 'warn' | 'error'](message, {
+    console[logLevel as "info" | "warn" | "error"](message, {
       eventId: event.id,
       timestamp: event.timestamp,
       source: event.source,
       clientIP: event.clientIP,
-      userAgent: event.userAgent
+      userAgent: event.userAgent,
     });
   }
 
   private sendToExternalMonitoring(event: SecurityEvent): void {
     // Send to Sentry, DataDog, or other monitoring services
-    if (typeof window !== 'undefined' && (window as any).gtag) {
+    if (typeof window !== "undefined" && (window as any).gtag) {
       // Send to Google Analytics as custom event
-      (window as any).gtag('event', 'security_event', {
-        event_category: 'security',
+      (window as any).gtag("event", "security_event", {
+        event_category: "security",
         event_label: event.type,
-        value: event.severity === 'critical' ? 4 : event.severity === 'high' ? 3 : event.severity === 'medium' ? 2 : 1
+        value:
+          event.severity === "critical"
+            ? 4
+            : event.severity === "high"
+              ? 3
+              : event.severity === "medium"
+                ? 2
+                : 1,
       });
     }
 
     // Send to backend monitoring endpoint
-    if (event.severity === 'high' || event.severity === 'critical') {
+    if (event.severity === "high" || event.severity === "critical") {
       this.sendToBackendMonitoring(event);
     }
   }
 
   private async sendToBackendMonitoring(event: SecurityEvent): Promise<void> {
     try {
-      await fetch('/api/monitoring/security-events', {
-        method: 'POST',
+      await fetch("/api/monitoring/security-events", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json'
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify(event)
+        body: JSON.stringify(event),
       });
     } catch (error) {
-      console.error('Failed to send security event to backend:', error);
+      console.error("Failed to send security event to backend:", error);
     }
   }
 
   private processCriticalEvent(event: SecurityEvent): void {
     // Immediate actions for critical events
-    console.error('CRITICAL SECURITY EVENT:', event);
+    console.error("CRITICAL SECURITY EVENT:", event);
 
     // Could trigger immediate alerts, notifications, etc.
     this.createAlert(event.type, [event]);
@@ -236,15 +246,16 @@ class SecurityMonitor {
 
   private processAlerts(): void {
     for (const [key, events] of this.eventBuffer.entries()) {
-      const [eventType] = key.split(':') as [SecurityEventType, string];
+      const [eventType] = key.split(":") as [SecurityEventType, string];
       const threshold = this.alertThresholds[eventType];
 
       if (!threshold) continue;
 
       // Filter events within time window
       const now = Date.now();
-      const recentEvents = events.filter(event =>
-        now - new Date(event.timestamp).getTime() < threshold.timeWindow
+      const recentEvents = events.filter(
+        (event) =>
+          now - new Date(event.timestamp).getTime() < threshold.timeWindow,
       );
 
       // Check if threshold is exceeded
@@ -257,7 +268,10 @@ class SecurityMonitor {
     }
   }
 
-  private createAlert(eventType: SecurityEventType, events: SecurityEvent[]): void {
+  private createAlert(
+    eventType: SecurityEventType,
+    events: SecurityEvent[],
+  ): void {
     const alertId = `alert_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
     const alert: SecurityAlert = {
@@ -268,13 +282,23 @@ class SecurityMonitor {
       threshold: this.alertThresholds[eventType].count,
       firstSeen: events[0].timestamp,
       lastSeen: events[events.length - 1].timestamp,
-      affectedIPs: [...new Set(events.map(e => e.clientIP).filter((ip): ip is string => Boolean(ip)))],
-      affectedUsers: [...new Set(events.map(e => e.userId).filter((id): id is string => Boolean(id)))]
+      affectedIPs: [
+        ...new Set(
+          events
+            .map((e) => e.clientIP)
+            .filter((ip): ip is string => Boolean(ip)),
+        ),
+      ],
+      affectedUsers: [
+        ...new Set(
+          events.map((e) => e.userId).filter((id): id is string => Boolean(id)),
+        ),
+      ],
     };
 
     this.alerts.push(alert);
 
-    console.error('SECURITY ALERT TRIGGERED:', alert);
+    console.error("SECURITY ALERT TRIGGERED:", alert);
 
     // Send alert notification
     this.sendAlertNotification(alert);
@@ -283,30 +307,30 @@ class SecurityMonitor {
   private async sendAlertNotification(alert: SecurityAlert): Promise<void> {
     // Send to notification systems (email, Slack, PagerDuty, etc.)
     try {
-      await fetch('/api/monitoring/security-alerts', {
-        method: 'POST',
+      await fetch("/api/monitoring/security-alerts", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json'
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify(alert)
+        body: JSON.stringify(alert),
       });
     } catch (error) {
-      console.error('Failed to send security alert:', error);
+      console.error("Failed to send security alert:", error);
     }
   }
 
   private cleanupOldEvents(): void {
-    const cutoffTime = Date.now() - (24 * 60 * 60 * 1000); // 24 hours ago
+    const cutoffTime = Date.now() - 24 * 60 * 60 * 1000; // 24 hours ago
 
     // Clean main events array
-    this.events = this.events.filter(event =>
-      new Date(event.timestamp).getTime() > cutoffTime
+    this.events = this.events.filter(
+      (event) => new Date(event.timestamp).getTime() > cutoffTime,
     );
 
     // Clean event buffer
     for (const [key, events] of this.eventBuffer.entries()) {
-      const filteredEvents = events.filter(event =>
-        new Date(event.timestamp).getTime() > cutoffTime
+      const filteredEvents = events.filter(
+        (event) => new Date(event.timestamp).getTime() > cutoffTime,
       );
 
       if (filteredEvents.length === 0) {
@@ -329,44 +353,49 @@ class SecurityMonitor {
   /**
    * Get security events
    */
-  getEvents(
-    filter?: {
-      type?: SecurityEventType;
-      severity?: 'low' | 'medium' | 'high' | 'critical';
-      timeRange?: number; // milliseconds
-      clientIP?: string;
-      userId?: string;
-    }
-  ): SecurityEvent[] {
+  getEvents(filter?: {
+    type?: SecurityEventType;
+    severity?: "low" | "medium" | "high" | "critical";
+    timeRange?: number; // milliseconds
+    clientIP?: string;
+    userId?: string;
+  }): SecurityEvent[] {
     let filteredEvents = [...this.events];
 
     if (filter) {
       if (filter.type) {
-        filteredEvents = filteredEvents.filter(e => e.type === filter.type);
+        filteredEvents = filteredEvents.filter((e) => e.type === filter.type);
       }
 
       if (filter.severity) {
-        filteredEvents = filteredEvents.filter(e => e.severity === filter.severity);
+        filteredEvents = filteredEvents.filter(
+          (e) => e.severity === filter.severity,
+        );
       }
 
       if (filter.timeRange) {
         const cutoff = Date.now() - filter.timeRange;
-        filteredEvents = filteredEvents.filter(e =>
-          new Date(e.timestamp).getTime() > cutoff
+        filteredEvents = filteredEvents.filter(
+          (e) => new Date(e.timestamp).getTime() > cutoff,
         );
       }
 
       if (filter.clientIP) {
-        filteredEvents = filteredEvents.filter(e => e.clientIP === filter.clientIP);
+        filteredEvents = filteredEvents.filter(
+          (e) => e.clientIP === filter.clientIP,
+        );
       }
 
       if (filter.userId) {
-        filteredEvents = filteredEvents.filter(e => e.userId === filter.userId);
+        filteredEvents = filteredEvents.filter(
+          (e) => e.userId === filter.userId,
+        );
       }
     }
 
-    return filteredEvents.sort((a, b) =>
-      new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+    return filteredEvents.sort(
+      (a, b) =>
+        new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime(),
     );
   }
 
@@ -374,8 +403,8 @@ class SecurityMonitor {
    * Get security alerts
    */
   getAlerts(): SecurityAlert[] {
-    return [...this.alerts].sort((a, b) =>
-      new Date(b.lastSeen).getTime() - new Date(a.lastSeen).getTime()
+    return [...this.alerts].sort(
+      (a, b) => new Date(b.lastSeen).getTime() - new Date(a.lastSeen).getTime(),
     );
   }
 
@@ -391,15 +420,15 @@ class SecurityMonitor {
     timeline: Array<{ timestamp: string; count: number }>;
   } {
     const cutoff = Date.now() - timeRange;
-    const recentEvents = this.events.filter(e =>
-      new Date(e.timestamp).getTime() > cutoff
+    const recentEvents = this.events.filter(
+      (e) => new Date(e.timestamp).getTime() > cutoff,
     );
 
     const eventsByType = {} as Record<SecurityEventType, number>;
     const eventsBySeverity = { low: 0, medium: 0, high: 0, critical: 0 };
     const ipCounts = new Map<string, number>();
 
-    recentEvents.forEach(event => {
+    recentEvents.forEach((event) => {
       // Count by type
       eventsByType[event.type] = (eventsByType[event.type] || 0) + 1;
 
@@ -427,15 +456,18 @@ class SecurityMonitor {
       eventsBySeverity,
       totalAlerts: this.alerts.length,
       topIPs,
-      timeline
+      timeline,
     };
   }
 
-  private generateTimeline(events: SecurityEvent[], timeRange: number): Array<{ timestamp: string; count: number }> {
+  private generateTimeline(
+    events: SecurityEvent[],
+    timeRange: number,
+  ): Array<{ timestamp: string; count: number }> {
     const bucketSize = Math.max(timeRange / 24, 60 * 60 * 1000); // At least 1 hour buckets
     const buckets = new Map<number, number>();
 
-    events.forEach(event => {
+    events.forEach((event) => {
       const eventTime = new Date(event.timestamp).getTime();
       const bucketKey = Math.floor(eventTime / bucketSize) * bucketSize;
       buckets.set(bucketKey, (buckets.get(bucketKey) || 0) + 1);
@@ -444,9 +476,12 @@ class SecurityMonitor {
     return Array.from(buckets.entries())
       .map(([timestamp, count]) => ({
         timestamp: new Date(timestamp).toISOString(),
-        count
+        count,
       }))
-      .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
+      .sort(
+        (a, b) =>
+          new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime(),
+      );
   }
 
   /**
@@ -473,13 +508,15 @@ export type { SecurityEvent, SecurityEventType, SecurityAlert };
 export function logSecurityEvent(
   type: SecurityEventType,
   details: Record<string, any>,
-  severity: 'low' | 'medium' | 'high' | 'critical' = 'medium',
-  source: string = 'frontend'
+  severity: "low" | "medium" | "high" | "critical" = "medium",
+  source: string = "frontend",
 ): void {
   securityMonitor.logEvent(type, details, severity, source);
 }
 
-export function getSecurityEvents(filter?: Parameters<typeof securityMonitor.getEvents>[0]) {
+export function getSecurityEvents(
+  filter?: Parameters<typeof securityMonitor.getEvents>[0],
+) {
   return securityMonitor.getEvents(filter);
 }
 
@@ -492,11 +529,12 @@ export function getSecurityStatistics(timeRange?: number) {
 }
 
 // Initialize monitoring
-const disableMonitoring = process.env.NODE_ENV === 'development' ||
-                          process.env.DISABLE_SECURITY_MONITORING === 'true';
+const disableMonitoring =
+  process.env.NODE_ENV === "development" ||
+  process.env.DISABLE_SECURITY_MONITORING === "true";
 
 if (!disableMonitoring) {
-  if (typeof window !== 'undefined') {
+  if (typeof window !== "undefined") {
     // Client-side initialization
   } else {
     // Server-side initialization

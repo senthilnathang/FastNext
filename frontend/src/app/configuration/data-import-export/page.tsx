@@ -1,36 +1,30 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect } from 'react';
-import { useAuth } from '@/modules/auth';
+import { AlertCircle, Download, FileText, Shield, Upload } from "lucide-react";
+import React, { useEffect, useState } from "react";
+import { useAuth } from "@/modules/auth";
 import {
+  Button,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-  Button,
   Input,
   Label,
-  Switch,
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue
-} from '@/shared/components';
-import {
-  Upload,
-  Download,
-  FileText,
-  Shield,
-  AlertCircle
-} from 'lucide-react';
+  SelectValue,
+  Switch,
+} from "@/shared/components";
 
 export default function DataImportExportConfigPage() {
   const { user } = useAuth();
   const [config, setConfig] = useState({
     max_file_size_mb: 100,
-    allowed_formats: ['csv', 'json', 'xlsx'],
+    allowed_formats: ["csv", "json", "xlsx"],
     batch_size: 1000,
     timeout_seconds: 300,
     enable_validation: true,
@@ -38,15 +32,15 @@ export default function DataImportExportConfigPage() {
     require_approval: false,
     notify_on_completion: true,
     retention_days: 30,
-    compression_level: 'medium',
+    compression_level: "medium",
     encryption_enabled: false,
     parallel_processing: true,
     max_concurrent_jobs: 5,
-    memory_limit_mb: 512
+    memory_limit_mb: 512,
   });
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
   // Load configuration on component mount
   useEffect(() => {
@@ -55,21 +49,24 @@ export default function DataImportExportConfigPage() {
 
   const loadConfiguration = async () => {
     setLoading(true);
-    setError('');
+    setError("");
 
     try {
-      const token = localStorage.getItem('access_token');
+      const token = localStorage.getItem("access_token");
       if (!token) {
-        setError('No access token found');
+        setError("No access token found");
         return;
       }
 
-      const response = await fetch('/api/v1/config/data-import-export/current', {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
+      const response = await fetch(
+        "/api/v1/config/data-import-export/current",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        },
+      );
 
       if (!response.ok) {
         throw new Error(`Failed to load configuration: ${response.status}`);
@@ -80,8 +77,10 @@ export default function DataImportExportConfigPage() {
         setConfig(data.config_data);
       }
     } catch (error) {
-      console.error('Error loading configuration:', error);
-      setError(error instanceof Error ? error.message : 'Failed to load configuration');
+      console.error("Error loading configuration:", error);
+      setError(
+        error instanceof Error ? error.message : "Failed to load configuration",
+      );
     } finally {
       setLoading(false);
     }
@@ -89,35 +88,40 @@ export default function DataImportExportConfigPage() {
 
   const saveConfiguration = async () => {
     setSaving(true);
-    setError('');
+    setError("");
 
     try {
-      const token = localStorage.getItem('access_token');
+      const token = localStorage.getItem("access_token");
       if (!token) {
-        setError('No access token found');
+        setError("No access token found");
         return;
       }
 
-      const response = await fetch('/api/v1/config/data-import-export/current', {
-        method: 'PUT',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
+      const response = await fetch(
+        "/api/v1/config/data-import-export/current",
+        {
+          method: "PUT",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            config_data: config,
+            change_reason: "Updated via configuration UI",
+          }),
         },
-        body: JSON.stringify({
-          config_data: config,
-          change_reason: 'Updated via configuration UI'
-        })
-      });
+      );
 
       if (!response.ok) {
         throw new Error(`Failed to save configuration: ${response.status}`);
       }
 
-      alert('Configuration saved successfully!');
+      alert("Configuration saved successfully!");
     } catch (error) {
-      console.error('Error saving configuration:', error);
-      setError(error instanceof Error ? error.message : 'Failed to save configuration');
+      console.error("Error saving configuration:", error);
+      setError(
+        error instanceof Error ? error.message : "Failed to save configuration",
+      );
     } finally {
       setSaving(false);
     }
@@ -130,7 +134,7 @@ export default function DataImportExportConfigPage() {
   const resetToDefaults = () => {
     setConfig({
       max_file_size_mb: 100,
-      allowed_formats: ['csv', 'json', 'xlsx'],
+      allowed_formats: ["csv", "json", "xlsx"],
       batch_size: 1000,
       timeout_seconds: 300,
       enable_validation: true,
@@ -138,11 +142,11 @@ export default function DataImportExportConfigPage() {
       require_approval: false,
       notify_on_completion: true,
       retention_days: 30,
-      compression_level: 'medium',
+      compression_level: "medium",
       encryption_enabled: false,
       parallel_processing: true,
       max_concurrent_jobs: 5,
-      memory_limit_mb: 512
+      memory_limit_mb: 512,
     });
   };
 
@@ -181,7 +185,9 @@ export default function DataImportExportConfigPage() {
               <Upload className="h-5 w-5" />
               <span>Import Settings</span>
             </CardTitle>
-            <CardDescription>Configure data import parameters and validation rules</CardDescription>
+            <CardDescription>
+              Configure data import parameters and validation rules
+            </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
@@ -190,7 +196,12 @@ export default function DataImportExportConfigPage() {
                 id="maxFileSize"
                 type="number"
                 value={config.max_file_size_mb}
-                onChange={(e) => setConfig(prev => ({ ...prev, max_file_size_mb: parseInt(e.target.value) || 100 }))}
+                onChange={(e) =>
+                  setConfig((prev) => ({
+                    ...prev,
+                    max_file_size_mb: parseInt(e.target.value) || 100,
+                  }))
+                }
               />
             </div>
 
@@ -200,7 +211,12 @@ export default function DataImportExportConfigPage() {
                 id="batchSize"
                 type="number"
                 value={config.batch_size}
-                onChange={(e) => setConfig(prev => ({ ...prev, batch_size: parseInt(e.target.value) || 1000 }))}
+                onChange={(e) =>
+                  setConfig((prev) => ({
+                    ...prev,
+                    batch_size: parseInt(e.target.value) || 1000,
+                  }))
+                }
               />
             </div>
 
@@ -210,7 +226,12 @@ export default function DataImportExportConfigPage() {
                 id="timeout"
                 type="number"
                 value={config.timeout_seconds}
-                onChange={(e) => setConfig(prev => ({ ...prev, timeout_seconds: parseInt(e.target.value) || 300 }))}
+                onChange={(e) =>
+                  setConfig((prev) => ({
+                    ...prev,
+                    timeout_seconds: parseInt(e.target.value) || 300,
+                  }))
+                }
               />
             </div>
 
@@ -218,7 +239,9 @@ export default function DataImportExportConfigPage() {
               <Switch
                 id="enableValidation"
                 checked={config.enable_validation}
-                onCheckedChange={(checked) => setConfig(prev => ({ ...prev, enable_validation: checked }))}
+                onCheckedChange={(checked) =>
+                  setConfig((prev) => ({ ...prev, enable_validation: checked }))
+                }
               />
               <Label htmlFor="enableValidation">Enable Data Validation</Label>
             </div>
@@ -227,7 +250,9 @@ export default function DataImportExportConfigPage() {
               <Switch
                 id="requireApproval"
                 checked={config.require_approval}
-                onCheckedChange={(checked) => setConfig(prev => ({ ...prev, require_approval: checked }))}
+                onCheckedChange={(checked) =>
+                  setConfig((prev) => ({ ...prev, require_approval: checked }))
+                }
               />
               <Label htmlFor="requireApproval">Require Import Approval</Label>
             </div>
@@ -241,14 +266,18 @@ export default function DataImportExportConfigPage() {
               <Download className="h-5 w-5" />
               <span>Export Settings</span>
             </CardTitle>
-            <CardDescription>Configure data export formats and compression options</CardDescription>
+            <CardDescription>
+              Configure data export formats and compression options
+            </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="compressionLevel">Compression Level</Label>
               <Select
                 value={config.compression_level}
-                onValueChange={(value) => setConfig(prev => ({ ...prev, compression_level: value }))}
+                onValueChange={(value) =>
+                  setConfig((prev) => ({ ...prev, compression_level: value }))
+                }
               >
                 <SelectTrigger>
                   <SelectValue />
@@ -268,7 +297,12 @@ export default function DataImportExportConfigPage() {
                 id="retentionDays"
                 type="number"
                 value={config.retention_days}
-                onChange={(e) => setConfig(prev => ({ ...prev, retention_days: parseInt(e.target.value) || 30 }))}
+                onChange={(e) =>
+                  setConfig((prev) => ({
+                    ...prev,
+                    retention_days: parseInt(e.target.value) || 30,
+                  }))
+                }
               />
             </div>
 
@@ -276,7 +310,12 @@ export default function DataImportExportConfigPage() {
               <Switch
                 id="notifyOnCompletion"
                 checked={config.notify_on_completion}
-                onCheckedChange={(checked) => setConfig(prev => ({ ...prev, notify_on_completion: checked }))}
+                onCheckedChange={(checked) =>
+                  setConfig((prev) => ({
+                    ...prev,
+                    notify_on_completion: checked,
+                  }))
+                }
               />
               <Label htmlFor="notifyOnCompletion">Notify on Completion</Label>
             </div>
@@ -285,7 +324,9 @@ export default function DataImportExportConfigPage() {
               <Switch
                 id="enableAuditLog"
                 checked={config.enable_audit_log}
-                onCheckedChange={(checked) => setConfig(prev => ({ ...prev, enable_audit_log: checked }))}
+                onCheckedChange={(checked) =>
+                  setConfig((prev) => ({ ...prev, enable_audit_log: checked }))
+                }
               />
               <Label htmlFor="enableAuditLog">Enable Audit Logging</Label>
             </div>
@@ -299,29 +340,37 @@ export default function DataImportExportConfigPage() {
               <FileText className="h-5 w-5" />
               <span>File Format Settings</span>
             </CardTitle>
-            <CardDescription>Configure supported file formats and parsing options</CardDescription>
+            <CardDescription>
+              Configure supported file formats and parsing options
+            </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <Label>Allowed File Formats</Label>
               <div className="grid grid-cols-2 gap-2">
-                {['csv', 'json', 'xlsx', 'xml', 'tsv', 'parquet'].map((format) => (
-                  <div key={format} className="flex items-center space-x-2">
-                    <Switch
-                      id={format}
-                      checked={config.allowed_formats.includes(format)}
-                      onCheckedChange={(checked) => {
-                        setConfig(prev => ({
-                          ...prev,
-                          allowed_formats: checked
-                            ? [...prev.allowed_formats, format]
-                            : prev.allowed_formats.filter(f => f !== format)
-                        }));
-                      }}
-                    />
-                    <Label htmlFor={format} className="text-sm uppercase">{format}</Label>
-                  </div>
-                ))}
+                {["csv", "json", "xlsx", "xml", "tsv", "parquet"].map(
+                  (format) => (
+                    <div key={format} className="flex items-center space-x-2">
+                      <Switch
+                        id={format}
+                        checked={config.allowed_formats.includes(format)}
+                        onCheckedChange={(checked) => {
+                          setConfig((prev) => ({
+                            ...prev,
+                            allowed_formats: checked
+                              ? [...prev.allowed_formats, format]
+                              : prev.allowed_formats.filter(
+                                  (f) => f !== format,
+                                ),
+                          }));
+                        }}
+                      />
+                      <Label htmlFor={format} className="text-sm uppercase">
+                        {format}
+                      </Label>
+                    </div>
+                  ),
+                )}
               </div>
             </div>
           </CardContent>
@@ -334,16 +383,21 @@ export default function DataImportExportConfigPage() {
               <Shield className="h-5 w-5" />
               <span>Security & Compliance</span>
             </CardTitle>
-            <CardDescription>Configure security measures and compliance requirements</CardDescription>
+            <CardDescription>
+              Configure security measures and compliance requirements
+            </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-800">
               <div className="flex items-start space-x-2">
                 <AlertCircle className="h-5 w-5 text-yellow-600 mt-0.5" />
                 <div>
-                  <p className="text-sm font-medium text-yellow-800 dark:text-yellow-200">Security Notice</p>
+                  <p className="text-sm font-medium text-yellow-800 dark:text-yellow-200">
+                    Security Notice
+                  </p>
                   <p className="text-sm text-yellow-700 dark:text-yellow-300 mt-1">
-                    All import/export operations are logged and monitored for compliance.
+                    All import/export operations are logged and monitored for
+                    compliance.
                   </p>
                 </div>
               </div>
@@ -353,7 +407,12 @@ export default function DataImportExportConfigPage() {
               <Switch
                 id="encryptionEnabled"
                 checked={config.encryption_enabled}
-                onCheckedChange={(checked) => setConfig(prev => ({ ...prev, encryption_enabled: checked }))}
+                onCheckedChange={(checked) =>
+                  setConfig((prev) => ({
+                    ...prev,
+                    encryption_enabled: checked,
+                  }))
+                }
               />
               <Label htmlFor="encryptionEnabled">Enable Encryption</Label>
             </div>
@@ -364,7 +423,12 @@ export default function DataImportExportConfigPage() {
                 id="maxConcurrentJobs"
                 type="number"
                 value={config.max_concurrent_jobs}
-                onChange={(e) => setConfig(prev => ({ ...prev, max_concurrent_jobs: parseInt(e.target.value) || 5 }))}
+                onChange={(e) =>
+                  setConfig((prev) => ({
+                    ...prev,
+                    max_concurrent_jobs: parseInt(e.target.value) || 5,
+                  }))
+                }
               />
             </div>
 
@@ -374,7 +438,12 @@ export default function DataImportExportConfigPage() {
                 id="memoryLimit"
                 type="number"
                 value={config.memory_limit_mb}
-                onChange={(e) => setConfig(prev => ({ ...prev, memory_limit_mb: parseInt(e.target.value) || 512 }))}
+                onChange={(e) =>
+                  setConfig((prev) => ({
+                    ...prev,
+                    memory_limit_mb: parseInt(e.target.value) || 512,
+                  }))
+                }
               />
             </div>
 
@@ -382,9 +451,16 @@ export default function DataImportExportConfigPage() {
               <Switch
                 id="parallelProcessing"
                 checked={config.parallel_processing}
-                onCheckedChange={(checked) => setConfig(prev => ({ ...prev, parallel_processing: checked }))}
+                onCheckedChange={(checked) =>
+                  setConfig((prev) => ({
+                    ...prev,
+                    parallel_processing: checked,
+                  }))
+                }
               />
-              <Label htmlFor="parallelProcessing">Enable Parallel Processing</Label>
+              <Label htmlFor="parallelProcessing">
+                Enable Parallel Processing
+              </Label>
             </div>
           </CardContent>
         </Card>
@@ -396,7 +472,7 @@ export default function DataImportExportConfigPage() {
           Reset to Defaults
         </Button>
         <Button onClick={handleSave} disabled={saving}>
-          {saving ? 'Saving...' : 'Save Configuration'}
+          {saving ? "Saving..." : "Save Configuration"}
         </Button>
       </div>
     </div>

@@ -1,7 +1,13 @@
-'use client';
+"use client";
 
-import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
-import { initializeTrustedTypes } from './trusted-types';
+import React, {
+  createContext,
+  type ReactNode,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
+import { initializeTrustedTypes } from "./trusted-types";
 
 /**
  * Security features available in the current browser environment
@@ -31,7 +37,9 @@ interface SecurityContextType {
   securityFeatures: SecurityFeatures;
 }
 
-const SecurityContext = createContext<SecurityContextType | undefined>(undefined);
+const SecurityContext = createContext<SecurityContextType | undefined>(
+  undefined,
+);
 
 /**
  * Props for the SecurityProvider component
@@ -48,15 +56,15 @@ interface SecurityProviderProps {
  */
 export function SecurityProvider({ children }: SecurityProviderProps) {
   const [securityState, setSecurityState] = useState<SecurityContextType>({
-    cspNonce: '',
+    cspNonce: "",
     trustedTypesEnabled: false,
     isSecureContext: false,
     securityFeatures: {
       trustedTypes: false,
       csp: false,
       sri: false,
-      hsts: false
-    }
+      hsts: false,
+    },
   });
 
   useEffect(() => {
@@ -73,17 +81,19 @@ export function SecurityProvider({ children }: SecurityProviderProps) {
       const nonce = generateNonce();
 
       // Check for Trusted Types API support
-      const trustedTypesEnabled = typeof window !== 'undefined' && 'trustedTypes' in window;
+      const trustedTypesEnabled =
+        typeof window !== "undefined" && "trustedTypes" in window;
 
       // Check if we're in a secure context (HTTPS)
-      const isSecureContext = typeof window !== 'undefined' && window.isSecureContext;
+      const isSecureContext =
+        typeof window !== "undefined" && window.isSecureContext;
 
       // Initialize Trusted Types if supported
       if (trustedTypesEnabled) {
         try {
           initializeTrustedTypes();
         } catch (error) {
-          console.warn('Failed to initialize Trusted Types:', error);
+          console.warn("Failed to initialize Trusted Types:", error);
           // Continue without Trusted Types - not critical for basic functionality
         }
       }
@@ -96,7 +106,7 @@ export function SecurityProvider({ children }: SecurityProviderProps) {
         cspNonce: nonce,
         trustedTypesEnabled,
         isSecureContext,
-        securityFeatures
+        securityFeatures,
       });
 
       // Set up security event listeners for monitoring
@@ -104,17 +114,16 @@ export function SecurityProvider({ children }: SecurityProviderProps) {
 
       // Perform initial security checks
       performSecurityChecks();
-
     } catch (error) {
-      console.error('Failed to initialize security features:', error);
+      console.error("Failed to initialize security features:", error);
       // Set minimal security state on failure
-      setSecurityState(prev => ({
+      setSecurityState((prev) => ({
         ...prev,
         securityFeatures: {
           ...prev.securityFeatures,
           csp: false,
-          trustedTypes: false
-        }
+          trustedTypes: false,
+        },
       }));
     }
   };
@@ -144,8 +153,8 @@ export function useSecurity(): SecurityContextType {
   const context = useContext(SecurityContext);
   if (context === undefined) {
     throw new Error(
-      'useSecurity must be used within a SecurityProvider. ' +
-      'Make sure your component is wrapped with <SecurityProvider>.'
+      "useSecurity must be used within a SecurityProvider. " +
+        "Make sure your component is wrapped with <SecurityProvider>.",
     );
   }
   return context;
@@ -158,16 +167,18 @@ export function useSecurity(): SecurityContextType {
  */
 function generateNonce(): string {
   // Return empty string for SSR to avoid hydration mismatches
-  if (typeof window === 'undefined') return '';
+  if (typeof window === "undefined") return "";
 
   try {
     // Generate a cryptographically secure random nonce
     const array = new Uint8Array(16);
     window.crypto.getRandomValues(array);
-    return Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('');
+    return Array.from(array, (byte) => byte.toString(16).padStart(2, "0")).join(
+      "",
+    );
   } catch (error) {
-    console.warn('Failed to generate CSP nonce:', error);
-    return '';
+    console.warn("Failed to generate CSP nonce:", error);
+    return "";
   }
 }
 
@@ -178,20 +189,20 @@ function generateNonce(): string {
  */
 function detectSecurityFeatures(): SecurityFeatures {
   // Return all features as false during SSR
-  if (typeof window === 'undefined') {
+  if (typeof window === "undefined") {
     return {
       trustedTypes: false,
       csp: false,
       sri: false,
-      hsts: false
+      hsts: false,
     };
   }
 
   return {
-    trustedTypes: 'trustedTypes' in window,
+    trustedTypes: "trustedTypes" in window,
     csp: checkCSPSupport(),
     sri: checkSRISupport(),
-    hsts: window.isSecureContext
+    hsts: window.isSecureContext,
   };
 }
 
@@ -202,7 +213,7 @@ function detectSecurityFeatures(): SecurityFeatures {
  */
 function checkCSPSupport(): boolean {
   try {
-    return 'SecurityPolicyViolationEvent' in window;
+    return "SecurityPolicyViolationEvent" in window;
   } catch {
     return false;
   }
@@ -215,8 +226,8 @@ function checkCSPSupport(): boolean {
  */
 function checkSRISupport(): boolean {
   try {
-    const script = document.createElement('script');
-    return 'integrity' in script;
+    const script = document.createElement("script");
+    return "integrity" in script;
   } catch {
     return false;
   }
@@ -226,22 +237,21 @@ function checkSRISupport(): boolean {
  * Set up security event listeners for monitoring and violation detection
  */
 function addSecurityEventListeners(): void {
-  if (typeof window === 'undefined') return;
+  if (typeof window === "undefined") return;
 
   try {
     // Listen for CSP violations
-    document.addEventListener('securitypolicyviolation', handleCSPViolation);
+    document.addEventListener("securitypolicyviolation", handleCSPViolation);
 
     // Listen for mixed content warnings on page unload
-    if ('onbeforeunload' in window) {
-      window.addEventListener('beforeunload', checkMixedContent);
+    if ("onbeforeunload" in window) {
+      window.addEventListener("beforeunload", checkMixedContent);
     }
 
     // Listen for potentially malicious messages
-    window.addEventListener('message', validateMessageOrigin, false);
-
+    window.addEventListener("message", validateMessageOrigin, false);
   } catch (error) {
-    console.warn('Failed to add security event listeners:', error);
+    console.warn("Failed to add security event listeners:", error);
   }
 }
 
@@ -258,20 +268,20 @@ function handleCSPViolation(event: SecurityPolicyViolationEvent): void {
     sourceFile: event.sourceFile,
     lineNumber: event.lineNumber,
     columnNumber: event.columnNumber,
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
   };
 
-  console.error('CSP Violation detected:', violationDetails);
+  console.error("CSP Violation detected:", violationDetails);
 
   // Report violation for monitoring
-  reportSecurityViolation('csp_violation', violationDetails);
+  reportSecurityViolation("csp_violation", violationDetails);
 }
 
 /**
  * Perform initial security checks on page load
  */
 function performSecurityChecks(): void {
-  if (typeof window === 'undefined') return;
+  if (typeof window === "undefined") return;
 
   try {
     // Check for insecure protocols in production
@@ -285,9 +295,8 @@ function performSecurityChecks(): void {
 
     // Validate current document origin
     validateDocumentOrigin();
-
   } catch (error) {
-    console.warn('Security check failed:', error);
+    console.warn("Security check failed:", error);
   }
 }
 
@@ -295,15 +304,16 @@ function performSecurityChecks(): void {
  * Check if the application is running over a secure protocol
  */
 function checkProtocolSecurity(): void {
-  const isLocalhost = window.location.hostname === 'localhost' ||
-                     window.location.hostname === '127.0.0.1' ||
-                     window.location.hostname.startsWith('192.168.') ||
-                     window.location.hostname.startsWith('10.');
+  const isLocalhost =
+    window.location.hostname === "localhost" ||
+    window.location.hostname === "127.0.0.1" ||
+    window.location.hostname.startsWith("192.168.") ||
+    window.location.hostname.startsWith("10.");
 
-  if (window.location.protocol === 'http:' && !isLocalhost) {
+  if (window.location.protocol === "http:" && !isLocalhost) {
     console.warn(
-      'Security Warning: Application is running over HTTP in a non-local environment. ' +
-      'Consider using HTTPS for enhanced security.'
+      "Security Warning: Application is running over HTTP in a non-local environment. " +
+        "Consider using HTTPS for enhanced security.",
     );
   }
 }
@@ -313,19 +323,22 @@ function checkProtocolSecurity(): void {
  * Wraps them to log when they're called for security monitoring
  */
 function checkDangerousGlobals(): void {
-  const dangerousGlobals: string[] = ['eval', 'Function'];
+  const dangerousGlobals: string[] = ["eval", "Function"];
 
   for (const globalName of dangerousGlobals) {
     try {
       const globalValue = (window as any)[globalName];
-      if (typeof globalValue === 'function') {
+      if (typeof globalValue === "function") {
         // Wrap dangerous functions to log usage
         const original = globalValue;
-        (window as any)[globalName] = function(...args: unknown[]) {
-          console.warn(`Security Warning: Potentially dangerous function '${globalName}' called`, {
-            args: args.length,
-            stack: new Error().stack?.split('\n')[2]?.trim()
-          });
+        (window as any)[globalName] = function (...args: unknown[]) {
+          console.warn(
+            `Security Warning: Potentially dangerous function '${globalName}' called`,
+            {
+              args: args.length,
+              stack: new Error().stack?.split("\n")[2]?.trim(),
+            },
+          );
           return original.apply(this, args);
         };
       }
@@ -341,15 +354,15 @@ function checkDangerousGlobals(): void {
  */
 function checkInlineScripts(): void {
   try {
-    const inlineScripts = document.querySelectorAll('script:not([src])');
+    const inlineScripts = document.querySelectorAll("script:not([src])");
     if (inlineScripts.length > 0) {
       console.warn(
         `Security Warning: Found ${inlineScripts.length} inline script(s) without CSP nonces. ` +
-        'Consider using CSP with nonces for enhanced security.'
+          "Consider using CSP with nonces for enhanced security.",
       );
     }
   } catch (error) {
-    console.debug('Could not check for inline scripts:', error);
+    console.debug("Could not check for inline scripts:", error);
   }
 }
 
@@ -360,16 +373,16 @@ function validateDocumentOrigin(): void {
   const currentOrigin = window.location.origin;
   const allowedOrigins = [
     currentOrigin, // Current origin is always allowed
-    'https://localhost:3000',
-    'https://127.0.0.1:3000',
-    'http://localhost:3000', // Allow HTTP for local development
-    'http://127.0.0.1:3000'
+    "https://localhost:3000",
+    "https://127.0.0.1:3000",
+    "http://localhost:3000", // Allow HTTP for local development
+    "http://127.0.0.1:3000",
   ];
 
   if (!allowedOrigins.includes(currentOrigin)) {
-    console.warn('Security Warning: Document origin not in allowed list:', {
+    console.warn("Security Warning: Document origin not in allowed list:", {
       current: currentOrigin,
-      allowed: allowedOrigins
+      allowed: allowedOrigins,
     });
   }
 }
@@ -378,17 +391,19 @@ function validateDocumentOrigin(): void {
  * Check for mixed content (HTTP resources on HTTPS pages)
  */
 function checkMixedContent(): void {
-  if (window.location.protocol === 'https:') {
+  if (window.location.protocol === "https:") {
     try {
-      const httpResources = document.querySelectorAll('[src^="http:"], [href^="http:"]');
+      const httpResources = document.querySelectorAll(
+        '[src^="http:"], [href^="http:"]',
+      );
       if (httpResources.length > 0) {
         console.warn(
           `Security Warning: Found ${httpResources.length} HTTP resource(s) on HTTPS page. ` +
-          'This creates mixed content and should be avoided.'
+            "This creates mixed content and should be avoided.",
         );
       }
     } catch (error) {
-      console.debug('Could not check for mixed content:', error);
+      console.debug("Could not check for mixed content:", error);
     }
   }
 }
@@ -399,28 +414,34 @@ function checkMixedContent(): void {
 function validateMessageOrigin(event: MessageEvent): void {
   const allowedOrigins = [
     window.location.origin,
-    'https://localhost:3000',
-    'https://127.0.0.1:3000',
-    'http://localhost:3000',
-    'http://127.0.0.1:3000'
+    "https://localhost:3000",
+    "https://127.0.0.1:3000",
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
   ];
 
   if (!allowedOrigins.includes(event.origin)) {
-    console.warn('Security Warning: Received message from unauthorized origin:', {
-      origin: event.origin,
-      allowed: allowedOrigins,
-      data: typeof event.data
-    });
+    console.warn(
+      "Security Warning: Received message from unauthorized origin:",
+      {
+        origin: event.origin,
+        allowed: allowedOrigins,
+        data: typeof event.data,
+      },
+    );
     return;
   }
 
   // Additional validation for message content
-  if (typeof event.data === 'string') {
-    if (event.data.includes('<script') || event.data.includes('javascript:')) {
-      console.error('Security Alert: Potentially malicious script content in message:', {
-        origin: event.origin,
-        data: event.data.substring(0, 100) + '...'
-      });
+  if (typeof event.data === "string") {
+    if (event.data.includes("<script") || event.data.includes("javascript:")) {
+      console.error(
+        "Security Alert: Potentially malicious script content in message:",
+        {
+          origin: event.origin,
+          data: event.data.substring(0, 100) + "...",
+        },
+      );
     }
   }
 }
@@ -428,32 +449,36 @@ function validateMessageOrigin(event: MessageEvent): void {
 /**
  * Report security violations to monitoring services
  */
-function reportSecurityViolation(type: string, details: Record<string, unknown>): void {
+function reportSecurityViolation(
+  type: string,
+  details: Record<string, unknown>,
+): void {
   const violationData = {
     type,
     details,
     timestamp: new Date().toISOString(),
-    userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : 'unknown',
-    url: typeof window !== 'undefined' ? window.location.href : 'unknown',
-    environment: process.env.NODE_ENV || 'unknown'
+    userAgent:
+      typeof navigator !== "undefined" ? navigator.userAgent : "unknown",
+    url: typeof window !== "undefined" ? window.location.href : "unknown",
+    environment: process.env.NODE_ENV || "unknown",
   };
 
-  if (process.env.NODE_ENV === 'development') {
+  if (process.env.NODE_ENV === "development") {
     console.error(`Security violation [${type}]:`, violationData);
   } else {
     // Send to monitoring service like Sentry, DataDog, etc.
     try {
-      fetch('/api/security/violations', {
-        method: 'POST',
+      fetch("/api/security/violations", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify(violationData)
-      }).catch(error => {
-        console.error('Failed to report security violation:', error);
+        body: JSON.stringify(violationData),
+      }).catch((error) => {
+        console.error("Failed to report security violation:", error);
       });
     } catch (error) {
-      console.error('Error reporting security violation:', error);
+      console.error("Error reporting security violation:", error);
     }
   }
 }
@@ -484,38 +509,39 @@ export function useSecureOperation() {
     options: {
       requireHTTPS?: boolean;
       requireTrustedTypes?: boolean;
-    } = {}
+    } = {},
   ): Promise<void> => {
     const { requireHTTPS = false, requireTrustedTypes = false } = options;
 
     // Validate security requirements
     if (requireHTTPS && !security.isSecureContext) {
       throw new Error(
-        'Operation requires HTTPS context but current context is not secure. ' +
-        'Please ensure the application is served over HTTPS.'
+        "Operation requires HTTPS context but current context is not secure. " +
+          "Please ensure the application is served over HTTPS.",
       );
     }
 
     if (requireTrustedTypes && !security.trustedTypesEnabled) {
       console.warn(
-        'Operation requested Trusted Types but they are not available. ' +
-        'Falling back to basic security measures.'
+        "Operation requested Trusted Types but they are not available. " +
+          "Falling back to basic security measures.",
       );
     }
 
     try {
       await operation();
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      const errorMessage =
+        error instanceof Error ? error.message : "Unknown error";
 
-      console.error('Secure operation failed:', errorMessage);
+      console.error("Secure operation failed:", errorMessage);
 
       // Report the failure for monitoring
-      reportSecurityViolation('operation_failure', {
+      reportSecurityViolation("operation_failure", {
         error: errorMessage,
         requireHTTPS,
         requireTrustedTypes,
-        operationName: operation.name || 'anonymous'
+        operationName: operation.name || "anonymous",
       });
 
       throw error;
@@ -541,13 +567,13 @@ export function useSecureHTML() {
   const security = useSecurity();
 
   const renderHTML = (html: string): string => {
-    if (typeof html !== 'string') {
-      console.warn('useSecureHTML: Input must be a string');
-      return '';
+    if (typeof html !== "string") {
+      console.warn("useSecureHTML: Input must be a string");
+      return "";
     }
 
     if (!security.trustedTypesEnabled) {
-      console.warn('Trusted Types not available, using basic sanitization');
+      console.warn("Trusted Types not available, using basic sanitization");
       return basicSanitizeHTML(html);
     }
 
@@ -564,15 +590,15 @@ export function useSecureHTML() {
  * This is a fallback and should not be relied upon as primary security
  */
 function basicSanitizeHTML(html: string): string {
-  if (typeof html !== 'string') return '';
+  if (typeof html !== "string") return "";
 
   return html
-    .replace(/<script[\s\S]*?>[\s\S]*?<\/script>/gi, '') // Remove script tags
-    .replace(/<iframe[\s\S]*?>/gi, '') // Remove iframe tags
-    .replace(/<object[\s\S]*?>/gi, '') // Remove object tags
-    .replace(/<embed[\s\S]*?>/gi, '') // Remove embed tags
-    .replace(/on\w+\s*=\s*["'][^"']*["']/gi, '') // Remove event handlers
-    .replace(/javascript:/gi, '') // Remove javascript: URLs
-    .replace(/vbscript:/gi, '') // Remove vbscript: URLs
-    .replace(/data:text\/html/gi, ''); // Remove data: URLs with HTML
+    .replace(/<script[\s\S]*?>[\s\S]*?<\/script>/gi, "") // Remove script tags
+    .replace(/<iframe[\s\S]*?>/gi, "") // Remove iframe tags
+    .replace(/<object[\s\S]*?>/gi, "") // Remove object tags
+    .replace(/<embed[\s\S]*?>/gi, "") // Remove embed tags
+    .replace(/on\w+\s*=\s*["'][^"']*["']/gi, "") // Remove event handlers
+    .replace(/javascript:/gi, "") // Remove javascript: URLs
+    .replace(/vbscript:/gi, "") // Remove vbscript: URLs
+    .replace(/data:text\/html/gi, ""); // Remove data: URLs with HTML
 }

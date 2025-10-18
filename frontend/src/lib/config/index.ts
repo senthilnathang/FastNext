@@ -4,19 +4,22 @@
  */
 
 export {
-  validateServerEnvironment,
-  validateClientEnvironment,
-  getEnvironmentReport,
-  useEnvironment,
-  getServerEnvironment,
-  getEnvVar,
-  isSecureContext,
-  validateEnvironmentMiddleware,
+  type ClientEnvConfig,
   type EnvConfig,
-  type ClientEnvConfig
-} from './env-validator';
+  getEnvironmentReport,
+  getEnvVar,
+  getServerEnvironment,
+  isSecureContext,
+  useEnvironment,
+  validateClientEnvironment,
+  validateEnvironmentMiddleware,
+  validateServerEnvironment,
+} from "./env-validator";
 
-import { validateServerEnvironment, validateClientEnvironment } from './env-validator';
+import {
+  validateClientEnvironment,
+  validateServerEnvironment,
+} from "./env-validator";
 
 // Application configuration derived from environment variables
 export class AppConfig {
@@ -39,14 +42,15 @@ export class AppConfig {
     if (this.config) return this.config;
 
     try {
-      const env = typeof window === 'undefined'
-        ? validateServerEnvironment()
-        : validateClientEnvironment();
+      const env =
+        typeof window === "undefined"
+          ? validateServerEnvironment()
+          : validateClientEnvironment();
 
       this.config = this.buildConfig(env);
       return this.config;
     } catch (error) {
-      console.error('Failed to initialize app configuration:', error);
+      console.error("Failed to initialize app configuration:", error);
       throw error;
     }
   }
@@ -55,21 +59,21 @@ export class AppConfig {
    * Build application configuration from environment
    */
   private buildConfig(env: any) {
-    const isProduction = env.NODE_ENV === 'production';
-    const isDevelopment = env.NODE_ENV === 'development';
+    const isProduction = env.NODE_ENV === "production";
+    const isDevelopment = env.NODE_ENV === "development";
 
     return {
       // Environment
-      environment: env.NODE_ENV || 'development',
+      environment: env.NODE_ENV || "development",
       isProduction,
       isDevelopment,
-      isTest: env.NODE_ENV === 'test',
+      isTest: env.NODE_ENV === "test",
 
       // API Configuration
       api: {
-        baseUrl: env.NEXT_PUBLIC_API_URL || 'http://localhost:8000',
+        baseUrl: env.NEXT_PUBLIC_API_URL || "http://localhost:8000",
         timeout: isProduction ? 10000 : 30000,
-        retries: isProduction ? 3 : 1
+        retries: isProduction ? 3 : 1,
       },
 
       // Security Configuration
@@ -81,8 +85,8 @@ export class AppConfig {
         rateLimiting: {
           enabled: true,
           windowMs: isProduction ? 60000 : 120000, // 1-2 minutes
-          maxRequests: isProduction ? 100 : 200
-        }
+          maxRequests: isProduction ? 100 : 200,
+        },
       },
 
       // Features
@@ -90,7 +94,7 @@ export class AppConfig {
         analytics: env.NEXT_PUBLIC_ENABLE_ANALYTICS ?? false,
         pwa: env.NEXT_PUBLIC_ENABLE_PWA ?? false,
         bundleAnalysis: env.ANALYZE_BUNDLE ?? false,
-        telemetry: !env.DISABLE_TELEMETRY
+        telemetry: !env.DISABLE_TELEMETRY,
       },
 
       // Monitoring
@@ -99,12 +103,14 @@ export class AppConfig {
           dsn: env.NEXT_PUBLIC_SENTRY_DSN,
           enabled: !!env.NEXT_PUBLIC_SENTRY_DSN && isProduction,
           environment: env.NODE_ENV,
-          tracesSampleRate: isProduction ? 0.1 : 1.0
+          tracesSampleRate: isProduction ? 0.1 : 1.0,
         },
         analytics: {
           googleAnalytics: env.NEXT_PUBLIC_GA_TRACKING_ID,
-          enabled: !!env.NEXT_PUBLIC_GA_TRACKING_ID && env.NEXT_PUBLIC_ENABLE_ANALYTICS
-        }
+          enabled:
+            !!env.NEXT_PUBLIC_GA_TRACKING_ID &&
+            env.NEXT_PUBLIC_ENABLE_ANALYTICS,
+        },
       },
 
       // Performance
@@ -112,15 +118,15 @@ export class AppConfig {
         enableServiceWorker: isProduction && env.NEXT_PUBLIC_ENABLE_PWA,
         enablePreload: isProduction,
         bundleOptimization: isProduction,
-        imageOptimization: true
+        imageOptimization: true,
       },
 
       // Development
       development: {
         showDebugInfo: isDevelopment,
         enableHotReload: isDevelopment,
-        verboseLogging: isDevelopment
-      }
+        verboseLogging: isDevelopment,
+      },
     };
   }
 
@@ -128,7 +134,7 @@ export class AppConfig {
    * Get trusted domains for security policies
    */
   private getTrustedDomains(env: any): string[] {
-    const domains = ['self'];
+    const domains = ["self"];
 
     if (env.NEXT_PUBLIC_DOMAIN) {
       domains.push(env.NEXT_PUBLIC_DOMAIN);
@@ -144,7 +150,10 @@ export class AppConfig {
         const apiUrl = new URL(env.NEXT_PUBLIC_API_URL);
         domains.push(apiUrl.origin);
       } catch {
-        console.warn('Invalid API URL in environment:', env.NEXT_PUBLIC_API_URL);
+        console.warn(
+          "Invalid API URL in environment:",
+          env.NEXT_PUBLIC_API_URL,
+        );
       }
     }
 
@@ -173,7 +182,7 @@ export class AppConfig {
    * Check if feature is enabled
    */
   isFeatureEnabled(feature: string): boolean {
-    const features = this.getSection('features');
+    const features = this.getSection("features");
     return features[feature] ?? false;
   }
 
@@ -181,14 +190,14 @@ export class AppConfig {
    * Get API configuration
    */
   getApiConfig() {
-    return this.getSection('api');
+    return this.getSection("api");
   }
 
   /**
    * Get security configuration
    */
   getSecurityConfig() {
-    return this.getSection('security');
+    return this.getSection("security");
   }
 }
 
@@ -225,47 +234,51 @@ export function validateConfiguration(): {
 
     // Validate API configuration
     if (!config.api.baseUrl) {
-      errors.push('API base URL is not configured');
+      errors.push("API base URL is not configured");
     } else {
       try {
         new URL(config.api.baseUrl);
       } catch {
-        errors.push('API base URL is invalid');
+        errors.push("API base URL is invalid");
       }
     }
 
     // Validate production requirements
     if (config.isProduction) {
-      if (config.api.baseUrl.includes('localhost')) {
-        warnings.push('Using localhost API in production');
+      if (config.api.baseUrl.includes("localhost")) {
+        warnings.push("Using localhost API in production");
       }
 
       if (!config.monitoring.sentry.enabled) {
-        warnings.push('Error monitoring not configured for production');
+        warnings.push("Error monitoring not configured for production");
       }
 
       if (!config.security.enableHSTS) {
-        warnings.push('HSTS not enabled for production');
+        warnings.push("HSTS not enabled for production");
       }
     }
 
     // Validate security configuration
     if (!config.security.trustedDomains.length) {
-      warnings.push('No trusted domains configured');
+      warnings.push("No trusted domains configured");
     }
 
     return {
       isValid: errors.length === 0,
       errors,
       warnings,
-      config
+      config,
     };
   } catch (error) {
     return {
       isValid: false,
-      errors: [error instanceof Error ? error.message : 'Configuration validation failed'],
+      errors: [
+        error instanceof Error
+          ? error.message
+          : "Configuration validation failed",
+      ],
       warnings: [],
-      config: null
+      config: null,
     };
   }
 }
@@ -276,5 +289,5 @@ export function validateConfiguration(): {
 try {
   appConfig.init();
 } catch (error) {
-  console.error('Failed to initialize configuration:', error);
+  console.error("Failed to initialize configuration:", error);
 }

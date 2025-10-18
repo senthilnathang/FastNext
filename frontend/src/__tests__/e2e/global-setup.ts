@@ -1,4 +1,4 @@
-import { chromium, FullConfig } from '@playwright/test';
+import { chromium, type FullConfig } from "@playwright/test";
 
 /**
  * Global setup for Playwright tests.
@@ -10,21 +10,21 @@ import { chromium, FullConfig } from '@playwright/test';
  */
 
 async function globalSetup(config: FullConfig) {
-  console.log('🚀 Starting global setup for FastNext E2E tests...');
+  console.log("🚀 Starting global setup for FastNext E2E tests...");
 
   const { baseURL } = config.projects[0].use;
   const browser = await chromium.launch();
 
   try {
     // Setup regular user authentication
-    await setupUserAuth(browser, baseURL!, 'tests/e2e/.auth/user.json');
+    await setupUserAuth(browser, baseURL!, "tests/e2e/.auth/user.json");
 
     // Setup admin user authentication
-    await setupAdminAuth(browser, baseURL!, 'tests/e2e/.auth/admin.json');
+    await setupAdminAuth(browser, baseURL!, "tests/e2e/.auth/admin.json");
 
-    console.log('✅ Global setup completed successfully');
+    console.log("✅ Global setup completed successfully");
   } catch (error) {
-    console.error('❌ Global setup failed:', error);
+    console.error("❌ Global setup failed:", error);
     throw error;
   } finally {
     await browser.close();
@@ -32,7 +32,7 @@ async function globalSetup(config: FullConfig) {
 }
 
 async function setupUserAuth(browser: any, baseURL: string, authFile: string) {
-  console.log('🔐 Setting up regular user authentication...');
+  console.log("🔐 Setting up regular user authentication...");
 
   const page = await browser.newPage();
 
@@ -41,33 +41,39 @@ async function setupUserAuth(browser: any, baseURL: string, authFile: string) {
     await page.goto(`${baseURL}/login`);
 
     // Wait for login form
-    await page.waitForSelector('form');
+    await page.waitForSelector("form");
 
     // Fill login form with test user credentials
-    await page.fill('input[name="username"], input[type="email"]', 'user@test.com');
-    await page.fill('input[name="password"], input[type="password"]', 'testpassword');
+    await page.fill(
+      'input[name="username"], input[type="email"]',
+      "user@test.com",
+    );
+    await page.fill(
+      'input[name="password"], input[type="password"]',
+      "testpassword",
+    );
 
     // Submit login form
     await page.click('button[type="submit"]');
 
     // Wait for successful login redirect
-    await page.waitForURL('**/dashboard', { timeout: 10000 });
+    await page.waitForURL("**/dashboard", { timeout: 10000 });
 
     // Save authentication state
     await page.context().storageState({ path: authFile });
 
-    console.log('✅ Regular user authentication setup complete');
+    console.log("✅ Regular user authentication setup complete");
   } catch {
-    console.log('⚠️  Regular user auth failed, using fallback setup');
+    console.log("⚠️  Regular user auth failed, using fallback setup");
     // Create a minimal auth state for testing
-    await createFallbackAuthState(authFile, 'user');
+    await createFallbackAuthState(authFile, "user");
   } finally {
     await page.close();
   }
 }
 
 async function setupAdminAuth(browser: any, baseURL: string, authFile: string) {
-  console.log('🔐 Setting up admin user authentication...');
+  console.log("🔐 Setting up admin user authentication...");
 
   const page = await browser.newPage();
 
@@ -76,34 +82,40 @@ async function setupAdminAuth(browser: any, baseURL: string, authFile: string) {
     await page.goto(`${baseURL}/login`);
 
     // Wait for login form
-    await page.waitForSelector('form');
+    await page.waitForSelector("form");
 
     // Fill login form with admin credentials
-    await page.fill('input[name="username"], input[type="email"]', 'admin@test.com');
-    await page.fill('input[name="password"], input[type="password"]', 'testpassword');
+    await page.fill(
+      'input[name="username"], input[type="email"]',
+      "admin@test.com",
+    );
+    await page.fill(
+      'input[name="password"], input[type="password"]',
+      "testpassword",
+    );
 
     // Submit login form
     await page.click('button[type="submit"]');
 
     // Wait for successful login redirect
-    await page.waitForURL('**/dashboard', { timeout: 10000 });
+    await page.waitForURL("**/dashboard", { timeout: 10000 });
 
     // Save authentication state
     await page.context().storageState({ path: authFile });
 
-    console.log('✅ Admin user authentication setup complete');
+    console.log("✅ Admin user authentication setup complete");
   } catch {
-    console.log('⚠️  Admin user auth failed, using fallback setup');
+    console.log("⚠️  Admin user auth failed, using fallback setup");
     // Create a minimal auth state for testing
-    await createFallbackAuthState(authFile, 'admin');
+    await createFallbackAuthState(authFile, "admin");
   } finally {
     await page.close();
   }
 }
 
 async function createFallbackAuthState(authFile: string, userType: string) {
-  const fs = await import('fs');
-  const path = await import('path');
+  const fs = await import("fs");
+  const path = await import("path");
 
   // Ensure directory exists
   const dir = path.dirname(authFile);
@@ -115,30 +127,30 @@ async function createFallbackAuthState(authFile: string, userType: string) {
   const authState = {
     cookies: [
       {
-        name: 'access_token',
+        name: "access_token",
         value: `mock_${userType}_token`,
-        domain: 'localhost',
-        path: '/',
+        domain: "localhost",
+        path: "/",
         httpOnly: true,
         secure: false,
-        sameSite: 'Lax'
-      }
+        sameSite: "Lax",
+      },
     ],
     origins: [
       {
-        origin: 'http://localhost:3000',
+        origin: "http://localhost:3000",
         localStorage: [
           {
-            name: 'access_token',
-            value: `mock_${userType}_token`
+            name: "access_token",
+            value: `mock_${userType}_token`,
           },
           {
-            name: 'user_type',
-            value: userType
-          }
-        ]
-      }
-    ]
+            name: "user_type",
+            value: userType,
+          },
+        ],
+      },
+    ],
   };
 
   fs.writeFileSync(authFile, JSON.stringify(authState, null, 2));

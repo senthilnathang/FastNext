@@ -4,7 +4,10 @@
 declare global {
   interface Window {
     trustedTypes?: {
-      createPolicy(name: string, policy: TrustedTypePolicyOptions): TrustedTypePolicy;
+      createPolicy(
+        name: string,
+        policy: TrustedTypePolicyOptions,
+      ): TrustedTypePolicy;
       defaultPolicy?: TrustedTypePolicy;
       isHTML(value: any): boolean;
       isScript(value: any): boolean;
@@ -15,15 +18,15 @@ declare global {
   }
 
   interface TrustedHTML {
-    readonly __brand?: 'TrustedHTML';
+    readonly __brand?: "TrustedHTML";
   }
 
   interface TrustedScript {
-    readonly __brand?: 'TrustedScript';
+    readonly __brand?: "TrustedScript";
   }
 
   interface TrustedScriptURL {
-    readonly __brand?: 'TrustedScriptURL';
+    readonly __brand?: "TrustedScriptURL";
   }
 
   interface CustomTrustedTypePolicy {
@@ -51,9 +54,15 @@ class SimpleTrustedTypes {
 
     const trustedPolicy = {
       name,
-      createHTML: policy.createHTML ? (input: string) => ({ __brand: 'TrustedHTML', value: input }) : undefined,
-      createScript: policy.createScript ? (input: string) => ({ __brand: 'TrustedScript', value: input }) : undefined,
-      createScriptURL: policy.createScriptURL ? (input: string) => ({ __brand: 'TrustedScriptURL', value: input }) : undefined,
+      createHTML: policy.createHTML
+        ? (input: string) => ({ __brand: "TrustedHTML", value: input })
+        : undefined,
+      createScript: policy.createScript
+        ? (input: string) => ({ __brand: "TrustedScript", value: input })
+        : undefined,
+      createScriptURL: policy.createScriptURL
+        ? (input: string) => ({ __brand: "TrustedScriptURL", value: input })
+        : undefined,
     };
 
     this.policies.set(name, trustedPolicy);
@@ -61,48 +70,52 @@ class SimpleTrustedTypes {
   }
 
   isHTML(value: any): boolean {
-    return value && typeof value === 'object' && value.__brand === 'TrustedHTML';
+    return (
+      value && typeof value === "object" && value.__brand === "TrustedHTML"
+    );
   }
 
   isScript(value: any): boolean {
-    return value && typeof value === 'object' && value.__brand === 'TrustedScript';
+    return (
+      value && typeof value === "object" && value.__brand === "TrustedScript"
+    );
   }
 
   isScriptURL(value: any): boolean {
-    return value && typeof value === 'object' && value.__brand === 'TrustedScriptURL';
+    return (
+      value && typeof value === "object" && value.__brand === "TrustedScriptURL"
+    );
   }
 
   get emptyHTML(): any {
-    return { __brand: 'TrustedHTML', value: '' };
+    return { __brand: "TrustedHTML", value: "" };
   }
 
   get emptyScript(): any {
-    return { __brand: 'TrustedScript', value: '' };
+    return { __brand: "TrustedScript", value: "" };
   }
 }
 
 // Initialize simple implementation if Trusted Types is not supported
-if (typeof window !== 'undefined' && !window.trustedTypes) {
+if (typeof window !== "undefined" && !window.trustedTypes) {
   (window as any).trustedTypes = new SimpleTrustedTypes();
 }
 
 // Basic HTML sanitization without DOMPurify
 function basicHTMLSanitize(html: string): string {
   return html
-    .replace(/<script[\s\S]*?>[\s\S]*?<\/script>/gi, '')
-    .replace(/<iframe[\s\S]*?>/gi, '')
-    .replace(/<object[\s\S]*?>/gi, '')
-    .replace(/<embed[\s\S]*?>/gi, '')
-    .replace(/<applet[\s\S]*?>/gi, '')
-    .replace(/<meta[\s\S]*?>/gi, '')
-    .replace(/<link[\s\S]*?>/gi, '')
-    .replace(/on\w+\s*=/gi, '')
-    .replace(/javascript:/gi, '')
-    .replace(/vbscript:/gi, '')
-    .replace(/data:text\/html/gi, '');
+    .replace(/<script[\s\S]*?>[\s\S]*?<\/script>/gi, "")
+    .replace(/<iframe[\s\S]*?>/gi, "")
+    .replace(/<object[\s\S]*?>/gi, "")
+    .replace(/<embed[\s\S]*?>/gi, "")
+    .replace(/<applet[\s\S]*?>/gi, "")
+    .replace(/<meta[\s\S]*?>/gi, "")
+    .replace(/<link[\s\S]*?>/gi, "")
+    .replace(/on\w+\s*=/gi, "")
+    .replace(/javascript:/gi, "")
+    .replace(/vbscript:/gi, "")
+    .replace(/data:text\/html/gi, "");
 }
-
-
 
 // URL validation and sanitization
 function sanitizeURL(url: string): string {
@@ -110,19 +123,29 @@ function sanitizeURL(url: string): string {
     const urlObj = new URL(url);
 
     // Block dangerous protocols
-    const dangerousProtocols = ['javascript:', 'vbscript:', 'data:', 'file:', 'ftp:'];
-    if (dangerousProtocols.some(protocol => url.toLowerCase().startsWith(protocol))) {
-      return 'about:blank';
+    const dangerousProtocols = [
+      "javascript:",
+      "vbscript:",
+      "data:",
+      "file:",
+      "ftp:",
+    ];
+    if (
+      dangerousProtocols.some((protocol) =>
+        url.toLowerCase().startsWith(protocol),
+      )
+    ) {
+      return "about:blank";
     }
 
     // Only allow HTTP, HTTPS, and mailto
-    if (!['http:', 'https:', 'mailto:'].includes(urlObj.protocol)) {
-      return 'about:blank';
+    if (!["http:", "https:", "mailto:"].includes(urlObj.protocol)) {
+      return "about:blank";
     }
 
     return urlObj.toString();
   } catch {
-    return 'about:blank';
+    return "about:blank";
   }
 }
 
@@ -140,12 +163,12 @@ function validateScript(script: string): string {
     /outerHTML/gi,
     /execScript/gi,
     /javascript:/gi,
-    /vbscript:/gi
+    /vbscript:/gi,
   ];
 
   for (const pattern of dangerousPatterns) {
     if (pattern.test(script)) {
-      throw new Error('Script contains dangerous patterns');
+      throw new Error("Script contains dangerous patterns");
     }
   }
 
@@ -155,13 +178,13 @@ function validateScript(script: string): string {
 // Create the main security policy
 export function createSecurityPolicy(): TrustedTypePolicy {
   if (!window.trustedTypes) {
-    throw new Error('Trusted Types not supported');
+    throw new Error("Trusted Types not supported");
   }
 
-  return window.trustedTypes.createPolicy('fastnext-security', {
+  return window.trustedTypes.createPolicy("fastnext-security", {
     createHTML: (input: string): string => {
-      if (typeof input !== 'string') {
-        throw new Error('HTML input must be a string');
+      if (typeof input !== "string") {
+        throw new Error("HTML input must be a string");
       }
 
       // Sanitize HTML content using basic sanitization
@@ -169,8 +192,8 @@ export function createSecurityPolicy(): TrustedTypePolicy {
     },
 
     createScript: (input: string): string => {
-      if (typeof input !== 'string') {
-        throw new Error('Script input must be a string');
+      if (typeof input !== "string") {
+        throw new Error("Script input must be a string");
       }
 
       // Validate script content
@@ -178,41 +201,41 @@ export function createSecurityPolicy(): TrustedTypePolicy {
     },
 
     createScriptURL: (input: string): string => {
-      if (typeof input !== 'string') {
-        throw new Error('Script URL input must be a string');
+      if (typeof input !== "string") {
+        throw new Error("Script URL input must be a string");
       }
 
       // Sanitize and validate URL
       return sanitizeURL(input);
-    }
+    },
   });
 }
 
 // Create a stricter policy for user-generated content
 export function createStrictPolicy(): TrustedTypePolicy {
   if (!window.trustedTypes) {
-    throw new Error('Trusted Types not supported');
+    throw new Error("Trusted Types not supported");
   }
 
-  return window.trustedTypes.createPolicy('fastnext-strict', {
+  return window.trustedTypes.createPolicy("fastnext-strict", {
     createHTML: (input: string): string => {
-      if (typeof input !== 'string') {
-        throw new Error('HTML input must be a string');
+      if (typeof input !== "string") {
+        throw new Error("HTML input must be a string");
       }
 
       // Use basic sanitization and strip all HTML tags for strict policy
-      return input.replace(/<[^>]*>/g, '');
+      return input.replace(/<[^>]*>/g, "");
     },
 
     createScript: (): string => {
       // Never allow scripts in strict policy
-      throw new Error('Scripts not allowed in strict policy');
+      throw new Error("Scripts not allowed in strict policy");
     },
 
     createScriptURL: (): string => {
       // Never allow script URLs in strict policy
-      throw new Error('Script URLs not allowed in strict policy');
-    }
+      throw new Error("Script URLs not allowed in strict policy");
+    },
   });
 }
 
@@ -222,25 +245,30 @@ export class TrustedTypesHelper {
   private static strictPolicy: TrustedTypePolicy | null = null;
 
   static async getSecurityPolicy(): Promise<TrustedTypePolicy> {
-    if (!this.securityPolicy) {
-      this.securityPolicy = createSecurityPolicy();
+    if (!TrustedTypesHelper.securityPolicy) {
+      TrustedTypesHelper.securityPolicy = createSecurityPolicy();
     }
-    return this.securityPolicy;
+    return TrustedTypesHelper.securityPolicy;
   }
 
   static async getStrictPolicy(): Promise<TrustedTypePolicy> {
-    if (!this.strictPolicy) {
-      this.strictPolicy = createStrictPolicy();
+    if (!TrustedTypesHelper.strictPolicy) {
+      TrustedTypesHelper.strictPolicy = createStrictPolicy();
     }
-    return this.strictPolicy;
+    return TrustedTypesHelper.strictPolicy;
   }
 
   // Safe HTML creation
-  static async createSafeHTML(html: string, strict = false): Promise<TrustedHTML> {
-    const policy = strict ? await this.getStrictPolicy() : await this.getSecurityPolicy();
+  static async createSafeHTML(
+    html: string,
+    strict = false,
+  ): Promise<TrustedHTML> {
+    const policy = strict
+      ? await TrustedTypesHelper.getStrictPolicy()
+      : await TrustedTypesHelper.getSecurityPolicy();
 
     if (!policy.createHTML) {
-      throw new Error('Policy does not support HTML creation');
+      throw new Error("Policy does not support HTML creation");
     }
 
     return policy.createHTML(html);
@@ -248,10 +276,10 @@ export class TrustedTypesHelper {
 
   // Safe script creation
   static async createSafeScript(script: string): Promise<TrustedScript> {
-    const policy = await this.getSecurityPolicy();
+    const policy = await TrustedTypesHelper.getSecurityPolicy();
 
     if (!policy.createScript) {
-      throw new Error('Policy does not support script creation');
+      throw new Error("Policy does not support script creation");
     }
 
     return policy.createScript(script);
@@ -259,10 +287,10 @@ export class TrustedTypesHelper {
 
   // Safe script URL creation
   static async createSafeScriptURL(url: string): Promise<TrustedScriptURL> {
-    const policy = await this.getSecurityPolicy();
+    const policy = await TrustedTypesHelper.getSecurityPolicy();
 
     if (!policy.createScriptURL) {
-      throw new Error('Policy does not support script URL creation');
+      throw new Error("Policy does not support script URL creation");
     }
 
     return policy.createScriptURL(url);
@@ -284,7 +312,9 @@ export class TrustedTypesHelper {
 
 // React hook for safe HTML rendering
 export function useSafeHTML(html: string, strict = false) {
-  const [trustedHTML, setTrustedHTML] = React.useState<TrustedHTML | null>(null);
+  const [trustedHTML, setTrustedHTML] = React.useState<TrustedHTML | null>(
+    null,
+  );
   const [error, setError] = React.useState<string | null>(null);
   const [loading, setLoading] = React.useState(true);
 
@@ -303,7 +333,7 @@ export function useSafeHTML(html: string, strict = false) {
         }
       } catch (err) {
         if (!isCancelled) {
-          setError(err instanceof Error ? err.message : 'Unknown error');
+          setError(err instanceof Error ? err.message : "Unknown error");
           setTrustedHTML(null);
         }
       } finally {
@@ -325,35 +355,34 @@ export function useSafeHTML(html: string, strict = false) {
 
 // Initialize Trusted Types on app startup
 export function initializeTrustedTypes(): void {
-  if (typeof window === 'undefined') return;
+  if (typeof window === "undefined") return;
 
   try {
     // Create default policy if it doesn't exist
     if (window.trustedTypes && !window.trustedTypes.defaultPolicy) {
-      window.trustedTypes.createPolicy('default', {
+      window.trustedTypes.createPolicy("default", {
         createHTML: (input: string) => {
-          console.warn('Using default policy for HTML creation:', input);
+          console.warn("Using default policy for HTML creation:", input);
           return basicHTMLSanitize(input);
         },
         createScript: (input: string) => {
-          console.warn('Using default policy for script creation:', input);
-          throw new Error('Scripts must use explicit policy');
+          console.warn("Using default policy for script creation:", input);
+          throw new Error("Scripts must use explicit policy");
         },
         createScriptURL: (input: string) => {
-          console.warn('Using default policy for script URL creation:', input);
+          console.warn("Using default policy for script URL creation:", input);
           return sanitizeURL(input);
-        }
+        },
       });
     }
 
     // Pre-create our main policies
     createSecurityPolicy();
     createStrictPolicy();
-
   } catch (_error) {
-    console.error('Failed to initialize Trusted Types:', _error);
+    console.error("Failed to initialize Trusted Types:", _error);
   }
 }
 
 // Export React for the hook
-import React from 'react';
+import React from "react";

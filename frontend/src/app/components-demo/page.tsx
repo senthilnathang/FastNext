@@ -1,21 +1,26 @@
-"use client"
+"use client";
 
-import * as React from "react"
+import * as React from "react";
+import type {
+  KanbanColumn,
+  ListColumn,
+  ListItem,
+  WidgetType,
+} from "@/shared/components";
 import {
+  Badge,
   Card,
   CardContent,
   CardHeader,
   CardTitle,
-  Badge,
   DateField,
   DateTimeField,
+  KanbanBoard,
+  ListView,
   NumberField,
   SelectionList,
   WidgetSelector,
-  KanbanBoard,
-  ListView
-} from "@/shared/components"
-import type { WidgetType, KanbanColumn, ListColumn, ListItem } from "@/shared/components"
+} from "@/shared/components";
 
 // Demo data for components
 const selectionOptions = [
@@ -25,7 +30,7 @@ const selectionOptions = [
   { value: "svelte", label: "Svelte" },
   { value: "nextjs", label: "Next.js" },
   { value: "nuxt", label: "Nuxt.js" },
-]
+];
 
 const kanbanColumns: KanbanColumn[] = [
   {
@@ -82,7 +87,7 @@ const kanbanColumns: KanbanColumn[] = [
       },
     ],
   },
-]
+];
 
 const listData: ListItem[] = [
   {
@@ -112,7 +117,7 @@ const listData: ListItem[] = [
     lastLogin: "2024-01-10",
     projects: 1,
   },
-]
+];
 
 const listColumns: ListColumn[] = [
   { key: "name", label: "Name", sortable: true },
@@ -121,7 +126,7 @@ const listColumns: ListColumn[] = [
     key: "role",
     label: "Role",
     sortable: true,
-    render: (value) => <Badge variant="secondary">{String(value)}</Badge>
+    render: (value) => <Badge variant="secondary">{String(value)}</Badge>,
   },
   {
     key: "status",
@@ -130,25 +135,27 @@ const listColumns: ListColumn[] = [
       <Badge variant={value === "Active" ? "success" : "destructive"}>
         {String(value)}
       </Badge>
-    )
+    ),
   },
   { key: "lastLogin", label: "Last Login", sortable: true },
   { key: "projects", label: "Projects", sortable: true },
-]
+];
 
 export default function ComponentsDemoPage() {
-  const [dateValue, setDateValue] = React.useState<Date>()
-  const [datetimeValue, setDatetimeValue] = React.useState<Date>()
-  const [numberValue, setNumberValue] = React.useState<number>()
-  const [floatValue, setFloatValue] = React.useState<number>()
-  const [selectedOptions, setSelectedOptions] = React.useState<string[]>([])
-  const [selectedWidget, setSelectedWidget] = React.useState<WidgetType>()
-  const [kanbanData, setKanbanData] = React.useState<KanbanColumn[]>(kanbanColumns)
-  const [listViewMode, setListViewMode] = React.useState<"list" | "grid" | "cards">("list")
+  const [dateValue, setDateValue] = React.useState<Date>();
+  const [datetimeValue, setDatetimeValue] = React.useState<Date>();
+  const [numberValue, setNumberValue] = React.useState<number>();
+  const [floatValue, setFloatValue] = React.useState<number>();
+  const [selectedOptions, setSelectedOptions] = React.useState<string[]>([]);
+  const [selectedWidget, setSelectedWidget] = React.useState<WidgetType>();
+  const [kanbanData, setKanbanData] =
+    React.useState<KanbanColumn[]>(kanbanColumns);
+  const [listViewMode, setListViewMode] = React.useState<
+    "list" | "grid" | "cards"
+  >("list");
 
   return (
     <div className="container mx-auto p-6 space-y-8">
-
       {/* Form Fields Section */}
       <div className="space-y-6">
         <h2 className="text-2xl font-semibold">Form Fields</h2>
@@ -296,14 +303,10 @@ export default function ComponentsDemoPage() {
             <KanbanBoard
               columns={kanbanData}
               onColumnsChange={setKanbanData}
-              onAddItem={(_columnId) => {
-              }}
-              onEditItem={(_item) => {
-              }}
-              onDeleteItem={(_item) => {
-              }}
-              onMoveItem={(_itemId, _fromColumn, _toColumn) => {
-              }}
+              onAddItem={(_columnId) => {}}
+              onEditItem={(_item) => {}}
+              onDeleteItem={(_item) => {}}
+              onMoveItem={(_itemId, _fromColumn, _toColumn) => {}}
             />
           </CardContent>
         </Card>
@@ -322,29 +325,29 @@ export default function ComponentsDemoPage() {
               searchable
               sortable
               selectable
-               actions={[
-                 {
-                   key: "edit",
-                   label: "Edit",
-                   onClick: (item) => console.log("Edit", item),
-                 },
-                 {
-                   key: "delete",
-                   label: "Delete",
-                   variant: "destructive",
-                   onClick: (item) => console.log("Delete", item),
-                 }
-               ]}
+              actions={[
+                {
+                  key: "edit",
+                  label: "Edit",
+                  onClick: (item) => console.log("Edit", item),
+                },
+                {
+                  key: "delete",
+                  label: "Delete",
+                  variant: "destructive",
+                  onClick: (item) => console.log("Delete", item),
+                },
+              ]}
               pagination={{
                 page: 1,
                 pageSize: 10,
                 total: listData.length,
-                totalPages: 1
+                totalPages: 1,
               }}
             />
           </CardContent>
         </Card>
       </div>
     </div>
-  )
+  );
 }

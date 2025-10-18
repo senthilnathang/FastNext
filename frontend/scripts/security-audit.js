@@ -5,21 +5,21 @@
  * Analyzes dependencies for vulnerabilities and security issues
  */
 
-import fs from 'fs';
-import path from 'path';
-import { execSync } from 'child_process';
+import { execSync } from "child_process";
+import fs from "fs";
+import path from "path";
 
 class SecurityAuditor {
   constructor() {
     this.vulnerabilities = [];
     this.warnings = [];
     this.info = [];
-    this.packageJsonPath = path.join(process.cwd(), 'package.json');
-    this.lockFilePath = path.join(process.cwd(), 'package-lock.json');
+    this.packageJsonPath = path.join(process.cwd(), "package.json");
+    this.lockFilePath = path.join(process.cwd(), "package-lock.json");
   }
 
   async runAudit() {
-    console.log('🔍 Starting Security Audit for FastNext...\n');
+    console.log("🔍 Starting Security Audit for FastNext...\n");
 
     try {
       // 1. NPM Audit
@@ -42,20 +42,19 @@ class SecurityAuditor {
 
       // 7. Generate Report
       this.generateReport();
-
     } catch (error) {
-      console.error('❌ Security audit failed:', error.message);
+      console.error("❌ Security audit failed:", error.message);
       process.exit(1);
     }
   }
 
   async runNpmAudit() {
-    console.log('📋 Running NPM Security Audit...');
+    console.log("📋 Running NPM Security Audit...");
 
     try {
-      const auditResult = execSync('npm audit --json', {
-        encoding: 'utf8',
-        stdio: 'pipe'
+      const auditResult = execSync("npm audit --json", {
+        encoding: "utf8",
+        stdio: "pipe",
       });
 
       const audit = JSON.parse(auditResult);
@@ -63,18 +62,19 @@ class SecurityAuditor {
       if (audit.vulnerabilities) {
         Object.entries(audit.vulnerabilities).forEach(([pkg, vuln]) => {
           this.vulnerabilities.push({
-            type: 'npm-vulnerability',
+            type: "npm-vulnerability",
             package: pkg,
             severity: vuln.severity,
             title: vuln.title,
             url: vuln.url,
-            range: vuln.range
+            range: vuln.range,
           });
         });
       }
 
-      console.log(`   Found ${Object.keys(audit.vulnerabilities || {}).length} vulnerabilities`);
-
+      console.log(
+        `   Found ${Object.keys(audit.vulnerabilities || {}).length} vulnerabilities`,
+      );
     } catch (error) {
       if (error.status === 1) {
         // NPM audit found vulnerabilities
@@ -83,60 +83,62 @@ class SecurityAuditor {
           if (audit.vulnerabilities) {
             Object.entries(audit.vulnerabilities).forEach(([pkg, vuln]) => {
               this.vulnerabilities.push({
-                type: 'npm-vulnerability',
+                type: "npm-vulnerability",
                 package: pkg,
                 severity: vuln.severity,
                 title: vuln.title,
-                url: vuln.url
+                url: vuln.url,
               });
             });
           }
         } catch {
           this.warnings.push({
-            type: 'audit-error',
-            message: 'Failed to parse NPM audit results'
+            type: "audit-error",
+            message: "Failed to parse NPM audit results",
           });
         }
       } else {
         this.warnings.push({
-          type: 'audit-error',
-          message: `NPM audit failed: ${error.message}`
+          type: "audit-error",
+          message: `NPM audit failed: ${error.message}`,
         });
       }
     }
   }
 
   async analyzeDependencies() {
-    console.log('📦 Analyzing Dependencies...');
+    console.log("📦 Analyzing Dependencies...");
 
     if (!fs.existsSync(this.packageJsonPath)) {
       this.warnings.push({
-        type: 'missing-file',
-        message: 'package.json not found'
+        type: "missing-file",
+        message: "package.json not found",
       });
       return;
     }
 
-    const packageJson = JSON.parse(fs.readFileSync(this.packageJsonPath, 'utf8'));
+    const packageJson = JSON.parse(
+      fs.readFileSync(this.packageJsonPath, "utf8"),
+    );
     const allDeps = {
       ...packageJson.dependencies,
-      ...packageJson.devDependencies
+      ...packageJson.devDependencies,
     };
 
     // Check for suspicious packages
     const suspiciousPatterns = [
-      /^[a-z]{1,2}$/,  // Very short names
-      /^\d+$/,         // Only numbers
-      /test|debug|temp/i // Test/debug packages
+      /^[a-z]{1,2}$/, // Very short names
+      /^\d+$/, // Only numbers
+      /test|debug|temp/i, // Test/debug packages
     ];
 
-    Object.keys(allDeps).forEach(dep => {
-      suspiciousPatterns.forEach(pattern => {
+    Object.keys(allDeps).forEach((dep) => {
+      suspiciousPatterns.forEach((pattern) => {
         if (pattern.test(dep)) {
           this.warnings.push({
-            type: 'suspicious-package',
+            type: "suspicious-package",
             package: dep,
-            reason: 'Unusual package name pattern'
+            reason: "Unusual package name pattern",
           });
         }
       });
@@ -144,18 +146,18 @@ class SecurityAuditor {
 
     // Check for known problematic packages
     const problematicPackages = [
-      'lodash', // Security issues in old versions
-      'moment', // Large bundle size, deprecated
-      'request', // Deprecated
-      'babel-polyfill' // Large bundle impact
+      "lodash", // Security issues in old versions
+      "moment", // Large bundle size, deprecated
+      "request", // Deprecated
+      "babel-polyfill", // Large bundle impact
     ];
 
-    problematicPackages.forEach(pkg => {
+    problematicPackages.forEach((pkg) => {
       if (allDeps[pkg]) {
         this.warnings.push({
-          type: 'problematic-package',
+          type: "problematic-package",
           package: pkg,
-          reason: this.getPackageIssue(pkg)
+          reason: this.getPackageIssue(pkg),
         });
       }
     });
@@ -165,120 +167,131 @@ class SecurityAuditor {
 
   getPackageIssue(pkg) {
     const issues = {
-      'lodash': 'Has had security vulnerabilities, consider lodash-es',
-      'moment': 'Large bundle size and deprecated, use date-fns or dayjs',
-      'request': 'Deprecated package, use axios or fetch',
-      'babel-polyfill': 'Large bundle impact, use core-js directly'
+      lodash: "Has had security vulnerabilities, consider lodash-es",
+      moment: "Large bundle size and deprecated, use date-fns or dayjs",
+      request: "Deprecated package, use axios or fetch",
+      "babel-polyfill": "Large bundle impact, use core-js directly",
     };
-    return issues[pkg] || 'Known issues with this package';
+    return issues[pkg] || "Known issues with this package";
   }
 
   async analyzeBundleSize() {
-    console.log('📊 Analyzing Bundle Size...');
+    console.log("📊 Analyzing Bundle Size...");
 
     try {
       // Run bundle analyzer if available
-      if (fs.existsSync(path.join(process.cwd(), 'node_modules', '@next', 'bundle-analyzer'))) {
-        execSync('npm run analyze 2>/dev/null || true', { stdio: 'pipe' });
+      if (
+        fs.existsSync(
+          path.join(process.cwd(), "node_modules", "@next", "bundle-analyzer"),
+        )
+      ) {
+        execSync("npm run analyze 2>/dev/null || true", { stdio: "pipe" });
       }
 
       // Check for large dependencies
-      const packageJson = JSON.parse(fs.readFileSync(this.packageJsonPath, 'utf8'));
+      const packageJson = JSON.parse(
+        fs.readFileSync(this.packageJsonPath, "utf8"),
+      );
       const largeDependencies = [
-        '@emotion/react',
-        '@mui/material',
-        'antd',
-        'lodash',
-        'moment',
-        'rxjs'
+        "@emotion/react",
+        "@mui/material",
+        "antd",
+        "lodash",
+        "moment",
+        "rxjs",
       ];
 
-      largeDependencies.forEach(dep => {
-        if (packageJson.dependencies?.[dep] || packageJson.devDependencies?.[dep]) {
+      largeDependencies.forEach((dep) => {
+        if (
+          packageJson.dependencies?.[dep] ||
+          packageJson.devDependencies?.[dep]
+        ) {
           this.info.push({
-            type: 'large-dependency',
+            type: "large-dependency",
             package: dep,
-            message: 'Large dependency detected - consider bundle impact'
+            message: "Large dependency detected - consider bundle impact",
           });
         }
       });
-
     } catch (error) {
       this.warnings.push({
-        type: 'bundle-analysis-error',
-        message: `Bundle analysis failed: ${error.message}`
+        type: "bundle-analysis-error",
+        message: `Bundle analysis failed: ${error.message}`,
       });
     }
   }
 
   async checkLicenses() {
-    console.log('📄 Checking Licenses...');
+    console.log("📄 Checking Licenses...");
 
     try {
-      const result = execSync('npx license-checker --json --onlyAllow "MIT;Apache-2.0;BSD-2-Clause;BSD-3-Clause;ISC" 2>/dev/null || echo "{}"', {
-        encoding: 'utf8',
-        stdio: 'pipe'
-      });
+      const result = execSync(
+        'npx license-checker --json --onlyAllow "MIT;Apache-2.0;BSD-2-Clause;BSD-3-Clause;ISC" 2>/dev/null || echo "{}"',
+        {
+          encoding: "utf8",
+          stdio: "pipe",
+        },
+      );
 
       const licenses = JSON.parse(result);
-      const restrictiveLicenses = ['GPL', 'AGPL', 'LGPL', 'CDDL', 'EPL'];
+      const restrictiveLicenses = ["GPL", "AGPL", "LGPL", "CDDL", "EPL"];
 
       Object.entries(licenses).forEach(([pkg, info]) => {
         if (info.licenses) {
-          const license = Array.isArray(info.licenses) ? info.licenses.join(',') : info.licenses;
-          restrictiveLicenses.forEach(restrictive => {
+          const license = Array.isArray(info.licenses)
+            ? info.licenses.join(",")
+            : info.licenses;
+          restrictiveLicenses.forEach((restrictive) => {
             if (license.includes(restrictive)) {
               this.warnings.push({
-                type: 'restrictive-license',
+                type: "restrictive-license",
                 package: pkg,
-                license: license
+                license: license,
               });
             }
           });
         }
       });
-
     } catch {
       this.warnings.push({
-        type: 'license-check-error',
-        message: 'License check failed - install license-checker'
+        type: "license-check-error",
+        message: "License check failed - install license-checker",
       });
     }
   }
 
   async checkOutdatedPackages() {
-    console.log('🔄 Checking for Outdated Packages...');
+    console.log("🔄 Checking for Outdated Packages...");
 
     try {
-      const result = execSync('npm outdated --json', {
-        encoding: 'utf8',
-        stdio: 'pipe'
+      const result = execSync("npm outdated --json", {
+        encoding: "utf8",
+        stdio: "pipe",
       });
 
       const outdated = JSON.parse(result);
       Object.entries(outdated).forEach(([pkg, info]) => {
-        const currentMajor = parseInt(info.current.split('.')[0]);
-        const latestMajor = parseInt(info.latest.split('.')[0]);
+        const currentMajor = parseInt(info.current.split(".")[0]);
+        const latestMajor = parseInt(info.latest.split(".")[0]);
 
         if (latestMajor > currentMajor) {
           this.warnings.push({
-            type: 'major-update-available',
+            type: "major-update-available",
             package: pkg,
             current: info.current,
-            latest: info.latest
+            latest: info.latest,
           });
         }
       });
-
     } catch (error) {
       // npm outdated returns non-zero exit code when packages are outdated
       if (error.stdout) {
         try {
           const outdated = JSON.parse(error.stdout);
           this.info.push({
-            type: 'outdated-packages',
+            type: "outdated-packages",
             count: Object.keys(outdated).length,
-            message: 'Some packages have updates available'
+            message: "Some packages have updates available",
           });
         } catch {
           // Ignore parse errors
@@ -288,71 +301,80 @@ class SecurityAuditor {
   }
 
   async checkSecurityHeaders() {
-    console.log('🛡️  Checking Security Configuration...');
+    console.log("🛡️  Checking Security Configuration...");
 
     // Check if security middleware exists
-    const middlewarePath = path.join(process.cwd(), 'middleware.ts');
+    const middlewarePath = path.join(process.cwd(), "middleware.ts");
     if (!fs.existsSync(middlewarePath)) {
       this.warnings.push({
-        type: 'missing-middleware',
-        message: 'No middleware.ts found - security middleware missing'
+        type: "missing-middleware",
+        message: "No middleware.ts found - security middleware missing",
       });
     } else {
-      const middlewareContent = fs.readFileSync(middlewarePath, 'utf8');
+      const middlewareContent = fs.readFileSync(middlewarePath, "utf8");
 
       // Check for security features
       const securityFeatures = [
-        { pattern: /CSP|Content-Security-Policy/i, name: 'Content Security Policy' },
-        { pattern: /X-Frame-Options/i, name: 'X-Frame-Options' },
-        { pattern: /X-XSS-Protection/i, name: 'XSS Protection' },
-        { pattern: /rateLimit/i, name: 'Rate Limiting' },
-        { pattern: /HSTS|Strict-Transport-Security/i, name: 'HSTS' }
+        {
+          pattern: /CSP|Content-Security-Policy/i,
+          name: "Content Security Policy",
+        },
+        { pattern: /X-Frame-Options/i, name: "X-Frame-Options" },
+        { pattern: /X-XSS-Protection/i, name: "XSS Protection" },
+        { pattern: /rateLimit/i, name: "Rate Limiting" },
+        { pattern: /HSTS|Strict-Transport-Security/i, name: "HSTS" },
       ];
 
-      securityFeatures.forEach(feature => {
+      securityFeatures.forEach((feature) => {
         if (!feature.pattern.test(middlewareContent)) {
           this.warnings.push({
-            type: 'missing-security-feature',
+            type: "missing-security-feature",
             feature: feature.name,
-            message: `${feature.name} not found in middleware`
+            message: `${feature.name} not found in middleware`,
           });
         }
       });
     }
 
     // Check next.config.ts
-    const nextConfigPath = path.join(process.cwd(), 'next.config.ts');
+    const nextConfigPath = path.join(process.cwd(), "next.config.ts");
     if (fs.existsSync(nextConfigPath)) {
-      const configContent = fs.readFileSync(nextConfigPath, 'utf8');
+      const configContent = fs.readFileSync(nextConfigPath, "utf8");
 
-      if (!configContent.includes('headers()')) {
+      if (!configContent.includes("headers()")) {
         this.warnings.push({
-          type: 'missing-security-headers',
-          message: 'No security headers configured in next.config.ts'
+          type: "missing-security-headers",
+          message: "No security headers configured in next.config.ts",
         });
       }
     }
   }
 
   generateReport() {
-    console.log('\n📋 Security Audit Report');
-    console.log('========================\n');
+    console.log("\n📋 Security Audit Report");
+    console.log("========================\n");
 
     // Summary
-    const criticalVulns = this.vulnerabilities.filter(v => v.severity === 'critical').length;
-    const highVulns = this.vulnerabilities.filter(v => v.severity === 'high').length;
+    const criticalVulns = this.vulnerabilities.filter(
+      (v) => v.severity === "critical",
+    ).length;
+    const highVulns = this.vulnerabilities.filter(
+      (v) => v.severity === "high",
+    ).length;
     const totalVulns = this.vulnerabilities.length;
 
-    console.log(`🚨 Vulnerabilities: ${totalVulns} total (${criticalVulns} critical, ${highVulns} high)`);
+    console.log(
+      `🚨 Vulnerabilities: ${totalVulns} total (${criticalVulns} critical, ${highVulns} high)`,
+    );
     console.log(`⚠️  Warnings: ${this.warnings.length}`);
     console.log(`ℹ️  Info: ${this.info.length}\n`);
 
     // Critical vulnerabilities
     if (criticalVulns > 0) {
-      console.log('🚨 CRITICAL VULNERABILITIES:');
+      console.log("🚨 CRITICAL VULNERABILITIES:");
       this.vulnerabilities
-        .filter(v => v.severity === 'critical')
-        .forEach(v => {
+        .filter((v) => v.severity === "critical")
+        .forEach((v) => {
           console.log(`   • ${v.package}: ${v.title}`);
           if (v.url) console.log(`     ${v.url}`);
         });
@@ -361,10 +383,10 @@ class SecurityAuditor {
 
     // High vulnerabilities
     if (highVulns > 0) {
-      console.log('🔴 HIGH SEVERITY VULNERABILITIES:');
+      console.log("🔴 HIGH SEVERITY VULNERABILITIES:");
       this.vulnerabilities
-        .filter(v => v.severity === 'high')
-        .forEach(v => {
+        .filter((v) => v.severity === "high")
+        .forEach((v) => {
           console.log(`   • ${v.package}: ${v.title}`);
         });
       console.log();
@@ -372,8 +394,8 @@ class SecurityAuditor {
 
     // Warnings
     if (this.warnings.length > 0) {
-      console.log('⚠️  WARNINGS:');
-      this.warnings.forEach(w => {
+      console.log("⚠️  WARNINGS:");
+      this.warnings.forEach((w) => {
         console.log(`   • ${w.type}: ${w.message || w.reason}`);
         if (w.package) console.log(`     Package: ${w.package}`);
       });
@@ -381,36 +403,36 @@ class SecurityAuditor {
     }
 
     // Recommendations
-    console.log('💡 RECOMMENDATIONS:');
+    console.log("💡 RECOMMENDATIONS:");
 
     if (totalVulns > 0) {
       console.log('   • Run "npm audit fix" to resolve vulnerabilities');
     }
 
-    if (this.warnings.some(w => w.type === 'outdated-packages')) {
+    if (this.warnings.some((w) => w.type === "outdated-packages")) {
       console.log('   • Update outdated packages with "npm update"');
     }
 
-    if (this.warnings.some(w => w.type === 'missing-security-feature')) {
-      console.log('   • Implement missing security features in middleware');
+    if (this.warnings.some((w) => w.type === "missing-security-feature")) {
+      console.log("   • Implement missing security features in middleware");
     }
 
-    console.log('   • Regularly run security audits');
-    console.log('   • Keep dependencies updated');
-    console.log('   • Review and update security policies');
+    console.log("   • Regularly run security audits");
+    console.log("   • Keep dependencies updated");
+    console.log("   • Review and update security policies");
 
     // Write detailed report to file
     this.writeDetailedReport();
 
     // Exit with error code if critical issues found
     if (criticalVulns > 0) {
-      console.log('\n❌ Security audit failed due to critical vulnerabilities');
+      console.log("\n❌ Security audit failed due to critical vulnerabilities");
       process.exit(1);
     } else if (totalVulns > 0) {
-      console.log('\n⚠️  Security audit completed with vulnerabilities found');
+      console.log("\n⚠️  Security audit completed with vulnerabilities found");
       process.exit(1);
     } else {
-      console.log('\n✅ Security audit passed');
+      console.log("\n✅ Security audit passed");
       process.exit(0);
     }
   }
@@ -421,14 +443,14 @@ class SecurityAuditor {
       summary: {
         vulnerabilities: this.vulnerabilities.length,
         warnings: this.warnings.length,
-        info: this.info.length
+        info: this.info.length,
       },
       vulnerabilities: this.vulnerabilities,
       warnings: this.warnings,
-      info: this.info
+      info: this.info,
     };
 
-    const reportPath = path.join(process.cwd(), 'security-audit-report.json');
+    const reportPath = path.join(process.cwd(), "security-audit-report.json");
     fs.writeFileSync(reportPath, JSON.stringify(report, null, 2));
     console.log(`\n📄 Detailed report saved to: ${reportPath}`);
   }
@@ -437,8 +459,8 @@ class SecurityAuditor {
 // Run the audit
 if (import.meta.url === `file://${process.argv[1]}`) {
   const auditor = new SecurityAuditor();
-  auditor.runAudit().catch(error => {
-    console.error('Audit failed:', error);
+  auditor.runAudit().catch((error) => {
+    console.error("Audit failed:", error);
     process.exit(1);
   });
 }

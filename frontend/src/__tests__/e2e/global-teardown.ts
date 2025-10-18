@@ -10,7 +10,7 @@
  */
 
 async function globalTeardown() {
-  console.log('🧹 Starting global teardown for FastNext E2E tests...');
+  console.log("🧹 Starting global teardown for FastNext E2E tests...");
 
   try {
     // Clean up auth files if needed
@@ -22,33 +22,36 @@ async function globalTeardown() {
     // Generate test summary
     await generateTestSummary();
 
-    console.log('✅ Global teardown completed successfully');
+    console.log("✅ Global teardown completed successfully");
   } catch (error) {
-    console.error('❌ Global teardown failed:', error);
+    console.error("❌ Global teardown failed:", error);
   }
 }
 
 async function cleanupAuthFiles() {
-  const fs = await import('fs');
-  const path = await import('path');
+  const fs = await import("fs");
+  const path = await import("path");
 
   try {
-    const authDir = path.join(process.cwd(), 'tests/e2e/.auth');
+    const authDir = path.join(process.cwd(), "tests/e2e/.auth");
 
     if (fs.existsSync(authDir)) {
       // Keep auth files for local development, clean in CI
       if (process.env.CI) {
         const files = fs.readdirSync(authDir);
         for (const file of files) {
-          if (file.endsWith('.json')) {
+          if (file.endsWith(".json")) {
             fs.unlinkSync(path.join(authDir, file));
           }
         }
-        console.log('🗑️  Auth files cleaned up');
+        console.log("🗑️  Auth files cleaned up");
       }
     }
   } catch (error) {
-    console.log('⚠️  Auth file cleanup skipped:', error instanceof Error ? error.message : String(error));
+    console.log(
+      "⚠️  Auth file cleanup skipped:",
+      error instanceof Error ? error.message : String(error),
+    );
   }
 }
 
@@ -57,12 +60,12 @@ async function cleanupTestArtifacts() {
     return; // Keep artifacts in local development
   }
 
-  const fs = await import('fs');
-  const path = await import('path');
+  const fs = await import("fs");
+  const path = await import("path");
 
   try {
     // Clean up old screenshots (keep recent ones)
-    const testResultsDir = path.join(process.cwd(), 'test-results');
+    const testResultsDir = path.join(process.cwd(), "test-results");
 
     if (fs.existsSync(testResultsDir)) {
       const now = Date.now();
@@ -87,22 +90,25 @@ async function cleanupTestArtifacts() {
       };
 
       cleanupDirectory(testResultsDir);
-      console.log('🗑️  Old test artifacts cleaned up');
+      console.log("🗑️  Old test artifacts cleaned up");
     }
   } catch (error) {
-    console.log('⚠️  Test artifact cleanup skipped:', error instanceof Error ? error.message : String(error));
+    console.log(
+      "⚠️  Test artifact cleanup skipped:",
+      error instanceof Error ? error.message : String(error),
+    );
   }
 }
 
 async function generateTestSummary() {
-  const fs = await import('fs');
-  const path = await import('path');
+  const fs = await import("fs");
+  const path = await import("path");
 
   try {
-    const resultsFile = path.join(process.cwd(), 'test-results/results.json');
+    const resultsFile = path.join(process.cwd(), "test-results/results.json");
 
     if (fs.existsSync(resultsFile)) {
-      const results = JSON.parse(fs.readFileSync(resultsFile, 'utf8'));
+      const results = JSON.parse(fs.readFileSync(resultsFile, "utf8"));
 
       const summary = {
         totalTests: results.stats?.total || 0,
@@ -113,7 +119,7 @@ async function generateTestSummary() {
         timestamp: new Date().toISOString(),
       };
 
-      console.log('📊 Test Summary:');
+      console.log("📊 Test Summary:");
       console.log(`   Total: ${summary.totalTests}`);
       console.log(`   Passed: ${summary.passed}`);
       console.log(`   Failed: ${summary.failed}`);
@@ -122,12 +128,18 @@ async function generateTestSummary() {
 
       // Save summary for CI
       if (process.env.CI) {
-        const summaryFile = path.join(process.cwd(), 'test-results/summary.json');
+        const summaryFile = path.join(
+          process.cwd(),
+          "test-results/summary.json",
+        );
         fs.writeFileSync(summaryFile, JSON.stringify(summary, null, 2));
       }
     }
   } catch (error) {
-    console.log('⚠️  Test summary generation skipped:', error instanceof Error ? error.message : String(error));
+    console.log(
+      "⚠️  Test summary generation skipped:",
+      error instanceof Error ? error.message : String(error),
+    );
   }
 }
 

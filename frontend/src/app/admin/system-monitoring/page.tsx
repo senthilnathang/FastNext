@@ -1,132 +1,149 @@
-'use client'
+"use client";
 
+import { format, subMinutes } from "date-fns";
+import {
+  Activity,
+  AlertCircle,
+  AlertTriangle,
+  CheckCircle,
+  Cpu,
+  HardDrive,
+  Info,
+  MemoryStick,
+  Network,
+  RefreshCw,
+  TrendingDown,
+  TrendingUp,
+  XCircle,
+} from "lucide-react";
 /**
  * System Monitoring Dashboard - Migrated to ECharts
  * Real-time system performance and health monitoring
  */
-import React, { useState, useEffect, useCallback, useMemo } from 'react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/components/ui/card'
-import { Button } from '@/shared/components/ui/button'
-import { Badge } from '@/shared/components/ui/badge'
-import { Progress } from '@/shared/components/ui/progress'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/components/ui/tabs'
-import { Alert, AlertDescription, AlertTitle } from '@/shared/components/ui/alert'
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
-  StatCard,
+  AreaChart,
   ChartCard,
-  LineChart,
   GaugeChart,
-  AreaChart
-} from '@/shared/components/charts'
+  LineChart,
+  StatCard,
+} from "@/shared/components/charts";
 import {
-  Activity,
-  Cpu,
-  HardDrive,
-  MemoryStick,
-  Network,
-  AlertTriangle,
-  CheckCircle,
-  XCircle,
-  RefreshCw,
-  TrendingUp,
-  TrendingDown,
-  AlertCircle,
-  Info
-} from 'lucide-react'
-import { format, subMinutes } from 'date-fns'
+  Alert,
+  AlertDescription,
+  AlertTitle,
+} from "@/shared/components/ui/alert";
+import { Badge } from "@/shared/components/ui/badge";
+import { Button } from "@/shared/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/shared/components/ui/card";
+import { Progress } from "@/shared/components/ui/progress";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/shared/components/ui/tabs";
 
 interface SystemMetrics {
-  timestamp: string
+  timestamp: string;
   cpu: {
-    usage: number
-    cores: number
-    temperature?: number
-    processes: number
-  }
+    usage: number;
+    cores: number;
+    temperature?: number;
+    processes: number;
+  };
   memory: {
-    used: number
-    total: number
-    available: number
-    usage: number
-  }
+    used: number;
+    total: number;
+    available: number;
+    usage: number;
+  };
   disk: {
-    used: number
-    total: number
-    available: number
-    usage: number
-    iops: number
-  }
+    used: number;
+    total: number;
+    available: number;
+    usage: number;
+    iops: number;
+  };
   network: {
-    bytesIn: number
-    bytesOut: number
-    packetsIn: number
-    packetsOut: number
-    connections: number
-  }
+    bytesIn: number;
+    bytesOut: number;
+    packetsIn: number;
+    packetsOut: number;
+    connections: number;
+  };
   database: {
-    connections: number
-    queries: number
-    responseTime: number
-    size: number
-  }
+    connections: number;
+    queries: number;
+    responseTime: number;
+    size: number;
+  };
 }
 
 interface ServiceStatus {
-  name: string
-  status: 'healthy' | 'warning' | 'critical' | 'down'
-  uptime: number
-  responseTime: number
-  lastCheck: string
-  version?: string
-  url?: string
-  description: string
+  name: string;
+  status: "healthy" | "warning" | "critical" | "down";
+  uptime: number;
+  responseTime: number;
+  lastCheck: string;
+  version?: string;
+  url?: string;
+  description: string;
 }
 
 interface AlertItem {
-  id: string
-  type: 'info' | 'warning' | 'error' | 'critical'
-  title: string
-  message: string
-  timestamp: string
-  source: string
-  acknowledged: boolean
-  resolved: boolean
+  id: string;
+  type: "info" | "warning" | "error" | "critical";
+  title: string;
+  message: string;
+  timestamp: string;
+  source: string;
+  acknowledged: boolean;
+  resolved: boolean;
 }
 
 interface Performance {
-  metric: string
-  current: number
-  threshold: number
-  unit: string
-  trend: 'up' | 'down' | 'stable'
-  status: 'good' | 'warning' | 'critical'
+  metric: string;
+  current: number;
+  threshold: number;
+  unit: string;
+  trend: "up" | "down" | "stable";
+  status: "good" | "warning" | "critical";
 }
 
 // Historical data for charts
 interface HistoricalData {
-  cpu: number[]
-  memory: number[]
-  disk: number[]
-  network: number[]
-  timestamps: string[]
+  cpu: number[];
+  memory: number[];
+  disk: number[];
+  network: number[];
+  timestamps: string[];
 }
 
 export default function SystemMonitoringPageECharts() {
-  const [currentMetrics, setCurrentMetrics] = useState<SystemMetrics | null>(null)
+  const [currentMetrics, setCurrentMetrics] = useState<SystemMetrics | null>(
+    null,
+  );
   const [historicalData, setHistoricalData] = useState<HistoricalData>({
     cpu: [],
     memory: [],
     disk: [],
     network: [],
-    timestamps: []
-  })
-  const [services, setServices] = useState<ServiceStatus[]>([])
-  const [alerts, setAlerts] = useState<AlertItem[]>([])
-  const [performance, setPerformance] = useState<Performance[]>([])
-  const [isLoading, setIsLoading] = useState(true)
-  const [lastUpdated, setLastUpdated] = useState<Date>(new Date())
-  const [autoRefresh, setAutoRefresh] = useState(true)
-  const [activeTab, setActiveTab] = useState('overview')
+    timestamps: [],
+  });
+  const [services, setServices] = useState<ServiceStatus[]>([]);
+  const [alerts, setAlerts] = useState<AlertItem[]>([]);
+  const [performance, setPerformance] = useState<Performance[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
+  const [autoRefresh, setAutoRefresh] = useState(true);
+  const [activeTab, setActiveTab] = useState("overview");
 
   // Mock data generation
   const generateMockMetrics = useCallback((): SystemMetrics => {
@@ -136,216 +153,242 @@ export default function SystemMonitoringPageECharts() {
         usage: Math.random() * 100,
         cores: 8,
         temperature: 45 + Math.random() * 20,
-        processes: 150 + Math.floor(Math.random() * 50)
+        processes: 150 + Math.floor(Math.random() * 50),
       },
       memory: {
         used: 6.5 + Math.random() * 2,
         total: 16,
         available: 9.5 - Math.random() * 2,
-        usage: (6.5 + Math.random() * 2) / 16 * 100
+        usage: ((6.5 + Math.random() * 2) / 16) * 100,
       },
       disk: {
         used: 450 + Math.random() * 50,
         total: 1000,
         available: 550 - Math.random() * 50,
-        usage: (450 + Math.random() * 50) / 1000 * 100,
-        iops: Math.floor(Math.random() * 1000) + 500
+        usage: ((450 + Math.random() * 50) / 1000) * 100,
+        iops: Math.floor(Math.random() * 1000) + 500,
       },
       network: {
         bytesIn: Math.floor(Math.random() * 1000000) + 500000,
         bytesOut: Math.floor(Math.random() * 800000) + 300000,
         packetsIn: Math.floor(Math.random() * 10000) + 5000,
         packetsOut: Math.floor(Math.random() * 8000) + 3000,
-        connections: Math.floor(Math.random() * 500) + 100
+        connections: Math.floor(Math.random() * 500) + 100,
       },
       database: {
         connections: Math.floor(Math.random() * 50) + 10,
         queries: Math.floor(Math.random() * 1000) + 500,
         responseTime: Math.random() * 100 + 10,
-        size: 2.5 + Math.random() * 0.5
-      }
-    }
-  }, [])
+        size: 2.5 + Math.random() * 0.5,
+      },
+    };
+  }, []);
 
-  const mockServices: ServiceStatus[] = useMemo(() => [
-    {
-      name: 'Web Server',
-      status: 'healthy',
-      uptime: 99.9,
-      responseTime: 45,
-      lastCheck: new Date().toISOString(),
-      version: '2.4.1',
-      url: 'https://api.example.com',
-      description: 'Main application server'
-    },
-    {
-      name: 'Database',
-      status: 'healthy',
-      uptime: 99.8,
-      responseTime: 12,
-      lastCheck: new Date().toISOString(),
-      version: '14.2',
-      description: 'PostgreSQL database server'
-    },
-    {
-      name: 'Cache Server',
-      status: 'warning',
-      uptime: 98.5,
-      responseTime: 8,
-      lastCheck: new Date().toISOString(),
-      version: '6.2',
-      description: 'Redis cache server'
-    },
-    {
-      name: 'Authentication Service',
-      status: 'healthy',
-      uptime: 99.9,
-      responseTime: 25,
-      lastCheck: new Date().toISOString(),
-      version: '1.0.5',
-      description: 'OAuth authentication provider'
-    },
-    {
-      name: 'File Storage',
-      status: 'critical',
-      uptime: 95.2,
-      responseTime: 150,
-      lastCheck: subMinutes(new Date(), 5).toISOString(),
-      version: '2.1.0',
-      description: 'Object storage service'
-    }
-  ], [])
+  const mockServices: ServiceStatus[] = useMemo(
+    () => [
+      {
+        name: "Web Server",
+        status: "healthy",
+        uptime: 99.9,
+        responseTime: 45,
+        lastCheck: new Date().toISOString(),
+        version: "2.4.1",
+        url: "https://api.example.com",
+        description: "Main application server",
+      },
+      {
+        name: "Database",
+        status: "healthy",
+        uptime: 99.8,
+        responseTime: 12,
+        lastCheck: new Date().toISOString(),
+        version: "14.2",
+        description: "PostgreSQL database server",
+      },
+      {
+        name: "Cache Server",
+        status: "warning",
+        uptime: 98.5,
+        responseTime: 8,
+        lastCheck: new Date().toISOString(),
+        version: "6.2",
+        description: "Redis cache server",
+      },
+      {
+        name: "Authentication Service",
+        status: "healthy",
+        uptime: 99.9,
+        responseTime: 25,
+        lastCheck: new Date().toISOString(),
+        version: "1.0.5",
+        description: "OAuth authentication provider",
+      },
+      {
+        name: "File Storage",
+        status: "critical",
+        uptime: 95.2,
+        responseTime: 150,
+        lastCheck: subMinutes(new Date(), 5).toISOString(),
+        version: "2.1.0",
+        description: "Object storage service",
+      },
+    ],
+    [],
+  );
 
-  const mockAlerts: AlertItem[] = useMemo(() => [
-    {
-      id: '1',
-      type: 'critical',
-      title: 'High Memory Usage',
-      message: 'Memory usage has exceeded 85% for the last 10 minutes',
-      timestamp: subMinutes(new Date(), 5).toISOString(),
-      source: 'System Monitor',
-      acknowledged: false,
-      resolved: false
-    },
-    {
-      id: '2',
-      type: 'warning',
-      title: 'Disk Space Warning',
-      message: 'Disk usage is at 75%. Consider cleaning up old logs.',
-      timestamp: subMinutes(new Date(), 15).toISOString(),
-      source: 'Disk Monitor',
-      acknowledged: true,
-      resolved: false
-    }
-  ], [])
+  const mockAlerts: AlertItem[] = useMemo(
+    () => [
+      {
+        id: "1",
+        type: "critical",
+        title: "High Memory Usage",
+        message: "Memory usage has exceeded 85% for the last 10 minutes",
+        timestamp: subMinutes(new Date(), 5).toISOString(),
+        source: "System Monitor",
+        acknowledged: false,
+        resolved: false,
+      },
+      {
+        id: "2",
+        type: "warning",
+        title: "Disk Space Warning",
+        message: "Disk usage is at 75%. Consider cleaning up old logs.",
+        timestamp: subMinutes(new Date(), 15).toISOString(),
+        source: "Disk Monitor",
+        acknowledged: true,
+        resolved: false,
+      },
+    ],
+    [],
+  );
 
-  const mockPerformance: Performance[] = useMemo(() => [
-    {
-      metric: 'API Response Time',
-      current: 125,
-      threshold: 200,
-      unit: 'ms',
-      trend: 'up',
-      status: 'good'
-    },
-    {
-      metric: 'Database Queries/sec',
-      current: 850,
-      threshold: 1000,
-      unit: 'qps',
-      trend: 'stable',
-      status: 'good'
-    },
-    {
-      metric: 'Active Connections',
-      current: 245,
-      threshold: 500,
-      unit: 'conn',
-      trend: 'down',
-      status: 'good'
-    },
-    {
-      metric: 'Error Rate',
-      current: 0.5,
-      threshold: 1.0,
-      unit: '%',
-      trend: 'down',
-      status: 'good'
-    }
-  ], [])
+  const mockPerformance: Performance[] = useMemo(
+    () => [
+      {
+        metric: "API Response Time",
+        current: 125,
+        threshold: 200,
+        unit: "ms",
+        trend: "up",
+        status: "good",
+      },
+      {
+        metric: "Database Queries/sec",
+        current: 850,
+        threshold: 1000,
+        unit: "qps",
+        trend: "stable",
+        status: "good",
+      },
+      {
+        metric: "Active Connections",
+        current: 245,
+        threshold: 500,
+        unit: "conn",
+        trend: "down",
+        status: "good",
+      },
+      {
+        metric: "Error Rate",
+        current: 0.5,
+        threshold: 1.0,
+        unit: "%",
+        trend: "down",
+        status: "good",
+      },
+    ],
+    [],
+  );
 
   // Fetch/update metrics
   const updateMetrics = useCallback(() => {
-    setIsLoading(true)
+    setIsLoading(true);
 
-    const newMetrics = generateMockMetrics()
-    setCurrentMetrics(newMetrics)
+    const newMetrics = generateMockMetrics();
+    setCurrentMetrics(newMetrics);
 
     // Update historical data (keep last 20 points)
-    setHistoricalData(prev => {
-      const maxPoints = 20
-      const newTimestamp = format(new Date(), 'HH:mm:ss')
+    setHistoricalData((prev) => {
+      const maxPoints = 20;
+      const newTimestamp = format(new Date(), "HH:mm:ss");
 
       return {
         cpu: [...prev.cpu.slice(-maxPoints + 1), newMetrics.cpu.usage],
         memory: [...prev.memory.slice(-maxPoints + 1), newMetrics.memory.usage],
         disk: [...prev.disk.slice(-maxPoints + 1), newMetrics.disk.usage],
-        network: [...prev.network.slice(-maxPoints + 1), newMetrics.network.bytesIn / 1000000],
-        timestamps: [...prev.timestamps.slice(-maxPoints + 1), newTimestamp]
-      }
-    })
+        network: [
+          ...prev.network.slice(-maxPoints + 1),
+          newMetrics.network.bytesIn / 1000000,
+        ],
+        timestamps: [...prev.timestamps.slice(-maxPoints + 1), newTimestamp],
+      };
+    });
 
-    setServices(mockServices)
-    setAlerts(mockAlerts)
-    setPerformance(mockPerformance)
-    setLastUpdated(new Date())
-    setIsLoading(false)
-  }, [generateMockMetrics, mockServices, mockAlerts, mockPerformance])
+    setServices(mockServices);
+    setAlerts(mockAlerts);
+    setPerformance(mockPerformance);
+    setLastUpdated(new Date());
+    setIsLoading(false);
+  }, [generateMockMetrics, mockServices, mockAlerts, mockPerformance]);
 
   useEffect(() => {
-    updateMetrics()
+    updateMetrics();
 
     if (autoRefresh) {
-      const interval = setInterval(updateMetrics, 5000)
-      return () => clearInterval(interval)
+      const interval = setInterval(updateMetrics, 5000);
+      return () => clearInterval(interval);
     }
-  }, [autoRefresh, updateMetrics])
+  }, [autoRefresh, updateMetrics]);
 
-  const getStatusColor = (status: ServiceStatus['status']) => {
+  const getStatusColor = (status: ServiceStatus["status"]) => {
     switch (status) {
-      case 'healthy': return 'text-green-600'
-      case 'warning': return 'text-yellow-600'
-      case 'critical': return 'text-orange-600'
-      case 'down': return 'text-red-600'
-      default: return 'text-gray-600'
+      case "healthy":
+        return "text-green-600";
+      case "warning":
+        return "text-yellow-600";
+      case "critical":
+        return "text-orange-600";
+      case "down":
+        return "text-red-600";
+      default:
+        return "text-gray-600";
     }
-  }
+  };
 
-  const getStatusIcon = (status: ServiceStatus['status']) => {
+  const getStatusIcon = (status: ServiceStatus["status"]) => {
     switch (status) {
-      case 'healthy': return <CheckCircle className="h-4 w-4" />
-      case 'warning': return <AlertTriangle className="h-4 w-4" />
-      case 'critical': return <AlertCircle className="h-4 w-4" />
-      case 'down': return <XCircle className="h-4 w-4" />
-      default: return <Activity className="h-4 w-4" />
+      case "healthy":
+        return <CheckCircle className="h-4 w-4" />;
+      case "warning":
+        return <AlertTriangle className="h-4 w-4" />;
+      case "critical":
+        return <AlertCircle className="h-4 w-4" />;
+      case "down":
+        return <XCircle className="h-4 w-4" />;
+      default:
+        return <Activity className="h-4 w-4" />;
     }
-  }
+  };
 
-  const getAlertIcon = (type: AlertItem['type']) => {
+  const getAlertIcon = (type: AlertItem["type"]) => {
     switch (type) {
-      case 'critical': return <XCircle className="h-4 w-4 text-red-600" />
-      case 'error': return <AlertCircle className="h-4 w-4 text-red-500" />
-      case 'warning': return <AlertTriangle className="h-4 w-4 text-yellow-500" />
-      case 'info': return <Info className="h-4 w-4 text-blue-500" />
+      case "critical":
+        return <XCircle className="h-4 w-4 text-red-600" />;
+      case "error":
+        return <AlertCircle className="h-4 w-4 text-red-500" />;
+      case "warning":
+        return <AlertTriangle className="h-4 w-4 text-yellow-500" />;
+      case "info":
+        return <Info className="h-4 w-4 text-blue-500" />;
     }
-  }
+  };
 
   if (!currentMetrics) {
     return (
       <div className="flex items-center justify-center h-screen">
         <RefreshCw className="h-8 w-8 animate-spin" />
       </div>
-    )
+    );
   }
 
   return (
@@ -353,36 +396,41 @@ export default function SystemMonitoringPageECharts() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">System Monitoring</h1>
+          <h1 className="text-3xl font-bold tracking-tight">
+            System Monitoring
+          </h1>
           <p className="text-muted-foreground">
             Real-time system performance and health monitoring
           </p>
         </div>
         <div className="flex items-center gap-4">
           <div className="text-sm text-muted-foreground">
-            Last updated: {format(lastUpdated, 'HH:mm:ss')}
+            Last updated: {format(lastUpdated, "HH:mm:ss")}
           </div>
           <Button
             onClick={() => setAutoRefresh(!autoRefresh)}
-            variant={autoRefresh ? 'default' : 'outline'}
+            variant={autoRefresh ? "default" : "outline"}
             size="sm"
           >
-            {autoRefresh ? 'Auto-refresh: ON' : 'Auto-refresh: OFF'}
+            {autoRefresh ? "Auto-refresh: ON" : "Auto-refresh: OFF"}
           </Button>
           <Button onClick={updateMetrics} variant="outline" size="sm">
-            <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
+            <RefreshCw
+              className={`h-4 w-4 mr-2 ${isLoading ? "animate-spin" : ""}`}
+            />
             Refresh
           </Button>
         </div>
       </div>
 
       {/* Critical Alerts */}
-      {alerts.some(a => !a.resolved && a.type === 'critical') && (
+      {alerts.some((a) => !a.resolved && a.type === "critical") && (
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
           <AlertTitle>Critical System Alerts</AlertTitle>
           <AlertDescription>
-            {alerts.filter(a => !a.resolved && a.type === 'critical').length} critical issue(s) require immediate attention
+            {alerts.filter((a) => !a.resolved && a.type === "critical").length}{" "}
+            critical issue(s) require immediate attention
           </AlertDescription>
         </Alert>
       )}
@@ -397,7 +445,7 @@ export default function SystemMonitoringPageECharts() {
           icon={<Cpu className="h-4 w-4" />}
           chartData={historicalData.cpu}
           chartType="area"
-          color={currentMetrics.cpu.usage > 70 ? '#ef4444' : '#10b981'}
+          color={currentMetrics.cpu.usage > 70 ? "#ef4444" : "#10b981"}
         />
         <StatCard
           title="Memory Usage"
@@ -407,7 +455,7 @@ export default function SystemMonitoringPageECharts() {
           icon={<MemoryStick className="h-4 w-4" />}
           chartData={historicalData.memory}
           chartType="area"
-          color={currentMetrics.memory.usage > 80 ? '#ef4444' : '#3b82f6'}
+          color={currentMetrics.memory.usage > 80 ? "#ef4444" : "#3b82f6"}
         />
         <StatCard
           title="Disk Usage"
@@ -417,7 +465,7 @@ export default function SystemMonitoringPageECharts() {
           icon={<HardDrive className="h-4 w-4" />}
           chartData={historicalData.disk}
           chartType="area"
-          color={currentMetrics.disk.usage > 85 ? '#ef4444' : '#f59e0b'}
+          color={currentMetrics.disk.usage > 85 ? "#ef4444" : "#f59e0b"}
         />
         <StatCard
           title="Network Traffic"
@@ -439,9 +487,9 @@ export default function SystemMonitoringPageECharts() {
           <TabsTrigger value="performance">Performance</TabsTrigger>
           <TabsTrigger value="alerts">
             Alerts
-            {alerts.filter(a => !a.resolved).length > 0 && (
+            {alerts.filter((a) => !a.resolved).length > 0 && (
               <Badge variant="destructive" className="ml-2">
-                {alerts.filter(a => !a.resolved).length}
+                {alerts.filter((a) => !a.resolved).length}
               </Badge>
             )}
           </TabsTrigger>
@@ -462,11 +510,11 @@ export default function SystemMonitoringPageECharts() {
                   max={100}
                   unit="%"
                   radius="65%"
-                  center={['50%', '55%']}
+                  center={["50%", "55%"]}
                   color={[
-                    [0.6, '#10b981'],
-                    [0.8, '#f59e0b'],
-                    [1, '#ef4444']
+                    [0.6, "#10b981"],
+                    [0.8, "#f59e0b"],
+                    [1, "#ef4444"],
                   ]}
                   className="h-full w-full"
                 />
@@ -484,11 +532,11 @@ export default function SystemMonitoringPageECharts() {
                   max={100}
                   unit="%"
                   radius="65%"
-                  center={['50%', '55%']}
+                  center={["50%", "55%"]}
                   color={[
-                    [0.7, '#10b981'],
-                    [0.85, '#f59e0b'],
-                    [1, '#ef4444']
+                    [0.7, "#10b981"],
+                    [0.85, "#f59e0b"],
+                    [1, "#ef4444"],
                   ]}
                   className="h-full w-full"
                 />
@@ -506,11 +554,11 @@ export default function SystemMonitoringPageECharts() {
                   max={100}
                   unit="%"
                   radius="65%"
-                  center={['50%', '55%']}
+                  center={["50%", "55%"]}
                   color={[
-                    [0.75, '#10b981'],
-                    [0.9, '#f59e0b'],
-                    [1, '#ef4444']
+                    [0.75, "#10b981"],
+                    [0.9, "#f59e0b"],
+                    [1, "#ef4444"],
                   ]}
                   className="h-full w-full"
                 />
@@ -528,33 +576,33 @@ export default function SystemMonitoringPageECharts() {
                 <LineChart
                   data={[
                     {
-                      name: 'CPU',
+                      name: "CPU",
                       data: historicalData.cpu,
                       smooth: true,
-                      color: '#10b981'
+                      color: "#10b981",
                     },
                     {
-                      name: 'Memory',
+                      name: "Memory",
                       data: historicalData.memory,
                       smooth: true,
-                      color: '#3b82f6'
+                      color: "#3b82f6",
                     },
                     {
-                      name: 'Disk',
+                      name: "Disk",
                       data: historicalData.disk,
                       smooth: true,
-                      color: '#f59e0b'
-                    }
+                      color: "#f59e0b",
+                    },
                   ]}
                   xAxisData={historicalData.timestamps}
                   legend={true}
-                  yAxis={{ name: 'Usage %', min: 0, max: 100 }}
+                  yAxis={{ name: "Usage %", min: 0, max: 100 }}
                   grid={{
                     top: 40,
                     right: 20,
                     bottom: 30,
                     left: 50,
-                    containLabel: true
+                    containLabel: true,
                   }}
                   className="h-full w-full"
                 />
@@ -569,21 +617,21 @@ export default function SystemMonitoringPageECharts() {
                 <AreaChart
                   data={[
                     {
-                      name: 'Incoming',
+                      name: "Incoming",
                       data: historicalData.network,
                       smooth: true,
-                      color: '#8b5cf6'
-                    }
+                      color: "#8b5cf6",
+                    },
                   ]}
                   xAxisData={historicalData.timestamps}
                   legend={false}
-                  yAxis={{ name: 'MB/s' }}
+                  yAxis={{ name: "MB/s" }}
                   grid={{
                     top: 30,
                     right: 20,
                     bottom: 30,
                     left: 50,
-                    containLabel: true
+                    containLabel: true,
                   }}
                   className="h-full w-full"
                 />
@@ -611,8 +659,11 @@ export default function SystemMonitoringPageECharts() {
                       <span className="text-muted-foreground">Status</span>
                       <Badge
                         variant={
-                          service.status === 'healthy' ? 'default' :
-                          service.status === 'warning' ? 'secondary' : 'destructive'
+                          service.status === "healthy"
+                            ? "default"
+                            : service.status === "warning"
+                              ? "secondary"
+                              : "destructive"
                         }
                       >
                         {service.status}
@@ -620,11 +671,17 @@ export default function SystemMonitoringPageECharts() {
                     </div>
                     <div className="flex items-center justify-between text-sm">
                       <span className="text-muted-foreground">Uptime</span>
-                      <span className="font-medium">{Math.round(service.uptime)}%</span>
+                      <span className="font-medium">
+                        {Math.round(service.uptime)}%
+                      </span>
                     </div>
                     <div className="flex items-center justify-between text-sm">
-                      <span className="text-muted-foreground">Response Time</span>
-                      <span className="font-medium">{Math.round(service.responseTime)}ms</span>
+                      <span className="text-muted-foreground">
+                        Response Time
+                      </span>
+                      <span className="font-medium">
+                        {Math.round(service.responseTime)}ms
+                      </span>
                     </div>
                     {service.version && (
                       <div className="flex items-center justify-between text-sm">
@@ -649,18 +706,27 @@ export default function SystemMonitoringPageECharts() {
               <Card key={index}>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <div>
-                    <CardTitle className="text-sm font-medium">{perf.metric}</CardTitle>
+                    <CardTitle className="text-sm font-medium">
+                      {perf.metric}
+                    </CardTitle>
                     <CardDescription>
                       Threshold: {perf.threshold} {perf.unit}
                     </CardDescription>
                   </div>
                   <div className="flex items-center gap-2">
-                    {perf.trend === 'up' && <TrendingUp className="h-4 w-4 text-green-600" />}
-                    {perf.trend === 'down' && <TrendingDown className="h-4 w-4 text-red-600" />}
+                    {perf.trend === "up" && (
+                      <TrendingUp className="h-4 w-4 text-green-600" />
+                    )}
+                    {perf.trend === "down" && (
+                      <TrendingDown className="h-4 w-4 text-red-600" />
+                    )}
                     <Badge
                       variant={
-                        perf.status === 'good' ? 'default' :
-                        perf.status === 'warning' ? 'secondary' : 'destructive'
+                        perf.status === "good"
+                          ? "default"
+                          : perf.status === "warning"
+                            ? "secondary"
+                            : "destructive"
                       }
                     >
                       {perf.status}
@@ -674,7 +740,8 @@ export default function SystemMonitoringPageECharts() {
                         {perf.current} {perf.unit}
                       </span>
                       <span className="text-sm text-muted-foreground">
-                        {((perf.current / perf.threshold) * 100).toFixed(0)}% of threshold
+                        {((perf.current / perf.threshold) * 100).toFixed(0)}% of
+                        threshold
                       </span>
                     </div>
                     <Progress
@@ -693,7 +760,11 @@ export default function SystemMonitoringPageECharts() {
           {alerts.map((alert) => (
             <Alert
               key={alert.id}
-              variant={alert.type === 'critical' || alert.type === 'error' ? 'destructive' : 'default'}
+              variant={
+                alert.type === "critical" || alert.type === "error"
+                  ? "destructive"
+                  : "default"
+              }
             >
               {getAlertIcon(alert.type)}
               <AlertTitle className="flex items-center justify-between">
@@ -702,9 +773,7 @@ export default function SystemMonitoringPageECharts() {
                   {alert.acknowledged && (
                     <Badge variant="outline">Acknowledged</Badge>
                   )}
-                  {alert.resolved && (
-                    <Badge variant="default">Resolved</Badge>
-                  )}
+                  {alert.resolved && <Badge variant="default">Resolved</Badge>}
                 </div>
               </AlertTitle>
               <AlertDescription>
@@ -712,7 +781,9 @@ export default function SystemMonitoringPageECharts() {
                   <p>{alert.message}</p>
                   <div className="flex items-center gap-4 text-xs text-muted-foreground mt-2">
                     <span>Source: {alert.source}</span>
-                    <span>Time: {format(new Date(alert.timestamp), 'PPpp')}</span>
+                    <span>
+                      Time: {format(new Date(alert.timestamp), "PPpp")}
+                    </span>
                   </div>
                 </div>
               </AlertDescription>
@@ -735,5 +806,5 @@ export default function SystemMonitoringPageECharts() {
         </TabsContent>
       </Tabs>
     </div>
-  )
+  );
 }

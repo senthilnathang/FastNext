@@ -363,7 +363,7 @@ export function CommonFormViewManager<T extends { id?: string | number }>({
   };
 
   // Validate edit/view mode requirements
-  if ((mode === "edit" || mode === "view")) {
+  if (mode === "edit" || mode === "view") {
     if (!itemId) {
       return (
         <div className="space-y-6">
@@ -376,7 +376,9 @@ export function CommonFormViewManager<T extends { id?: string | number }>({
                     Invalid Request
                   </h3>
                   <p className="text-gray-600 dark:text-gray-400 mb-4">
-                    {mode === "edit" ? "Please select a project to edit." : "Please select a project to view."}
+                    {mode === "edit"
+                      ? "Please select a project to edit."
+                      : "Please select a project to view."}
                   </p>
                   <Button onClick={() => handleModeChange("list")}>
                     Back to Projects

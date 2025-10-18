@@ -1,28 +1,35 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { SecureCookieManager, createCSRFToken } from '@/lib/auth/secure-cookies';
-import { logSecurityEvent } from '@/lib/monitoring/security-monitor';
-import { rateLimit } from '@/lib/security/rate-limit';
+import { type NextRequest, NextResponse } from "next/server";
+import {
+  createCSRFToken,
+  SecureCookieManager,
+} from "@/lib/auth/secure-cookies";
+import { logSecurityEvent } from "@/lib/monitoring/security-monitor";
+import { rateLimit } from "@/lib/security/rate-limit";
 
 export async function POST(request: NextRequest) {
   const clientIP = getClientIP(request);
 
   try {
     // Rate limiting for login attempts
-    const rateLimitResult = await rateLimit(clientIP, '/api/auth/login');
+    const rateLimitResult = await rateLimit(clientIP, "/api/auth/login");
 
     if (!rateLimitResult.allowed) {
-      logSecurityEvent('rate_limit_exceeded', {
-        clientIP,
-        remaining: rateLimitResult.remaining,
-        limit: rateLimitResult.limit
-      }, 'medium');
+      logSecurityEvent(
+        "rate_limit_exceeded",
+        {
+          clientIP,
+          remaining: rateLimitResult.remaining,
+          limit: rateLimitResult.limit,
+        },
+        "medium",
+      );
 
       return NextResponse.json(
         {
-          error: 'Too many login attempts',
-          retryAfter: rateLimitResult.retryAfter
+          error: "Too many login attempts",
+          retryAfter: rateLimitResult.retryAfter,
         },
-        { status: 429 }
+        { status: 429 },
       );
     }
 
@@ -32,8 +39,8 @@ export async function POST(request: NextRequest) {
     // Validate input
     if (!email || !password) {
       return NextResponse.json(
-        { error: 'Email and password are required' },
-        { status: 400 }
+        { error: "Email and password are required" },
+        { status: 400 },
       );
     }
 
@@ -41,8 +48,8 @@ export async function POST(request: NextRequest) {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       return NextResponse.json(
-        { error: 'Invalid email format' },
-        { status: 400 }
+        { error: "Invalid email format" },
+        { status: 400 },
       );
     }
 
@@ -50,24 +57,25 @@ export async function POST(request: NextRequest) {
     const authResult = await authenticateUser(email, password);
 
     if (!authResult.success) {
-      logSecurityEvent('authentication_failure', {
-        email: email.substring(0, 3) + '***', // Partial email for privacy
-        clientIP,
-        reason: authResult.reason,
-        userAgent: request.headers.get('user-agent')
-      }, 'medium');
-
-      return NextResponse.json(
-        { error: authResult.error },
-        { status: 401 }
+      logSecurityEvent(
+        "authentication_failure",
+        {
+          email: email.substring(0, 3) + "***", // Partial email for privacy
+          clientIP,
+          reason: authResult.reason,
+          userAgent: request.headers.get("user-agent"),
+        },
+        "medium",
       );
+
+      return NextResponse.json({ error: authResult.error }, { status: 401 });
     }
 
     // Ensure user exists in successful authentication
     if (!authResult.user) {
       return NextResponse.json(
-        { error: 'Authentication failed: user data missing' },
-        { status: 500 }
+        { error: "Authentication failed: user data missing" },
+        { status: 500 },
       );
     }
 
@@ -75,25 +83,25 @@ export async function POST(request: NextRequest) {
     const { accessToken, refreshToken } = await generateTokens(
       authResult.user.id,
       authResult.user.roles,
-      rememberMe
+      rememberMe,
     );
 
     // Create response
     const response = NextResponse.json({
       success: true,
-      message: 'Login successful',
+      message: "Login successful",
       user: {
         id: authResult.user.id,
         email: authResult.user.email,
         name: authResult.user.name,
         roles: authResult.user.roles,
-        permissions: authResult.user.permissions
-      }
+        permissions: authResult.user.permissions,
+      },
     });
 
     // Set secure auth cookies
-    SecureCookieManager.setAuthCookie(response, accessToken, 'session');
-    SecureCookieManager.setAuthCookie(response, refreshToken, 'refresh');
+    SecureCookieManager.setAuthCookie(response, accessToken, "session");
+    SecureCookieManager.setAuthCookie(response, refreshToken, "refresh");
 
     // Set CSRF token
     const csrfToken = createCSRFToken();
@@ -101,35 +109,38 @@ export async function POST(request: NextRequest) {
 
     // Log successful login (for audit purposes)
     // Note: Successful logins are typically logged separately from security events
-    console.log('User login successful', {
+    console.log("User login successful", {
       userId: authResult.user.id,
-      email: email.substring(0, 3) + '***',
+      email: email.substring(0, 3) + "***",
       clientIP,
       rememberMe,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
 
     return response;
-
   } catch (error) {
-    console.error('Login error:', error);
+    console.error("Login error:", error);
 
-    logSecurityEvent('suspicious_request', {
-      clientIP,
-      error: error instanceof Error ? error.message : 'Unknown error',
-      userAgent: request.headers.get('user-agent')
-    }, 'high');
+    logSecurityEvent(
+      "suspicious_request",
+      {
+        clientIP,
+        error: error instanceof Error ? error.message : "Unknown error",
+        userAgent: request.headers.get("user-agent"),
+      },
+      "high",
+    );
 
     return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
+      { error: "Internal server error" },
+      { status: 500 },
     );
   }
 }
 
 async function authenticateUser(
   email: string,
-  password: string
+  password: string,
 ): Promise<{
   success: boolean;
   user?: {
@@ -149,30 +160,38 @@ async function authenticateUser(
     // Mock user database
     const mockUsers = [
       {
-        id: '1',
-        email: 'admin@fastnext.com',
-        password: 'Admin@FastNext2025!', // Secure password matching backend
-        name: 'FastNext Administrator',
-        roles: ['admin', 'user'],
-        permissions: ['read', 'write', 'delete', 'admin', 'system_manage', 'user_manage', 'project_manage']
+        id: "1",
+        email: "admin@fastnext.com",
+        password: "Admin@FastNext2025!", // Secure password matching backend
+        name: "FastNext Administrator",
+        roles: ["admin", "user"],
+        permissions: [
+          "read",
+          "write",
+          "delete",
+          "admin",
+          "system_manage",
+          "user_manage",
+          "project_manage",
+        ],
       },
       {
-        id: '2',
-        email: 'user@example.com',
-        password: 'user123',
-        name: 'Regular User',
-        roles: ['user'],
-        permissions: ['read', 'write']
-      }
+        id: "2",
+        email: "user@example.com",
+        password: "user123",
+        name: "Regular User",
+        roles: ["user"],
+        permissions: ["read", "write"],
+      },
     ];
 
-    const user = mockUsers.find(u => u.email === email);
+    const user = mockUsers.find((u) => u.email === email);
 
     if (!user) {
       return {
         success: false,
-        error: 'Invalid email or password',
-        reason: 'user_not_found'
+        error: "Invalid email or password",
+        reason: "user_not_found",
       };
     }
 
@@ -180,8 +199,8 @@ async function authenticateUser(
     if (user.password !== password) {
       return {
         success: false,
-        error: 'Invalid email or password',
-        reason: 'invalid_password'
+        error: "Invalid email or password",
+        reason: "invalid_password",
       };
     }
 
@@ -191,7 +210,7 @@ async function authenticateUser(
       return {
         success: false,
         error: securityCheck.reason,
-        reason: 'security_block'
+        reason: "security_block",
       };
     }
 
@@ -202,16 +221,15 @@ async function authenticateUser(
         email: user.email,
         name: user.name,
         roles: user.roles,
-        permissions: user.permissions
-      }
+        permissions: user.permissions,
+      },
     };
-
   } catch (error) {
-    console.error('Authentication error:', error);
+    console.error("Authentication error:", error);
     return {
       success: false,
-      error: 'Authentication service unavailable',
-      reason: 'service_error'
+      error: "Authentication service unavailable",
+      reason: "service_error",
     };
   }
 }
@@ -228,10 +246,9 @@ async function checkAccountSecurity(): Promise<{
 
     // Mock implementation
     return { allowed: true };
-
   } catch (error) {
     // On error, allow login but log the issue
-    console.error('Security check error:', error);
+    console.error("Security check error:", error);
     return { allowed: true };
   }
 }
@@ -239,7 +256,7 @@ async function checkAccountSecurity(): Promise<{
 async function generateTokens(
   userId: string,
   roles: string[],
-  rememberMe: boolean
+  rememberMe: boolean,
 ): Promise<{
   accessToken: string;
   refreshToken: string;
@@ -249,44 +266,55 @@ async function generateTokens(
   // Access token (short-lived)
   const accessTokenPayload = {
     sub: userId,
-    type: 'access',
+    type: "access",
     iat: now,
-    exp: now + (60 * 60), // 1 hour
+    exp: now + 60 * 60, // 1 hour
     roles,
-    permissions: roles.includes('admin') ? ['read', 'write', 'delete', 'admin'] : ['read', 'write']
+    permissions: roles.includes("admin")
+      ? ["read", "write", "delete", "admin"]
+      : ["read", "write"],
   };
 
   // Refresh token (longer-lived, even longer if "remember me")
-  const refreshTokenExpiry = rememberMe ?
-    now + (60 * 60 * 24 * 30) : // 30 days if remember me
-    now + (60 * 60 * 24 * 7);   // 7 days normally
+  const refreshTokenExpiry = rememberMe
+    ? now + 60 * 60 * 24 * 30
+    : // 30 days if remember me
+      now + 60 * 60 * 24 * 7; // 7 days normally
 
   const refreshTokenPayload = {
     sub: userId,
-    type: 'refresh',
+    type: "refresh",
     iat: now,
-    exp: refreshTokenExpiry
+    exp: refreshTokenExpiry,
   };
 
   // Create mock JWT tokens (in production, use proper JWT library with signing)
-  const accessToken = btoa(JSON.stringify({ alg: 'HS256', typ: 'JWT' })) + '.' +
-                     btoa(JSON.stringify(accessTokenPayload)) + '.' +
-                     'mock_signature_' + Date.now();
+  const accessToken =
+    btoa(JSON.stringify({ alg: "HS256", typ: "JWT" })) +
+    "." +
+    btoa(JSON.stringify(accessTokenPayload)) +
+    "." +
+    "mock_signature_" +
+    Date.now();
 
-  const refreshToken = btoa(JSON.stringify({ alg: 'HS256', typ: 'JWT' })) + '.' +
-                      btoa(JSON.stringify(refreshTokenPayload)) + '.' +
-                      'mock_signature_' + Date.now();
+  const refreshToken =
+    btoa(JSON.stringify({ alg: "HS256", typ: "JWT" })) +
+    "." +
+    btoa(JSON.stringify(refreshTokenPayload)) +
+    "." +
+    "mock_signature_" +
+    Date.now();
 
   return { accessToken, refreshToken };
 }
 
 function getClientIP(request: NextRequest): string {
-  const forwarded = request.headers.get('x-forwarded-for');
-  const realIP = request.headers.get('x-real-ip');
+  const forwarded = request.headers.get("x-forwarded-for");
+  const realIP = request.headers.get("x-real-ip");
 
   if (forwarded) {
-    return forwarded.split(',')[0].trim();
+    return forwarded.split(",")[0].trim();
   }
 
-  return realIP || 'unknown';
+  return realIP || "unknown";
 }

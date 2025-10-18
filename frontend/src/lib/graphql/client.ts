@@ -2,16 +2,23 @@
  * GraphQL Client Configuration
  * Apollo Client setup with authentication and error handling
  */
-import { ApolloClient, InMemoryCache, createHttpLink, from, NormalizedCacheObject } from '@apollo/client';
-import { setContext } from '@apollo/client/link/context';
-import { onError } from '@apollo/client/link/error';
-import { RetryLink } from '@apollo/client/link/retry';
+import {
+  ApolloClient,
+  createHttpLink,
+  from,
+  InMemoryCache,
+  type NormalizedCacheObject,
+} from "@apollo/client";
+import { setContext } from "@apollo/client/link/context";
+import { onError } from "@apollo/client/link/error";
+import { RetryLink } from "@apollo/client/link/retry";
 
 // GraphQL endpoint
-const GRAPHQL_ENDPOINT = process.env.NEXT_PUBLIC_GRAPHQL_URL || 'http://localhost:8000/api/v1/graphql';
+const GRAPHQL_ENDPOINT =
+  process.env.NEXT_PUBLIC_GRAPHQL_URL || "http://localhost:8000/api/v1/graphql";
 
 // Check if we're in a browser environment
-const isBrowser = typeof window !== 'undefined';
+const isBrowser = typeof window !== "undefined";
 
 // Global Apollo Client instance (for SSR compatibility)
 let apolloClientInstance: ApolloClient<NormalizedCacheObject> | null = null;
@@ -19,7 +26,7 @@ let apolloClientInstance: ApolloClient<NormalizedCacheObject> | null = null;
 // HTTP link for GraphQL requests
 const httpLink = createHttpLink({
   uri: GRAPHQL_ENDPOINT,
-  credentials: 'include', // Include cookies for authentication
+  credentials: "include", // Include cookies for authentication
 });
 
 // Auth link to add JWT token to headers
@@ -28,9 +35,9 @@ const authLink = setContext((_, { headers }) => {
   let token = null;
   if (isBrowser) {
     try {
-      token = localStorage.getItem('access_token');
+      token = localStorage.getItem("access_token");
     } catch (error) {
-      console.warn('Failed to access localStorage:', error);
+      console.warn("Failed to access localStorage:", error);
     }
   }
 
@@ -38,8 +45,8 @@ const authLink = setContext((_, { headers }) => {
     headers: {
       ...headers,
       ...(token ? { authorization: `Bearer ${token}` } : {}),
-      'Content-Type': 'application/json',
-    }
+      "Content-Type": "application/json",
+    },
   };
 });
 
@@ -48,7 +55,7 @@ const errorLink = onError(({ graphQLErrors, networkError }) => {
   if (graphQLErrors) {
     graphQLErrors.forEach(({ message, locations, path }) => {
       console.error(
-        `[GraphQL error]: Message: ${message}, Location: ${locations}, Path: ${path}`
+        `[GraphQL error]: Message: ${message}, Location: ${locations}, Path: ${path}`,
       );
     });
   }
@@ -57,15 +64,15 @@ const errorLink = onError(({ graphQLErrors, networkError }) => {
     console.error(`[Network error]: ${networkError}`);
 
     // Handle 401 errors by redirecting to login
-    if ('statusCode' in networkError && networkError.statusCode === 401) {
+    if ("statusCode" in networkError && networkError.statusCode === 401) {
       // Clear stored token
       if (isBrowser) {
         try {
-          localStorage.removeItem('access_token');
+          localStorage.removeItem("access_token");
           // Redirect to login page
-          window.location.href = '/login';
+          window.location.href = "/login";
         } catch (error) {
-          console.warn('Failed to handle logout:', error);
+          console.warn("Failed to handle logout:", error);
         }
       }
     }
@@ -77,15 +84,15 @@ const retryLink = new RetryLink({
   delay: {
     initial: 300,
     max: Infinity,
-    jitter: true
+    jitter: true,
   },
   attempts: {
     max: 3,
     retryIf: (error) => {
       // Retry on network errors, but not on authentication errors
-      return !!error && !error.message.includes('401');
-    }
-  }
+      return !!error && !error.message.includes("401");
+    },
+  },
 });
 
 // Create Apollo Client instance (SSR compatible)
@@ -99,7 +106,7 @@ function createApolloClient(): ApolloClient<NormalizedCacheObject> {
           fields: {
             // Pagination for users
             users: {
-              keyArgs: ['search'],
+              keyArgs: ["search"],
               merge(existing, incoming) {
                 if (!existing) return incoming;
                 return {
@@ -110,7 +117,7 @@ function createApolloClient(): ApolloClient<NormalizedCacheObject> {
             },
             // Pagination for projects
             projects: {
-              keyArgs: ['userId', 'isPublic'],
+              keyArgs: ["userId", "isPublic"],
               merge(existing, incoming) {
                 if (!existing) return incoming;
                 return {
@@ -121,7 +128,7 @@ function createApolloClient(): ApolloClient<NormalizedCacheObject> {
             },
             // Pagination for pages
             pages: {
-              keyArgs: ['projectId'],
+              keyArgs: ["projectId"],
               merge(existing, incoming) {
                 if (!existing) return incoming;
                 return {
@@ -164,20 +171,20 @@ function createApolloClient(): ApolloClient<NormalizedCacheObject> {
     }),
     defaultOptions: {
       watchQuery: {
-        errorPolicy: 'all',
+        errorPolicy: "all",
         notifyOnNetworkStatusChange: true,
       },
       query: {
-        errorPolicy: 'all',
+        errorPolicy: "all",
         notifyOnNetworkStatusChange: true,
       },
       mutate: {
-        errorPolicy: 'all',
+        errorPolicy: "all",
       },
     },
     // Enable devtools in development
     devtools: {
-      enabled: isBrowser && process.env.NODE_ENV === 'development',
+      enabled: isBrowser && process.env.NODE_ENV === "development",
     },
   });
 }
@@ -200,16 +207,16 @@ export const updateAuthToken = (token: string | null) => {
   if (isBrowser) {
     try {
       if (token) {
-        localStorage.setItem('access_token', token);
+        localStorage.setItem("access_token", token);
       } else {
-        localStorage.removeItem('access_token');
+        localStorage.removeItem("access_token");
       }
 
       // Reset Apollo Client cache to refetch with new token
       const client = getApolloClient();
       client.resetStore();
     } catch (error) {
-      console.warn('Failed to update auth token:', error);
+      console.warn("Failed to update auth token:", error);
     }
   }
 };
@@ -220,12 +227,12 @@ export const updateAuthToken = (token: string | null) => {
 export const logout = async () => {
   if (isBrowser) {
     try {
-      localStorage.removeItem('access_token');
+      localStorage.removeItem("access_token");
       const client = getApolloClient();
       await client.clearStore();
-      window.location.href = '/login';
+      window.location.href = "/login";
     } catch (error) {
-      console.warn('Failed to logout:', error);
+      console.warn("Failed to logout:", error);
     }
   }
 };

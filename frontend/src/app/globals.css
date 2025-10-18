@@ -2,45 +2,47 @@
 
 /* Inter Font - Modern, highly readable sans-serif */
 @font-face {
-  font-family: 'Inter';
-  src: url('/fonts/InterVariable.ttf') format('truetype');
+  font-family: "Inter";
+  src: url("/fonts/InterVariable.ttf") format("truetype");
   font-weight: 100 900;
   font-style: normal;
   font-display: swap;
-  font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
 }
 
 @font-face {
-  font-family: 'Inter Italic';
-  src: url('/fonts/InterVariable-Italic.ttf') format('truetype');
+  font-family: "Inter Italic";
+  src: url("/fonts/InterVariable-Italic.ttf") format("truetype");
   font-weight: 100 900;
   font-style: italic;
   font-display: swap;
-  font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
 }
 
 /* Fira Code - Programming font with ligatures */
 @font-face {
-  font-family: 'Fira Code';
-  src: url('/fonts/FiraCode-Variable.ttf') format('truetype');
+  font-family: "Fira Code";
+  src: url("/fonts/FiraCode-Variable.ttf") format("truetype");
   font-weight: 300 700;
   font-style: normal;
   font-display: swap;
-  font-feature-settings: 'calt' 1, 'liga' 1;
+  font-feature-settings:
+    "calt" 1,
+    "liga" 1;
 }
 
 /* Fallback fonts for backward compatibility */
 @font-face {
-  font-family: 'Geist';
-  src: url('/fonts/GeistVF.woff2') format('woff2');
+  font-family: "Geist";
+  src: url("/fonts/GeistVF.woff2") format("woff2");
   font-weight: 100 900;
   font-style: normal;
   font-display: swap;
 }
 
 @font-face {
-  font-family: 'Geist Mono';
-  src: url('/fonts/GeistMonoVF.woff2') format('woff2');
+  font-family: "Geist Mono";
+  src: url("/fonts/GeistMonoVF.woff2") format("woff2");
   font-weight: 100 900;
   font-style: normal;
   font-display: swap;
@@ -196,8 +198,8 @@
   --color-primary-rgb: rgb(var(--primary-rgb));
   --color-destructive-rgb: rgb(var(--destructive-rgb));
 
-  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
-  --font-mono: 'Fira Code', ui-monospace, monospace;
+  --font-sans: "Inter", system-ui, -apple-system, sans-serif;
+  --font-mono: "Fira Code", ui-monospace, monospace;
   --radius: var(--radius);
 }
 
@@ -210,7 +212,12 @@ body {
   color: var(--foreground);
   font-family: var(--font-sans);
   line-height: 1.6;
-  font-feature-settings: "cv02" 1, "cv03" 1, "cv04" 1, "cv11" 1, "calt" 1;
+  font-feature-settings:
+    "cv02" 1,
+    "cv03" 1,
+    "cv04" 1,
+    "cv11" 1,
+    "calt" 1;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -218,16 +225,19 @@ body {
 
 /* Smooth transitions for theme changes */
 * {
-  transition: background-color 0.2s ease-in-out,
-              border-color 0.2s ease-in-out,
-              color 0.2s ease-in-out,
-              box-shadow 0.2s ease-in-out;
+  transition:
+    background-color 0.2s ease-in-out,
+    border-color 0.2s ease-in-out,
+    color 0.2s ease-in-out,
+    box-shadow 0.2s ease-in-out;
 }
 
 /* Enhanced focus styles with achromatic-pro patterns */
 *:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 2px var(--background), 0 0 0 4px var(--ring);
+  box-shadow:
+    0 0 0 2px var(--background),
+    0 0 0 4px var(--ring);
   border-radius: calc(var(--radius) / 2);
 }
 
@@ -296,15 +306,24 @@ body {
 
 /* Enhanced Typography Classes */
 .font-feature-default {
-  font-feature-settings: "cv02" 1, "cv03" 1, "cv04" 1, "cv11" 1, "calt" 1;
+  font-feature-settings:
+    "cv02" 1,
+    "cv03" 1,
+    "cv04" 1,
+    "cv11" 1,
+    "calt" 1;
 }
 
 .font-feature-tabular {
-  font-feature-settings: "tnum" 1, "lnum" 1;
+  font-feature-settings:
+    "tnum" 1,
+    "lnum" 1;
 }
 
 .font-feature-ligatures {
-  font-feature-settings: "liga" 1, "calt" 1;
+  font-feature-settings:
+    "liga" 1,
+    "calt" 1;
 }
 
 /* Typography scale with better proportions */
@@ -359,7 +378,9 @@ body {
 /* Code and monospace improvements */
 .font-mono {
   font-family: var(--font-mono);
-  font-feature-settings: "liga" 1, "calt" 1;
+  font-feature-settings:
+    "liga" 1,
+    "calt" 1;
 }
 
 /* Mobile-first responsive text sizes */

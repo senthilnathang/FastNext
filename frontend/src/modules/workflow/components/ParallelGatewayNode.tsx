@@ -1,26 +1,39 @@
-'use client';
+"use client";
 
-import React, { memo, useState, useCallback } from 'react';
-import { Handle, Position, NodeProps } from 'reactflow';
-import { WorkflowNodeData } from '../types/reactflow';
-import { GitMerge, Zap, Settings } from 'lucide-react';
-import { Button } from '@/shared/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/shared/components/ui/dialog';
-import { Input } from '@/shared/components/ui/input';
-import { Label } from '@/shared/components/ui/label';
-import { Textarea } from '@/shared/components/ui/textarea';
+import { GitMerge, Settings, Zap } from "lucide-react";
+import React, { memo, useCallback, useState } from "react";
+import { Handle, type NodeProps, Position } from "reactflow";
+import { Button } from "@/shared/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/shared/components/ui/dialog";
+import { Input } from "@/shared/components/ui/input";
+import { Label } from "@/shared/components/ui/label";
+import { Textarea } from "@/shared/components/ui/textarea";
+import type { WorkflowNodeData } from "../types/reactflow";
 
-function ParallelGatewayNode({ data, selected, id }: NodeProps<WorkflowNodeData>) {
+function ParallelGatewayNode({
+  data,
+  selected,
+  id,
+}: NodeProps<WorkflowNodeData>) {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [editData, setEditData] = useState(data);
 
-  const isStart = data.label?.toLowerCase().includes('split') || data.label?.toLowerCase().includes('fork');
-  const isMerge = data.label?.toLowerCase().includes('merge') || data.label?.toLowerCase().includes('join');
+  const isStart =
+    data.label?.toLowerCase().includes("split") ||
+    data.label?.toLowerCase().includes("fork");
+  const isMerge =
+    data.label?.toLowerCase().includes("merge") ||
+    data.label?.toLowerCase().includes("join");
 
   const handleSave = useCallback(() => {
-    if (typeof window !== 'undefined') {
-      const event = new CustomEvent('updateNodeData', {
-        detail: { nodeId: id, newData: editData }
+    if (typeof window !== "undefined") {
+      const event = new CustomEvent("updateNodeData", {
+        detail: { nodeId: id, newData: editData },
       });
       window.dispatchEvent(event);
     }
@@ -32,9 +45,9 @@ function ParallelGatewayNode({ data, selected, id }: NodeProps<WorkflowNodeData>
       <div
         className={`
           relative px-3 py-2 shadow-md border-2 min-w-[100px] max-w-[150px] cursor-pointer group
-          ${selected ? 'border-purple-500' : 'border-purple-300'}
+          ${selected ? "border-purple-500" : "border-purple-300"}
           bg-purple-50 transition-all duration-200 hover:shadow-lg
-          ${isStart ? 'rounded-l-lg rounded-r-none' : isMerge ? 'rounded-r-lg rounded-l-none' : 'rounded-lg'}
+          ${isStart ? "rounded-l-lg rounded-r-none" : isMerge ? "rounded-r-lg rounded-l-none" : "rounded-lg"}
         `}
         onDoubleClick={() => setIsEditDialogOpen(true)}
       >
@@ -73,7 +86,7 @@ function ParallelGatewayNode({ data, selected, id }: NodeProps<WorkflowNodeData>
 
           <div className="text-center">
             <div className="font-medium text-xs text-purple-800 truncate">
-              {data.label || 'Gateway'}
+              {data.label || "Gateway"}
             </div>
             {data.description && (
               <div className="text-xs text-purple-600 mt-1 line-clamp-1">
@@ -85,7 +98,7 @@ function ParallelGatewayNode({ data, selected, id }: NodeProps<WorkflowNodeData>
           {/* Gateway type indicator */}
           <div className="text-center">
             <span className="px-1.5 py-0.5 text-xs bg-purple-100 text-purple-700 rounded">
-              {isStart ? 'Split' : isMerge ? 'Merge' : 'Parallel'}
+              {isStart ? "Split" : isMerge ? "Merge" : "Parallel"}
             </span>
           </div>
         </div>
@@ -98,14 +111,14 @@ function ParallelGatewayNode({ data, selected, id }: NodeProps<WorkflowNodeData>
               position={Position.Right}
               id="out1"
               className="w-3 h-3 !bg-purple-400 border-2 border-white"
-              style={{ right: -6, top: '30%' }}
+              style={{ right: -6, top: "30%" }}
             />
             <Handle
               type="source"
               position={Position.Right}
               id="out2"
               className="w-3 h-3 !bg-purple-400 border-2 border-white"
-              style={{ right: -6, top: '70%' }}
+              style={{ right: -6, top: "70%" }}
             />
           </>
         ) : (
@@ -125,14 +138,14 @@ function ParallelGatewayNode({ data, selected, id }: NodeProps<WorkflowNodeData>
               position={Position.Left}
               id="in1"
               className="w-3 h-3 !bg-purple-400 border-2 border-white"
-              style={{ left: -6, top: '30%' }}
+              style={{ left: -6, top: "30%" }}
             />
             <Handle
               type="target"
               position={Position.Left}
               id="in2"
               className="w-3 h-3 !bg-purple-400 border-2 border-white"
-              style={{ left: -6, top: '70%' }}
+              style={{ left: -6, top: "70%" }}
             />
           </>
         )}
@@ -149,8 +162,10 @@ function ParallelGatewayNode({ data, selected, id }: NodeProps<WorkflowNodeData>
               <Label htmlFor="label">Gateway Name</Label>
               <Input
                 id="label"
-                value={editData.label || ''}
-                onChange={(e) => setEditData({ ...editData, label: e.target.value })}
+                value={editData.label || ""}
+                onChange={(e) =>
+                  setEditData({ ...editData, label: e.target.value })
+                }
                 placeholder="Enter gateway name"
               />
             </div>
@@ -159,24 +174,28 @@ function ParallelGatewayNode({ data, selected, id }: NodeProps<WorkflowNodeData>
               <Label htmlFor="description">Description</Label>
               <Textarea
                 id="description"
-                value={editData.description || ''}
-                onChange={(e) => setEditData({ ...editData, description: e.target.value })}
+                value={editData.description || ""}
+                onChange={(e) =>
+                  setEditData({ ...editData, description: e.target.value })
+                }
                 placeholder="Enter gateway description"
               />
             </div>
 
             <div className="text-xs text-gray-500">
-              <strong>Tip:</strong> Use &quot;split&quot; or &quot;fork&quot; in the name for splitting gateways,
-              &quot;merge&quot; or &quot;join&quot; for merging gateways.
+              <strong>Tip:</strong> Use &quot;split&quot; or &quot;fork&quot; in
+              the name for splitting gateways, &quot;merge&quot; or
+              &quot;join&quot; for merging gateways.
             </div>
 
             <div className="flex justify-end space-x-2">
-              <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
+              <Button
+                variant="outline"
+                onClick={() => setIsEditDialogOpen(false)}
+              >
                 Cancel
               </Button>
-              <Button onClick={handleSave}>
-                Save Changes
-              </Button>
+              <Button onClick={handleSave}>Save Changes</Button>
             </div>
           </div>
         </DialogContent>

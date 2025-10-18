@@ -1,89 +1,116 @@
-'use client'
+"use client";
 
+import {
+  Activity,
+  DollarSign,
+  RefreshCw,
+  TrendingUp,
+  Users,
+} from "lucide-react";
 /**
  * Charts Demo Component
  * Showcases all ECharts components with examples
  */
-import React, { useState } from 'react'
+import type React from "react";
+import { useState } from "react";
 import {
-  LineChart,
-  BarChart,
-  PieChart,
   AreaChart,
+  BarChart,
+  ChartCard,
   GaugeChart,
+  LineChart,
+  PieChart,
   StatCard,
-  ChartCard
-} from '@/shared/components/charts'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/components/ui/tabs'
-import { Button } from '@/shared/components/ui/button'
-import { RefreshCw, TrendingUp, Users, DollarSign, Activity } from 'lucide-react'
+} from "@/shared/components/charts";
+import { Button } from "@/shared/components/ui/button";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/shared/components/ui/tabs";
 
 export const ChartsDemo: React.FC = () => {
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(false);
 
   // Sample data
   const lineData = [
     {
-      name: 'Sales',
+      name: "Sales",
       data: [120, 200, 150, 80, 70, 110, 130, 180, 160, 140, 190, 210],
       smooth: true,
-      color: '#3b82f6'
+      color: "#3b82f6",
     },
     {
-      name: 'Revenue',
+      name: "Revenue",
       data: [100, 180, 130, 90, 60, 100, 120, 160, 150, 130, 170, 200],
       smooth: true,
-      color: '#10b981'
-    }
-  ]
+      color: "#10b981",
+    },
+  ];
 
   const barData = [
     {
-      name: 'Product A',
+      name: "Product A",
       data: [320, 302, 301, 334, 390, 330, 320],
-      color: '#3b82f6'
+      color: "#3b82f6",
     },
     {
-      name: 'Product B',
+      name: "Product B",
       data: [220, 182, 191, 234, 290, 230, 220],
-      color: '#10b981'
+      color: "#10b981",
     },
     {
-      name: 'Product C',
+      name: "Product C",
       data: [150, 232, 201, 154, 190, 330, 410],
-      color: '#f59e0b'
-    }
-  ]
+      color: "#f59e0b",
+    },
+  ];
 
   const pieData = [
-    { name: 'Desktop', value: 1048, color: '#3b82f6' },
-    { name: 'Mobile', value: 735, color: '#10b981' },
-    { name: 'Tablet', value: 580, color: '#f59e0b' },
-    { name: 'Other', value: 484, color: '#ef4444' }
-  ]
+    { name: "Desktop", value: 1048, color: "#3b82f6" },
+    { name: "Mobile", value: 735, color: "#10b981" },
+    { name: "Tablet", value: 580, color: "#f59e0b" },
+    { name: "Other", value: 484, color: "#ef4444" },
+  ];
 
   const areaData = [
     {
-      name: 'Users',
+      name: "Users",
       data: [140, 232, 101, 264, 290, 330, 310, 250, 280, 320, 350, 380],
       smooth: true,
-      color: '#8b5cf6'
-    }
-  ]
+      color: "#8b5cf6",
+    },
+  ];
 
-  const xAxisData = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-  const weekData = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+  const xAxisData = [
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "May",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec",
+  ];
+  const weekData = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
   const handleRefresh = () => {
-    setLoading(true)
-    setTimeout(() => setLoading(false), 1500)
-  }
+    setLoading(true);
+    setTimeout(() => setLoading(false), 1500);
+  };
 
   return (
     <div className="space-y-6 p-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">ECharts Dashboard</h1>
+          <h1 className="text-3xl font-bold tracking-tight">
+            ECharts Dashboard
+          </h1>
           <p className="text-muted-foreground">
             Comprehensive chart library built with ECharts
           </p>
@@ -112,7 +139,9 @@ export const ChartsDemo: React.FC = () => {
           change={15.3}
           changeLabel="from last month"
           icon={<Users className="h-4 w-4" />}
-          chartData={[140, 232, 101, 264, 290, 330, 310, 250, 280, 320, 350, 380]}
+          chartData={[
+            140, 232, 101, 264, 290, 330, 310, 250, 280, 320, 350, 380,
+          ]}
           chartType="area"
           color="#3b82f6"
         />
@@ -122,7 +151,9 @@ export const ChartsDemo: React.FC = () => {
           change={-2.5}
           changeLabel="from last month"
           icon={<TrendingUp className="h-4 w-4" />}
-          chartData={[3.5, 3.2, 3.8, 3.1, 2.9, 3.2, 3.4, 3.0, 3.1, 3.3, 3.2, 3.1]}
+          chartData={[
+            3.5, 3.2, 3.8, 3.1, 2.9, 3.2, 3.4, 3.0, 3.1, 3.3, 3.2, 3.1,
+          ]}
           chartType="line"
           color="#f59e0b"
         />
@@ -174,11 +205,14 @@ export const ChartsDemo: React.FC = () => {
                 <LineChart
                   data={[
                     {
-                      name: 'Trend',
-                      data: [120, 200, 150, 80, 70, 110, 130, 180, 160, 140, 190, 210],
+                      name: "Trend",
+                      data: [
+                        120, 200, 150, 80, 70, 110, 130, 180, 160, 140, 190,
+                        210,
+                      ],
                       smooth: true,
-                      color: '#8b5cf6'
-                    }
+                      color: "#8b5cf6",
+                    },
                   ]}
                   xAxisData={xAxisData}
                   legend={false}
@@ -232,10 +266,10 @@ export const ChartsDemo: React.FC = () => {
                 <BarChart
                   data={[
                     {
-                      name: 'Sales',
+                      name: "Sales",
                       data: [320, 302, 301, 334, 390, 330, 320],
-                      color: '#3b82f6'
-                    }
+                      color: "#3b82f6",
+                    },
                   ]}
                   xAxisData={weekData}
                   legend={false}
@@ -315,10 +349,7 @@ export const ChartsDemo: React.FC = () => {
 
         <TabsContent value="area" className="space-y-4">
           <div className="grid gap-4 md:grid-cols-2">
-            <ChartCard
-              title="User Growth"
-              description="Monthly active users"
-            >
+            <ChartCard title="User Growth" description="Monthly active users">
               <div className="h-[300px]">
                 <AreaChart
                   data={areaData}
@@ -338,20 +369,20 @@ export const ChartsDemo: React.FC = () => {
                 <AreaChart
                   data={[
                     {
-                      name: 'Email',
+                      name: "Email",
                       data: [120, 132, 101, 134, 90, 230, 210],
-                      color: '#3b82f6'
+                      color: "#3b82f6",
                     },
                     {
-                      name: 'Direct',
+                      name: "Direct",
                       data: [220, 182, 191, 234, 290, 330, 310],
-                      color: '#10b981'
+                      color: "#10b981",
                     },
                     {
-                      name: 'Social',
+                      name: "Social",
                       data: [150, 232, 201, 154, 190, 330, 410],
-                      color: '#f59e0b'
-                    }
+                      color: "#f59e0b",
+                    },
                   ]}
                   xAxisData={weekData}
                   legend={true}
@@ -393,9 +424,9 @@ export const ChartsDemo: React.FC = () => {
                   max={100}
                   unit="%"
                   color={[
-                    [0.5, '#10b981'],
-                    [0.8, '#f59e0b'],
-                    [1, '#ef4444']
+                    [0.5, "#10b981"],
+                    [0.8, "#f59e0b"],
+                    [1, "#ef4444"],
                   ]}
                   loading={loading}
                   className="h-full"
@@ -403,10 +434,7 @@ export const ChartsDemo: React.FC = () => {
               </div>
             </ChartCard>
 
-            <ChartCard
-              title="Disk Usage"
-              description="Current disk space used"
-            >
+            <ChartCard title="Disk Usage" description="Current disk space used">
               <div className="h-[300px]">
                 <GaugeChart
                   value={85}
@@ -414,9 +442,9 @@ export const ChartsDemo: React.FC = () => {
                   max={100}
                   unit="%"
                   color={[
-                    [0.3, '#10b981'],
-                    [0.7, '#f59e0b'],
-                    [1, '#ef4444']
+                    [0.3, "#10b981"],
+                    [0.7, "#f59e0b"],
+                    [1, "#ef4444"],
                   ]}
                   loading={loading}
                   className="h-full"
@@ -427,7 +455,7 @@ export const ChartsDemo: React.FC = () => {
         </TabsContent>
       </Tabs>
     </div>
-  )
-}
+  );
+};
 
-ChartsDemo.displayName = 'ChartsDemo'
+ChartsDemo.displayName = "ChartsDemo";

@@ -1,179 +1,288 @@
-"use client"
+"use client";
 
-import { useState } from 'react'
 import {
-  Plus,
-  Settings,
-  Check,
-  X,
   AlertCircle,
-  Zap,
-  Database,
-  Mail,
-  MessageSquare,
+  Check,
   Cloud,
+  Database,
   Globe,
   Key,
-  RefreshCw
-} from 'lucide-react'
-
-import { Button } from '@/shared/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/components/ui/card'
-import { Badge } from '@/shared/components/ui/badge'
-import { Input } from '@/shared/components/ui/input'
-import { Label } from '@/shared/components/ui/label'
-import { Textarea } from '@/shared/components/ui/textarea'
-import { Switch } from '@/shared/components/ui/switch'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/components/ui/tabs'
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/shared/components/ui/dialog'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/components/ui/select'
-import { Alert, AlertDescription } from '@/shared/components/ui/alert'
+  Mail,
+  MessageSquare,
+  Plus,
+  RefreshCw,
+  Settings,
+  X,
+  Zap,
+} from "lucide-react";
+import { useState } from "react";
+import { Alert, AlertDescription } from "@/shared/components/ui/alert";
+import { Badge } from "@/shared/components/ui/badge";
+import { Button } from "@/shared/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/shared/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/shared/components/ui/dialog";
+import { Input } from "@/shared/components/ui/input";
+import { Label } from "@/shared/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/shared/components/ui/select";
+import { Switch } from "@/shared/components/ui/switch";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/shared/components/ui/tabs";
+import { Textarea } from "@/shared/components/ui/textarea";
 
 interface Integration {
-  id: string
-  name: string
-  description: string
-  category: 'database' | 'api' | 'messaging' | 'storage' | 'analytics' | 'auth'
-  icon: React.ComponentType<{ className?: string }>
-  status: 'connected' | 'disconnected' | 'error' | 'configuring'
-  config: Record<string, any>
-  lastSync?: Date
-  features: string[]
-  documentation?: string
-  webhookUrl?: string
+  id: string;
+  name: string;
+  description: string;
+  category: "database" | "api" | "messaging" | "storage" | "analytics" | "auth";
+  icon: React.ComponentType<{ className?: string }>;
+  status: "connected" | "disconnected" | "error" | "configuring";
+  config: Record<string, any>;
+  lastSync?: Date;
+  features: string[];
+  documentation?: string;
+  webhookUrl?: string;
 }
 
 interface IntegrationTemplate {
-  id: string
-  name: string
-  description: string
-  category: string
-  icon: React.ComponentType<{ className?: string }>
-  configFields: ConfigField[]
-  popular: boolean
-  verified: boolean
+  id: string;
+  name: string;
+  description: string;
+  category: string;
+  icon: React.ComponentType<{ className?: string }>;
+  configFields: ConfigField[];
+  popular: boolean;
+  verified: boolean;
 }
 
 interface ConfigField {
-  name: string
-  label: string
-  type: 'text' | 'password' | 'email' | 'url' | 'number' | 'select' | 'textarea'
-  required: boolean
-  placeholder?: string
-  options?: string[]
-  description?: string
+  name: string;
+  label: string;
+  type:
+    | "text"
+    | "password"
+    | "email"
+    | "url"
+    | "number"
+    | "select"
+    | "textarea";
+  required: boolean;
+  placeholder?: string;
+  options?: string[];
+  description?: string;
 }
 
 const integrationTemplates: IntegrationTemplate[] = [
   {
-    id: 'slack',
-    name: 'Slack',
-    description: 'Send notifications and alerts to Slack channels',
-    category: 'messaging',
+    id: "slack",
+    name: "Slack",
+    description: "Send notifications and alerts to Slack channels",
+    category: "messaging",
     icon: MessageSquare,
     popular: true,
     verified: true,
     configFields: [
-      { name: 'webhook_url', label: 'Webhook URL', type: 'url', required: true, placeholder: 'https://hooks.slack.com/...' },
-      { name: 'channel', label: 'Default Channel', type: 'text', required: false, placeholder: '#general' },
-      { name: 'username', label: 'Bot Username', type: 'text', required: false, placeholder: 'FastNext Bot' }
-    ]
+      {
+        name: "webhook_url",
+        label: "Webhook URL",
+        type: "url",
+        required: true,
+        placeholder: "https://hooks.slack.com/...",
+      },
+      {
+        name: "channel",
+        label: "Default Channel",
+        type: "text",
+        required: false,
+        placeholder: "#general",
+      },
+      {
+        name: "username",
+        label: "Bot Username",
+        type: "text",
+        required: false,
+        placeholder: "FastNext Bot",
+      },
+    ],
   },
   {
-    id: 'postgresql',
-    name: 'PostgreSQL',
-    description: 'Connect to external PostgreSQL databases',
-    category: 'database',
+    id: "postgresql",
+    name: "PostgreSQL",
+    description: "Connect to external PostgreSQL databases",
+    category: "database",
     icon: Database,
     popular: true,
     verified: true,
     configFields: [
-      { name: 'host', label: 'Host', type: 'text', required: true, placeholder: 'localhost' },
-      { name: 'port', label: 'Port', type: 'number', required: true, placeholder: '5432' },
-      { name: 'database', label: 'Database', type: 'text', required: true },
-      { name: 'username', label: 'Username', type: 'text', required: true },
-      { name: 'password', label: 'Password', type: 'password', required: true },
-      { name: 'ssl', label: 'Use SSL', type: 'select', required: false, options: ['true', 'false'] }
-    ]
+      {
+        name: "host",
+        label: "Host",
+        type: "text",
+        required: true,
+        placeholder: "localhost",
+      },
+      {
+        name: "port",
+        label: "Port",
+        type: "number",
+        required: true,
+        placeholder: "5432",
+      },
+      { name: "database", label: "Database", type: "text", required: true },
+      { name: "username", label: "Username", type: "text", required: true },
+      { name: "password", label: "Password", type: "password", required: true },
+      {
+        name: "ssl",
+        label: "Use SSL",
+        type: "select",
+        required: false,
+        options: ["true", "false"],
+      },
+    ],
   },
   {
-    id: 'sendgrid',
-    name: 'SendGrid',
-    description: 'Send emails through SendGrid API',
-    category: 'messaging',
+    id: "sendgrid",
+    name: "SendGrid",
+    description: "Send emails through SendGrid API",
+    category: "messaging",
     icon: Mail,
     popular: true,
     verified: true,
     configFields: [
-      { name: 'api_key', label: 'API Key', type: 'password', required: true },
-      { name: 'from_email', label: 'From Email', type: 'email', required: true },
-      { name: 'from_name', label: 'From Name', type: 'text', required: false }
-    ]
+      { name: "api_key", label: "API Key", type: "password", required: true },
+      {
+        name: "from_email",
+        label: "From Email",
+        type: "email",
+        required: true,
+      },
+      { name: "from_name", label: "From Name", type: "text", required: false },
+    ],
   },
   {
-    id: 's3',
-    name: 'Amazon S3',
-    description: 'Store and retrieve files from Amazon S3',
-    category: 'storage',
+    id: "s3",
+    name: "Amazon S3",
+    description: "Store and retrieve files from Amazon S3",
+    category: "storage",
     icon: Cloud,
     popular: true,
     verified: true,
     configFields: [
-      { name: 'access_key_id', label: 'Access Key ID', type: 'text', required: true },
-      { name: 'secret_access_key', label: 'Secret Access Key', type: 'password', required: true },
-      { name: 'bucket', label: 'Bucket Name', type: 'text', required: true },
-      { name: 'region', label: 'Region', type: 'select', required: true, options: ['us-east-1', 'us-west-2', 'eu-west-1'] }
-    ]
+      {
+        name: "access_key_id",
+        label: "Access Key ID",
+        type: "text",
+        required: true,
+      },
+      {
+        name: "secret_access_key",
+        label: "Secret Access Key",
+        type: "password",
+        required: true,
+      },
+      { name: "bucket", label: "Bucket Name", type: "text", required: true },
+      {
+        name: "region",
+        label: "Region",
+        type: "select",
+        required: true,
+        options: ["us-east-1", "us-west-2", "eu-west-1"],
+      },
+    ],
   },
   {
-    id: 'webhook',
-    name: 'Custom Webhook',
-    description: 'Send HTTP requests to custom endpoints',
-    category: 'api',
+    id: "webhook",
+    name: "Custom Webhook",
+    description: "Send HTTP requests to custom endpoints",
+    category: "api",
     icon: Globe,
     popular: false,
     verified: true,
     configFields: [
-      { name: 'url', label: 'Webhook URL', type: 'url', required: true },
-      { name: 'method', label: 'HTTP Method', type: 'select', required: true, options: ['POST', 'PUT', 'PATCH'] },
-      { name: 'headers', label: 'Custom Headers', type: 'textarea', required: false, placeholder: 'Authorization: Bearer token\nContent-Type: application/json' },
-      { name: 'secret', label: 'Secret Key', type: 'password', required: false, description: 'For request signing' }
-    ]
-  }
-]
+      { name: "url", label: "Webhook URL", type: "url", required: true },
+      {
+        name: "method",
+        label: "HTTP Method",
+        type: "select",
+        required: true,
+        options: ["POST", "PUT", "PATCH"],
+      },
+      {
+        name: "headers",
+        label: "Custom Headers",
+        type: "textarea",
+        required: false,
+        placeholder:
+          "Authorization: Bearer token\nContent-Type: application/json",
+      },
+      {
+        name: "secret",
+        label: "Secret Key",
+        type: "password",
+        required: false,
+        description: "For request signing",
+      },
+    ],
+  },
+];
 
 export function IntegrationHub() {
-  const [integrations, setIntegrations] = useState<Integration[]>([])
-  const [selectedCategory, setSelectedCategory] = useState<string>('all')
-  const [isConfiguring, setIsConfiguring] = useState<string | null>(null)
-  const [configData, setConfigData] = useState<Record<string, any>>({})
-  const [testingConnection, setTestingConnection] = useState<string | null>(null)
+  const [integrations, setIntegrations] = useState<Integration[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<string>("all");
+  const [isConfiguring, setIsConfiguring] = useState<string | null>(null);
+  const [configData, setConfigData] = useState<Record<string, any>>({});
+  const [testingConnection, setTestingConnection] = useState<string | null>(
+    null,
+  );
 
   const categories = [
-    { id: 'all', label: 'All', icon: Globe },
-    { id: 'database', label: 'Databases', icon: Database },
-    { id: 'messaging', label: 'Messaging', icon: MessageSquare },
-    { id: 'storage', label: 'Storage', icon: Cloud },
-    { id: 'api', label: 'APIs', icon: Zap },
-    { id: 'auth', label: 'Authentication', icon: Key }
-  ]
+    { id: "all", label: "All", icon: Globe },
+    { id: "database", label: "Databases", icon: Database },
+    { id: "messaging", label: "Messaging", icon: MessageSquare },
+    { id: "storage", label: "Storage", icon: Cloud },
+    { id: "api", label: "APIs", icon: Zap },
+    { id: "auth", label: "Authentication", icon: Key },
+  ];
 
-  const filteredTemplates = selectedCategory === 'all'
-    ? integrationTemplates
-    : integrationTemplates.filter(t => t.category === selectedCategory)
+  const filteredTemplates =
+    selectedCategory === "all"
+      ? integrationTemplates
+      : integrationTemplates.filter((t) => t.category === selectedCategory);
 
   const handleConfigureIntegration = (template: IntegrationTemplate) => {
-    setIsConfiguring(template.id)
-    setConfigData({})
-  }
+    setIsConfiguring(template.id);
+    setConfigData({});
+  };
 
   const handleSaveIntegration = async () => {
-    if (!isConfiguring) return
+    if (!isConfiguring) return;
 
-    const template = integrationTemplates.find(t => t.id === isConfiguring)!
+    const template = integrationTemplates.find((t) => t.id === isConfiguring)!;
 
     // Simulate API call
-    setTestingConnection(isConfiguring)
+    setTestingConnection(isConfiguring);
 
     setTimeout(() => {
       const newIntegration: Integration = {
@@ -182,52 +291,52 @@ export function IntegrationHub() {
         description: template.description,
         category: template.category as any,
         icon: template.icon,
-        status: 'connected',
+        status: "connected",
         config: configData,
-        features: ['webhook', 'polling', 'real-time'],
-        lastSync: new Date()
-      }
+        features: ["webhook", "polling", "real-time"],
+        lastSync: new Date(),
+      };
 
-      setIntegrations(prev => [...prev, newIntegration])
-      setIsConfiguring(null)
-      setConfigData({})
-      setTestingConnection(null)
-    }, 2000)
-  }
+      setIntegrations((prev) => [...prev, newIntegration]);
+      setIsConfiguring(null);
+      setConfigData({});
+      setTestingConnection(null);
+    }, 2000);
+  };
 
   const handleTestConnection = async (integrationId: string) => {
-    setTestingConnection(integrationId)
+    setTestingConnection(integrationId);
 
     // Simulate test
     setTimeout(() => {
-      setTestingConnection(null)
+      setTestingConnection(null);
       // Update integration status based on test result
-    }, 1500)
-  }
+    }, 1500);
+  };
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'connected':
-        return <Check className="h-4 w-4 text-green-500" />
-      case 'error':
-        return <X className="h-4 w-4 text-red-500" />
-      case 'configuring':
-        return <Settings className="h-4 w-4 text-yellow-500 animate-spin" />
+      case "connected":
+        return <Check className="h-4 w-4 text-green-500" />;
+      case "error":
+        return <X className="h-4 w-4 text-red-500" />;
+      case "configuring":
+        return <Settings className="h-4 w-4 text-yellow-500 animate-spin" />;
       default:
-        return <AlertCircle className="h-4 w-4 text-gray-500" />
+        return <AlertCircle className="h-4 w-4 text-gray-500" />;
     }
-  }
+  };
 
   const getStatusBadge = (status: string) => {
     const variants = {
-      connected: 'default',
-      disconnected: 'secondary',
-      error: 'destructive',
-      configuring: 'outline'
-    }[status] as any
+      connected: "default",
+      disconnected: "secondary",
+      error: "destructive",
+      configuring: "outline",
+    }[status] as any;
 
-    return <Badge variant={variants}>{status}</Badge>
-  }
+    return <Badge variant={variants}>{status}</Badge>;
+  };
 
   return (
     <div className="space-y-6">
@@ -247,34 +356,40 @@ export function IntegrationHub() {
 
       <Tabs defaultValue="available" className="space-y-6">
         <TabsList>
-          <TabsTrigger value="available">Available ({filteredTemplates.length})</TabsTrigger>
-          <TabsTrigger value="configured">Configured ({integrations.length})</TabsTrigger>
+          <TabsTrigger value="available">
+            Available ({filteredTemplates.length})
+          </TabsTrigger>
+          <TabsTrigger value="configured">
+            Configured ({integrations.length})
+          </TabsTrigger>
           <TabsTrigger value="webhooks">Webhooks</TabsTrigger>
         </TabsList>
 
         <TabsContent value="available" className="space-y-6">
           {/* Category Filter */}
           <div className="flex flex-wrap gap-2">
-            {categories.map(category => {
-              const Icon = category.icon
+            {categories.map((category) => {
+              const Icon = category.icon;
               return (
                 <Button
                   key={category.id}
-                  variant={selectedCategory === category.id ? "default" : "outline"}
+                  variant={
+                    selectedCategory === category.id ? "default" : "outline"
+                  }
                   size="sm"
                   onClick={() => setSelectedCategory(category.id)}
                 >
                   <Icon className="h-4 w-4 mr-2" />
                   {category.label}
                 </Button>
-              )
+              );
             })}
           </div>
 
           {/* Integration Templates */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filteredTemplates.map(template => {
-              const Icon = template.icon
+            {filteredTemplates.map((template) => {
+              const Icon = template.icon;
               return (
                 <Card key={template.id} className="relative">
                   <CardHeader>
@@ -284,13 +399,19 @@ export function IntegrationHub() {
                           <Icon className="h-6 w-6" />
                         </div>
                         <div>
-                          <CardTitle className="text-lg">{template.name}</CardTitle>
+                          <CardTitle className="text-lg">
+                            {template.name}
+                          </CardTitle>
                           <div className="flex items-center space-x-2">
                             {template.popular && (
-                              <Badge variant="secondary" className="text-xs">Popular</Badge>
+                              <Badge variant="secondary" className="text-xs">
+                                Popular
+                              </Badge>
                             )}
                             {template.verified && (
-                              <Badge variant="outline" className="text-xs">Verified</Badge>
+                              <Badge variant="outline" className="text-xs">
+                                Verified
+                              </Badge>
                             )}
                           </div>
                         </div>
@@ -312,59 +433,81 @@ export function IntegrationHub() {
                           <DialogTrigger asChild>
                             <Button
                               className="flex-1"
-                              onClick={() => handleConfigureIntegration(template)}
+                              onClick={() =>
+                                handleConfigureIntegration(template)
+                              }
                             >
                               Configure
                             </Button>
                           </DialogTrigger>
                           <DialogContent className="max-w-md">
                             <DialogHeader>
-                              <DialogTitle>Configure {template.name}</DialogTitle>
+                              <DialogTitle>
+                                Configure {template.name}
+                              </DialogTitle>
                               <DialogDescription>
                                 {template.description}
                               </DialogDescription>
                             </DialogHeader>
 
                             <div className="space-y-4">
-                              {template.configFields.map(field => (
+                              {template.configFields.map((field) => (
                                 <div key={field.name}>
                                   <Label>
                                     {field.label}
-                                    {field.required && <span className="text-red-500 ml-1">*</span>}
+                                    {field.required && (
+                                      <span className="text-red-500 ml-1">
+                                        *
+                                      </span>
+                                    )}
                                   </Label>
-                                  {field.type === 'select' ? (
+                                  {field.type === "select" ? (
                                     <Select
-                                      value={configData[field.name] || ''}
+                                      value={configData[field.name] || ""}
                                       onValueChange={(value) =>
-                                        setConfigData({...configData, [field.name]: value})
+                                        setConfigData({
+                                          ...configData,
+                                          [field.name]: value,
+                                        })
                                       }
                                     >
                                       <SelectTrigger>
-                                        <SelectValue placeholder={`Select ${field.label.toLowerCase()}`} />
+                                        <SelectValue
+                                          placeholder={`Select ${field.label.toLowerCase()}`}
+                                        />
                                       </SelectTrigger>
                                       <SelectContent>
-                                        {field.options?.map(option => (
-                                          <SelectItem key={option} value={option}>
+                                        {field.options?.map((option) => (
+                                          <SelectItem
+                                            key={option}
+                                            value={option}
+                                          >
                                             {option}
                                           </SelectItem>
                                         ))}
                                       </SelectContent>
                                     </Select>
-                                  ) : field.type === 'textarea' ? (
+                                  ) : field.type === "textarea" ? (
                                     <Textarea
                                       placeholder={field.placeholder}
-                                      value={configData[field.name] || ''}
+                                      value={configData[field.name] || ""}
                                       onChange={(e) =>
-                                        setConfigData({...configData, [field.name]: e.target.value})
+                                        setConfigData({
+                                          ...configData,
+                                          [field.name]: e.target.value,
+                                        })
                                       }
                                     />
                                   ) : (
                                     <Input
                                       type={field.type}
                                       placeholder={field.placeholder}
-                                      value={configData[field.name] || ''}
+                                      value={configData[field.name] || ""}
                                       onChange={(e) =>
-                                        setConfigData({...configData, [field.name]: e.target.value})
+                                        setConfigData({
+                                          ...configData,
+                                          [field.name]: e.target.value,
+                                        })
                                       }
                                     />
                                   )}
@@ -388,7 +531,7 @@ export function IntegrationHub() {
                                       Testing...
                                     </>
                                   ) : (
-                                    'Save & Test'
+                                    "Save & Test"
                                   )}
                                 </Button>
                               </div>
@@ -401,7 +544,7 @@ export function IntegrationHub() {
                     </div>
                   </CardContent>
                 </Card>
-              )
+              );
             })}
           </div>
         </TabsContent>
@@ -411,19 +554,21 @@ export function IntegrationHub() {
             <Card>
               <CardContent className="p-8 text-center">
                 <Zap className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <h3 className="text-lg font-medium mb-2">No integrations configured</h3>
+                <h3 className="text-lg font-medium mb-2">
+                  No integrations configured
+                </h3>
                 <p className="text-muted-foreground mb-4">
                   Configure your first integration to get started
                 </p>
-                <Button onClick={() => setSelectedCategory('all')}>
+                <Button onClick={() => setSelectedCategory("all")}>
                   Browse Integrations
                 </Button>
               </CardContent>
             </Card>
           ) : (
             <div className="space-y-4">
-              {integrations.map(integration => {
-                const Icon = integration.icon
+              {integrations.map((integration) => {
+                const Icon = integration.icon;
                 return (
                   <Card key={integration.id}>
                     <CardContent className="p-6">
@@ -434,7 +579,9 @@ export function IntegrationHub() {
                           </div>
                           <div>
                             <div className="flex items-center space-x-2">
-                              <h3 className="font-medium">{integration.name}</h3>
+                              <h3 className="font-medium">
+                                {integration.name}
+                              </h3>
                               {getStatusIcon(integration.status)}
                               {getStatusBadge(integration.status)}
                             </div>
@@ -443,7 +590,8 @@ export function IntegrationHub() {
                             </p>
                             {integration.lastSync && (
                               <p className="text-xs text-muted-foreground">
-                                Last sync: {integration.lastSync.toLocaleString()}
+                                Last sync:{" "}
+                                {integration.lastSync.toLocaleString()}
                               </p>
                             )}
                           </div>
@@ -459,7 +607,7 @@ export function IntegrationHub() {
                             {testingConnection === integration.id ? (
                               <RefreshCw className="h-4 w-4 animate-spin" />
                             ) : (
-                              'Test'
+                              "Test"
                             )}
                           </Button>
                           <Button variant="outline" size="sm">
@@ -470,8 +618,12 @@ export function IntegrationHub() {
 
                       {integration.features && (
                         <div className="mt-4 flex flex-wrap gap-2">
-                          {integration.features.map(feature => (
-                            <Badge key={feature} variant="secondary" className="text-xs">
+                          {integration.features.map((feature) => (
+                            <Badge
+                              key={feature}
+                              variant="secondary"
+                              className="text-xs"
+                            >
                               {feature}
                             </Badge>
                           ))}
@@ -479,7 +631,7 @@ export function IntegrationHub() {
                       )}
                     </CardContent>
                   </Card>
-                )
+                );
               })}
             </div>
           )}
@@ -489,8 +641,9 @@ export function IntegrationHub() {
           <Alert>
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>
-              Webhook endpoints allow external services to send data to FastNext.
-              Each integration can have its own webhook URL for receiving real-time updates.
+              Webhook endpoints allow external services to send data to
+              FastNext. Each integration can have its own webhook URL for
+              receiving real-time updates.
             </AlertDescription>
           </Alert>
 
@@ -520,11 +673,13 @@ export function IntegrationHub() {
                   </div>
                 </div>
 
-                {integrations.map(integration => (
+                {integrations.map((integration) => (
                   <div key={integration.id} className="p-4 border rounded-lg">
                     <div className="flex items-center justify-between">
                       <div>
-                        <h4 className="font-medium">{integration.name} Webhook</h4>
+                        <h4 className="font-medium">
+                          {integration.name} Webhook
+                        </h4>
                         <p className="text-sm text-muted-foreground">
                           Dedicated endpoint for {integration.name}
                         </p>
@@ -547,7 +702,7 @@ export function IntegrationHub() {
         </TabsContent>
       </Tabs>
     </div>
-  )
+  );
 }
 
-export default IntegrationHub
+export default IntegrationHub;

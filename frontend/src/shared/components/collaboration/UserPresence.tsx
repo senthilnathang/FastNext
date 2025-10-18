@@ -3,8 +3,8 @@
  */
 
 import { AnimatePresence, motion } from "framer-motion";
-import Image from "next/image";
 import { User, Users } from "lucide-react";
+import Image from "next/image";
 import type React from "react";
 import { useCallback, useEffect, useState } from "react";
 
@@ -27,7 +27,7 @@ interface UserPresenceProps {
 
 // Helper to safely get avatar URL
 const getAvatarUrl = (user: UserPresenceInfo): string => {
-  return user.avatar || '';
+  return user.avatar || "";
 };
 
 // Safe Image component wrapper using Next.js Image
@@ -40,14 +40,14 @@ const SafeImage: React.FC<{
   style?: React.CSSProperties;
 }> = ({ src, alt, ...props }) => {
   // Only render if src is a valid string
-  if (!src || typeof src !== 'string') {
+  if (!src || typeof src !== "string") {
     return null;
   }
 
   return (
     <Image
       src={src}
-      alt={alt || 'User avatar'}
+      alt={alt || "User avatar"}
       width={props.width}
       height={props.height}
       className={props.className}
@@ -204,13 +204,13 @@ export const UserPresence: React.FC<UserPresenceProps> = ({
                       style={{ borderColor: user.color }}
                     />
                   ) : (
-                  <div
-                    className="w-8 h-8 rounded-full border-2 border-white shadow-sm flex items-center justify-center"
-                    style={{ backgroundColor: user.color }}
-                  >
-                    <User className="w-4 h-4 text-white" />
-                  </div>
-                );
+                    <div
+                      className="w-8 h-8 rounded-full border-2 border-white shadow-sm flex items-center justify-center"
+                      style={{ backgroundColor: user.color }}
+                    >
+                      <User className="w-4 h-4 text-white" />
+                    </div>
+                  );
                 })()}
               </motion.div>
             ))}
@@ -269,13 +269,13 @@ export const UserPresence: React.FC<UserPresenceProps> = ({
                       style={{ borderColor: user.color }}
                     />
                   ) : (
-                  <div
-                    className="w-10 h-10 rounded-full border-2 shadow-sm flex items-center justify-center"
-                    style={{ backgroundColor: user.color }}
-                  >
-                    <User className="w-5 h-5 text-white" />
-                  </div>
-                );
+                    <div
+                      className="w-10 h-10 rounded-full border-2 shadow-sm flex items-center justify-center"
+                      style={{ backgroundColor: user.color }}
+                    >
+                      <User className="w-5 h-5 text-white" />
+                    </div>
+                  );
                 })()}
                 <div
                   className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-white"
@@ -316,13 +316,13 @@ export const UserPresence: React.FC<UserPresenceProps> = ({
                       style={{ borderColor: user.color }}
                     />
                   ) : (
-                  <div
-                    className="w-10 h-10 rounded-full border-2 shadow-sm flex items-center justify-center grayscale"
-                    style={{ backgroundColor: user.color }}
-                  >
-                    <User className="w-5 h-5 text-white" />
-                  </div>
-                );
+                    <div
+                      className="w-10 h-10 rounded-full border-2 shadow-sm flex items-center justify-center grayscale"
+                      style={{ backgroundColor: user.color }}
+                    >
+                      <User className="w-5 h-5 text-white" />
+                    </div>
+                  );
                 })()}
                 <div className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-white bg-gray-400" />
               </div>

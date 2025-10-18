@@ -69,7 +69,7 @@ A comprehensive, production-ready full-stack web application framework built wit
 ### 🧪 Testing & Quality Assurance
 - **Test Coverage**: Maintained high test coverage across all new features and fixes
 - **Security Validation**: All changes pass security audits and vulnerability scans
-- **Code Quality**: ESLint and type checking pass with zero errors in production code
+- **Code Quality**: Biome and type checking pass with zero errors in production code
 
 ### 🏗️ Infrastructure & DevOps
 - **Container Ready**: Multi-stage Docker builds with security scanning
@@ -818,7 +818,7 @@ npm run storybook          # Start Storybook
 npm run build-storybook    # Build static Storybook
 
 # Code quality and linting
-npm run lint               # ESLint
+npm run lint               # Biome linting
 npm run biome              # Biome linting
 npm run biome:fix          # Auto-fix issues
 ```

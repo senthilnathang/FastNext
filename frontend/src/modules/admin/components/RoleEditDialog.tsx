@@ -1,13 +1,16 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { z } from "zod"
-import { Loader2 } from "lucide-react"
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Loader2 } from "lucide-react";
+import * as React from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { usePermissions } from "@/modules/admin/hooks/usePermissions";
 
+import { useUpdateRole } from "@/modules/admin/hooks/useRoles";
 import {
   Button,
+  Checkbox,
   Dialog,
   DialogContent,
   DialogDescription,
@@ -22,34 +25,35 @@ import {
   FormLabel,
   FormMessage,
   Input,
+  Switch,
   Textarea,
-  Checkbox,
-  Switch
-} from "@/shared/components"
-
-import { useUpdateRole } from "@/modules/admin/hooks/useRoles"
-import { usePermissions } from "@/modules/admin/hooks/usePermissions"
-import type { Role } from "@/shared/services/api/roles"
-import type { Permission } from "@/shared/services/api/permissions"
+} from "@/shared/components";
+import type { Permission } from "@/shared/services/api/permissions";
+import type { Role } from "@/shared/services/api/roles";
 
 const roleEditSchema = z.object({
   name: z.string().min(2, "Role name must be at least 2 characters"),
   description: z.string().optional(),
   is_active: z.boolean(),
   permissions: z.array(z.number()),
-})
+});
 
-type RoleEditFormData = z.infer<typeof roleEditSchema>
+type RoleEditFormData = z.infer<typeof roleEditSchema>;
 
 interface RoleEditDialogProps {
-  role: Role | null
-  open: boolean
-  onOpenChange: (open: boolean) => void
+  role: Role | null;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
 }
 
-export function RoleEditDialog({ role, open, onOpenChange }: RoleEditDialogProps) {
-  const updateRoleMutation = useUpdateRole()
-  const { data: permissionsData, isLoading: permissionsLoading } = usePermissions()
+export function RoleEditDialog({
+  role,
+  open,
+  onOpenChange,
+}: RoleEditDialogProps) {
+  const updateRoleMutation = useUpdateRole();
+  const { data: permissionsData, isLoading: permissionsLoading } =
+    usePermissions();
 
   const form = useForm<RoleEditFormData>({
     resolver: zodResolver(roleEditSchema),
@@ -59,7 +63,7 @@ export function RoleEditDialog({ role, open, onOpenChange }: RoleEditDialogProps
       is_active: true,
       permissions: [],
     },
-  })
+  });
 
   // Update form when role changes
   React.useEffect(() => {
@@ -68,13 +72,13 @@ export function RoleEditDialog({ role, open, onOpenChange }: RoleEditDialogProps
         name: role.name || "",
         description: role.description || "",
         is_active: role.is_active ?? true,
-        permissions: role.permissions?.map(p => p.id) || [],
-      })
+        permissions: role.permissions?.map((p) => p.id) || [],
+      });
     }
-  }, [role, open, form])
+  }, [role, open, form]);
 
   const onSubmit = async (data: RoleEditFormData) => {
-    if (!role || !role.id) return
+    if (!role || !role.id) return;
 
     try {
       await updateRoleMutation.mutateAsync({
@@ -84,38 +88,44 @@ export function RoleEditDialog({ role, open, onOpenChange }: RoleEditDialogProps
           description: data.description || undefined,
           is_active: data.is_active,
           permissions: data.permissions,
-        }
-      })
-      onOpenChange(false)
+        },
+      });
+      onOpenChange(false);
     } catch (error) {
       // Error is handled by the mutation
-      console.error("Failed to update role:", error)
+      console.error("Failed to update role:", error);
     }
-  }
+  };
 
-  const permissions = permissionsData?.items || []
-  const isSubmitting = updateRoleMutation.isPending
+  const permissions = permissionsData?.items || [];
+  const isSubmitting = updateRoleMutation.isPending;
 
   // Group permissions by category
-  const groupedPermissions = permissions.reduce((acc, permission) => {
-    const category = permission.category || 'uncategorized'
-    if (!acc[category]) {
-      acc[category] = []
-    }
-    acc[category].push(permission)
-    return acc
-  }, {} as Record<string, Permission[]>)
+  const groupedPermissions = permissions.reduce(
+    (acc, permission) => {
+      const category = permission.category || "uncategorized";
+      if (!acc[category]) {
+        acc[category] = [];
+      }
+      acc[category].push(permission);
+      return acc;
+    },
+    {} as Record<string, Permission[]>,
+  );
 
   const handlePermissionChange = (permissionId: number, checked: boolean) => {
-    const currentPermissions = form.getValues("permissions")
+    const currentPermissions = form.getValues("permissions");
     if (checked) {
-      form.setValue("permissions", [...currentPermissions, permissionId])
+      form.setValue("permissions", [...currentPermissions, permissionId]);
     } else {
-      form.setValue("permissions", currentPermissions.filter(id => id !== permissionId))
+      form.setValue(
+        "permissions",
+        currentPermissions.filter((id) => id !== permissionId),
+      );
     }
-  }
+  };
 
-  if (!role) return null
+  if (!role) return null;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -123,7 +133,8 @@ export function RoleEditDialog({ role, open, onOpenChange }: RoleEditDialogProps
         <DialogHeader>
           <DialogTitle>Edit Role</DialogTitle>
           <DialogDescription>
-            Update role information and permissions. Changes will be applied immediately.
+            Update role information and permissions. Changes will be applied
+            immediately.
           </DialogDescription>
         </DialogHeader>
 
@@ -206,44 +217,60 @@ export function RoleEditDialog({ role, open, onOpenChange }: RoleEditDialogProps
                   {permissionsLoading ? (
                     <div className="flex items-center gap-2 py-4">
                       <Loader2 className="h-4 w-4 animate-spin" />
-                      <span className="text-sm text-muted-foreground">Loading permissions...</span>
+                      <span className="text-sm text-muted-foreground">
+                        Loading permissions...
+                      </span>
                     </div>
                   ) : (
                     <div className="space-y-4 max-h-60 overflow-y-auto border rounded-md p-3">
-                      {Object.entries(groupedPermissions).map(([category, categoryPermissions]) => (
-                        <div key={category} className="space-y-2">
-                          <h4 className="font-medium text-sm text-foreground capitalize">
-                            {category}
-                          </h4>
-                          <div className="space-y-2 pl-4">
-                            {categoryPermissions.filter(p => p.id !== undefined).map((permission) => (
-                              <div key={permission.id} className="flex items-start space-x-2">
-                                <Checkbox
-                                  id={`edit-permission-${permission.id}`}
-                                  checked={field.value.includes(permission.id!)}
-                                  onCheckedChange={(checked) =>
-                                    handlePermissionChange(permission.id!, checked as boolean)
-                                  }
-                                  disabled={isSubmitting || role.is_system_role}
-                                />
-                                <div className="grid gap-1.5 leading-none">
-                                  <label
-                                    htmlFor={`edit-permission-${permission.id}`}
-                                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                      {Object.entries(groupedPermissions).map(
+                        ([category, categoryPermissions]) => (
+                          <div key={category} className="space-y-2">
+                            <h4 className="font-medium text-sm text-foreground capitalize">
+                              {category}
+                            </h4>
+                            <div className="space-y-2 pl-4">
+                              {categoryPermissions
+                                .filter((p) => p.id !== undefined)
+                                .map((permission) => (
+                                  <div
+                                    key={permission.id}
+                                    className="flex items-start space-x-2"
                                   >
-                                    {permission.name}
-                                  </label>
-                                  {permission.description && (
-                                    <p className="text-xs text-muted-foreground">
-                                      {permission.description}
-                                    </p>
-                                  )}
-                                </div>
-                              </div>
-                            ))}
+                                    <Checkbox
+                                      id={`edit-permission-${permission.id}`}
+                                      checked={field.value.includes(
+                                        permission.id!,
+                                      )}
+                                      onCheckedChange={(checked) =>
+                                        handlePermissionChange(
+                                          permission.id!,
+                                          checked as boolean,
+                                        )
+                                      }
+                                      disabled={
+                                        isSubmitting || role.is_system_role
+                                      }
+                                    />
+                                    <div className="grid gap-1.5 leading-none">
+                                      <label
+                                        htmlFor={`edit-permission-${permission.id}`}
+                                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                                      >
+                                        {permission.name}
+                                      </label>
+                                      {permission.description && (
+                                        <p className="text-xs text-muted-foreground">
+                                          {permission.description}
+                                        </p>
+                                      )}
+                                    </div>
+                                  </div>
+                                ))}
+                            </div>
                           </div>
-                        </div>
-                      ))}
+                        ),
+                      )}
                       {permissions.length === 0 && (
                         <p className="text-sm text-muted-foreground text-center py-4">
                           No permissions available
@@ -274,7 +301,9 @@ export function RoleEditDialog({ role, open, onOpenChange }: RoleEditDialogProps
                 type="submit"
                 disabled={isSubmitting || role.is_system_role}
               >
-                {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {isSubmitting && (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                )}
                 {isSubmitting ? "Updating..." : "Update Role"}
               </Button>
             </DialogFooter>
@@ -282,5 +311,5 @@ export function RoleEditDialog({ role, open, onOpenChange }: RoleEditDialogProps
         </Form>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

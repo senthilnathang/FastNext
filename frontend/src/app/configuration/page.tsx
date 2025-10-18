@@ -1,19 +1,16 @@
-'use client';
+"use client";
 
-import React from 'react';
-import Link from 'next/link';
-import { useAuth } from '@/modules/auth';
+import { Database, Shield } from "lucide-react";
+import Link from "next/link";
+import type React from "react";
+import { useAuth } from "@/modules/auth";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
-  CardTitle
-} from '@/shared/components';
-import {
-  Database,
-  Shield
-} from 'lucide-react';
+  CardTitle,
+} from "@/shared/components";
 
 interface ConfigurationItem {
   title: string;
@@ -25,19 +22,21 @@ interface ConfigurationItem {
 
 const configurationItems: ConfigurationItem[] = [
   {
-    title: 'Data Import/Export Config',
-    description: 'Configure data import and export settings, file formats, and processing options',
-    href: '/configuration/data-import-export',
+    title: "Data Import/Export Config",
+    description:
+      "Configure data import and export settings, file formats, and processing options",
+    href: "/configuration/data-import-export",
     icon: Database,
-    permission: 'admin.data_config'
+    permission: "admin.data_config",
   },
   {
-    title: 'Permissions Config',
-    description: 'Manage system permissions, roles, and access control settings',
-    href: '/configuration/permissions',
+    title: "Permissions Config",
+    description:
+      "Manage system permissions, roles, and access control settings",
+    href: "/configuration/permissions",
     icon: Shield,
-    permission: 'admin.permissions'
-  }
+    permission: "admin.permissions",
+  },
 ];
 
 export default function ConfigurationPage() {
@@ -87,7 +86,9 @@ export default function ConfigurationPage() {
             <div className="flex items-center space-x-2">
               <Database className="h-5 w-5 text-blue-600" />
               <div>
-                <p className="text-sm font-medium text-gray-500">Active Configs</p>
+                <p className="text-sm font-medium text-gray-500">
+                  Active Configs
+                </p>
                 <p className="text-lg font-bold">2</p>
               </div>
             </div>
@@ -99,7 +100,9 @@ export default function ConfigurationPage() {
             <div className="flex items-center space-x-2">
               <Shield className="h-5 w-5 text-green-600" />
               <div>
-                <p className="text-sm font-medium text-gray-500">Security Level</p>
+                <p className="text-sm font-medium text-gray-500">
+                  Security Level
+                </p>
                 <p className="text-lg font-bold text-green-600">High</p>
               </div>
             </div>

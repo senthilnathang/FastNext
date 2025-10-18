@@ -1,23 +1,34 @@
-'use client';
+"use client";
 
-import React, { memo, useState, useCallback } from 'react';
-import { Handle, Position, NodeProps } from 'reactflow';
-import { WorkflowNodeData } from '../types/reactflow';
-import { Variable, Settings, Calculator, Type, Hash } from 'lucide-react';
-import { Button } from '@/shared/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/shared/components/ui/dialog';
-import { Input } from '@/shared/components/ui/input';
-import { Label } from '@/shared/components/ui/label';
-import { Textarea } from '@/shared/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/components/ui/select';
+import { Calculator, Hash, Settings, Type, Variable } from "lucide-react";
+import React, { memo, useCallback, useState } from "react";
+import { Handle, type NodeProps, Position } from "reactflow";
+import { Button } from "@/shared/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/shared/components/ui/dialog";
+import { Input } from "@/shared/components/ui/input";
+import { Label } from "@/shared/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/shared/components/ui/select";
+import { Textarea } from "@/shared/components/ui/textarea";
+import type { WorkflowNodeData } from "../types/reactflow";
 
 interface VariableNodeData extends WorkflowNodeData {
-  operationType: 'set' | 'get' | 'calculate' | 'transform';
+  operationType: "set" | "get" | "calculate" | "transform";
   variableName: string;
-  variableType: 'string' | 'number' | 'boolean' | 'object' | 'array';
+  variableType: "string" | "number" | "boolean" | "object" | "array";
   value?: any;
   expression?: string;
-  scope: 'local' | 'global' | 'instance';
+  scope: "local" | "global" | "instance";
 }
 
 function VariableNode({ data, selected, id }: NodeProps<VariableNodeData>) {
@@ -25,9 +36,9 @@ function VariableNode({ data, selected, id }: NodeProps<VariableNodeData>) {
   const [editData, setEditData] = useState(data);
 
   const handleSave = useCallback(() => {
-    if (typeof window !== 'undefined') {
-      const event = new CustomEvent('updateNodeData', {
-        detail: { nodeId: id, newData: editData }
+    if (typeof window !== "undefined") {
+      const event = new CustomEvent("updateNodeData", {
+        detail: { nodeId: id, newData: editData },
       });
       window.dispatchEvent(event);
     }
@@ -36,13 +47,13 @@ function VariableNode({ data, selected, id }: NodeProps<VariableNodeData>) {
 
   const getOperationIcon = () => {
     switch (data.operationType) {
-      case 'set':
+      case "set":
         return <Variable size={14} className="text-teal-600" />;
-      case 'get':
+      case "get":
         return <Variable size={14} className="text-teal-600" />;
-      case 'calculate':
+      case "calculate":
         return <Calculator size={14} className="text-teal-600" />;
-      case 'transform':
+      case "transform":
         return <Type size={14} className="text-teal-600" />;
       default:
         return <Variable size={14} className="text-teal-600" />;
@@ -51,15 +62,15 @@ function VariableNode({ data, selected, id }: NodeProps<VariableNodeData>) {
 
   const getTypeIcon = () => {
     switch (data.variableType) {
-      case 'number':
+      case "number":
         return <Hash size={10} className="text-teal-500" />;
-      case 'string':
+      case "string":
         return <Type size={10} className="text-teal-500" />;
-      case 'boolean':
+      case "boolean":
         return <span className="text-xs font-bold text-teal-500">B</span>;
-      case 'object':
+      case "object":
         return <span className="text-xs font-bold text-teal-500">O</span>;
-      case 'array':
+      case "array":
         return <span className="text-xs font-bold text-teal-500">A</span>;
       default:
         return <Variable size={10} className="text-teal-500" />;
@@ -68,14 +79,14 @@ function VariableNode({ data, selected, id }: NodeProps<VariableNodeData>) {
 
   const getScopeColor = () => {
     switch (data.scope) {
-      case 'global':
-        return 'bg-red-100 text-red-700';
-      case 'instance':
-        return 'bg-blue-100 text-blue-700';
-      case 'local':
-        return 'bg-gray-100 text-gray-700';
+      case "global":
+        return "bg-red-100 text-red-700";
+      case "instance":
+        return "bg-blue-100 text-blue-700";
+      case "local":
+        return "bg-gray-100 text-gray-700";
       default:
-        return 'bg-gray-100 text-gray-700';
+        return "bg-gray-100 text-gray-700";
     }
   };
 
@@ -83,12 +94,14 @@ function VariableNode({ data, selected, id }: NodeProps<VariableNodeData>) {
     <div
       className={`
         px-3 py-2 shadow-md rounded-lg border-2 min-w-[140px] max-w-[200px]
-        ${selected ? 'border-teal-500' : 'border-teal-300'}
+        ${selected ? "border-teal-500" : "border-teal-300"}
         bg-teal-50 transition-all duration-200 hover:shadow-lg
       `}
     >
       {/* Input handle (for set/calculate operations) */}
-      {(data.operationType === 'set' || data.operationType === 'calculate' || data.operationType === 'transform') && (
+      {(data.operationType === "set" ||
+        data.operationType === "calculate" ||
+        data.operationType === "transform") && (
         <Handle
           type="target"
           position={Position.Top}
@@ -105,7 +118,7 @@ function VariableNode({ data, selected, id }: NodeProps<VariableNodeData>) {
             {data.label || `${data.operationType} Variable`}
           </div>
           <div className="text-xs text-teal-600 mt-1 truncate">
-            {data.variableName || 'variable_name'}
+            {data.variableName || "variable_name"}
           </div>
         </div>
         <Button
@@ -131,7 +144,9 @@ function VariableNode({ data, selected, id }: NodeProps<VariableNodeData>) {
               {data.variableType}
             </span>
           </div>
-          <span className={`px-1.5 py-0.5 text-xs rounded uppercase ${getScopeColor()}`}>
+          <span
+            className={`px-1.5 py-0.5 text-xs rounded uppercase ${getScopeColor()}`}
+          >
             {data.scope}
           </span>
         </div>
@@ -160,13 +175,13 @@ function VariableNode({ data, selected, id }: NodeProps<VariableNodeData>) {
       />
 
       {/* Value output handle (for get operations) */}
-      {data.operationType === 'get' && (
+      {data.operationType === "get" && (
         <Handle
           type="source"
           position={Position.Right}
           id="value"
           className="w-3 h-3 !bg-orange-400 border-2 border-white"
-          style={{ right: -6, top: '50%' }}
+          style={{ right: -6, top: "50%" }}
         />
       )}
 
@@ -181,8 +196,10 @@ function VariableNode({ data, selected, id }: NodeProps<VariableNodeData>) {
               <Label htmlFor="label">Label</Label>
               <Input
                 id="label"
-                value={editData.label || ''}
-                onChange={(e) => setEditData({ ...editData, label: e.target.value })}
+                value={editData.label || ""}
+                onChange={(e) =>
+                  setEditData({ ...editData, label: e.target.value })
+                }
                 placeholder="Enter variable label"
               />
             </div>
@@ -191,8 +208,10 @@ function VariableNode({ data, selected, id }: NodeProps<VariableNodeData>) {
               <Label htmlFor="description">Description</Label>
               <Textarea
                 id="description"
-                value={editData.description || ''}
-                onChange={(e) => setEditData({ ...editData, description: e.target.value })}
+                value={editData.description || ""}
+                onChange={(e) =>
+                  setEditData({ ...editData, description: e.target.value })
+                }
                 placeholder="Enter variable description"
               />
             </div>
@@ -200,8 +219,10 @@ function VariableNode({ data, selected, id }: NodeProps<VariableNodeData>) {
             <div className="space-y-2">
               <Label htmlFor="operationType">Operation Type</Label>
               <Select
-                value={editData.operationType || 'set'}
-                onValueChange={(value) => setEditData({ ...editData, operationType: value as any })}
+                value={editData.operationType || "set"}
+                onValueChange={(value) =>
+                  setEditData({ ...editData, operationType: value as any })
+                }
               >
                 <SelectTrigger>
                   <SelectValue />
@@ -219,8 +240,10 @@ function VariableNode({ data, selected, id }: NodeProps<VariableNodeData>) {
               <Label htmlFor="variableName">Variable Name</Label>
               <Input
                 id="variableName"
-                value={editData.variableName || ''}
-                onChange={(e) => setEditData({ ...editData, variableName: e.target.value })}
+                value={editData.variableName || ""}
+                onChange={(e) =>
+                  setEditData({ ...editData, variableName: e.target.value })
+                }
                 placeholder="Enter variable name"
               />
             </div>
@@ -228,8 +251,10 @@ function VariableNode({ data, selected, id }: NodeProps<VariableNodeData>) {
             <div className="space-y-2">
               <Label htmlFor="variableType">Variable Type</Label>
               <Select
-                value={editData.variableType || 'string'}
-                onValueChange={(value) => setEditData({ ...editData, variableType: value as any })}
+                value={editData.variableType || "string"}
+                onValueChange={(value) =>
+                  setEditData({ ...editData, variableType: value as any })
+                }
               >
                 <SelectTrigger>
                   <SelectValue />
@@ -247,8 +272,10 @@ function VariableNode({ data, selected, id }: NodeProps<VariableNodeData>) {
             <div className="space-y-2">
               <Label htmlFor="scope">Scope</Label>
               <Select
-                value={editData.scope || 'local'}
-                onValueChange={(value) => setEditData({ ...editData, scope: value as any })}
+                value={editData.scope || "local"}
+                onValueChange={(value) =>
+                  setEditData({ ...editData, scope: value as any })
+                }
               >
                 <SelectTrigger>
                   <SelectValue />
@@ -261,37 +288,43 @@ function VariableNode({ data, selected, id }: NodeProps<VariableNodeData>) {
               </Select>
             </div>
 
-            {(editData.operationType === 'set' || editData.operationType === 'transform') && (
+            {(editData.operationType === "set" ||
+              editData.operationType === "transform") && (
               <div className="space-y-2">
                 <Label htmlFor="value">Value</Label>
                 <Input
                   id="value"
-                  value={editData.value || ''}
-                  onChange={(e) => setEditData({ ...editData, value: e.target.value })}
+                  value={editData.value || ""}
+                  onChange={(e) =>
+                    setEditData({ ...editData, value: e.target.value })
+                  }
                   placeholder="Enter value"
                 />
               </div>
             )}
 
-            {editData.operationType === 'calculate' && (
+            {editData.operationType === "calculate" && (
               <div className="space-y-2">
                 <Label htmlFor="expression">Expression</Label>
                 <Input
                   id="expression"
-                  value={editData.expression || ''}
-                  onChange={(e) => setEditData({ ...editData, expression: e.target.value })}
+                  value={editData.expression || ""}
+                  onChange={(e) =>
+                    setEditData({ ...editData, expression: e.target.value })
+                  }
                   placeholder="e.g., a + b"
                 />
               </div>
             )}
 
             <div className="flex justify-end space-x-2">
-              <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
+              <Button
+                variant="outline"
+                onClick={() => setIsEditDialogOpen(false)}
+              >
                 Cancel
               </Button>
-              <Button onClick={handleSave}>
-                Save Changes
-              </Button>
+              <Button onClick={handleSave}>Save Changes</Button>
             </div>
           </div>
         </DialogContent>

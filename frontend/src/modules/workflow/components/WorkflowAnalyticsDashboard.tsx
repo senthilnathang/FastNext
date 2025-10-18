@@ -1,35 +1,35 @@
-'use client';
+"use client";
 
-import React, { memo } from 'react';
+import {
+  Activity,
+  AlertCircle,
+  CheckCircle,
+  Clock,
+  GitBranch,
+  TrendingUp,
+  Zap,
+} from "lucide-react";
+import React, { memo } from "react";
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Cell,
+  Line,
+  LineChart,
+  Pie,
+  PieChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
 import {
   Card,
   CardContent,
   CardHeader,
-  CardTitle
-} from '@/shared/components/ui/card';
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  PieChart,
-  Pie,
-  Cell,
-  LineChart,
-  Line,
-  ResponsiveContainer
-} from 'recharts';
-import {
-  Activity,
-  Clock,
-  CheckCircle,
-  AlertCircle,
-  TrendingUp,
-  Zap,
-  GitBranch
-} from 'lucide-react';
+  CardTitle,
+} from "@/shared/components/ui/card";
 
 interface WorkflowMetrics {
   totalWorkflows: number;
@@ -63,15 +63,14 @@ interface WorkflowMetrics {
 
 interface WorkflowAnalyticsDashboardProps {
   metrics: WorkflowMetrics;
-  timeRange: '24h' | '7d' | '30d' | '90d';
-  onTimeRangeChange: (range: '24h' | '7d' | '30d' | '90d') => void;
+  timeRange: "24h" | "7d" | "30d" | "90d";
+  onTimeRangeChange: (range: "24h" | "7d" | "30d" | "90d") => void;
 }
-
 
 function WorkflowAnalyticsDashboard({
   metrics,
   timeRange,
-  onTimeRangeChange
+  onTimeRangeChange,
 }: WorkflowAnalyticsDashboardProps) {
   const formatTime = (minutes: number) => {
     if (minutes < 60) return `${minutes}m`;
@@ -88,19 +87,21 @@ function WorkflowAnalyticsDashboard({
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-3">
           <Activity className="h-6 w-6 text-blue-600" />
-          <h2 className="text-xl font-semibold text-gray-900">Workflow Analytics</h2>
+          <h2 className="text-xl font-semibold text-gray-900">
+            Workflow Analytics
+          </h2>
         </div>
 
         {/* Time Range Selector */}
         <div className="flex items-center space-x-1 bg-gray-100 rounded-lg p-1">
-          {(['24h', '7d', '30d', '90d'] as const).map((range) => (
+          {(["24h", "7d", "30d", "90d"] as const).map((range) => (
             <button
               key={range}
               onClick={() => onTimeRangeChange(range)}
               className={`px-3 py-1 text-sm font-medium rounded-md transition-colors ${
                 timeRange === range
-                  ? 'bg-white text-blue-600 shadow-sm'
-                  : 'text-gray-600 hover:text-gray-900'
+                  ? "bg-white text-blue-600 shadow-sm"
+                  : "text-gray-600 hover:text-gray-900"
               }`}
             >
               {range}
@@ -115,8 +116,12 @@ function WorkflowAnalyticsDashboard({
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Total Workflows</p>
-                <p className="text-2xl font-bold text-gray-900">{metrics.totalWorkflows}</p>
+                <p className="text-sm font-medium text-gray-600">
+                  Total Workflows
+                </p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {metrics.totalWorkflows}
+                </p>
               </div>
               <GitBranch className="h-8 w-8 text-blue-500" />
             </div>
@@ -127,8 +132,12 @@ function WorkflowAnalyticsDashboard({
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Active Instances</p>
-                <p className="text-2xl font-bold text-gray-900">{metrics.activeInstances}</p>
+                <p className="text-sm font-medium text-gray-600">
+                  Active Instances
+                </p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {metrics.activeInstances}
+                </p>
               </div>
               <Zap className="h-8 w-8 text-orange-500" />
             </div>
@@ -139,8 +148,12 @@ function WorkflowAnalyticsDashboard({
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Completed Today</p>
-                <p className="text-2xl font-bold text-gray-900">{metrics.completedToday}</p>
+                <p className="text-sm font-medium text-gray-600">
+                  Completed Today
+                </p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {metrics.completedToday}
+                </p>
               </div>
               <CheckCircle className="h-8 w-8 text-green-500" />
             </div>
@@ -166,7 +179,9 @@ function WorkflowAnalyticsDashboard({
         {/* Status Distribution */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Instance Status Distribution</CardTitle>
+            <CardTitle className="text-base">
+              Instance Status Distribution
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="h-64">
@@ -186,7 +201,7 @@ function WorkflowAnalyticsDashboard({
                     ))}
                   </Pie>
                   <Tooltip
-                    formatter={(value: number) => [value, 'Instances']}
+                    formatter={(value: number) => [value, "Instances"]}
                     labelFormatter={(label) => `Status: ${label}`}
                   />
                 </PieChart>
@@ -194,7 +209,10 @@ function WorkflowAnalyticsDashboard({
             </div>
             <div className="mt-4 space-y-2">
               {metrics.statusDistribution.map((item, index) => (
-                <div key={index} className="flex items-center justify-between text-sm">
+                <div
+                  key={index}
+                  className="flex items-center justify-between text-sm"
+                >
                   <div className="flex items-center space-x-2">
                     <div
                       className="w-3 h-3 rounded-full"
@@ -222,14 +240,18 @@ function WorkflowAnalyticsDashboard({
                   <XAxis
                     dataKey="date"
                     tick={{ fontSize: 12 }}
-                    tickFormatter={(value) => new Date(value).toLocaleDateString()}
+                    tickFormatter={(value) =>
+                      new Date(value).toLocaleDateString()
+                    }
                   />
                   <YAxis tick={{ fontSize: 12 }} />
                   <Tooltip
-                    labelFormatter={(value) => new Date(value).toLocaleDateString()}
+                    labelFormatter={(value) =>
+                      new Date(value).toLocaleDateString()
+                    }
                     formatter={(value: number, name: string) => [
                       value,
-                      name === 'completed' ? 'Completed' : 'Failed'
+                      name === "completed" ? "Completed" : "Failed",
                     ]}
                   />
                   <Line
@@ -257,7 +279,9 @@ function WorkflowAnalyticsDashboard({
         {/* Performance by Type */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Performance by Workflow Type</CardTitle>
+            <CardTitle className="text-base">
+              Performance by Workflow Type
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="h-64">
@@ -273,12 +297,16 @@ function WorkflowAnalyticsDashboard({
                   />
                   <Tooltip
                     formatter={(value: number, name: string) => [
-                      name === 'avgTime' ? formatTime(value) :
-                      name === 'successRate' ? formatPercentage(value) :
-                      value,
-                      name === 'avgTime' ? 'Avg Time' :
-                      name === 'successRate' ? 'Success Rate' :
-                      'Count'
+                      name === "avgTime"
+                        ? formatTime(value)
+                        : name === "successRate"
+                          ? formatPercentage(value)
+                          : value,
+                      name === "avgTime"
+                        ? "Avg Time"
+                        : name === "successRate"
+                          ? "Success Rate"
+                          : "Count",
                     ]}
                   />
                   <Bar dataKey="avgTime" fill="#3B82F6" />
@@ -296,20 +324,32 @@ function WorkflowAnalyticsDashboard({
           <CardContent>
             <div className="space-y-4">
               {metrics.bottlenecks.slice(0, 5).map((bottleneck, index) => (
-                <div key={bottleneck.nodeId} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                <div
+                  key={bottleneck.nodeId}
+                  className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+                >
                   <div className="flex-1">
                     <div className="flex items-center space-x-2">
-                      <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold text-white ${
-                        index === 0 ? 'bg-red-500' :
-                        index === 1 ? 'bg-orange-500' :
-                        index === 2 ? 'bg-yellow-500' :
-                        'bg-gray-500'
-                      }`}>
+                      <span
+                        className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold text-white ${
+                          index === 0
+                            ? "bg-red-500"
+                            : index === 1
+                              ? "bg-orange-500"
+                              : index === 2
+                                ? "bg-yellow-500"
+                                : "bg-gray-500"
+                        }`}
+                      >
                         {index + 1}
                       </span>
                       <div>
-                        <p className="font-medium text-sm text-gray-900">{bottleneck.nodeName}</p>
-                        <p className="text-xs text-gray-600">{bottleneck.instanceCount} instances</p>
+                        <p className="font-medium text-sm text-gray-900">
+                          {bottleneck.nodeName}
+                        </p>
+                        <p className="text-xs text-gray-600">
+                          {bottleneck.instanceCount} instances
+                        </p>
                       </div>
                     </div>
                   </div>
@@ -337,13 +377,19 @@ function WorkflowAnalyticsDashboard({
         <CardContent className="p-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
-              <TrendingUp className={`h-6 w-6 ${
-                metrics.successRate >= 90 ? 'text-green-500' :
-                metrics.successRate >= 70 ? 'text-yellow-500' :
-                'text-red-500'
-              }`} />
+              <TrendingUp
+                className={`h-6 w-6 ${
+                  metrics.successRate >= 90
+                    ? "text-green-500"
+                    : metrics.successRate >= 70
+                      ? "text-yellow-500"
+                      : "text-red-500"
+                }`}
+              />
               <div>
-                <p className="text-sm font-medium text-gray-600">Overall Success Rate</p>
+                <p className="text-sm font-medium text-gray-600">
+                  Overall Success Rate
+                </p>
                 <p className="text-lg font-bold text-gray-900">
                   {formatPercentage(metrics.successRate)}
                 </p>
@@ -352,9 +398,11 @@ function WorkflowAnalyticsDashboard({
             <div className="w-32 bg-gray-200 rounded-full h-3">
               <div
                 className={`h-3 rounded-full transition-all duration-300 ${
-                  metrics.successRate >= 90 ? 'bg-green-500' :
-                  metrics.successRate >= 70 ? 'bg-yellow-500' :
-                  'bg-red-500'
+                  metrics.successRate >= 90
+                    ? "bg-green-500"
+                    : metrics.successRate >= 70
+                      ? "bg-yellow-500"
+                      : "bg-red-500"
                 }`}
                 style={{ width: `${metrics.successRate}%` }}
               />

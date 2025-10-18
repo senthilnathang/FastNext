@@ -1,52 +1,54 @@
-"use client"
+"use client";
 
-import React, { useEffect, useState, useMemo, useCallback } from 'react'
-import dynamic from 'next/dynamic'
-import { useAuth } from '@/modules/auth'
-import { Card } from '@/shared/components/ui/card'
-import { Button } from '@/shared/components/ui/button'
-import { RefreshCw, Server, Shield, AlertCircle } from 'lucide-react'
-import { cn } from '@/shared/utils'
-import SwaggerErrorBoundary from './SwaggerErrorBoundary'
+import { AlertCircle, RefreshCw, Server, Shield } from "lucide-react";
+import dynamic from "next/dynamic";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { useAuth } from "@/modules/auth";
+import { Button } from "@/shared/components/ui/button";
+import { Card } from "@/shared/components/ui/card";
+import { cn } from "@/shared/utils";
+import SwaggerErrorBoundary from "./SwaggerErrorBoundary";
 
 // Import alternative SwaggerUI implementation
-const SwaggerUINoStrict = dynamic(() => import('./SwaggerUINoStrict'), {
+const SwaggerUINoStrict = dynamic(() => import("./SwaggerUINoStrict"), {
   ssr: false,
   loading: () => (
     <div className="flex items-center justify-center h-96">
       <div className="text-center">
         <RefreshCw className="w-8 h-8 animate-spin mx-auto mb-2 text-muted-foreground" />
-        <p className="text-sm text-muted-foreground">Loading API Documentation...</p>
+        <p className="text-sm text-muted-foreground">
+          Loading API Documentation...
+        </p>
       </div>
     </div>
   ),
-})
+});
 
 // Fallback: Dynamically import SwaggerUI React with warning suppression
 const SwaggerUIBundle = dynamic(
   () => {
     // Temporarily suppress React lifecycle warnings for SwaggerUI
-    const originalError = console.error
+    const originalError = console.error;
     console.error = (...args) => {
       if (
-        typeof args[0] === 'string' &&
-        (args[0].includes('UNSAFE_componentWillReceiveProps') ||
-         args[0].includes('componentWillReceiveProps') ||
-         args[0].includes('OperationContainer') ||
-         args[0].includes('Warning: Using UNSAFE_componentWillReceiveProps'))
+        typeof args[0] === "string" &&
+        (args[0].includes("UNSAFE_componentWillReceiveProps") ||
+          args[0].includes("componentWillReceiveProps") ||
+          args[0].includes("OperationContainer") ||
+          args[0].includes("Warning: Using UNSAFE_componentWillReceiveProps"))
       ) {
-        return // Suppress these specific warnings
+        return; // Suppress these specific warnings
       }
-      originalError.apply(console, args)
-    }
+      originalError.apply(console, args);
+    };
 
-    return import('swagger-ui-react').then((mod) => {
+    return import("swagger-ui-react").then((mod) => {
       // Restore original console.error after import
       setTimeout(() => {
-        console.error = originalError
-      }, 1000)
-      return mod
-    })
+        console.error = originalError;
+      }, 1000);
+      return mod;
+    });
   },
   {
     ssr: false,
@@ -54,142 +56,166 @@ const SwaggerUIBundle = dynamic(
       <div className="flex items-center justify-center h-96">
         <div className="text-center">
           <RefreshCw className="w-8 h-8 animate-spin mx-auto mb-2 text-muted-foreground" />
-          <p className="text-sm text-muted-foreground">Loading API Documentation...</p>
+          <p className="text-sm text-muted-foreground">
+            Loading API Documentation...
+          </p>
         </div>
       </div>
     ),
-  }
-)
+  },
+);
 
 interface SwaggerUIProps {
-  className?: string
-  apiUrl?: string
-  showToolbar?: boolean
-  useStrictMode?: boolean // If false, uses vanilla SwaggerUI to avoid React warnings
+  className?: string;
+  apiUrl?: string;
+  showToolbar?: boolean;
+  useStrictMode?: boolean; // If false, uses vanilla SwaggerUI to avoid React warnings
 }
 
 export function SwaggerUI({
   className,
   apiUrl,
   showToolbar = true,
-  useStrictMode = false
+  useStrictMode = false,
 }: SwaggerUIProps) {
   // Get API URL from environment variables with fallback
-  const baseApiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
-  const defaultApiUrl = `${baseApiUrl}/api/v1/openapi.json`
-  const finalApiUrl = apiUrl || defaultApiUrl
-  const { user } = useAuth()
-  const [isConnected, setIsConnected] = useState(false)
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  const baseApiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+  const defaultApiUrl = `${baseApiUrl}/api/v1/openapi.json`;
+  const finalApiUrl = apiUrl || defaultApiUrl;
+  const { user } = useAuth();
+  const [isConnected, setIsConnected] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   // Memoized token getter to prevent unnecessary function recreations
   const getToken = useCallback(() => {
-    if (typeof window !== 'undefined') {
-      return localStorage.getItem('access_token')
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("access_token");
     }
-    return null
-  }, [])
+    return null;
+  }, []);
 
   // Memoized connection checker
   const checkAPIConnection = useCallback(async () => {
     try {
-      setIsLoading(true)
-      setError(null)
+      setIsLoading(true);
+      setError(null);
 
-      const healthUrl = `${baseApiUrl}/health`
-      const response = await fetch(healthUrl)
+      const healthUrl = `${baseApiUrl}/health`;
+      const response = await fetch(healthUrl);
 
       if (response.ok) {
-        const data = await response.json()
-        if (data.status === 'healthy') {
-          setIsConnected(true)
+        const data = await response.json();
+        if (data.status === "healthy") {
+          setIsConnected(true);
         } else {
-          setIsConnected(false)
-          setError('API server is not healthy')
+          setIsConnected(false);
+          setError("API server is not healthy");
         }
       } else {
-        setIsConnected(false)
-        setError(`API server responded with status ${response.status}`)
+        setIsConnected(false);
+        setError(`API server responded with status ${response.status}`);
       }
     } catch (error) {
-      setIsConnected(false)
-      setError(`Cannot connect to API server at ${baseApiUrl}. Please ensure the backend is running.`)
-      console.error('API connection error:', error)
+      setIsConnected(false);
+      setError(
+        `Cannot connect to API server at ${baseApiUrl}. Please ensure the backend is running.`,
+      );
+      console.error("API connection error:", error);
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }, [baseApiUrl])
+  }, [baseApiUrl]);
 
   useEffect(() => {
-    checkAPIConnection()
-  }, [checkAPIConnection])
+    checkAPIConnection();
+  }, [checkAPIConnection]);
 
   // Memoized SwaggerUI configuration to prevent re-renders
-  const swaggerConfig = useMemo(() => ({
-    url: finalApiUrl,
-    deepLinking: true,
-    showExtensions: true,
-    showCommonExtensions: true,
-    displayOperationId: false,
-    tryItOutEnabled: true,
-    filter: true,
-    docExpansion: 'none' as const,
-    operationsSorter: 'alpha' as const,
-    tagsSorter: 'alpha' as const,
-    validatorUrl: null, // Disable schema validation to avoid external calls
-    // Suppress React warnings in Swagger UI
-    supportedSubmitMethods: ['get', 'post', 'put', 'delete', 'patch', 'head', 'options'],
-    requestInterceptor: (request: any) => {
-      // Add authorization header if user is logged in
-      const token = getToken()
-      if (token) {
-        request.headers = request.headers || {}
-        request.headers.Authorization = `Bearer ${token}`
-      }
+  const swaggerConfig = useMemo(
+    () => ({
+      url: finalApiUrl,
+      deepLinking: true,
+      showExtensions: true,
+      showCommonExtensions: true,
+      displayOperationId: false,
+      tryItOutEnabled: true,
+      filter: true,
+      docExpansion: "none" as const,
+      operationsSorter: "alpha" as const,
+      tagsSorter: "alpha" as const,
+      validatorUrl: null, // Disable schema validation to avoid external calls
+      // Suppress React warnings in Swagger UI
+      supportedSubmitMethods: [
+        "get",
+        "post",
+        "put",
+        "delete",
+        "patch",
+        "head",
+        "options",
+      ],
+      requestInterceptor: (request: any) => {
+        // Add authorization header if user is logged in
+        const token = getToken();
+        if (token) {
+          request.headers = request.headers || {};
+          request.headers.Authorization = `Bearer ${token}`;
+        }
 
-      // Ensure content-type for POST/PUT requests
-      if (['POST', 'PUT', 'PATCH'].includes(request.method) && request.body) {
-        request.headers['Content-Type'] = request.headers['Content-Type'] || 'application/json'
-      }
+        // Ensure content-type for POST/PUT requests
+        if (["POST", "PUT", "PATCH"].includes(request.method) && request.body) {
+          request.headers["Content-Type"] =
+            request.headers["Content-Type"] || "application/json";
+        }
 
-      return request
-    },
-    responseInterceptor: (response: any) => {
+        return request;
+      },
+      responseInterceptor: (response: any) => {
+        // Handle authentication errors
+        if (response.status === 401) {
+          console.warn("Authentication required for this endpoint");
+        }
 
-      // Handle authentication errors
-      if (response.status === 401) {
-        console.warn('Authentication required for this endpoint')
-      }
-
-      return response
-    },
-    onComplete: () => {
-    },
-    onFailure: (error: any) => {
-      console.error('SwaggerUI failed to load:', error)
-      setError('Failed to load API documentation. Please check the API server.')
-    }
-  }), [finalApiUrl, getToken])
+        return response;
+      },
+      onComplete: () => {},
+      onFailure: (error: any) => {
+        console.error("SwaggerUI failed to load:", error);
+        setError(
+          "Failed to load API documentation. Please check the API server.",
+        );
+      },
+    }),
+    [finalApiUrl, getToken],
+  );
 
   return (
-    <div className={cn('w-full', className)}>
+    <div className={cn("w-full", className)}>
       {showToolbar && (
         <Card className="mb-4 p-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
               <div className="flex items-center space-x-2">
-                <Server className={cn(
-                  'w-4 h-4',
-                  isConnected ? 'text-green-500' : 'text-red-500'
-                )} />
+                <Server
+                  className={cn(
+                    "w-4 h-4",
+                    isConnected ? "text-green-500" : "text-red-500",
+                  )}
+                />
                 <span className="text-sm font-medium">
                   API Status:
-                  <span className={cn(
-                    'ml-1',
-                    isConnected ? 'text-green-600' : 'text-red-600'
-                  )}>
-                    {isLoading ? 'Checking...' : isConnected ? 'Connected' : 'Disconnected'}
+                  <span
+                    className={cn(
+                      "ml-1",
+                      isConnected ? "text-green-600" : "text-red-600",
+                    )}
+                  >
+                    {isLoading
+                      ? "Checking..."
+                      : isConnected
+                        ? "Connected"
+                        : "Disconnected"}
                   </span>
                 </span>
               </div>
@@ -210,7 +236,9 @@ export function SwaggerUI({
               onClick={checkAPIConnection}
               disabled={isLoading}
             >
-              <RefreshCw className={cn('w-4 h-4 mr-2', isLoading && 'animate-spin')} />
+              <RefreshCw
+                className={cn("w-4 h-4 mr-2", isLoading && "animate-spin")}
+              />
               Refresh
             </Button>
           </div>
@@ -239,12 +267,17 @@ export function SwaggerUI({
           ) : (
             <div className="p-8 text-center">
               <AlertCircle className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
-              <h3 className="text-lg font-semibold mb-2">API Documentation Unavailable</h3>
+              <h3 className="text-lg font-semibold mb-2">
+                API Documentation Unavailable
+              </h3>
               <p className="text-sm text-muted-foreground mb-4">
-                {error || 'Cannot load API documentation. Please check your connection.'}
+                {error ||
+                  "Cannot load API documentation. Please check your connection."}
               </p>
               <Button onClick={checkAPIConnection} disabled={isLoading}>
-                <RefreshCw className={cn('w-4 h-4 mr-2', isLoading && 'animate-spin')} />
+                <RefreshCw
+                  className={cn("w-4 h-4 mr-2", isLoading && "animate-spin")}
+                />
                 Retry Connection
               </Button>
             </div>
@@ -290,7 +323,7 @@ export function SwaggerUI({
         }
       `}</style>
     </div>
-  )
+  );
 }
 
-export default SwaggerUI
+export default SwaggerUI;

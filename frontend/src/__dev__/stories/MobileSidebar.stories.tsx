@@ -1,50 +1,54 @@
-import type { Meta, StoryObj } from '@storybook/nextjs'
-import { useState } from 'react'
-import { Home, Users, Settings, Bell, Search, Menu } from 'lucide-react'
-import { MobileSidebar, useMobileSidebar } from '@/shared/components/navigation/MobileSidebar'
-import { Button } from '@/shared/components/ui/button'
+import type { Meta, StoryObj } from "@storybook/nextjs";
+import { Bell, Home, Menu, Search, Settings, Users } from "lucide-react";
+import { useState } from "react";
+import {
+  MobileSidebar,
+  useMobileSidebar,
+} from "@/shared/components/navigation/MobileSidebar";
+import { Button } from "@/shared/components/ui/button";
 
 const meta: Meta<typeof MobileSidebar> = {
-  title: 'Mobile/MobileSidebar',
+  title: "Mobile/MobileSidebar",
   component: MobileSidebar,
   parameters: {
-    layout: 'fullscreen',
+    layout: "fullscreen",
     docs: {
       description: {
-        component: 'A mobile-first sidebar component with gesture support and smooth animations.'
-      }
-    }
+        component:
+          "A mobile-first sidebar component with gesture support and smooth animations.",
+      },
+    },
   },
   argTypes: {
     isOpen: {
-      control: 'boolean',
-      description: 'Controls whether the sidebar is open'
+      control: "boolean",
+      description: "Controls whether the sidebar is open",
     },
     width: {
-      control: { type: 'range', min: 200, max: 400, step: 20 },
-      description: 'Width of the sidebar in pixels'
+      control: { type: "range", min: 200, max: 400, step: 20 },
+      description: "Width of the sidebar in pixels",
     },
     side: {
-      control: { type: 'select', options: ['left', 'right'] },
-      description: 'Which side the sidebar appears from'
+      control: { type: "select", options: ["left", "right"] },
+      description: "Which side the sidebar appears from",
     },
     enableSwipe: {
-      control: 'boolean',
-      description: 'Enable swipe gestures to open/close'
+      control: "boolean",
+      description: "Enable swipe gestures to open/close",
     },
     closeOnOverlayClick: {
-      control: 'boolean',
-      description: 'Close sidebar when clicking overlay'
+      control: "boolean",
+      description: "Close sidebar when clicking overlay",
     },
     showCloseButton: {
-      control: 'boolean',
-      description: 'Show close button in header'
-    }
-  }
-}
+      control: "boolean",
+      description: "Show close button in header",
+    },
+  },
+};
 
-export default meta
-type Story = StoryObj<typeof MobileSidebar>
+export default meta;
+type Story = StoryObj<typeof MobileSidebar>;
 
 // Sample navigation content
 const NavigationContent = () => (
@@ -66,11 +70,11 @@ const NavigationContent = () => (
       <span className="text-gray-900 dark:text-white">Settings</span>
     </div>
   </nav>
-)
+);
 
 // Wrapper component for stories
 const SidebarStory = ({ children, ...props }: any) => {
-  const [isOpen, setIsOpen] = useState(false)
+  const [isOpen, setIsOpen] = useState(false);
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -81,21 +85,19 @@ const SidebarStory = ({ children, ...props }: any) => {
         </Button>
         <div className="mt-4 text-gray-600 dark:text-gray-400">
           <p>This story demonstrates the mobile sidebar component.</p>
-          <p className="mt-2">On mobile: Click the button above or swipe from the edge to open.</p>
+          <p className="mt-2">
+            On mobile: Click the button above or swipe from the edge to open.
+          </p>
           <p>On desktop: Use browser dev tools to simulate mobile viewport.</p>
         </div>
       </div>
 
-      <MobileSidebar
-        {...props}
-        isOpen={isOpen}
-        onOpenChange={setIsOpen}
-      >
+      <MobileSidebar {...props} isOpen={isOpen} onOpenChange={setIsOpen}>
         {children}
       </MobileSidebar>
     </div>
-  )
-}
+  );
+};
 
 export const Default: Story = {
   render: (args) => (
@@ -105,12 +107,12 @@ export const Default: Story = {
   ),
   args: {
     width: 280,
-    side: 'left',
+    side: "left",
     enableSwipe: true,
     closeOnOverlayClick: true,
-    showCloseButton: true
-  }
-}
+    showCloseButton: true,
+  },
+};
 
 export const RightSide: Story = {
   render: (args) => (
@@ -120,12 +122,12 @@ export const RightSide: Story = {
   ),
   args: {
     width: 280,
-    side: 'right',
+    side: "right",
     enableSwipe: true,
     closeOnOverlayClick: true,
-    showCloseButton: true
-  }
-}
+    showCloseButton: true,
+  },
+};
 
 export const WideWidth: Story = {
   render: (args) => (
@@ -135,12 +137,12 @@ export const WideWidth: Story = {
   ),
   args: {
     width: 350,
-    side: 'left',
+    side: "left",
     enableSwipe: true,
     closeOnOverlayClick: true,
-    showCloseButton: true
-  }
-}
+    showCloseButton: true,
+  },
+};
 
 export const NoSwipeGestures: Story = {
   render: (args) => (
@@ -150,12 +152,12 @@ export const NoSwipeGestures: Story = {
   ),
   args: {
     width: 280,
-    side: 'left',
+    side: "left",
     enableSwipe: false,
     closeOnOverlayClick: true,
-    showCloseButton: true
-  }
-}
+    showCloseButton: true,
+  },
+};
 
 export const NoCloseButton: Story = {
   render: (args) => (
@@ -165,16 +167,16 @@ export const NoCloseButton: Story = {
   ),
   args: {
     width: 280,
-    side: 'left',
+    side: "left",
     enableSwipe: true,
     closeOnOverlayClick: true,
-    showCloseButton: false
-  }
-}
+    showCloseButton: false,
+  },
+};
 
 export const CustomTrigger: Story = {
   render: (args) => {
-    const [isOpen, setIsOpen] = useState(false)
+    const [isOpen, setIsOpen] = useState(false);
 
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -203,20 +205,20 @@ export const CustomTrigger: Story = {
           <NavigationContent />
         </MobileSidebar>
       </div>
-    )
+    );
   },
   args: {
     width: 280,
-    side: 'left',
+    side: "left",
     enableSwipe: true,
     closeOnOverlayClick: true,
-    showCloseButton: true
-  }
-}
+    showCloseButton: true,
+  },
+};
 
 export const WithHook: Story = {
   render: () => {
-    const { isOpen, toggle, close } = useMobileSidebar()
+    const { isOpen, toggle, close } = useMobileSidebar();
 
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -232,18 +234,14 @@ export const WithHook: Story = {
           </div>
           <div className="mt-4 text-gray-600 dark:text-gray-400">
             <p>Using the useMobileSidebar hook for state management.</p>
-            <p>Status: {isOpen ? 'Open' : 'Closed'}</p>
+            <p>Status: {isOpen ? "Open" : "Closed"}</p>
           </div>
         </div>
 
-        <MobileSidebar
-          isOpen={isOpen}
-          onOpenChange={close}
-          enableSwipe={true}
-        >
+        <MobileSidebar isOpen={isOpen} onOpenChange={close} enableSwipe={true}>
           <NavigationContent />
         </MobileSidebar>
       </div>
-    )
-  }
-}
+    );
+  },
+};

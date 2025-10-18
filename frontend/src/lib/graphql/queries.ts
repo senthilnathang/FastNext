@@ -2,7 +2,7 @@
  * GraphQL Queries
  * Centralized GraphQL queries for the application
  */
-import { gql } from '@apollo/client';
+import { gql } from "@apollo/client";
 
 // Fragment definitions for reusable type definitions
 export const USER_FRAGMENT = gql`

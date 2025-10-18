@@ -70,7 +70,13 @@
       "type": "select",
       "required": true,
       "label": "Category",
-      "options": ["Electronics", "Clothing", "Books", "Sports", "Home & Garden"],
+      "options": [
+        "Electronics",
+        "Clothing",
+        "Books",
+        "Sports",
+        "Home & Garden"
+      ],
       "displayInList": true,
       "filterable": true
     },

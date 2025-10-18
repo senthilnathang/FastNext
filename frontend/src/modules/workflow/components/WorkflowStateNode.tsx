@@ -1,28 +1,45 @@
-'use client';
+"use client";
 
-import React, { memo, useState, useCallback } from 'react';
-import { Handle, Position, NodeProps } from 'reactflow';
-import { WorkflowNodeData } from '../types/reactflow';
-import * as Icons from 'lucide-react';
-import { Button } from '@/shared/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/shared/components/ui/dialog';
-import { Input } from '@/shared/components/ui/input';
-import { Label } from '@/shared/components/ui/label';
-import { Textarea } from '@/shared/components/ui/textarea';
-import { Checkbox } from '@/shared/components/ui/checkbox';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/components/ui/select';
+import * as Icons from "lucide-react";
+import React, { memo, useCallback, useState } from "react";
+import { Handle, type NodeProps, Position } from "reactflow";
+import { Button } from "@/shared/components/ui/button";
+import { Checkbox } from "@/shared/components/ui/checkbox";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/shared/components/ui/dialog";
+import { Input } from "@/shared/components/ui/input";
+import { Label } from "@/shared/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/shared/components/ui/select";
+import { Textarea } from "@/shared/components/ui/textarea";
+import type { WorkflowNodeData } from "../types/reactflow";
 
-function WorkflowStateNode({ data, selected, id }: NodeProps<WorkflowNodeData>) {
+function WorkflowStateNode({
+  data,
+  selected,
+  id,
+}: NodeProps<WorkflowNodeData>) {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [editData, setEditData] = useState(data || {});
 
-  const IconComponent = data?.icon ? (Icons as any)[data.icon] || Icons.Circle : Icons.Circle;
+  const IconComponent = data?.icon
+    ? (Icons as any)[data.icon] || Icons.Circle
+    : Icons.Circle;
 
   const handleSave = useCallback(() => {
     // Update the node data
-    if (typeof window !== 'undefined') {
-      const event = new CustomEvent('updateNodeData', {
-        detail: { nodeId: id, newData: editData }
+    if (typeof window !== "undefined") {
+      const event = new CustomEvent("updateNodeData", {
+        detail: { nodeId: id, newData: editData },
       });
       window.dispatchEvent(event);
     }
@@ -30,9 +47,23 @@ function WorkflowStateNode({ data, selected, id }: NodeProps<WorkflowNodeData>) 
   }, [id, editData]);
 
   const iconOptions = [
-    'Circle', 'Square', 'Triangle', 'Star', 'Heart', 'Diamond',
-    'CheckCircle', 'XCircle', 'AlertCircle', 'Info', 'Settings',
-    'User', 'Users', 'Mail', 'Phone', 'Calendar', 'Clock'
+    "Circle",
+    "Square",
+    "Triangle",
+    "Star",
+    "Heart",
+    "Diamond",
+    "CheckCircle",
+    "XCircle",
+    "AlertCircle",
+    "Info",
+    "Settings",
+    "User",
+    "Users",
+    "Mail",
+    "Phone",
+    "Calendar",
+    "Clock",
   ];
 
   return (
@@ -40,12 +71,12 @@ function WorkflowStateNode({ data, selected, id }: NodeProps<WorkflowNodeData>) 
       <div
         className={`
           px-4 py-3 shadow-md rounded-lg border-2 min-w-[150px] max-w-[200px] cursor-pointer
-          ${selected ? 'border-blue-500' : 'border-gray-300'}
+          ${selected ? "border-blue-500" : "border-gray-300"}
           transition-all duration-200 hover:shadow-lg
         `}
         style={{
-          backgroundColor: data?.bgColor || '#ffffff',
-          borderColor: selected ? '#3B82F6' : (data?.color || '#D1D5DB')
+          backgroundColor: data?.bgColor || "#ffffff",
+          borderColor: selected ? "#3B82F6" : data?.color || "#D1D5DB",
         }}
         onDoubleClick={() => setIsEditDialogOpen(true)}
       >
@@ -61,15 +92,15 @@ function WorkflowStateNode({ data, selected, id }: NodeProps<WorkflowNodeData>) 
         <div className="flex items-center space-x-2">
           <IconComponent
             size={16}
-            style={{ color: data?.color || '#6B7280' }}
+            style={{ color: data?.color || "#6B7280" }}
             className="flex-shrink-0"
           />
           <div className="flex-1 min-w-0">
             <div
               className="font-medium text-sm truncate"
-              style={{ color: data?.color || '#374151' }}
+              style={{ color: data?.color || "#374151" }}
             >
-              {data?.label || 'State'}
+              {data?.label || "State"}
             </div>
             {data?.description && (
               <div className="text-xs text-gray-500 mt-1 line-clamp-2">
@@ -124,8 +155,10 @@ function WorkflowStateNode({ data, selected, id }: NodeProps<WorkflowNodeData>) 
               <Label htmlFor="label">Label</Label>
               <Input
                 id="label"
-                value={editData.label || ''}
-                onChange={(e) => setEditData({ ...editData, label: e.target.value })}
+                value={editData.label || ""}
+                onChange={(e) =>
+                  setEditData({ ...editData, label: e.target.value })
+                }
                 placeholder="Enter state label"
               />
             </div>
@@ -134,8 +167,10 @@ function WorkflowStateNode({ data, selected, id }: NodeProps<WorkflowNodeData>) 
               <Label htmlFor="description">Description</Label>
               <Textarea
                 id="description"
-                value={editData.description || ''}
-                onChange={(e) => setEditData({ ...editData, description: e.target.value })}
+                value={editData.description || ""}
+                onChange={(e) =>
+                  setEditData({ ...editData, description: e.target.value })
+                }
                 placeholder="Enter state description"
               />
             </div>
@@ -146,8 +181,10 @@ function WorkflowStateNode({ data, selected, id }: NodeProps<WorkflowNodeData>) 
                 <Input
                   id="color"
                   type="color"
-                  value={editData.color || '#6B7280'}
-                  onChange={(e) => setEditData({ ...editData, color: e.target.value })}
+                  value={editData.color || "#6B7280"}
+                  onChange={(e) =>
+                    setEditData({ ...editData, color: e.target.value })
+                  }
                 />
               </div>
 
@@ -156,8 +193,10 @@ function WorkflowStateNode({ data, selected, id }: NodeProps<WorkflowNodeData>) 
                 <Input
                   id="bgColor"
                   type="color"
-                  value={editData.bgColor || '#F9FAFB'}
-                  onChange={(e) => setEditData({ ...editData, bgColor: e.target.value })}
+                  value={editData.bgColor || "#F9FAFB"}
+                  onChange={(e) =>
+                    setEditData({ ...editData, bgColor: e.target.value })
+                  }
                 />
               </div>
             </div>
@@ -165,8 +204,10 @@ function WorkflowStateNode({ data, selected, id }: NodeProps<WorkflowNodeData>) 
             <div className="space-y-2">
               <Label htmlFor="icon">Icon</Label>
               <Select
-                value={editData.icon || 'Circle'}
-                onValueChange={(value) => setEditData({ ...editData, icon: value })}
+                value={editData.icon || "Circle"}
+                onValueChange={(value) =>
+                  setEditData({ ...editData, icon: value })
+                }
               >
                 <SelectTrigger>
                   <SelectValue />
@@ -175,7 +216,10 @@ function WorkflowStateNode({ data, selected, id }: NodeProps<WorkflowNodeData>) 
                   {iconOptions.map((icon) => (
                     <SelectItem key={icon} value={icon}>
                       <div className="flex items-center space-x-2">
-                        {React.createElement((Icons as any)[icon] || Icons.Circle, { size: 16 })}
+                        {React.createElement(
+                          (Icons as any)[icon] || Icons.Circle,
+                          { size: 16 },
+                        )}
                         <span>{icon}</span>
                       </div>
                     </SelectItem>
@@ -189,7 +233,9 @@ function WorkflowStateNode({ data, selected, id }: NodeProps<WorkflowNodeData>) 
                 <Checkbox
                   id="isInitial"
                   checked={editData.isInitial || false}
-                  onCheckedChange={(checked) => setEditData({ ...editData, isInitial: !!checked })}
+                  onCheckedChange={(checked) =>
+                    setEditData({ ...editData, isInitial: !!checked })
+                  }
                 />
                 <Label htmlFor="isInitial">Start State</Label>
               </div>
@@ -198,19 +244,22 @@ function WorkflowStateNode({ data, selected, id }: NodeProps<WorkflowNodeData>) 
                 <Checkbox
                   id="isFinal"
                   checked={editData.isFinal || false}
-                  onCheckedChange={(checked) => setEditData({ ...editData, isFinal: !!checked })}
+                  onCheckedChange={(checked) =>
+                    setEditData({ ...editData, isFinal: !!checked })
+                  }
                 />
                 <Label htmlFor="isFinal">End State</Label>
               </div>
             </div>
 
             <div className="flex justify-end space-x-2">
-              <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
+              <Button
+                variant="outline"
+                onClick={() => setIsEditDialogOpen(false)}
+              >
                 Cancel
               </Button>
-              <Button onClick={handleSave}>
-                Save Changes
-              </Button>
+              <Button onClick={handleSave}>Save Changes</Button>
             </div>
           </div>
         </DialogContent>

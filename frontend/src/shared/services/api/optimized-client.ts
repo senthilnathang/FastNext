@@ -461,7 +461,6 @@ export function useOptimizedApiQuery<T>(
     } finally {
       setLoading(false);
     }
-     
   }, [endpoint, config, options]);
 
   useEffect(() => {

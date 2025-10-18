@@ -1,8 +1,15 @@
-'use client';
+"use client";
 
-import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
-import { useRouter } from 'next/navigation';
-import { API_CONFIG, getApiUrl } from '@/shared/services/api/config';
+import { useRouter } from "next/navigation";
+import React, {
+  createContext,
+  type ReactNode,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
+import { API_CONFIG, getApiUrl } from "@/shared/services/api/config";
 
 // Types for authentication
 interface User {
@@ -33,7 +40,9 @@ interface AuthContextType {
   updateUser: (userData: Partial<User>) => void;
 }
 
-export const AuthContext = createContext<AuthContextType | undefined>(undefined);
+export const AuthContext = createContext<AuthContextType | undefined>(
+  undefined,
+);
 
 interface AuthProviderProps {
   children: ReactNode;
@@ -46,84 +55,87 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const isAuthenticated = !!user;
 
-
   // Helper function to make authenticated requests
-  const makeAuthenticatedRequest = useCallback(async (url: string, options: RequestInit = {}) => {
-    const token = localStorage.getItem('access_token');
+  const makeAuthenticatedRequest = useCallback(
+    async (url: string, options: RequestInit = {}) => {
+      const token = localStorage.getItem("access_token");
 
-    // Create Headers object for type safety
-    const headers = new Headers(options.headers);
-    headers.set('Content-Type', 'application/json');
+      // Create Headers object for type safety
+      const headers = new Headers(options.headers);
+      headers.set("Content-Type", "application/json");
 
-    if (token) {
-      headers.set('Authorization', `Bearer ${token}`);
-    }
-
-    const response = await fetch(`${API_CONFIG.API_BASE_URL}${url}`, {
-      ...options,
-      headers,
-    });
-
-    // Handle auto-logout scenarios
-    if (response.status === 401) {
-      const authStatus = response.headers.get('X-Auth-Status');
-      const autoLogout = response.headers.get('X-Auto-Logout');
-
-      if (autoLogout === 'true') {
-        // Clear tokens and redirect to login
-        localStorage.removeItem('access_token');
-        localStorage.removeItem('refresh_token');
-        localStorage.removeItem('user');
-        setUser(null);
-
-        // Store current path for redirect after login
-        const currentPath = window.location.pathname;
-        if (currentPath !== '/login' && currentPath !== '/register') {
-          sessionStorage.setItem('redirectAfterLogin', currentPath);
-        }
-
-        // Redirect with reason
-        const reason = authStatus || 'session_expired';
-        router.push(`/login?reason=${reason}`);
-
-        throw new Error('Session expired');
+      if (token) {
+        headers.set("Authorization", `Bearer ${token}`);
       }
-    }
 
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.detail || errorData.message || 'Request failed');
-    }
+      const response = await fetch(`${API_CONFIG.API_BASE_URL}${url}`, {
+        ...options,
+        headers,
+      });
 
-    return response;
-  }, [router]);
+      // Handle auto-logout scenarios
+      if (response.status === 401) {
+        const authStatus = response.headers.get("X-Auth-Status");
+        const autoLogout = response.headers.get("X-Auto-Logout");
+
+        if (autoLogout === "true") {
+          // Clear tokens and redirect to login
+          localStorage.removeItem("access_token");
+          localStorage.removeItem("refresh_token");
+          localStorage.removeItem("user");
+          setUser(null);
+
+          // Store current path for redirect after login
+          const currentPath = window.location.pathname;
+          if (currentPath !== "/login" && currentPath !== "/register") {
+            sessionStorage.setItem("redirectAfterLogin", currentPath);
+          }
+
+          // Redirect with reason
+          const reason = authStatus || "session_expired";
+          router.push(`/login?reason=${reason}`);
+
+          throw new Error("Session expired");
+        }
+      }
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(
+          errorData.detail || errorData.message || "Request failed",
+        );
+      }
+
+      return response;
+    },
+    [router],
+  );
 
   // Login function
   const login = async (username: string, password: string) => {
     setIsLoading(true);
     try {
       const response = await fetch(getApiUrl(API_CONFIG.ENDPOINTS.AUTH.LOGIN), {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({ username, password }),
       });
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.detail || 'Login failed');
+        throw new Error(errorData.detail || "Login failed");
       }
 
       const data = await response.json();
 
       // Store tokens
-      localStorage.setItem('access_token', data.access_token);
-      localStorage.setItem('refresh_token', data.refresh_token);
+      localStorage.setItem("access_token", data.access_token);
+      localStorage.setItem("refresh_token", data.refresh_token);
 
       // Get user information
       await getCurrentUser();
-
     } catch (error) {
       setIsLoading(false);
       throw error;
@@ -133,14 +145,16 @@ export function AuthProvider({ children }: AuthProviderProps) {
   // Get current user information
   const getCurrentUser = useCallback(async () => {
     try {
-      const response = await makeAuthenticatedRequest(API_CONFIG.ENDPOINTS.AUTH.ME);
+      const response = await makeAuthenticatedRequest(
+        API_CONFIG.ENDPOINTS.AUTH.ME,
+      );
       const userData = await response.json();
 
       setUser(userData);
-      localStorage.setItem('user', JSON.stringify(userData));
+      localStorage.setItem("user", JSON.stringify(userData));
       setIsLoading(false);
     } catch (error) {
-      console.error('Failed to get user info:', error);
+      console.error("Failed to get user info:", error);
       setIsLoading(false);
       throw error;
     }
@@ -151,50 +165,52 @@ export function AuthProvider({ children }: AuthProviderProps) {
     try {
       // Call logout endpoint
       await makeAuthenticatedRequest(API_CONFIG.ENDPOINTS.AUTH.LOGOUT, {
-        method: 'POST',
+        method: "POST",
       });
     } catch (error) {
-      console.warn('Logout request failed:', error);
+      console.warn("Logout request failed:", error);
     }
 
     // Clear local storage
-    localStorage.removeItem('access_token');
-    localStorage.removeItem('refresh_token');
-    localStorage.removeItem('user');
-    sessionStorage.removeItem('redirectAfterLogin');
+    localStorage.removeItem("access_token");
+    localStorage.removeItem("refresh_token");
+    localStorage.removeItem("user");
+    sessionStorage.removeItem("redirectAfterLogin");
 
     setUser(null);
-    router.push('/login');
+    router.push("/login");
   }, [makeAuthenticatedRequest, router]);
 
   // Refresh token function
   const refreshToken = useCallback(async () => {
     try {
-      const refreshTokenValue = localStorage.getItem('refresh_token');
+      const refreshTokenValue = localStorage.getItem("refresh_token");
       if (!refreshTokenValue) {
-        throw new Error('No refresh token available');
+        throw new Error("No refresh token available");
       }
 
-      const response = await fetch(getApiUrl(API_CONFIG.ENDPOINTS.AUTH.REFRESH), {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
+      const response = await fetch(
+        getApiUrl(API_CONFIG.ENDPOINTS.AUTH.REFRESH),
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ refresh_token: refreshTokenValue }),
         },
-        body: JSON.stringify({ refresh_token: refreshTokenValue }),
-      });
+      );
 
       if (!response.ok) {
-        throw new Error('Token refresh failed');
+        throw new Error("Token refresh failed");
       }
 
       const data = await response.json();
 
       // Update tokens
-      localStorage.setItem('access_token', data.access_token);
-      localStorage.setItem('refresh_token', data.refresh_token);
-
+      localStorage.setItem("access_token", data.access_token);
+      localStorage.setItem("refresh_token", data.refresh_token);
     } catch (error) {
-      console.error('Token refresh failed:', error);
+      console.error("Token refresh failed:", error);
       logout();
       throw error;
     }
@@ -205,15 +221,15 @@ export function AuthProvider({ children }: AuthProviderProps) {
     if (user) {
       const updatedUser = { ...user, ...userData };
       setUser(updatedUser);
-      localStorage.setItem('user', JSON.stringify(updatedUser));
+      localStorage.setItem("user", JSON.stringify(updatedUser));
     }
   };
 
   // Check for existing session on mount
   useEffect(() => {
     const initAuth = async () => {
-      const token = localStorage.getItem('access_token');
-      const userData = localStorage.getItem('user');
+      const token = localStorage.getItem("access_token");
+      const userData = localStorage.getItem("user");
 
       if (token && userData) {
         try {
@@ -221,11 +237,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
           setUser(JSON.parse(userData));
           await getCurrentUser();
         } catch (error) {
-          console.error('Session validation failed:', error);
+          console.error("Session validation failed:", error);
           // Clear invalid session
-          localStorage.removeItem('access_token');
-          localStorage.removeItem('refresh_token');
-          localStorage.removeItem('user');
+          localStorage.removeItem("access_token");
+          localStorage.removeItem("refresh_token");
+          localStorage.removeItem("user");
           setIsLoading(false);
         }
       } else {
@@ -240,18 +256,18 @@ export function AuthProvider({ children }: AuthProviderProps) {
   useEffect(() => {
     if (!isAuthenticated) return;
 
-    const token = localStorage.getItem('access_token');
+    const token = localStorage.getItem("access_token");
     if (!token) return;
 
     // Parse token to check expiry (simplified)
     try {
-      const payload = JSON.parse(atob(token.split('.')[1]));
+      const payload = JSON.parse(atob(token.split(".")[1]));
       const expiryTime = payload.exp * 1000; // Convert to milliseconds
       const currentTime = Date.now();
       const timeUntilExpiry = expiryTime - currentTime;
 
       // Refresh token 5 minutes before expiry
-      const refreshTime = timeUntilExpiry - (5 * 60 * 1000);
+      const refreshTime = timeUntilExpiry - 5 * 60 * 1000;
 
       if (refreshTime > 0) {
         const refreshTimer = setTimeout(() => {
@@ -261,7 +277,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         return () => clearTimeout(refreshTimer);
       }
     } catch (error) {
-      console.error('Token parsing failed:', error);
+      console.error("Token parsing failed:", error);
     }
   }, [isAuthenticated, user, refreshToken]);
 
@@ -275,17 +291,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
     updateUser,
   };
 
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
 export function useAuth(): AuthContextType {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 }

@@ -1,4 +1,4 @@
-import { Node, Edge } from 'reactflow';
+import type { Edge, Node } from "reactflow";
 
 export interface WorkflowNodeData {
   label: string;
@@ -17,7 +17,7 @@ export interface WorkflowNodeData {
   assignee?: string;
   requiredRoles?: string[];
   approval?: boolean;
-  priority?: 'low' | 'medium' | 'high';
+  priority?: "low" | "medium" | "high";
 }
 
 export interface WorkflowEdgeData {

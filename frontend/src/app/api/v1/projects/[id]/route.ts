@@ -1,11 +1,11 @@
-import { NextRequest, NextResponse } from 'next/server';
-import type { UpdateProjectRequest } from '@/shared/types';
-import { projectsStore } from '@/lib/data/projects';
+import { type NextRequest, NextResponse } from "next/server";
+import { projectsStore } from "@/lib/data/projects";
+import type { UpdateProjectRequest } from "@/shared/types";
 
 // GET /api/v1/projects/[id] - Get single project
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const { id: idString } = await params;
@@ -13,26 +13,23 @@ export async function GET(
 
     if (isNaN(id)) {
       return NextResponse.json(
-        { error: 'Invalid project ID' },
-        { status: 400 }
+        { error: "Invalid project ID" },
+        { status: 400 },
       );
     }
 
     const project = projectsStore.getById(id);
 
     if (!project) {
-      return NextResponse.json(
-        { error: 'Project not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Project not found" }, { status: 404 });
     }
 
     return NextResponse.json(project);
   } catch (error) {
-    console.error('Error fetching project:', error);
+    console.error("Error fetching project:", error);
     return NextResponse.json(
-      { error: 'Failed to fetch project' },
-      { status: 500 }
+      { error: "Failed to fetch project" },
+      { status: 500 },
     );
   }
 }
@@ -40,7 +37,7 @@ export async function GET(
 // PUT /api/v1/projects/[id] - Update project
 export async function PUT(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const { id: idString } = await params;
@@ -48,8 +45,8 @@ export async function PUT(
 
     if (isNaN(id)) {
       return NextResponse.json(
-        { error: 'Invalid project ID' },
-        { status: 400 }
+        { error: "Invalid project ID" },
+        { status: 400 },
       );
     }
 
@@ -62,15 +59,15 @@ export async function PUT(
 
       if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
         return NextResponse.json(
-          { error: 'Invalid date format. Use YYYY-MM-DD format.' },
-          { status: 400 }
+          { error: "Invalid date format. Use YYYY-MM-DD format." },
+          { status: 400 },
         );
       }
 
       if (endDate < startDate) {
         return NextResponse.json(
-          { error: 'End date must be after start date' },
-          { status: 400 }
+          { error: "End date must be after start date" },
+          { status: 400 },
         );
       }
     }
@@ -79,18 +76,15 @@ export async function PUT(
     const updatedProject = projectsStore.update(id, body);
 
     if (!updatedProject) {
-      return NextResponse.json(
-        { error: 'Project not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Project not found" }, { status: 404 });
     }
 
     return NextResponse.json(updatedProject);
   } catch (error) {
-    console.error('Error updating project:', error);
+    console.error("Error updating project:", error);
     return NextResponse.json(
-      { error: 'Failed to update project' },
-      { status: 500 }
+      { error: "Failed to update project" },
+      { status: 500 },
     );
   }
 }
@@ -98,7 +92,7 @@ export async function PUT(
 // DELETE /api/v1/projects/[id] - Delete project
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const { id: idString } = await params;
@@ -106,26 +100,23 @@ export async function DELETE(
 
     if (isNaN(id)) {
       return NextResponse.json(
-        { error: 'Invalid project ID' },
-        { status: 400 }
+        { error: "Invalid project ID" },
+        { status: 400 },
       );
     }
 
     const deleted = projectsStore.delete(id);
 
     if (!deleted) {
-      return NextResponse.json(
-        { error: 'Project not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Project not found" }, { status: 404 });
     }
 
-    return NextResponse.json({ message: 'Project deleted successfully' });
+    return NextResponse.json({ message: "Project deleted successfully" });
   } catch (error) {
-    console.error('Error deleting project:', error);
+    console.error("Error deleting project:", error);
     return NextResponse.json(
-      { error: 'Failed to delete project' },
-      { status: 500 }
+      { error: "Failed to delete project" },
+      { status: 500 },
     );
   }
 }

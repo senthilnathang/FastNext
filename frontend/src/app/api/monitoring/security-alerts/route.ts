@@ -1,5 +1,5 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { getSecurityAlerts } from '@/lib/monitoring/security-monitor';
+import { type NextRequest, NextResponse } from "next/server";
+import { getSecurityAlerts } from "@/lib/monitoring/security-monitor";
 
 export async function POST(request: NextRequest) {
   try {
@@ -11,31 +11,41 @@ export async function POST(request: NextRequest) {
     // Example: Send to external alerting service
     if (process.env.WEBHOOK_URL) {
       await fetch(process.env.WEBHOOK_URL, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json'
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           text: `🚨 Security Alert: ${alert.eventType}`,
-          attachments: [{
-            color: 'danger',
-            fields: [
-              { title: 'Event Type', value: alert.eventType, short: true },
-              { title: 'Count', value: alert.count.toString(), short: true },
-              { title: 'Affected IPs', value: alert.affectedIPs.join(', '), short: false },
-              { title: 'Time Window', value: `${alert.timeWindow / 1000}s`, short: true }
-            ]
-          }]
-        })
+          attachments: [
+            {
+              color: "danger",
+              fields: [
+                { title: "Event Type", value: alert.eventType, short: true },
+                { title: "Count", value: alert.count.toString(), short: true },
+                {
+                  title: "Affected IPs",
+                  value: alert.affectedIPs.join(", "),
+                  short: false,
+                },
+                {
+                  title: "Time Window",
+                  value: `${alert.timeWindow / 1000}s`,
+                  short: true,
+                },
+              ],
+            },
+          ],
+        }),
       });
     }
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Failed to process security alert:', error);
+    console.error("Failed to process security alert:", error);
     return NextResponse.json(
-      { error: 'Failed to process security alert' },
-      { status: 500 }
+      { error: "Failed to process security alert" },
+      { status: 500 },
     );
   }
 }
@@ -45,10 +55,10 @@ export async function GET() {
     const alerts = getSecurityAlerts();
     return NextResponse.json({ alerts });
   } catch (error) {
-    console.error('Failed to get security alerts:', error);
+    console.error("Failed to get security alerts:", error);
     return NextResponse.json(
-      { error: 'Failed to get security alerts' },
-      { status: 500 }
+      { error: "Failed to get security alerts" },
+      { status: 500 },
     );
   }
 }

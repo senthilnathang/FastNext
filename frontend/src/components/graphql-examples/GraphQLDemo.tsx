@@ -2,39 +2,49 @@
  * GraphQL Demo Component
  * Showcases GraphQL implementation with live queries and mutations
  */
-'use client';
+"use client";
 
-import React, { useState } from 'react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/components/ui/tabs';
-import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card';
-import { Badge } from '@/shared/components/ui/badge';
-
-import { Alert, AlertDescription } from '@/shared/components/ui/alert';
-import { useMe } from '@/lib/graphql';
-import { UsersList } from './UsersList';
-import { ProjectsGrid } from './ProjectsGrid';
-import { GraphQLTester } from './GraphQLTester';
 import {
-  Database,
-  Users,
-  FolderOpen,
   Activity,
-  Code,
-  CheckCircle,
   AlertCircle,
+  CheckCircle,
+  Code,
+  Database,
+  FolderOpen,
   Info,
-} from 'lucide-react';
+  Users,
+} from "lucide-react";
+import React, { useState } from "react";
+import { useMe } from "@/lib/graphql";
+import { Alert, AlertDescription } from "@/shared/components/ui/alert";
+import { Badge } from "@/shared/components/ui/badge";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/shared/components/ui/card";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/shared/components/ui/tabs";
+import { GraphQLTester } from "./GraphQLTester";
+import { ProjectsGrid } from "./ProjectsGrid";
+import { UsersList } from "./UsersList";
 
 export function GraphQLDemo() {
   const { data: currentUser, loading: userLoading, error: userError } = useMe();
-  const [activeTab, setActiveTab] = useState('overview');
+  const [activeTab, setActiveTab] = useState("overview");
 
   return (
     <div className="space-y-6">
       <div className="border-b pb-6">
         <h1 className="text-3xl font-bold mb-2">GraphQL Implementation Demo</h1>
         <p className="text-muted-foreground">
-          Real-time demonstration of GraphQL queries, mutations, and subscriptions
+          Real-time demonstration of GraphQL queries, mutations, and
+          subscriptions
         </p>
       </div>
 
@@ -56,13 +66,17 @@ export function GraphQLDemo() {
             ) : userError ? (
               <div className="flex items-center gap-2">
                 <div className="h-2 w-2 rounded-full bg-red-500" />
-                <span className="text-sm text-red-600">GraphQL Connection Failed</span>
+                <span className="text-sm text-red-600">
+                  GraphQL Connection Failed
+                </span>
                 <Badge variant="destructive">Error</Badge>
               </div>
             ) : (
               <div className="flex items-center gap-2">
                 <div className="h-2 w-2 rounded-full bg-green-500" />
-                <span className="text-sm text-green-600">GraphQL Connected</span>
+                <span className="text-sm text-green-600">
+                  GraphQL Connected
+                </span>
                 <Badge variant="default">
                   <CheckCircle className="h-3 w-3 mr-1" />
                   Active
@@ -74,7 +88,8 @@ export function GraphQLDemo() {
           {currentUser?.me && (
             <div className="mt-4 p-4 bg-muted rounded-lg">
               <p className="text-sm">
-                <strong>Authenticated as:</strong> {currentUser.me.fullName || currentUser.me.username}
+                <strong>Authenticated as:</strong>{" "}
+                {currentUser.me.fullName || currentUser.me.username}
                 {currentUser.me.isSuperuser && (
                   <Badge variant="outline" className="ml-2">
                     Admin
@@ -183,8 +198,9 @@ export function GraphQLDemo() {
           <Alert>
             <Info className="h-4 w-4" />
             <AlertDescription>
-              This demo showcases a full GraphQL implementation with real backend connectivity.
-              Use the tabs above to explore different features and see live data operations.
+              This demo showcases a full GraphQL implementation with real
+              backend connectivity. Use the tabs above to explore different
+              features and see live data operations.
             </AlertDescription>
           </Alert>
         </TabsContent>
@@ -210,7 +226,7 @@ export function GraphQLDemo() {
               <div>
                 <h3 className="font-medium mb-2">1. Query Hook Usage</h3>
                 <pre className="bg-muted p-4 rounded-lg text-sm overflow-x-auto">
-{`import { useUsers } from '@/lib/graphql';
+                  {`import { useUsers } from '@/lib/graphql';
 
 function UsersList() {
   const { data, loading, error } = useUsers({
@@ -235,7 +251,7 @@ function UsersList() {
               <div>
                 <h3 className="font-medium mb-2">2. Mutation Hook Usage</h3>
                 <pre className="bg-muted p-4 rounded-lg text-sm overflow-x-auto">
-{`import { useCreateProject } from '@/lib/graphql';
+                  {`import { useCreateProject } from '@/lib/graphql';
 
 function CreateProjectForm() {
   const { createProject, loading } = useCreateProject();
@@ -258,9 +274,11 @@ function CreateProjectForm() {
               </div>
 
               <div>
-                <h3 className="font-medium mb-2">3. GraphQL Query Definition</h3>
+                <h3 className="font-medium mb-2">
+                  3. GraphQL Query Definition
+                </h3>
                 <pre className="bg-muted p-4 rounded-lg text-sm overflow-x-auto">
-{`export const GET_USERS = gql\`
+                  {`export const GET_USERS = gql\`
   query GetUsers($first: Int, $after: String, $search: String) {
     users(first: $first, after: $after, search: $search) {
       edges {
@@ -281,9 +299,11 @@ function CreateProjectForm() {
               </div>
 
               <div>
-                <h3 className="font-medium mb-2">4. Backend GraphQL Resolver</h3>
+                <h3 className="font-medium mb-2">
+                  4. Backend GraphQL Resolver
+                </h3>
                 <pre className="bg-muted p-4 rounded-lg text-sm overflow-x-auto">
-{`@strawberry.field
+                  {`@strawberry.field
 async def users(
     self,
     info: strawberry.Info[GraphQLContext],

@@ -1,14 +1,23 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect } from 'react';
-import { useForm } from 'react-hook-form';
-import { Button } from '@/shared/components/ui/button';
-import { Input } from '@/shared/components/ui/input';
-import { Label } from '@/shared/components/ui/label';
-import { Card } from '@/shared/components/ui/card';
-import { useAuth } from '@/modules/auth';
-import { User, MapPin, Globe, FileText, Trash2, Upload, Download, Eye } from 'lucide-react';
-import { API_CONFIG, getApiUrl } from '@/shared/services/api/config';
+import {
+  Download,
+  Eye,
+  FileText,
+  Globe,
+  MapPin,
+  Trash2,
+  Upload,
+  User,
+} from "lucide-react";
+import React, { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import { useAuth } from "@/modules/auth";
+import { Button } from "@/shared/components/ui/button";
+import { Card } from "@/shared/components/ui/card";
+import { Input } from "@/shared/components/ui/input";
+import { Label } from "@/shared/components/ui/label";
+import { API_CONFIG, getApiUrl } from "@/shared/services/api/config";
 
 interface ProfileFormData {
   full_name: string;
@@ -23,29 +32,34 @@ interface UpdateProfileFormProps {
   onCancel?: () => void;
 }
 
-export default function UpdateProfileForm({ onSuccess, onCancel }: UpdateProfileFormProps) {
+export default function UpdateProfileForm({
+  onSuccess,
+  onCancel,
+}: UpdateProfileFormProps) {
   const { user, updateUser } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
-  const [profileBackup, setProfileBackup] = useState<ProfileFormData | null>(null);
+  const [profileBackup, setProfileBackup] = useState<ProfileFormData | null>(
+    null,
+  );
 
   const {
     register,
     handleSubmit,
     formState: { errors },
     reset,
-    setValue
+    setValue,
   } = useForm<ProfileFormData>();
 
   useEffect(() => {
     if (user) {
-      setValue('full_name', user.full_name || '');
-      setValue('bio', user.bio || '');
-      setValue('location', user.location || '');
-      setValue('website', user.website || '');
-      setValue('avatar_url', user.avatar_url || '');
+      setValue("full_name", user.full_name || "");
+      setValue("bio", user.bio || "");
+      setValue("location", user.location || "");
+      setValue("website", user.website || "");
+      setValue("avatar_url", user.avatar_url || "");
     }
   }, [user, setValue]);
 
@@ -55,19 +69,19 @@ export default function UpdateProfileForm({ onSuccess, onCancel }: UpdateProfile
     setSuccess(false);
 
     try {
-      const token = localStorage.getItem('access_token');
+      const token = localStorage.getItem("access_token");
       const response = await fetch(getApiUrl(API_CONFIG.ENDPOINTS.PROFILE.ME), {
-        method: 'PUT',
+        method: "PUT",
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(data),
       });
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.detail || 'Failed to update profile');
+        throw new Error(errorData.detail || "Failed to update profile");
       }
 
       const updatedUser = await response.json();
@@ -78,7 +92,7 @@ export default function UpdateProfileForm({ onSuccess, onCancel }: UpdateProfile
         onSuccess();
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
+      setError(err instanceof Error ? err.message : "An error occurred");
     } finally {
       setLoading(false);
     }
@@ -87,21 +101,21 @@ export default function UpdateProfileForm({ onSuccess, onCancel }: UpdateProfile
   const handleReset = () => {
     reset();
     if (user) {
-      setValue('full_name', user.full_name || '');
-      setValue('bio', user.bio || '');
-      setValue('location', user.location || '');
-      setValue('website', user.website || '');
-      setValue('avatar_url', user.avatar_url || '');
+      setValue("full_name", user.full_name || "");
+      setValue("bio", user.bio || "");
+      setValue("location", user.location || "");
+      setValue("website", user.website || "");
+      setValue("avatar_url", user.avatar_url || "");
     }
   };
 
   const handleBackupProfile = () => {
     const currentData = {
-      full_name: user?.full_name || '',
-      bio: user?.bio || '',
-      location: user?.location || '',
-      website: user?.website || '',
-      avatar_url: user?.avatar_url || ''
+      full_name: user?.full_name || "",
+      bio: user?.bio || "",
+      location: user?.location || "",
+      website: user?.website || "",
+      avatar_url: user?.avatar_url || "",
     };
     setProfileBackup(currentData);
     setSuccess(true);
@@ -110,18 +124,22 @@ export default function UpdateProfileForm({ onSuccess, onCancel }: UpdateProfile
 
   const handleRestoreProfile = () => {
     if (profileBackup) {
-      setValue('full_name', profileBackup.full_name);
-      setValue('bio', profileBackup.bio);
-      setValue('location', profileBackup.location);
-      setValue('website', profileBackup.website);
-      setValue('avatar_url', profileBackup.avatar_url);
+      setValue("full_name", profileBackup.full_name);
+      setValue("bio", profileBackup.bio);
+      setValue("location", profileBackup.location);
+      setValue("website", profileBackup.website);
+      setValue("avatar_url", profileBackup.avatar_url);
       setSuccess(true);
       setTimeout(() => setSuccess(false), 2000);
     }
   };
 
   const handleClearProfile = async () => {
-    if (!confirm('Are you sure you want to clear all profile information? This action cannot be undone.')) {
+    if (
+      !confirm(
+        "Are you sure you want to clear all profile information? This action cannot be undone.",
+      )
+    ) {
       return;
     }
 
@@ -129,27 +147,27 @@ export default function UpdateProfileForm({ onSuccess, onCancel }: UpdateProfile
     setError(null);
 
     try {
-      const token = localStorage.getItem('access_token');
+      const token = localStorage.getItem("access_token");
       const clearData = {
-        full_name: '',
-        bio: '',
-        location: '',
-        website: '',
-        avatar_url: ''
+        full_name: "",
+        bio: "",
+        location: "",
+        website: "",
+        avatar_url: "",
       };
 
       const response = await fetch(getApiUrl(API_CONFIG.ENDPOINTS.PROFILE.ME), {
-        method: 'PUT',
+        method: "PUT",
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(clearData),
       });
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.detail || 'Failed to clear profile');
+        throw new Error(errorData.detail || "Failed to clear profile");
       }
 
       const updatedUser = await response.json();
@@ -157,7 +175,7 @@ export default function UpdateProfileForm({ onSuccess, onCancel }: UpdateProfile
       reset();
       setSuccess(true);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
+      setError(err instanceof Error ? err.message : "An error occurred");
     } finally {
       setLoading(false);
     }
@@ -165,23 +183,23 @@ export default function UpdateProfileForm({ onSuccess, onCancel }: UpdateProfile
 
   const handleExportProfile = () => {
     const profileData = {
-      full_name: user?.full_name || '',
-      bio: user?.bio || '',
-      location: user?.location || '',
-      website: user?.website || '',
-      avatar_url: user?.avatar_url || '',
-      username: user?.username || '',
-      email: user?.email || '',
-      created_at: user?.created_at || '',
-      last_login_at: user?.last_login_at || ''
+      full_name: user?.full_name || "",
+      bio: user?.bio || "",
+      location: user?.location || "",
+      website: user?.website || "",
+      avatar_url: user?.avatar_url || "",
+      username: user?.username || "",
+      email: user?.email || "",
+      created_at: user?.created_at || "",
+      last_login_at: user?.last_login_at || "",
     };
 
     const dataStr = JSON.stringify(profileData, null, 2);
-    const dataBlob = new Blob([dataStr], { type: 'application/json' });
+    const dataBlob = new Blob([dataStr], { type: "application/json" });
     const url = URL.createObjectURL(dataBlob);
-    const link = document.createElement('a');
+    const link = document.createElement("a");
     link.href = url;
-    link.download = `profile-backup-${new Date().toISOString().split('T')[0]}.json`;
+    link.download = `profile-backup-${new Date().toISOString().split("T")[0]}.json`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -205,7 +223,9 @@ export default function UpdateProfileForm({ onSuccess, onCancel }: UpdateProfile
 
       {success && (
         <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-md">
-          <p className="text-sm text-green-600">Profile updated successfully!</p>
+          <p className="text-sm text-green-600">
+            Profile updated successfully!
+          </p>
         </div>
       )}
 
@@ -217,14 +237,19 @@ export default function UpdateProfileForm({ onSuccess, onCancel }: UpdateProfile
           </Label>
           <Input
             id="full_name"
-            {...register('full_name', {
-              maxLength: { value: 255, message: 'Full name must be less than 255 characters' }
+            {...register("full_name", {
+              maxLength: {
+                value: 255,
+                message: "Full name must be less than 255 characters",
+              },
             })}
             placeholder="Enter your full name"
             className="mt-1"
           />
           {errors.full_name && (
-            <p className="text-sm text-red-600 mt-1">{errors.full_name.message}</p>
+            <p className="text-sm text-red-600 mt-1">
+              {errors.full_name.message}
+            </p>
           )}
         </div>
 
@@ -235,8 +260,11 @@ export default function UpdateProfileForm({ onSuccess, onCancel }: UpdateProfile
           </Label>
           <textarea
             id="bio"
-            {...register('bio', {
-              maxLength: { value: 1000, message: 'Bio must be less than 1000 characters' }
+            {...register("bio", {
+              maxLength: {
+                value: 1000,
+                message: "Bio must be less than 1000 characters",
+              },
             })}
             placeholder="Tell us about yourself"
             rows={3}
@@ -254,14 +282,19 @@ export default function UpdateProfileForm({ onSuccess, onCancel }: UpdateProfile
           </Label>
           <Input
             id="location"
-            {...register('location', {
-              maxLength: { value: 255, message: 'Location must be less than 255 characters' }
+            {...register("location", {
+              maxLength: {
+                value: 255,
+                message: "Location must be less than 255 characters",
+              },
             })}
             placeholder="Your location"
             className="mt-1"
           />
           {errors.location && (
-            <p className="text-sm text-red-600 mt-1">{errors.location.message}</p>
+            <p className="text-sm text-red-600 mt-1">
+              {errors.location.message}
+            </p>
           )}
         </div>
 
@@ -273,18 +306,24 @@ export default function UpdateProfileForm({ onSuccess, onCancel }: UpdateProfile
           <Input
             id="website"
             type="url"
-            {...register('website', {
-              maxLength: { value: 500, message: 'Website URL must be less than 500 characters' },
+            {...register("website", {
+              maxLength: {
+                value: 500,
+                message: "Website URL must be less than 500 characters",
+              },
               pattern: {
                 value: /^https?:\/\/.*/,
-                message: 'Website must be a valid URL starting with http:// or https://'
-              }
+                message:
+                  "Website must be a valid URL starting with http:// or https://",
+              },
             })}
             placeholder="https://your-website.com"
             className="mt-1"
           />
           {errors.website && (
-            <p className="text-sm text-red-600 mt-1">{errors.website.message}</p>
+            <p className="text-sm text-red-600 mt-1">
+              {errors.website.message}
+            </p>
           )}
         </div>
 
@@ -296,26 +335,27 @@ export default function UpdateProfileForm({ onSuccess, onCancel }: UpdateProfile
           <Input
             id="avatar_url"
             type="url"
-            {...register('avatar_url', {
-              maxLength: { value: 500, message: 'Avatar URL must be less than 500 characters' }
+            {...register("avatar_url", {
+              maxLength: {
+                value: 500,
+                message: "Avatar URL must be less than 500 characters",
+              },
             })}
             placeholder="https://your-avatar-url.com/image.jpg"
             className="mt-1"
           />
           {errors.avatar_url && (
-            <p className="text-sm text-red-600 mt-1">{errors.avatar_url.message}</p>
+            <p className="text-sm text-red-600 mt-1">
+              {errors.avatar_url.message}
+            </p>
           )}
         </div>
 
         <div className="space-y-4 pt-4">
           {/* Primary Actions */}
           <div className="flex space-x-3">
-            <Button
-              type="submit"
-              disabled={loading}
-              className="flex-1"
-            >
-              {loading ? 'Updating...' : 'Update Profile'}
+            <Button type="submit" disabled={loading} className="flex-1">
+              {loading ? "Updating..." : "Update Profile"}
             </Button>
             <Button
               type="button"
@@ -339,7 +379,9 @@ export default function UpdateProfileForm({ onSuccess, onCancel }: UpdateProfile
 
           {/* Advanced Actions */}
           <div className="border-t pt-4">
-            <p className="text-sm font-medium text-gray-700 mb-3">Advanced Operations</p>
+            <p className="text-sm font-medium text-gray-700 mb-3">
+              Advanced Operations
+            </p>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
               <Button
                 type="button"

@@ -1,22 +1,21 @@
-'use client'
+"use client";
 
-import { useRouter } from 'next/navigation'
-import { ArrowLeft, Package } from 'lucide-react'
-
-import { Button } from '@/shared/components'
-import { ProductForm } from '@/modules/product/components/ProductForm'
+import { ArrowLeft, Package } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { ProductForm } from "@/modules/product/components/ProductForm";
+import { Button } from "@/shared/components";
 // Product type imported but not used in component
 
 export default function CreateProductPage() {
-  const router = useRouter()
+  const router = useRouter();
 
   const handleSuccess = () => {
-    router.push('/products')
-  }
+    router.push("/products");
+  };
 
   const handleCancel = () => {
-    router.back()
-  }
+    router.back();
+  };
 
   return (
     <div className="container mx-auto px-4 py-6 max-w-2xl">
@@ -37,7 +36,9 @@ export default function CreateProductPage() {
               <Package className="h-5 w-5 text-primary" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold tracking-tight">Create New Product</h1>
+              <h1 className="text-2xl font-bold tracking-tight">
+                Create New Product
+              </h1>
               <p className="text-sm text-muted-foreground">
                 Manage products in your inventory system
               </p>
@@ -46,12 +47,9 @@ export default function CreateProductPage() {
         </div>
 
         <div className="bg-card border rounded-lg p-6">
-          <ProductForm
-            onSuccess={handleSuccess}
-            onCancel={handleCancel}
-          />
+          <ProductForm onSuccess={handleSuccess} onCancel={handleCancel} />
         </div>
       </div>
     </div>
-  )
+  );
 }

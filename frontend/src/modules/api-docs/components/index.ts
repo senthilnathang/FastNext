@@ -1,1 +1,1 @@
-export { default as SwaggerUI } from './SwaggerUI'
+export { default as SwaggerUI } from "./SwaggerUI";

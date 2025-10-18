@@ -1,4 +1,4 @@
-import { Page, Locator, expect } from '@playwright/test';
+import { expect, type Locator, type Page } from "@playwright/test";
 
 /**
  * Utility functions for Playwright E2E tests.
@@ -14,16 +14,24 @@ export class TestHelpers {
    * Login with credentials
    */
   async login(email: string, password: string) {
-    await this.page.goto('/login');
+    await this.page.goto("/login");
 
-    await this.page.fill('input[type="email"], input[name="username"], input[name="email"]', email);
-    await this.page.fill('input[type="password"], input[name="password"]', password);
+    await this.page.fill(
+      'input[type="email"], input[name="username"], input[name="email"]',
+      email,
+    );
+    await this.page.fill(
+      'input[type="password"], input[name="password"]',
+      password,
+    );
 
-    const submitButton = this.page.locator('button[type="submit"], button:has-text("Login"), button:has-text("Sign in")');
+    const submitButton = this.page.locator(
+      'button[type="submit"], button:has-text("Login"), button:has-text("Sign in")',
+    );
     await submitButton.click();
 
     // Wait for redirect
-    await this.page.waitForURL('**/dashboard', { timeout: 10000 });
+    await this.page.waitForURL("**/dashboard", { timeout: 10000 });
   }
 
   /**
@@ -31,12 +39,12 @@ export class TestHelpers {
    */
   async logout() {
     const logoutButton = this.page.locator(
-      'button:has-text("Logout"), button:has-text("Sign out"), a:has-text("Logout")'
+      'button:has-text("Logout"), button:has-text("Sign out"), a:has-text("Logout")',
     );
 
-    if (await logoutButton.count() > 0) {
+    if ((await logoutButton.count()) > 0) {
       await logoutButton.click();
-      await this.page.waitForURL('**/login');
+      await this.page.waitForURL("**/login");
     }
   }
 
@@ -45,12 +53,14 @@ export class TestHelpers {
    */
   async fillForm(formData: Record<string, string>) {
     for (const [fieldName, value] of Object.entries(formData)) {
-      const field = this.page.locator(`input[name="${fieldName}"], textarea[name="${fieldName}"], select[name="${fieldName}"]`);
+      const field = this.page.locator(
+        `input[name="${fieldName}"], textarea[name="${fieldName}"], select[name="${fieldName}"]`,
+      );
 
-      if (await field.count() > 0) {
-        const tagName = await field.evaluate(el => el.tagName.toLowerCase());
+      if ((await field.count()) > 0) {
+        const tagName = await field.evaluate((el) => el.tagName.toLowerCase());
 
-        if (tagName === 'select') {
+        if (tagName === "select") {
           await field.selectOption(value);
         } else {
           await field.fill(value);
@@ -64,7 +74,7 @@ export class TestHelpers {
    */
   async waitForElement(selector: string, timeout = 5000): Promise<Locator> {
     const element = this.page.locator(selector);
-    await element.waitFor({ state: 'visible', timeout });
+    await element.waitFor({ state: "visible", timeout });
     return element;
   }
 
@@ -72,7 +82,7 @@ export class TestHelpers {
    * Check if element exists
    */
   async elementExists(selector: string): Promise<boolean> {
-    return await this.page.locator(selector).count() > 0;
+    return (await this.page.locator(selector).count()) > 0;
   }
 
   /**
@@ -102,10 +112,10 @@ export class TestHelpers {
    * Take screenshot with timestamp
    */
   async takeScreenshot(name: string) {
-    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+    const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
     await this.page.screenshot({
       path: `test-results/screenshots/${name}-${timestamp}.png`,
-      fullPage: true
+      fullPage: true,
     });
   }
 
@@ -116,14 +126,14 @@ export class TestHelpers {
     const table = this.page.locator(tableSelector);
     await expect(table).toBeVisible();
 
-    const rows = table.locator('tbody tr, .table-row');
+    const rows = table.locator("tbody tr, .table-row");
     const rowCount = await rows.count();
 
     expect(rowCount).toBe(expectedData.length);
 
     for (let i = 0; i < expectedData.length; i++) {
       const row = rows.nth(i);
-      const cells = row.locator('td, .table-cell');
+      const cells = row.locator("td, .table-cell");
 
       for (let j = 0; j < expectedData[i].length; j++) {
         await expect(cells.nth(j)).toContainText(expectedData[i][j]);
@@ -134,9 +144,11 @@ export class TestHelpers {
   /**
    * Wait for API call to complete
    */
-  async waitForApiCall(urlPattern: string, method = 'GET') {
-    return await this.page.waitForResponse(response =>
-      response.url().includes(urlPattern) && response.request().method() === method
+  async waitForApiCall(urlPattern: string, method = "GET") {
+    return await this.page.waitForResponse(
+      (response) =>
+        response.url().includes(urlPattern) &&
+        response.request().method() === method,
     );
   }
 
@@ -144,11 +156,11 @@ export class TestHelpers {
    * Mock API response
    */
   async mockApiResponse(urlPattern: string, responseData: any, status = 200) {
-    await this.page.route(urlPattern, route => {
+    await this.page.route(urlPattern, (route) => {
       route.fulfill({
         status,
-        contentType: 'application/json',
-        body: JSON.stringify(responseData)
+        contentType: "application/json",
+        body: JSON.stringify(responseData),
       });
     });
   }
@@ -158,22 +170,22 @@ export class TestHelpers {
    */
   async checkAccessibility() {
     // This is a basic check - you might want to integrate with axe-core
-    const headings = this.page.locator('h1, h2, h3, h4, h5, h6');
+    const headings = this.page.locator("h1, h2, h3, h4, h5, h6");
     const headingCount = await headings.count();
 
     if (headingCount > 0) {
       // Check that h1 exists
-      const h1 = this.page.locator('h1');
+      const h1 = this.page.locator("h1");
       expect(await h1.count()).toBeGreaterThan(0);
     }
 
     // Check for alt text on images
-    const images = this.page.locator('img');
+    const images = this.page.locator("img");
     const imageCount = await images.count();
 
     for (let i = 0; i < imageCount; i++) {
       const img = images.nth(i);
-      const alt = await img.getAttribute('alt');
+      const alt = await img.getAttribute("alt");
       expect(alt).not.toBeNull();
     }
   }
@@ -199,12 +211,16 @@ export class TestHelpers {
    * Navigate using sidebar menu
    */
   async navigateUsingSidebar(menuItemText: string) {
-    const sidebarMenu = this.page.locator('[data-testid="sidebar"], .sidebar, nav');
-    const menuItem = sidebarMenu.locator(`a:has-text("${menuItemText}"), button:has-text("${menuItemText}")`);
+    const sidebarMenu = this.page.locator(
+      '[data-testid="sidebar"], .sidebar, nav',
+    );
+    const menuItem = sidebarMenu.locator(
+      `a:has-text("${menuItemText}"), button:has-text("${menuItemText}")`,
+    );
 
-    if (await menuItem.count() > 0) {
+    if ((await menuItem.count()) > 0) {
       await menuItem.click();
-      await this.page.waitForLoadState('networkidle');
+      await this.page.waitForLoadState("networkidle");
     } else {
       throw new Error(`Menu item "${menuItemText}" not found in sidebar`);
     }
@@ -213,9 +229,12 @@ export class TestHelpers {
   /**
    * Verify notification/toast message
    */
-  async verifyNotification(message: string, type: 'success' | 'error' | 'info' = 'success') {
+  async verifyNotification(
+    message: string,
+    type: "success" | "error" | "info" = "success",
+  ) {
     const notification = this.page.locator(
-      `[data-testid="notification"], .toast, .alert, .notification, [role="alert"]`
+      `[data-testid="notification"], .toast, .alert, .notification, [role="alert"]`,
     );
 
     await expect(notification).toBeVisible();
@@ -223,11 +242,13 @@ export class TestHelpers {
 
     // Check notification type if possible
     if (type) {
-      const hasTypeClass = await notification.evaluate((el, t) =>
-        el.classList.contains(t) ||
-        el.classList.contains(`alert-${t}`) ||
-        el.classList.contains(`toast-${t}`) ||
-        el.classList.contains(`notification-${t}`), type
+      const hasTypeClass = await notification.evaluate(
+        (el, t) =>
+          el.classList.contains(t) ||
+          el.classList.contains(`alert-${t}`) ||
+          el.classList.contains(`toast-${t}`) ||
+          el.classList.contains(`notification-${t}`),
+        type,
       );
 
       if (!hasTypeClass) {
@@ -243,27 +264,27 @@ export class TestHelpers {
     // Wait for common loading indicators to disappear
     const loadingSelectors = [
       '[data-testid="loading"]',
-      '.loading',
-      '.spinner',
+      ".loading",
+      ".spinner",
       '[data-loading="true"]',
-      '.skeleton'
+      ".skeleton",
     ];
 
     for (const selector of loadingSelectors) {
       const loader = this.page.locator(selector);
-      if (await loader.count() > 0) {
-        await loader.waitFor({ state: 'hidden', timeout: 10000 });
+      if ((await loader.count()) > 0) {
+        await loader.waitFor({ state: "hidden", timeout: 10000 });
       }
     }
 
     // Wait for network to be idle
-    await this.page.waitForLoadState('networkidle');
+    await this.page.waitForLoadState("networkidle");
   }
 
   /**
    * Generate unique test data
    */
-  generateTestData(prefix = 'test') {
+  generateTestData(prefix = "test") {
     const timestamp = Date.now();
     const random = Math.random().toString(36).substring(7);
 
@@ -272,7 +293,7 @@ export class TestHelpers {
       username: `${prefix}_${timestamp}_${random}`,
       name: `Test ${prefix} ${timestamp}`,
       timestamp,
-      random
+      random,
     };
   }
 }

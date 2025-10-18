@@ -16,15 +16,20 @@ const rateLimitStore = new Map<string, { count: number; resetTime: number }>();
 
 // Rate limit configurations for different endpoints
 const rateLimitConfigs: Record<string, RateLimitConfig> = {
-  '/login': { windowMs: 15 * 60 * 1000, maxRequests: 5 }, // 5 attempts per 15 minutes
-  '/register': { windowMs: 60 * 60 * 1000, maxRequests: 3 }, // 3 attempts per hour
-  '/api/': { windowMs: 60 * 1000, maxRequests: 100 }, // 100 requests per minute for API
-  default: { windowMs: 60 * 1000, maxRequests: 60 } // 60 requests per minute default
+  "/login": { windowMs: 15 * 60 * 1000, maxRequests: 5 }, // 5 attempts per 15 minutes
+  "/register": { windowMs: 60 * 60 * 1000, maxRequests: 3 }, // 3 attempts per hour
+  "/api/": { windowMs: 60 * 1000, maxRequests: 100 }, // 100 requests per minute for API
+  default: { windowMs: 60 * 1000, maxRequests: 60 }, // 60 requests per minute default
 };
 
-export async function rateLimit(identifier: string, pathname: string): Promise<RateLimitResult> {
+export async function rateLimit(
+  identifier: string,
+  pathname: string,
+): Promise<RateLimitResult> {
   // Skip rate limiting in development or if explicitly bypassed
-  const bypassRateLimit = process.env.NODE_ENV === 'development' || process.env.BYPASS_RATE_LIMIT === 'true';
+  const bypassRateLimit =
+    process.env.NODE_ENV === "development" ||
+    process.env.BYPASS_RATE_LIMIT === "true";
 
   if (bypassRateLimit) {
     return {
@@ -32,7 +37,7 @@ export async function rateLimit(identifier: string, pathname: string): Promise<R
       limit: 999999,
       remaining: 999999,
       resetTime: Date.now() + 60000,
-      retryAfter: 0
+      retryAfter: 0,
     };
   }
 
@@ -66,7 +71,7 @@ export async function rateLimit(identifier: string, pathname: string): Promise<R
       limit: config.maxRequests,
       remaining: config.maxRequests - 1,
       resetTime,
-      retryAfter: 0
+      retryAfter: 0,
     };
   }
 
@@ -83,7 +88,7 @@ export async function rateLimit(identifier: string, pathname: string): Promise<R
     limit: config.maxRequests,
     remaining,
     resetTime: entry.resetTime,
-    retryAfter
+    retryAfter,
   };
 }
 
@@ -103,7 +108,7 @@ export class AdvancedRateLimit {
   async slidingWindow(
     identifier: string,
     windowMs: number,
-    maxRequests: number
+    maxRequests: number,
   ): Promise<RateLimitResult> {
     const key = `sliding:${identifier}`;
     const now = Date.now();
@@ -126,7 +131,7 @@ export class AdvancedRateLimit {
       limit: maxRequests,
       remaining,
       resetTime: now + windowMs,
-      retryAfter: allowed ? 0 : Math.ceil(windowMs / 1000)
+      retryAfter: allowed ? 0 : Math.ceil(windowMs / 1000),
     };
   }
 
@@ -135,14 +140,14 @@ export class AdvancedRateLimit {
     identifier: string,
     capacity: number,
     refillRate: number,
-    refillPeriod: number
+    refillPeriod: number,
   ): Promise<RateLimitResult> {
     const key = `bucket:${identifier}`;
     const now = Date.now();
 
     const bucket = this.store.get(key) || {
       tokens: capacity,
-      lastRefill: now
+      lastRefill: now,
     };
 
     // Calculate tokens to add based on time elapsed
@@ -165,7 +170,7 @@ export class AdvancedRateLimit {
       limit: capacity,
       remaining: bucket.tokens,
       resetTime: now + refillPeriod,
-      retryAfter: allowed ? 0 : refillPeriod / 1000
+      retryAfter: allowed ? 0 : refillPeriod / 1000,
     };
   }
 }

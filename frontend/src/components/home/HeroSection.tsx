@@ -20,13 +20,17 @@ export function HeroSection() {
             <span className="block text-blue-600">Full-Stack Development</span>
           </h1>
 
-            <p className="text-xl text-gray-600 dark:text-gray-300 mb-8 max-w-3xl mx-auto">
-              FastNext Framework is a comprehensive production-ready full-stack development platform that combines Next.js 15 for the frontend,
-              FastAPI for the backend, PostgreSQL for data persistence, and Redis for caching and real-time features.
-              It includes enterprise-grade security with OWASP compliance, advanced workflow automation with visual builders,
-              multi-view data management (List, Card, Kanban, Gantt, Calendar), and built-in internationalization support for 20+ languages.
-              Deploy from prototype to production in minutes, not months, with Docker support and comprehensive API documentation.
-            </p>
+          <p className="text-xl text-gray-600 dark:text-gray-300 mb-8 max-w-3xl mx-auto">
+            FastNext Framework is a comprehensive production-ready full-stack
+            development platform that combines Next.js 15 for the frontend,
+            FastAPI for the backend, PostgreSQL for data persistence, and Redis
+            for caching and real-time features. It includes enterprise-grade
+            security with OWASP compliance, advanced workflow automation with
+            visual builders, multi-view data management (List, Card, Kanban,
+            Gantt, Calendar), and built-in internationalization support for 20+
+            languages. Deploy from prototype to production in minutes, not
+            months, with Docker support and comprehensive API documentation.
+          </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
             <Link
@@ -35,14 +39,14 @@ export function HeroSection() {
             >
               🚀 Get Started
             </Link>
-             <a
-               href="https://docs.fastnext.dev"
-               target="_blank"
-               rel="noopener noreferrer"
-               className="border-2 border-gray-300 dark:border-gray-600 hover:border-blue-500 text-gray-700 dark:text-gray-300 hover:text-blue-600 px-8 py-4 rounded-lg font-semibold text-lg transition-colors"
-             >
-               📚 View Documentation
-             </a>
+            <a
+              href="https://docs.fastnext.dev"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="border-2 border-gray-300 dark:border-gray-600 hover:border-blue-500 text-gray-700 dark:text-gray-300 hover:text-blue-600 px-8 py-4 rounded-lg font-semibold text-lg transition-colors"
+            >
+              📚 View Documentation
+            </a>
             <a
               href="https://github.com/fastnext/fastnext-framework"
               target="_blank"

@@ -1,5 +1,5 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { SecureCookieManager } from '@/lib/auth/secure-cookies';
+import { type NextRequest, NextResponse } from "next/server";
+import { SecureCookieManager } from "@/lib/auth/secure-cookies";
 
 export async function POST(request: NextRequest) {
   try {
@@ -10,7 +10,7 @@ export async function POST(request: NextRequest) {
     let userId: string | undefined;
     if (authToken) {
       try {
-        const payload = JSON.parse(atob(authToken.split('.')[1]));
+        const payload = JSON.parse(atob(authToken.split(".")[1]));
         userId = payload.sub || payload.user_id;
       } catch {
         // Invalid token, but we'll still proceed with logout
@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
     // Create response
     const response = NextResponse.json({
       success: true,
-      message: 'Logged out successfully'
+      message: "Logged out successfully",
     });
 
     // Clear all auth cookies securely
@@ -32,23 +32,22 @@ export async function POST(request: NextRequest) {
     }
 
     // Log user logout for audit purposes
-    console.log('User logout', {
-      userId: userId || 'unknown',
+    console.log("User logout", {
+      userId: userId || "unknown",
       clientIP: getClientIP(request),
       hasAuthToken: !!authToken,
       hasRefreshToken: !!refreshToken,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
 
     return response;
-
   } catch (error) {
-    console.error('Logout error:', error);
+    console.error("Logout error:", error);
 
     // Even if there's an error, clear the cookies
     const response = NextResponse.json({
       success: true,
-      message: 'Logged out successfully'
+      message: "Logged out successfully",
     });
 
     SecureCookieManager.clearAuthCookies(response);
@@ -62,7 +61,10 @@ export async function GET(request: NextRequest) {
   return POST(request);
 }
 
-async function blacklistTokens(authToken?: string | null, refreshToken?: string | null): Promise<void> {
+async function blacklistTokens(
+  authToken?: string | null,
+  refreshToken?: string | null,
+): Promise<void> {
   try {
     // In a real application, you would:
     // 1. Add tokens to a blacklist/revocation list in your database
@@ -74,16 +76,16 @@ async function blacklistTokens(authToken?: string | null, refreshToken?: string 
     if (authToken) {
       tokensToBlacklist.push({
         token: authToken,
-        type: 'access',
-        blacklistedAt: new Date().toISOString()
+        type: "access",
+        blacklistedAt: new Date().toISOString(),
       });
     }
 
     if (refreshToken) {
       tokensToBlacklist.push({
         token: refreshToken,
-        type: 'refresh',
-        blacklistedAt: new Date().toISOString()
+        type: "refresh",
+        blacklistedAt: new Date().toISOString(),
       });
     }
 
@@ -94,22 +96,20 @@ async function blacklistTokens(authToken?: string | null, refreshToken?: string 
       //   headers: { 'Content-Type': 'application/json' },
       //   body: JSON.stringify({ tokens: tokensToBlacklist })
       // });
-
     }
-
   } catch (error) {
-    console.error('Failed to blacklist tokens:', error);
+    console.error("Failed to blacklist tokens:", error);
     // Don't throw error - logout should still succeed
   }
 }
 
 function getClientIP(request: NextRequest): string {
-  const forwarded = request.headers.get('x-forwarded-for');
-  const realIP = request.headers.get('x-real-ip');
+  const forwarded = request.headers.get("x-forwarded-for");
+  const realIP = request.headers.get("x-real-ip");
 
   if (forwarded) {
-    return forwarded.split(',')[0].trim();
+    return forwarded.split(",")[0].trim();
   }
 
-  return realIP || 'unknown';
+  return realIP || "unknown";
 }

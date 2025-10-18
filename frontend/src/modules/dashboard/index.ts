@@ -1,13 +1,11 @@
 // Dashboard Module - Export all components, hooks, and types
 
 // Components
-export * from './components'
+export * from "./components";
 
 // Hooks
-export * from './hooks'
-
-// Types
-export * from './types'
-
+export * from "./hooks";
 // Services
-export * from './services'
+export * from "./services";
+// Types
+export * from "./types";

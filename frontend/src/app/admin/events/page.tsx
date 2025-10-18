@@ -1,12 +1,24 @@
-"use client"
-
-import * as React from "react"
-import { ViewManager, ViewConfig, Column } from '@/shared/components/views'
-import { AlertTriangle, RefreshCw, Calendar, Clock, AlertCircle, Info } from "lucide-react"
+"use client";
 
 import {
-  Button,
+  AlertCircle,
+  AlertTriangle,
+  Calendar,
+  Clock,
+  Info,
+  RefreshCw,
+} from "lucide-react";
+import * as React from "react";
+// Import dialogs
+import { EventDetailDialog } from "@/modules/admin/components/EventDetailDialog";
+// Import event hooks and types
+import { useEvents, useExportEvents } from "@/modules/admin/hooks/useEvents";
+import type { EventResponse } from "@/modules/admin/types/events";
+import {
+  Alert,
+  AlertDescription,
   Badge,
+  Button,
   Card,
   CardContent,
   CardHeader,
@@ -16,299 +28,331 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-  Alert,
-  AlertDescription
-} from "@/shared/components"
-import type { SortOption, GroupOption } from '@/shared/components/ui'
+} from "@/shared/components";
+import type { GroupOption, SortOption } from "@/shared/components/ui";
+import {
+  type Column,
+  type ViewConfig,
+  ViewManager,
+} from "@/shared/components/views";
 
-// Import event hooks and types
-import { useEvents, useExportEvents } from "@/modules/admin/hooks/useEvents"
-import type { EventResponse } from "@/modules/admin/types/events"
-
-// Import dialogs
-import { EventDetailDialog } from "@/modules/admin/components/EventDetailDialog"
-
-type EventsPageProps = Record<string, never>
+type EventsPageProps = Record<string, never>;
 
 const EventsPage: React.FC<EventsPageProps> = () => {
   // ViewManager state
-  const [activeView, setActiveView] = React.useState('events-list')
-  const [searchQuery, setSearchQuery] = React.useState('')
-  const [filters, setFilters] = React.useState<Record<string, any>>({})
-  const [sortBy, setSortBy] = React.useState<string>('timestamp')
-  const [sortOrder, setSortOrder] = React.useState<'asc' | 'desc'>('desc')
-  const [groupBy, setGroupBy] = React.useState<string>('')
-  const [selectedItems, setSelectedItems] = React.useState<EventResponse[]>([])
+  const [activeView, setActiveView] = React.useState("events-list");
+  const [searchQuery, setSearchQuery] = React.useState("");
+  const [filters, setFilters] = React.useState<Record<string, any>>({});
+  const [sortBy, setSortBy] = React.useState<string>("timestamp");
+  const [sortOrder, setSortOrder] = React.useState<"asc" | "desc">("desc");
+  const [groupBy, setGroupBy] = React.useState<string>("");
+  const [selectedItems, setSelectedItems] = React.useState<EventResponse[]>([]);
 
   // State
-  const [selectedEvent, setSelectedEvent] = React.useState<EventResponse | null>(null)
-  const [timeRange, setTimeRange] = React.useState<number>(24) // Hours
-  const [autoRefresh, setAutoRefresh] = React.useState<boolean>(false)
-  const [refreshInterval] = React.useState<number>(30) // Seconds
+  const [selectedEvent, setSelectedEvent] =
+    React.useState<EventResponse | null>(null);
+  const [timeRange, setTimeRange] = React.useState<number>(24); // Hours
+  const [autoRefresh, setAutoRefresh] = React.useState<boolean>(false);
+  const [refreshInterval] = React.useState<number>(30); // Seconds
 
   // Queries
   const {
     data: eventsData,
     isLoading: eventsLoading,
     error: eventsError,
-    refetch: refetchEvents
-  } = useEvents()
+    refetch: refetchEvents,
+  } = useEvents();
 
-   const { mutate: exportEvents } = useExportEvents()
+  const { mutate: exportEvents } = useExportEvents();
 
   // Level configuration
   const getLevelConfig = (level: string) => {
     switch (level.toLowerCase()) {
-      case 'error':
-        return { variant: 'destructive' as const, icon: <AlertTriangle className="h-3 w-3" /> }
-      case 'warning':
-        return { variant: 'secondary' as const, icon: <AlertCircle className="h-3 w-3" /> }
-      case 'info':
-        return { variant: 'default' as const, icon: <Info className="h-3 w-3" /> }
-      case 'debug':
-        return { variant: 'outline' as const, icon: <Clock className="h-3 w-3" /> }
+      case "error":
+        return {
+          variant: "destructive" as const,
+          icon: <AlertTriangle className="h-3 w-3" />,
+        };
+      case "warning":
+        return {
+          variant: "secondary" as const,
+          icon: <AlertCircle className="h-3 w-3" />,
+        };
+      case "info":
+        return {
+          variant: "default" as const,
+          icon: <Info className="h-3 w-3" />,
+        };
+      case "debug":
+        return {
+          variant: "outline" as const,
+          icon: <Clock className="h-3 w-3" />,
+        };
       default:
-        return { variant: 'default' as const, icon: <Info className="h-3 w-3" /> }
+        return {
+          variant: "default" as const,
+          icon: <Info className="h-3 w-3" />,
+        };
     }
-  }
+  };
 
   // Category icon helper
   const getCategoryIcon = (category: string) => {
     switch (category) {
-      case 'authentication': return '🔐'
-      case 'user_management': return '👥'
-      case 'system': return '⚙️'
-      case 'api': return '🔌'
-      case 'database': return '🗄️'
-      default: return '📄'
+      case "authentication":
+        return "🔐";
+      case "user_management":
+        return "👥";
+      case "system":
+        return "⚙️";
+      case "api":
+        return "🔌";
+      case "database":
+        return "🗄️";
+      default:
+        return "📄";
     }
-  }
+  };
 
   // Define columns for the ViewManager
-  const columns: Column[] = React.useMemo(() => [
-    {
-      id: 'timestamp',
-      key: 'timestamp',
-      label: 'Time',
-      sortable: true,
-      render: (value) => {
-        const date = new Date(value as string)
-        return (
-          <div className="flex items-center space-x-2">
-            <Calendar className="h-4 w-4 text-muted-foreground" />
-            <div className="text-sm">
-              <div className="font-medium">{date.toLocaleDateString()}</div>
-              <div className="text-muted-foreground">{date.toLocaleTimeString()}</div>
+  const columns: Column[] = React.useMemo(
+    () => [
+      {
+        id: "timestamp",
+        key: "timestamp",
+        label: "Time",
+        sortable: true,
+        render: (value) => {
+          const date = new Date(value as string);
+          return (
+            <div className="flex items-center space-x-2">
+              <Calendar className="h-4 w-4 text-muted-foreground" />
+              <div className="text-sm">
+                <div className="font-medium">{date.toLocaleDateString()}</div>
+                <div className="text-muted-foreground">
+                  {date.toLocaleTimeString()}
+                </div>
+              </div>
             </div>
-          </div>
-        )
+          );
+        },
       },
-    },
-    {
-      id: 'level',
-      key: 'level',
-      label: 'Level',
-      sortable: true,
-      filterable: true,
-      type: 'select',
-      filterOptions: [
-        { label: 'Info', value: 'info' },
-        { label: 'Warning', value: 'warning' },
-        { label: 'Error', value: 'error' },
-        { label: 'Debug', value: 'debug' }
-      ],
-      render: (value) => {
-        const level = value as string
-        const config = getLevelConfig(level)
-        return (
-          <Badge variant={config.variant} className="capitalize">
-            {config.icon} {level}
+      {
+        id: "level",
+        key: "level",
+        label: "Level",
+        sortable: true,
+        filterable: true,
+        type: "select",
+        filterOptions: [
+          { label: "Info", value: "info" },
+          { label: "Warning", value: "warning" },
+          { label: "Error", value: "error" },
+          { label: "Debug", value: "debug" },
+        ],
+        render: (value) => {
+          const level = value as string;
+          const config = getLevelConfig(level);
+          return (
+            <Badge variant={config.variant} className="capitalize">
+              {config.icon} {level}
+            </Badge>
+          );
+        },
+      },
+      {
+        id: "category",
+        key: "category",
+        label: "Category",
+        sortable: true,
+        filterable: true,
+        type: "select",
+        filterOptions: [
+          { label: "Authentication", value: "authentication" },
+          { label: "User Management", value: "user_management" },
+          { label: "System", value: "system" },
+          { label: "API", value: "api" },
+          { label: "Database", value: "database" },
+        ],
+        render: (value) => {
+          const category = value as string;
+          const icon = getCategoryIcon(category);
+          return (
+            <div className="flex items-center gap-2">
+              <span>{icon}</span>
+              <span className="capitalize text-sm">
+                {category.replace("_", " ")}
+              </span>
+            </div>
+          );
+        },
+      },
+      {
+        id: "action",
+        key: "action",
+        label: "Action",
+        sortable: true,
+        searchable: true,
+        render: (value) => (
+          <Badge variant="outline" className="capitalize">
+            {(value as string).replace("_", " ")}
           </Badge>
-        )
+        ),
       },
-    },
-    {
-      id: 'category',
-      key: 'category',
-      label: 'Category',
-      sortable: true,
-      filterable: true,
-      type: 'select',
-      filterOptions: [
-        { label: 'Authentication', value: 'authentication' },
-        { label: 'User Management', value: 'user_management' },
-        { label: 'System', value: 'system' },
-        { label: 'API', value: 'api' },
-        { label: 'Database', value: 'database' }
-      ],
-      render: (value) => {
-        const category = value as string
-        const icon = getCategoryIcon(category)
-        return (
-          <div className="flex items-center gap-2">
-            <span>{icon}</span>
-            <span className="capitalize text-sm">
-              {category.replace('_', ' ')}
-            </span>
+      {
+        id: "description",
+        key: "description",
+        label: "Description",
+        searchable: true,
+        render: (value) => (
+          <div className="max-w-md">
+            <p className="text-sm font-medium truncate" title={value as string}>
+              {value as string}
+            </p>
           </div>
-        )
+        ),
       },
-    },
-    {
-      id: 'action',
-      key: 'action',
-      label: 'Action',
-      sortable: true,
-      searchable: true,
-      render: (value) => (
-        <Badge variant="outline" className="capitalize">
-          {(value as string).replace('_', ' ')}
-        </Badge>
-      ),
-    },
-    {
-      id: 'description',
-      key: 'description',
-      label: 'Description',
-      searchable: true,
-      render: (value) => (
-        <div className="max-w-md">
-          <p className="text-sm font-medium truncate" title={value as string}>
-            {value as string}
-          </p>
-        </div>
-      ),
-    },
-    {
-      id: 'user',
-      key: 'user',
-      label: 'User',
-      sortable: true,
-      render: (value) => {
-        const user = value as EventResponse['user']
-        return user ? (
-          <div className="text-sm">
-            <div className="font-medium">{user.username}</div>
-            <div className="text-muted-foreground">ID: {user.id}</div>
-          </div>
-        ) : (
-          <span className="text-muted-foreground">System</span>
-        )
+      {
+        id: "user",
+        key: "user",
+        label: "User",
+        sortable: true,
+        render: (value) => {
+          const user = value as EventResponse["user"];
+          return user ? (
+            <div className="text-sm">
+              <div className="font-medium">{user.username}</div>
+              <div className="text-muted-foreground">ID: {user.id}</div>
+            </div>
+          ) : (
+            <span className="text-muted-foreground">System</span>
+          );
+        },
       },
-    }
-  ], [])
+    ],
+    [],
+  );
 
   // Define sort options
-  const sortOptions: SortOption[] = React.useMemo(() => [
-    {
-      key: 'timestamp',
-      label: 'Time',
-      defaultOrder: 'desc'
-    },
-    {
-      key: 'level',
-      label: 'Level',
-      defaultOrder: 'desc'
-    },
-    {
-      key: 'category',
-      label: 'Category',
-      defaultOrder: 'asc'
-    },
-    {
-      key: 'action',
-      label: 'Action',
-      defaultOrder: 'asc'
-    }
-  ], [])
+  const sortOptions: SortOption[] = React.useMemo(
+    () => [
+      {
+        key: "timestamp",
+        label: "Time",
+        defaultOrder: "desc",
+      },
+      {
+        key: "level",
+        label: "Level",
+        defaultOrder: "desc",
+      },
+      {
+        key: "category",
+        label: "Category",
+        defaultOrder: "asc",
+      },
+      {
+        key: "action",
+        label: "Action",
+        defaultOrder: "asc",
+      },
+    ],
+    [],
+  );
 
   // Define group options
-  const groupOptions: GroupOption[] = React.useMemo(() => [
-    {
-      key: 'level',
-      label: 'Level',
-      icon: <AlertTriangle className="h-4 w-4" />
-    },
-    {
-      key: 'category',
-      label: 'Category',
-      icon: <Info className="h-4 w-4" />
-    }
-  ], [])
+  const groupOptions: GroupOption[] = React.useMemo(
+    () => [
+      {
+        key: "level",
+        label: "Level",
+        icon: <AlertTriangle className="h-4 w-4" />,
+      },
+      {
+        key: "category",
+        label: "Category",
+        icon: <Info className="h-4 w-4" />,
+      },
+    ],
+    [],
+  );
 
   // Define available views
-  const views: ViewConfig[] = React.useMemo(() => [
-    {
-      id: 'events-card',
-      name: 'Card View',
-      type: 'card',
-      columns,
-      filters: {},
-      sortBy: 'timestamp',
-      sortOrder: 'desc'
-    },
-    {
-      id: 'events-list',
-      name: 'List View',
-      type: 'list',
-      columns,
-      filters: {},
-      sortBy: 'timestamp',
-      sortOrder: 'desc'
-    },
-    {
-      id: 'events-kanban',
-      name: 'Kanban Board',
-      type: 'kanban',
-      columns,
-      filters: {},
-      groupBy: 'level'
-    }
-  ], [columns])
+  const views: ViewConfig[] = React.useMemo(
+    () => [
+      {
+        id: "events-card",
+        name: "Card View",
+        type: "card",
+        columns,
+        filters: {},
+        sortBy: "timestamp",
+        sortOrder: "desc",
+      },
+      {
+        id: "events-list",
+        name: "List View",
+        type: "list",
+        columns,
+        filters: {},
+        sortBy: "timestamp",
+        sortOrder: "desc",
+      },
+      {
+        id: "events-kanban",
+        name: "Kanban Board",
+        type: "kanban",
+        columns,
+        filters: {},
+        groupBy: "level",
+      },
+    ],
+    [columns],
+  );
 
   // Auto-refresh effect
   React.useEffect(() => {
-    if (!autoRefresh) return
+    if (!autoRefresh) return;
 
     const interval = setInterval(() => {
-      refetchEvents()
-    }, refreshInterval * 1000)
+      refetchEvents();
+    }, refreshInterval * 1000);
 
-    return () => clearInterval(interval)
-  }, [autoRefresh, refreshInterval, refetchEvents])
+    return () => clearInterval(interval);
+  }, [autoRefresh, refreshInterval, refetchEvents]);
 
   // Prepare data
   const events = React.useMemo(() => {
     return (eventsData?.data || []).map((event, index) => ({
       ...event,
-      id: (event as any).id || `event-${index}` // Ensure each event has an id
-    }))
-  }, [eventsData])
+      id: (event as any).id || `event-${index}`, // Ensure each event has an id
+    }));
+  }, [eventsData]);
 
   // Handle actions
   const handleViewEvent = (event: EventResponse) => {
-    setSelectedEvent(event)
-  }
+    setSelectedEvent(event);
+  };
 
   const handleExport = (format: string) => {
-    exportEvents({ format: format as "json" | "csv" })
-  }
+    exportEvents({ format: format as "json" | "csv" });
+  };
 
   const handleImport = () => {
-    console.log('Importing events');
+    console.log("Importing events");
     // TODO: Integrate with backend import API
-  }
+  };
 
   const bulkActions = [
     {
-      label: 'Mark as Reviewed',
+      label: "Mark as Reviewed",
       action: (items: EventResponse[]) => {
         console.log(`Marking ${items.length} events as reviewed`);
         // TODO: Integrate with backend API to mark as reviewed
       },
-      variant: 'default' as const
-    }
-  ]
+      variant: "default" as const,
+    },
+  ];
 
   if (eventsError) {
     return (
@@ -320,7 +364,7 @@ const EventsPage: React.FC<EventsPageProps> = () => {
           </AlertDescription>
         </Alert>
       </div>
-    )
+    );
   }
 
   return (
@@ -355,8 +399,10 @@ const EventsPage: React.FC<EventsPageProps> = () => {
                 size="sm"
                 onClick={() => setAutoRefresh(!autoRefresh)}
               >
-                <RefreshCw className={`h-4 w-4 mr-2 ${autoRefresh ? 'animate-spin' : ''}`} />
-                {autoRefresh ? 'Stop' : 'Auto'} Refresh
+                <RefreshCw
+                  className={`h-4 w-4 mr-2 ${autoRefresh ? "animate-spin" : ""}`}
+                />
+                {autoRefresh ? "Stop" : "Auto"} Refresh
               </Button>
               <Button
                 variant="outline"
@@ -364,7 +410,9 @@ const EventsPage: React.FC<EventsPageProps> = () => {
                 onClick={() => refetchEvents()}
                 disabled={eventsLoading}
               >
-                <RefreshCw className={`h-4 w-4 mr-2 ${eventsLoading ? 'animate-spin' : ''}`} />
+                <RefreshCw
+                  className={`h-4 w-4 mr-2 ${eventsLoading ? "animate-spin" : ""}`}
+                />
                 Refresh
               </Button>
             </div>
@@ -378,19 +426,19 @@ const EventsPage: React.FC<EventsPageProps> = () => {
             </div>
             <div className="text-center p-3 border rounded-lg">
               <div className="text-2xl font-bold text-red-600">
-                {events.filter(e => e.level === 'error').length}
+                {events.filter((e) => e.level === "error").length}
               </div>
               <div className="text-sm text-muted-foreground">Errors</div>
             </div>
             <div className="text-center p-3 border rounded-lg">
               <div className="text-2xl font-bold text-yellow-600">
-                {events.filter(e => e.level === 'warning').length}
+                {events.filter((e) => e.level === "warning").length}
               </div>
               <div className="text-sm text-muted-foreground">Warnings</div>
             </div>
             <div className="text-center p-3 border rounded-lg">
               <div className="text-2xl font-bold text-blue-600">
-                {events.filter(e => e.level === 'info').length}
+                {events.filter((e) => e.level === "info").length}
               </div>
               <div className="text-sm text-muted-foreground">Info</div>
             </div>
@@ -408,7 +456,11 @@ const EventsPage: React.FC<EventsPageProps> = () => {
         activeView={activeView}
         onViewChange={setActiveView}
         loading={eventsLoading}
-        error={eventsError ? (eventsError as any).message || String(eventsError) : null}
+        error={
+          eventsError
+            ? (eventsError as any).message || String(eventsError)
+            : null
+        }
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
         filters={filters}
@@ -416,8 +468,8 @@ const EventsPage: React.FC<EventsPageProps> = () => {
         sortBy={sortBy}
         sortOrder={sortOrder}
         onSortChange={(field, order) => {
-          setSortBy(field)
-          setSortOrder(order)
+          setSortBy(field);
+          setSortOrder(order);
         }}
         sortOptions={sortOptions}
         groupBy={groupBy}
@@ -446,7 +498,7 @@ const EventsPage: React.FC<EventsPageProps> = () => {
         />
       )}
     </div>
-  )
-}
+  );
+};
 
-export default EventsPage
+export default EventsPage;

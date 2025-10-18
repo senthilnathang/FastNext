@@ -1,12 +1,13 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { z } from "zod"
-import { Loader2 } from "lucide-react"
-
-import { Button } from "@/shared/components/ui/button"
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Loader2 } from "lucide-react";
+import * as React from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { useRoles } from "@/modules/admin/hooks/useRoles";
+import { useUpdateUser } from "@/modules/admin/hooks/useUsers";
+import { Button } from "@/shared/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -14,7 +15,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/shared/components/ui/dialog"
+} from "@/shared/components/ui/dialog";
 import {
   Form,
   FormControl,
@@ -23,20 +24,17 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/shared/components/ui/form"
-import { Input } from "@/shared/components/ui/input"
-import { Switch } from "@/shared/components/ui/switch"
+} from "@/shared/components/ui/form";
+import { Input } from "@/shared/components/ui/input";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/shared/components/ui/select"
-
-import { useUpdateUser } from "@/modules/admin/hooks/useUsers"
-import { useRoles } from "@/modules/admin/hooks/useRoles"
-import type { User } from "@/shared/services/api/users"
+} from "@/shared/components/ui/select";
+import { Switch } from "@/shared/components/ui/switch";
+import type { User } from "@/shared/services/api/users";
 
 // Validation schema
 const userEditSchema = z.object({
@@ -50,19 +48,25 @@ const userEditSchema = z.object({
   location: z.string().optional(),
   website: z.string().url("Invalid URL").optional().or(z.literal("")),
   role_id: z.number().optional(),
-})
+});
 
-type UserEditFormData = z.infer<typeof userEditSchema>
+type UserEditFormData = z.infer<typeof userEditSchema>;
 
 interface UserEditDialogProps {
-  user: User | null
-  open: boolean
-  onOpenChange: (open: boolean) => void
+  user: User | null;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
 }
 
-export function UserEditDialog({ user, open, onOpenChange }: UserEditDialogProps) {
-  const { data: rolesData, isLoading: rolesLoading } = useRoles({ active_only: true })
-  const updateUserMutation = useUpdateUser()
+export function UserEditDialog({
+  user,
+  open,
+  onOpenChange,
+}: UserEditDialogProps) {
+  const { data: rolesData, isLoading: rolesLoading } = useRoles({
+    active_only: true,
+  });
+  const updateUserMutation = useUpdateUser();
 
   const form = useForm<UserEditFormData>({
     resolver: zodResolver(userEditSchema),
@@ -78,7 +82,7 @@ export function UserEditDialog({ user, open, onOpenChange }: UserEditDialogProps
       website: "",
       role_id: undefined,
     },
-  })
+  });
 
   // Reset form when user changes
   React.useEffect(() => {
@@ -94,12 +98,12 @@ export function UserEditDialog({ user, open, onOpenChange }: UserEditDialogProps
         location: user.location || "",
         website: user.website || "",
         role_id: user.roles?.[0] ? parseInt(user.roles[0]) : undefined,
-      })
+      });
     }
-  }, [user, form])
+  }, [user, form]);
 
   const onSubmit = async (data: UserEditFormData) => {
-    if (!user || !user.id) return
+    if (!user || !user.id) return;
 
     try {
       await updateUserMutation.mutateAsync({
@@ -107,17 +111,17 @@ export function UserEditDialog({ user, open, onOpenChange }: UserEditDialogProps
         data: {
           ...data,
           website: data.website || undefined,
-        }
-      })
-      onOpenChange(false)
+        },
+      });
+      onOpenChange(false);
     } catch (error) {
       // Error is handled by the mutation
-      console.error("Failed to update user:", error)
+      console.error("Failed to update user:", error);
     }
-  }
+  };
 
-  const roles = rolesData?.items || []
-  const isSubmitting = updateUserMutation.isPending
+  const roles = rolesData?.items || [];
+  const isSubmitting = updateUserMutation.isPending;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -125,7 +129,8 @@ export function UserEditDialog({ user, open, onOpenChange }: UserEditDialogProps
         <DialogHeader>
           <DialogTitle>Edit User</DialogTitle>
           <DialogDescription>
-            Update user information and permissions. Changes will be applied immediately.
+            Update user information and permissions. Changes will be applied
+            immediately.
           </DialogDescription>
         </DialogHeader>
 
@@ -183,7 +188,9 @@ export function UserEditDialog({ user, open, onOpenChange }: UserEditDialogProps
                   <FormLabel>Role</FormLabel>
                   <Select
                     disabled={isSubmitting || rolesLoading}
-                    onValueChange={(value) => field.onChange(value ? parseInt(value) : undefined)}
+                    onValueChange={(value) =>
+                      field.onChange(value ? parseInt(value) : undefined)
+                    }
                     value={field.value?.toString()}
                   >
                     <FormControl>
@@ -193,13 +200,17 @@ export function UserEditDialog({ user, open, onOpenChange }: UserEditDialogProps
                     </FormControl>
                     <SelectContent>
                       <SelectItem value="none">No role</SelectItem>
-                      {roles.map((role) => (
-                        role.id && (
-                          <SelectItem key={role.id} value={role.id.toString()}>
-                            {role.name}
-                          </SelectItem>
-                        )
-                      ))}
+                      {roles.map(
+                        (role) =>
+                          role.id && (
+                            <SelectItem
+                              key={role.id}
+                              value={role.id.toString()}
+                            >
+                              {role.name}
+                            </SelectItem>
+                          ),
+                      )}
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -215,7 +226,11 @@ export function UserEditDialog({ user, open, onOpenChange }: UserEditDialogProps
                   <FormItem>
                     <FormLabel>Location</FormLabel>
                     <FormControl>
-                      <Input {...field} placeholder="e.g., San Francisco, CA" disabled={isSubmitting} />
+                      <Input
+                        {...field}
+                        placeholder="e.g., San Francisco, CA"
+                        disabled={isSubmitting}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -229,7 +244,11 @@ export function UserEditDialog({ user, open, onOpenChange }: UserEditDialogProps
                   <FormItem>
                     <FormLabel>Website</FormLabel>
                     <FormControl>
-                      <Input {...field} placeholder="https://example.com" disabled={isSubmitting} />
+                      <Input
+                        {...field}
+                        placeholder="https://example.com"
+                        disabled={isSubmitting}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -244,7 +263,11 @@ export function UserEditDialog({ user, open, onOpenChange }: UserEditDialogProps
                 <FormItem>
                   <FormLabel>Bio</FormLabel>
                   <FormControl>
-                    <Input {...field} placeholder="Brief description..." disabled={isSubmitting} />
+                    <Input
+                      {...field}
+                      placeholder="Brief description..."
+                      disabled={isSubmitting}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -261,7 +284,9 @@ export function UserEditDialog({ user, open, onOpenChange }: UserEditDialogProps
                   render={({ field }) => (
                     <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
                       <div className="space-y-0.5">
-                        <FormLabel className="text-base font-medium">Active</FormLabel>
+                        <FormLabel className="text-base font-medium">
+                          Active
+                        </FormLabel>
                         <FormDescription className="text-sm">
                           User can log in
                         </FormDescription>
@@ -283,7 +308,9 @@ export function UserEditDialog({ user, open, onOpenChange }: UserEditDialogProps
                   render={({ field }) => (
                     <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
                       <div className="space-y-0.5">
-                        <FormLabel className="text-base font-medium">Verified</FormLabel>
+                        <FormLabel className="text-base font-medium">
+                          Verified
+                        </FormLabel>
                         <FormDescription className="text-sm">
                           Email verified
                         </FormDescription>
@@ -305,7 +332,9 @@ export function UserEditDialog({ user, open, onOpenChange }: UserEditDialogProps
                   render={({ field }) => (
                     <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
                       <div className="space-y-0.5">
-                        <FormLabel className="text-base font-medium">Superuser</FormLabel>
+                        <FormLabel className="text-base font-medium">
+                          Superuser
+                        </FormLabel>
                         <FormDescription className="text-sm">
                           Full access
                         </FormDescription>
@@ -333,7 +362,9 @@ export function UserEditDialog({ user, open, onOpenChange }: UserEditDialogProps
                 Cancel
               </Button>
               <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {isSubmitting && (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                )}
                 {isSubmitting ? "Updating..." : "Update User"}
               </Button>
             </DialogFooter>
@@ -341,5 +372,5 @@ export function UserEditDialog({ user, open, onOpenChange }: UserEditDialogProps
         </Form>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
-import { useAuth } from '@/modules/auth';
-import { apiClient } from '@/shared/services/api/client';
+import { useEffect, useState } from "react";
+import { useAuth } from "@/modules/auth";
+import { apiClient } from "@/shared/services/api/client";
 
 interface PushSubscriptionData {
   endpoint: string;
@@ -14,11 +14,13 @@ export function usePushNotifications() {
   const { user } = useAuth();
   const [isSupported, setIsSupported] = useState(false);
   const [isSubscribed, setIsSubscribed] = useState(false);
-  const [subscription, setSubscription] = useState<PushSubscription | null>(null);
+  const [subscription, setSubscription] = useState<PushSubscription | null>(
+    null,
+  );
 
   useEffect(() => {
     // Check if push notifications are supported
-    if ('serviceWorker' in navigator && 'PushManager' in window) {
+    if ("serviceWorker" in navigator && "PushManager" in window) {
       setIsSupported(true);
     }
   }, []);
@@ -33,14 +35,15 @@ export function usePushNotifications() {
   const checkSubscriptionStatus = async () => {
     try {
       const registration = await navigator.serviceWorker.ready;
-      const existingSubscription = await registration.pushManager.getSubscription();
+      const existingSubscription =
+        await registration.pushManager.getSubscription();
 
       if (existingSubscription) {
         setSubscription(existingSubscription);
         setIsSubscribed(true);
       }
     } catch (error) {
-      console.error('Error checking subscription status:', error);
+      console.error("Error checking subscription status:", error);
     }
   };
 
@@ -52,20 +55,20 @@ export function usePushNotifications() {
 
       // Request permission first
       const permission = await Notification.requestPermission();
-      if (permission !== 'granted') {
-        throw new Error('Notification permission denied');
+      if (permission !== "granted") {
+        throw new Error("Notification permission denied");
       }
 
       // Get VAPID public key from environment
       const vapidPublicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
       if (!vapidPublicKey) {
-        throw new Error('VAPID public key not configured');
+        throw new Error("VAPID public key not configured");
       }
 
       // Subscribe to push notifications
       const pushSubscription = await registration.pushManager.subscribe({
         userVisibleOnly: true,
-        applicationServerKey: urlBase64ToUint8Array(vapidPublicKey)
+        applicationServerKey: urlBase64ToUint8Array(vapidPublicKey),
       });
 
       setSubscription(pushSubscription);
@@ -76,7 +79,7 @@ export function usePushNotifications() {
 
       return pushSubscription;
     } catch (error) {
-      console.error('Error subscribing to push notifications:', error);
+      console.error("Error subscribing to push notifications:", error);
       throw error;
     }
   };
@@ -92,7 +95,7 @@ export function usePushNotifications() {
       // Remove subscription from backend
       await removeSubscriptionFromBackend();
     } catch (error) {
-      console.error('Error unsubscribing from push notifications:', error);
+      console.error("Error unsubscribing from push notifications:", error);
     }
   };
 
@@ -100,32 +103,38 @@ export function usePushNotifications() {
     const subscriptionData: PushSubscriptionData = {
       endpoint: subscription.endpoint,
       keys: {
-        p256dh: btoa(String.fromCharCode(...new Uint8Array(subscription.getKey('p256dh')!))),
-        auth: btoa(String.fromCharCode(...new Uint8Array(subscription.getKey('auth')!)))
-      }
+        p256dh: btoa(
+          String.fromCharCode(
+            ...new Uint8Array(subscription.getKey("p256dh")!),
+          ),
+        ),
+        auth: btoa(
+          String.fromCharCode(...new Uint8Array(subscription.getKey("auth")!)),
+        ),
+      },
     };
 
-    await apiClient.post('/api/v1/notifications/subscribe', subscriptionData);
+    await apiClient.post("/api/v1/notifications/subscribe", subscriptionData);
   };
 
   const removeSubscriptionFromBackend = async () => {
-    await apiClient.post('/api/v1/notifications/unsubscribe', { endpoint: subscription?.endpoint });
+    await apiClient.post("/api/v1/notifications/unsubscribe", {
+      endpoint: subscription?.endpoint,
+    });
   };
 
   return {
     isSupported,
     isSubscribed,
     subscribe,
-    unsubscribe
+    unsubscribe,
   };
 }
 
 // Utility function to convert VAPID key
 function urlBase64ToUint8Array(base64String: string) {
-  const padding = '='.repeat((4 - base64String.length % 4) % 4);
-  const base64 = (base64String + padding)
-    .replace(/-/g, '+')
-    .replace(/_/g, '/');
+  const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
+  const base64 = (base64String + padding).replace(/-/g, "+").replace(/_/g, "/");
 
   const rawData = window.atob(base64);
   const outputArray = new Uint8Array(rawData.length);

@@ -1,128 +1,148 @@
-"use client"
+"use client";
 
-import { useEffect, useState } from 'react'
-import { Wifi, WifiOff, RefreshCw, Home, Database, Settings } from 'lucide-react'
-import { Button } from '@/shared/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/components/ui/card'
-import { Badge } from '@/shared/components/ui/badge'
-import { Alert, AlertDescription } from '@/shared/components/ui/alert'
+import {
+  Database,
+  Home,
+  RefreshCw,
+  Settings,
+  Wifi,
+  WifiOff,
+} from "lucide-react";
+import { useEffect, useState } from "react";
+import { Alert, AlertDescription } from "@/shared/components/ui/alert";
+import { Badge } from "@/shared/components/ui/badge";
+import { Button } from "@/shared/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/shared/components/ui/card";
 
 export default function OfflinePage() {
-  const [isOnline, setIsOnline] = useState(true)
-  const [lastUpdate, setLastUpdate] = useState<string>('')
-  const [queuedActions, setQueuedActions] = useState(0)
-  const [cacheStatus, setCacheStatus] = useState<any>(null)
+  const [isOnline, setIsOnline] = useState(true);
+  const [lastUpdate, setLastUpdate] = useState<string>("");
+  const [queuedActions, setQueuedActions] = useState(0);
+  const [cacheStatus, setCacheStatus] = useState<any>(null);
 
   useEffect(() => {
     // Check online status
-    setIsOnline(navigator.onLine)
-    setLastUpdate(new Date().toLocaleString())
+    setIsOnline(navigator.onLine);
+    setLastUpdate(new Date().toLocaleString());
 
     // Listen for online/offline events
-    const handleOnline = () => setIsOnline(true)
-    const handleOffline = () => setIsOnline(false)
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
 
-    window.addEventListener('online', handleOnline)
-    window.addEventListener('offline', handleOffline)
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
 
     // Listen for service worker messages
-    navigator.serviceWorker?.addEventListener('message', (event) => {
-      const { type, data } = event.data
+    navigator.serviceWorker?.addEventListener("message", (event) => {
+      const { type, data } = event.data;
 
       switch (type) {
-        case 'REQUEST_QUEUED':
-          setQueuedActions(data.count)
-          break
-        case 'SYNC_COMPLETE':
-          setQueuedActions(0)
-          break
+        case "REQUEST_QUEUED":
+          setQueuedActions(data.count);
+          break;
+        case "SYNC_COMPLETE":
+          setQueuedActions(0);
+          break;
       }
-    })
+    });
 
     // Get cache status
-    getCacheStatus()
+    getCacheStatus();
 
     return () => {
-      window.removeEventListener('online', handleOnline)
-      window.removeEventListener('offline', handleOffline)
-    }
-  }, [])
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
+    };
+  }, []);
 
   const getCacheStatus = async () => {
-    if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+    if ("serviceWorker" in navigator && navigator.serviceWorker.controller) {
       try {
-        const channel = new MessageChannel()
+        const channel = new MessageChannel();
         navigator.serviceWorker.controller.postMessage(
-          { type: 'GET_CACHE_STATUS' },
-          [channel.port2]
-        )
+          { type: "GET_CACHE_STATUS" },
+          [channel.port2],
+        );
 
         channel.port1.onmessage = (event) => {
-          setCacheStatus(event.data)
-        }
+          setCacheStatus(event.data);
+        };
       } catch (error) {
-        console.error('Failed to get cache status:', error)
+        console.error("Failed to get cache status:", error);
       }
     }
-  }
+  };
 
   const handleRetry = () => {
     if (isOnline) {
-      window.location.reload()
+      window.location.reload();
     } else {
       // Attempt to reconnect
-      fetch('/api/health')
+      fetch("/api/health")
         .then(() => {
-          window.location.reload()
+          window.location.reload();
         })
-        .catch(() => {
-        })
+        .catch(() => {});
     }
-  }
+  };
 
   const clearCache = async () => {
-    if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+    if ("serviceWorker" in navigator && navigator.serviceWorker.controller) {
       try {
-        const channel = new MessageChannel()
+        const channel = new MessageChannel();
         navigator.serviceWorker.controller.postMessage(
-          { type: 'CLEAR_CACHE' },
-          [channel.port2]
-        )
+          { type: "CLEAR_CACHE" },
+          [channel.port2],
+        );
 
         channel.port1.onmessage = (event) => {
           if (event.data.success) {
-            window.location.reload()
+            window.location.reload();
           }
-        }
+        };
       } catch (error) {
-        console.error('Failed to clear cache:', error)
+        console.error("Failed to clear cache:", error);
       }
     }
-  }
+  };
 
   const offlineFeatures = [
     {
-      title: 'Cached Pages',
-      description: 'View previously loaded pages',
+      title: "Cached Pages",
+      description: "View previously loaded pages",
       icon: Database,
       available: true,
-      items: ['Dashboard', 'User Management', 'Settings', 'Workflow Builder']
+      items: ["Dashboard", "User Management", "Settings", "Workflow Builder"],
     },
     {
-      title: 'Queued Actions',
-      description: 'Actions saved for when you\'re back online',
+      title: "Queued Actions",
+      description: "Actions saved for when you're back online",
       icon: RefreshCw,
       available: queuedActions > 0,
-      items: queuedActions > 0 ? [`${queuedActions} pending actions`] : ['No pending actions']
+      items:
+        queuedActions > 0
+          ? [`${queuedActions} pending actions`]
+          : ["No pending actions"],
     },
     {
-      title: 'Local Data',
-      description: 'Access to cached data and forms',
+      title: "Local Data",
+      description: "Access to cached data and forms",
       icon: Settings,
       available: true,
-      items: ['Form drafts', 'Recent searches', 'User preferences', 'Import templates']
-    }
-  ]
+      items: [
+        "Form drafts",
+        "Recent searches",
+        "User preferences",
+        "Import templates",
+      ],
+    },
+  ];
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center p-4">
@@ -143,19 +163,18 @@ export default function OfflinePage() {
 
           <div>
             <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-              {isOnline ? 'Connection Restored' : 'You\'re Offline'}
+              {isOnline ? "Connection Restored" : "You're Offline"}
             </h1>
             <p className="text-lg text-gray-600 dark:text-gray-400 mt-2">
               {isOnline
-                ? 'Your internet connection has been restored. Click retry to reload the page.'
-                : 'No internet connection detected. You can still access cached content and features.'
-              }
+                ? "Your internet connection has been restored. Click retry to reload the page."
+                : "No internet connection detected. You can still access cached content and features."}
             </p>
           </div>
 
           <div className="flex items-center justify-center space-x-4">
             <Badge variant={isOnline ? "default" : "secondary"}>
-              {isOnline ? 'Online' : 'Offline'}
+              {isOnline ? "Online" : "Offline"}
             </Badge>
             <span className="text-sm text-gray-500">
               Last update: {lastUpdate}
@@ -164,18 +183,28 @@ export default function OfflinePage() {
         </div>
 
         {/* Connection Status */}
-        <Alert className={isOnline ? "border-green-200 bg-green-50" : "border-yellow-200 bg-yellow-50"}>
+        <Alert
+          className={
+            isOnline
+              ? "border-green-200 bg-green-50"
+              : "border-yellow-200 bg-yellow-50"
+          }
+        >
           <AlertDescription>
             {isOnline ? (
               <div className="flex items-center space-x-2">
                 <Wifi className="h-4 w-4 text-green-600" />
-                <span>Connection restored. You can now access all features normally.</span>
+                <span>
+                  Connection restored. You can now access all features normally.
+                </span>
               </div>
             ) : (
               <div className="flex items-center space-x-2">
                 <WifiOff className="h-4 w-4 text-yellow-600" />
                 <span>
-                  You&apos;re currently offline. FastNext will continue to work with cached data and queue actions for when you&apos;re back online.
+                  You&apos;re currently offline. FastNext will continue to work
+                  with cached data and queue actions for when you&apos;re back
+                  online.
                 </span>
               </div>
             )}
@@ -189,21 +218,28 @@ export default function OfflinePage() {
           </h2>
 
           {offlineFeatures.map((feature, index) => {
-            const Icon = feature.icon
+            const Icon = feature.icon;
             return (
-              <Card key={index} className={feature.available ? '' : 'opacity-60'}>
+              <Card
+                key={index}
+                className={feature.available ? "" : "opacity-60"}
+              >
                 <CardHeader className="pb-3">
                   <div className="flex items-center space-x-3">
-                    <div className={`p-2 rounded-lg ${
-                      feature.available
-                        ? 'bg-blue-100 dark:bg-blue-900/20'
-                        : 'bg-gray-100 dark:bg-gray-800'
-                    }`}>
-                      <Icon className={`h-5 w-5 ${
+                    <div
+                      className={`p-2 rounded-lg ${
                         feature.available
-                          ? 'text-blue-600 dark:text-blue-400'
-                          : 'text-gray-400'
-                      }`} />
+                          ? "bg-blue-100 dark:bg-blue-900/20"
+                          : "bg-gray-100 dark:bg-gray-800"
+                      }`}
+                    >
+                      <Icon
+                        className={`h-5 w-5 ${
+                          feature.available
+                            ? "text-blue-600 dark:text-blue-400"
+                            : "text-gray-400"
+                        }`}
+                      />
                     </div>
                     <div>
                       <CardTitle className="text-lg">{feature.title}</CardTitle>
@@ -214,17 +250,24 @@ export default function OfflinePage() {
                 <CardContent>
                   <ul className="space-y-1">
                     {feature.items.map((item, itemIndex) => (
-                      <li key={itemIndex} className="flex items-center space-x-2 text-sm">
-                        <div className={`h-1.5 w-1.5 rounded-full ${
-                          feature.available ? 'bg-green-500' : 'bg-gray-400'
-                        }`} />
-                        <span className="text-gray-600 dark:text-gray-400">{item}</span>
+                      <li
+                        key={itemIndex}
+                        className="flex items-center space-x-2 text-sm"
+                      >
+                        <div
+                          className={`h-1.5 w-1.5 rounded-full ${
+                            feature.available ? "bg-green-500" : "bg-gray-400"
+                          }`}
+                        />
+                        <span className="text-gray-600 dark:text-gray-400">
+                          {item}
+                        </span>
                       </li>
                     ))}
                   </ul>
                 </CardContent>
               </Card>
-            )
+            );
           })}
         </div>
 
@@ -240,23 +283,32 @@ export default function OfflinePage() {
                 <div>
                   <span className="font-medium">Cached Resources:</span>
                   <div className="text-gray-600 dark:text-gray-400">
-                    {Object.entries(cacheStatus.caches || {}).map(([name, count]) => (
-                      <div key={name} className="flex justify-between">
-                        <span>{name.replace('fastnext-', '').replace('-v1.2.0', '')}:</span>
-                        <span>{String(count)} items</span>
-                      </div>
-                    ))}
+                    {Object.entries(cacheStatus.caches || {}).map(
+                      ([name, count]) => (
+                        <div key={name} className="flex justify-between">
+                          <span>
+                            {name
+                              .replace("fastnext-", "")
+                              .replace("-v1.2.0", "")}
+                            :
+                          </span>
+                          <span>{String(count)} items</span>
+                        </div>
+                      ),
+                    )}
                   </div>
                 </div>
                 <div>
                   <span className="font-medium">Queued Requests:</span>
                   <div className="text-gray-600 dark:text-gray-400">
-                    {Object.entries(cacheStatus.queuedRequests || {}).map(([queue, requests]) => (
-                      <div key={queue} className="flex justify-between">
-                        <span>{queue.replace('-queue', '')}:</span>
-                        <span>{(requests as any[]).length} pending</span>
-                      </div>
-                    ))}
+                    {Object.entries(cacheStatus.queuedRequests || {}).map(
+                      ([queue, requests]) => (
+                        <div key={queue} className="flex justify-between">
+                          <span>{queue.replace("-queue", "")}:</span>
+                          <span>{(requests as any[]).length} pending</span>
+                        </div>
+                      ),
+                    )}
                   </div>
                 </div>
               </div>
@@ -268,12 +320,12 @@ export default function OfflinePage() {
         <div className="flex space-x-4">
           <Button onClick={handleRetry} className="flex-1">
             <RefreshCw className="h-4 w-4 mr-2" />
-            {isOnline ? 'Reload Page' : 'Retry Connection'}
+            {isOnline ? "Reload Page" : "Retry Connection"}
           </Button>
 
           <Button
             variant="outline"
-            onClick={() => window.location.href = '/'}
+            onClick={() => (window.location.href = "/")}
             className="flex-1"
           >
             <Home className="h-4 w-4 mr-2" />
@@ -294,5 +346,5 @@ export default function OfflinePage() {
         </div>
       </div>
     </div>
-  )
+  );
 }

@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import React from 'react';
+import type React from "react";
 
 export default function ConfigurationLayout({
   children,
@@ -11,9 +11,7 @@ export default function ConfigurationLayout({
     <div className="flex min-h-screen">
       {/* Main Content */}
       <div className="flex-1">
-        <div className="p-8">
-          {children}
-        </div>
+        <div className="p-8">{children}</div>
       </div>
     </div>
   );

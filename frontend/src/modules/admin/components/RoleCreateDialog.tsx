@@ -1,13 +1,16 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { z } from "zod"
-import { Loader2 } from "lucide-react"
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Loader2 } from "lucide-react";
+import * as React from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { usePermissions } from "@/modules/admin/hooks/usePermissions";
 
+import { useCreateRole } from "@/modules/admin/hooks/useRoles";
 import {
   Button,
+  Checkbox,
   Dialog,
   DialogContent,
   DialogDescription,
@@ -23,29 +26,29 @@ import {
   FormMessage,
   Input,
   Textarea,
-  Checkbox
-} from "@/shared/components"
-
-import { useCreateRole } from "@/modules/admin/hooks/useRoles"
-import { usePermissions } from "@/modules/admin/hooks/usePermissions"
-import type { Permission } from "@/shared/services/api/permissions"
+} from "@/shared/components";
+import type { Permission } from "@/shared/services/api/permissions";
 
 const roleCreateSchema = z.object({
   name: z.string().min(2, "Role name must be at least 2 characters"),
   description: z.string().optional(),
   permissions: z.array(z.number()),
-})
+});
 
-type RoleCreateFormData = z.infer<typeof roleCreateSchema>
+type RoleCreateFormData = z.infer<typeof roleCreateSchema>;
 
 interface RoleCreateDialogProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
 }
 
-export function RoleCreateDialog({ open, onOpenChange }: RoleCreateDialogProps) {
-  const createRoleMutation = useCreateRole()
-  const { data: permissionsData, isLoading: permissionsLoading } = usePermissions()
+export function RoleCreateDialog({
+  open,
+  onOpenChange,
+}: RoleCreateDialogProps) {
+  const createRoleMutation = useCreateRole();
+  const { data: permissionsData, isLoading: permissionsLoading } =
+    usePermissions();
 
   const form = useForm<RoleCreateFormData>({
     resolver: zodResolver(roleCreateSchema),
@@ -54,13 +57,13 @@ export function RoleCreateDialog({ open, onOpenChange }: RoleCreateDialogProps) 
       description: "",
       permissions: [],
     },
-  })
+  });
 
   React.useEffect(() => {
     if (!open) {
-      form.reset()
+      form.reset();
     }
-  }, [open, form])
+  }, [open, form]);
 
   const onSubmit = async (data: RoleCreateFormData) => {
     try {
@@ -68,35 +71,41 @@ export function RoleCreateDialog({ open, onOpenChange }: RoleCreateDialogProps) 
         name: data.name,
         description: data.description || undefined,
         permissions: data.permissions,
-      })
-      onOpenChange(false)
+      });
+      onOpenChange(false);
     } catch (error) {
       // Error is handled by the mutation
-      console.error("Failed to create role:", error)
+      console.error("Failed to create role:", error);
     }
-  }
+  };
 
-  const permissions = permissionsData?.items || []
-  const isSubmitting = createRoleMutation.isPending
+  const permissions = permissionsData?.items || [];
+  const isSubmitting = createRoleMutation.isPending;
 
   // Group permissions by category
-  const groupedPermissions = permissions.reduce((acc, permission) => {
-    const category = permission.category || 'uncategorized'
-    if (!acc[category]) {
-      acc[category] = []
-    }
-    acc[category].push(permission)
-    return acc
-  }, {} as Record<string, Permission[]>)
+  const groupedPermissions = permissions.reduce(
+    (acc, permission) => {
+      const category = permission.category || "uncategorized";
+      if (!acc[category]) {
+        acc[category] = [];
+      }
+      acc[category].push(permission);
+      return acc;
+    },
+    {} as Record<string, Permission[]>,
+  );
 
   const handlePermissionChange = (permissionId: number, checked: boolean) => {
-    const currentPermissions = form.getValues("permissions")
+    const currentPermissions = form.getValues("permissions");
     if (checked) {
-      form.setValue("permissions", [...currentPermissions, permissionId])
+      form.setValue("permissions", [...currentPermissions, permissionId]);
     } else {
-      form.setValue("permissions", currentPermissions.filter(id => id !== permissionId))
+      form.setValue(
+        "permissions",
+        currentPermissions.filter((id) => id !== permissionId),
+      );
     }
-  }
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -104,7 +113,8 @@ export function RoleCreateDialog({ open, onOpenChange }: RoleCreateDialogProps) 
         <DialogHeader>
           <DialogTitle>Create New Role</DialogTitle>
           <DialogDescription>
-            Create a new role and assign permissions to define what users with this role can do.
+            Create a new role and assign permissions to define what users with
+            this role can do.
           </DialogDescription>
         </DialogHeader>
 
@@ -162,44 +172,58 @@ export function RoleCreateDialog({ open, onOpenChange }: RoleCreateDialogProps) 
                   {permissionsLoading ? (
                     <div className="flex items-center gap-2 py-4">
                       <Loader2 className="h-4 w-4 animate-spin" />
-                      <span className="text-sm text-muted-foreground">Loading permissions...</span>
+                      <span className="text-sm text-muted-foreground">
+                        Loading permissions...
+                      </span>
                     </div>
                   ) : (
                     <div className="space-y-4 max-h-60 overflow-y-auto border rounded-md p-3">
-                      {Object.entries(groupedPermissions).map(([category, categoryPermissions]) => (
-                        <div key={category} className="space-y-2">
-                          <h4 className="font-medium text-sm text-foreground capitalize">
-                            {category}
-                          </h4>
-                          <div className="space-y-2 pl-4">
-                            {categoryPermissions.filter(p => p.id !== undefined).map((permission) => (
-                              <div key={permission.id} className="flex items-start space-x-2">
-                                <Checkbox
-                                  id={`permission-${permission.id}`}
-                                  checked={field.value.includes(permission.id!)}
-                                  onCheckedChange={(checked) =>
-                                    handlePermissionChange(permission.id!, checked as boolean)
-                                  }
-                                  disabled={isSubmitting}
-                                />
-                                <div className="grid gap-1.5 leading-none">
-                                  <label
-                                    htmlFor={`permission-${permission.id}`}
-                                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                      {Object.entries(groupedPermissions).map(
+                        ([category, categoryPermissions]) => (
+                          <div key={category} className="space-y-2">
+                            <h4 className="font-medium text-sm text-foreground capitalize">
+                              {category}
+                            </h4>
+                            <div className="space-y-2 pl-4">
+                              {categoryPermissions
+                                .filter((p) => p.id !== undefined)
+                                .map((permission) => (
+                                  <div
+                                    key={permission.id}
+                                    className="flex items-start space-x-2"
                                   >
-                                    {permission.name}
-                                  </label>
-                                  {permission.description && (
-                                    <p className="text-xs text-muted-foreground">
-                                      {permission.description}
-                                    </p>
-                                  )}
-                                </div>
-                              </div>
-                            ))}
+                                    <Checkbox
+                                      id={`permission-${permission.id}`}
+                                      checked={field.value.includes(
+                                        permission.id!,
+                                      )}
+                                      onCheckedChange={(checked) =>
+                                        handlePermissionChange(
+                                          permission.id!,
+                                          checked as boolean,
+                                        )
+                                      }
+                                      disabled={isSubmitting}
+                                    />
+                                    <div className="grid gap-1.5 leading-none">
+                                      <label
+                                        htmlFor={`permission-${permission.id}`}
+                                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                                      >
+                                        {permission.name}
+                                      </label>
+                                      {permission.description && (
+                                        <p className="text-xs text-muted-foreground">
+                                          {permission.description}
+                                        </p>
+                                      )}
+                                    </div>
+                                  </div>
+                                ))}
+                            </div>
                           </div>
-                        </div>
-                      ))}
+                        ),
+                      )}
                       {permissions.length === 0 && (
                         <p className="text-sm text-muted-foreground text-center py-4">
                           No permissions available
@@ -221,11 +245,10 @@ export function RoleCreateDialog({ open, onOpenChange }: RoleCreateDialogProps) 
               >
                 Cancel
               </Button>
-              <Button
-                type="submit"
-                disabled={isSubmitting}
-              >
-                {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting && (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                )}
                 {isSubmitting ? "Creating..." : "Create Role"}
               </Button>
             </DialogFooter>
@@ -233,5 +256,5 @@ export function RoleCreateDialog({ open, onOpenChange }: RoleCreateDialogProps) 
         </Form>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

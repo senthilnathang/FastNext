@@ -20,10 +20,10 @@
   "files": {
     "includes": [
       "**",
-      "!**/.next/**",
-      "!**/node_modules/**",
-      "!**/.storybook/**",
-      "!**/dist/**"
+      "!**/.next",
+      "!**/node_modules",
+      "!**/.storybook",
+      "!**/dist"
     ]
   }
 }

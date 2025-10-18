@@ -231,7 +231,10 @@ export function FormatSelector({
           <div className="space-y-3">
             <h4 className="text-sm font-medium">CSV Options</h4>
             <div className="space-y-2">
-              <Label htmlFor={`${id}-delimiter`} className="text-sm font-medium">
+              <Label
+                htmlFor={`${id}-delimiter`}
+                className="text-sm font-medium"
+              >
                 Delimiter
               </Label>
               <Select
@@ -274,7 +277,10 @@ export function FormatSelector({
           <div className="space-y-3">
             <h4 className="text-sm font-medium">Excel Options</h4>
             <div className="space-y-2">
-              <Label htmlFor={`${id}-sheetname`} className="text-sm font-medium">
+              <Label
+                htmlFor={`${id}-sheetname`}
+                className="text-sm font-medium"
+              >
                 Sheet Name
               </Label>
               <Input
@@ -326,9 +332,15 @@ export function FormatSelector({
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="YYYY-MM-DD">ISO Date (YYYY-MM-DD)</SelectItem>
-                <SelectItem value="MM/DD/YYYY">US Format (MM/DD/YYYY)</SelectItem>
-                <SelectItem value="DD/MM/YYYY">European (DD/MM/YYYY)</SelectItem>
+                <SelectItem value="YYYY-MM-DD">
+                  ISO Date (YYYY-MM-DD)
+                </SelectItem>
+                <SelectItem value="MM/DD/YYYY">
+                  US Format (MM/DD/YYYY)
+                </SelectItem>
+                <SelectItem value="DD/MM/YYYY">
+                  European (DD/MM/YYYY)
+                </SelectItem>
                 <SelectItem value="YYYY-MM-DD HH:mm:ss">
                   ISO DateTime (YYYY-MM-DD HH:mm:ss)
                 </SelectItem>

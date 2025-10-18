@@ -1,12 +1,36 @@
-import { Suspense, lazy } from "react";
+import { lazy, Suspense } from "react";
 
 // Lazy load homepage components for better performance
-const HeroSection = lazy(() => import("@/components/home/HeroSection").then(module => ({ default: module.HeroSection })));
-const FeaturesSection = lazy(() => import("@/components/home/FeaturesSection").then(module => ({ default: module.FeaturesSection })));
-const TechStackSection = lazy(() => import("@/components/home/TechStackSection").then(module => ({ default: module.TechStackSection })));
-const PerformanceSection = lazy(() => import("@/components/home/PerformanceSection").then(module => ({ default: module.PerformanceSection })));
-const GettingStartedSection = lazy(() => import("@/components/home/GettingStartedSection").then(module => ({ default: module.GettingStartedSection })));
-const Footer = lazy(() => import("@/components/home/Footer").then(module => ({ default: module.Footer })));
+const HeroSection = lazy(() =>
+  import("@/components/home/HeroSection").then((module) => ({
+    default: module.HeroSection,
+  })),
+);
+const FeaturesSection = lazy(() =>
+  import("@/components/home/FeaturesSection").then((module) => ({
+    default: module.FeaturesSection,
+  })),
+);
+const TechStackSection = lazy(() =>
+  import("@/components/home/TechStackSection").then((module) => ({
+    default: module.TechStackSection,
+  })),
+);
+const PerformanceSection = lazy(() =>
+  import("@/components/home/PerformanceSection").then((module) => ({
+    default: module.PerformanceSection,
+  })),
+);
+const GettingStartedSection = lazy(() =>
+  import("@/components/home/GettingStartedSection").then((module) => ({
+    default: module.GettingStartedSection,
+  })),
+);
+const Footer = lazy(() =>
+  import("@/components/home/Footer").then((module) => ({
+    default: module.Footer,
+  })),
+);
 
 /**
  * Loading fallback component for lazy-loaded sections
@@ -50,7 +74,9 @@ export default function Home() {
         <GettingStartedSection />
       </Suspense>
 
-      <Suspense fallback={<div className="h-48 bg-gray-900 animate-pulse"></div>}>
+      <Suspense
+        fallback={<div className="h-48 bg-gray-900 animate-pulse"></div>}
+      >
         <Footer />
       </Suspense>
     </div>

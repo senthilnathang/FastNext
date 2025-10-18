@@ -1,8 +1,9 @@
-'use client';
+"use client";
 
-import React, { ReactNode } from 'react';
-import { useConditionalAccess } from '../hooks/useRLS';
-import { Shield, Lock, AlertTriangle } from 'lucide-react';
+import { AlertTriangle, Lock, Shield } from "lucide-react";
+import type React from "react";
+import type { ReactNode } from "react";
+import { useConditionalAccess } from "../hooks/useRLS";
 
 interface RLSProtectedComponentProps {
   entityType: string;
@@ -28,12 +29,12 @@ export default function RLSProtectedComponent({
   showLoader = true,
   showDeniedMessage = true,
   customDeniedMessage,
-  className = ''
+  className = "",
 }: RLSProtectedComponentProps) {
   const { hasAccess, loading, error } = useConditionalAccess(
     entityType,
     action,
-    entityId
+    entityId,
   );
 
   // Show loading state
@@ -41,7 +42,9 @@ export default function RLSProtectedComponent({
     return (
       <div className={`flex items-center justify-center p-4 ${className}`}>
         <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
-        <span className="ml-2 text-sm text-gray-600">Checking permissions...</span>
+        <span className="ml-2 text-sm text-gray-600">
+          Checking permissions...
+        </span>
       </div>
     );
   }
@@ -49,7 +52,9 @@ export default function RLSProtectedComponent({
   // Show error state
   if (error) {
     return (
-      <div className={`p-4 bg-red-50 border border-red-200 rounded-md ${className}`}>
+      <div
+        className={`p-4 bg-red-50 border border-red-200 rounded-md ${className}`}
+      >
         <div className="flex items-center">
           <AlertTriangle className="h-5 w-5 text-red-400 mr-2" />
           <p className="text-sm text-red-600">
@@ -68,13 +73,14 @@ export default function RLSProtectedComponent({
 
     if (showDeniedMessage) {
       return (
-        <div className={`p-4 bg-gray-50 border border-gray-200 rounded-md ${className}`}>
+        <div
+          className={`p-4 bg-gray-50 border border-gray-200 rounded-md ${className}`}
+        >
           <div className="flex items-center">
             <Lock className="h-5 w-5 text-gray-400 mr-2" />
             <p className="text-sm text-gray-600">
               {customDeniedMessage ||
-                `You don't have permission to ${action.toLowerCase()} ${entityType.toLowerCase()}.`
-              }
+                `You don't have permission to ${action.toLowerCase()} ${entityType.toLowerCase()}.`}
             </p>
           </div>
         </div>
@@ -100,7 +106,7 @@ export function withRLSProtection<P extends object>(
   Component: React.ComponentType<P>,
   entityType: string,
   action: string,
-  getEntityId?: (props: P) => number | undefined
+  getEntityId?: (props: P) => number | undefined,
 ) {
   return function RLSProtectedWrapper(props: P) {
     const entityId = getEntityId ? getEntityId(props) : undefined;
@@ -140,7 +146,7 @@ export function RLSMultiProtected({
   fallback,
   requireAll = true,
   showLoader = true,
-  className = ''
+  className = "",
 }: RLSMultiProtectedProps) {
   // Call hooks for each check (hooks must be called at the top level)
   const accessResults = checks.map((check) => {
@@ -148,16 +154,18 @@ export function RLSMultiProtected({
     return useConditionalAccess(check.entityType, check.action, check.entityId);
   });
 
-  const loading = accessResults.some(result => result.loading);
-  const errors = accessResults.map(result => result.error).filter(Boolean);
-  const hasAccessResults = accessResults.map(result => result.hasAccess);
+  const loading = accessResults.some((result) => result.loading);
+  const errors = accessResults.map((result) => result.error).filter(Boolean);
+  const hasAccessResults = accessResults.map((result) => result.hasAccess);
 
   // Show loading state
   if (loading && showLoader) {
     return (
       <div className={`flex items-center justify-center p-4 ${className}`}>
         <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
-        <span className="ml-2 text-sm text-gray-600">Checking permissions...</span>
+        <span className="ml-2 text-sm text-gray-600">
+          Checking permissions...
+        </span>
       </div>
     );
   }
@@ -165,13 +173,19 @@ export function RLSMultiProtected({
   // Show error state
   if (errors.length > 0) {
     return (
-      <div className={`p-4 bg-red-50 border border-red-200 rounded-md ${className}`}>
+      <div
+        className={`p-4 bg-red-50 border border-red-200 rounded-md ${className}`}
+      >
         <div className="flex items-center">
           <AlertTriangle className="h-5 w-5 text-red-400 mr-2" />
           <div>
-            <p className="text-sm text-red-600 font-medium">Permission check failed:</p>
+            <p className="text-sm text-red-600 font-medium">
+              Permission check failed:
+            </p>
             {errors.map((error, index) => (
-              <p key={index} className="text-xs text-red-500 mt-1">{error}</p>
+              <p key={index} className="text-xs text-red-500 mt-1">
+                {error}
+              </p>
             ))}
           </div>
         </div>
@@ -181,8 +195,8 @@ export function RLSMultiProtected({
 
   // Check access logic
   const hasAccess = requireAll
-    ? hasAccessResults.every(result => result === true)
-    : hasAccessResults.some(result => result === true);
+    ? hasAccessResults.every((result) => result === true)
+    : hasAccessResults.some((result) => result === true);
 
   if (!hasAccess) {
     if (fallback) {
@@ -190,7 +204,9 @@ export function RLSMultiProtected({
     }
 
     return (
-      <div className={`p-4 bg-gray-50 border border-gray-200 rounded-md ${className}`}>
+      <div
+        className={`p-4 bg-gray-50 border border-gray-200 rounded-md ${className}`}
+      >
         <div className="flex items-center">
           <Lock className="h-5 w-5 text-gray-400 mr-2" />
           <p className="text-sm text-gray-600">
@@ -226,12 +242,12 @@ export function RLSConditional({
   denied,
   loading: loadingContent,
   error: errorContent,
-  className = ''
+  className = "",
 }: RLSConditionalProps) {
   const { hasAccess, loading, error } = useConditionalAccess(
     entityType,
     action,
-    entityId
+    entityId,
   );
 
   if (loading) {
@@ -277,12 +293,12 @@ export function RLSConditional({
 export function useRLSButton(
   entityType: string,
   action: string,
-  entityId?: number
+  entityId?: number,
 ) {
   const { hasAccess, loading, error } = useConditionalAccess(
     entityType,
     action,
-    entityId
+    entityId,
   );
 
   return {
@@ -290,11 +306,12 @@ export function useRLSButton(
     loading,
     hasAccess,
     error,
-    title: hasAccess === false
-      ? `You don't have permission to ${action.toLowerCase()} ${entityType.toLowerCase()}`
-      : error
-        ? `Permission check failed: ${error}`
-        : undefined
+    title:
+      hasAccess === false
+        ? `You don't have permission to ${action.toLowerCase()} ${entityType.toLowerCase()}`
+        : error
+          ? `Permission check failed: ${error}`
+          : undefined,
   };
 }
 
@@ -306,8 +323,8 @@ interface RLSButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   action: string;
   entityId?: number;
   children: ReactNode;
-  variant?: 'default' | 'outline' | 'ghost' | 'destructive';
-  size?: 'sm' | 'md' | 'lg';
+  variant?: "default" | "outline" | "ghost" | "destructive";
+  size?: "sm" | "md" | "lg";
   showIcon?: boolean;
 }
 
@@ -316,7 +333,7 @@ export function RLSButton({
   action,
   entityId,
   children,
-  className = '',
+  className = "",
   disabled: externalDisabled,
   title: externalTitle,
   showIcon = true,
@@ -325,7 +342,7 @@ export function RLSButton({
   const { disabled, loading, hasAccess, title } = useRLSButton(
     entityType,
     action,
-    entityId
+    entityId,
   );
 
   const isDisabled = disabled || Boolean(externalDisabled);
@@ -340,7 +357,7 @@ export function RLSButton({
         inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors
         focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2
         disabled:opacity-50 disabled:pointer-events-none
-        ${isDisabled ? 'cursor-not-allowed' : 'cursor-pointer'}
+        ${isDisabled ? "cursor-not-allowed" : "cursor-pointer"}
         ${className}
       `}
     >
@@ -376,12 +393,12 @@ export function RLSForm({
   entityId,
   children,
   onSubmit,
-  className = ''
+  className = "",
 }: RLSFormProps) {
   const { hasAccess, loading } = useConditionalAccess(
     entityType,
     action,
-    entityId
+    entityId,
   );
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {

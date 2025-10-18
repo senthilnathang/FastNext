@@ -1,9 +1,9 @@
-import { NextRequest } from 'next/server';
+import type { NextRequest } from "next/server";
 
 interface ValidationResult {
   isValid: boolean;
   reason?: string;
-  severity?: 'low' | 'medium' | 'high' | 'critical';
+  severity?: "low" | "medium" | "high" | "critical";
 }
 
 // Malicious patterns to detect
@@ -16,7 +16,7 @@ const MALICIOUS_PATTERNS = {
     /<object[\s\S]*?>/gi,
     /<embed[\s\S]*?>/gi,
     /data:.*base64/gi,
-    /vbscript:/gi
+    /vbscript:/gi,
   ],
   sqlInjection: [
     /union\s+select/gi,
@@ -26,7 +26,7 @@ const MALICIOUS_PATTERNS = {
     /update\s+.*\s+set/gi,
     /exec\s*\(/gi,
     /sp_\w+/gi,
-    /xp_\w+/gi
+    /xp_\w+/gi,
   ],
   pathTraversal: [
     /\.\.\//g,
@@ -34,14 +34,14 @@ const MALICIOUS_PATTERNS = {
     /%2e%2e%2f/gi,
     /%2e%2e%5c/gi,
     /\.\.%2f/gi,
-    /\.\.%5c/gi
+    /\.\.%5c/gi,
   ],
   commandInjection: [
     /;\s*(rm|del|format|shutdown)/gi,
     /\|\s*(nc|netcat|curl|wget)/gi,
     /`.*`/g,
-    /\$\(.*\)/g
-  ]
+    /\$\(.*\)/g,
+  ],
 };
 
 // Suspicious user agents
@@ -53,7 +53,7 @@ const SUSPICIOUS_USER_AGENTS = [
   /zap/i,
   /burp/i,
   /acunetix/i,
-  /nessus/i
+  /nessus/i,
 ];
 
 // Rate limiting bypass attempts
@@ -65,23 +65,24 @@ const BYPASS_PATTERNS = [
 
 export function validateRequest(request: NextRequest): ValidationResult {
   // Skip request validation in development or if explicitly bypassed
-  const bypassValidation = process.env.NODE_ENV === 'development' ||
-                          process.env.DISABLE_SECURITY_MONITORING === 'true';
+  const bypassValidation =
+    process.env.NODE_ENV === "development" ||
+    process.env.DISABLE_SECURITY_MONITORING === "true";
 
   if (bypassValidation) {
     return { isValid: true };
   }
 
   const url = request.nextUrl;
-  const userAgent = request.headers.get('user-agent') || '';
+  const userAgent = request.headers.get("user-agent") || "";
 
   // Check for suspicious user agents
   for (const pattern of SUSPICIOUS_USER_AGENTS) {
     if (pattern.test(userAgent)) {
       return {
         isValid: false,
-        reason: 'Suspicious user agent detected',
-        severity: 'high'
+        reason: "Suspicious user agent detected",
+        severity: "high",
       };
     }
   }
@@ -105,12 +106,13 @@ export function validateRequest(request: NextRequest): ValidationResult {
   }
 
   // Validate request size
-  const contentLength = request.headers.get('content-length');
-  if (contentLength && parseInt(contentLength) > 10 * 1024 * 1024) { // 10MB limit
+  const contentLength = request.headers.get("content-length");
+  if (contentLength && parseInt(contentLength) > 10 * 1024 * 1024) {
+    // 10MB limit
     return {
       isValid: false,
-      reason: 'Request size exceeds limit',
-      severity: 'medium'
+      reason: "Request size exceeds limit",
+      severity: "medium",
     };
   }
 
@@ -129,20 +131,20 @@ function validatePath(pathname: string): ValidationResult {
     if (pattern.test(pathname)) {
       return {
         isValid: false,
-        reason: 'Path traversal attempt detected',
-        severity: 'high'
+        reason: "Path traversal attempt detected",
+        severity: "high",
       };
     }
   }
 
   // Check for suspicious file extensions
-  const suspiciousExtensions = ['.php', '.asp', '.jsp', '.cgi', '.pl'];
-  const extension = pathname.split('.').pop()?.toLowerCase();
+  const suspiciousExtensions = [".php", ".asp", ".jsp", ".cgi", ".pl"];
+  const extension = pathname.split(".").pop()?.toLowerCase();
   if (extension && suspiciousExtensions.includes(`.${extension}`)) {
     return {
       isValid: false,
-      reason: 'Suspicious file extension',
-      severity: 'medium'
+      reason: "Suspicious file extension",
+      severity: "medium",
     };
   }
 
@@ -150,8 +152,8 @@ function validatePath(pathname: string): ValidationResult {
   if (pathname.length > 2048) {
     return {
       isValid: false,
-      reason: 'Path length exceeds limit',
-      severity: 'medium'
+      reason: "Path length exceeds limit",
+      severity: "medium",
     };
   }
 
@@ -165,8 +167,8 @@ function validateQueryParams(searchParams: URLSearchParams): ValidationResult {
       if (pattern.test(value) || pattern.test(key)) {
         return {
           isValid: false,
-          reason: 'XSS attempt in query parameters',
-          severity: 'high'
+          reason: "XSS attempt in query parameters",
+          severity: "high",
         };
       }
     }
@@ -176,8 +178,8 @@ function validateQueryParams(searchParams: URLSearchParams): ValidationResult {
       if (pattern.test(value) || pattern.test(key)) {
         return {
           isValid: false,
-          reason: 'SQL injection attempt in query parameters',
-          severity: 'critical'
+          reason: "SQL injection attempt in query parameters",
+          severity: "critical",
         };
       }
     }
@@ -187,8 +189,8 @@ function validateQueryParams(searchParams: URLSearchParams): ValidationResult {
       if (pattern.test(value)) {
         return {
           isValid: false,
-          reason: 'Command injection attempt in query parameters',
-          severity: 'critical'
+          reason: "Command injection attempt in query parameters",
+          severity: "critical",
         };
       }
     }
@@ -197,8 +199,8 @@ function validateQueryParams(searchParams: URLSearchParams): ValidationResult {
     if (key.length > 100 || value.length > 1000) {
       return {
         isValid: false,
-        reason: 'Query parameter length exceeds limit',
-        severity: 'medium'
+        reason: "Query parameter length exceeds limit",
+        severity: "medium",
       };
     }
   }
@@ -210,20 +212,20 @@ function validateHeaders(headers: Headers): ValidationResult {
   // Check for header injection attempts
   for (const [name, value] of headers.entries()) {
     // Check for CRLF injection
-    if (value.includes('\r') || value.includes('\n')) {
+    if (value.includes("\r") || value.includes("\n")) {
       return {
         isValid: false,
-        reason: 'Header injection attempt detected',
-        severity: 'high'
+        reason: "Header injection attempt detected",
+        severity: "high",
       };
     }
 
     // Check for suspicious header values
-    if (name.toLowerCase() === 'host' && value.includes('..')) {
+    if (name.toLowerCase() === "host" && value.includes("..")) {
       return {
         isValid: false,
-        reason: 'Suspicious host header',
-        severity: 'high'
+        reason: "Suspicious host header",
+        severity: "high",
       };
     }
 
@@ -232,20 +234,20 @@ function validateHeaders(headers: Headers): ValidationResult {
       if (pattern.test(`${name}: ${value}`)) {
         return {
           isValid: false,
-          reason: 'Rate limiting bypass attempt',
-          severity: 'medium'
+          reason: "Rate limiting bypass attempt",
+          severity: "medium",
         };
       }
     }
   }
 
   // Validate critical headers
-  const host = headers.get('host');
+  const host = headers.get("host");
   if (host && !isValidHost(host)) {
     return {
       isValid: false,
-      reason: 'Invalid host header',
-      severity: 'high'
+      reason: "Invalid host header",
+      severity: "high",
     };
   }
 
@@ -254,9 +256,10 @@ function validateHeaders(headers: Headers): ValidationResult {
 
 function validateRequestTiming(request: NextRequest): ValidationResult {
   // Skip timing validation in development or if explicitly bypassed
-  const bypassTimingCheck = process.env.NODE_ENV === 'development' ||
-                           process.env.BYPASS_RATE_LIMIT === 'true' ||
-                           process.env.DISABLE_SECURITY_MONITORING === 'true';
+  const bypassTimingCheck =
+    process.env.NODE_ENV === "development" ||
+    process.env.BYPASS_RATE_LIMIT === "true" ||
+    process.env.DISABLE_SECURITY_MONITORING === "true";
 
   if (bypassTimingCheck) {
     return { isValid: true };
@@ -270,16 +273,17 @@ function validateRequestTiming(request: NextRequest): ValidationResult {
   const key = `timing:${clientIP}`;
 
   // Simple in-memory store (use Redis in production)
-  if (typeof globalThis !== 'undefined') {
+  if (typeof globalThis !== "undefined") {
     const store = (globalThis as any).__requestTimingStore || new Map();
     (globalThis as any).__requestTimingStore = store;
 
     const lastRequest = store.get(key);
-    if (lastRequest && (now - lastRequest) < 100) { // Less than 100ms between requests
+    if (lastRequest && now - lastRequest < 100) {
+      // Less than 100ms between requests
       return {
         isValid: false,
-        reason: 'Rapid-fire requests detected',
-        severity: 'medium'
+        reason: "Rapid-fire requests detected",
+        severity: "medium",
       };
     }
 
@@ -292,59 +296,62 @@ function validateRequestTiming(request: NextRequest): ValidationResult {
 function isValidHost(host: string): boolean {
   // Define allowed hosts
   const allowedHosts = [
-    'localhost',
-    '127.0.0.1',
+    "localhost",
+    "127.0.0.1",
     process.env.NEXT_PUBLIC_DOMAIN,
-    process.env.VERCEL_URL
+    process.env.VERCEL_URL,
   ].filter(Boolean);
 
-  return allowedHosts.some(allowedHost =>
-    host === allowedHost || host.startsWith(`${allowedHost}:`)
+  return allowedHosts.some(
+    (allowedHost) => host === allowedHost || host.startsWith(`${allowedHost}:`),
   );
 }
 
 function getClientIP(request: NextRequest): string {
-  const forwarded = request.headers.get('x-forwarded-for');
-  const realIP = request.headers.get('x-real-ip');
+  const forwarded = request.headers.get("x-forwarded-for");
+  const realIP = request.headers.get("x-real-ip");
 
   if (forwarded) {
-    return forwarded.split(',')[0].trim();
+    return forwarded.split(",")[0].trim();
   }
 
-  return realIP || 'unknown';
+  return realIP || "unknown";
 }
 
 // Additional validation for specific content types
-export async function validateRequestBody(request: NextRequest): Promise<ValidationResult> {
+export async function validateRequestBody(
+  request: NextRequest,
+): Promise<ValidationResult> {
   // Skip body validation in development or if explicitly bypassed
-  const bypassValidation = process.env.NODE_ENV === 'development' ||
-                          process.env.DISABLE_SECURITY_MONITORING === 'true';
+  const bypassValidation =
+    process.env.NODE_ENV === "development" ||
+    process.env.DISABLE_SECURITY_MONITORING === "true";
 
   if (bypassValidation) {
     return { isValid: true };
   }
 
-  const contentType = request.headers.get('content-type');
+  const contentType = request.headers.get("content-type");
 
   if (!contentType) {
     return { isValid: true };
   }
 
   try {
-    if (contentType.includes('application/json')) {
+    if (contentType.includes("application/json")) {
       const body = await request.json();
       return validateJsonPayload(body);
     }
 
-    if (contentType.includes('application/x-www-form-urlencoded')) {
+    if (contentType.includes("application/x-www-form-urlencoded")) {
       const formData = await request.formData();
       return validateFormData(formData);
     }
   } catch {
     return {
       isValid: false,
-      reason: 'Invalid request body format',
-      severity: 'medium'
+      reason: "Invalid request body format",
+      severity: "medium",
     };
   }
 
@@ -359,18 +366,19 @@ function validateJsonPayload(payload: any): ValidationResult {
     if (pattern.test(jsonString)) {
       return {
         isValid: false,
-        reason: 'XSS attempt in JSON payload',
-        severity: 'high'
+        reason: "XSS attempt in JSON payload",
+        severity: "high",
       };
     }
   }
 
   // Check JSON size
-  if (jsonString.length > 1024 * 1024) { // 1MB limit
+  if (jsonString.length > 1024 * 1024) {
+    // 1MB limit
     return {
       isValid: false,
-      reason: 'JSON payload too large',
-      severity: 'medium'
+      reason: "JSON payload too large",
+      severity: "medium",
     };
   }
 
@@ -379,14 +387,14 @@ function validateJsonPayload(payload: any): ValidationResult {
 
 function validateFormData(formData: FormData): ValidationResult {
   for (const [key, value] of formData.entries()) {
-    if (typeof value === 'string') {
+    if (typeof value === "string") {
       // Check for malicious patterns in form data
       for (const pattern of MALICIOUS_PATTERNS.xss) {
         if (pattern.test(value) || pattern.test(key)) {
           return {
             isValid: false,
-            reason: 'XSS attempt in form data',
-            severity: 'high'
+            reason: "XSS attempt in form data",
+            severity: "high",
           };
         }
       }

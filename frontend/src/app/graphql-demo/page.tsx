@@ -2,7 +2,7 @@
  * GraphQL Demo Page
  * Showcases the complete GraphQL implementation
  */
-import { GraphQLDemo } from '@/components/graphql-examples';
+import { GraphQLDemo } from "@/components/graphql-examples";
 
 export default function GraphQLDemoPage() {
   return (
@@ -13,6 +13,7 @@ export default function GraphQLDemoPage() {
 }
 
 export const metadata = {
-  title: 'GraphQL Demo - FastNext Framework',
-  description: 'Live demonstration of GraphQL queries, mutations, and real-time features',
+  title: "GraphQL Demo - FastNext Framework",
+  description:
+    "Live demonstration of GraphQL queries, mutations, and real-time features",
 };

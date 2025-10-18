@@ -1,64 +1,81 @@
-"use client"
+"use client";
 
-import { useState, useMemo } from 'react'
 import {
-  TrendingUp,
-  Clock,
   CheckCircle,
-  XCircle,
+  Clock,
   Download,
+  TrendingUp,
   Users,
-  Zap
-} from 'lucide-react'
+  XCircle,
+  Zap,
+} from "lucide-react";
+import { useMemo, useState } from "react";
+import { Badge } from "@/shared/components/ui/badge";
+import { Button } from "@/shared/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/shared/components/ui/card";
+import { Progress } from "@/shared/components/ui/progress";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/shared/components/ui/select";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/shared/components/ui/tabs";
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/components/ui/card'
-import { Badge } from '@/shared/components/ui/badge'
-import { Button } from '@/shared/components/ui/button'
-import { Progress } from '@/shared/components/ui/progress'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/components/ui/tabs'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/components/ui/select'
 // DatePickerWithRange import removed - component doesn't exist
 
 interface WorkflowMetrics {
-  totalExecutions: number
-  successfulExecutions: number
-  failedExecutions: number
-  averageDuration: number
-  totalDuration: number
-  activeWorkflows: number
-  queuedExecutions: number
+  totalExecutions: number;
+  successfulExecutions: number;
+  failedExecutions: number;
+  averageDuration: number;
+  totalDuration: number;
+  activeWorkflows: number;
+  queuedExecutions: number;
 }
 
 interface WorkflowExecution {
-  id: string
-  workflowId: string
-  workflowName: string
-  status: 'running' | 'completed' | 'failed' | 'cancelled' | 'queued'
-  startTime: Date
-  endTime?: Date
-  duration?: number
-  triggeredBy: string
-  user?: string
-  errorMessage?: string
+  id: string;
+  workflowId: string;
+  workflowName: string;
+  status: "running" | "completed" | "failed" | "cancelled" | "queued";
+  startTime: Date;
+  endTime?: Date;
+  duration?: number;
+  triggeredBy: string;
+  user?: string;
+  errorMessage?: string;
 }
 
 interface WorkflowPerformance {
-  workflowId: string
-  workflowName: string
-  executions: number
-  successRate: number
-  averageDuration: number
-  lastExecuted: Date
-  trend: 'up' | 'down' | 'stable'
+  workflowId: string;
+  workflowName: string;
+  executions: number;
+  successRate: number;
+  averageDuration: number;
+  lastExecuted: Date;
+  trend: "up" | "down" | "stable";
 }
 
 interface WorkflowAnalyticsAdvancedProps {
-  metrics: WorkflowMetrics
-  executions: WorkflowExecution[]
-  performance: WorkflowPerformance[]
-  timeRange: 'today' | 'week' | 'month' | 'quarter'
-  onTimeRangeChange: (range: string) => void
-  onExport: () => void
+  metrics: WorkflowMetrics;
+  executions: WorkflowExecution[];
+  performance: WorkflowPerformance[];
+  timeRange: "today" | "week" | "month" | "quarter";
+  onTimeRangeChange: (range: string) => void;
+  onExport: () => void;
 }
 
 export function WorkflowAnalyticsAdvanced({
@@ -67,118 +84,123 @@ export function WorkflowAnalyticsAdvanced({
   performance,
   timeRange,
   onTimeRangeChange,
-  onExport
+  onExport,
 }: WorkflowAnalyticsAdvancedProps) {
-  const [selectedWorkflow, setSelectedWorkflow] = useState<string>('all')
-  const [selectedStatus, setSelectedStatus] = useState<string>('all')
+  const [selectedWorkflow, setSelectedWorkflow] = useState<string>("all");
+  const [selectedStatus, setSelectedStatus] = useState<string>("all");
 
   // Calculate derived metrics
   const derivedMetrics = useMemo(() => {
-    const successRate = metrics.totalExecutions > 0
-      ? (metrics.successfulExecutions / metrics.totalExecutions) * 100
-      : 0
+    const successRate =
+      metrics.totalExecutions > 0
+        ? (metrics.successfulExecutions / metrics.totalExecutions) * 100
+        : 0;
 
-    const failureRate = metrics.totalExecutions > 0
-      ? (metrics.failedExecutions / metrics.totalExecutions) * 100
-      : 0
+    const failureRate =
+      metrics.totalExecutions > 0
+        ? (metrics.failedExecutions / metrics.totalExecutions) * 100
+        : 0;
 
-    const avgExecutionsPerDay = metrics.totalExecutions / 30 // Assuming 30-day period
+    const avgExecutionsPerDay = metrics.totalExecutions / 30; // Assuming 30-day period
 
     return {
       successRate,
       failureRate,
-      avgExecutionsPerDay
-    }
-  }, [metrics])
+      avgExecutionsPerDay,
+    };
+  }, [metrics]);
 
   // Filter executions based on selected filters
   const filteredExecutions = useMemo(() => {
-    return executions.filter(execution => {
-      if (selectedWorkflow !== 'all' && execution.workflowId !== selectedWorkflow) {
-        return false
+    return executions.filter((execution) => {
+      if (
+        selectedWorkflow !== "all" &&
+        execution.workflowId !== selectedWorkflow
+      ) {
+        return false;
       }
-      if (selectedStatus !== 'all' && execution.status !== selectedStatus) {
-        return false
+      if (selectedStatus !== "all" && execution.status !== selectedStatus) {
+        return false;
       }
-      return true
-    })
-  }, [executions, selectedWorkflow, selectedStatus])
+      return true;
+    });
+  }, [executions, selectedWorkflow, selectedStatus]);
 
   // Group executions by hour for timeline view
   const executionTimeline = useMemo(() => {
-    const timeline: Record<string, number> = {}
-    const now = new Date()
+    const timeline: Record<string, number> = {};
+    const now = new Date();
 
     // Initialize last 24 hours
     for (let i = 23; i >= 0; i--) {
-      const hour = new Date(now.getTime() - i * 60 * 60 * 1000)
-      timeline[hour.toISOString().slice(0, 13)] = 0
+      const hour = new Date(now.getTime() - i * 60 * 60 * 1000);
+      timeline[hour.toISOString().slice(0, 13)] = 0;
     }
 
     // Count executions per hour
-    filteredExecutions.forEach(execution => {
-      const hourKey = execution.startTime.toISOString().slice(0, 13)
+    filteredExecutions.forEach((execution) => {
+      const hourKey = execution.startTime.toISOString().slice(0, 13);
       if (timeline[hourKey] !== undefined) {
-        timeline[hourKey]++
+        timeline[hourKey]++;
       }
-    })
+    });
 
     return Object.entries(timeline).map(([hour, count]) => ({
-      hour: new Date(hour + ':00:00').toLocaleTimeString('en-US', {
-        hour: 'numeric',
-        hour12: true
+      hour: new Date(hour + ":00:00").toLocaleTimeString("en-US", {
+        hour: "numeric",
+        hour12: true,
       }),
-      count
-    }))
-  }, [filteredExecutions])
+      count,
+    }));
+  }, [filteredExecutions]);
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'completed':
-        return <CheckCircle className="h-4 w-4 text-green-500" />
-      case 'failed':
-        return <XCircle className="h-4 w-4 text-red-500" />
-      case 'running':
-        return <Clock className="h-4 w-4 text-blue-500 animate-pulse" />
-      case 'cancelled':
-        return <XCircle className="h-4 w-4 text-gray-500" />
+      case "completed":
+        return <CheckCircle className="h-4 w-4 text-green-500" />;
+      case "failed":
+        return <XCircle className="h-4 w-4 text-red-500" />;
+      case "running":
+        return <Clock className="h-4 w-4 text-blue-500 animate-pulse" />;
+      case "cancelled":
+        return <XCircle className="h-4 w-4 text-gray-500" />;
       default:
-        return <Clock className="h-4 w-4 text-yellow-500" />
+        return <Clock className="h-4 w-4 text-yellow-500" />;
     }
-  }
+  };
 
   const getStatusBadge = (status: string) => {
     const variants = {
-      completed: 'default',
-      failed: 'destructive',
-      running: 'default',
-      cancelled: 'secondary',
-      queued: 'outline'
-    }[status] as any
+      completed: "default",
+      failed: "destructive",
+      running: "default",
+      cancelled: "secondary",
+      queued: "outline",
+    }[status] as any;
 
-    return <Badge variant={variants}>{status}</Badge>
-  }
+    return <Badge variant={variants}>{status}</Badge>;
+  };
 
   const getTrendIcon = (trend: string) => {
     switch (trend) {
-      case 'up':
-        return <TrendingUp className="h-4 w-4 text-green-500" />
-      case 'down':
-        return <TrendingUp className="h-4 w-4 text-red-500 rotate-180" />
+      case "up":
+        return <TrendingUp className="h-4 w-4 text-green-500" />;
+      case "down":
+        return <TrendingUp className="h-4 w-4 text-red-500 rotate-180" />;
       default:
-        return <div className="h-4 w-4 bg-gray-300 rounded-full" />
+        return <div className="h-4 w-4 bg-gray-300 rounded-full" />;
     }
-  }
+  };
 
   const formatDuration = (milliseconds: number) => {
-    const seconds = Math.floor(milliseconds / 1000)
-    const minutes = Math.floor(seconds / 60)
-    const hours = Math.floor(minutes / 60)
+    const seconds = Math.floor(milliseconds / 1000);
+    const minutes = Math.floor(seconds / 60);
+    const hours = Math.floor(minutes / 60);
 
-    if (hours > 0) return `${hours}h ${minutes % 60}m`
-    if (minutes > 0) return `${minutes}m ${seconds % 60}s`
-    return `${seconds}s`
-  }
+    if (hours > 0) return `${hours}h ${minutes % 60}m`;
+    if (minutes > 0) return `${minutes}m ${seconds % 60}s`;
+    return `${seconds}s`;
+  };
 
   return (
     <div className="space-y-6">
@@ -219,7 +241,9 @@ export function WorkflowAnalyticsAdvanced({
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold">{metrics.totalExecutions.toLocaleString()}</div>
+            <div className="text-3xl font-bold">
+              {metrics.totalExecutions.toLocaleString()}
+            </div>
             <p className="text-sm text-muted-foreground">
               {derivedMetrics.avgExecutionsPerDay.toFixed(1)} per day avg
             </p>
@@ -234,7 +258,9 @@ export function WorkflowAnalyticsAdvanced({
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold">{derivedMetrics.successRate.toFixed(1)}%</div>
+            <div className="text-3xl font-bold">
+              {derivedMetrics.successRate.toFixed(1)}%
+            </div>
             <Progress value={derivedMetrics.successRate} className="mt-2" />
           </CardContent>
         </Card>
@@ -247,7 +273,9 @@ export function WorkflowAnalyticsAdvanced({
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold">{formatDuration(metrics.averageDuration)}</div>
+            <div className="text-3xl font-bold">
+              {formatDuration(metrics.averageDuration)}
+            </div>
             <p className="text-sm text-muted-foreground">
               Total: {formatDuration(metrics.totalDuration)}
             </p>
@@ -293,7 +321,9 @@ export function WorkflowAnalyticsAdvanced({
                       <span>Successful</span>
                     </div>
                     <div className="text-right">
-                      <div className="font-medium">{metrics.successfulExecutions}</div>
+                      <div className="font-medium">
+                        {metrics.successfulExecutions}
+                      </div>
                       <div className="text-sm text-muted-foreground">
                         {derivedMetrics.successRate.toFixed(1)}%
                       </div>
@@ -306,7 +336,9 @@ export function WorkflowAnalyticsAdvanced({
                       <span>Failed</span>
                     </div>
                     <div className="text-right">
-                      <div className="font-medium">{metrics.failedExecutions}</div>
+                      <div className="font-medium">
+                        {metrics.failedExecutions}
+                      </div>
                       <div className="text-sm text-muted-foreground">
                         {derivedMetrics.failureRate.toFixed(1)}%
                       </div>
@@ -319,7 +351,9 @@ export function WorkflowAnalyticsAdvanced({
                       <span>Queued</span>
                     </div>
                     <div className="text-right">
-                      <div className="font-medium">{metrics.queuedExecutions}</div>
+                      <div className="font-medium">
+                        {metrics.queuedExecutions}
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -333,10 +367,15 @@ export function WorkflowAnalyticsAdvanced({
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  {performance.slice(0, 5).map(workflow => (
-                    <div key={workflow.workflowId} className="flex items-center justify-between">
+                  {performance.slice(0, 5).map((workflow) => (
+                    <div
+                      key={workflow.workflowId}
+                      className="flex items-center justify-between"
+                    >
                       <div>
-                        <div className="font-medium truncate">{workflow.workflowName}</div>
+                        <div className="font-medium truncate">
+                          {workflow.workflowName}
+                        </div>
                         <div className="text-sm text-muted-foreground">
                           {workflow.executions} executions
                         </div>
@@ -365,13 +404,17 @@ export function WorkflowAnalyticsAdvanced({
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {performance.map(workflow => (
-                  <div key={workflow.workflowId} className="p-4 border rounded-lg">
+                {performance.map((workflow) => (
+                  <div
+                    key={workflow.workflowId}
+                    className="p-4 border rounded-lg"
+                  >
                     <div className="flex items-center justify-between mb-3">
                       <div>
                         <h4 className="font-medium">{workflow.workflowName}</h4>
                         <p className="text-sm text-muted-foreground">
-                          Last executed: {workflow.lastExecuted.toLocaleDateString()}
+                          Last executed:{" "}
+                          {workflow.lastExecuted.toLocaleDateString()}
                         </p>
                       </div>
                       <div className="flex items-center space-x-2">
@@ -384,16 +427,26 @@ export function WorkflowAnalyticsAdvanced({
 
                     <div className="grid grid-cols-3 gap-4 text-sm">
                       <div>
-                        <span className="text-muted-foreground">Executions</span>
+                        <span className="text-muted-foreground">
+                          Executions
+                        </span>
                         <div className="font-medium">{workflow.executions}</div>
                       </div>
                       <div>
-                        <span className="text-muted-foreground">Avg Duration</span>
-                        <div className="font-medium">{formatDuration(workflow.averageDuration)}</div>
+                        <span className="text-muted-foreground">
+                          Avg Duration
+                        </span>
+                        <div className="font-medium">
+                          {formatDuration(workflow.averageDuration)}
+                        </div>
                       </div>
                       <div>
-                        <span className="text-muted-foreground">Success Rate</span>
-                        <div className="font-medium">{workflow.successRate.toFixed(1)}%</div>
+                        <span className="text-muted-foreground">
+                          Success Rate
+                        </span>
+                        <div className="font-medium">
+                          {workflow.successRate.toFixed(1)}%
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -406,14 +459,20 @@ export function WorkflowAnalyticsAdvanced({
         <TabsContent value="executions" className="space-y-4">
           {/* Filters */}
           <div className="flex items-center space-x-4">
-            <Select value={selectedWorkflow} onValueChange={setSelectedWorkflow}>
+            <Select
+              value={selectedWorkflow}
+              onValueChange={setSelectedWorkflow}
+            >
               <SelectTrigger className="w-48">
                 <SelectValue placeholder="All Workflows" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Workflows</SelectItem>
-                {performance.map(workflow => (
-                  <SelectItem key={workflow.workflowId} value={workflow.workflowId}>
+                {performance.map((workflow) => (
+                  <SelectItem
+                    key={workflow.workflowId}
+                    value={workflow.workflowId}
+                  >
                     {workflow.workflowName}
                   </SelectItem>
                 ))}
@@ -441,18 +500,21 @@ export function WorkflowAnalyticsAdvanced({
                 {filteredExecutions.slice(0, 20).map((execution, index) => (
                   <div
                     key={execution.id}
-                    className={`p-4 ${index !== filteredExecutions.length - 1 ? 'border-b' : ''}`}
+                    className={`p-4 ${index !== filteredExecutions.length - 1 ? "border-b" : ""}`}
                   >
                     <div className="flex items-center justify-between">
                       <div className="space-y-1">
                         <div className="flex items-center space-x-2">
                           {getStatusIcon(execution.status)}
-                          <span className="font-medium">{execution.workflowName}</span>
+                          <span className="font-medium">
+                            {execution.workflowName}
+                          </span>
                           {getStatusBadge(execution.status)}
                         </div>
                         <div className="text-sm text-muted-foreground">
                           Started: {execution.startTime.toLocaleString()}
-                          {execution.duration && ` • Duration: ${formatDuration(execution.duration)}`}
+                          {execution.duration &&
+                            ` • Duration: ${formatDuration(execution.duration)}`}
                           {execution.user && ` • By: ${execution.user}`}
                         </div>
                         {execution.errorMessage && (
@@ -492,10 +554,12 @@ export function WorkflowAnalyticsAdvanced({
                         <div
                           className="bg-blue-500 h-4 rounded"
                           style={{
-                            width: `${Math.max((point.count / Math.max(...executionTimeline.map(p => p.count))) * 100, 2)}%`
+                            width: `${Math.max((point.count / Math.max(...executionTimeline.map((p) => p.count))) * 100, 2)}%`,
                           }}
                         />
-                        <span className="text-sm font-medium">{point.count}</span>
+                        <span className="text-sm font-medium">
+                          {point.count}
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -506,7 +570,7 @@ export function WorkflowAnalyticsAdvanced({
         </TabsContent>
       </Tabs>
     </div>
-  )
+  );
 }
 
-export default WorkflowAnalyticsAdvanced
+export default WorkflowAnalyticsAdvanced;

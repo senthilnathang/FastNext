@@ -205,7 +205,9 @@ export function NotificationCenter({
     if (!user) return;
 
     try {
-      const response = await apiClient.get("/api/v1/notifications/unread-count");
+      const response = await apiClient.get(
+        "/api/v1/notifications/unread-count",
+      );
       setUnreadCount(response.data.unread_count);
     } catch (error) {
       console.error("Failed to fetch unread count:", error);

@@ -1,4 +1,4 @@
-import type { Project } from '@/shared/types';
+import type { Project } from "@/shared/types";
 
 // In-memory storage for development - replace with actual database
 class ProjectsDataStore {
@@ -13,7 +13,7 @@ class ProjectsDataStore {
       start_date: "2024-01-15",
       end_date: "2024-06-30",
       created_at: "2024-01-01T00:00:00Z",
-      updated_at: "2024-01-01T00:00:00Z"
+      updated_at: "2024-01-01T00:00:00Z",
     },
     {
       id: 2,
@@ -25,7 +25,7 @@ class ProjectsDataStore {
       start_date: "2024-02-01",
       end_date: "2024-05-15",
       created_at: "2024-01-25T10:00:00Z",
-      updated_at: "2024-02-01T09:00:00Z"
+      updated_at: "2024-02-01T09:00:00Z",
     },
     {
       id: 3,
@@ -37,8 +37,8 @@ class ProjectsDataStore {
       start_date: "2024-03-01",
       end_date: "2024-08-30",
       created_at: "2024-02-20T14:00:00Z",
-      updated_at: "2024-03-01T11:00:00Z"
-    }
+      updated_at: "2024-03-01T11:00:00Z",
+    },
   ];
 
   private nextId = 4;
@@ -48,24 +48,29 @@ class ProjectsDataStore {
   }
 
   getById(id: number): Project | undefined {
-    return this.projects.find(p => p.id === id);
+    return this.projects.find((p) => p.id === id);
   }
 
-  create(projectData: Omit<Project, 'id' | 'created_at' | 'updated_at'>): Project {
+  create(
+    projectData: Omit<Project, "id" | "created_at" | "updated_at">,
+  ): Project {
     const now = new Date().toISOString();
     const newProject: Project = {
       ...projectData,
       id: this.nextId++,
       created_at: now,
-      updated_at: now
+      updated_at: now,
     };
 
     this.projects.push(newProject);
     return newProject;
   }
 
-  update(id: number, updates: Partial<Omit<Project, 'id' | 'created_at'>>): Project | null {
-    const index = this.projects.findIndex(p => p.id === id);
+  update(
+    id: number,
+    updates: Partial<Omit<Project, "id" | "created_at">>,
+  ): Project | null {
+    const index = this.projects.findIndex((p) => p.id === id);
     if (index === -1) {
       return null;
     }
@@ -73,7 +78,7 @@ class ProjectsDataStore {
     const updatedProject: Project = {
       ...this.projects[index],
       ...updates,
-      updated_at: new Date().toISOString()
+      updated_at: new Date().toISOString(),
     };
 
     this.projects[index] = updatedProject;
@@ -81,7 +86,7 @@ class ProjectsDataStore {
   }
 
   delete(id: number): boolean {
-    const index = this.projects.findIndex(p => p.id === id);
+    const index = this.projects.findIndex((p) => p.id === id);
     if (index === -1) {
       return false;
     }
@@ -101,18 +106,19 @@ class ProjectsDataStore {
 
     if (filters.search) {
       const search = filters.search.toLowerCase();
-      filtered = filtered.filter(p =>
-        p.name.toLowerCase().includes(search) ||
-        (p.description && p.description.toLowerCase().includes(search))
+      filtered = filtered.filter(
+        (p) =>
+          p.name.toLowerCase().includes(search) ||
+          (p.description && p.description.toLowerCase().includes(search)),
       );
     }
 
     if (filters.is_public !== undefined) {
-      filtered = filtered.filter(p => p.is_public === filters.is_public);
+      filtered = filtered.filter((p) => p.is_public === filters.is_public);
     }
 
     if (filters.user_id !== undefined) {
-      filtered = filtered.filter(p => p.user_id === filters.user_id);
+      filtered = filtered.filter((p) => p.user_id === filters.user_id);
     }
 
     // Apply pagination

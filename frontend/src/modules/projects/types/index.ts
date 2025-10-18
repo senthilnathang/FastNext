@@ -1,21 +1,21 @@
 // Projects Types
 export interface Project {
-  id: number
-  name: string
-  description?: string
-  status: 'active' | 'inactive' | 'completed'
-  owner_id: number
-  start_date?: string
-  end_date?: string
-  created_at: string
-  updated_at: string
+  id: number;
+  name: string;
+  description?: string;
+  status: "active" | "inactive" | "completed";
+  owner_id: number;
+  start_date?: string;
+  end_date?: string;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface ProjectMember {
-  id: number
-  project_id: number
-  user_id: number
-  role: string
-  permissions: string[]
-  joined_at: string
+  id: number;
+  project_id: number;
+  user_id: number;
+  role: string;
+  permissions: string[];
+  joined_at: string;
 }

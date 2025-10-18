@@ -1,10 +1,10 @@
-import { router } from '../server'
-import { usersRouter } from './users'
-import { projectsRouter } from './projects'
-import { rolesRouter } from './roles'
-import { permissionsRouter } from './permissions'
-import { pagesRouter } from './pages'
-import { componentsRouter } from './components'
+import { router } from "../server";
+import { componentsRouter } from "./components";
+import { pagesRouter } from "./pages";
+import { permissionsRouter } from "./permissions";
+import { projectsRouter } from "./projects";
+import { rolesRouter } from "./roles";
+import { usersRouter } from "./users";
 
 export const appRouter = router({
   users: usersRouter,
@@ -13,6 +13,6 @@ export const appRouter = router({
   components: componentsRouter,
   roles: rolesRouter,
   permissions: permissionsRouter,
-})
+});
 
-export type AppRouter = typeof appRouter
+export type AppRouter = typeof appRouter;

@@ -2,59 +2,63 @@
  * GraphQL Client for TRPC
  * Helper functions to use GraphQL operations within TRPC procedures
  */
-import { getApolloClient } from '@/lib/graphql/client';
+
+import { ApolloError } from "@apollo/client";
+import { getApolloClient } from "@/lib/graphql/client";
 import {
-  GET_USERS,
-  GET_USER,
-  GET_PROJECTS,
-  GET_PROJECT,
-  GET_PAGES,
-  GET_PAGE,
-  GET_COMPONENTS,
-  GET_COMPONENT,
-  GET_ROLES,
-  GET_PERMISSIONS,
-  GET_ACTIVITY_LOGS,
-  GET_PROJECT_MEMBERS,
-  GET_AUDIT_TRAILS,
-  GET_ASSETS,
-} from '@/lib/graphql/queries';
-import {
-  CREATE_USER,
-  UPDATE_USER,
-  DELETE_USER,
-  CREATE_PROJECT,
-  UPDATE_PROJECT,
-  DELETE_PROJECT,
-  CREATE_PAGE,
-  UPDATE_PAGE,
-  DELETE_PAGE,
-  CREATE_COMPONENT,
-  UPDATE_COMPONENT,
-  DELETE_COMPONENT,
   ADD_PROJECT_MEMBER,
+  CREATE_COMPONENT,
+  CREATE_PAGE,
+  CREATE_PROJECT,
+  CREATE_USER,
+  DELETE_COMPONENT,
+  DELETE_PAGE,
+  DELETE_PROJECT,
+  DELETE_USER,
   REMOVE_PROJECT_MEMBER,
-} from '@/lib/graphql/mutations';
-import { ApolloError } from '@apollo/client';
+  UPDATE_COMPONENT,
+  UPDATE_PAGE,
+  UPDATE_PROJECT,
+  UPDATE_USER,
+} from "@/lib/graphql/mutations";
+import {
+  GET_ACTIVITY_LOGS,
+  GET_ASSETS,
+  GET_AUDIT_TRAILS,
+  GET_COMPONENT,
+  GET_COMPONENTS,
+  GET_PAGE,
+  GET_PAGES,
+  GET_PERMISSIONS,
+  GET_PROJECT,
+  GET_PROJECT_MEMBERS,
+  GET_PROJECTS,
+  GET_ROLES,
+  GET_USER,
+  GET_USERS,
+} from "@/lib/graphql/queries";
 import type {
-  UserInput,
-  UserUpdateInput,
-  ProjectInput,
-  ProjectUpdateInput,
-  PageInput,
-  PageUpdateInput,
   ComponentInput,
   ComponentUpdateInput,
-  ProjectMemberInput
-} from '@/lib/graphql/types';
+  PageInput,
+  PageUpdateInput,
+  ProjectInput,
+  ProjectMemberInput,
+  ProjectUpdateInput,
+  UserInput,
+  UserUpdateInput,
+} from "@/lib/graphql/types";
 
 // Helper function to handle GraphQL errors consistently
 function handleGraphQLError(error: unknown): never {
   if (error instanceof ApolloError) {
-    const message = error.graphQLErrors[0]?.message || error.message || 'GraphQL operation failed';
+    const message =
+      error.graphQLErrors[0]?.message ||
+      error.message ||
+      "GraphQL operation failed";
     throw new Error(message);
   }
-  throw new Error('Unknown GraphQL error occurred');
+  throw new Error("Unknown GraphQL error occurred");
 }
 
 // User operations
@@ -65,7 +69,7 @@ export const userOperations = {
       const result = await client.query({
         query: GET_USERS,
         variables,
-        fetchPolicy: 'cache-first',
+        fetchPolicy: "cache-first",
       });
       return result.data;
     } catch (error) {
@@ -79,7 +83,7 @@ export const userOperations = {
       const result = await client.query({
         query: GET_USER,
         variables: { id },
-        fetchPolicy: 'cache-first',
+        fetchPolicy: "cache-first",
       });
       return result.data;
     } catch (error) {
@@ -135,13 +139,18 @@ export const userOperations = {
 
 // Project operations
 export const projectOperations = {
-  async getAll(variables: { first?: number; after?: string; userId?: number; isPublic?: boolean }) {
+  async getAll(variables: {
+    first?: number;
+    after?: string;
+    userId?: number;
+    isPublic?: boolean;
+  }) {
     try {
       const client = getApolloClient();
       const result = await client.query({
         query: GET_PROJECTS,
         variables,
-        fetchPolicy: 'cache-first',
+        fetchPolicy: "cache-first",
       });
       return result.data;
     } catch (error) {
@@ -155,7 +164,7 @@ export const projectOperations = {
       const result = await client.query({
         query: GET_PROJECT,
         variables: { id },
-        fetchPolicy: 'cache-first',
+        fetchPolicy: "cache-first",
       });
       return result.data;
     } catch (error) {
@@ -211,13 +220,17 @@ export const projectOperations = {
 
 // Page operations
 export const pageOperations = {
-  async getAll(variables: { first?: number; after?: string; projectId?: number }) {
+  async getAll(variables: {
+    first?: number;
+    after?: string;
+    projectId?: number;
+  }) {
     try {
       const client = getApolloClient();
       const result = await client.query({
         query: GET_PAGES,
         variables,
-        fetchPolicy: 'cache-first',
+        fetchPolicy: "cache-first",
       });
       return result.data;
     } catch (error) {
@@ -231,7 +244,7 @@ export const pageOperations = {
       const result = await client.query({
         query: GET_PAGE,
         variables: { id },
-        fetchPolicy: 'cache-first',
+        fetchPolicy: "cache-first",
       });
       return result.data;
     } catch (error) {
@@ -293,7 +306,7 @@ export const componentOperations = {
       const result = await client.query({
         query: GET_COMPONENTS,
         variables,
-        fetchPolicy: 'cache-first',
+        fetchPolicy: "cache-first",
       });
       return result.data;
     } catch (error) {
@@ -307,7 +320,7 @@ export const componentOperations = {
       const result = await client.query({
         query: GET_COMPONENT,
         variables: { id },
-        fetchPolicy: 'cache-first',
+        fetchPolicy: "cache-first",
       });
       return result.data;
     } catch (error) {
@@ -368,7 +381,7 @@ export const roleOperations = {
       const client = getApolloClient();
       const result = await client.query({
         query: GET_ROLES,
-        fetchPolicy: 'cache-first',
+        fetchPolicy: "cache-first",
       });
       return result.data;
     } catch (error) {
@@ -384,7 +397,7 @@ export const permissionOperations = {
       const client = getApolloClient();
       const result = await client.query({
         query: GET_PERMISSIONS,
-        fetchPolicy: 'cache-first',
+        fetchPolicy: "cache-first",
       });
       return result.data;
     } catch (error) {
@@ -395,13 +408,17 @@ export const permissionOperations = {
 
 // Activity log operations
 export const activityLogOperations = {
-  async getAll(variables: { userId?: number; action?: string; limit?: number }) {
+  async getAll(variables: {
+    userId?: number;
+    action?: string;
+    limit?: number;
+  }) {
     try {
       const client = getApolloClient();
       const result = await client.query({
         query: GET_ACTIVITY_LOGS,
         variables,
-        fetchPolicy: 'cache-first',
+        fetchPolicy: "cache-first",
       });
       return result.data;
     } catch (error) {
@@ -418,7 +435,7 @@ export const projectMemberOperations = {
       const result = await client.query({
         query: GET_PROJECT_MEMBERS,
         variables: { projectId },
-        fetchPolicy: 'cache-first',
+        fetchPolicy: "cache-first",
       });
       return result.data;
     } catch (error) {
@@ -433,7 +450,10 @@ export const projectMemberOperations = {
         mutation: ADD_PROJECT_MEMBER,
         variables: { input },
         refetchQueries: [
-          { query: GET_PROJECT_MEMBERS, variables: { projectId: input.projectId } },
+          {
+            query: GET_PROJECT_MEMBERS,
+            variables: { projectId: input.projectId },
+          },
         ],
       });
       return result.data;
@@ -461,13 +481,17 @@ export const projectMemberOperations = {
 
 // Audit trail operations
 export const auditTrailOperations = {
-  async getAll(variables: { resourceType?: string; resourceId?: string; limit?: number }) {
+  async getAll(variables: {
+    resourceType?: string;
+    resourceId?: string;
+    limit?: number;
+  }) {
     try {
       const client = getApolloClient();
       const result = await client.query({
         query: GET_AUDIT_TRAILS,
         variables,
-        fetchPolicy: 'cache-first',
+        fetchPolicy: "cache-first",
       });
       return result.data;
     } catch (error) {
@@ -484,7 +508,7 @@ export const assetOperations = {
       const result = await client.query({
         query: GET_ASSETS,
         variables,
-        fetchPolicy: 'cache-first',
+        fetchPolicy: "cache-first",
       });
       return result.data;
     } catch (error) {

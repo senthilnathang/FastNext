@@ -2,43 +2,54 @@
  * ProjectsGrid Component
  * Example GraphQL implementation with projects query and mutations
  */
-'use client';
+"use client";
 
-import React, { useState } from 'react';
 import {
-  useProjects,
+  Calendar,
+  Edit,
+  FolderOpen,
+  Globe,
+  Lock,
+  MoreVertical,
+  Plus,
+  Trash,
+  Users,
+} from "lucide-react";
+import React, { useState } from "react";
+import { useForm } from "react-hook-form";
+import {
   useCreateProject,
   useDeleteProject,
   usePagination,
-} from '@/lib/graphql';
-import { Button } from '@/shared/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card';
-import { Badge } from '@/shared/components/ui/badge';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/shared/components/ui/dialog';
-import { Input } from '@/shared/components/ui/input';
-import { Textarea } from '@/shared/components/ui/textarea';
-import { Switch } from '@/shared/components/ui/switch';
-import { Label } from '@/shared/components/ui/label';
-import { Spinner } from '@/shared/components/ui/spinner';
-import { Alert, AlertDescription } from '@/shared/components/ui/alert';
+  useProjects,
+} from "@/lib/graphql";
+import { Alert, AlertDescription } from "@/shared/components/ui/alert";
+import { Badge } from "@/shared/components/ui/badge";
+import { Button } from "@/shared/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/shared/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/shared/components/ui/dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/shared/components/ui/dropdown-menu';
-import {
-  Plus,
-  FolderOpen,
-  Calendar,
-  Users,
-  Globe,
-  Lock,
-  MoreVertical,
-  Edit,
-  Trash,
-} from 'lucide-react';
-import { useForm } from 'react-hook-form';
+} from "@/shared/components/ui/dropdown-menu";
+import { Input } from "@/shared/components/ui/input";
+import { Label } from "@/shared/components/ui/label";
+import { Spinner } from "@/shared/components/ui/spinner";
+import { Switch } from "@/shared/components/ui/switch";
+import { Textarea } from "@/shared/components/ui/textarea";
 
 interface ProjectForm {
   name: string;
@@ -56,8 +67,8 @@ export function ProjectsGrid() {
 
   const form = useForm<ProjectForm>({
     defaultValues: {
-      name: '',
-      description: '',
+      name: "",
+      description: "",
       isPublic: false,
     },
   });
@@ -75,30 +86,33 @@ export function ProjectsGrid() {
         form.reset();
         refetch();
       } else {
-        console.error('Failed to create project:', result?.errors);
+        console.error("Failed to create project:", result?.errors);
       }
     } catch (err) {
-      console.error('Error creating project:', err);
+      console.error("Error creating project:", err);
     }
   };
 
   const handleDeleteProject = async (projectId: number) => {
-    if (!confirm('Are you sure you want to delete this project?')) return;
+    if (!confirm("Are you sure you want to delete this project?")) return;
 
     try {
       const result = await deleteProject(projectId);
       if (result?.success) {
         refetch();
       } else {
-        console.error('Failed to delete project:', result?.errors);
+        console.error("Failed to delete project:", result?.errors);
       }
     } catch (err) {
-      console.error('Error deleting project:', err);
+      console.error("Error deleting project:", err);
     }
   };
 
   const handleLoadMore = () => {
-    if (data?.projects.pageInfo.hasNextPage && data.projects.pageInfo.endCursor) {
+    if (
+      data?.projects.pageInfo.hasNextPage &&
+      data.projects.pageInfo.endCursor
+    ) {
       loadMore(data.projects.pageInfo.endCursor);
     }
   };
@@ -134,12 +148,15 @@ export function ProjectsGrid() {
             <DialogHeader>
               <DialogTitle>Create New Project</DialogTitle>
             </DialogHeader>
-            <form onSubmit={form.handleSubmit(handleCreateProject)} className="space-y-4">
+            <form
+              onSubmit={form.handleSubmit(handleCreateProject)}
+              className="space-y-4"
+            >
               <div>
                 <Label htmlFor="name">Project Name</Label>
                 <Input
                   id="name"
-                  {...form.register('name', { required: true })}
+                  {...form.register("name", { required: true })}
                   placeholder="Enter project name"
                 />
               </div>
@@ -148,17 +165,14 @@ export function ProjectsGrid() {
                 <Label htmlFor="description">Description</Label>
                 <Textarea
                   id="description"
-                  {...form.register('description')}
+                  {...form.register("description")}
                   placeholder="Enter project description (optional)"
                   rows={3}
                 />
               </div>
 
               <div className="flex items-center space-x-2">
-                <Switch
-                  id="isPublic"
-                  {...form.register('isPublic')}
-                />
+                <Switch id="isPublic" {...form.register("isPublic")} />
                 <Label htmlFor="isPublic">Make project public</Label>
               </div>
 
@@ -177,7 +191,7 @@ export function ProjectsGrid() {
                       Creating...
                     </>
                   ) : (
-                    'Create Project'
+                    "Create Project"
                   )}
                 </Button>
               </div>
@@ -197,12 +211,17 @@ export function ProjectsGrid() {
         <>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {data.projects.edges.map((project) => (
-              <Card key={project.id} className="group hover:shadow-md transition-shadow">
+              <Card
+                key={project.id}
+                className="group hover:shadow-md transition-shadow"
+              >
                 <CardHeader className="pb-3">
                   <div className="flex items-start justify-between">
                     <div className="flex items-center gap-2">
                       <FolderOpen className="h-5 w-5 text-primary" />
-                      <CardTitle className="text-lg truncate">{project.name}</CardTitle>
+                      <CardTitle className="text-lg truncate">
+                        {project.name}
+                      </CardTitle>
                     </div>
 
                     <DropdownMenu>
@@ -291,7 +310,7 @@ export function ProjectsGrid() {
                     Loading...
                   </>
                 ) : (
-                  'Load More Projects'
+                  "Load More Projects"
                 )}
               </Button>
             </div>

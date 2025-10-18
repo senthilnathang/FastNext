@@ -1,31 +1,31 @@
-import { NextRequest, NextResponse } from 'next/server';
-import type { CreateProjectRequest } from '@/shared/types';
-import { projectsStore } from '@/lib/data/projects';
+import { type NextRequest, NextResponse } from "next/server";
+import { projectsStore } from "@/lib/data/projects";
+import type { CreateProjectRequest } from "@/shared/types";
 
 // GET /api/v1/projects - List projects
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const skip = parseInt(searchParams.get('skip') || '0');
-    const limit = parseInt(searchParams.get('limit') || '100');
-    const search = searchParams.get('search');
-    const is_public = searchParams.get('is_public');
+    const skip = parseInt(searchParams.get("skip") || "0");
+    const limit = parseInt(searchParams.get("limit") || "100");
+    const search = searchParams.get("search");
+    const is_public = searchParams.get("is_public");
 
     const filters = {
       search: search || undefined,
-      is_public: is_public ? is_public === 'true' : undefined,
+      is_public: is_public ? is_public === "true" : undefined,
       skip,
-      limit
+      limit,
     };
 
     const filteredProjects = projectsStore.filter(filters);
 
     return NextResponse.json(filteredProjects);
   } catch (error) {
-    console.error('Error fetching projects:', error);
+    console.error("Error fetching projects:", error);
     return NextResponse.json(
-      { error: 'Failed to fetch projects' },
-      { status: 500 }
+      { error: "Failed to fetch projects" },
+      { status: 500 },
     );
   }
 }
@@ -38,8 +38,8 @@ export async function POST(request: NextRequest) {
     // Validate required fields
     if (!body.name) {
       return NextResponse.json(
-        { error: 'Project name is required' },
-        { status: 400 }
+        { error: "Project name is required" },
+        { status: 400 },
       );
     }
 
@@ -50,15 +50,15 @@ export async function POST(request: NextRequest) {
 
       if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
         return NextResponse.json(
-          { error: 'Invalid date format. Use YYYY-MM-DD format.' },
-          { status: 400 }
+          { error: "Invalid date format. Use YYYY-MM-DD format." },
+          { status: 400 },
         );
       }
 
       if (endDate < startDate) {
         return NextResponse.json(
-          { error: 'End date must be after start date' },
-          { status: 400 }
+          { error: "End date must be after start date" },
+          { status: 400 },
         );
       }
     }
@@ -71,15 +71,15 @@ export async function POST(request: NextRequest) {
       is_public: body.is_public || false,
       settings: body.settings || {},
       start_date: body.start_date || undefined,
-      end_date: body.end_date || undefined
+      end_date: body.end_date || undefined,
     });
 
     return NextResponse.json(newProject, { status: 201 });
   } catch (error) {
-    console.error('Error creating project:', error);
+    console.error("Error creating project:", error);
     return NextResponse.json(
-      { error: 'Failed to create project' },
-      { status: 500 }
+      { error: "Failed to create project" },
+      { status: 500 },
     );
   }
 }

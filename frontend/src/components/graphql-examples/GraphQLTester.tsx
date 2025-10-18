@@ -2,25 +2,35 @@
  * GraphQL Tester Component
  * Tests the GraphQL backend integration from the frontend
  */
-'use client';
+"use client";
 
-import React, { useState } from 'react';
-import { Button } from '@/shared/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card';
-import { Textarea } from '@/shared/components/ui/textarea';
-import { Alert, AlertDescription } from '@/shared/components/ui/alert';
-import { Badge } from '@/shared/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/components/ui/tabs';
 import {
-  Play,
+  AlertTriangle,
   CheckCircle,
-  XCircle,
   Clock,
-  Database,
   Code,
+  Database,
+  Play,
+  XCircle,
   Zap,
-  AlertTriangle
-} from 'lucide-react';
+} from "lucide-react";
+import React, { useState } from "react";
+import { Alert, AlertDescription } from "@/shared/components/ui/alert";
+import { Badge } from "@/shared/components/ui/badge";
+import { Button } from "@/shared/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/shared/components/ui/card";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/shared/components/ui/tabs";
+import { Textarea } from "@/shared/components/ui/textarea";
 
 interface TestResult {
   success: boolean;
@@ -30,28 +40,32 @@ interface TestResult {
 }
 
 export function GraphQLTester() {
-  const [customQuery, setCustomQuery] = useState('');
-  const [testResults, setTestResults] = useState<Record<string, TestResult>>({});
+  const [customQuery, setCustomQuery] = useState("");
+  const [testResults, setTestResults] = useState<Record<string, TestResult>>(
+    {},
+  );
   const [isLoading, setIsLoading] = useState(false);
-  const [connectionStatus, setConnectionStatus] = useState<'unknown' | 'connected' | 'error'>('unknown');
+  const [connectionStatus, setConnectionStatus] = useState<
+    "unknown" | "connected" | "error"
+  >("unknown");
 
   const predefinedQueries = {
-    'Test Connection': `query { __typename }`,
-    'Get Users': `query { users { edges { id username email } totalCount } }`,
-    'Get Projects': `query { projects { edges { id name description } totalCount } }`,
-    'Get Current User': `query { me { id username email fullName } }`,
-    'Get Roles': `query { roles { id name description } }`,
-    'Create Project': `mutation { createProject(input: { name: "Test Project", description: "Created from frontend" }) { success message } }`
+    "Test Connection": `query { __typename }`,
+    "Get Users": `query { users { edges { id username email } totalCount } }`,
+    "Get Projects": `query { projects { edges { id name description } totalCount } }`,
+    "Get Current User": `query { me { id username email fullName } }`,
+    "Get Roles": `query { roles { id name description } }`,
+    "Create Project": `mutation { createProject(input: { name: "Test Project", description: "Created from frontend" }) { success message } }`,
   };
 
   const testGraphQLQuery = async (query: string, testName: string) => {
     const startTime = Date.now();
 
     try {
-      const response = await fetch('/api/v1/graphql', {
-        method: 'POST',
+      const response = await fetch("/api/v1/graphql", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({ query }),
       });
@@ -60,35 +74,37 @@ export function GraphQLTester() {
       const result = await response.json();
 
       if (response.ok) {
-        setTestResults(prev => ({
+        setTestResults((prev) => ({
           ...prev,
           [testName]: {
             success: true,
             data: result,
-            duration
-          }
+            duration,
+          },
         }));
 
-        if (testName === 'Test Connection') {
-          setConnectionStatus('connected');
+        if (testName === "Test Connection") {
+          setConnectionStatus("connected");
         }
       } else {
-        throw new Error(`HTTP ${response.status}: ${result.message || 'Unknown error'}`);
+        throw new Error(
+          `HTTP ${response.status}: ${result.message || "Unknown error"}`,
+        );
       }
     } catch (error) {
       const duration = Date.now() - startTime;
 
-      setTestResults(prev => ({
+      setTestResults((prev) => ({
         ...prev,
         [testName]: {
           success: false,
-          error: error instanceof Error ? error.message : 'Unknown error',
-          duration
-        }
+          error: error instanceof Error ? error.message : "Unknown error",
+          duration,
+        },
       }));
 
-      if (testName === 'Test Connection') {
-        setConnectionStatus('error');
+      if (testName === "Test Connection") {
+        setConnectionStatus("error");
       }
     }
   };
@@ -97,7 +113,7 @@ export function GraphQLTester() {
     if (!customQuery.trim()) return;
 
     setIsLoading(true);
-    await testGraphQLQuery(customQuery, 'Custom Query');
+    await testGraphQLQuery(customQuery, "Custom Query");
     setIsLoading(false);
   };
 
@@ -108,7 +124,7 @@ export function GraphQLTester() {
     for (const [testName, query] of Object.entries(predefinedQueries)) {
       await testGraphQLQuery(query, testName);
       // Small delay between tests
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await new Promise((resolve) => setTimeout(resolve, 100));
     }
 
     setIsLoading(false);
@@ -116,22 +132,28 @@ export function GraphQLTester() {
 
   const getStatusIcon = (result?: TestResult) => {
     if (!result) return <Clock className="h-4 w-4 text-muted-foreground" />;
-    return result.success
-      ? <CheckCircle className="h-4 w-4 text-green-500" />
-      : <XCircle className="h-4 w-4 text-red-500" />;
+    return result.success ? (
+      <CheckCircle className="h-4 w-4 text-green-500" />
+    ) : (
+      <XCircle className="h-4 w-4 text-red-500" />
+    );
   };
 
   const getStatusBadge = (result?: TestResult) => {
     if (!result) return <Badge variant="secondary">Pending</Badge>;
-    return result.success
-      ? <Badge variant="default">Pass</Badge>
-      : <Badge variant="destructive">Fail</Badge>;
+    return result.success ? (
+      <Badge variant="default">Pass</Badge>
+    ) : (
+      <Badge variant="destructive">Fail</Badge>
+    );
   };
 
   return (
     <div className="space-y-6">
       <div className="border-b pb-6">
-        <h1 className="text-3xl font-bold mb-2">GraphQL Backend Integration Tester</h1>
+        <h1 className="text-3xl font-bold mb-2">
+          GraphQL Backend Integration Tester
+        </h1>
         <p className="text-muted-foreground">
           Test GraphQL queries and mutations against the FastNext backend
         </p>
@@ -147,21 +169,23 @@ export function GraphQLTester() {
         </CardHeader>
         <CardContent>
           <div className="flex items-center gap-4">
-            {connectionStatus === 'connected' && (
+            {connectionStatus === "connected" && (
               <div className="flex items-center gap-2">
                 <div className="h-2 w-2 rounded-full bg-green-500" />
-                <span className="text-sm text-green-600">Connected to GraphQL Backend</span>
+                <span className="text-sm text-green-600">
+                  Connected to GraphQL Backend
+                </span>
                 <Badge variant="default">Active</Badge>
               </div>
             )}
-            {connectionStatus === 'error' && (
+            {connectionStatus === "error" && (
               <div className="flex items-center gap-2">
                 <div className="h-2 w-2 rounded-full bg-red-500" />
                 <span className="text-sm text-red-600">Connection Failed</span>
                 <Badge variant="destructive">Error</Badge>
               </div>
             )}
-            {connectionStatus === 'unknown' && (
+            {connectionStatus === "unknown" && (
               <div className="flex items-center gap-2">
                 <div className="h-2 w-2 rounded-full bg-yellow-500 animate-pulse" />
                 <span className="text-sm text-yellow-600">Unknown Status</span>
@@ -172,7 +196,12 @@ export function GraphQLTester() {
 
           <div className="mt-4">
             <Button
-              onClick={() => testGraphQLQuery(predefinedQueries['Test Connection'], 'Test Connection')}
+              onClick={() =>
+                testGraphQLQuery(
+                  predefinedQueries["Test Connection"],
+                  "Test Connection",
+                )
+              }
               variant="outline"
               size="sm"
             >
@@ -194,7 +223,7 @@ export function GraphQLTester() {
             <h3 className="text-lg font-medium">Predefined GraphQL Tests</h3>
             <Button onClick={runAllTests} disabled={isLoading}>
               <Play className="h-4 w-4 mr-2" />
-              {isLoading ? 'Running Tests...' : 'Run All Tests'}
+              {isLoading ? "Running Tests..." : "Run All Tests"}
             </Button>
           </div>
 
@@ -231,15 +260,18 @@ export function GraphQLTester() {
                     {result && (
                       <div>
                         <h4 className="text-sm font-medium mb-2">
-                          {result.success ? 'Response:' : 'Error:'}
+                          {result.success ? "Response:" : "Error:"}
                         </h4>
-                        <pre className={`p-3 rounded text-xs overflow-x-auto ${
-                          result.success ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-800'
-                        }`}>
+                        <pre
+                          className={`p-3 rounded text-xs overflow-x-auto ${
+                            result.success
+                              ? "bg-green-50 text-green-800"
+                              : "bg-red-50 text-red-800"
+                          }`}
+                        >
                           {result.success
                             ? JSON.stringify(result.data, null, 2)
-                            : result.error
-                          }
+                            : result.error}
                         </pre>
                       </div>
                     )}
@@ -273,30 +305,38 @@ export function GraphQLTester() {
               />
             </div>
 
-            <Button onClick={runCustomQuery} disabled={isLoading || !customQuery.trim()}>
+            <Button
+              onClick={runCustomQuery}
+              disabled={isLoading || !customQuery.trim()}
+            >
               <Play className="h-4 w-4 mr-2" />
-              {isLoading ? 'Running...' : 'Run Query'}
+              {isLoading ? "Running..." : "Run Query"}
             </Button>
 
-            {testResults['Custom Query'] && (
+            {testResults["Custom Query"] && (
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    {getStatusIcon(testResults['Custom Query'])}
+                    {getStatusIcon(testResults["Custom Query"])}
                     Custom Query Result
-                    {getStatusBadge(testResults['Custom Query'])}
+                    {getStatusBadge(testResults["Custom Query"])}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <pre className={`p-4 rounded text-sm overflow-x-auto ${
-                    testResults['Custom Query'].success
-                      ? 'bg-green-50 text-green-800'
-                      : 'bg-red-50 text-red-800'
-                  }`}>
-                    {testResults['Custom Query'].success
-                      ? JSON.stringify(testResults['Custom Query'].data, null, 2)
-                      : testResults['Custom Query'].error
-                    }
+                  <pre
+                    className={`p-4 rounded text-sm overflow-x-auto ${
+                      testResults["Custom Query"].success
+                        ? "bg-green-50 text-green-800"
+                        : "bg-red-50 text-red-800"
+                    }`}
+                  >
+                    {testResults["Custom Query"].success
+                      ? JSON.stringify(
+                          testResults["Custom Query"].data,
+                          null,
+                          2,
+                        )
+                      : testResults["Custom Query"].error}
                   </pre>
                 </CardContent>
               </Card>
@@ -317,7 +357,7 @@ export function GraphQLTester() {
           <div>
             <h4 className="font-medium mb-2">Query with Variables:</h4>
             <pre className="bg-muted p-3 rounded text-sm overflow-x-auto">
-{`query GetUser($id: Int!) {
+              {`query GetUser($id: Int!) {
   user(id: $id) {
     id
     username
@@ -331,7 +371,7 @@ export function GraphQLTester() {
           <div>
             <h4 className="font-medium mb-2">Mutation Example:</h4>
             <pre className="bg-muted p-3 rounded text-sm overflow-x-auto">
-{`mutation CreateProject($input: ProjectInput!) {
+              {`mutation CreateProject($input: ProjectInput!) {
   createProject(input: $input) {
     success
     message

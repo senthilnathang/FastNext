@@ -5,20 +5,20 @@
  * Analyzes webpack bundles for security issues and optimization opportunities
  */
 
-import fs from 'fs';
-import path from 'path';
-import { execSync } from 'child_process';
+import { execSync } from "child_process";
+import fs from "fs";
+import path from "path";
 
 class BundleSecurityAnalyzer {
   constructor() {
-    this.buildDir = path.join(process.cwd(), '.next');
+    this.buildDir = path.join(process.cwd(), ".next");
     this.issues = [];
     this.recommendations = [];
     this.bundleInfo = {};
   }
 
   async analyze() {
-    console.log('📦 Starting Bundle Security Analysis...\n');
+    console.log("📦 Starting Bundle Security Analysis...\n");
 
     try {
       // 1. Check if build exists
@@ -41,63 +41,62 @@ class BundleSecurityAnalyzer {
 
       // 7. Generate report
       this.generateReport();
-
     } catch (error) {
-      console.error('❌ Bundle analysis failed:', error.message);
+      console.error("❌ Bundle analysis failed:", error.message);
       process.exit(1);
     }
   }
 
   async checkBuildExists() {
     if (!fs.existsSync(this.buildDir)) {
-      console.log('🔨 No build found, running build...');
+      console.log("🔨 No build found, running build...");
       try {
-        execSync('npm run build', { stdio: 'inherit' });
+        execSync("npm run build", { stdio: "inherit" });
       } catch {
-        throw new Error('Build failed. Cannot analyze bundle.');
+        throw new Error("Build failed. Cannot analyze bundle.");
       }
     }
   }
 
   async analyzeBundleComposition() {
-    console.log('🔍 Analyzing Bundle Composition...');
+    console.log("🔍 Analyzing Bundle Composition...");
 
     try {
       // Get build info
-      const buildManifest = path.join(this.buildDir, 'build-manifest.json');
+      const buildManifest = path.join(this.buildDir, "build-manifest.json");
       if (fs.existsSync(buildManifest)) {
-        const manifest = JSON.parse(fs.readFileSync(buildManifest, 'utf8'));
+        const manifest = JSON.parse(fs.readFileSync(buildManifest, "utf8"));
         this.bundleInfo.pages = Object.keys(manifest.pages || {}).length;
         this.bundleInfo.assets = manifest.pages;
       }
 
       // Analyze static directory
-      const staticDir = path.join(this.buildDir, 'static');
+      const staticDir = path.join(this.buildDir, "static");
       if (fs.existsSync(staticDir)) {
         const chunks = this.getChunkFiles(staticDir);
         this.bundleInfo.chunks = chunks;
 
         // Check chunk sizes
-        chunks.forEach(chunk => {
-          if (chunk.size > 1024 * 1024) { // > 1MB
+        chunks.forEach((chunk) => {
+          if (chunk.size > 1024 * 1024) {
+            // > 1MB
             this.issues.push({
-              type: 'large-chunk',
+              type: "large-chunk",
               file: chunk.name,
               size: chunk.size,
-              severity: 'warning',
-              message: `Large chunk detected (${this.formatSize(chunk.size)})`
+              severity: "warning",
+              message: `Large chunk detected (${this.formatSize(chunk.size)})`,
             });
           }
         });
       }
 
       console.log(`   Found ${this.bundleInfo.chunks?.length || 0} chunks`);
-
     } catch (error) {
       this.issues.push({
-        type: 'analysis-error',
-        severity: 'warning',
-        message: `Bundle composition analysis failed: ${error.message}`
+        type: "analysis-error",
+        severity: "warning",
+        message: `Bundle composition analysis failed: ${error.message}`,
       });
     }
   }
@@ -108,18 +107,18 @@ class BundleSecurityAnalyzer {
     function walkDir(currentDir) {
       const files = fs.readdirSync(currentDir);
 
-      files.forEach(file => {
+      files.forEach((file) => {
         const filePath = path.join(currentDir, file);
         const stat = fs.statSync(filePath);
 
         if (stat.isDirectory()) {
           walkDir(filePath);
-        } else if (file.endsWith('.js') || file.endsWith('.css')) {
+        } else if (file.endsWith(".js") || file.endsWith(".css")) {
           chunks.push({
             name: file,
             path: filePath,
             size: stat.size,
-            type: file.endsWith('.js') ? 'javascript' : 'css'
+            type: file.endsWith(".js") ? "javascript" : "css",
           });
         }
       });
@@ -130,67 +129,72 @@ class BundleSecurityAnalyzer {
   }
 
   async checkSecurityIssues() {
-    console.log('🔒 Checking for Security Issues...');
+    console.log("🔒 Checking for Security Issues...");
 
     const chunks = this.bundleInfo.chunks || [];
 
     for (const chunk of chunks) {
       try {
-        const content = fs.readFileSync(chunk.path, 'utf8');
+        const content = fs.readFileSync(chunk.path, "utf8");
 
         // Check for exposed API keys/secrets
         const secretPatterns = [
-          { pattern: /sk_live_[a-zA-Z0-9]{24,}/, name: 'Stripe Live Key' },
-          { pattern: /pk_live_[a-zA-Z0-9]{24,}/, name: 'Stripe Publishable Key' },
-          { pattern: /AKIA[0-9A-Z]{16}/, name: 'AWS Access Key' },
-          { pattern: /AIza[0-9A-Za-z\\-_]{35}/, name: 'Google API Key' },
-          { pattern: /ya29\\.[0-9A-Za-z\\-_]+/, name: 'Google OAuth Token' },
-          { pattern: /[a-zA-Z0-9]{32,}/, name: 'Potential Secret' } // Generic long strings
+          { pattern: /sk_live_[a-zA-Z0-9]{24,}/, name: "Stripe Live Key" },
+          {
+            pattern: /pk_live_[a-zA-Z0-9]{24,}/,
+            name: "Stripe Publishable Key",
+          },
+          { pattern: /AKIA[0-9A-Z]{16}/, name: "AWS Access Key" },
+          { pattern: /AIza[0-9A-Za-z\\-_]{35}/, name: "Google API Key" },
+          { pattern: /ya29\\.[0-9A-Za-z\\-_]+/, name: "Google OAuth Token" },
+          { pattern: /[a-zA-Z0-9]{32,}/, name: "Potential Secret" }, // Generic long strings
         ];
 
         secretPatterns.forEach(({ pattern, name }) => {
           const matches = content.match(pattern);
           if (matches) {
             this.issues.push({
-              type: 'exposed-secret',
+              type: "exposed-secret",
               file: chunk.name,
-              severity: 'critical',
+              severity: "critical",
               secretType: name,
-              message: `Potential ${name} found in bundle`
+              message: `Potential ${name} found in bundle`,
             });
           }
         });
 
         // Check for eval usage
-        if (content.includes('eval(') || content.includes('new Function(')) {
+        if (content.includes("eval(") || content.includes("new Function(")) {
           this.issues.push({
-            type: 'unsafe-eval',
+            type: "unsafe-eval",
             file: chunk.name,
-            severity: 'high',
-            message: 'Unsafe eval usage detected'
+            severity: "high",
+            message: "Unsafe eval usage detected",
           });
         }
 
         // Check for innerHTML usage
-        if (content.includes('innerHTML') && !content.includes('DOMPurify')) {
+        if (content.includes("innerHTML") && !content.includes("DOMPurify")) {
           this.issues.push({
-            type: 'unsafe-html',
+            type: "unsafe-html",
             file: chunk.name,
-            severity: 'medium',
-            message: 'innerHTML usage without sanitization'
+            severity: "medium",
+            message: "innerHTML usage without sanitization",
           });
         }
 
         // Check for console.log in production
-        if (process.env.NODE_ENV === 'production' && content.includes('console.log')) {
+        if (
+          process.env.NODE_ENV === "production" &&
+          content.includes("console.log")
+        ) {
           this.issues.push({
-            type: 'debug-code',
+            type: "debug-code",
             file: chunk.name,
-            severity: 'low',
-            message: 'Console.log statements in production build'
+            severity: "low",
+            message: "Console.log statements in production build",
           });
         }
-
       } catch (error) {
         console.warn(`   Could not analyze ${chunk.name}: ${error.message}`);
       }
@@ -198,38 +202,49 @@ class BundleSecurityAnalyzer {
   }
 
   async analyzeDependencies() {
-    console.log('📚 Analyzing Bundle Dependencies...');
+    console.log("📚 Analyzing Bundle Dependencies...");
 
     try {
       // Use webpack-bundle-analyzer if available
-      const analyzerPath = path.join(process.cwd(), 'node_modules', 'webpack-bundle-analyzer');
+      const analyzerPath = path.join(
+        process.cwd(),
+        "node_modules",
+        "webpack-bundle-analyzer",
+      );
       if (fs.existsSync(analyzerPath)) {
         // Generate bundle analysis
-        execSync('npx webpack-bundle-analyzer .next/static/chunks/*.js --mode=json --report=bundle-report.json', {
-          stdio: 'pipe'
-        });
+        execSync(
+          "npx webpack-bundle-analyzer .next/static/chunks/*.js --mode=json --report=bundle-report.json",
+          {
+            stdio: "pipe",
+          },
+        );
 
-        if (fs.existsSync('bundle-report.json')) {
-          const report = JSON.parse(fs.readFileSync('bundle-report.json', 'utf8'));
+        if (fs.existsSync("bundle-report.json")) {
+          const report = JSON.parse(
+            fs.readFileSync("bundle-report.json", "utf8"),
+          );
           this.analyzeBundleReport(report);
         }
       }
 
       // Check for duplicate dependencies
-      const packageJson = JSON.parse(fs.readFileSync('package.json', 'utf8'));
-      const deps = { ...packageJson.dependencies, ...packageJson.devDependencies };
+      const packageJson = JSON.parse(fs.readFileSync("package.json", "utf8"));
+      const deps = {
+        ...packageJson.dependencies,
+        ...packageJson.devDependencies,
+      };
 
       // Check for potential duplicates
       const potentialDuplicates = this.findPotentialDuplicates(deps);
-      potentialDuplicates.forEach(duplicate => {
+      potentialDuplicates.forEach((duplicate) => {
         this.issues.push({
-          type: 'duplicate-dependency',
-          severity: 'warning',
+          type: "duplicate-dependency",
+          severity: "warning",
           packages: duplicate,
-          message: `Potential duplicate dependencies: ${duplicate.join(', ')}`
+          message: `Potential duplicate dependencies: ${duplicate.join(", ")}`,
         });
       });
-
     } catch (error) {
       console.warn(`   Dependency analysis failed: ${error.message}`);
     }
@@ -241,15 +256,15 @@ class BundleSecurityAnalyzer {
 
     // Check for similar package names that might be duplicates
     const similarityGroups = [
-      ['lodash', 'lodash-es', 'lodash.get', 'lodash.set'],
-      ['moment', 'dayjs', 'date-fns'],
-      ['axios', 'fetch', 'node-fetch', 'isomorphic-fetch'],
-      ['react-router', 'reach-router', 'next/router'],
-      ['styled-components', 'emotion', '@emotion/styled']
+      ["lodash", "lodash-es", "lodash.get", "lodash.set"],
+      ["moment", "dayjs", "date-fns"],
+      ["axios", "fetch", "node-fetch", "isomorphic-fetch"],
+      ["react-router", "reach-router", "next/router"],
+      ["styled-components", "emotion", "@emotion/styled"],
     ];
 
-    similarityGroups.forEach(group => {
-      const found = packages.filter(pkg => group.includes(pkg));
+    similarityGroups.forEach((group) => {
+      const found = packages.filter((pkg) => group.includes(pkg));
       if (found.length > 1) {
         duplicates.push(found);
       }
@@ -261,28 +276,31 @@ class BundleSecurityAnalyzer {
   analyzeBundleReport(report) {
     // Analyze webpack bundle report for security issues
     if (report.children) {
-      report.children.forEach(child => {
+      report.children.forEach((child) => {
         if (child.modules) {
-          child.modules.forEach(module => {
+          child.modules.forEach((module) => {
             // Check for large modules
-            if (module.size > 500 * 1024) { // > 500KB
+            if (module.size > 500 * 1024) {
+              // > 500KB
               this.issues.push({
-                type: 'large-module',
+                type: "large-module",
                 module: module.name,
                 size: module.size,
-                severity: 'warning',
-                message: `Large module: ${this.formatSize(module.size)}`
+                severity: "warning",
+                message: `Large module: ${this.formatSize(module.size)}`,
               });
             }
 
             // Check for suspicious module names
-            if (module.name.includes('node_modules') &&
-                (module.name.includes('test') || module.name.includes('demo'))) {
+            if (
+              module.name.includes("node_modules") &&
+              (module.name.includes("test") || module.name.includes("demo"))
+            ) {
               this.issues.push({
-                type: 'test-code-in-bundle',
+                type: "test-code-in-bundle",
                 module: module.name,
-                severity: 'warning',
-                message: 'Test/demo code included in production bundle'
+                severity: "warning",
+                message: "Test/demo code included in production bundle",
               });
             }
           });
@@ -292,37 +310,36 @@ class BundleSecurityAnalyzer {
   }
 
   async checkForSecrets() {
-    console.log('🔑 Checking for Exposed Secrets...');
+    console.log("🔑 Checking for Exposed Secrets...");
 
     // Check build output for common secret patterns
     const buildFiles = this.getAllBuildFiles();
 
-    buildFiles.forEach(file => {
-      if (file.endsWith('.js') || file.endsWith('.html')) {
+    buildFiles.forEach((file) => {
+      if (file.endsWith(".js") || file.endsWith(".html")) {
         try {
-          const content = fs.readFileSync(file, 'utf8');
+          const content = fs.readFileSync(file, "utf8");
 
           // Environment variable leaks
           const envLeakPatterns = [
             /process\.env\.[A-Z_]+/g,
             /NODE_ENV.*production/g,
             /API_KEY.*['"]/g,
-            /SECRET.*['"]/g
+            /SECRET.*['"]/g,
           ];
 
-          envLeakPatterns.forEach(pattern => {
+          envLeakPatterns.forEach((pattern) => {
             const matches = content.match(pattern);
             if (matches && matches.length > 0) {
               this.issues.push({
-                type: 'env-leak',
+                type: "env-leak",
                 file: path.basename(file),
-                severity: 'medium',
+                severity: "medium",
                 matches: matches.slice(0, 5), // Limit to first 5 matches
-                message: 'Environment variables exposed in bundle'
+                message: "Environment variables exposed in bundle",
               });
             }
           });
-
         } catch {
           // Ignore files that can't be read
         }
@@ -337,7 +354,7 @@ class BundleSecurityAnalyzer {
       if (!fs.existsSync(dir)) return;
 
       const items = fs.readdirSync(dir);
-      items.forEach(item => {
+      items.forEach((item) => {
         const fullPath = path.join(dir, item);
         const stat = fs.statSync(fullPath);
 
@@ -354,18 +371,18 @@ class BundleSecurityAnalyzer {
   }
 
   async analyzePerformanceImpact() {
-    console.log('⚡ Analyzing Performance Impact...');
+    console.log("⚡ Analyzing Performance Impact...");
 
     const chunks = this.bundleInfo.chunks || [];
     let totalSize = 0;
     let jsSize = 0;
     let cssSize = 0;
 
-    chunks.forEach(chunk => {
+    chunks.forEach((chunk) => {
       totalSize += chunk.size;
-      if (chunk.type === 'javascript') {
+      if (chunk.type === "javascript") {
         jsSize += chunk.size;
-      } else if (chunk.type === 'css') {
+      } else if (chunk.type === "css") {
         cssSize += chunk.size;
       }
     });
@@ -375,47 +392,54 @@ class BundleSecurityAnalyzer {
     this.bundleInfo.cssSize = cssSize;
 
     // Performance recommendations
-    if (jsSize > 1024 * 1024) { // > 1MB JS
+    if (jsSize > 1024 * 1024) {
+      // > 1MB JS
       this.recommendations.push({
-        type: 'performance',
-        message: `Large JavaScript bundle (${this.formatSize(jsSize)}). Consider code splitting.`
+        type: "performance",
+        message: `Large JavaScript bundle (${this.formatSize(jsSize)}). Consider code splitting.`,
       });
     }
 
     if (chunks.length > 50) {
       this.recommendations.push({
-        type: 'performance',
-        message: `Many chunks (${chunks.length}). Consider chunk optimization.`
+        type: "performance",
+        message: `Many chunks (${chunks.length}). Consider chunk optimization.`,
       });
     }
   }
 
   formatSize(bytes) {
-    if (bytes === 0) return '0 Bytes';
+    if (bytes === 0) return "0 Bytes";
     const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const sizes = ["Bytes", "KB", "MB", "GB"];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    return parseFloat((bytes / k ** i).toFixed(2)) + " " + sizes[i];
   }
 
   generateReport() {
-    console.log('\n📋 Bundle Security Analysis Report');
-    console.log('==================================\n');
+    console.log("\n📋 Bundle Security Analysis Report");
+    console.log("==================================\n");
 
     // Summary
-    const critical = this.issues.filter(i => i.severity === 'critical').length;
-    const high = this.issues.filter(i => i.severity === 'high').length;
-    const medium = this.issues.filter(i => i.severity === 'medium').length;
-    const low = this.issues.filter(i => i.severity === 'low').length;
+    const critical = this.issues.filter(
+      (i) => i.severity === "critical",
+    ).length;
+    const high = this.issues.filter((i) => i.severity === "high").length;
+    const medium = this.issues.filter((i) => i.severity === "medium").length;
+    const low = this.issues.filter((i) => i.severity === "low").length;
 
-    console.log('📊 BUNDLE STATISTICS:');
-    console.log(`   Total Size: ${this.formatSize(this.bundleInfo.totalSize || 0)}`);
-    console.log(`   JavaScript: ${this.formatSize(this.bundleInfo.jsSize || 0)}`);
+    console.log("📊 BUNDLE STATISTICS:");
+    console.log(
+      `   Total Size: ${this.formatSize(this.bundleInfo.totalSize || 0)}`,
+    );
+    console.log(
+      `   JavaScript: ${this.formatSize(this.bundleInfo.jsSize || 0)}`,
+    );
     console.log(`   CSS: ${this.formatSize(this.bundleInfo.cssSize || 0)}`);
     console.log(`   Chunks: ${this.bundleInfo.chunks?.length || 0}`);
     console.log(`   Pages: ${this.bundleInfo.pages || 0}\n`);
 
-    console.log('🚨 SECURITY ISSUES:');
+    console.log("🚨 SECURITY ISSUES:");
     console.log(`   Critical: ${critical}`);
     console.log(`   High: ${high}`);
     console.log(`   Medium: ${medium}`);
@@ -423,10 +447,10 @@ class BundleSecurityAnalyzer {
 
     // Critical issues
     if (critical > 0) {
-      console.log('🚨 CRITICAL ISSUES:');
+      console.log("🚨 CRITICAL ISSUES:");
       this.issues
-        .filter(i => i.severity === 'critical')
-        .forEach(issue => {
+        .filter((i) => i.severity === "critical")
+        .forEach((issue) => {
           console.log(`   • ${issue.type}: ${issue.message}`);
           if (issue.file) console.log(`     File: ${issue.file}`);
         });
@@ -435,10 +459,10 @@ class BundleSecurityAnalyzer {
 
     // High severity issues
     if (high > 0) {
-      console.log('🔴 HIGH SEVERITY ISSUES:');
+      console.log("🔴 HIGH SEVERITY ISSUES:");
       this.issues
-        .filter(i => i.severity === 'high')
-        .forEach(issue => {
+        .filter((i) => i.severity === "high")
+        .forEach((issue) => {
           console.log(`   • ${issue.type}: ${issue.message}`);
           if (issue.file) console.log(`     File: ${issue.file}`);
         });
@@ -447,8 +471,8 @@ class BundleSecurityAnalyzer {
 
     // Recommendations
     if (this.recommendations.length > 0) {
-      console.log('💡 RECOMMENDATIONS:');
-      this.recommendations.forEach(rec => {
+      console.log("💡 RECOMMENDATIONS:");
+      this.recommendations.forEach((rec) => {
         console.log(`   • ${rec.message}`);
       });
       console.log();
@@ -459,13 +483,13 @@ class BundleSecurityAnalyzer {
 
     // Exit with appropriate code
     if (critical > 0) {
-      console.log('❌ Bundle analysis failed due to critical security issues');
+      console.log("❌ Bundle analysis failed due to critical security issues");
       process.exit(1);
     } else if (high > 0) {
-      console.log('⚠️  Bundle analysis completed with high severity issues');
+      console.log("⚠️  Bundle analysis completed with high severity issues");
       process.exit(1);
     } else {
-      console.log('✅ Bundle security analysis passed');
+      console.log("✅ Bundle security analysis passed");
       process.exit(0);
     }
   }
@@ -477,14 +501,14 @@ class BundleSecurityAnalyzer {
       issues: this.issues,
       recommendations: this.recommendations,
       summary: {
-        critical: this.issues.filter(i => i.severity === 'critical').length,
-        high: this.issues.filter(i => i.severity === 'high').length,
-        medium: this.issues.filter(i => i.severity === 'medium').length,
-        low: this.issues.filter(i => i.severity === 'low').length
-      }
+        critical: this.issues.filter((i) => i.severity === "critical").length,
+        high: this.issues.filter((i) => i.severity === "high").length,
+        medium: this.issues.filter((i) => i.severity === "medium").length,
+        low: this.issues.filter((i) => i.severity === "low").length,
+      },
     };
 
-    const reportPath = path.join(process.cwd(), 'bundle-security-report.json');
+    const reportPath = path.join(process.cwd(), "bundle-security-report.json");
     fs.writeFileSync(reportPath, JSON.stringify(report, null, 2));
     console.log(`📄 Detailed report saved to: ${reportPath}`);
   }
@@ -493,8 +517,8 @@ class BundleSecurityAnalyzer {
 // Run the analyzer
 if (import.meta.url === `file://${process.argv[1]}`) {
   const analyzer = new BundleSecurityAnalyzer();
-  analyzer.analyze().catch(error => {
-    console.error('Analysis failed:', error);
+  analyzer.analyze().catch((error) => {
+    console.error("Analysis failed:", error);
     process.exit(1);
   });
 }

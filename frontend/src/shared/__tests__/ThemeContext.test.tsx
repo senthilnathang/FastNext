@@ -54,13 +54,25 @@ const TestComponent: React.FC = () => {
     <div>
       <div data-testid="current-theme">{theme}</div>
       <div data-testid="actual-theme">{actualTheme}</div>
-      <button type="button" onClick={() => setTheme("light")} data-testid="set-light">
+      <button
+        type="button"
+        onClick={() => setTheme("light")}
+        data-testid="set-light"
+      >
         Set Light
       </button>
-      <button type="button" onClick={() => setTheme("dark")} data-testid="set-dark">
+      <button
+        type="button"
+        onClick={() => setTheme("dark")}
+        data-testid="set-dark"
+      >
         Set Dark
       </button>
-      <button type="button" onClick={() => setTheme("system")} data-testid="set-system">
+      <button
+        type="button"
+        onClick={() => setTheme("system")}
+        data-testid="set-system"
+      >
         Set System
       </button>
       <button type="button" onClick={toggleTheme} data-testid="toggle-theme">

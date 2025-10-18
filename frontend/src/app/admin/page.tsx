@@ -1,109 +1,114 @@
-'use client';
+"use client";
 
-import React from 'react';
-import Link from 'next/link';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/components/ui/card';
-import { Button } from '@/shared/components/ui/button';
-import { Badge } from '@/shared/components/ui/badge';
 import {
-  Shield,
-  Users,
-  Key,
-  Upload,
-  Download,
-  Settings,
+  AlertTriangle,
   ArrowRight,
+  Download,
   FileText,
-  Server,
+  Key,
   Lock,
+  Server,
+  Settings,
+  Shield,
+  Upload,
   UserCheck,
-  AlertTriangle
-} from 'lucide-react';
+  Users,
+} from "lucide-react";
+import Link from "next/link";
+import React from "react";
+import { Badge } from "@/shared/components/ui/badge";
+import { Button } from "@/shared/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/shared/components/ui/card";
 
 const adminMenuItems = [
   {
-    title: 'User Management',
-    href: '/admin/users',
+    title: "User Management",
+    href: "/admin/users",
     icon: Users,
-    description: 'Manage user accounts and access'
+    description: "Manage user accounts and access",
   },
   {
-    title: 'Role Management',
-    href: '/admin/roles',
+    title: "Role Management",
+    href: "/admin/roles",
     icon: Key,
-    description: 'Configure user roles and permissions'
+    description: "Configure user roles and permissions",
   },
   {
-    title: 'Permissions',
-    href: '/admin/permissions',
+    title: "Permissions",
+    href: "/admin/permissions",
     icon: Shield,
-    description: 'Define and manage system permissions'
+    description: "Define and manage system permissions",
   },
   {
-    title: 'Audit Logs',
-    href: '/admin/audit-logs',
+    title: "Audit Logs",
+    href: "/admin/audit-logs",
     icon: FileText,
-    description: 'Track and monitor all system activities',
-    badge: 'New'
+    description: "Track and monitor all system activities",
+    badge: "New",
   },
   {
-    title: 'System Monitoring',
-    href: '/admin/system-monitoring',
+    title: "System Monitoring",
+    href: "/admin/system-monitoring",
     icon: Server,
-    description: 'Real-time system performance and health monitoring',
-    badge: 'New'
+    description: "Real-time system performance and health monitoring",
+    badge: "New",
   },
   {
-    title: 'Configuration Management',
-    href: '/admin/configuration',
+    title: "Configuration Management",
+    href: "/admin/configuration",
     icon: Settings,
-    description: 'Manage system configuration and settings',
-    badge: 'New'
+    description: "Manage system configuration and settings",
+    badge: "New",
   },
   {
-    title: 'Data Import',
-    href: '/admin/data-import',
+    title: "Data Import",
+    href: "/admin/data-import",
     icon: Upload,
-    description: 'Import data into database tables'
+    description: "Import data into database tables",
   },
   {
-    title: 'Data Export',
-    href: '/admin/data-export',
+    title: "Data Export",
+    href: "/admin/data-export",
     icon: Download,
-    description: 'Export data from database tables'
+    description: "Export data from database tables",
   },
   {
-    title: 'Row Level Security',
-    href: '/admin/rls',
+    title: "Row Level Security",
+    href: "/admin/rls",
     icon: Lock,
-    description: 'Manage data access policies and security rules',
-    badge: 'Security'
+    description: "Manage data access policies and security rules",
+    badge: "Security",
   },
   {
-    title: 'RLS Policies',
-    href: '/admin/rls/policies',
+    title: "RLS Policies",
+    href: "/admin/rls/policies",
     icon: Shield,
-    description: 'Configure row-level security policies',
-    badge: 'Security'
+    description: "Configure row-level security policies",
+    badge: "Security",
   },
   {
-    title: 'RLS Assignments',
-    href: '/admin/rls/assignments',
+    title: "RLS Assignments",
+    href: "/admin/rls/assignments",
     icon: UserCheck,
-    description: 'Manage security rule assignments',
-    badge: 'Security'
+    description: "Manage security rule assignments",
+    badge: "Security",
   },
   {
-    title: 'RLS Audit Logs',
-    href: '/admin/rls/audit',
+    title: "RLS Audit Logs",
+    href: "/admin/rls/audit",
     icon: AlertTriangle,
-    description: 'View security access logs and violations',
-    badge: 'Security'
-  }
+    description: "View security access logs and violations",
+    badge: "Security",
+  },
 ];
 
 export default function AdminPage() {
-
   return (
     <div className="container mx-auto p-8">
       <div className="flex items-center space-x-2 mb-8">
@@ -136,7 +141,11 @@ export default function AdminPage() {
                   <CardDescription className="text-gray-600 dark:text-gray-400 mb-4">
                     {item.description}
                   </CardDescription>
-                  <Button variant="ghost" size="sm" className="w-full justify-between">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="w-full justify-between"
+                  >
                     Access
                     <ArrowRight className="h-4 w-4" />
                   </Button>

@@ -10,8 +10,9 @@ export function TechStackSection() {
             FastNext Framework Technology Stack
           </h2>
           <p className="text-xl text-gray-600 dark:text-gray-300">
-            Enterprise-grade full-stack platform built with the latest technologies for maximum performance,
-            security, and developer experience.
+            Enterprise-grade full-stack platform built with the latest
+            technologies for maximum performance, security, and developer
+            experience.
           </p>
         </div>
 
@@ -23,24 +24,38 @@ export function TechStackSection() {
             </h3>
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <span className="text-gray-700 dark:text-gray-300">Next.js 15</span>
+                <span className="text-gray-700 dark:text-gray-300">
+                  Next.js 15
+                </span>
                 <span className="text-green-600 font-medium">App Router</span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-gray-700 dark:text-gray-300">TypeScript</span>
+                <span className="text-gray-700 dark:text-gray-300">
+                  TypeScript
+                </span>
                 <span className="text-green-600 font-medium">Strict Mode</span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-gray-700 dark:text-gray-300">Tailwind CSS + shadcn/ui</span>
+                <span className="text-gray-700 dark:text-gray-300">
+                  Tailwind CSS + shadcn/ui
+                </span>
                 <span className="text-green-600 font-medium">Modern UI</span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-gray-700 dark:text-gray-300">TanStack Query + tRPC</span>
-                <span className="text-green-600 font-medium">Type-Safe APIs</span>
+                <span className="text-gray-700 dark:text-gray-300">
+                  TanStack Query + tRPC
+                </span>
+                <span className="text-green-600 font-medium">
+                  Type-Safe APIs
+                </span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-gray-700 dark:text-gray-300">Jest + Playwright</span>
-                <span className="text-green-600 font-medium">Testing Suite</span>
+                <span className="text-gray-700 dark:text-gray-300">
+                  Jest + Playwright
+                </span>
+                <span className="text-green-600 font-medium">
+                  Testing Suite
+                </span>
               </div>
             </div>
           </div>
@@ -52,23 +67,35 @@ export function TechStackSection() {
             </h3>
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <span className="text-gray-700 dark:text-gray-300">FastAPI</span>
+                <span className="text-gray-700 dark:text-gray-300">
+                  FastAPI
+                </span>
                 <span className="text-green-600 font-medium">Async/Await</span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-gray-700 dark:text-gray-300">PostgreSQL + SQLAlchemy</span>
-                <span className="text-green-600 font-medium">Enterprise DB</span>
+                <span className="text-gray-700 dark:text-gray-300">
+                  PostgreSQL + SQLAlchemy
+                </span>
+                <span className="text-green-600 font-medium">
+                  Enterprise DB
+                </span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-gray-700 dark:text-gray-300">Redis Cluster</span>
+                <span className="text-gray-700 dark:text-gray-300">
+                  Redis Cluster
+                </span>
                 <span className="text-green-600 font-medium">12GB Cache</span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-gray-700 dark:text-gray-300">JWT + RBAC</span>
+                <span className="text-gray-700 dark:text-gray-300">
+                  JWT + RBAC
+                </span>
                 <span className="text-green-600 font-medium">Security</span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-gray-700 dark:text-gray-300">Pydantic v2</span>
+                <span className="text-gray-700 dark:text-gray-300">
+                  Pydantic v2
+                </span>
                 <span className="text-green-600 font-medium">Validation</span>
               </div>
             </div>

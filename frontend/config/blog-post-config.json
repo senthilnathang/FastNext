@@ -80,7 +80,14 @@
       "type": "multiselect",
       "required": false,
       "label": "Categories",
-      "options": ["Technology", "Design", "Business", "Tutorial", "News", "Opinion"],
+      "options": [
+        "Technology",
+        "Design",
+        "Business",
+        "Tutorial",
+        "News",
+        "Opinion"
+      ],
       "displayInList": true,
       "filterable": true
     },

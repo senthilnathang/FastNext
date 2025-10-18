@@ -1,5 +1,5 @@
-import { useState, useEffect, useCallback } from 'react';
-import { getApiUrl } from '@/shared/services/api/config';
+import { useCallback, useEffect, useState } from "react";
+import { getApiUrl } from "@/shared/services/api/config";
 
 // Types
 export interface RLSContext {
@@ -51,12 +51,12 @@ export const useRLSContext = () => {
   const fetchContext = useCallback(async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('access_token');
+      const token = localStorage.getItem("access_token");
 
-      const response = await fetch(getApiUrl('/api/v1/rls/context'), {
+      const response = await fetch(getApiUrl("/api/v1/rls/context"), {
         headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
         },
       });
 
@@ -65,10 +65,12 @@ export const useRLSContext = () => {
         setContext(data);
         setError(null);
       } else {
-        throw new Error('Failed to fetch RLS context');
+        throw new Error("Failed to fetch RLS context");
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load RLS context');
+      setError(
+        err instanceof Error ? err.message : "Failed to load RLS context",
+      );
       setContext(null);
     } finally {
       setLoading(false);
@@ -77,13 +79,13 @@ export const useRLSContext = () => {
 
   const refreshContext = useCallback(async () => {
     try {
-      const token = localStorage.getItem('access_token');
+      const token = localStorage.getItem("access_token");
 
-      const response = await fetch(getApiUrl('/api/v1/rls/context/refresh'), {
-        method: 'POST',
+      const response = await fetch(getApiUrl("/api/v1/rls/context/refresh"), {
+        method: "POST",
         headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
         },
       });
 
@@ -93,10 +95,12 @@ export const useRLSContext = () => {
         setError(null);
         return data;
       } else {
-        throw new Error('Failed to refresh RLS context');
+        throw new Error("Failed to refresh RLS context");
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to refresh RLS context');
+      setError(
+        err instanceof Error ? err.message : "Failed to refresh RLS context",
+      );
       throw err;
     }
   }, []);
@@ -110,7 +114,7 @@ export const useRLSContext = () => {
     loading,
     error,
     refreshContext,
-    refetch: fetchContext
+    refetch: fetchContext,
   };
 };
 
@@ -121,62 +125,70 @@ export const useRLSAccess = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const checkAccess = useCallback(async (request: AccessCheckRequest): Promise<AccessCheckResult> => {
-    try {
-      setLoading(true);
-      setError(null);
+  const checkAccess = useCallback(
+    async (request: AccessCheckRequest): Promise<AccessCheckResult> => {
+      try {
+        setLoading(true);
+        setError(null);
 
-      const token = localStorage.getItem('access_token');
+        const token = localStorage.getItem("access_token");
 
-      const response = await fetch(getApiUrl('/api/v1/rls/check-access'), {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify(request),
-      });
+        const response = await fetch(getApiUrl("/api/v1/rls/check-access"), {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(request),
+        });
 
-      if (response.ok) {
-        const result = await response.json();
-        return result;
-      } else {
-        const errorData = await response.json();
-        throw new Error(errorData.detail || 'Access check failed');
+        if (response.ok) {
+          const result = await response.json();
+          return result;
+        } else {
+          const errorData = await response.json();
+          throw new Error(errorData.detail || "Access check failed");
+        }
+      } catch (err) {
+        const errorMessage =
+          err instanceof Error ? err.message : "Access check failed";
+        setError(errorMessage);
+        throw new Error(errorMessage);
+      } finally {
+        setLoading(false);
       }
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Access check failed';
-      setError(errorMessage);
-      throw new Error(errorMessage);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+    },
+    [],
+  );
 
-  const checkMultipleAccess = useCallback(async (requests: AccessCheckRequest[]): Promise<AccessCheckResult[]> => {
-    try {
-      setLoading(true);
-      setError(null);
+  const checkMultipleAccess = useCallback(
+    async (requests: AccessCheckRequest[]): Promise<AccessCheckResult[]> => {
+      try {
+        setLoading(true);
+        setError(null);
 
-      const results = await Promise.all(
-        requests.map(request => checkAccess(request))
-      );
+        const results = await Promise.all(
+          requests.map((request) => checkAccess(request)),
+        );
 
-      return results;
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Multiple access check failed';
-      setError(errorMessage);
-      throw new Error(errorMessage);
-    } finally {
-      setLoading(false);
-    }
-  }, [checkAccess]);
+        return results;
+      } catch (err) {
+        const errorMessage =
+          err instanceof Error ? err.message : "Multiple access check failed";
+        setError(errorMessage);
+        throw new Error(errorMessage);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [checkAccess],
+  );
 
   return {
     checkAccess,
     checkMultipleAccess,
     loading,
-    error
+    error,
   };
 };
 
@@ -193,23 +205,23 @@ export const useRLSPolicies = () => {
       setLoading(true);
       setError(null);
 
-      const token = localStorage.getItem('access_token');
+      const token = localStorage.getItem("access_token");
       const params = new URLSearchParams();
 
       if (filters) {
         Object.entries(filters).forEach(([key, value]) => {
-          if (value !== undefined && value !== '') {
+          if (value !== undefined && value !== "") {
             params.append(key, value.toString());
           }
         });
       }
 
-      const url = `${getApiUrl('/api/v1/rls/policies')}${params.toString() ? `?${params}` : ''}`;
+      const url = `${getApiUrl("/api/v1/rls/policies")}${params.toString() ? `?${params}` : ""}`;
 
       const response = await fetch(url, {
         headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
         },
       });
 
@@ -217,10 +229,12 @@ export const useRLSPolicies = () => {
         const data = await response.json();
         setPolicies(data);
       } else {
-        throw new Error('Failed to fetch RLS policies');
+        throw new Error("Failed to fetch RLS policies");
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load RLS policies');
+      setError(
+        err instanceof Error ? err.message : "Failed to load RLS policies",
+      );
     } finally {
       setLoading(false);
     }
@@ -231,27 +245,28 @@ export const useRLSPolicies = () => {
       setLoading(true);
       setError(null);
 
-      const token = localStorage.getItem('access_token');
+      const token = localStorage.getItem("access_token");
 
-      const response = await fetch(getApiUrl('/api/v1/rls/policies'), {
-        method: 'POST',
+      const response = await fetch(getApiUrl("/api/v1/rls/policies"), {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(policyData),
       });
 
       if (response.ok) {
         const newPolicy = await response.json();
-        setPolicies(prev => [...prev, newPolicy]);
+        setPolicies((prev) => [...prev, newPolicy]);
         return newPolicy;
       } else {
         const errorData = await response.json();
-        throw new Error(errorData.detail || 'Failed to create policy');
+        throw new Error(errorData.detail || "Failed to create policy");
       }
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to create policy';
+      const errorMessage =
+        err instanceof Error ? err.message : "Failed to create policy";
       setError(errorMessage);
       throw new Error(errorMessage);
     } finally {
@@ -259,65 +274,76 @@ export const useRLSPolicies = () => {
     }
   }, []);
 
-  const updatePolicy = useCallback(async (policyId: number, updates: Partial<RLSPolicy>) => {
-    try {
-      setLoading(true);
-      setError(null);
+  const updatePolicy = useCallback(
+    async (policyId: number, updates: Partial<RLSPolicy>) => {
+      try {
+        setLoading(true);
+        setError(null);
 
-      const token = localStorage.getItem('access_token');
+        const token = localStorage.getItem("access_token");
 
-      const response = await fetch(`${getApiUrl('/api/v1/rls/policies')}/${policyId}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify(updates),
-      });
-
-      if (response.ok) {
-        const updatedPolicy = await response.json();
-        setPolicies(prev =>
-          prev.map(policy =>
-            policy.id === policyId ? updatedPolicy : policy
-          )
+        const response = await fetch(
+          `${getApiUrl("/api/v1/rls/policies")}/${policyId}`,
+          {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify(updates),
+          },
         );
-        return updatedPolicy;
-      } else {
-        const errorData = await response.json();
-        throw new Error(errorData.detail || 'Failed to update policy');
+
+        if (response.ok) {
+          const updatedPolicy = await response.json();
+          setPolicies((prev) =>
+            prev.map((policy) =>
+              policy.id === policyId ? updatedPolicy : policy,
+            ),
+          );
+          return updatedPolicy;
+        } else {
+          const errorData = await response.json();
+          throw new Error(errorData.detail || "Failed to update policy");
+        }
+      } catch (err) {
+        const errorMessage =
+          err instanceof Error ? err.message : "Failed to update policy";
+        setError(errorMessage);
+        throw new Error(errorMessage);
+      } finally {
+        setLoading(false);
       }
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to update policy';
-      setError(errorMessage);
-      throw new Error(errorMessage);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+    },
+    [],
+  );
 
   const deletePolicy = useCallback(async (policyId: number) => {
     try {
       setLoading(true);
       setError(null);
 
-      const token = localStorage.getItem('access_token');
+      const token = localStorage.getItem("access_token");
 
-      const response = await fetch(`${getApiUrl('/api/v1/rls/policies')}/${policyId}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`,
+      const response = await fetch(
+        `${getApiUrl("/api/v1/rls/policies")}/${policyId}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         },
-      });
+      );
 
       if (response.ok) {
-        setPolicies(prev => prev.filter(policy => policy.id !== policyId));
+        setPolicies((prev) => prev.filter((policy) => policy.id !== policyId));
       } else {
         const errorData = await response.json();
-        throw new Error(errorData.detail || 'Failed to delete policy');
+        throw new Error(errorData.detail || "Failed to delete policy");
       }
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to delete policy';
+      const errorMessage =
+        err instanceof Error ? err.message : "Failed to delete policy";
       setError(errorMessage);
       throw new Error(errorMessage);
     } finally {
@@ -332,7 +358,7 @@ export const useRLSPolicies = () => {
     fetchPolicies,
     createPolicy,
     updatePolicy,
-    deletePolicy
+    deletePolicy,
   };
 };
 
@@ -342,7 +368,7 @@ export const useRLSPolicies = () => {
 export const useConditionalAccess = (
   entityType: string,
   action: string,
-  entityId?: number
+  entityId?: number,
 ) => {
   const [hasAccess, setHasAccess] = useState<boolean | null>(null);
   const [loading, setLoading] = useState(true);
@@ -358,12 +384,12 @@ export const useConditionalAccess = (
         const result = await checkAccess({
           entity_type: entityType,
           action,
-          entity_id: entityId
+          entity_id: entityId,
         });
 
         setHasAccess(result.access_granted);
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Access check failed');
+        setError(err instanceof Error ? err.message : "Access check failed");
         setHasAccess(false);
       } finally {
         setLoading(false);
@@ -376,7 +402,7 @@ export const useConditionalAccess = (
   return {
     hasAccess,
     loading,
-    error
+    error,
   };
 };
 
@@ -384,58 +410,71 @@ export const useConditionalAccess = (
  * Hook for caching access check results
  */
 export const useCachedAccess = () => {
-  const [cache, setCache] = useState<Map<string, { result: AccessCheckResult; timestamp: number }>>(new Map());
+  const [cache, setCache] = useState<
+    Map<string, { result: AccessCheckResult; timestamp: number }>
+  >(new Map());
   const { checkAccess } = useRLSAccess();
 
   const cacheTimeout = 5 * 60 * 1000; // 5 minutes
 
-  const getCachedAccess = useCallback(async (request: AccessCheckRequest): Promise<AccessCheckResult> => {
-    const cacheKey = `${request.entity_type}-${request.action}-${request.entity_id || 'null'}`;
-    const cached = cache.get(cacheKey);
+  const getCachedAccess = useCallback(
+    async (request: AccessCheckRequest): Promise<AccessCheckResult> => {
+      const cacheKey = `${request.entity_type}-${request.action}-${request.entity_id || "null"}`;
+      const cached = cache.get(cacheKey);
 
-    // Check if cache is valid
-    if (cached && (Date.now() - cached.timestamp) < cacheTimeout) {
-      return cached.result;
-    }
+      // Check if cache is valid
+      if (cached && Date.now() - cached.timestamp < cacheTimeout) {
+        return cached.result;
+      }
 
-    // Perform fresh access check
-    const result = await checkAccess(request);
+      // Perform fresh access check
+      const result = await checkAccess(request);
 
-    // Update cache
-    setCache(prev => new Map(prev.set(cacheKey, {
-      result,
-      timestamp: Date.now()
-    })));
+      // Update cache
+      setCache(
+        (prev) =>
+          new Map(
+            prev.set(cacheKey, {
+              result,
+              timestamp: Date.now(),
+            }),
+          ),
+      );
 
-    return result;
-  }, [cache, checkAccess, cacheTimeout]);
+      return result;
+    },
+    [cache, checkAccess, cacheTimeout],
+  );
 
   const clearCache = useCallback(() => {
     setCache(new Map());
   }, []);
 
-  const clearCacheForEntity = useCallback((entityType: string, entityId?: number) => {
-    setCache(prev => {
-      const newCache = new Map(prev);
-      const pattern = `${entityType}-`;
+  const clearCacheForEntity = useCallback(
+    (entityType: string, entityId?: number) => {
+      setCache((prev) => {
+        const newCache = new Map(prev);
+        const pattern = `${entityType}-`;
 
-      for (const [key] of newCache) {
-        if (key.startsWith(pattern)) {
-          if (!entityId || key.includes(`-${entityId}`)) {
-            newCache.delete(key);
+        for (const [key] of newCache) {
+          if (key.startsWith(pattern)) {
+            if (!entityId || key.includes(`-${entityId}`)) {
+              newCache.delete(key);
+            }
           }
         }
-      }
 
-      return newCache;
-    });
-  }, []);
+        return newCache;
+      });
+    },
+    [],
+  );
 
   return {
     getCachedAccess,
     clearCache,
     clearCacheForEntity,
-    cacheSize: cache.size
+    cacheSize: cache.size,
   };
 };
 
@@ -461,15 +500,27 @@ export const useRLSManager = () => {
 
     // Quick access checks
     canRead: (entityType: string, entityId?: number) =>
-      access.checkAccess({ entity_type: entityType, action: 'SELECT', entity_id: entityId }),
+      access.checkAccess({
+        entity_type: entityType,
+        action: "SELECT",
+        entity_id: entityId,
+      }),
 
     canWrite: (entityType: string, entityId?: number) =>
-      access.checkAccess({ entity_type: entityType, action: 'UPDATE', entity_id: entityId }),
+      access.checkAccess({
+        entity_type: entityType,
+        action: "UPDATE",
+        entity_id: entityId,
+      }),
 
     canDelete: (entityType: string, entityId?: number) =>
-      access.checkAccess({ entity_type: entityType, action: 'DELETE', entity_id: entityId }),
+      access.checkAccess({
+        entity_type: entityType,
+        action: "DELETE",
+        entity_id: entityId,
+      }),
 
     canCreate: (entityType: string) =>
-      access.checkAccess({ entity_type: entityType, action: 'INSERT' })
+      access.checkAccess({ entity_type: entityType, action: "INSERT" }),
   };
 };

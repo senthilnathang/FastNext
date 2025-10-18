@@ -1,10 +1,10 @@
-import crypto from 'crypto';
-import * as React from 'react';
+import crypto from "crypto";
+import * as React from "react";
 
 interface SRIResource {
   url: string;
   integrity: string;
-  crossorigin?: 'anonymous' | 'use-credentials';
+  crossorigin?: "anonymous" | "use-credentials";
 }
 
 // Pre-computed SRI hashes for common CDN resources
@@ -13,13 +13,22 @@ export const SRI_HASHES: Record<string, SRIResource> = {
 };
 
 // Generate SRI hash for a given content
-export function generateSRIHash(content: string, algorithm: 'sha256' | 'sha384' | 'sha512' = 'sha384'): string {
-  const hash = crypto.createHash(algorithm).update(content, 'utf8').digest('base64');
+export function generateSRIHash(
+  content: string,
+  algorithm: "sha256" | "sha384" | "sha512" = "sha384",
+): string {
+  const hash = crypto
+    .createHash(algorithm)
+    .update(content, "utf8")
+    .digest("base64");
   return `${algorithm}-${hash}`;
 }
 
 // Generate SRI hash from URL
-export async function generateSRIFromURL(url: string, algorithm: 'sha256' | 'sha384' | 'sha512' = 'sha384'): Promise<string> {
+export async function generateSRIFromURL(
+  url: string,
+  algorithm: "sha256" | "sha384" | "sha512" = "sha384",
+): Promise<string> {
   try {
     const response = await fetch(url);
     if (!response.ok) {
@@ -37,15 +46,18 @@ export async function generateSRIFromURL(url: string, algorithm: 'sha256' | 'sha
 // Verify SRI hash
 export function verifySRIHash(content: string, expectedHash: string): boolean {
   try {
-    const [algorithm, expectedHashValue] = expectedHash.split('-');
+    const [algorithm, expectedHashValue] = expectedHash.split("-");
     if (!algorithm || !expectedHashValue) {
       return false;
     }
 
-    const actualHash = crypto.createHash(algorithm).update(content, 'utf8').digest('base64');
+    const actualHash = crypto
+      .createHash(algorithm)
+      .update(content, "utf8")
+      .digest("base64");
     return actualHash === expectedHashValue;
   } catch (error) {
-    console.error('Error verifying SRI hash:', error);
+    console.error("Error verifying SRI hash:", error);
     return false;
   }
 }
@@ -54,7 +66,7 @@ export function verifySRIHash(content: string, expectedHash: string): boolean {
 export interface SecureScriptProps {
   src: string;
   integrity?: string;
-  crossOrigin?: 'anonymous' | 'use-credentials';
+  crossOrigin?: "anonymous" | "use-credentials";
   async?: boolean;
   defer?: boolean;
   onLoad?: () => void;
@@ -64,28 +76,34 @@ export interface SecureScriptProps {
 export function SecureScript({
   src,
   integrity,
-  crossOrigin = 'anonymous',
+  crossOrigin = "anonymous",
   async = true,
   defer = false,
   onLoad,
-  onError
+  onError,
 }: SecureScriptProps) {
   // Check if we have a pre-computed hash
-  const knownResource = Object.values(SRI_HASHES).find(resource => resource.url === src);
+  const knownResource = Object.values(SRI_HASHES).find(
+    (resource) => resource.url === src,
+  );
   const finalIntegrity = integrity || knownResource?.integrity;
 
   if (!finalIntegrity) {
-    console.warn(`No SRI hash provided for script: ${src}. This is a security risk.`);
+    console.warn(
+      `No SRI hash provided for script: ${src}. This is a security risk.`,
+    );
   }
 
-  const script = document.createElement('script');
+  const script = document.createElement("script");
   script.src = src;
   if (finalIntegrity) script.integrity = finalIntegrity;
   if (crossOrigin) script.crossOrigin = crossOrigin;
   script.async = async;
   script.defer = defer;
   if (onLoad) script.onload = onLoad;
-  if (onError) script.onerror = (event) => onError(event instanceof Event ? event : new Event('error'));
+  if (onError)
+    script.onerror = (event) =>
+      onError(event instanceof Event ? event : new Event("error"));
 
   return script;
 }
@@ -94,7 +112,7 @@ export function SecureScript({
 export interface SecureStylesheetProps {
   href: string;
   integrity?: string;
-  crossOrigin?: 'anonymous' | 'use-credentials';
+  crossOrigin?: "anonymous" | "use-credentials";
   media?: string;
   onLoad?: () => void;
   onError?: (error: Event) => void;
@@ -103,26 +121,32 @@ export interface SecureStylesheetProps {
 export function SecureStylesheet({
   href,
   integrity,
-  crossOrigin = 'anonymous',
-  media = 'all',
+  crossOrigin = "anonymous",
+  media = "all",
   onLoad,
-  onError
+  onError,
 }: SecureStylesheetProps) {
-  const knownResource = Object.values(SRI_HASHES).find(resource => resource.url === href);
+  const knownResource = Object.values(SRI_HASHES).find(
+    (resource) => resource.url === href,
+  );
   const finalIntegrity = integrity || knownResource?.integrity;
 
   if (!finalIntegrity) {
-    console.warn(`No SRI hash provided for stylesheet: ${href}. This is a security risk.`);
+    console.warn(
+      `No SRI hash provided for stylesheet: ${href}. This is a security risk.`,
+    );
   }
 
-  const link = document.createElement('link');
-  link.rel = 'stylesheet';
+  const link = document.createElement("link");
+  link.rel = "stylesheet";
   link.href = href;
   if (finalIntegrity) link.integrity = finalIntegrity;
   if (crossOrigin) link.crossOrigin = crossOrigin;
   if (media) link.media = media;
   if (onLoad) link.onload = onLoad;
-  if (onError) link.onerror = (event) => onError(event instanceof Event ? event : new Event('error'));
+  if (onError)
+    link.onerror = (event) =>
+      onError(event instanceof Event ? event : new Event("error"));
 
   return link;
 }
@@ -140,19 +164,23 @@ export function useSecureScript(src: string, integrity?: string) {
       return;
     }
 
-    const script = document.createElement('script');
+    const script = document.createElement("script");
     script.src = src;
     script.async = true;
-    script.crossOrigin = 'anonymous';
+    script.crossOrigin = "anonymous";
 
     // Set integrity if provided
-    const knownResource = Object.values(SRI_HASHES).find(resource => resource.url === src);
+    const knownResource = Object.values(SRI_HASHES).find(
+      (resource) => resource.url === src,
+    );
     const finalIntegrity = integrity || knownResource?.integrity;
 
     if (finalIntegrity) {
       script.integrity = finalIntegrity;
     } else {
-      console.warn(`No SRI hash provided for script: ${src}. This is a security risk.`);
+      console.warn(
+        `No SRI hash provided for script: ${src}. This is a security risk.`,
+      );
     }
 
     script.onload = () => {
@@ -176,7 +204,10 @@ export function useSecureScript(src: string, integrity?: string) {
 }
 
 // Utility to validate external resources before loading
-export async function validateExternalResource(url: string, expectedIntegrity?: string): Promise<{
+export async function validateExternalResource(
+  url: string,
+  expectedIntegrity?: string,
+): Promise<{
   isValid: boolean;
   actualIntegrity?: string;
   error?: string;
@@ -186,7 +217,7 @@ export async function validateExternalResource(url: string, expectedIntegrity?: 
     if (!response.ok) {
       return {
         isValid: false,
-        error: `HTTP ${response.status}: ${response.statusText}`
+        error: `HTTP ${response.status}: ${response.statusText}`,
       };
     }
 
@@ -198,37 +229,44 @@ export async function validateExternalResource(url: string, expectedIntegrity?: 
       return {
         isValid,
         actualIntegrity,
-        error: isValid ? undefined : 'Integrity hash mismatch'
+        error: isValid ? undefined : "Integrity hash mismatch",
       };
     }
 
     return {
       isValid: true,
-      actualIntegrity
+      actualIntegrity,
     };
   } catch (error) {
     return {
       isValid: false,
-      error: error instanceof Error ? error.message : 'Unknown error'
+      error: error instanceof Error ? error.message : "Unknown error",
     };
   }
 }
 
 // Batch validate multiple resources
-export async function validateResourceBatch(resources: Array<{
-  url: string;
-  expectedIntegrity?: string;
-}>): Promise<Array<{
-  url: string;
-  isValid: boolean;
-  actualIntegrity?: string;
-  error?: string;
-}>> {
+export async function validateResourceBatch(
+  resources: Array<{
+    url: string;
+    expectedIntegrity?: string;
+  }>,
+): Promise<
+  Array<{
+    url: string;
+    isValid: boolean;
+    actualIntegrity?: string;
+    error?: string;
+  }>
+> {
   const validationPromises = resources.map(async (resource) => {
-    const result = await validateExternalResource(resource.url, resource.expectedIntegrity);
+    const result = await validateExternalResource(
+      resource.url,
+      resource.expectedIntegrity,
+    );
     return {
       url: resource.url,
-      ...result
+      ...result,
     };
   });
 
@@ -237,7 +275,9 @@ export async function validateResourceBatch(resources: Array<{
 
 // Development helper to generate SRI hashes for your resources
 export class SRIGenerator {
-  static async generateForURLs(urls: string[]): Promise<Record<string, SRIResource>> {
+  static async generateForURLs(
+    urls: string[],
+  ): Promise<Record<string, SRIResource>> {
     const result: Record<string, SRIResource> = {};
 
     for (const url of urls) {
@@ -246,9 +286,8 @@ export class SRIGenerator {
         result[url] = {
           url,
           integrity,
-          crossorigin: 'anonymous'
+          crossorigin: "anonymous",
         };
-
       } catch (error) {
         console.error(`Failed to generate SRI for ${url}:`, error);
       }
@@ -257,7 +296,9 @@ export class SRIGenerator {
     return result;
   }
 
-  static async generateForFiles(files: Array<{ path: string; content: string }>): Promise<Record<string, string>> {
+  static async generateForFiles(
+    files: Array<{ path: string; content: string }>,
+  ): Promise<Record<string, string>> {
     const result: Record<string, string> = {};
 
     for (const file of files) {

@@ -1,18 +1,29 @@
-'use client';
+"use client";
 
-import React, { memo, useState, useCallback } from 'react';
-import { Handle, Position, NodeProps } from 'reactflow';
-import { WorkflowNodeData } from '../types/reactflow';
-import { RotateCw, Settings, Hash } from 'lucide-react';
-import { Button } from '@/shared/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/shared/components/ui/dialog';
-import { Input } from '@/shared/components/ui/input';
-import { Label } from '@/shared/components/ui/label';
-import { Textarea } from '@/shared/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/components/ui/select';
+import { Hash, RotateCw, Settings } from "lucide-react";
+import React, { memo, useCallback, useState } from "react";
+import { Handle, type NodeProps, Position } from "reactflow";
+import { Button } from "@/shared/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/shared/components/ui/dialog";
+import { Input } from "@/shared/components/ui/input";
+import { Label } from "@/shared/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/shared/components/ui/select";
+import { Textarea } from "@/shared/components/ui/textarea";
+import type { WorkflowNodeData } from "../types/reactflow";
 
 interface LoopNodeData extends WorkflowNodeData {
-  loopType: 'for' | 'while' | 'forEach';
+  loopType: "for" | "while" | "forEach";
   condition?: string;
   maxIterations?: number;
   iteratorVariable?: string;
@@ -24,9 +35,9 @@ function LoopNode({ data, selected, id }: NodeProps<LoopNodeData>) {
   const [editData, setEditData] = useState(data);
 
   const handleSave = useCallback(() => {
-    if (typeof window !== 'undefined') {
-      const event = new CustomEvent('updateNodeData', {
-        detail: { nodeId: id, newData: editData }
+    if (typeof window !== "undefined") {
+      const event = new CustomEvent("updateNodeData", {
+        detail: { nodeId: id, newData: editData },
       });
       window.dispatchEvent(event);
     }
@@ -35,11 +46,11 @@ function LoopNode({ data, selected, id }: NodeProps<LoopNodeData>) {
 
   const getLoopTypeIcon = () => {
     switch (data.loopType) {
-      case 'for':
+      case "for":
         return <Hash size={14} className="text-purple-600" />;
-      case 'while':
+      case "while":
         return <RotateCw size={14} className="text-purple-600" />;
-      case 'forEach':
+      case "forEach":
         return <RotateCw size={14} className="text-purple-600" />;
       default:
         return <RotateCw size={14} className="text-purple-600" />;
@@ -48,14 +59,14 @@ function LoopNode({ data, selected, id }: NodeProps<LoopNodeData>) {
 
   const getLoopDescription = () => {
     switch (data.loopType) {
-      case 'for':
-        return `For ${data.maxIterations || 'N'} iterations`;
-      case 'while':
-        return `While ${data.condition || 'condition'}`;
-      case 'forEach':
-        return `For each in ${data.collection || 'collection'}`;
+      case "for":
+        return `For ${data.maxIterations || "N"} iterations`;
+      case "while":
+        return `While ${data.condition || "condition"}`;
+      case "forEach":
+        return `For each in ${data.collection || "collection"}`;
       default:
-        return 'Loop operation';
+        return "Loop operation";
     }
   };
 
@@ -63,7 +74,7 @@ function LoopNode({ data, selected, id }: NodeProps<LoopNodeData>) {
     <div
       className={`
         px-3 py-2 shadow-md rounded-lg border-2 min-w-[140px] max-w-[200px]
-        ${selected ? 'border-purple-500' : 'border-purple-300'}
+        ${selected ? "border-purple-500" : "border-purple-300"}
         bg-purple-50 transition-all duration-200 hover:shadow-lg
       `}
     >
@@ -80,7 +91,7 @@ function LoopNode({ data, selected, id }: NodeProps<LoopNodeData>) {
         {getLoopTypeIcon()}
         <div className="flex-1 min-w-0">
           <div className="font-medium text-xs text-purple-800 truncate">
-            {data.label || 'Loop'}
+            {data.label || "Loop"}
           </div>
           <div className="text-xs text-purple-600 mt-1">
             {data.description || getLoopDescription()}
@@ -125,7 +136,7 @@ function LoopNode({ data, selected, id }: NodeProps<LoopNodeData>) {
         position={Position.Right}
         id="continue"
         className="w-3 h-3 !bg-purple-400 border-2 border-white"
-        style={{ right: -6, top: '40%' }}
+        style={{ right: -6, top: "40%" }}
       />
 
       {/* Loop body */}
@@ -143,7 +154,7 @@ function LoopNode({ data, selected, id }: NodeProps<LoopNodeData>) {
         position={Position.Left}
         id="exit"
         className="w-3 h-3 !bg-green-400 border-2 border-white"
-        style={{ left: -6, top: '60%' }}
+        style={{ left: -6, top: "60%" }}
       />
 
       {/* Loop back input (from loop body) */}
@@ -152,7 +163,7 @@ function LoopNode({ data, selected, id }: NodeProps<LoopNodeData>) {
         position={Position.Left}
         id="loop_back"
         className="w-3 h-3 !bg-blue-400 border-2 border-white"
-        style={{ left: -6, top: '30%' }}
+        style={{ left: -6, top: "30%" }}
       />
 
       {/* Edit Dialog */}
@@ -166,8 +177,10 @@ function LoopNode({ data, selected, id }: NodeProps<LoopNodeData>) {
               <Label htmlFor="label">Loop Name</Label>
               <Input
                 id="label"
-                value={editData.label || ''}
-                onChange={(e) => setEditData({ ...editData, label: e.target.value })}
+                value={editData.label || ""}
+                onChange={(e) =>
+                  setEditData({ ...editData, label: e.target.value })
+                }
                 placeholder="Enter loop name"
               />
             </div>
@@ -176,8 +189,10 @@ function LoopNode({ data, selected, id }: NodeProps<LoopNodeData>) {
               <Label htmlFor="description">Description</Label>
               <Textarea
                 id="description"
-                value={editData.description || ''}
-                onChange={(e) => setEditData({ ...editData, description: e.target.value })}
+                value={editData.description || ""}
+                onChange={(e) =>
+                  setEditData({ ...editData, description: e.target.value })
+                }
                 placeholder="Enter loop description"
               />
             </div>
@@ -185,8 +200,10 @@ function LoopNode({ data, selected, id }: NodeProps<LoopNodeData>) {
             <div className="space-y-2">
               <Label htmlFor="loopType">Loop Type</Label>
               <Select
-                value={editData.loopType || 'for'}
-                onValueChange={(value) => setEditData({ ...editData, loopType: value as any })}
+                value={editData.loopType || "for"}
+                onValueChange={(value) =>
+                  setEditData({ ...editData, loopType: value as any })
+                }
               >
                 <SelectTrigger>
                   <SelectValue />
@@ -199,39 +216,48 @@ function LoopNode({ data, selected, id }: NodeProps<LoopNodeData>) {
               </Select>
             </div>
 
-            {editData.loopType === 'for' && (
+            {editData.loopType === "for" && (
               <div className="space-y-2">
                 <Label htmlFor="maxIterations">Maximum Iterations</Label>
                 <Input
                   id="maxIterations"
                   type="number"
-                  value={editData.maxIterations || ''}
-                  onChange={(e) => setEditData({ ...editData, maxIterations: parseInt(e.target.value) || undefined })}
+                  value={editData.maxIterations || ""}
+                  onChange={(e) =>
+                    setEditData({
+                      ...editData,
+                      maxIterations: parseInt(e.target.value) || undefined,
+                    })
+                  }
                   placeholder="Enter max iterations"
                 />
               </div>
             )}
 
-            {editData.loopType === 'while' && (
+            {editData.loopType === "while" && (
               <div className="space-y-2">
                 <Label htmlFor="condition">Condition</Label>
                 <Input
                   id="condition"
-                  value={editData.condition || ''}
-                  onChange={(e) => setEditData({ ...editData, condition: e.target.value })}
+                  value={editData.condition || ""}
+                  onChange={(e) =>
+                    setEditData({ ...editData, condition: e.target.value })
+                  }
                   placeholder="e.g., counter < 10"
                 />
               </div>
             )}
 
-            {editData.loopType === 'forEach' && (
+            {editData.loopType === "forEach" && (
               <>
                 <div className="space-y-2">
                   <Label htmlFor="collection">Collection Variable</Label>
                   <Input
                     id="collection"
-                    value={editData.collection || ''}
-                    onChange={(e) => setEditData({ ...editData, collection: e.target.value })}
+                    value={editData.collection || ""}
+                    onChange={(e) =>
+                      setEditData({ ...editData, collection: e.target.value })
+                    }
                     placeholder="e.g., items"
                   />
                 </div>
@@ -239,8 +265,13 @@ function LoopNode({ data, selected, id }: NodeProps<LoopNodeData>) {
                   <Label htmlFor="iteratorVariable">Iterator Variable</Label>
                   <Input
                     id="iteratorVariable"
-                    value={editData.iteratorVariable || ''}
-                    onChange={(e) => setEditData({ ...editData, iteratorVariable: e.target.value })}
+                    value={editData.iteratorVariable || ""}
+                    onChange={(e) =>
+                      setEditData({
+                        ...editData,
+                        iteratorVariable: e.target.value,
+                      })
+                    }
                     placeholder="e.g., item"
                   />
                 </div>
@@ -248,12 +279,13 @@ function LoopNode({ data, selected, id }: NodeProps<LoopNodeData>) {
             )}
 
             <div className="flex justify-end space-x-2">
-              <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
+              <Button
+                variant="outline"
+                onClick={() => setIsEditDialogOpen(false)}
+              >
                 Cancel
               </Button>
-              <Button onClick={handleSave}>
-                Save Changes
-              </Button>
+              <Button onClick={handleSave}>Save Changes</Button>
             </div>
           </div>
         </DialogContent>

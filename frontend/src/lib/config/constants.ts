@@ -39,8 +39,12 @@ export const UI_CONFIG = {
 // File Upload Configuration
 export const UPLOAD_CONFIG = {
   MAX_FILE_SIZE: 10 * 1024 * 1024, // 10MB
-  ALLOWED_IMAGE_TYPES: ['image/jpeg', 'image/png', 'image/webp', 'image/gif'],
-  ALLOWED_DOCUMENT_TYPES: ['application/pdf', 'text/plain', 'application/msword'],
+  ALLOWED_IMAGE_TYPES: ["image/jpeg", "image/png", "image/webp", "image/gif"],
+  ALLOWED_DOCUMENT_TYPES: [
+    "application/pdf",
+    "text/plain",
+    "application/msword",
+  ],
   CHUNK_SIZE: 1024 * 1024, // 1MB chunks for large uploads
 } as const;
 
@@ -55,8 +59,9 @@ export const CACHE_CONFIG = {
 // Validation Rules
 export const VALIDATION_RULES = {
   EMAIL_REGEX: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-  URL_REGEX: /^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)$/,
-  PHONE_REGEX: /^\+?[\d\s\-\(\)]+$/,
+  URL_REGEX:
+    /^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&//=]*)$/,
+  PHONE_REGEX: /^\+?[\d\s\-()]+$/,
   PASSWORD_STRENGTH: {
     MIN_LENGTH: 8,
     REQUIRE_UPPERCASE: true,
@@ -79,21 +84,22 @@ export const FEATURE_FLAGS = {
 
 // Error Messages
 export const ERROR_MESSAGES = {
-  NETWORK_ERROR: 'Network connection failed. Please check your internet connection.',
-  UNAUTHORIZED: 'You are not authorized to perform this action.',
-  FORBIDDEN: 'Access to this resource is forbidden.',
-  NOT_FOUND: 'The requested resource was not found.',
-  VALIDATION_ERROR: 'Please check your input and try again.',
-  SERVER_ERROR: 'An unexpected error occurred. Please try again later.',
-  FILE_TOO_LARGE: 'File size exceeds the maximum allowed limit.',
-  INVALID_FILE_TYPE: 'File type is not supported.',
+  NETWORK_ERROR:
+    "Network connection failed. Please check your internet connection.",
+  UNAUTHORIZED: "You are not authorized to perform this action.",
+  FORBIDDEN: "Access to this resource is forbidden.",
+  NOT_FOUND: "The requested resource was not found.",
+  VALIDATION_ERROR: "Please check your input and try again.",
+  SERVER_ERROR: "An unexpected error occurred. Please try again later.",
+  FILE_TOO_LARGE: "File size exceeds the maximum allowed limit.",
+  INVALID_FILE_TYPE: "File type is not supported.",
 } as const;
 
 // Success Messages
 export const SUCCESS_MESSAGES = {
-  SAVE_SUCCESS: 'Changes saved successfully.',
-  DELETE_SUCCESS: 'Item deleted successfully.',
-  UPLOAD_SUCCESS: 'File uploaded successfully.',
-  IMPORT_SUCCESS: 'Data imported successfully.',
-  EXPORT_SUCCESS: 'Data exported successfully.',
+  SAVE_SUCCESS: "Changes saved successfully.",
+  DELETE_SUCCESS: "Item deleted successfully.",
+  UPLOAD_SUCCESS: "File uploaded successfully.",
+  IMPORT_SUCCESS: "Data imported successfully.",
+  EXPORT_SUCCESS: "Data exported successfully.",
 } as const;
