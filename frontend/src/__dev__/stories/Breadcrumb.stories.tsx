@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from "@storybook/nextjs";
+import type { Meta, StoryObj } from "@storybook/react";
 import { Building2, Cog, Home } from "lucide-react";
 import { Breadcrumb } from "@/shared/components";
 

@@ -1,5 +1,5 @@
 import { MockedProvider } from "@apollo/client/testing";
-import type { Meta, StoryObj } from "@storybook/nextjs";
+import type { Meta, StoryObj } from "@storybook/react";
 import { GET_PROJECTS, GET_USERS } from "@/lib/graphql/queries";
 import { GraphQLDemo } from "./GraphQLDemo";
 

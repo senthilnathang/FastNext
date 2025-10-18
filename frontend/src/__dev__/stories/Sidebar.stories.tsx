@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from "@storybook/nextjs";
+import type { Meta, StoryObj } from "@storybook/react";
 import { AuthContext } from "@/modules/auth/services/AuthContext";
 import Sidebar from "@/shared/components/navigation/Sidebar";
 

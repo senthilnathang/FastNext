@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from "@storybook/nextjs";
+import type { Meta, StoryObj } from "@storybook/react";
 import { WindowControls } from "./window-controls";
 
 const meta: Meta<typeof WindowControls> = {
