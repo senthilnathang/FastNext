@@ -1,11 +1,14 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import Home from "../page";
 
 describe("Home", () => {
-  it("renders the main page", () => {
+  it("renders the main page", async () => {
     render(<Home />);
 
-    const heading = screen.getByRole("heading", { level: 1 });
-    expect(heading).toBeInTheDocument();
+    // Wait for the lazy-loaded HeroSection to render
+    await waitFor(() => {
+      const heading = screen.getByRole("heading", { level: 1 });
+      expect(heading).toBeInTheDocument();
+    });
   });
 });

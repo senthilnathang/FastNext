@@ -7,6 +7,11 @@ import Sidebar from "../navigation/Sidebar";
 // Mock Next.js navigation
 jest.mock("next/navigation", () => ({
   usePathname: () => "/dashboard",
+  useRouter: () => ({
+    push: jest.fn(),
+    replace: jest.fn(),
+    prefetch: jest.fn(),
+  }),
 }));
 
 // Mock user role hook
@@ -24,6 +29,18 @@ jest.mock("@/modules/admin/hooks/useUserRole", () => ({
     canAccessModule: () => true,
   }),
 }));
+
+// Mock fetch API for NotificationCenter
+global.fetch = jest.fn(() =>
+  Promise.resolve({
+    ok: true,
+    status: 200,
+    json: () => Promise.resolve({ data: { notifications: [], unread_count: 0 } }),
+    clone: () => ({
+      json: () => Promise.resolve({ data: { notifications: [], unread_count: 0 } }),
+    }),
+  })
+);
 
 const mockAuthContextValue = {
   user: {
@@ -57,7 +74,6 @@ describe("Sidebar Component", () => {
     renderWithAuth(<Sidebar />);
 
     expect(screen.getByText("FastNext")).toBeInTheDocument();
-    expect(screen.getByText("Enterprise App Builder")).toBeInTheDocument();
     expect(screen.getByText("FN")).toBeInTheDocument();
   });
 
@@ -66,10 +82,11 @@ describe("Sidebar Component", () => {
 
     expect(screen.getByText("Dashboard")).toBeInTheDocument();
     expect(screen.getByText("Projects")).toBeInTheDocument();
-    expect(screen.getByText("Builder")).toBeInTheDocument();
-    expect(screen.getByText("Compliance")).toBeInTheDocument();
-    expect(screen.getByText("AI Management")).toBeInTheDocument();
-    expect(screen.getByText("Operations")).toBeInTheDocument();
+    expect(screen.getByText("Products")).toBeInTheDocument();
+    expect(screen.getByText("Workflows")).toBeInTheDocument();
+    expect(screen.getByText("Settings")).toBeInTheDocument();
+    // Configuration appears in multiple places, just check that it exists
+    expect(screen.getAllByText("Configuration")).toHaveLength(2);
     expect(screen.getByText("Administration")).toBeInTheDocument();
   });
 

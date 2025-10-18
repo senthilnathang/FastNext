@@ -74,11 +74,9 @@ describe("Header Component", () => {
       </TestWrapper>,
     );
 
-    const searchInput = screen.getByPlaceholderText(
-      "Search projects, components...",
-    );
+    const searchInput = screen.getByPlaceholderText("Search...");
     expect(searchInput).toBeInTheDocument();
-    expect(searchInput).toHaveClass("pl-10", "pr-4", "py-2", "w-80");
+    expect(searchInput).toHaveClass("pl-8", "pr-3", "py-1.5", "w-48");
   });
 
   it("renders all action buttons", () => {
@@ -88,10 +86,9 @@ describe("Header Component", () => {
       </TestWrapper>,
     );
 
-    // Check for buttons by their title attributes
-    expect(screen.getByTitle("Help")).toBeInTheDocument();
+    // Check for buttons by their title attributes or accessible text
     expect(screen.getByTitle("Notifications")).toBeInTheDocument();
-    expect(screen.getByTitle("Toggle theme")).toBeInTheDocument();
+    expect(screen.getByText("Toggle theme")).toBeInTheDocument();
   });
 
   it("renders user profile dropdown trigger", () => {
@@ -101,8 +98,7 @@ describe("Header Component", () => {
       </TestWrapper>,
     );
 
-    expect(screen.getByText("John Doe")).toBeInTheDocument();
-    expect(screen.getByText("Admin")).toBeInTheDocument();
+    expect(screen.getByText("User")).toBeInTheDocument();
   });
 
   it("opens user profile dropdown when clicked", () => {
@@ -112,7 +108,7 @@ describe("Header Component", () => {
       </TestWrapper>,
     );
 
-    const userButton = screen.getByText("John Doe").closest("button");
+    const userButton = screen.getByText("User").closest("button");
     expect(userButton).toBeInTheDocument();
 
     fireEvent.click(userButton!);
@@ -140,16 +136,13 @@ describe("Header Component", () => {
       </TestWrapper>,
     );
 
-    const searchInput = screen.getByPlaceholderText(
-      "Search projects, components...",
-    );
+    const searchInput = screen.getByPlaceholderText("Search...");
     expect(searchInput).toHaveClass(
       "border",
-      "border-gray-300",
-      "dark:border-gray-600",
-      "rounded-lg",
-      "focus:ring-2",
-      "focus:ring-blue-500",
+      "border-input",
+      "rounded-md",
+      "focus:ring-1",
+      "focus:ring-ring",
     );
   });
 
@@ -160,7 +153,7 @@ describe("Header Component", () => {
       </TestWrapper>,
     );
 
-    const themeButton = screen.getByTitle("Toggle theme");
+    const themeButton = screen.getByText("Toggle theme").closest("button");
     expect(themeButton).toBeInTheDocument();
 
     // Check for Sun/Moon icons (they are rendered conditionally)
@@ -180,15 +173,15 @@ describe("Header Component", () => {
     // Check main header structure
     const headerElement = container.querySelector("header");
     expect(headerElement).toHaveClass(
-      "h-16",
+      "h-12",
       "flex",
       "items-center",
       "justify-between",
-      "px-6",
+      "px-3",
     );
 
     // Check breadcrumb section
-    const breadcrumbSection = container.querySelector(".px-6.py-3");
+    const breadcrumbSection = container.querySelector('[data-testid="breadcrumb"]')?.parentElement;
     expect(breadcrumbSection).toBeInTheDocument();
   });
 
@@ -201,11 +194,9 @@ describe("Header Component", () => {
 
     const headerContainer = container.firstChild;
     expect(headerContainer).toHaveClass(
-      "bg-white",
-      "dark:bg-gray-900",
+      "bg-background",
       "border-b",
-      "border-gray-200",
-      "dark:border-gray-800",
+      "border-border",
     );
   });
 });

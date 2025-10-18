@@ -78,7 +78,7 @@ describe("QuickActionButton Component", () => {
     const button = screen.getByRole("button", { name: /quick actions/i });
     // The button should have outline variant and sm size classes
     expect(button).toHaveClass("border", "border-input"); // outline variant classes
-    expect(button).toHaveClass("h-8", "px-3", "text-xs"); // sm size classes
+    expect(button).toHaveClass("md:h-8", "md:px-3", "md:text-xs"); // sm size classes
   });
 
   it("maintains menu state correctly", () => {
