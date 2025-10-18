@@ -159,17 +159,9 @@ export default function ViewProductPage() {
                   Tags
                 </label>
                 <div className="mt-1">
-                  <div className="flex flex-wrap gap-1">
-                    {product.tags?.map((item, index) => (
-                      <Badge key={index} variant="outline" className="text-xs">
-                        {item}
-                      </Badge>
-                    )) || (
-                      <span className="text-sm text-muted-foreground">
-                        No tags
-                      </span>
-                    )}
-                  </div>
+                  <span className="text-sm text-muted-foreground">
+                    {product.sku}
+                  </span>
                 </div>
               </div>
               <div>
@@ -201,11 +193,11 @@ export default function ViewProductPage() {
               </div>
               <div>
                 <label className="text-sm font-medium text-muted-foreground">
-                  Release Date
+                  Launch Date
                 </label>
                 <div className="mt-1">
-                  {product.release_date
-                    ? new Date(product.release_date).toLocaleDateString()
+                  {product.launch_date
+                    ? new Date(product.launch_date).toLocaleDateString()
                     : "Not set"}
                 </div>
               </div>

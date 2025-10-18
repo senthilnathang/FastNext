@@ -67,7 +67,7 @@ class ProductCreate(ProductBase):
     category: ProductCategory = Field(
         ..., description="Product category", example="electronics"
     )
-    sku: str = Field(..., description="Stock Keeping Unit", example="HDPH-001-BLK")
+    sku: Optional[str] = Field(None, description="Stock Keeping Unit", example="HDPH-001-BLK")
     stock_quantity: int = Field(0, description="Current stock quantity", example=150)
     is_featured: Optional[bool] = Field(
         False, description="Whether this product is featured"

@@ -160,6 +160,50 @@ function UsersList() {
 - User-friendly error messages
 - Development error details
 
+### Error Templates
+FastNext provides reusable error page components for consistent error handling across the application:
+
+- **Error400**: Bad Request errors
+- **Error401**: Unauthorized access
+- **Error403**: Forbidden access
+- **Error404**: Not Found errors
+- **Error500**: Internal Server Error (with retry option)
+- **Error501**: Not Implemented errors
+
+These components are automatically used by the global ErrorBoundary based on HTTP status codes.
+
+```typescript
+import { ErrorBoundary } from '@/shared/components'
+
+// The ErrorBoundary automatically selects the appropriate error template
+// based on the error status code from API responses
+<ErrorBoundary>
+  <YourComponent />
+</ErrorBoundary>
+```
+
+For custom error handling in components:
+
+```typescript
+import { Error500, Error404 } from '@/shared/components/error-templates'
+
+function MyComponent() {
+  const { data, error } = useApiQuery()
+
+  if (error) {
+    if (apiUtils.isNotFoundError(error)) {
+      return <Error404 />
+    }
+    if (apiUtils.isServerError(error)) {
+      return <Error500 onRetry={() => refetch()} />
+    }
+    // Handle other errors...
+  }
+
+  return <div>{/* success state */}</div>
+}
+```
+
 ### Component-Level Error Handling
 ```typescript
 import { apiUtils } from '@/lib/api/client'

@@ -122,7 +122,7 @@ class BaseCRUDController(Generic[ModelType, CreateSchemaType, UpdateSchemaType])
             )
 
         # Get data and add owner if field exists
-        obj_data = obj_in.dict()
+        obj_data = obj_in.model_dump()
         if hasattr(self.model, self.owner_field):
             obj_data[self.owner_field] = current_user.id
 
@@ -155,7 +155,7 @@ class BaseCRUDController(Generic[ModelType, CreateSchemaType, UpdateSchemaType])
                 detail=f"{self.resource_name.title()} update access denied",
             )
 
-        obj_data = obj_in.dict(exclude_unset=True)
+        obj_data = obj_in.model_dump(exclude_unset=True)
         for field, value in obj_data.items():
             setattr(obj, field, value)
 

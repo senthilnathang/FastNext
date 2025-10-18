@@ -51,8 +51,10 @@ class TestProductAPI:
     def test_create_product(self, client: TestClient, normal_user_token_headers: dict):
         """Test creating product via API"""
         data = {
-            "name": "test_name",
-            "sku": "test_sku",
+            "name": "Test Product",
+            "price": 99.99,
+            "category": "Electronics",
+            "sku": "TEST-001",
             "stock_quantity": 123,
             "is_featured": True,
             "support_email": "test@example.com",

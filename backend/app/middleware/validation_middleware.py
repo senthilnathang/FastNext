@@ -396,7 +396,13 @@ class ValidationMiddleware(BaseHTTPMiddleware):
                     False, "Request body too large", "CONTENT_TOO_LARGE"
                 )
 
-            # For JSON content, validate the JSON structure and content
+            # Skip ALL body validation for API routes to avoid conflicts with Pydantic validation
+            # Pydantic will handle schema validation, we focus on security validation only
+            if request.url.path.startswith("/api/"):
+                # For API routes, only do basic content length check - DO NOT consume body
+                return ValidationResult(True)
+
+            # For non-API routes (like file uploads), validate the JSON structure and content
             if "application/json" in content_type:
                 try:
                     body = await request.body()

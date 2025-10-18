@@ -5,27 +5,34 @@ export interface Product {
   id: number;
   created_at: string;
   updated_at?: string;
-  is_active?: boolean;
   name: string;
   description?: string;
   price: number;
   category: "Electronics" | "Clothing" | "Books" | "Sports" | "Home & Garden";
-  tags?: string[];
+  sku?: string;
+  stock_quantity?: number;
   is_featured?: boolean;
+  launch_date?: string;
+  specifications?: Record<string, any>;
   website_url?: string;
-  release_date?: string;
+  support_email?: string;
+  category_id?: number;
+  owner_id?: number;
 }
 
 export interface CreateProductRequest {
   name: string;
   price: number;
   category: "Electronics" | "Clothing" | "Books" | "Sports" | "Home & Garden";
+  sku?: string;
   description?: string;
-  tags?: string[];
+  stock_quantity?: number;
   is_featured?: boolean;
+  launch_date?: string;
+  specifications?: Record<string, any>;
   website_url?: string;
-  release_date?: string;
-  is_active?: boolean;
+  support_email?: string;
+  category_id?: number;
 }
 
 export interface UpdateProductRequest {
@@ -33,11 +40,14 @@ export interface UpdateProductRequest {
   description?: string;
   price?: number;
   category?: "Electronics" | "Clothing" | "Books" | "Sports" | "Home & Garden";
-  tags?: string[];
+  sku?: string;
+  stock_quantity?: number;
   is_featured?: boolean;
+  launch_date?: string;
+  specifications?: Record<string, any>;
   website_url?: string;
-  release_date?: string;
-  is_active?: boolean;
+  support_email?: string;
+  category_id?: number;
 }
 
 export interface ProductListParams {

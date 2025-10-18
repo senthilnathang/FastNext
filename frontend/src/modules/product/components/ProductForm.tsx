@@ -49,11 +49,14 @@ const productSchema = z.object({
     "Sports",
     "Home & Garden",
   ]),
-  tags: z.array(z.string()).optional(),
+  sku: z.string().optional(),
+  stock_quantity: z.number().min(0).optional(),
   is_featured: z.boolean().optional(),
-  website_url: z.string().url("Invalid URL").optional(),
-  release_date: z.string().optional(),
-  is_active: z.boolean().optional(),
+  launch_date: z.string().optional(),
+  specifications: z.record(z.string(), z.any()).optional(),
+  website_url: z.string().optional(),
+  support_email: z.string().optional(),
+  category_id: z.number().optional().nullable(),
 });
 
 type ProductFormData = z.infer<typeof productSchema>;
@@ -82,11 +85,14 @@ export function ProductForm({
       description: "",
       price: 0,
       category: "Electronics",
-      tags: [],
+      sku: undefined,
+      stock_quantity: 0,
       is_featured: false,
-      website_url: "",
-      release_date: "",
-      is_active: true,
+      launch_date: undefined,
+      specifications: undefined,
+      website_url: undefined,
+      support_email: undefined,
+      category_id: null,
     },
   });
 
@@ -94,29 +100,45 @@ export function ProductForm({
     if (product) {
       form.reset({
         name: product.name || "",
-        description: product.description || "",
+        description: product.description || undefined,
         price: product.price || 0,
         category: product.category || "Electronics",
-        tags: product.tags || [],
+        sku: product.sku || undefined,
+        stock_quantity: product.stock_quantity || 0,
         is_featured: product.is_featured || false,
-        website_url: product.website_url || "",
-        release_date: product.release_date || "",
-        is_active: product.is_active ?? true,
+        launch_date: product.launch_date || undefined,
+        specifications: product.specifications || undefined,
+        website_url: product.website_url || undefined,
+        support_email: product.support_email || undefined,
+        category_id: product.category_id || null,
       });
     }
   }, [product, form]);
 
   const onSubmit = async (data: ProductFormData) => {
     try {
+      // Clean up the data before sending
+      const cleanedData = {
+        ...data,
+        // Convert empty strings to undefined for optional fields
+        description: data.description?.trim() || undefined,
+        sku: data.sku?.trim() || undefined,
+        launch_date: data.launch_date?.trim() || undefined,
+        specifications: data.specifications && Object.keys(data.specifications).length > 0 ? data.specifications : undefined,
+        website_url: data.website_url?.trim() || undefined,
+        support_email: data.support_email?.trim() || undefined,
+        category_id: data.category_id || undefined,
+      };
+
       let result: Product;
 
       if (isEditing && product) {
         result = await updateMutation.mutateAsync({
           id: product.id,
-          data: data as any,
+          data: cleanedData as any,
         });
       } else {
-        result = await createMutation.mutateAsync(data as any);
+        result = await createMutation.mutateAsync(cleanedData as any);
       }
 
       onSuccess?.(result);
@@ -250,48 +272,54 @@ export function ProductForm({
                 <FormMessage />
               </FormItem>
             )}
-          />
+           />
 
-          <FormField
-            control={form.control}
-            name="tags"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Tags</FormLabel>
-                <div className="space-y-2">
-                  {["New", "Sale", "Popular", "Limited", "Featured"].map(
-                    (option) => (
-                      <div key={option} className="flex items-center space-x-2">
-                        <Checkbox
-                          id={`${field.name}-${option}`}
-                          checked={field.value?.includes(option) || false}
-                          onCheckedChange={(checked) => {
-                            const currentValues = field.value || [];
-                            if (checked) {
-                              field.onChange([...currentValues, option]);
-                            } else {
-                              field.onChange(
-                                currentValues.filter((v) => v !== option),
-                              );
-                            }
-                          }}
-                          disabled={isSubmitting}
-                        />
-                        <label
-                          htmlFor={`${field.name}-${option}`}
-                          className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
-                        >
-                          {option}
-                        </label>
-                      </div>
-                    ),
-                  )}
-                </div>
+            <FormField
+              control={form.control}
+              name="sku"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>SKU</FormLabel>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      placeholder="Enter product SKU..."
+                      disabled={isSubmitting}
+                    />
+                  </FormControl>
+                  <FormDescription>
+                    Unique Stock Keeping Unit identifier (optional)
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+           <FormField
+             control={form.control}
+             name="stock_quantity"
+             render={({ field }) => (
+               <FormItem>
+                 <FormLabel>Stock Quantity</FormLabel>
+                 <FormControl>
+                   <Input
+                     {...field}
+                     type="number"
+                     placeholder="Enter stock quantity..."
+                     disabled={isSubmitting}
+                     onChange={(e) =>
+                       field.onChange(
+                         e.target.value ? Number(e.target.value) : 0,
+                       )
+                     }
+                   />
+                 </FormControl>
+                 <FormMessage />
+               </FormItem>
+             )}
+           />
+
+
 
           <FormField
             control={form.control}
@@ -337,20 +365,39 @@ export function ProductForm({
             )}
           />
 
-          <FormField
-            control={form.control}
-            name="release_date"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Release Date</FormLabel>
-                <FormControl>
-                  <Input {...field} type="date" disabled={isSubmitting} />
-                </FormControl>
+           <FormField
+             control={form.control}
+             name="launch_date"
+             render={({ field }) => (
+               <FormItem>
+                 <FormLabel>Launch Date</FormLabel>
+                 <FormControl>
+                   <Input {...field} type="date" disabled={isSubmitting} />
+                 </FormControl>
 
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+                 <FormMessage />
+               </FormItem>
+             )}
+           />
+
+           <FormField
+             control={form.control}
+             name="support_email"
+             render={({ field }) => (
+               <FormItem>
+                 <FormLabel>Support Email</FormLabel>
+                 <FormControl>
+                   <Input
+                     {...field}
+                     type="email"
+                     placeholder="support@example.com"
+                     disabled={isSubmitting}
+                   />
+                 </FormControl>
+                 <FormMessage />
+               </FormItem>
+             )}
+           />
 
           <div className="flex items-center justify-end space-x-2 pt-4 border-t">
             {onCancel && (

@@ -114,9 +114,9 @@ Charlie Wilson,charlie.wilson@example.com,32,Finance"""
     products_csv = """name,sku,price,category,stock
 Laptop Pro,LP001,1299.99,Electronics,50
 Wireless Mouse,WM002,29.99,Electronics,200
-Office Chair,OC003,149.99,Furniture,75
-Desk Lamp,DL004,39.99,Furniture,100
-Notebook,NB005,4.99,Office Supplies,500"""
+Office Chair,OC003,149.99,Home & Garden,75
+Desk Lamp,DL004,39.99,Home & Garden,100
+Notebook,NB005,4.99,Books,500"""
 
     # Sample orders data
     orders_csv = """order_id,customer_email,product_sku,quantity,order_date,total

@@ -483,6 +483,18 @@ def _setup_exception_handlers(app: FastAPI):
         """Handle validation errors"""
         logger.warning(f"Validation error: {exc.message} - Details: {exc.details}")
 
+        # Log the full validation error details for debugging
+        logger.error(f"Full validation error details: {str(exc)}")
+        logger.error(f"Request path: {request.url.path}")
+        logger.error(f"Request method: {request.method}")
+
+        # Try to get request body for debugging
+        try:
+            body = await request.body()
+            logger.error(f"Request body: {body.decode('utf-8')}")
+        except Exception as e:
+            logger.error(f"Could not read request body: {e}")
+
         return JSONResponse(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             content={
