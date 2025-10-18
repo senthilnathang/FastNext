@@ -362,6 +362,60 @@ export function CommonFormViewManager<T extends { id?: string | number }>({
     );
   };
 
+  // Validate edit/view mode requirements
+  if ((mode === "edit" || mode === "view")) {
+    if (!itemId) {
+      return (
+        <div className="space-y-6">
+          {renderBreadcrumb()}
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-center h-64">
+                <div className="text-center">
+                  <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+                    Invalid Request
+                  </h3>
+                  <p className="text-gray-600 dark:text-gray-400 mb-4">
+                    {mode === "edit" ? "Please select a project to edit." : "Please select a project to view."}
+                  </p>
+                  <Button onClick={() => handleModeChange("list")}>
+                    Back to Projects
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      );
+    }
+
+    // Check if item exists in data (after loading is complete)
+    if (!loading && data && itemId && !selectedItem) {
+      return (
+        <div className="space-y-6">
+          {renderBreadcrumb()}
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-center h-64">
+                <div className="text-center">
+                  <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+                    Project Not Found
+                  </h3>
+                  <p className="text-gray-600 dark:text-gray-400 mb-4">
+                    The project you&apos;re trying to {mode} could not be found.
+                  </p>
+                  <Button onClick={() => handleModeChange("list")}>
+                    Back to Projects
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      );
+    }
+  }
+
   // Render based on current mode
   if (mode === "list") {
     return renderListView();

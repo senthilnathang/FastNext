@@ -14,51 +14,52 @@ export function Footer() {
               Production-ready full-stack framework for modern web applications.
             </p>
             <div className="flex space-x-4">
-              <a href="https://github.com/fastnext/fastnext-framework" className="text-gray-400 hover:text-white">
+              <a href="https://github.com/fastnext/fastnext-framework" className="text-gray-400 hover:text-white" target="_blank" rel="noopener noreferrer">
                 GitHub
               </a>
-              <a href="/docs" className="text-gray-400 hover:text-white">
+              <a href="https://docs.fastnext.dev" className="text-gray-400 hover:text-white" target="_blank" rel="noopener noreferrer">
                 Docs
               </a>
-              <a href="/community" className="text-gray-400 hover:text-white">
-                Community
+              <a href="https://discord.gg/fastnext" className="text-gray-400 hover:text-white" target="_blank" rel="noopener noreferrer">
+                Discord
+              </a>
+              <a href="https://twitter.com/fastnextdev" className="text-gray-400 hover:text-white" target="_blank" rel="noopener noreferrer">
+                Twitter
               </a>
             </div>
           </div>
 
-          <div>
-            <h3 className="font-semibold mb-4">Product</h3>
-            <ul className="space-y-2 text-gray-400">
-              <li><Link href="/features" className="hover:text-white">Features</Link></li>
-              <li><Link href="/pricing" className="hover:text-white">Pricing</Link></li>
-              <li><Link href="/security" className="hover:text-white">Security</Link></li>
-              <li><Link href="/performance" className="hover:text-white">Performance</Link></li>
-            </ul>
-          </div>
+           <div>
+             <h3 className="font-semibold mb-4">Product</h3>
+             <ul className="space-y-2 text-gray-400">
+               <li><a href="https://github.com/fastnext/fastnext-framework" className="hover:text-white" target="_blank" rel="noopener noreferrer">GitHub Repository</a></li>
+               <li><a href="https://docs.fastnext.dev" className="hover:text-white" target="_blank" rel="noopener noreferrer">Documentation</a></li>
+               <li><a href="https://fastnext.dev" className="hover:text-white" target="_blank" rel="noopener noreferrer">Official Website</a></li>
+             </ul>
+           </div>
 
           <div>
             <h3 className="font-semibold mb-4">Resources</h3>
             <ul className="space-y-2 text-gray-400">
-              <li><Link href="/docs" className="hover:text-white">Documentation</Link></li>
-              <li><Link href="/api" className="hover:text-white">API Reference</Link></li>
-              <li><Link href="/tutorials" className="hover:text-white">Tutorials</Link></li>
-              <li><Link href="/blog" className="hover:text-white">Blog</Link></li>
+              <li><a href="https://docs.fastnext.dev" className="hover:text-white" target="_blank" rel="noopener noreferrer">Documentation</a></li>
+              <li><a href="https://api.fastnext.dev" className="hover:text-white" target="_blank" rel="noopener noreferrer">API Reference</a></li>
+              <li><a href="https://github.com/fastnext/fastnext-framework/tree/main/examples" className="hover:text-white" target="_blank" rel="noopener noreferrer">Examples</a></li>
+              <li><a href="https://blog.fastnext.dev" className="hover:text-white" target="_blank" rel="noopener noreferrer">Blog</a></li>
             </ul>
           </div>
 
-          <div>
-            <h3 className="font-semibold mb-4">Support</h3>
-            <ul className="space-y-2 text-gray-400">
-              <li><Link href="/help" className="hover:text-white">Help Center</Link></li>
-              <li><Link href="/contact" className="hover:text-white">Contact Us</Link></li>
-              <li><Link href="/status" className="hover:text-white">System Status</Link></li>
-              <li><a href="mailto:security@fastnext.dev" className="hover:text-white">Security</a></li>
-            </ul>
-          </div>
+           <div>
+             <h3 className="font-semibold mb-4">Support</h3>
+             <ul className="space-y-2 text-gray-400">
+               <li><a href="https://discord.gg/fastnext" className="hover:text-white" target="_blank" rel="noopener noreferrer">Community Discord</a></li>
+               <li><a href="mailto:support@fastnext.dev" className="hover:text-white">Support Email</a></li>
+               <li><a href="mailto:security@fastnext.dev" className="hover:text-white">Security</a></li>
+             </ul>
+           </div>
         </div>
 
         <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
-          <p>&copy; 2025 FastNext Framework. MIT License.</p>
+          <p>&copy; 2025 <a href="https://fastnext.dev" className="text-blue-400 hover:text-blue-300" target="_blank" rel="noopener noreferrer">FastNext Framework</a>. MIT License.</p>
         </div>
       </div>
     </footer>

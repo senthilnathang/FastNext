@@ -7,10 +7,13 @@ export function FeaturesSection() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
           <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
-            Enterprise-Grade Features
+            FastNext Framework Features
           </h2>
           <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
             Everything you need to build secure, scalable applications with modern best practices built-in.
+            <a href="https://github.com/fastnext/fastnext-framework" className="text-blue-600 hover:text-blue-700 ml-2" target="_blank" rel="noopener noreferrer">
+              Learn more on GitHub →
+            </a>
           </p>
         </div>
 
@@ -54,6 +57,56 @@ export function FeaturesSection() {
               Cultural adaptation and global content management.
             </p>
           </div>
+
+          {/* Data Import/Export */}
+          <div className="bg-gradient-to-br from-emerald-50 to-green-50 dark:from-emerald-900/20 dark:to-green-900/20 p-6 rounded-xl border border-emerald-200 dark:border-emerald-800">
+            <div className="text-3xl mb-4">📊</div>
+            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3">Advanced Data Management</h3>
+            <p className="text-gray-600 dark:text-gray-300">
+              Powerful import/export system with CSV, Excel, and API support.
+              Bulk operations and data transformation workflows.
+            </p>
+          </div>
+
+          {/* Real-time Collaboration */}
+          <div className="bg-gradient-to-br from-violet-50 to-purple-50 dark:from-violet-900/20 dark:to-purple-900/20 p-6 rounded-xl border border-violet-200 dark:border-violet-800">
+            <div className="text-3xl mb-4">🤝</div>
+            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3">Real-time Collaboration</h3>
+            <p className="text-gray-600 dark:text-gray-300">
+              Live collaboration features with WebSocket support, real-time notifications,
+              and concurrent editing capabilities.
+            </p>
+          </div>
+
+           {/* API-First Architecture */}
+           <div className="bg-gradient-to-br from-rose-50 to-pink-50 dark:from-rose-900/20 dark:to-pink-900/20 p-6 rounded-xl border border-rose-200 dark:border-rose-800">
+             <div className="text-3xl mb-4">🔌</div>
+             <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3">API-First Architecture</h3>
+             <p className="text-gray-600 dark:text-gray-300">
+               RESTful APIs with GraphQL support, OpenAPI documentation,
+               and comprehensive API management tools.
+             </p>
+           </div>
+
+           {/* Developer Experience */}
+           <div className="bg-gradient-to-br from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20 p-6 rounded-xl border border-yellow-200 dark:border-yellow-800">
+             <div className="text-3xl mb-4">🚀</div>
+             <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3">Developer Experience</h3>
+             <p className="text-gray-600 dark:text-gray-300">
+               Hot reload, TypeScript strict mode, comprehensive testing suite with Jest and Playwright,
+               automated linting and formatting, and extensive documentation.
+             </p>
+           </div>
+
+           {/* Scalability & Performance */}
+           <div className="bg-gradient-to-br from-indigo-50 to-blue-50 dark:from-indigo-900/20 dark:to-blue-900/20 p-6 rounded-xl border border-indigo-200 dark:border-indigo-800">
+             <div className="text-3xl mb-4">⚡</div>
+             <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3">Enterprise Scalability</h3>
+             <p className="text-gray-600 dark:text-gray-300">
+               Horizontal scaling with Redis clustering, database optimization with indexing strategies,
+               CDN integration, and microservices-ready architecture supporting 50k+ req/sec.
+             </p>
+           </div>
         </div>
       </div>
     </section>

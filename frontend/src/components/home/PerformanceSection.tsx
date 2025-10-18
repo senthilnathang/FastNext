@@ -7,10 +7,13 @@ export function PerformanceSection() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
           <h2 className="text-4xl font-bold mb-4">
-            Enterprise Performance
+            FastNext Framework Performance
           </h2>
           <p className="text-xl opacity-90">
             Built for scale with industry-leading performance metrics.
+            <a href="https://benchmarks.fastnext.dev" className="text-blue-300 hover:text-blue-200 ml-2 underline" target="_blank" rel="noopener noreferrer">
+              View Benchmarks →
+            </a>
           </p>
         </div>
 

@@ -7,10 +7,11 @@ export function TechStackSection() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
           <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
-            Modern Technology Stack
+            FastNext Framework Technology Stack
           </h2>
           <p className="text-xl text-gray-600 dark:text-gray-300">
-            Built with the latest technologies for maximum performance and developer experience.
+            Enterprise-grade full-stack platform built with the latest technologies for maximum performance,
+            security, and developer experience.
           </p>
         </div>
 

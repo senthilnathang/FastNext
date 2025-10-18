@@ -9,10 +9,13 @@ export function GettingStartedSection() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
           <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
-            Get Started in Minutes
+            Get Started with FastNext Framework
           </h2>
           <p className="text-xl text-gray-600 dark:text-gray-300">
             From zero to production-ready application with our streamlined setup process.
+            <a href="https://docs.fastnext.dev/getting-started" className="text-blue-600 hover:text-blue-700 ml-2" target="_blank" rel="noopener noreferrer">
+              View Quick Start Guide →
+            </a>
           </p>
         </div>
 
@@ -40,13 +43,19 @@ export function GettingStartedSection() {
             <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Quick Setup</h3>
             <div className="bg-gray-50 dark:bg-slate-800 p-4 rounded-lg text-left font-mono text-sm">
               <div className="text-gray-700 dark:text-gray-300">
-                # Clone and start
+                # Clone FastNext Framework
                 <br />
-                git clone https://github.com/fastnext/fastnext-framework
+                git clone https://github.com/fastnext/fastnext-framework.git
                 <br />
                 cd FastNext
                 <br />
+                # Start with Docker
+                <br />
                 docker-compose up -d
+                <br />
+                # Or use our CLI tool
+                <br />
+                <a href="https://github.com/fastnext/fastnext-cli" className="text-blue-600 hover:text-blue-700" target="_blank" rel="noopener noreferrer">npx fastnext-cli init</a>
               </div>
             </div>
           </div>
@@ -67,14 +76,16 @@ export function GettingStartedSection() {
           </div>
         </div>
 
-        <div className="text-center mt-12">
-          <Link
-            href="/docs/getting-started"
-            className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-lg font-semibold text-lg transition-colors shadow-lg hover:shadow-xl"
-          >
-            📖 Read Full Documentation
-          </Link>
-        </div>
+         <div className="text-center mt-12">
+           <a
+             href="https://docs.fastnext.dev/getting-started"
+             target="_blank"
+             rel="noopener noreferrer"
+             className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-lg font-semibold text-lg transition-colors shadow-lg hover:shadow-xl"
+           >
+             📖 Read Full Documentation
+           </a>
+         </div>
       </div>
     </section>
   );
