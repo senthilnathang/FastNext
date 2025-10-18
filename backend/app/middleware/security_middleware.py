@@ -8,6 +8,7 @@ import time
 from datetime import datetime
 from typing import Any, Callable, Dict
 
+from app.core.csp_config import get_csp_header
 from app.utils.security_utils import (
     detect_suspicious_patterns,
     get_client_ip_enhanced,
@@ -133,7 +134,7 @@ class SecurityMiddleware(BaseHTTPMiddleware):
             "X-XSS-Protection": "1; mode=block",
             "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
             "Referrer-Policy": "strict-origin-when-cross-origin",
-            "Content-Security-Policy": "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:;",
+            "Content-Security-Policy": get_csp_header(),
             "Permissions-Policy": "geolocation=(), microphone=(), camera=()",
         }
 

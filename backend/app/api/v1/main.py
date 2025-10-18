@@ -17,6 +17,7 @@ from . import (
     cache_management,
     collaboration,
     components,
+    csp,
     data_import_export,
     database_performance,
     events,
@@ -48,6 +49,9 @@ v1_router.include_router(users.router, prefix="/users", tags=["v1-users"])
 v1_router.include_router(profile.router, prefix="/profile", tags=["v1-profile"])
 v1_router.include_router(security.router, prefix="/security", tags=["v1-security"])
 v1_router.include_router(notifications.router, prefix="/notifications", tags=["v1-notifications"])
+
+# Content Security Policy
+v1_router.include_router(csp.router, prefix="/csp", tags=["v1-csp"])
 
 # Admin & Permissions
 v1_router.include_router(roles.router, prefix="/roles", tags=["v1-roles"])
