@@ -4,7 +4,7 @@ This guide covers frontend development, testing, Storybook, and deployment for t
 
 ## Prerequisites
 
-- Node.js 18+
+- Node.js 20.9+
 - npm or yarn
 - Git
 
@@ -652,19 +652,19 @@ vercel --prod
 #### Docker
 ```dockerfile
 # Dockerfile
-FROM node:18-alpine AS deps
+FROM node:20.9-alpine AS deps
 RUN apk add --no-cache libc6-compat
 WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci --only=production
 
-FROM node:18-alpine AS builder
+FROM node:20.9-alpine AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 RUN npm run build
 
-FROM node:18-alpine AS runner
+FROM node:20.9-alpine AS runner
 WORKDIR /app
 ENV NODE_ENV production
 RUN addgroup --system --gid 1001 nodejs

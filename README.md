@@ -1,11 +1,11 @@
 # FastNext Framework 🚀
 
-A comprehensive, production-ready full-stack web application framework built with Next.js 15, FastAPI, and enterprise-grade security features.
+A comprehensive, production-ready full-stack web application framework built with Next.js 16, FastAPI, and enterprise-grade security features.
 
 ## ✨ Features
 
-### 🎯 Frontend (Next.js 15)
-- **Modern React Architecture**: App Router with TypeScript and Server Components
+### 🎯 Frontend (Next.js 16)
+- **Modern React Architecture**: App Router with TypeScript, Server Components, and React 19 + Compiler integration
 - **Advanced UI Components**: Radix UI + Tailwind CSS + shadcn/ui
 - **Theme System**: Dark mode with multiple color schemes and system preference detection
 - **Universal ViewManager**: Multi-view data display (List, Card, Kanban, Gantt, Cohort) with advanced filtering
@@ -16,7 +16,7 @@ A comprehensive, production-ready full-stack web application framework built wit
 - **Workflow Engine**: Visual workflow builder with advanced analytics
 - **Real-time Features**: WebSocket support for live updates
 - **Performance**: Optimized with Turbopack and intelligent caching
-- **Testing**: Jest, Playwright, and Storybook integration
+- **Testing**: Jest, Playwright, Storybook, and Biome linting integration
 
 ### ⚡ Backend (FastAPI)
 - **High-Performance API**: FastAPI with async/await and Pydantic v2
@@ -165,13 +165,13 @@ Frontend Architecture
 ## 🛠️ Technology Stack
 
 ### 🎨 Frontend
-- **Framework**: Next.js 15 with App Router and Turbopack
+- **Framework**: Next.js 16 with App Router and Turbopack
 - **Language**: TypeScript with strict mode
 - **Styling**: Tailwind CSS 4 + shadcn/ui + Radix UI
 - **State Management**: TanStack Query + Zustand + Nuqs for URL state
 - **Type Safety**: tRPC for end-to-end type safety
 - **Security**: CSP, Trusted Types, SRI, XSS protection
-- **Testing**: Jest + React Testing Library + Playwright + Storybook
+- **Testing**: Jest + React Testing Library + Playwright + Storybook + Biome
 - **Development**: Hot reload, bundle analysis, and performance monitoring
 
 ### ⚙️ Backend
@@ -197,7 +197,7 @@ Frontend Architecture
 ## 🚀 Quick Start
 
 ### Prerequisites
-- Node.js 18+ and npm/yarn/pnpm
+- Node.js 20.9+ and npm/yarn/pnpm
 - Python 3.11+
 - PostgreSQL 15+
 - Redis 7+
@@ -291,7 +291,7 @@ cd ../backend && python test_workflow_comprehensive.py
 
 ```
 FastNext/
-├── frontend/                          # Next.js 15 Application
+├── frontend/                          # Next.js 16 Application
 │   ├── src/
 │   │   ├── app/                      # App Router (pages, layouts, APIs)
 │   │   │   ├── (dashboard)/          # Dashboard route group

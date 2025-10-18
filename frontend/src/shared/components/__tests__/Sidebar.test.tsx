@@ -39,6 +39,7 @@ global.fetch = jest.fn(() =>
     clone: () => ({
       json: () => Promise.resolve({ data: { notifications: [], unread_count: 0 } }),
     }),
+    headers: new Headers({ 'content-type': 'application/json' }),
   })
 );
 
@@ -93,18 +94,20 @@ describe("Sidebar Component", () => {
   it("expands and collapses submenu items", () => {
     renderWithAuth(<Sidebar />);
 
-    const complianceButton = screen.getByText("Compliance");
+    // Find the Configuration button in the main menu (not the one in Administration submenu)
+    const configurationButtons = screen.getAllByText("Configuration");
+    const configurationButton = configurationButtons[0]; // First one should be the main menu item
 
     // Initially, submenu items should not be visible
-    expect(screen.queryByText("AI Trust Center")).not.toBeInTheDocument();
+    expect(screen.queryByText("Data Import/Export Config")).not.toBeInTheDocument();
 
     // Click to expand
-    fireEvent.click(complianceButton);
+    fireEvent.click(configurationButton);
 
     // Now submenu items should be visible
-    expect(screen.getByText("AI Trust Center")).toBeInTheDocument();
-    expect(screen.getByText("Policy Dashboard")).toBeInTheDocument();
-    expect(screen.getByText("Framework")).toBeInTheDocument();
+    expect(screen.getByText("Data Import/Export Config")).toBeInTheDocument();
+    expect(screen.getByText("Permissions Config")).toBeInTheDocument();
+    expect(screen.getByText("API Documentation")).toBeInTheDocument();
   });
 
   it("renders version information", () => {
