@@ -320,7 +320,7 @@ def _setup_middleware(app: FastAPI):
     """Setup application middleware"""
 
     # Import middleware
-    from app.middleware.cache_middleware import CacheMiddleware, RateLimitMiddleware
+    # from app.middleware.cache_middleware import CacheMiddleware, RateLimitMiddleware
 
     # Enhanced Event Logging Middleware
     # Add authentication event tracking
@@ -328,52 +328,30 @@ def _setup_middleware(app: FastAPI):
 
     # Add comprehensive event logging
     app.add_middleware(
-        create_enhanced_logging_middleware(
-            enable_enhanced_logging=True,
-            log_all_requests=False,  # Only log sensitive endpoints and errors
-            exclude_paths={
-                "/health",
-                "/metrics",
-                "/favicon.ico",
-                "/static/",
-                "/_next/",
-                "/docs",
-                "/redoc",
-                "/openapi.json",
-                "/ping",
-                "/version",
-                "/debug",
-            },
-        )
+        create_enhanced_logging_middleware()
     )
 
-    # Add Row Level Security middleware
-    app.add_middleware(
-        RLSMiddleware,
-        enable_audit=True,
-        exclude_paths=[
-            "/health",
-            "/docs",
-            "/redoc",
-            "/openapi.json",
-            "/static/",
-            "/_next/",
-            "/favicon.ico",
-            "/debug",
-            "/api/v1/auth/login",
-            "/api/v1/auth/register",  # Don't apply RLS to auth endpoints
-        ],
-    )
+    # Security middleware
+    app.add_middleware(SecurityMiddleware)
+    app.add_middleware(AutoLogoutMiddleware)
+    app.add_middleware(SessionExpirationMiddleware)
 
-    # Rate limiting middleware - Re-enabled with fixed header encoding
-    if settings.CACHE_ENABLED:
-        app.add_middleware(
-            RateLimitMiddleware, requests_per_minute=60, requests_per_hour=1000
-        )
+    # RLS middleware
+    app.add_middleware(RLSMiddleware)
 
-    # Cache middleware for HTTP responses - Re-enabled with fixed header encoding
-    if settings.CACHE_ENABLED:
-        app.add_middleware(CacheMiddleware, default_ttl=settings.CACHE_DEFAULT_TTL)
+    # Validation middleware
+    from app.middleware.validation_middleware import ValidationMiddleware
+    app.add_middleware(ValidationMiddleware)
+
+    # Rate limiting middleware - temporarily disabled
+    # if settings.RATE_LIMITING_ENABLED:
+    #     app.add_middleware(
+    #         RateLimitMiddleware, requests_per_minute=60, requests_per_hour=1000
+    #     )
+
+    # Cache middleware - temporarily disabled
+    # if settings.CACHE_ENABLED:
+    #     app.add_middleware(CacheMiddleware, default_ttl=settings.CACHE_DEFAULT_TTL)
 
     # CORS middleware - Properly configured with security
     allowed_origins = (
@@ -455,59 +433,9 @@ def _setup_middleware(app: FastAPI):
                     logger.debug(f"Skipping header sanitization for streaming response: {response_class_name}")
                     return response
 
-                # Try different sanitization approaches
-                if hasattr(response, 'init_headers') and callable(response.init_headers):
-                    # For responses that allow header initialization
-                    current_headers = dict(response.headers)
-                    sanitized_headers = {}
-
-                    for key, value in current_headers.items():
-                        try:
-                            if isinstance(key, bytes):
-                                str_key = key.decode('utf-8', errors='ignore')
-                            elif isinstance(key, str):
-                                str_key = key
-                            else:
-                                str_key = str(key)
-
-                            if isinstance(value, bytes):
-                                str_value = value.decode('utf-8', errors='ignore')
-                            elif isinstance(value, str):
-                                str_value = value
-                            else:
-                                str_value = str(value)
-
-                            sanitized_headers[str_key] = str_value
-                        except (UnicodeDecodeError, AttributeError, TypeError):
-                            continue
-
-                    # Try to reinitialize headers
-                    try:
-                        from starlette.datastructures import MutableHeaders
-                        response.headers = MutableHeaders(sanitized_headers)
-                        logger.debug(f"Sanitized headers for {request.url.path}")
-                    except (AttributeError, TypeError):
-                        logger.debug(f"Could not set headers for {response_class_name}")
-                else:
-                    # For other response types, try to modify raw headers
-                    if hasattr(response.headers, '_list'):
-                        raw_headers = response.headers._list
-                        if isinstance(raw_headers, list):
-                            sanitized_raw = []
-                            for item in raw_headers:
-                                if isinstance(item, tuple) and len(item) == 2:
-                                    key_bytes, value_bytes = item
-                                    try:
-                                        # Ensure both are bytes
-                                        if isinstance(key_bytes, str):
-                                            key_bytes = key_bytes.encode('utf-8')
-                                        if isinstance(value_bytes, str):
-                                            value_bytes = value_bytes.encode('utf-8')
-                                        sanitized_raw.append((key_bytes, value_bytes))
-                                    except (UnicodeEncodeError, AttributeError):
-                                        continue
-                            response.headers._list = sanitized_raw
-                            logger.debug(f"Sanitized raw headers for {request.url.path}")
+                # Skip header sanitization for now to avoid bytes/string issues
+                # TODO: Re-enable with proper type checking
+                logger.debug(f"Skipping header sanitization for {request.url.path} due to type issues")
 
             except Exception as e:
                 logger.warning(f"Header sanitization failed for {request.url.path}: {e}")

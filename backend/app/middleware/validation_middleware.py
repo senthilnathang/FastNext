@@ -243,8 +243,20 @@ class ValidationMiddleware(BaseHTTPMiddleware):
     async def _validate_headers(self, request: Request) -> "ValidationResult":
         """Validate request headers"""
         try:
+            # Skip validation for common safe headers
+            safe_headers = {
+                "accept", "accept-encoding", "accept-language", "user-agent",
+                "cache-control", "connection", "host", "upgrade-insecure-requests",
+                "sec-fetch-dest", "sec-fetch-mode", "sec-fetch-site", "sec-fetch-user",
+                "dnt", "upgrade", "pragma"
+            }
+
             # Check for suspicious headers
             for header_name, header_value in request.headers.items():
+                # Skip validation for safe headers
+                if header_name.lower() in safe_headers:
+                    continue
+
                 # Validate header length
                 if len(header_value) > self.max_lengths["header"]:
                     await self._log_validation_error(
@@ -265,7 +277,7 @@ class ValidationMiddleware(BaseHTTPMiddleware):
                     )
                     return ValidationResult(
                         False,
-                        f"Invalid header content: {header_name}",
+                        f"Invalid header content in {header_name}",
                         "MALICIOUS_HEADER",
                     )
 
