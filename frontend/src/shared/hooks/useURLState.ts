@@ -1,33 +1,70 @@
 "use client";
 
-import {
-  parseAsArrayOf,
-  parseAsBoolean,
-  parseAsInteger,
-  parseAsJson,
-  parseAsString,
-  parseAsStringLiteral,
-  useQueryState,
-} from "nuqs";
+import { useState, useCallback } from "react";
+
+// Temporary replacement for nuqs hooks until Next.js 16 support is available
+// TODO: Replace with nuqs when Next.js 16 support is added
+
+// Simple state-based replacement for useQueryState
+function useQueryState<T>(
+  key: string,
+  parser: { withDefault: (defaultValue: T) => any }
+): [T, (value: T | null) => void] {
+  const defaultValue = parser.withDefault ? parser.withDefault : (() => null);
+  const [state, setState] = useState<T>(defaultValue);
+
+  const setValue = useCallback((value: T | null) => {
+    setState(value ?? defaultValue);
+  }, [defaultValue]);
+
+  return [state, setValue];
+}
+
+// Simple parsers (temporary replacements)
+const parseAsString = {
+  withDefault: (defaultValue: string) => defaultValue,
+};
+
+const parseAsInteger = {
+  withDefault: (defaultValue: number) => defaultValue,
+};
+
+const parseAsBoolean = {
+  withDefault: (defaultValue: boolean) => defaultValue,
+};
+
+const parseAsStringLiteral = (options: readonly string[]) => ({
+  withDefault: (defaultValue: string) => defaultValue,
+});
+
+const parseAsArrayOf = (parser: any) => ({
+  withDefault: (defaultValue: any[]) => defaultValue,
+});
+
+const parseAsJson = (parser: any) => ({
+  withDefault: (defaultValue: any) => defaultValue,
+});
 
 /**
  * Custom hook for managing search/filter state in URL
+ * TODO: Currently using local state, will use URL state when nuqs supports Next.js 16
  */
 export function useSearchState(defaultValue = "") {
-  return useQueryState("search", parseAsString.withDefault(defaultValue));
+  return useQueryState("search", { withDefault: () => defaultValue });
 }
 
 /**
  * Custom hook for managing pagination state in URL
+ * TODO: Currently using local state, will use URL state when nuqs supports Next.js 16
  */
 export function usePaginationState(defaultPage = 1, defaultLimit = 10) {
   const [page, setPage] = useQueryState(
     "page",
-    parseAsInteger.withDefault(defaultPage),
+    { withDefault: () => defaultPage },
   );
   const [limit, setLimit] = useQueryState(
     "limit",
-    parseAsInteger.withDefault(defaultLimit),
+    { withDefault: () => defaultLimit },
   );
 
   return {
@@ -41,6 +78,7 @@ export function usePaginationState(defaultPage = 1, defaultLimit = 10) {
 
 /**
  * Custom hook for managing sort state in URL
+ * TODO: Currently using local state, will use URL state when nuqs supports Next.js 16
  */
 export function useSortState(
   defaultSortBy = "",
@@ -48,13 +86,11 @@ export function useSortState(
 ) {
   const [sortBy, setSortBy] = useQueryState(
     "sortBy",
-    parseAsString.withDefault(defaultSortBy),
+    { withDefault: () => defaultSortBy },
   );
   const [sortOrder, setSortOrder] = useQueryState(
     "sortOrder",
-    parseAsStringLiteral(["asc", "desc"] as const).withDefault(
-      defaultSortOrder,
-    ),
+    { withDefault: () => defaultSortOrder },
   );
 
   return {
@@ -71,23 +107,26 @@ export function useSortState(
 
 /**
  * Custom hook for managing filter arrays in URL (e.g., tags, categories)
+ * TODO: Currently using local state, will use URL state when nuqs supports Next.js 16
  */
 export function useFilterArrayState(key: string, defaultValue: string[] = []) {
   return useQueryState(
     key,
-    parseAsArrayOf(parseAsString).withDefault(defaultValue),
+    { withDefault: () => defaultValue },
   );
 }
 
 /**
  * Custom hook for managing boolean filters in URL
+ * TODO: Currently using local state, will use URL state when nuqs supports Next.js 16
  */
 export function useBooleanFilterState(key: string, defaultValue = false) {
-  return useQueryState(key, parseAsBoolean.withDefault(defaultValue));
+  return useQueryState(key, { withDefault: () => defaultValue });
 }
 
 /**
  * Custom hook for managing view mode state in URL
+ * TODO: Currently using local state, will use URL state when nuqs supports Next.js 16
  */
 export function useViewModeState<T extends readonly string[]>(
   modes: T,
@@ -95,13 +134,14 @@ export function useViewModeState<T extends readonly string[]>(
 ) {
   return useQueryState(
     "view",
-    parseAsStringLiteral(modes).withDefault(defaultMode),
+    { withDefault: () => defaultMode },
   );
 }
 
 /**
  * Custom hook for managing complex object state in URL as JSON
  * Note: Consider using schema validation libraries like Zod for production use
+ * TODO: Currently using local state, will use URL state when nuqs supports Next.js 16
  */
 export function useJSONState<T extends Record<string, any>>(
   key: string,
@@ -109,21 +149,17 @@ export function useJSONState<T extends Record<string, any>>(
 ) {
   return useQueryState(
     key,
-    parseAsJson((value: unknown) => {
-      if (typeof value === "object" && value !== null) {
-        return value as T;
-      }
-      return null;
-    }).withDefault(defaultValue as NonNullable<T>),
+    { withDefault: () => defaultValue },
   );
 }
 
 /**
  * Custom hook for managing date range state in URL
+ * TODO: Currently using local state, will use URL state when nuqs supports Next.js 16
  */
 export function useDateRangeState() {
-  const [startDate, setStartDate] = useQueryState("startDate", parseAsString);
-  const [endDate, setEndDate] = useQueryState("endDate", parseAsString);
+  const [startDate, setStartDate] = useQueryState("startDate", { withDefault: () => null });
+  const [endDate, setEndDate] = useQueryState("endDate", { withDefault: () => null });
 
   return {
     startDate,
@@ -139,6 +175,7 @@ export function useDateRangeState() {
 
 /**
  * Custom hook for managing tab state in URL
+ * TODO: Currently using local state, will use URL state when nuqs supports Next.js 16
  */
 export function useTabState<T extends readonly string[]>(
   tabs: T,
@@ -146,17 +183,18 @@ export function useTabState<T extends readonly string[]>(
 ) {
   return useQueryState(
     "tab",
-    parseAsStringLiteral(tabs).withDefault(defaultTab),
+    { withDefault: () => defaultTab },
   );
 }
 
 /**
  * Custom hook for managing modal/dialog state in URL
+ * TODO: Currently using local state, will use URL state when nuqs supports Next.js 16
  */
 export function useModalState(defaultOpen = false) {
   const [isOpen, setIsOpen] = useQueryState(
     "modal",
-    parseAsBoolean.withDefault(defaultOpen),
+    { withDefault: () => defaultOpen },
   );
 
   return {
@@ -170,6 +208,7 @@ export function useModalState(defaultOpen = false) {
 
 /**
  * Custom hook for managing generic string literal state in URL
+ * TODO: Currently using local state, will use URL state when nuqs supports Next.js 16
  */
 export function useStringLiteralState<T extends readonly string[]>(
   key: string,
@@ -178,6 +217,6 @@ export function useStringLiteralState<T extends readonly string[]>(
 ) {
   return useQueryState(
     key,
-    parseAsStringLiteral(options).withDefault(defaultValue),
+    { withDefault: () => defaultValue },
   );
 }

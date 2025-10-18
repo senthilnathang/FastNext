@@ -1,6 +1,5 @@
 "use client";
 
-import { NuqsAdapter } from "nuqs/adapters/next/app";
 import { Suspense } from "react";
 
 interface NuqsProviderProps {
@@ -8,13 +7,14 @@ interface NuqsProviderProps {
 }
 
 /**
- * Provider for nuqs URL state management
- * Wraps the application with NuqsAdapter for URL-based state management
+ * Temporary provider for URL state management
+ * TODO: Replace with nuqs when Next.js 16 support is available
+ * Currently just a pass-through provider without nuqs functionality
  */
 export function NuqsProvider({ children }: NuqsProviderProps) {
   return (
-    <NuqsAdapter>
-      <Suspense fallback={<div>Loading...</div>}>{children}</Suspense>
-    </NuqsAdapter>
+    <Suspense fallback={<div>Loading...</div>}>
+      {children}
+    </Suspense>
   );
 }

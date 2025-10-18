@@ -15,6 +15,9 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
   compress: true,
 
+  // React Compiler for automatic memoization
+  reactCompiler: true,
+
   // Experimental features for better performance
   experimental: {
     optimizePackageImports: ["@radix-ui/react-icons", "lucide-react"],
@@ -22,9 +25,19 @@ const nextConfig: NextConfig = {
 
   // Image optimization
   images: {
-    domains: [
-      "localhost",
-      "127.0.0.1",
+    remotePatterns: [
+      {
+        protocol: "http",
+        hostname: "localhost",
+        port: "",
+        pathname: "/**",
+      },
+      {
+        protocol: "http",
+        hostname: "127.0.0.1",
+        port: "",
+        pathname: "/**",
+      },
       // Add your production domains here
     ],
     unoptimized: process.env.NODE_ENV === "development",

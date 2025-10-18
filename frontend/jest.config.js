@@ -11,7 +11,7 @@ const customJestConfig = {
     "^@/(.*)$": "<rootDir>/src/$1",
   },
   // Transform ES modules in node_modules for packages that need it
-  transformIgnorePatterns: ["node_modules/(?!(nuqs|@tanstack|@hookform)/)"],
+  transformIgnorePatterns: ["node_modules/(?!(@tanstack|@hookform)/)"],
   // Exclude E2E tests from Jest (they should be run with Playwright)
   testPathIgnorePatterns: ["<rootDir>/src/__tests__/e2e/"],
 };
