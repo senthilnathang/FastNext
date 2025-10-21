@@ -214,6 +214,27 @@ with open('users.csv', 'r') as f:
 bulk_create_users(db, users_data)
 ```
 
+### User Management Interface
+
+#### Admin Dashboard Features
+- **User List View**: Comprehensive table view with search, filtering, and sorting
+- **User Card View**: Visual card-based layout for user management
+- **Bulk Operations**: Select multiple users for batch actions (activate/deactivate, delete)
+- **Real-time Statistics**: User counts, verification rates, and activity metrics
+- **Advanced Filtering**: Filter by status, roles, creation date, and last login
+
+#### User CRUD Operations
+- **Create Users**: Add new users with email, username, and role assignment
+- **Edit Users**: Modify user details, roles, and account status
+- **Delete Users**: Remove users with confirmation dialogs
+- **Status Management**: Activate/deactivate user accounts
+- **Password Management**: Secure password updates and resets
+
+#### Recent Improvements (October 2025)
+- ✅ **Fixed Missing Action Buttons**: Restored Edit/Delete buttons in List and Card views
+- ✅ **Enhanced Type Safety**: Improved component communication and prop handling
+- ✅ **Optimized Performance**: Better rendering and state management for user operations
+
 ### User Roles and Permissions
 
 #### Built-in Roles

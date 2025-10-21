@@ -5,6 +5,7 @@ This directory contains comprehensive documentation for the FastNext framework. 
 ## 📚 Main Documentation
 
 - [**Main README**](../README.md) - Complete project overview and quick start guide
+- [**Changelog**](../CHANGELOG.md) - Version history and recent updates
 - [**Contributing Guide**](CONTRIBUTING.md) - How to contribute to the project
 - [**Code of Conduct**](CODE_OF_CONDUCT.md) - Community guidelines
 - [**Coding Standards**](CODING_STANDARDS.md) - General coding standards across the project
@@ -51,6 +52,15 @@ Located in [`docs/features/`](features/):
 - [**Authentication Verification**](features/AUTHENTICATION_VERIFICATION.md) - Authentication system verification and testing
 
 ## 🆕 Latest Updates
+
+### 🔧 Recent Critical Fixes (October 2025)
+
+**User Management UI Enhancements:**
+- ✅ **Fixed Missing Action Buttons**: Resolved missing Edit/Delete buttons in admin/users List View and Card View
+- ✅ **Type System Fixes**: Aligned ViewManager component types with User model for proper prop passing
+- ✅ **Prop Passing Optimization**: Improved CommonFormViewManager prop handling for better component communication
+
+**Impact**: Admin users can now properly edit and delete users through the web interface, with full CRUD functionality restored.
 
 ### Event Logging & Activity Monitoring System (NEW!) 🎉
 
@@ -235,6 +245,11 @@ When adding new documentation:
 - ✅ Created quick navigation sections
 - ✅ Added feature badges for new functionality
 - ✅ Created features/ directory for feature-specific docs
+
+### User Management UI Fixes Documentation
+- ✅ Updated main README with recent UI fixes
+- ✅ Added documentation for ViewManager type system improvements
+- ✅ Updated admin guide with user management interface enhancements
 
 ---
 

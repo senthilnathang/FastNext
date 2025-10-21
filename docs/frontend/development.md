@@ -2,6 +2,17 @@
 
 This guide covers frontend development, testing, Storybook, and deployment for the FastNext framework.
 
+## 🆕 Recent Updates (October 2025)
+
+### 🔧 Critical UI Fixes
+- **ViewManager Type System**: Fixed type constraint mismatch in ViewManager component to properly support optional `id` fields, ensuring compatibility with User model
+- **CommonFormViewManager Props**: Optimized prop passing order to ensure CRUD action callbacks (onEditClick, onDeleteClick) are correctly passed to child components
+- **User Management Interface**: Restored missing Edit/Delete action buttons in admin/users List View and Card View templates
+
+### 📊 Component Architecture Improvements
+- **Enhanced Type Safety**: Improved TypeScript definitions across view management components
+- **Prop Optimization**: Streamlined component communication for better performance and reliability
+
 ## Prerequisites
 
 - Node.js 20.9+

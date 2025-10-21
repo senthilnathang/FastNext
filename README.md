@@ -55,6 +55,8 @@ A comprehensive, production-ready full-stack web application framework built wit
 ## 🆕 Recent Updates (October 2025)
 
 ### 🔧 Critical Fixes & Improvements
+- **User Management UI Fixes**: Resolved missing Edit/Delete action buttons in admin/users List View and Card View by fixing prop passing in CommonFormViewManager and ViewManager components
+- **Type System Alignment**: Fixed type constraint mismatch in ViewManager component to properly support optional `id` fields, ensuring compatibility with User model
 - **Header Sanitization Middleware**: Resolved "Bytes Pattern on String-like Object" errors by implementing comprehensive header sanitization across all backend middleware files, preventing uvicorn validation failures
 - **Notification API Fixes**: Fixed 404 errors in frontend notification calls by replacing plain `fetch` with authenticated `apiClient` in NotificationCenter and push notification hooks
 - **Project CRUD Enhancements**: Simplified permission requirements in projects API endpoint to allow authenticated users to create projects, removing blocking permission checks
@@ -1067,6 +1069,12 @@ jobs:
 - **ReDoc Documentation**: `http://localhost:8000/redoc`
 - **OpenAPI Export**: Available in JSON/YAML formats
 - **Postman Collection**: `backend/exports/fastnext-postman-collection.json`
+
+### 📋 Project Documentation
+- [**📖 Full Documentation**](docs/README.md) - Complete documentation index
+- [**📋 Changelog**](CHANGELOG.md) - Version history and recent updates
+- [**🚀 Quick Start Guide**](docs/tutorials/getting-started-tutorial.md) - Get started in 5 minutes
+- [**🔧 API Reference**](docs/api-export-guide.md) - Technical API documentation
 
 ### 🏗️ Architecture Documentation
 - **Backend Architecture**: `backend/docs/ARCHITECTURE.md`
