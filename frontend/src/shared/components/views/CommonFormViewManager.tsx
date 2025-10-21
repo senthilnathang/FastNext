@@ -222,7 +222,6 @@ export function CommonFormViewManager<T extends { id?: string | number }>({
 
   // Enhanced ViewManager props
   const enhancedViewManagerProps = {
-    ...viewManagerProps,
     data,
     loading,
     error,
@@ -236,7 +235,8 @@ export function CommonFormViewManager<T extends { id?: string | number }>({
     onEditClick: config.canEdit ? handleEdit : undefined,
     onViewClick: config.canView ? handleView : undefined,
     onDeleteClick: config.canDelete ? handleDelete : undefined,
-  } as ViewManagerProps<T>;
+    ...viewManagerProps,
+  };
 
   const renderBreadcrumb = () => {
     const breadcrumbs = [

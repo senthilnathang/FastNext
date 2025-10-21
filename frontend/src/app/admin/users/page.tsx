@@ -515,6 +515,10 @@ const UsersPage: React.FC<UsersPageProps> = () => {
     onCreate: createUserApi,
     onUpdate: updateUserApi,
     onDelete: deleteUserApi,
+    canCreate: true,
+    canEdit: true,
+    canDelete: true,
+    canView: true,
     views: [
       {
         id: "users-card",

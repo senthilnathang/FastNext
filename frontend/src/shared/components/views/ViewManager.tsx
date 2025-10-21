@@ -202,7 +202,7 @@ export interface ViewManagerProps<T = any> {
 }
 
 export const ViewManager = React.memo(function ViewManager<
-  T extends { id: number | string },
+  T extends { id?: number | string },
 >({
   data,
   columns: initialColumns,
