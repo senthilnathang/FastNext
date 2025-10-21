@@ -7,8 +7,8 @@ import { expect, test as setup } from "@playwright/test";
  * for use in other tests.
  */
 
-const authFile = "tests/e2e/.auth/user.json";
-const adminAuthFile = "tests/e2e/.auth/admin.json";
+const authFile = "src/__tests__/e2e/.auth/user.json";
+const adminAuthFile = "src/__tests__/e2e/.auth/admin.json";
 
 setup("authenticate regular user", async ({ page }) => {
   try {
