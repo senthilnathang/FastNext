@@ -47,9 +47,36 @@ const apiFetch = async <T = any>(
     }
 
     if (!response.ok) {
-      const error: ApiError = new Error(
-        `HTTP ${response.status}: ${response.statusText}`,
-      );
+      let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+
+      // Use common error template messages for standard HTTP status codes
+      switch (response.status) {
+        case 400:
+          errorMessage = "Bad request. Please check your input and try again.";
+          break;
+        case 401:
+          errorMessage = "Authentication required. Please log in to continue.";
+          break;
+        case 403:
+          errorMessage = "Access denied. You don't have permission to perform this action.";
+          break;
+        case 404:
+          errorMessage = "The requested resource was not found.";
+          break;
+        case 500:
+          errorMessage = "Something went wrong on our end. Please try again later.";
+          break;
+        case 501:
+          errorMessage = "This feature is not implemented yet.";
+          break;
+        case 502:
+        case 503:
+        case 504:
+          errorMessage = "Service temporarily unavailable. Please try again later.";
+          break;
+      }
+
+      const error: ApiError = new Error(errorMessage);
       error.status = response.status;
       error.statusText = response.statusText;
       error.data = data;

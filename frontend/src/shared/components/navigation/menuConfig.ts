@@ -1,5 +1,6 @@
 import {
   Activity,
+  AlertTriangle,
   Book,
   Building2,
   Cog,
@@ -55,6 +56,42 @@ export const menuItems: MenuItem[] = [
     title: "Settings",
     href: "/settings",
     icon: Settings,
+  },
+  {
+    title: "Error Pages",
+    icon: AlertTriangle,
+    children: [
+      {
+        title: "400 Bad Request",
+        href: "/error/400",
+        icon: AlertTriangle,
+      },
+      {
+        title: "401 Unauthorized",
+        href: "/error/401",
+        icon: AlertTriangle,
+      },
+      {
+        title: "403 Forbidden",
+        href: "/error/403",
+        icon: AlertTriangle,
+      },
+      {
+        title: "404 Not Found",
+        href: "/error/404",
+        icon: AlertTriangle,
+      },
+      {
+        title: "500 Internal Server Error",
+        href: "/error/500",
+        icon: AlertTriangle,
+      },
+      {
+        title: "501 Not Implemented",
+        href: "/error/501",
+        icon: AlertTriangle,
+      },
+    ],
   },
   {
     title: "Configuration",

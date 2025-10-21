@@ -531,7 +531,7 @@ function getSecurityHeaders(request: NextRequest): Record<string, string> {
     `style-src 'self' 'nonce-${nonce}' 'unsafe-inline'`,
     "img-src 'self' data: https: blob:",
     "font-src 'self' https://fonts.gstatic.com",
-    "connect-src 'self' ws://localhost:* http://localhost:8000",
+    "connect-src 'self' ws://localhost:* http://localhost:8000 https://vercel.live wss://vercel.live https://vitals.vercel-insights.com",
     "media-src 'self' https: blob:",
     "object-src 'none'",
     "frame-src 'none'",
