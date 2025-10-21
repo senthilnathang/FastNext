@@ -48,7 +48,7 @@ export function ErrorPage({
       <Card className="w-full max-w-md mx-auto shadow-lg">
         <CardHeader className="text-center pb-4">
           {icon && (
-            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-red-100">
+            <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-red-100">
               {icon}
             </div>
           )}
