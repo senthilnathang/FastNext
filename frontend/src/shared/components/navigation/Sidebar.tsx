@@ -159,7 +159,6 @@ export default function Sidebar({
   const { canAccessModule, hasPermission } = useUserRole();
   const { user } = useAuth();
   const [expandedItems, setExpandedItems] = useState<string[]>([
-    "Settings",
     "Administration",
   ]);
   const [isHovered, setIsHovered] = useState(false);
@@ -182,6 +181,13 @@ export default function Sidebar({
       JSON.stringify(expandedItems),
     );
   }, [expandedItems]);
+
+  // Clear expanded items when sidebar is collapsed
+  useEffect(() => {
+    if (isCollapsed) {
+      setExpandedItems([]);
+    }
+  }, [isCollapsed]);
 
   const handleToggleExpanded = useCallback((itemTitle: string) => {
     setExpandedItems((prev) =>

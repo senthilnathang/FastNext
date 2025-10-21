@@ -123,22 +123,18 @@ export default function AppLayout({ children }: AppLayoutProps) {
             </div>
 
             <div className="flex items-center space-x-2">
-              <NotificationCenter
-                trigger={
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="relative p-1.5"
-                    aria-label="Notifications"
-                  >
-                    <Bell className="h-4 w-4" aria-hidden="true" />
-                    <span
-                      className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-red-500 rounded-full"
-                      aria-label="Unread notifications"
-                    ></span>
-                  </Button>
-                }
-              />
+               <NotificationCenter
+                 trigger={
+                   <Button
+                     variant="ghost"
+                     size="sm"
+                     className="relative p-1.5"
+                     aria-label="Notifications"
+                   >
+                     <Bell className="h-4 w-4" aria-hidden="true" />
+                   </Button>
+                 }
+               />
             </div>
           </div>
         </header>
