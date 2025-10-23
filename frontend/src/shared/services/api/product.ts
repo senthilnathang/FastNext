@@ -12,6 +12,7 @@ export interface Product {
   sku?: string;
   stock_quantity?: number;
   is_featured?: boolean;
+  is_active: boolean;
   launch_date?: string;
   specifications?: Record<string, any>;
   website_url?: string;
@@ -28,6 +29,7 @@ export interface CreateProductRequest {
   description?: string;
   stock_quantity?: number;
   is_featured?: boolean;
+  is_active?: boolean;
   launch_date?: string;
   specifications?: Record<string, any>;
   website_url?: string;
@@ -43,6 +45,7 @@ export interface UpdateProductRequest {
   sku?: string;
   stock_quantity?: number;
   is_featured?: boolean;
+  is_active?: boolean;
   launch_date?: string;
   specifications?: Record<string, any>;
   website_url?: string;

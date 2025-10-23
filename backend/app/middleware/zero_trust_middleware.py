@@ -12,6 +12,7 @@ import logging
 
 from app.services.zero_trust_security import ZeroTrustSecurity, SecurityContext, TrustLevel
 from app.core.config import settings
+from app.db.session import get_db
 
 logger = logging.getLogger(__name__)
 
@@ -48,11 +49,14 @@ class ZeroTrustMiddleware(BaseHTTPMiddleware):
                     content={"detail": "Session expired or invalid"}
                 )
 
+            # Get database session
+            db = next(get_db())
+
             # Evaluate trust level
-            trust_level = ZeroTrustSecurity.evaluate_trust_level(security_context, None)  # TODO: Pass db session
+            trust_level = ZeroTrustSecurity.evaluate_trust_level(security_context, db)
 
             # Apply security policies
-            policies_applied = ZeroTrustSecurity.apply_security_policies(security_context, None)  # TODO: Pass db session
+            policies_applied = ZeroTrustSecurity.apply_security_policies(security_context, db)
 
             # Check micro-segmentation
             network_segment = self._get_network_segment(request)

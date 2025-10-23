@@ -519,11 +519,54 @@ class ValidationMiddleware(BaseHTTPMiddleware):
                 )
                 return ValidationResult(False, "File too large", "FILE_TOO_LARGE")
 
-            # TODO: Implement proper file upload validation
-            # - Check file extensions
-            # - Validate MIME types
-            # - Scan for malware
-            # - Check file headers
+            # Basic file upload validation
+            try:
+                # Get request body for basic validation
+                body = await request.body()
+                body_str = body.decode('latin-1', errors='ignore')  # multipart data may contain binary
+
+                # Check for dangerous file extensions in filename patterns
+                dangerous_extensions = ['.exe', '.bat', '.cmd', '.scr', '.pif', '.com', '.vbs', '.jar']
+                for ext in dangerous_extensions:
+                    if ext.lower() in body_str.lower():
+                        await self._log_validation_error(
+                            "dangerous_file_extension",
+                            f"File upload contains dangerous extension: {ext}",
+                            request,
+                        )
+                        return ValidationResult(False, f"Dangerous file extension detected: {ext}", "DANGEROUS_FILE")
+
+                # Check for suspicious script content patterns
+                suspicious_patterns = ['<%', '<?php', '<script', 'javascript:', 'vbscript:', 'onload=', 'onerror=']
+                for pattern in suspicious_patterns:
+                    if pattern.lower() in body_str.lower():
+                        await self._log_validation_error(
+                            "suspicious_content",
+                            f"File upload contains suspicious content pattern: {pattern}",
+                            request,
+                        )
+                        return ValidationResult(False, "Suspicious content detected in file upload", "SUSPICIOUS_CONTENT")
+
+                # Check content-type header for known dangerous types
+                content_type = request.headers.get("Content-Type", "")
+                dangerous_mimes = [
+                    'application/x-executable',
+                    'application/x-msdownload',
+                    'application/x-shockwave-flash'
+                ]
+
+                for mime in dangerous_mimes:
+                    if mime in content_type.lower():
+                        await self._log_validation_error(
+                            "dangerous_mime_type",
+                            f"File upload has dangerous MIME type: {mime}",
+                            request,
+                        )
+                        return ValidationResult(False, f"Dangerous file type detected: {mime}", "DANGEROUS_MIME")
+
+            except Exception as e:
+                # If validation fails, log but don't block (fail open for basic security)
+                logger.warning(f"File upload validation failed: {e}")
 
             return ValidationResult(True)
 

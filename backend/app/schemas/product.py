@@ -30,6 +30,9 @@ class ProductBase(BaseModel):
     is_featured: bool = Field(
         False, description="Whether this product is featured"
     )
+    is_active: bool = Field(
+        True, description="Whether this product is active/available"
+    )
     launch_date: Optional[date] = Field(None, description="Product launch date")
     specifications: Optional[Dict[str, Any]] = Field(
         None,

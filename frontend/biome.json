@@ -25,5 +25,11 @@
       "!**/.storybook",
       "!**/dist"
     ]
+  },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "recommended": true
+    }
   }
 }

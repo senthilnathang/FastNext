@@ -433,9 +433,71 @@ def _setup_middleware(app: FastAPI):
                     logger.debug(f"Skipping header sanitization for streaming response: {response_class_name}")
                     return response
 
-                # Skip header sanitization for now to avoid bytes/string issues
-                # TODO: Re-enable with proper type checking
-                logger.debug(f"Skipping header sanitization for {request.url.path} due to type issues")
+                # Sanitize headers to prevent information disclosure
+                headers_to_remove = [
+                    'server',  # Hide server information
+                    'x-powered-by',  # Hide technology stack
+                    'x-aspnet-version',  # Hide ASP.NET version
+                    'x-debug-token',  # Remove debug tokens
+                    'x-debug-token-link',  # Remove debug links
+                ]
+
+                # Create a new response with sanitized headers
+                try:
+                    # Get current headers
+                    current_headers = []
+                    if hasattr(response, 'init_headers'):
+                        # For ASGI responses, headers might be in init_headers
+                        current_headers = getattr(response, 'init_headers', [])
+                    elif hasattr(response, 'headers'):
+                        # For other responses, try to get headers
+                        if hasattr(response.headers, 'items'):
+                            current_headers = list(response.headers.items())
+                        elif hasattr(response.headers, 'raw'):
+                            # Handle raw headers (bytes)
+                            raw_headers = response.headers.raw
+                            for name, value in raw_headers:
+                                if isinstance(name, bytes):
+                                    name = name.decode('latin-1')
+                                if isinstance(value, bytes):
+                                    value = value.decode('latin-1')
+                                current_headers.append((name, value))
+
+                    # Filter out sensitive headers
+                    sanitized_headers = []
+                    for name, value in current_headers:
+                        name_lower = name.lower() if isinstance(name, str) else str(name).lower()
+                        if name_lower not in headers_to_remove:
+                            sanitized_headers.append((name, value))
+
+                    # Add security headers
+                    sanitized_headers.extend([
+                        ('X-Content-Type-Options', 'nosniff'),
+                        ('X-Frame-Options', 'DENY'),
+                        ('X-XSS-Protection', '1; mode=block'),
+                        ('Referrer-Policy', 'strict-origin-when-cross-origin'),
+                    ])
+
+                    # Create new response with sanitized headers
+                    if hasattr(response, 'body'):
+                        # For responses with body attribute
+                        new_response = JSONResponse(
+                            content=response.body if hasattr(response, 'body') else {},
+                            status_code=response.status_code,
+                            headers=dict(sanitized_headers)
+                        )
+                        return new_response
+                    else:
+                        # For other response types, try to preserve original
+                        response.headers.clear()
+                        for name, value in sanitized_headers:
+                            response.headers[name] = value
+                        return response
+
+                except Exception as e:
+                    logger.warning(f"Header sanitization failed for {request.url.path}: {e}")
+                    # Return original response if sanitization fails
+                    return response
 
             except Exception as e:
                 logger.warning(f"Header sanitization failed for {request.url.path}: {e}")

@@ -50,6 +50,8 @@ class Product(Base, TimestampMixin, AuditMixin, SoftDeleteMixin, MetadataMixin):
     stock_quantity: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
     # Whether this product is featured
     is_featured: Mapped[Optional[bool]] = mapped_column(Boolean, default=False)
+    # Whether this product is active/available
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
     # Product launch date
     launch_date: Mapped[Optional[date]] = mapped_column(Date)
     # Product specifications as JSON

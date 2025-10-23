@@ -129,7 +129,7 @@ export interface KanbanViewProps<T = any> {
   }>;
 }
 
-export function KanbanView<T extends { id: string | number }>({
+export function KanbanView<T extends { id?: string | number }>({
   data,
   columns: initialColumns,
   loading = false,
@@ -523,22 +523,26 @@ export function KanbanView<T extends { id: string | number }>({
                         snapshot.isDraggingOver ? "bg-muted/50" : ""
                       }`}
                     >
-                      {columnItems.map((item, cardIndex) => (
-                        <Draggable
-                          key={String(item.id)}
-                          draggableId={String(item.id)}
-                          index={cardIndex}
-                          isDragDisabled={!canMove}
-                        >
-                          {(provided) => (
-                            <div className="group">
-                              {renderCard
-                                ? renderCard(item, provided)
-                                : renderDefaultCard(item, provided)}
-                            </div>
-                          )}
-                        </Draggable>
-                      ))}
+                      {columnItems.map((item, cardIndex) => {
+                        // Generate a unique key for items without id
+                        const itemId = item.id ?? `temp-${cardIndex}`;
+                        return (
+                          <Draggable
+                            key={String(itemId)}
+                            draggableId={String(itemId)}
+                            index={cardIndex}
+                            isDragDisabled={!canMove}
+                          >
+                            {(provided) => (
+                              <div className="group">
+                                {renderCard
+                                  ? renderCard(item, provided)
+                                  : renderDefaultCard(item, provided)}
+                              </div>
+                            )}
+                          </Draggable>
+                        );
+                      })}
                       {provided.placeholder}
 
                       {/* Empty State */}

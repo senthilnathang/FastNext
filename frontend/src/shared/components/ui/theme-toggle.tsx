@@ -156,9 +156,8 @@ export function SimpleThemeToggle({
       size="icon"
       onClick={toggleTheme}
       title={getTooltip()}
-      className={cn(themeToggleVariants({ variant, size }), className)}
-      data-slot="simple-theme-toggle"
-      {...props}
+      aria-label={getTooltip()}
+      className="relative"
     >
       {getIcon()}
       <span className="sr-only">Toggle theme</span>

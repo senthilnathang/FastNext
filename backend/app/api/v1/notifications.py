@@ -2,6 +2,7 @@ from typing import List, Optional, cast
 
 from app.api.deps import get_db
 from app.auth.deps import get_current_user
+from app.auth.permissions import require_admin
 from app.models.notification import Notification, NotificationType
 from app.models.user import User
 from app.schemas.notification import (
@@ -105,11 +106,9 @@ def delete_notification(
 def create_notification(
     notification: NotificationCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_admin),
 ):
     """Create a notification (admin only)"""
-    # TODO: Add admin permission check
-    # For now, allow any authenticated user to create notifications
 
     notification_service = NotificationService(db)
     created_notification = notification_service.create_notification(
@@ -133,10 +132,9 @@ def create_system_notification(
     notification_type: NotificationType = NotificationType.SYSTEM,
     channels: Optional[List[str]] = None,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(require_admin),
 ):
     """Create system notifications for multiple users (admin only)"""
-    # TODO: Add admin permission check
 
     notification_service = NotificationService(db)
     notifications = notification_service.create_system_notification(

@@ -326,19 +326,16 @@ export function BottomNavigation({
                 return (
                   <button
                     key={item.id}
-                    onClick={() => {
-                      handleItemClick(item);
-                      setShowOverflow(false);
-                    }}
-                    disabled={item.disabled}
+                    onClick={() => onItemClick?.(item)}
                     className={cn(
-                      "relative flex flex-col items-center justify-center p-4 rounded-lg transition-colors duration-200",
-                      "focus:outline-none focus:ring-2 focus:ring-blue-500",
-                      "disabled:opacity-50 disabled:cursor-not-allowed",
+                      "flex flex-col items-center justify-center p-2 rounded-lg transition-colors min-w-0 flex-1",
                       isActive
-                        ? "bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400"
-                        : "hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300",
+                        ? "bg-primary text-primary-foreground"
+                        : "text-muted-foreground hover:text-foreground hover:bg-accent",
+                      item.disabled && "opacity-50 cursor-not-allowed",
                     )}
+                    disabled={item.disabled}
+                    aria-label={item.label}
                   >
                     <div className="relative">
                       <IconComponent className="w-6 h-6 mb-2" />
