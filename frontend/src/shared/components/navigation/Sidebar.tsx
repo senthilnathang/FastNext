@@ -97,7 +97,7 @@ function SidebarItem({
 
   const renderItem = () => {
     const content = hasChildren ? (
-      <button onClick={handleToggle} className={itemClasses}>
+      <button onClick={handleToggle} className={itemClasses} aria-label="Toggle sidebar">
         <ItemContent />
       </button>
     ) : (

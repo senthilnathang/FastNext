@@ -193,7 +193,6 @@ export function BottomNavigation({
         {isActive && (
           <motion.div
             className="absolute bottom-0 left-1/2 w-1 h-1 bg-blue-600 dark:bg-blue-400 rounded-full"
-            layoutId="activeIndicator"
             transition={{
               type: "spring" as const,
               damping: 20,
@@ -274,7 +273,6 @@ export function BottomNavigation({
               {showOverflow && (
                 <motion.div
                   className="absolute bottom-0 left-1/2 w-1 h-1 bg-blue-600 dark:bg-blue-400 rounded-full"
-                  layoutId="moreActiveIndicator"
                   transition={{
                     type: "spring" as const,
                     damping: 20,
