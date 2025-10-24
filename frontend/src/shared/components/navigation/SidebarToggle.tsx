@@ -54,8 +54,8 @@ export default function SidebarToggle({
               "h-10 w-10",
               className,
             )}
-            disabled={disabled}
-            aria-label={isOpen ? "Close sidebar" : "Open sidebar"}
+            disabled={false}
+            aria-label={isCollapsed ? "Open sidebar" : "Close sidebar"}
           >
             {isCollapsed ? (
               <PanelLeft

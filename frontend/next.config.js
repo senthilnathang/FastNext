@@ -1,22 +1,10 @@
-import type { NextConfig } from "next";
-
-const nextConfig: NextConfig = {
+const nextConfig = {
   // Enable standalone output for Docker
   output: process.env.DOCKER_BUILD === "true" ? "standalone" : undefined,
-
-  // Turbopack configuration
-  turbopack: {
-    rules: {
-      // Add custom turbopack rules if needed
-    },
-  },
 
   // Performance optimizations
   poweredByHeader: false,
   compress: true,
-
-  // React Compiler for automatic memoization
-  reactCompiler: true,
 
   // Experimental features for better performance
   experimental: {
@@ -202,4 +190,4 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+module.exports = nextConfig;
