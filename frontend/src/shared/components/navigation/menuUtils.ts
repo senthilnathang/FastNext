@@ -30,10 +30,13 @@ export const filterMenuItems = (
   });
 };
 
-export const getPageTitle = (pathname: string): string => {
+export const getPageTitle = (pathname: string, search?: string): string => {
   const titleMap: Record<string, string> = {
     "/dashboard": "Dashboard",
     "/projects": "Projects",
+    "/workflows": "Workflow Types",
+    "/workflows/templates": "Workflow Templates",
+    "/workflows/templates/create": "Create Workflow Template",
     "/builder": "Builder",
     "/settings": "Settings",
     "/error/400": "400 Bad Request",
@@ -58,6 +61,11 @@ export const getPageTitle = (pathname: string): string => {
     "/operations/reports": "Reporting",
     "/operations/files": "File Manager",
   };
+
+  // Handle dynamic routes
+  if (pathname.startsWith("/workflows/templates/") && pathname.includes("/builder")) {
+    return "Workflow Builder";
+  }
 
   return titleMap[pathname] || "FastNext Platform";
 };

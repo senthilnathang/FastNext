@@ -7,6 +7,7 @@ import {
   Database,
   Download,
   FileText,
+  GitBranch,
   Home,
   Key,
   Lock,
@@ -47,9 +48,15 @@ export const menuItems: MenuItem[] = [
     module: "inventory",
   },
   {
-    title: "Workflows",
+    title: "Workflow Types",
     href: "/workflows",
-    icon: Workflow,
+    icon: Cog,
+    module: "workflows",
+  },
+  {
+    title: "Workflows",
+    href: "/workflows/templates",
+    icon: GitBranch,
     module: "workflows",
   },
   {

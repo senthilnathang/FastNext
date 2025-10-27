@@ -1,7 +1,7 @@
 "use client";
 
 import { Bell, Menu } from "lucide-react";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import React, { useState } from "react";
 import { useAuth } from "@/modules/auth";
 import { cn } from "@/shared/utils";
@@ -20,6 +20,7 @@ interface AppLayoutProps {
 export default function AppLayout({ children }: AppLayoutProps) {
   const { user } = useAuth();
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
     if (typeof window !== "undefined") {
@@ -92,8 +93,8 @@ export default function AppLayout({ children }: AppLayoutProps) {
         className={cn("transition-all duration-300 ease-in-out", sidebarWidth)}
       >
         {/* Compact header */}
-        <header className="bg-card border-b border-border px-4 py-2">
-          <div className="flex items-center justify-between">
+        <header className="bg-card border-b border-border px-4 h-12 flex items-center">
+          <div className="flex items-center justify-between w-full">
             <div className="flex items-center space-x-3">
               {/* Mobile menu button */}
               <button
@@ -117,7 +118,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
 
               <div>
                 <h1 className="text-lg font-semibold text-card-foreground">
-                  {getPageTitle(pathname)}
+                  {getPageTitle(pathname, searchParams.toString())}
                 </h1>
               </div>
             </div>
@@ -154,7 +155,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
           href: item.href,
           disabled: false,
         }))}
-        activeItem={getPageTitle(pathname).toLowerCase().replace(/\s+/g, "-")}
+        activeItem={getPageTitle(pathname, searchParams.toString()).toLowerCase().replace(/\s+/g, "-")}
       />
     </div>
   );
