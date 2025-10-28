@@ -6,6 +6,7 @@ from datetime import datetime
 from typing import Any, Dict, Generic, List, Optional, Type, TypeVar
 from sqlalchemy.orm import Session
 
+from app.core.config import settings
 from app.core.exceptions import NotFoundError
 from app.models.base import ActivityMixin, AuditTrailMixin, MessageMixin
 
@@ -35,7 +36,7 @@ class BaseCRUDService(Generic[T]):
         self.db.refresh(instance)
 
         # Automatic activity logging
-        if isinstance(instance, ActivityMixin):
+        if settings.ACTIVITY_LOGGING_ENABLED and isinstance(instance, ActivityMixin):
             instance.log_activity(
                 db=self.db,
                 action='create',
@@ -44,7 +45,7 @@ class BaseCRUDService(Generic[T]):
             )
 
         # Automatic audit trail
-        if isinstance(instance, AuditTrailMixin):
+        if settings.AUDIT_TRAIL_ENABLED and isinstance(instance, AuditTrailMixin):
             instance.create_audit_entry(
                 db=self.db,
                 operation='INSERT',
@@ -53,7 +54,7 @@ class BaseCRUDService(Generic[T]):
             )
 
         # Automatic notifications
-        if isinstance(instance, MessageMixin) and notify_users:
+        if settings.MESSAGE_NOTIFICATIONS_ENABLED and isinstance(instance, MessageMixin) and notify_users:
             instance.send_message(
                 db=self.db,
                 recipient_ids=notify_users,
@@ -87,7 +88,7 @@ class BaseCRUDService(Generic[T]):
         self.db.refresh(instance)
 
         # Automatic activity logging
-        if isinstance(instance, ActivityMixin):
+        if settings.ACTIVITY_LOGGING_ENABLED and isinstance(instance, ActivityMixin):
             changed_fields = list(data.keys())
             instance.log_activity(
                 db=self.db,
@@ -97,7 +98,7 @@ class BaseCRUDService(Generic[T]):
             )
 
         # Automatic audit trail
-        if isinstance(instance, AuditTrailMixin):
+        if settings.AUDIT_TRAIL_ENABLED and isinstance(instance, AuditTrailMixin):
             instance.create_audit_entry(
                 db=self.db,
                 operation='UPDATE',
@@ -108,7 +109,7 @@ class BaseCRUDService(Generic[T]):
             )
 
         # Automatic notifications
-        if isinstance(instance, MessageMixin) and notify_users:
+        if settings.MESSAGE_NOTIFICATIONS_ENABLED and isinstance(instance, MessageMixin) and notify_users:
             instance.send_message(
                 db=self.db,
                 recipient_ids=notify_users,
@@ -129,7 +130,7 @@ class BaseCRUDService(Generic[T]):
         instance_name = getattr(instance, 'name', str(instance.id))
 
         # Automatic activity logging
-        if isinstance(instance, ActivityMixin):
+        if settings.ACTIVITY_LOGGING_ENABLED and isinstance(instance, ActivityMixin):
             instance.log_activity(
                 db=self.db,
                 action='delete',
@@ -138,7 +139,7 @@ class BaseCRUDService(Generic[T]):
             )
 
         # Automatic audit trail
-        if isinstance(instance, AuditTrailMixin):
+        if settings.AUDIT_TRAIL_ENABLED and isinstance(instance, AuditTrailMixin):
             instance.create_audit_entry(
                 db=self.db,
                 operation='DELETE',
@@ -147,7 +148,7 @@ class BaseCRUDService(Generic[T]):
             )
 
         # Automatic notifications
-        if isinstance(instance, MessageMixin) and notify_users:
+        if settings.MESSAGE_NOTIFICATIONS_ENABLED and isinstance(instance, MessageMixin) and notify_users:
             instance.send_message(
                 db=self.db,
                 recipient_ids=notify_users,

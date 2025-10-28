@@ -1,6 +1,8 @@
 import enum
 
 from app.db.base import Base
+from app.models.base import AuditableActivityModel
+from sqlalchemy.sql import func
 from sqlalchemy import (
     JSON,
     Boolean,
@@ -13,7 +15,7 @@ from sqlalchemy import (
     Text,
 )
 from sqlalchemy.orm import relationship
-from sqlalchemy.sql import func
+
 
 
 class ComponentType(str, enum.Enum):
@@ -26,7 +28,7 @@ class ComponentType(str, enum.Enum):
     CUSTOM = "custom"
 
 
-class Component(Base):
+class Component(AuditableActivityModel):
     __tablename__ = "components"
 
     id = Column(Integer, primary_key=True, index=True)
@@ -44,8 +46,6 @@ class Component(Base):
     is_global = Column(Boolean, default=False)  # Available across all projects
     is_published = Column(Boolean, default=False)
     version = Column(String, default="1.0.0")
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
-    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
     project = relationship("Project", back_populates="components")
     instances = relationship(

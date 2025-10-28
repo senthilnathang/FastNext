@@ -40,6 +40,52 @@ class Settings(BaseSettings):
         "CACHE_DEFAULT_TTL", default=300, cast=int
     )  # 5 minutes
 
+    # Enhanced Base Model Logging Configuration
+    # Enable/disable automatic activity logging
+    ACTIVITY_LOGGING_ENABLED: bool = config(
+        "ACTIVITY_LOGGING_ENABLED", default=True, cast=bool
+    )
+
+    # Enable/disable automatic audit trail creation
+    AUDIT_TRAIL_ENABLED: bool = config(
+        "AUDIT_TRAIL_ENABLED", default=True, cast=bool
+    )
+
+    # Enable/disable automatic message notifications
+    MESSAGE_NOTIFICATIONS_ENABLED: bool = config(
+        "MESSAGE_NOTIFICATIONS_ENABLED", default=True, cast=bool
+    )
+
+    # Maximum number of audit trail entries to keep per entity
+    AUDIT_TRAIL_MAX_ENTRIES: int = config(
+        "AUDIT_TRAIL_MAX_ENTRIES", default=1000, cast=int
+    )
+
+    # Enable/disable logging of sensitive field changes
+    LOG_SENSITIVE_CHANGES: bool = config(
+        "LOG_SENSITIVE_CHANGES", default=False, cast=bool
+    )
+
+    # List of field names considered sensitive (comma-separated)
+    SENSITIVE_FIELDS: List[str] = config(
+        "SENSITIVE_FIELDS", default="password,secret_key,api_key,token", cast=lambda v: [x.strip() for x in v.split(",")]
+    )
+
+    # Enable/disable automatic user notifications on entity changes
+    AUTO_NOTIFY_USERS: bool = config(
+        "AUTO_NOTIFY_USERS", default=False, cast=bool
+    )
+
+    # Default notification level for activities
+    DEFAULT_ACTIVITY_LEVEL: str = config(
+        "DEFAULT_ACTIVITY_LEVEL", default="INFO"
+    )
+
+    # Enable/disable detailed change tracking in audit trails
+    DETAILED_CHANGE_TRACKING: bool = config(
+        "DETAILED_CHANGE_TRACKING", default=True, cast=bool
+    )
+
     # Performance Settings
     ENABLE_GZIP_COMPRESSION: bool = config(
         "ENABLE_GZIP_COMPRESSION", default=True, cast=bool

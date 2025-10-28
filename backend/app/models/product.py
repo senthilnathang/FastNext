@@ -1,13 +1,7 @@
 from datetime import date
 from typing import Any, Dict, List, Optional
 
-from app.models.base import (
-    AuditMixin,
-    Base,
-    MetadataMixin,
-    SoftDeleteMixin,
-    TimestampMixin,
-)
+from app.models.base import AuditableActivityModel
 from app.models.enums import ProductCategory
 from sqlalchemy import (
     JSON,
@@ -26,7 +20,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.sql import func
 
 
-class Product(Base, TimestampMixin, AuditMixin, SoftDeleteMixin, MetadataMixin):
+class Product(AuditableActivityModel):
     """
     Product inventory management model
     """
