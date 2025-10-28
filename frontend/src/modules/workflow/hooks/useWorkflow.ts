@@ -92,11 +92,11 @@ export function useWorkflowTemplates(
   });
 }
 
-export function useWorkflowTemplate(id: number) {
+export function useWorkflowTemplate(id: number, options?: { enabled?: boolean }) {
   return useQuery({
     queryKey: ["workflow-template", id],
     queryFn: () => workflowAPI.getWorkflowTemplate(id),
-    enabled: !!id,
+    enabled: options?.enabled ?? !!id,
   });
 }
 
@@ -116,11 +116,17 @@ export function useUpdateWorkflowTemplate() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, data }: { id: number; data: WorkflowTemplateUpdate }) =>
-      workflowAPI.updateWorkflowTemplate(id, data),
-    onSuccess: (_, { id }) => {
+    mutationFn: ({ id, data }: { id: number; data: WorkflowTemplateUpdate }) => {
+      console.log("Mutation: Starting updateWorkflowTemplate", { id, data });
+      return workflowAPI.updateWorkflowTemplate(id, data);
+    },
+    onSuccess: (result, { id }) => {
+      console.log("Mutation: updateWorkflowTemplate success", { id, result });
       queryClient.invalidateQueries({ queryKey: ["workflow-templates"] });
       queryClient.invalidateQueries({ queryKey: ["workflow-template", id] });
+    },
+    onError: (error, { id }) => {
+      console.error("Mutation: updateWorkflowTemplate failed", { id, error });
     },
   });
 }

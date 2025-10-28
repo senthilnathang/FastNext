@@ -46,6 +46,16 @@ function WorkflowStateNode({
     setIsEditDialogOpen(false);
   }, [id, editData]);
 
+  const handleDelete = useCallback(() => {
+    // Delete the node
+    if (typeof window !== "undefined") {
+      const event = new CustomEvent("deleteNode", {
+        detail: { nodeId: id },
+      });
+      window.dispatchEvent(event);
+    }
+  }, [id]);
+
   const iconOptions = [
     "Circle",
     "Square",
@@ -108,17 +118,30 @@ function WorkflowStateNode({
               </div>
             )}
           </div>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="p-1 h-auto opacity-0 group-hover:opacity-100 transition-opacity"
-            onClick={(e) => {
-              e.stopPropagation();
-              setIsEditDialogOpen(true);
-            }}
-          >
-            <Icons.Settings size={12} />
-          </Button>
+           <div className="flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
+             <Button
+               variant="ghost"
+               size="sm"
+               className="p-1 h-auto"
+               onClick={(e) => {
+                 e.stopPropagation();
+                 setIsEditDialogOpen(true);
+               }}
+             >
+               <Icons.Settings size={12} />
+             </Button>
+             <Button
+               variant="ghost"
+               size="sm"
+               className="p-1 h-auto text-red-500 hover:text-red-700 hover:bg-red-50"
+               onClick={(e) => {
+                 e.stopPropagation();
+                 handleDelete();
+               }}
+             >
+               <Icons.Trash2 size={12} />
+             </Button>
+           </div>
         </div>
 
         {/* Badges */}

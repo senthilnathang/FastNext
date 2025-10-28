@@ -1,6 +1,6 @@
 "use client";
 
-import { GitBranch, Settings } from "lucide-react";
+import { GitBranch, Settings, Trash2 } from "lucide-react";
 import React, { memo, useCallback, useState } from "react";
 import { Handle, type NodeProps, Position } from "reactflow";
 import { Button } from "@/shared/components/ui/button";
@@ -28,6 +28,15 @@ function ConditionalNode({ data, selected, id }: NodeProps<WorkflowNodeData>) {
     }
     setIsEditDialogOpen(false);
   }, [id, editData]);
+
+  const handleDelete = useCallback(() => {
+    if (typeof window !== "undefined") {
+      const event = new CustomEvent("deleteNode", {
+        detail: { nodeId: id },
+      });
+      window.dispatchEvent(event);
+    }
+  }, [id]);
   return (
     <>
       <div
@@ -59,17 +68,30 @@ function ConditionalNode({ data, selected, id }: NodeProps<WorkflowNodeData>) {
               </div>
             )}
           </div>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="p-1 h-auto opacity-0 group-hover:opacity-100 transition-opacity"
-            onClick={(e) => {
-              e.stopPropagation();
-              setIsEditDialogOpen(true);
-            }}
-          >
-            <Settings size={12} className="text-orange-500" />
-          </Button>
+           <div className="flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
+             <Button
+               variant="ghost"
+               size="sm"
+               className="p-1 h-auto"
+               onClick={(e) => {
+                 e.stopPropagation();
+                 setIsEditDialogOpen(true);
+               }}
+             >
+               <Settings size={12} className="text-orange-500" />
+             </Button>
+             <Button
+               variant="ghost"
+               size="sm"
+               className="p-1 h-auto text-red-500 hover:text-red-700 hover:bg-red-50"
+               onClick={(e) => {
+                 e.stopPropagation();
+                 handleDelete();
+               }}
+             >
+               <Trash2 size={12} />
+             </Button>
+           </div>
         </div>
 
         {/* Condition indicator */}

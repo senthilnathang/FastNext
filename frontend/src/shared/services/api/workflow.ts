@@ -279,20 +279,37 @@ class WorkflowAPI {
     id: number,
     data: WorkflowTemplateUpdate,
   ): Promise<WorkflowTemplate> {
+    console.log("API: updateWorkflowTemplate called", { id, data });
+
+    let body: string;
+    try {
+      body = JSON.stringify(data);
+      console.log("API: JSON serialization successful");
+    } catch (error) {
+      console.error("API: JSON serialization failed", error);
+      throw new Error(`Failed to serialize data: ${error}`);
+    }
+
     const response = await fetch(
       getApiUrl(`/api/v1/workflow-templates/${id}`),
       {
         method: "PUT",
         headers: this.getAuthHeaders(),
-        body: JSON.stringify(data),
+        body,
       },
     );
 
+    console.log("API: updateWorkflowTemplate response", { status: response.status, statusText: response.statusText });
+
     if (!response.ok) {
-      throw new Error("Failed to update workflow template");
+      const errorText = await response.text();
+      console.error("API: updateWorkflowTemplate failed", { status: response.status, errorText });
+      throw new Error(`Failed to update workflow template: ${response.status} ${response.statusText} - ${errorText}`);
     }
 
-    return response.json();
+    const result = await response.json();
+    console.log("API: updateWorkflowTemplate success", result);
+    return result;
   }
 
   async deleteWorkflowTemplate(id: number): Promise<{ message: string }> {

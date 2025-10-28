@@ -47,36 +47,61 @@ const apiFetch = async <T = any>(
     }
 
     if (!response.ok) {
+      // Try to extract error message from server response
       let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
 
-      // Use common error template messages for standard HTTP status codes
-      switch (response.status) {
-        case 400:
-          errorMessage = "Bad request. Please check your input and try again.";
-          break;
-        case 401:
-          errorMessage = "Authentication required. Please log in to continue.";
-          break;
-        case 403:
-          errorMessage = "Access denied. You don't have permission to perform this action.";
-          break;
-        case 404:
-          errorMessage = "The requested resource was not found.";
-          break;
-        case 500:
-          errorMessage = "Something went wrong on our end. Please try again later.";
-          break;
-        case 501:
-          errorMessage = "This feature is not implemented yet.";
-          break;
-        case 502:
-        case 503:
-        case 504:
-          errorMessage = "Service temporarily unavailable. Please try again later.";
-          break;
+      // Check if server provided a specific error message
+      if (data && typeof data === 'object' && data !== null) {
+        const errorData = data as Record<string, any>;
+        if (errorData.message) {
+          errorMessage = String(errorData.message);
+        } else if (errorData.error) {
+          errorMessage = String(errorData.error);
+        } else if (errorData.detail) {
+          errorMessage = String(errorData.detail);
+        }
       }
 
-      const error: ApiError = new Error(errorMessage);
+      // Fallback to user-friendly template messages for standard HTTP status codes
+      // Only use templates if no server message was provided
+      if (errorMessage === `HTTP ${response.status}: ${response.statusText}`) {
+        switch (response.status) {
+          case 400:
+            errorMessage = "Bad request. Please check your input and try again.";
+            break;
+          case 401:
+            errorMessage = "Authentication required. Please log in to continue.";
+            break;
+          case 403:
+            errorMessage = "Access denied. You don't have permission to perform this action.";
+            break;
+          case 404:
+            errorMessage = "The requested resource was not found.";
+            break;
+          case 409:
+            errorMessage = "Conflict detected. This action cannot be completed due to existing data.";
+            break;
+          case 422:
+            errorMessage = "Validation failed. Please check your input data.";
+            break;
+          case 429:
+            errorMessage = "Too many requests. Please wait a moment before trying again.";
+            break;
+          case 500:
+            errorMessage = "Something went wrong on our end. Please try again later.";
+            break;
+          case 501:
+            errorMessage = "This feature is not implemented yet.";
+            break;
+          case 502:
+          case 503:
+          case 504:
+            errorMessage = "Service temporarily unavailable. Please try again later.";
+            break;
+        }
+      }
+
+      const error = new Error(errorMessage) as ApiError;
       error.status = response.status;
       error.statusText = response.statusText;
       error.data = data;

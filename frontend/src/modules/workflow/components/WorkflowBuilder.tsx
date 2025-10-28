@@ -64,6 +64,7 @@ interface WorkflowBuilderProps {
   initialEdges?: WorkflowEdge[];
   onSave?: (nodes: WorkflowNode[], edges: WorkflowEdge[]) => void;
   readOnly?: boolean;
+  isSaving?: boolean;
 }
 
 const nodeTypes = {
@@ -85,20 +86,35 @@ const WorkflowBuilderInner = memo(
     initialEdges = [],
     onSave,
     readOnly = false,
+    isSaving = false,
   }: WorkflowBuilderProps) => {
     const reactFlowWrapper = useRef<HTMLDivElement>(null);
     const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
     const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
-    const [reactFlowInstance, setReactFlowInstance] =
-      useState<ReactFlowInstance | null>(null);
+  const [reactFlowInstance, setReactFlowInstance] =
+    useState<ReactFlowInstance | null>(null);
+  const [hasLoadedInitialData, setHasLoadedInitialData] = useState(false);
 
     // Load template data if templateId is provided
     const { data: templateData, isLoading: templateLoading } =
-      useWorkflowTemplate(templateId || 0);
+      useWorkflowTemplate(templateId || 0, {
+        enabled: !!templateId,
+      });
 
-    // Update nodes and edges when template data is loaded
+    // Reset loaded state when templateId changes
     useEffect(() => {
-      if (templateData) {
+      setHasLoadedInitialData(false);
+    }, [templateId]);
+
+    // Update nodes and edges when template data is loaded (only on initial load)
+    useEffect(() => {
+      // Only load initial data if we haven't loaded it yet and we have template data
+      if (templateData && !hasLoadedInitialData) {
+        console.log("Loading initial template data:", {
+          templateId,
+          nodesCount: templateData.nodes?.length || 0,
+          edgesCount: templateData.edges?.length || 0
+        });
         // Initialize with template data if available
         if (
           templateData.nodes &&
@@ -114,10 +130,27 @@ const WorkflowBuilderInner = memo(
         ) {
           setEdges(templateData.edges);
         }
-      } else if (templateId === undefined || templateId === null) {
+        setHasLoadedInitialData(true);
+      } else if (templateId === undefined || templateId === null && !hasLoadedInitialData) {
         // Reset to initial state if no template is selected
-        setNodes(initialNodes);
-        setEdges(initialEdges);
+        // For new workflows, add a default start node
+        const defaultStartNode = {
+          id: "start_node",
+          type: "workflowState",
+          position: { x: 100, y: 100 },
+          data: {
+            label: "Start",
+            description: "Workflow starting point",
+            color: "#10B981",
+            bgColor: "#ECFDF5",
+            icon: "Play",
+            isInitial: true,
+            isFinal: false,
+          },
+        };
+        setNodes([defaultStartNode]);
+        setEdges([]);
+        setHasLoadedInitialData(true);
       }
     }, [
       templateData,
@@ -126,6 +159,7 @@ const WorkflowBuilderInner = memo(
       initialEdges,
       setNodes,
       setEdges,
+      hasLoadedInitialData,
     ]);
 
     // Handle node data updates from edit dialogs
@@ -141,17 +175,34 @@ const WorkflowBuilderInner = memo(
         );
       };
 
+      const handleNodeDelete = (event: CustomEvent) => {
+        const { nodeId } = event.detail;
+        setNodes((nds) => nds.filter((node) => node.id !== nodeId));
+        // Also remove any edges connected to this node
+        setEdges((eds) =>
+          eds.filter((edge) => edge.source !== nodeId && edge.target !== nodeId),
+        );
+      };
+
       window.addEventListener(
         "updateNodeData",
         handleNodeDataUpdate as EventListener,
+      );
+      window.addEventListener(
+        "deleteNode",
+        handleNodeDelete as EventListener,
       );
       return () => {
         window.removeEventListener(
           "updateNodeData",
           handleNodeDataUpdate as EventListener,
         );
+        window.removeEventListener(
+          "deleteNode",
+          handleNodeDelete as EventListener,
+        );
       };
-    }, [setNodes]);
+    }, [setNodes, setEdges]);
 
     // Handle connection creation
     const onConnect = useCallback(
@@ -258,9 +309,17 @@ const WorkflowBuilderInner = memo(
     // Save workflow template
     const handleSave = useCallback(() => {
       if (onSave) {
+        console.log("WorkflowBuilder handleSave - current state:", {
+          nodesCount: nodes.length,
+          edgesCount: edges.length,
+          nodes: nodes.map(n => ({ id: n.id, type: n.type, position: n.position, data: n.data })),
+          edges: edges.map(e => ({ id: e.id, source: e.source, target: e.target, type: e.type })),
+          templateId,
+          templateData: templateData ? { id: templateData.id, name: templateData.name } : null
+        });
         onSave(nodes, edges);
       }
-    }, [nodes, edges, onSave]);
+    }, [nodes, edges, onSave, templateId, templateData]);
 
     // Auto-layout nodes
     const autoLayout = useCallback(() => {
@@ -354,9 +413,9 @@ const WorkflowBuilderInner = memo(
             </Button>
 
             {!readOnly && (
-              <Button onClick={handleSave} disabled={!onSave}>
+              <Button onClick={handleSave} disabled={!onSave || isSaving}>
                 <Save className="h-4 w-4 mr-2" />
-                Save
+                {isSaving ? "Saving..." : "Save"}
               </Button>
             )}
           </div>

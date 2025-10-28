@@ -1,6 +1,6 @@
 "use client";
 
-import { Settings, Timer } from "lucide-react";
+import { Settings, Timer, Trash2 } from "lucide-react";
 import React, { memo, useCallback, useState } from "react";
 import { Handle, type NodeProps, Position } from "reactflow";
 import { Button } from "@/shared/components/ui/button";
@@ -28,6 +28,15 @@ function TimerNode({ data, selected, id }: NodeProps<WorkflowNodeData>) {
     }
     setIsEditDialogOpen(false);
   }, [id, editData]);
+
+  const handleDelete = useCallback(() => {
+    if (typeof window !== "undefined") {
+      const event = new CustomEvent("deleteNode", {
+        detail: { nodeId: id },
+      });
+      window.dispatchEvent(event);
+    }
+  }, [id]);
   return (
     <>
       <div
@@ -47,18 +56,31 @@ function TimerNode({ data, selected, id }: NodeProps<WorkflowNodeData>) {
           style={{ left: -6 }}
         />
 
-        {/* Edit button */}
-        <Button
-          variant="ghost"
-          size="sm"
-          className="absolute top-1 right-1 p-1 h-auto opacity-0 group-hover:opacity-100 transition-opacity"
-          onClick={(e) => {
-            e.stopPropagation();
-            setIsEditDialogOpen(true);
-          }}
-        >
-          <Settings size={10} className="text-yellow-500" />
-        </Button>
+        {/* Edit and Delete buttons */}
+        <div className="absolute top-1 right-1 flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="p-1 h-auto"
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsEditDialogOpen(true);
+            }}
+          >
+            <Settings size={10} className="text-yellow-500" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="p-1 h-auto text-red-500 hover:text-red-700 hover:bg-red-50"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleDelete();
+            }}
+          >
+            <Trash2 size={10} />
+          </Button>
+        </div>
 
         {/* Node content */}
         <div className="flex flex-col items-center space-y-1">

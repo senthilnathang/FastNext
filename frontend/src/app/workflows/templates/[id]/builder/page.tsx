@@ -1,15 +1,13 @@
 "use client";
 
+import React from "react";
 import { useRouter, useParams } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
 import dynamic from "next/dynamic";
-import { useState, useEffect } from "react";
 import { Button } from "@/shared/components";
-import { Input } from "@/shared/components/ui/input";
-import { Label } from "@/shared/components/ui/label";
-import { Textarea } from "@/shared/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/components/ui/select";
-import { ArrowLeft, ChevronDown, ChevronUp, Save } from "lucide-react";
-import { useWorkflowTemplate, useWorkflowTypes, useUpdateWorkflowTemplate } from "@/modules/workflow/hooks/useWorkflow";
+import { ArrowLeft } from "lucide-react";
+import { toast } from "sonner";
+import { useWorkflowTemplate, useCreateWorkflowTemplate, useUpdateWorkflowTemplate } from "@/modules/workflow/hooks/useWorkflow";
 
 // Lazy load heavy workflow components
 const WorkflowBuilder = dynamic(
@@ -42,52 +40,124 @@ const AdvancedWorkflowBuilder = dynamic(
 export default function WorkflowBuilderPage() {
   const router = useRouter();
   const params = useParams();
-  const templateId = params.id ? parseInt(params.id as string) : undefined;
-
-  const [showDetails, setShowDetails] = useState(true);
-  const [formData, setFormData] = useState({
-    name: "",
-    description: "",
-    workflow_type_id: "",
-  });
+  const queryClient = useQueryClient();
+  const templateId = params.id && !isNaN(parseInt(params.id as string))
+    ? parseInt(params.id as string)
+    : undefined;
 
   // For now, use basic builder. In a real app, you might want to detect user preference
   const useAdvancedBuilder = false;
 
-  const { data: templateData, isLoading: templateLoading } = useWorkflowTemplate(templateId || 0);
-  const { data: typesData } = useWorkflowTypes();
+  const { data: templateData, isLoading: templateLoading } = useWorkflowTemplate(templateId || 0, {
+    enabled: !!templateId,
+  });
+
+  const createMutation = useCreateWorkflowTemplate();
   const updateMutation = useUpdateWorkflowTemplate();
 
-  // Update form data when template loads
-  useEffect(() => {
-    if (templateData) {
-      setFormData({
-        name: templateData.name || "",
-        description: templateData.description || "",
-        workflow_type_id: templateData.workflow_type?.id?.toString() || "",
-      });
-    }
-  }, [templateData]);
+  const handleSave = async (nodes: any[], edges: any[]) => {
+      console.log("handleSave called with:", { templateId, nodesCount: nodes.length, edgesCount: edges.length });
+      console.log("Raw nodes sample:", nodes.slice(0, 1));
+      console.log("Raw edges sample:", edges.slice(0, 1));
 
-  const handleUpdateTemplate = async () => {
-    if (!templateId) return;
+      try {
+        if (!templateId) {
+          console.error("Cannot save workflow: no templateId provided");
+          alert("Cannot save: No template ID provided");
+          return;
+        }
 
-    try {
-      await updateMutation.mutateAsync({
+        // Clean nodes and edges to remove ReactFlow-specific properties
+        const cleanNodes = nodes.map(node => {
+          // Ensure position has valid numbers
+          const position = {
+            x: typeof node.position?.x === 'number' ? node.position.x : 0,
+            y: typeof node.position?.y === 'number' ? node.position.y : 0,
+          };
+
+          // Ensure data is serializable
+          let cleanData;
+          try {
+            cleanData = JSON.parse(JSON.stringify(node.data));
+          } catch (error) {
+            console.error("Node data serialization failed:", node.id, error);
+            cleanData = {};
+          }
+
+          return {
+            id: node.id,
+            type: node.type,
+            position,
+            data: cleanData,
+          };
+        });
+
+        const cleanEdges = edges.map(edge => {
+          // Ensure data is serializable
+          let cleanData;
+          try {
+            cleanData = JSON.parse(JSON.stringify(edge.data));
+          } catch (error) {
+            console.error("Edge data serialization failed:", edge.id, error);
+            cleanData = {};
+          }
+
+          return {
+            id: edge.id,
+            source: edge.source,
+            target: edge.target,
+            sourceHandle: edge.sourceHandle,
+            targetHandle: edge.targetHandle,
+            type: edge.type,
+            animated: edge.animated,
+            data: cleanData,
+          };
+        });
+
+        console.log("Cleaned nodes sample:", cleanNodes.slice(0, 1));
+        console.log("Cleaned edges sample:", cleanEdges.slice(0, 1));
+
+        // Validate data before sending
+        const nodeIds = new Set(cleanNodes.map(n => n.id));
+        if (nodeIds.size !== cleanNodes.length) {
+          console.error("Duplicate node IDs detected");
+          toast.error("Cannot save: Duplicate node IDs detected");
+          return;
+        }
+
+        const edgeIds = new Set(cleanEdges.map(e => e.id));
+        if (edgeIds.size !== cleanEdges.length) {
+          console.error("Duplicate edge IDs detected");
+          toast.error("Cannot save: Duplicate edge IDs detected");
+          return;
+        }
+
+        // Check if all edge sources and targets exist
+        const invalidEdges = cleanEdges.filter(e => !nodeIds.has(e.source) || !nodeIds.has(e.target));
+        if (invalidEdges.length > 0) {
+          console.error("Invalid edges detected:", invalidEdges);
+          toast.error("Cannot save: Invalid edges detected");
+          return;
+        }
+
+        const result = await updateMutation.mutateAsync({
         id: templateId,
         data: {
-          name: formData.name,
-          description: formData.description,
+          nodes: cleanNodes,
+          edges: cleanEdges,
         },
       });
-    } catch (error) {
-      console.error("Failed to update template:", error);
-    }
-  };
 
-  const handleSave = () => {
-    // Navigate back to workflows after save
-    router.push("/workflows/templates");
+      console.log("Save successful:", result);
+      toast.success("Workflow template saved successfully!");
+
+      // Force a refetch of the template data to ensure UI is in sync
+      queryClient.invalidateQueries({ queryKey: ["workflow-template", templateId] });
+    } catch (error) {
+      console.error("Failed to save workflow template:", error);
+      const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
+      toast.error(`Failed to save workflow template: ${errorMessage}`);
+    }
   };
 
   if (templateLoading) {
@@ -121,72 +191,7 @@ export default function WorkflowBuilderPage() {
             </p>
           </div>
         </div>
-        <div className="flex items-center space-x-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setShowDetails(!showDetails)}
-          >
-            {showDetails ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-            Details
-          </Button>
-          <Button
-            onClick={handleUpdateTemplate}
-            disabled={updateMutation.isPending}
-            size="sm"
-          >
-            <Save className="h-4 w-4 mr-2" />
-            {updateMutation.isPending ? "Saving..." : "Save Details"}
-          </Button>
-        </div>
       </div>
-
-      {showDetails && (
-        <div className="p-4 border-b bg-gray-50">
-          <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="name">Name *</Label>
-              <Input
-                id="name"
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                placeholder="e.g., Standard Sales Process"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="description">Description</Label>
-              <Textarea
-                id="description"
-                value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                placeholder="Describe this workflow template"
-                rows={2}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="workflow_type">Workflow Type</Label>
-              <Select
-                value={formData.workflow_type_id}
-                onValueChange={(value) => setFormData({ ...formData, workflow_type_id: value })}
-                disabled
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select a workflow type" />
-                </SelectTrigger>
-                <SelectContent>
-                  {typesData?.items?.map((type) => (
-                    <SelectItem key={type.id} value={type.id.toString()}>
-                      {type.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-        </div>
-      )}
 
       <div className="flex-1">
         {useAdvancedBuilder ? (
@@ -198,9 +203,11 @@ export default function WorkflowBuilderPage() {
           />
         ) : (
           <WorkflowBuilder
+            key={templateId || 'new'}
             templateId={templateId}
             readOnly={false}
             onSave={handleSave}
+            isSaving={updateMutation.isPending}
           />
         )}
       </div>
