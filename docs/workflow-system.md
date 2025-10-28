@@ -2,7 +2,7 @@
 
 ## Overview
 
-The FastNext Workflow System is a comprehensive business process automation platform built with React Flow for visual workflow design and FastAPI for backend processing. It provides enterprise-grade workflow management with advanced features including loops, variables, conditional logic, and sub-workflow execution.
+The FastNext Workflow System is a comprehensive business process automation platform built with React Flow for visual workflow design and FastAPI for backend processing. It provides enterprise-grade workflow management with advanced features including loops, variables, conditional logic, sub-workflow execution, and seamless integration with the Dynamic ACL system for approval workflows and per-record permissions.
 
 ## Table of Contents
 
@@ -43,11 +43,13 @@ The FastNext Workflow System is a comprehensive business process automation plat
 The workflow system uses the following main entities:
 
 - **WorkflowType**: Categories of workflows (e.g., "Order Processing", "Invoice Approval")
-- **WorkflowState**: Individual states in a workflow (e.g., "Draft", "Approved", "Completed")
+- **WorkflowState**: Individual states in a workflow (stages) (e.g., "Draft", "Approved", "Completed")
 - **WorkflowTemplate**: Reusable workflow definitions with React Flow nodes and edges
 - **WorkflowInstance**: Active instances of workflows with current state and context
 - **WorkflowHistory**: Audit trail of all state transitions
-- **WorkflowTransition**: Allowed transitions between states
+- **WorkflowTransition**: Allowed transitions between states with approval requirements
+- **AccessControlList**: ACL rules integrated with workflow approvals
+- **RecordPermission**: Per-record permissions that can be granted based on workflow state
 
 ## Core Components
 
@@ -539,7 +541,48 @@ function WorkflowDesigner() {
 
 ## Advanced Features
 
-### 1. Conditional Logic
+### 1. ACL Integration & Approvals
+
+The workflow system integrates seamlessly with FastNext's Dynamic ACL system to provide approval-based workflows and conditional permissions.
+
+#### Approval Workflows
+```json
+{
+  "type": "userTask",
+  "data": {
+    "label": "Manager Approval",
+    "requiredRoles": ["manager"],
+    "approval": true,
+    "approvalWorkflowId": 123,
+    "description": "Requires manager approval for orders over $1000"
+  }
+}
+```
+
+#### State-Based Permissions
+Workflow state changes can automatically grant or revoke permissions:
+
+```python
+# When workflow reaches 'approved' state, grant access
+if workflow_instance.current_state.name == 'approved':
+    ACLService.grant_record_permission(
+        entity_type='orders',
+        entity_id=workflow_instance.entity_id,
+        role_id=approved_role.id,
+        operation='read'
+    )
+```
+
+#### Conditional Access Based on Workflow State
+```python
+# ACL condition that checks workflow state
+acl_condition = """
+entity_data['workflow_state'] == 'approved' or
+user.role in ['admin', 'auditor']
+"""
+```
+
+### 2. Conditional Logic
 
 Implement complex decision trees using conditional nodes:
 

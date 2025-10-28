@@ -12,168 +12,12 @@ A comprehensive, production-ready full-stack web application framework built wit
 - **State Management**: TanStack Query + tRPC for type-safe APIs
 - **Authentication**: Secure JWT-based authentication with auto-refresh
 - **Admin Dashboard**: Complete RBAC with roles, permissions, and audit trails
+- **ACL Management**: Dynamic per-record permissions with visual rule builder
 - **Data Management**: Advanced Import/Export with multi-format support and validation
-- **Workflow Engine**: Visual workflow builder with advanced analytics
+- **Workflow Engine**: Visual workflow builder with approval stages and state management
 - **Real-time Features**: WebSocket support for live updates
 - **Performance**: Optimized with Turbopack and intelligent caching
 - **Testing**: Jest, Playwright, Storybook, and Biome linting integration
-
-### ⚡ Backend (FastAPI)
-- **High-Performance API**: FastAPI with async/await and Pydantic v2
-- **Database**: PostgreSQL with SQLAlchemy 2.0 and Alembic migrations
-- **Authentication**: JWT with refresh tokens and role-based access control
-- **Security Middleware**: Comprehensive threat detection and rate limiting
-- **Caching Layer**: Redis integration with intelligent cache strategies
-- **Monitoring**: Structured logging, performance metrics, and health checks
-- **API Documentation**: Auto-generated OpenAPI/Swagger with export tools
-- **Data Import/Export**: Advanced file processing with validation and progress tracking
-- **Workflow System**: Complete workflow orchestration with state management
-
-### 🚀 Scalability & Performance (Phase 3)
-- **Database Optimization**: Strategic indexes, partitioning, and connection pooling (4x capacity)
-- **Multi-Level Caching**: Browser → CDN → Redis → Database caching (85% hit ratio)
-- **Horizontal Scaling**: Load balancing, database replication, and auto-scaling
-- **Distributed Caching**: Redis Cluster with 6 nodes (12GB capacity)
-- **Database Replication**: Primary + 2 read replicas with read/write splitting
-- **Load Balancing**: Nginx with health checks and automatic failover
-- **Auto-Scaling**: Kubernetes HPA (3-20 pods) based on CPU/Memory
-- **Performance**: 50,000+ req/sec, <100ms P95 latency, 99.99% uptime
-
-### 🔐 Enterprise Security Features
-- **Content Security Policy**: Advanced CSP with nonces and environment-specific rules
-- **XSS Protection**: Real-time detection with pattern matching and sanitization
-- **Request Validation**: Multi-layer validation with malicious content filtering
-- **Rate Limiting**: Intelligent rate limiting with sliding window and token bucket algorithms
-- **Security Monitoring**: Real-time threat detection with automated alerting
-- **Event Logging**: Comprehensive audit trails and activity monitoring system
-- **Bundle Security**: Dependency vulnerability scanning and secret detection
-- **Environment Validation**: Comprehensive environment variable validation with Zod
-- **Trusted Types**: Implementation with DOMPurify integration for XSS prevention
-- **Subresource Integrity**: SRI implementation for external resources
-- **Security Headers**: 20+ security headers with OWASP compliance
-
-## 🆕 Recent Updates (October 2025)
-
-### 🔧 Critical Fixes & Improvements
-- **User Management UI Fixes**: Resolved missing Edit/Delete action buttons in admin/users List View and Card View by fixing prop passing in CommonFormViewManager and ViewManager components
-- **Type System Alignment**: Fixed type constraint mismatch in ViewManager component to properly support optional `id` fields, ensuring compatibility with User model
-- **Header Sanitization Middleware**: Resolved "Bytes Pattern on String-like Object" errors by implementing comprehensive header sanitization across all backend middleware files, preventing uvicorn validation failures
-- **Notification API Fixes**: Fixed 404 errors in frontend notification calls by replacing plain `fetch` with authenticated `apiClient` in NotificationCenter and push notification hooks
-- **Project CRUD Enhancements**: Simplified permission requirements in projects API endpoint to allow authenticated users to create projects, removing blocking permission checks
-- **CSP & Security Headers**: Enhanced Content Security Policy implementation with improved nonce handling and environment-specific rule configuration
-- **API Client Integration**: Standardized API calls across frontend components to use authenticated client with proper JWT header inclusion
-
-### 📊 Performance & Stability
-- **Middleware Optimization**: Re-enabled and optimized cache and rate limiting middleware with proper encoding handling
-- **Database Connection Pooling**: Improved connection management and query optimization for better performance
-- **Error Handling**: Enhanced error responses and logging for better debugging and monitoring
-
-### 🧪 Testing & Quality Assurance
-- **Test Coverage**: Maintained high test coverage across all new features and fixes
-- **Security Validation**: All changes pass security audits and vulnerability scans
-- **Code Quality**: Biome and type checking pass with zero errors in production code
-
-### 🏗️ Infrastructure & DevOps
-- **Container Ready**: Multi-stage Docker builds with security scanning
-- **Orchestration**: Docker Compose with production and development configs
-- **CI/CD Pipeline**: GitHub Actions with automated testing and security checks
-- **Monitoring Stack**: Integrated logging, metrics, and error tracking
-- **Scalability**: Horizontal scaling with load balancer and database clustering
-- **Performance**: Bundle analysis, dependency auditing, and optimization tools
-
-## 🧩 Component Architecture
-
-### 🎯 **ViewManager & CommonFormViewManager - Universal Data Components**
-
-The centerpiece of FastNext's frontend includes two powerful, enterprise-grade data management systems:
-
-**ViewManager** - Multi-view data visualization:
-```typescript
-import { ViewManager } from '@/shared/components/views';
-
-<ViewManager
-  title="Projects"
-  data={projects}
-  columns={columns}
-  views={availableViews}
-  activeView={currentView}
-  onViewChange={setCurrentView}
-  sortOptions={sortOptions}
-  groupOptions={groupOptions}
-  selectable={true}
-  bulkActions={bulkActions}
-  onExport={handleExport}
-  onImport={handleImport}
-/>
-```
-
-**CommonFormViewManager** - Form-based data management:
-```typescript
-import { CommonFormViewManager } from '@/shared/components/views';
-
-<CommonFormViewManager
-  resourceName="projects"
-  baseUrl="/projects"
-  apiEndpoint="/api/v1/projects"
-  formFields={projectFormFields}
-  columns={projectColumns}
-  validationSchema={projectSchema}
-  showStatistics={true}
-  enableSearch={true}
-  enableFilters={true}
-/>
-```
-
-**Key Features:**
-- **5 View Types**: List, Card, Kanban, Gantt, Calendar views
-- **Form Management**: URL-based navigation, CRUD operations, validation
-- **Advanced Controls**: Search, filter, sort, group, and column management
-- **Data Operations**: Export/import, bulk actions, selection management
-- **Enterprise Ready**: Performance optimized, fully accessible, mobile responsive
-
-### 🔧 **Component System**
-
-```
-Frontend Architecture
-├── 🎯 Views (Universal Data Display)
-│   ├── ViewManager                # Multi-view data visualization
-│   ├── CommonFormViewManager     # Form-based data management
-│   ├── GenericFormView           # Dynamic form rendering
-│   ├── SortControl               # Advanced sorting interface
-│   ├── GroupControl              # Data grouping interface
-│   └── Column Management         # Drag-and-drop columns
-├── 📊 Data Visualization
-│   ├── Enhanced DataTable        # Advanced table with features
-│   ├── Kanban Board              # Project management boards
-│   ├── Gantt Chart               # Timeline visualization
-│   ├── Calendar View             # Calendar-based layouts
-│   └── Analytics Dashboard       # Charts and metrics
-├── 🎨 UI Components (shadcn/ui)
-│   ├── Form Controls             # Type-safe form components
-│   ├── Layout Components         # Responsive layouts
-│   └── Navigation                # Advanced navigation system
-├── 🔐 Security Components
-│   ├── Auth Guards               # Route protection
-│   ├── RBAC Controls             # Role-based access
-│   ├── RLS Management            # Row Level Security
-│   └── XSS Protection            # Security middleware
-└── 🔧 Admin Components
-    ├── RLS Dashboard             # Row Level Security management
-    ├── User Management           # User administration
-    ├── Permissions Manager       # Permission control
-    └── Audit Logs               # Activity monitoring
-```
-
-## 🛠️ Technology Stack
-
-### 🎨 Frontend
-- **Framework**: Next.js 16 with App Router and Turbopack
-- **Language**: TypeScript with strict mode
-- **Styling**: Tailwind CSS 4 + shadcn/ui + Radix UI
-- **State Management**: TanStack Query + Zustand + Nuqs for URL state
-- **Type Safety**: tRPC for end-to-end type safety
-- **Security**: CSP, Trusted Types, SRI, XSS protection
-- **Testing**: Jest + React Testing Library + Playwright + Storybook + Biome
 - **Development**: Hot reload, bundle analysis, and performance monitoring
 
 ### ⚙️ Backend
@@ -298,6 +142,7 @@ FastNext/
 │   │   ├── app/                      # App Router (pages, layouts, APIs)
 │   │   │   ├── (dashboard)/          # Dashboard route group
 │   │   │   ├── admin/               # Admin interface
+│   │   │   │   ├── acls/            # ACL management interface
 │   │   │   ├── api/                 # API routes
 │   │   │   │   └── monitoring/      # Security monitoring endpoints
 │   │   │   ├── workflows/           # Workflow management
@@ -315,6 +160,7 @@ FastNext/
 │   │   │   ├── auth/               # Authentication
 │   │   │   ├── admin/              # Admin management
 │   │   │   │   └── events/         # Event logging dashboard
+│   │   │   ├── acl/                # Dynamic ACL management
 │   │   │   ├── workflow/           # Workflow engine
 │   │   │   └── api-docs/           # API documentation
 │   │   └── shared/                 # Shared components and utilities
@@ -331,7 +177,9 @@ FastNext/
 │   ├── app/
 │   │   ├── api/                    # API routes with versioning
 │   │   │   ├── v1/                 # API v1 endpoints
-│   │   │   │   └── events.py       # Event logging API endpoints
+│   │   │   │   ├── events.py       # Event logging API endpoints
+│   │   │   │   ├── acls.py         # ACL management endpoints
+│   │   │   │   └── workflow_instances.py # Workflow instance management
 │   │   │   └── main.py             # API router configuration
 │   │   ├── core/                   # Core functionality
 │   │   │   ├── config.py           # Application configuration
@@ -339,6 +187,7 @@ FastNext/
 │   │   │   └── database_optimization.py # Performance optimizations
 │   │   ├── middleware/             # Security middleware
 │   │   │   ├── security_middleware.py # Comprehensive security
+│   │   │   ├── acl_middleware.py   # ACL permission checking
 │   │   │   └── optimization_middleware.py # Performance
 │   │   ├── models/                 # SQLAlchemy models
 │   │   │   ├── activity_log.py     # Enhanced event logging model
@@ -346,13 +195,19 @@ FastNext/
 │   │   │   └── security_setting.py # Security configuration
 │   │   ├── schemas/                # Pydantic schemas
 │   │   ├── services/               # Business logic
-│   │   │   └── workflow_engine.py  # Workflow orchestration
+│   │   │   ├── workflow_engine.py  # Workflow orchestration
+│   │   │   ├── acl_service.py      # ACL permission evaluation
+│   │   │   └── permission_service.py # Permission management
 │   │   └── utils/                  # Utilities
 │   │       ├── security_utils.py   # Security functions
 │   │       ├── activity_logger.py  # Basic audit logging
 │   │       └── enhanced_logger.py  # Enhanced event logging system
 │   ├── alembic/                    # Database migrations
 │   ├── tests/                      # Comprehensive test suite
+│   │   ├── test_acl_api.py         # ACL API tests
+│   │   ├── test_acl_service_unit.py # ACL service unit tests
+│   │   ├── test_workflow_approvals.py # Workflow approval tests
+│   │   └── test_workflow_api.py    # Workflow API tests
 │   ├── docs/                       # Documentation
 │   ├── scaffolding/                # Code generation tools
 │   └── requirements/               # Dependency management
@@ -382,6 +237,8 @@ FastNext implements comprehensive security measures following OWASP guidelines a
 ### 🔒 Authentication & Authorization
 - **JWT Security**: Secure token implementation with refresh rotation
 - **Role-Based Access Control**: Granular RBAC with permissions and audit trails
+- **Dynamic ACL System**: Per-record permissions with condition-based access control
+- **Field-Level Security**: Granular field-level permissions and data masking
 - **Session Management**: Automatic token refresh with secure cookie handling
 - **Multi-Factor Ready**: Infrastructure for MFA/2FA implementation
 - **Account Security**: Lockout mechanisms and suspicious activity detection
@@ -471,6 +328,55 @@ FastNext includes an enterprise-grade event logging and activity monitoring syst
 - **Export Functions**: One-click export in JSON/CSV formats
 
 For detailed documentation, see [Event Logging System Guide](docs/features/event-logging-system.md).
+
+## 🔐 Dynamic ACL & Permissions System
+
+FastNext includes an enterprise-grade **Dynamic Access Control List (ACL)** system that provides granular, per-record permissions with condition-based access control, enabling fine-tuned security policies for complex business requirements.
+
+### 🎯 Core ACL Features
+- **Per-Record Permissions**: Grant or deny access to specific records based on conditions
+- **Field-Level Security**: Control access to individual fields within records
+- **Condition-Based Rules**: Use Python expressions for dynamic permission evaluation
+- **Role & User-Based Access**: Combine role-based and user-specific permissions
+- **Audit Trails**: Complete logging of permission checks and access decisions
+- **Real-Time Evaluation**: Automatic permission checking on all API requests
+
+### 🔧 ACL Management Interface
+Access the ACL management interface at `/admin/acls` to:
+- Create and manage access control rules
+- Define conditions using Python expressions
+- Set role-based and user-specific permissions
+- Monitor permission evaluation in real-time
+- View audit logs of access decisions
+
+### 📋 Permission Types
+```python
+# Record-level permissions
+record_permission = RecordPermission(
+    entity_type="orders",
+    entity_id="order_123",
+    user_id=user.id,
+    operation="read",
+    conditions={"amount": {"$lt": 1000}}  # Only if order < $1000
+)
+
+# Field-level permissions
+field_acl = AccessControlList(
+    entity_type="users",
+    operation="read",
+    field_name="salary",  # Only salary field
+    allowed_roles=["hr_manager", "executive"],
+    condition_script="user.department == 'HR'"
+)
+```
+
+### 🔗 Integration with Workflows
+ACL permissions integrate seamlessly with workflow approvals:
+- **Approval Workflows**: Trigger approval processes based on ACL rules
+- **Conditional Access**: Grant permissions only after workflow completion
+- **Multi-Level Approvals**: Require multiple approvers for sensitive operations
+
+For detailed documentation, see [ACL System Guide](docs/features/acl-system.md).
 
 ## 📊 Data Import/Export System
 
@@ -798,6 +704,76 @@ npm run dev
 - **Performance Metrics**: Processing time and throughput statistics
 - **Usage Analytics**: User activity and system utilization reports
 
+## 🔄 Workflow Approvals & Stages System
+
+FastNext provides a comprehensive **Workflow Engine** with advanced approval processes and multi-stage state management, enabling complex business process automation with visual workflow design.
+
+### 🎯 Workflow Features
+- **Visual Workflow Builder**: Drag-and-drop interface with React Flow integration
+- **Multi-Stage States**: Define workflow states (Draft, Review, Approved, Rejected, etc.)
+- **Approval Workflows**: Multi-level approval processes with role-based authorization
+- **Conditional Logic**: Branch workflows based on data conditions and user decisions
+- **Parallel Processing**: Execute multiple paths simultaneously
+- **User Tasks**: Human-in-the-loop processes with assignment and notifications
+- **Script Execution**: Run custom code in multiple languages (JavaScript, Python, SQL)
+- **Sub-Workflows**: Nest workflows within workflows for complex processes
+
+### 📋 Workflow Node Types
+- **State Nodes**: Represent workflow stages and status transitions
+- **User Task Nodes**: Require human interaction with approval requirements
+- **Conditional Nodes**: Branch logic based on data or user input
+- **Parallel Gateway Nodes**: Split and merge workflow paths
+- **Timer Nodes**: Schedule delays and deadline management
+- **Variable Nodes**: Data manipulation and calculations
+- **Script Nodes**: Execute custom business logic
+- **Loop Nodes**: Iterate over collections with for/while/forEach loops
+
+### 🔧 Approval Process Management
+```typescript
+// Define approval workflow
+const approvalWorkflow = {
+  name: "Invoice Approval",
+  stages: [
+    { name: "draft", label: "Draft", isInitial: true },
+    { name: "manager_review", label: "Manager Review", requiresApproval: true },
+    { name: "finance_review", label: "Finance Review", requiresApproval: true },
+    { name: "approved", label: "Approved", isFinal: true },
+    { name: "rejected", label: "Rejected", isFinal: true }
+  ],
+  transitions: [
+    {
+      from: "draft",
+      to: "manager_review",
+      action: "submit",
+      conditions: ["invoice.amount > 0"]
+    },
+    {
+      from: "manager_review",
+      to: "finance_review",
+      action: "approve",
+      requiresApproval: true,
+      allowedRoles: ["manager"]
+    }
+  ]
+};
+```
+
+### 📊 Workflow Analytics
+- **Real-Time Monitoring**: Live workflow instance tracking
+- **Performance Metrics**: Completion times, bottleneck analysis, success rates
+- **Bottleneck Detection**: Identify slow stages and optimization opportunities
+- **Success Rate Tracking**: Monitor workflow completion and failure rates
+- **User Task Queues**: Track pending approvals and assignments
+
+### 🔗 Integration Capabilities
+- **ACL Integration**: Permissions change based on workflow state
+- **Notification System**: Automated alerts for approvals and deadlines
+- **Audit Trails**: Complete history of all workflow transitions
+- **External Systems**: API integration for third-party approvals
+- **Document Management**: Attach files and documents to workflow instances
+
+For detailed documentation, see [Workflow System Guide](docs/workflow-system.md) and [Workflow Tutorial](docs/workflow-tutorial.md).
+
 ## 🧪 Testing & Quality Assurance
 
 ### 🎯 Frontend Testing
@@ -833,6 +809,7 @@ cd backend
 pytest                              # Run all tests
 pytest --cov=app --cov-report=html # Coverage report
 pytest tests/api/ -v               # API tests only
+pytest tests/acl/ -v               # ACL tests
 pytest tests/workflow/ -v          # Workflow tests
 
 # Security testing
@@ -1075,6 +1052,7 @@ jobs:
 - [**📋 Changelog**](CHANGELOG.md) - Version history and recent updates
 - [**🚀 Quick Start Guide**](docs/tutorials/getting-started-tutorial.md) - Get started in 5 minutes
 - [**🔧 API Reference**](docs/api-export-guide.md) - Technical API documentation
+- [**🔐 ACL System Guide**](docs/features/acl-system.md) - Dynamic Access Control List documentation
 
 ### 🏗️ Architecture Documentation
 - **Backend Architecture**: `backend/docs/ARCHITECTURE.md`
@@ -1082,7 +1060,8 @@ jobs:
 - **ViewManager Component**: `frontend/docs/ViewManager.md` - Universal data visualization component
 - **Database Schema**: `backend/docs/DEVELOPMENT.md`
 - **Security Guide**: `backend/docs/SECURITY.md`
-- **Workflow System**: `docs/workflow-system.md`
+- **ACL System**: `docs/features/acl-system.md` - Dynamic Access Control List
+- **Workflow System**: `docs/workflow-system.md` - Workflow orchestration and approvals
 
 ### 🎨 Component Documentation
 - **Storybook**: `http://localhost:6006` (Component library)

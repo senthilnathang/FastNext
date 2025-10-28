@@ -17,6 +17,7 @@ from app.core.exceptions import (
 from app.core.logging import get_logger, log_security_event, setup_logging
 from app.core.swagger_config import customize_swagger_ui, setup_swagger_auth_config
 from app.db.init_db import init_db
+from app.middleware.acl_middleware import ACLMiddleware
 from app.middleware.enhanced_logging_middleware import (
     create_auth_event_middleware,
     create_enhanced_logging_middleware,
@@ -338,6 +339,9 @@ def _setup_middleware(app: FastAPI):
 
     # RLS middleware
     app.add_middleware(RLSMiddleware)
+
+    # ACL middleware for dynamic per-record permissions
+    app.add_middleware(ACLMiddleware)
 
     # Validation middleware
     from app.middleware.validation_middleware import ValidationMiddleware

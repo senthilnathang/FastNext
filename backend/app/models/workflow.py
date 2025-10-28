@@ -1,7 +1,8 @@
 import enum
 
+import enum
 from app.db.base import Base
-from sqlalchemy import JSON, Boolean, Column, DateTime
+from sqlalchemy import JSON, Boolean, Column, DateTime, Index
 from sqlalchemy import Enum as SQLEnum
 from sqlalchemy import ForeignKey, Integer, String, Text
 from sqlalchemy.orm import relationship
@@ -181,3 +182,75 @@ class WorkflowTransition(Base):
     template = relationship("WorkflowTemplate", backref="transitions")
     from_state = relationship("WorkflowState", foreign_keys=[from_state_id])
     to_state = relationship("WorkflowState", foreign_keys=[to_state_id])
+
+
+# ACL (Access Control List) Models for Dynamic Per-Record Permissions
+class AccessControlList(Base):
+    __tablename__ = "access_control_lists"
+
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, nullable=False, unique=True, index=True)
+    description = Column(Text)
+    entity_type = Column(String, nullable=False, index=True)  # 'order', 'invoice', 'product', etc.
+    operation = Column(String, nullable=False)  # 'read', 'write', 'delete', 'approve'
+    field_name = Column(String)  # For field-level permissions, None for record-level
+
+    # Condition evaluation
+    condition_script = Column(Text)  # Python expression for dynamic evaluation
+    condition_context = Column(JSON, default={})  # Additional context variables
+
+    # Permission rules
+    allowed_roles = Column(JSON, default=[])  # List of role names that are allowed
+    denied_roles = Column(JSON, default=[])  # List of role names that are denied
+    allowed_users = Column(JSON, default=[])  # List of specific user IDs
+    denied_users = Column(JSON, default=[])  # List of specific user IDs
+
+    # Advanced rules
+    requires_approval = Column(Boolean, default=False)
+    approval_workflow_id = Column(Integer, ForeignKey("workflow_templates.id"))
+
+    # Metadata
+    priority = Column(Integer, default=100)  # Higher priority rules are evaluated first
+    is_active = Column(Boolean, default=True)
+    created_by = Column(Integer, ForeignKey("users.id"), nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+    # Relationships
+    creator = relationship("User", foreign_keys=[created_by])
+    approval_workflow = relationship("WorkflowTemplate", foreign_keys=[approval_workflow_id])
+
+
+class RecordPermission(Base):
+    __tablename__ = "record_permissions"
+
+    id = Column(Integer, primary_key=True, index=True)
+    entity_type = Column(String, nullable=False, index=True)
+    entity_id = Column(String, nullable=False, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"))
+    role_id = Column(Integer, ForeignKey("roles.id"))
+    operation = Column(String, nullable=False)  # 'read', 'write', 'delete', 'approve'
+
+    # Permission details
+    granted_by = Column(Integer, ForeignKey("users.id"), nullable=False)
+    granted_at = Column(DateTime(timezone=True), server_default=func.now())
+    expires_at = Column(DateTime(timezone=True))
+    conditions = Column(JSON, default={})  # Additional conditions for this permission
+
+    # Audit
+    is_active = Column(Boolean, default=True)
+    revoked_by = Column(Integer, ForeignKey("users.id"))
+    revoked_at = Column(DateTime(timezone=True))
+
+    # Relationships
+    user = relationship("User", foreign_keys=[user_id])
+    role = relationship("Role", foreign_keys=[role_id])
+    granter = relationship("User", foreign_keys=[granted_by])
+    revoker = relationship("User", foreign_keys=[revoked_by])
+
+    # Indexes for performance
+    __table_args__ = (
+        Index('ix_record_permissions_entity', 'entity_type', 'entity_id'),
+        Index('ix_record_permissions_user', 'user_id', 'operation'),
+        Index('ix_record_permissions_role', 'role_id', 'operation'),
+    )

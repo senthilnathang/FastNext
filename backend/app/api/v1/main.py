@@ -10,6 +10,7 @@ from fastapi import APIRouter
 
 # Import v1 route modules
 from . import (
+    acls,
     activity_logs,
     assets,
     audit_trails,
@@ -61,6 +62,7 @@ v1_router.include_router(
 v1_router.include_router(
     user_roles.router, prefix="/user-roles", tags=["v1-user-roles"]
 )
+v1_router.include_router(acls.router, prefix="/acls", tags=["v1-acls"])
 
 # Project Management
 v1_router.include_router(projects.router, prefix="/projects", tags=["v1-projects"])
