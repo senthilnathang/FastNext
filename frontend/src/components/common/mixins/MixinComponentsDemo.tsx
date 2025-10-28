@@ -5,15 +5,15 @@ import {
   MessageNotifications,
   TimestampDisplay,
   AuditInfo,
-  ActivityLogEntry,
-  AuditTrailEntry,
-  MessageNotification,
-  TimestampInfo,
-  AuditInfo as AuditInfoType
+  ActivityLogEntryType,
+  AuditTrailEntryType,
+  MessageNotificationType,
+  TimestampInfoType,
+  AuditInfoType
 } from './index';
 
 // Mock data for demonstration
-const mockActivityLog: ActivityLogEntry[] = [
+const mockActivityLog: ActivityLogEntryType[] = [
   {
     id: 1,
     user_id: 1,
@@ -65,7 +65,7 @@ const mockActivityLog: ActivityLogEntry[] = [
   }
 ];
 
-const mockAuditTrail: AuditTrailEntry[] = [
+const mockAuditTrail: AuditTrailEntryType[] = [
   {
     id: 1,
     user_id: 1,
@@ -102,7 +102,7 @@ const mockAuditTrail: AuditTrailEntry[] = [
   }
 ];
 
-const mockNotifications: MessageNotification[] = [
+const mockNotifications: MessageNotificationType[] = [
   {
     id: 1,
     recipient_id: 1,
@@ -136,7 +136,7 @@ const mockNotifications: MessageNotification[] = [
   }
 ];
 
-const mockTimestampInfo: TimestampInfo = {
+const mockTimestampInfo: TimestampInfoType = {
   created_at: new Date(Date.now() - 1000 * 60 * 60 * 24 * 7).toISOString(), // 1 week ago
   updated_at: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(), // 2 hours ago
   created_by_datetime: new Date(Date.now() - 1000 * 60 * 60 * 24 * 7).toISOString(),
