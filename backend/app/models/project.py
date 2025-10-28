@@ -1,4 +1,4 @@
-from app.db.base import Base
+from app.models.base import AuditableActivityModel
 from sqlalchemy import (
     JSON,
     Boolean,
@@ -13,7 +13,7 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
 
-class Project(Base):
+class Project(AuditableActivityModel):
     __tablename__ = "projects"
 
     id = Column(Integer, primary_key=True, index=True)

@@ -1,3 +1,5 @@
+from typing import List, Optional
+
 from app.db.base import Base
 from sqlalchemy import (
     JSON,
@@ -9,7 +11,7 @@ from sqlalchemy import (
     String,
     Text,
 )
-from sqlalchemy.orm import declared_attr
+from sqlalchemy.orm import Session, declared_attr
 from sqlalchemy.sql import func
 
 
@@ -20,6 +22,10 @@ class TimestampMixin:
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+    # Track when user audit fields were set
+    created_by_datetime = Column(DateTime(timezone=True), nullable=True)
+    updated_by_datetime = Column(DateTime(timezone=True), nullable=True)
 
 
 class SoftDeleteMixin:
@@ -60,6 +66,105 @@ class MetadataMixin:
     version = Column(String(20), default="1.0.0", nullable=False)
 
 
+class ActivityMixin:
+    """Mixin for automatic activity logging on CRUD operations"""
+
+    def log_activity(self, db: Session, action: str, user_id: Optional[int] = None,
+                    description: str = None, **kwargs):
+        """Manually log activity for this instance"""
+        from app.utils.activity_logger import log_activity
+        from app.models.activity_log import ActivityAction, ActivityLevel, EventCategory
+
+        action_map = {
+            'create': ActivityAction.CREATE,
+            'update': ActivityAction.UPDATE,
+            'delete': ActivityAction.DELETE,
+            'read': ActivityAction.READ
+        }
+
+        return log_activity(
+            db=db,
+            user_id=user_id or getattr(self, 'updated_by', None) or getattr(self, 'created_by', None),
+            action=action_map.get(action, ActivityAction.UPDATE),
+            entity_type=self.__class__.__name__.lower(),
+            entity_id=getattr(self, 'id', None),
+            entity_name=getattr(self, 'name', None) or str(getattr(self, 'id', None)),
+            description=description or f"{action.title()} {self.__class__.__name__}",
+            category=EventCategory.DATA_MANAGEMENT,
+            **kwargs
+        )
+
+
+class MessageMixin:
+    """Mixin for automatic message/notification creation"""
+
+    def send_message(self, db: Session, recipient_ids: List[int],
+                    message_type: str = 'info', channels: List[str] = None,
+                    title: str = None, message: str = None, **kwargs):
+        """Send message/notification about this instance"""
+        from app.models.notification import Notification, NotificationType
+        import json
+
+        channels = channels or ['in_app']
+        title = title or f"Update on {self.__class__.__name__}"
+        message = message or f"There was an update to {getattr(self, 'name', 'this item')}"
+
+        notifications = []
+        for recipient_id in recipient_ids:
+            notification = Notification(
+                user_id=recipient_id,
+                title=title,
+                message=message,
+                type=getattr(NotificationType, message_type.upper(), NotificationType.INFO),
+                channels=json.dumps(channels),
+                data=json.dumps({
+                    'entity_type': self.__class__.__name__.lower(),
+                    'entity_id': getattr(self, 'id', None),
+                    'entity_name': getattr(self, 'name', None),
+                    **kwargs
+                })
+            )
+            notifications.append(notification)
+            db.add(notification)
+
+        db.commit()
+        return notifications
+
+
+class AuditTrailMixin:
+    """Mixin for automatic audit trail creation"""
+
+    def create_audit_entry(self, db: Session, operation: str,
+                          old_values: dict = None, new_values: dict = None,
+                          changed_fields: List[str] = None, user_id: int = None,
+                          reason: str = None, **kwargs):
+        """Create audit trail entry for this instance"""
+        from app.models.audit_trail import AuditTrail
+        import json
+
+        audit_entry = AuditTrail(
+            user_id=user_id or getattr(self, 'updated_by', None) or getattr(self, 'created_by', None),
+            entity_type=self.__class__.__name__.lower(),
+            entity_id=getattr(self, 'id', None),
+            entity_name=getattr(self, 'name', None) or str(getattr(self, 'id', None)),
+            operation=operation.upper(),
+            old_values=json.dumps(old_values) if old_values else None,
+            new_values=json.dumps(new_values) if new_values else None,
+            changed_fields=json.dumps(changed_fields) if changed_fields else None,
+            reason=reason,
+            extra_data=json.dumps(kwargs) if kwargs else None
+        )
+
+        db.add(audit_entry)
+        db.commit()
+        return audit_entry
+
+
+class FullActivityMixin(ActivityMixin, MessageMixin, AuditTrailMixin):
+    """Complete mixin combining all activity, message, and audit functionality"""
+    pass
+
+
 class BaseModel(Base, TimestampMixin):
     """Base model class with common fields"""
 
@@ -81,6 +186,24 @@ class SoftDeletableModel(BaseModel, SoftDeleteMixin):
 
 
 class FullAuditModel(BaseModel, AuditMixin, SoftDeleteMixin, MetadataMixin):
+    """Full-featured base model with all capabilities"""
+
+    __abstract__ = True
+
+
+class ActivityModel(BaseModel, FullActivityMixin):
+    """Base model with full activity tracking"""
+
+    __abstract__ = True
+
+
+class AuditableActivityModel(BaseModel, AuditMixin, FullActivityMixin):
+    """Base model with audit and full activity capabilities"""
+
+    __abstract__ = True
+
+
+class FullFeaturedModel(BaseModel, AuditMixin, SoftDeleteMixin, MetadataMixin, FullActivityMixin):
     """Full-featured base model with all capabilities"""
 
     __abstract__ = True

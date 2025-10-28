@@ -1,12 +1,12 @@
 from datetime import datetime
 
-from app.db.base import Base
+from app.models.base import AuditableActivityModel
 from sqlalchemy import Boolean, Column, DateTime, Integer, String, Text
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
 
-class User(Base):
+class User(AuditableActivityModel):
     __tablename__ = "users"
 
     id = Column(Integer, primary_key=True, index=True)
