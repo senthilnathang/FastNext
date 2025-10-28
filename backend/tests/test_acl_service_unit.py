@@ -198,7 +198,4 @@ class TestACLService:
         db.query.return_value.filter.return_value.first.return_value = None
 
         result = ACLService.revoke_record_permission(db, 999, 1)
-        assert result is False</content>
-</xai:function_call/>
-<xai:function_call name="write">
-<parameter name="filePath">backend/tests/test_workflow_approvals.py
+        assert result is False

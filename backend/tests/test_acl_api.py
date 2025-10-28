@@ -2,7 +2,7 @@ import pytest
 from app.auth.deps import get_current_active_user
 from app.db.base import Base
 from app.db.session import get_db
-from app.main import app
+from main import app
 from app.models.user import User
 from app.models.workflow import AccessControlList, RecordPermission
 from fastapi.testclient import TestClient
@@ -221,7 +221,4 @@ def test_check_permission(setup_database):
     assert response.status_code == 200
     data = response.json()
     assert "has_access" in data
-    assert "reason" in data</content>
-</xai:function_call/>
-<xai:function_call name="write">
-<parameter name="filePath">backend/tests/test_acl_service.py
+    assert "reason" in data

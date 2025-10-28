@@ -10,6 +10,7 @@ This service implements ServiceNow-style ACLs with:
 
 import ast
 import operator
+from datetime import datetime
 from typing import Any, Dict, List, Optional, Set, Tuple
 from sqlalchemy.orm import Session
 
@@ -384,4 +385,3 @@ class ACLService:
 
 # Import here to avoid circular imports
 from app.models.user_role import UserRole
-from datetime import datetime

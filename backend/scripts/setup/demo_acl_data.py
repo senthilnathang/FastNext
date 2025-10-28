@@ -119,6 +119,58 @@ def create_demo_acls(db: Session):
     )
     db.add(customer_acl)
 
+    # ACL 6: Project management permissions
+    # - Project owners can manage their own projects
+    # - Team members can view assigned projects
+    # - Admins can manage all projects
+    project_acl = AccessControlList(
+        name="project_management_acl",
+        description="ACL for project management with ownership-based access",
+        entity_type="projects",
+        operation="write",
+        condition_script="entity_data.get('user_id') == user.id or user.role in ['admin']",
+        allowed_roles=["admin"],
+        priority=75,
+        is_active=True,
+        created_by=admin_user.id,
+    )
+    db.add(project_acl)
+
+    # ACL 7: Project viewing permissions
+    # - Public projects can be viewed by anyone
+    # - Private projects only by owner and assigned members
+    project_view_acl = AccessControlList(
+        name="project_view_acl",
+        description="ACL for project viewing with public/private access control",
+        entity_type="projects",
+        operation="read",
+        condition_script="""
+        entity_data.get('is_public', False) or
+        entity_data.get('user_id') == user.id or
+        user.role in ['admin']
+        """,
+        allowed_roles=["user", "admin"],
+        priority=70,
+        is_active=True,
+        created_by=admin_user.id,
+    )
+    db.add(project_view_acl)
+
+    # ACL 8: Project deletion permissions
+    # - Only project owners and admins can delete projects
+    project_delete_acl = AccessControlList(
+        name="project_delete_acl",
+        description="ACL for project deletion with strict ownership control",
+        entity_type="projects",
+        operation="delete",
+        condition_script="entity_data.get('user_id') == user.id",
+        allowed_roles=["admin"],
+        priority=95,
+        is_active=True,
+        created_by=admin_user.id,
+    )
+    db.add(project_delete_acl)
+
     db.commit()
     logger.info("✅ Demo ACL rules created")
 
@@ -159,6 +211,31 @@ def create_demo_record_permissions(db: Session):
                 is_active=True,
             )
             db.add(readonly_perm)
+
+        # Give user permission to manage a specific project
+        project_perm = RecordPermission(
+            entity_type="projects",
+            entity_id=f"project_{i+1:03d}",
+            user_id=user.id,
+            operation="write",
+            granted_by=users[0].id,
+            conditions={"project_role": "owner"},
+            is_active=True,
+        )
+        db.add(project_perm)
+
+        # Give another user read access to the same project
+        if len(users) > 1 and i < len(users) - 1:
+            project_read_perm = RecordPermission(
+                entity_type="projects",
+                entity_id=f"project_{i+1:03d}",
+                user_id=users[i+1].id,
+                operation="read",
+                granted_by=users[0].id,
+                conditions={"project_role": "viewer"},
+                is_active=True,
+            )
+            db.add(project_read_perm)
 
     db.commit()
     logger.info("✅ Demo record permissions created")

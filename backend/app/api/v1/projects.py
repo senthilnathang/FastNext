@@ -8,6 +8,7 @@ from app.models.user import User
 from app.schemas.common import ListResponse
 from app.schemas.project import Project as ProjectSchema
 from app.schemas.project import ProjectCreate, ProjectUpdate
+from app.services.acl_service import ACLService
 from app.services.permission_service import PermissionService
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import func
@@ -26,12 +27,12 @@ def read_projects(
     search: Optional[str] = None,
     current_user: User = Depends(get_current_active_user),
 ) -> Any:
-    """Get projects user owns or has access to"""
+    """Get projects user owns or has access to via ACL permissions"""
     try:
-        # Build query
-        query = db.query(Project).filter(Project.user_id == current_user.id)
+        # Get all projects (we'll filter by ACL permissions)
+        query = db.query(Project)
 
-        # Apply search filter
+        # Apply search filter if provided
         if search:
             search_term = f"%{search}%"
             query = query.filter(
@@ -39,14 +40,38 @@ def read_projects(
                 | (Project.description.ilike(search_term))
             )
 
-        # Get total count
-        total = query.count()
+        # Get all projects that match search
+        all_projects = query.all()
 
-        # Get paginated projects
-        user_projects = query.offset(skip).limit(limit).all()
+        # Filter projects based on ACL permissions
+        accessible_projects = []
+        for project in all_projects:
+            # Check if user has read access to this project
+            project_data = {
+                "user_id": project.user_id,
+                "is_public": project.is_public,
+                "name": project.name,
+                "description": project.description,
+            }
+
+            has_access, _ = ACLService.check_record_access(
+                db=db,
+                user=current_user,
+                entity_type="projects",
+                entity_id=str(project.id),
+                operation="read",
+                entity_data=project_data
+            )
+
+            if has_access:
+                accessible_projects.append(project)
+
+        # Apply pagination to accessible projects
+        total = len(accessible_projects)
+        paginated_projects = accessible_projects[skip:skip + limit]
 
         return ListResponse.paginate(
-            items=user_projects, total=total, skip=skip, limit=limit
+            items=paginated_projects, total=total, skip=skip, limit=limit
         )
     except Exception as e:
         # Log the error and raise proper exception
@@ -82,17 +107,34 @@ def read_project(
     project_id: int,
     current_user: User = Depends(get_current_active_user),
 ) -> Any:
-    # Check if user has access to project
-    if not PermissionService.check_project_permission(
-        db, current_user.id, project_id, "read"
-    ):
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN, detail="Project access denied"
-        )
-
+    """Get a specific project with ACL permission checking"""
     project = db.query(Project).filter(Project.id == project_id).first()
     if not project:
         raise HTTPException(status_code=404, detail="Project not found")
+
+    # Check ACL permissions for reading this project
+    project_data = {
+        "user_id": project.user_id,
+        "is_public": project.is_public,
+        "name": project.name,
+        "description": project.description,
+    }
+
+    has_access, reason = ACLService.check_record_access(
+        db=db,
+        user=current_user,
+        entity_type="projects",
+        entity_id=str(project_id),
+        operation="read",
+        entity_data=project_data
+    )
+
+    if not has_access:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=f"Project access denied: {reason}"
+        )
+
     return project
 
 
@@ -104,18 +146,35 @@ def update_project(
     project_in: ProjectUpdate,
     current_user: User = Depends(get_current_active_user),
 ) -> Any:
-    # Check if user has permission to update project
-    if not PermissionService.check_project_permission(
-        db, current_user.id, project_id, "update"
-    ):
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN, detail="Project update access denied"
-        )
-
+    """Update a project with ACL permission checking"""
     project = db.query(Project).filter(Project.id == project_id).first()
     if not project:
         raise HTTPException(status_code=404, detail="Project not found")
 
+    # Check ACL permissions for updating this project
+    project_data = {
+        "user_id": project.user_id,
+        "is_public": project.is_public,
+        "name": project.name,
+        "description": project.description,
+    }
+
+    has_access, reason = ACLService.check_record_access(
+        db=db,
+        user=current_user,
+        entity_type="projects",
+        entity_id=str(project_id),
+        operation="update",
+        entity_data=project_data
+    )
+
+    if not has_access:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=f"Project update access denied: {reason}"
+        )
+
+    # Update project data
     project_data = project_in.dict(exclude_unset=True)
     for field, value in project_data.items():
         setattr(project, field, value)
@@ -133,17 +192,33 @@ def delete_project(
     project_id: int,
     current_user: User = Depends(get_current_active_user),
 ) -> Any:
-    # Check if user has permission to delete project
-    if not PermissionService.check_project_permission(
-        db, current_user.id, project_id, "delete"
-    ):
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN, detail="Project delete access denied"
-        )
-
+    """Delete a project with ACL permission checking"""
     project = db.query(Project).filter(Project.id == project_id).first()
     if not project:
         raise HTTPException(status_code=404, detail="Project not found")
+
+    # Check ACL permissions for deleting this project
+    project_data = {
+        "user_id": project.user_id,
+        "is_public": project.is_public,
+        "name": project.name,
+        "description": project.description,
+    }
+
+    has_access, reason = ACLService.check_record_access(
+        db=db,
+        user=current_user,
+        entity_type="projects",
+        entity_id=str(project_id),
+        operation="delete",
+        entity_data=project_data
+    )
+
+    if not has_access:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=f"Project delete access denied: {reason}"
+        )
 
     db.delete(project)
     db.commit()

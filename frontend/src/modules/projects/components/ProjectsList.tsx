@@ -9,6 +9,7 @@ import {
   List,
   Plus,
   Search,
+  Shield,
   SortAsc,
   SortDesc,
   Trash2,
@@ -25,6 +26,7 @@ import {
   useStringLiteralState,
   useViewModeState,
 } from "@/shared/hooks";
+import { useUserRole } from "@/modules/admin/hooks/useUserRole";
 
 interface Project {
   id: number;
@@ -91,6 +93,7 @@ export default function ProjectsList() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { isAdmin } = useUserRole();
 
   // URL State Management with nuqs
   const [search, setSearch] = useSearchState();
@@ -359,6 +362,16 @@ export default function ProjectsList() {
                       <Button variant="ghost" size="sm">
                         <Trash2 className="h-4 w-4" />
                       </Button>
+                      {isAdmin() && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => window.open(`/admin/projects?projectId=${project.id}`, '_blank')}
+                          title="Manage ACL Permissions"
+                        >
+                          <Shield className="h-4 w-4" />
+                        </Button>
+                      )}
                     </div>
                   </div>
                 </Card>
@@ -403,6 +416,16 @@ export default function ProjectsList() {
                       <Button variant="ghost" size="sm">
                         <Trash2 className="h-4 w-4" />
                       </Button>
+                      {isAdmin() && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => window.open(`/admin/projects?projectId=${project.id}`, '_blank')}
+                          title="Manage ACL Permissions"
+                        >
+                          <Shield className="h-4 w-4" />
+                        </Button>
+                      )}
                     </div>
                   </div>
                 </Card>
