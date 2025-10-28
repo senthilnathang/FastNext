@@ -55,7 +55,7 @@ const getMessageStyle = (type: string, isRead: boolean) => {
   }
 };
 
-export const MessageNotifications: React.FC<MessageNotificationsProps> = ({
+const MessageNotifications: React.FC<MessageNotificationsProps> = ({
   notifications,
   loading = false,
   onMarkAsRead,

@@ -56,7 +56,7 @@ const UserBadge: React.FC<{
   );
 };
 
-export const AuditInfo: React.FC<AuditInfoProps> = ({
+const AuditInfo: React.FC<AuditInfoProps> = ({
   audit,
   showTimestamps = true,
   showUsers = true,

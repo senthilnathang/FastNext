@@ -65,7 +65,7 @@ const getLevelColor = (level: string) => {
   }
 };
 
-export const ActivityLog: React.FC<ActivityLogProps> = ({
+const ActivityLog: React.FC<ActivityLogProps> = ({
   activities,
   loading = false,
   emptyMessage = 'No activity found',

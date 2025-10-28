@@ -63,7 +63,7 @@ const UserInfo: React.FC<{
   );
 };
 
-export const TimestampDisplay: React.FC<TimestampDisplayProps> = ({
+const TimestampDisplay: React.FC<TimestampDisplayProps> = ({
   timestamps,
   showRelative = true,
   showAbsolute = false,

@@ -89,7 +89,7 @@ const renderFieldChange = (field: string, oldValue: any, newValue: any) => {
   );
 };
 
-export const AuditTrail: React.FC<AuditTrailProps> = ({
+const AuditTrail: React.FC<AuditTrailProps> = ({
   auditEntries,
   loading = false,
   emptyMessage = 'No audit trail found',
