@@ -37,6 +37,7 @@ from app.schemas.rls import (
 )
 from app.services.rls_service import RLSService
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 router = APIRouter()
@@ -481,7 +482,7 @@ async def get_audit_stats(
     # Top denied reasons
     denied_reasons = (
         db.query(
-            RLSAuditLog.denial_reason, db.func.count(RLSAuditLog.id).label("count")
+            RLSAuditLog.denial_reason, func.count(RLSAuditLog.id).label("count")
         )
         .filter(
             RLSAuditLog.created_at >= from_date,
@@ -489,14 +490,14 @@ async def get_audit_stats(
             RLSAuditLog.denial_reason.isnot(None),
         )
         .group_by(RLSAuditLog.denial_reason)
-        .order_by(db.func.count(RLSAuditLog.id).desc())
+        .order_by(func.count(RLSAuditLog.id).desc())
         .limit(10)
         .all()
     )
 
     # Entity type breakdown
     entity_stats = (
-        db.query(RLSAuditLog.entity_type, db.func.count(RLSAuditLog.id).label("count"))
+        db.query(RLSAuditLog.entity_type, func.count(RLSAuditLog.id).label("count"))
         .filter(RLSAuditLog.created_at >= from_date)
         .group_by(RLSAuditLog.entity_type)
         .all()

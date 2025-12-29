@@ -238,9 +238,10 @@ FastNext implements comprehensive security measures following OWASP guidelines a
 - **JWT Security**: Secure token implementation with refresh rotation
 - **Role-Based Access Control**: Granular RBAC with permissions and audit trails
 - **Dynamic ACL System**: Per-record permissions with condition-based access control
+- **Row Level Security (RLS)**: Policy-based data filtering with audit logging
 - **Field-Level Security**: Granular field-level permissions and data masking
 - **Session Management**: Automatic token refresh with secure cookie handling
-- **Multi-Factor Ready**: Infrastructure for MFA/2FA implementation
+- **Two-Factor Authentication (2FA)**: TOTP-based 2FA with backup codes
 - **Account Security**: Lockout mechanisms and suspicious activity detection
 
 ### 🚦 Request Security & Rate Limiting
@@ -1059,8 +1060,9 @@ jobs:
 - **Frontend Architecture**: `frontend/docs/scaffolding-usage.md`
 - **ViewManager Component**: `frontend/docs/ViewManager.md` - Universal data visualization component
 - **Database Schema**: `backend/docs/DEVELOPMENT.md`
-- **Security Guide**: `backend/docs/SECURITY.md`
+- **Security Guide**: `backend/docs/SECURITY.md` - RLS, ACL, 2FA, and security settings
 - **ACL System**: `docs/features/acl-system.md` - Dynamic Access Control List
+- **Row Level Security**: `backend/docs/SECURITY.md#row-level-security-rls` - Policy-based data filtering
 - **Workflow System**: `docs/workflow-system.md` - Workflow orchestration and approvals
 
 ### 🎨 Component Documentation

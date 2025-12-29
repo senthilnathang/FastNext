@@ -108,178 +108,9 @@ class PermissionCheckResponse(BaseModel):
     applicable_acls: Optional[List[str]] = None
 
 
-# ACL CRUD endpoints
-@router.get("", response_model=ListResponse[ACLResponse])
-@router.get("/", response_model=ListResponse[ACLResponse])
-def read_acls(
-    db: Session = Depends(get_db),
-    skip: int = 0,
-    limit: int = 100,
-    entity_type: Optional[str] = None,
-    operation: Optional[str] = None,
-    is_active: Optional[bool] = None,
-    current_user: User = Depends(get_current_active_user),
-) -> Any:
-    """Get ACLs with optional filtering"""
-    # Check if user has permission to view ACLs
-    if not PermissionService.check_permission(db, current_user.id, "read", "acl"):
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Insufficient permissions to view ACLs",
-        )
-
-    query = db.query(AccessControlList)
-
-    if entity_type:
-        query = query.filter(AccessControlList.entity_type == entity_type)
-    if operation:
-        query = query.filter(AccessControlList.operation == operation)
-    if is_active is not None:
-        query = query.filter(AccessControlList.is_active == is_active)
-
-    total = query.count()
-    acls = query.offset(skip).limit(limit).all()
-
-    return {
-        "items": acls,
-        "total": total,
-        "page": (skip // limit) + 1,
-        "pages": (total + limit - 1) // limit,
-        "size": len(acls),
-    }
-
-
-@router.post("", response_model=ACLResponse)
-@router.post("/", response_model=ACLResponse)
-def create_acl(
-    *,
-    db: Session = Depends(get_db),
-    acl_in: ACLCreate,
-    current_user: User = Depends(get_current_active_user),
-) -> Any:
-    """Create new ACL"""
-    # Check if user has permission to create ACLs
-    if not PermissionService.check_permission(db, current_user.id, "create", "acl"):
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Insufficient permissions to create ACLs",
-        )
-
-    # Check if ACL with this name already exists
-    existing_acl = db.query(AccessControlList).filter(
-        AccessControlList.name == acl_in.name
-    ).first()
-    if existing_acl:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="ACL with this name already exists",
-        )
-
-    acl = AccessControlList(
-        **acl_in.dict(),
-        created_by=current_user.id,
-    )
-    db.add(acl)
-    db.commit()
-    db.refresh(acl)
-    return acl
-
-
-@router.get("/{acl_id}", response_model=ACLResponse)
-def read_acl(
-    *,
-    db: Session = Depends(get_db),
-    acl_id: int,
-    current_user: User = Depends(get_current_active_user),
-) -> Any:
-    """Get ACL by ID"""
-    # Check if user has permission to view ACLs
-    if not PermissionService.check_permission(db, current_user.id, "read", "acl"):
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Insufficient permissions to view ACLs",
-        )
-
-    acl = db.query(AccessControlList).filter(AccessControlList.id == acl_id).first()
-    if not acl:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="ACL not found",
-        )
-    return acl
-
-
-@router.put("/{acl_id}", response_model=ACLResponse)
-def update_acl(
-    *,
-    db: Session = Depends(get_db),
-    acl_id: int,
-    acl_in: ACLUpdate,
-    current_user: User = Depends(get_current_active_user),
-) -> Any:
-    """Update ACL"""
-    # Check if user has permission to update ACLs
-    if not PermissionService.check_permission(db, current_user.id, "update", "acl"):
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Insufficient permissions to update ACLs",
-        )
-
-    acl = db.query(AccessControlList).filter(AccessControlList.id == acl_id).first()
-    if not acl:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="ACL not found",
-        )
-
-    # Check if updating to a name that already exists
-    if acl_in.name and acl_in.name != acl.name:
-        existing_acl = db.query(AccessControlList).filter(
-            AccessControlList.name == acl_in.name,
-            AccessControlList.id != acl_id
-        ).first()
-        if existing_acl:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="ACL with this name already exists",
-            )
-
-    update_data = acl_in.dict(exclude_unset=True)
-    for field, value in update_data.items():
-        setattr(acl, field, value)
-
-    db.add(acl)
-    db.commit()
-    db.refresh(acl)
-    return acl
-
-
-@router.delete("/{acl_id}")
-def delete_acl(
-    *,
-    db: Session = Depends(get_db),
-    acl_id: int,
-    current_user: User = Depends(get_current_active_user),
-) -> Any:
-    """Delete ACL"""
-    # Check if user has permission to delete ACLs
-    if not PermissionService.check_permission(db, current_user.id, "delete", "acl"):
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Insufficient permissions to delete ACLs",
-        )
-
-    acl = db.query(AccessControlList).filter(AccessControlList.id == acl_id).first()
-    if not acl:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="ACL not found",
-        )
-
-    db.delete(acl)
-    db.commit()
-    return {"message": "ACL deleted successfully"}
-
+# =============================================================================
+# STATIC PATH ENDPOINTS - Must come before dynamic /{acl_id} routes
+# =============================================================================
 
 # Record Permission endpoints
 @router.get("/record-permissions", response_model=ListResponse[RecordPermissionResponse])
@@ -294,12 +125,14 @@ def read_record_permissions(
     current_user: User = Depends(get_current_active_user),
 ) -> Any:
     """Get record permissions with optional filtering"""
-    # Check if user has permission to view record permissions
-    if not PermissionService.check_permission(db, current_user.id, "read", "record_permission"):
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Insufficient permissions to view record permissions",
-        )
+    # Check if user has permission to view record permissions (superusers always have access)
+    if not current_user.is_superuser:
+        perm_service = PermissionService(db)
+        if not perm_service.has_permission(current_user.id, "record_permission.read"):
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Insufficient permissions to view record permissions",
+            )
 
     query = db.query(RecordPermission)
 
@@ -318,8 +151,8 @@ def read_record_permissions(
     return {
         "items": permissions,
         "total": total,
-        "page": (skip // limit) + 1,
-        "pages": (total + limit - 1) // limit,
+        "page": (skip // limit) + 1 if limit > 0 else 1,
+        "pages": (total + limit - 1) // limit if limit > 0 else 1,
         "size": len(permissions),
     }
 
@@ -332,12 +165,14 @@ def create_record_permission(
     current_user: User = Depends(get_current_active_user),
 ) -> Any:
     """Create new record permission"""
-    # Check if user has permission to create record permissions
-    if not PermissionService.check_permission(db, current_user.id, "create", "record_permission"):
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Insufficient permissions to create record permissions",
-        )
+    # Check if user has permission to create record permissions (superusers always have access)
+    if not current_user.is_superuser:
+        perm_service = PermissionService(db)
+        if not perm_service.has_permission(current_user.id, "record_permission.create"):
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Insufficient permissions to create record permissions",
+            )
 
     return ACLService.grant_record_permission(
         db=db,
@@ -360,12 +195,14 @@ def revoke_record_permission(
     current_user: User = Depends(get_current_active_user),
 ) -> Any:
     """Revoke record permission"""
-    # Check if user has permission to revoke record permissions
-    if not PermissionService.check_permission(db, current_user.id, "delete", "record_permission"):
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Insufficient permissions to revoke record permissions",
-        )
+    # Check if user has permission to revoke record permissions (superusers always have access)
+    if not current_user.is_superuser:
+        perm_service = PermissionService(db)
+        if not perm_service.has_permission(current_user.id, "record_permission.delete"):
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Insufficient permissions to revoke record permissions",
+            )
 
     success = ACLService.revoke_record_permission(db, permission_id, current_user.id)
     if not success:
@@ -457,3 +294,193 @@ def get_user_permissions(
             for p in permissions
         ],
     }
+
+
+# =============================================================================
+# ACL CRUD endpoints
+# =============================================================================
+
+@router.get("", response_model=ListResponse[ACLResponse])
+@router.get("/", response_model=ListResponse[ACLResponse])
+def read_acls(
+    db: Session = Depends(get_db),
+    skip: int = 0,
+    limit: int = 100,
+    entity_type: Optional[str] = None,
+    operation: Optional[str] = None,
+    is_active: Optional[bool] = None,
+    current_user: User = Depends(get_current_active_user),
+) -> Any:
+    """Get ACLs with optional filtering"""
+    # Check if user has permission to view ACLs (superusers always have access)
+    if not current_user.is_superuser:
+        perm_service = PermissionService(db)
+        if not perm_service.has_permission(current_user.id, "acl.read"):
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Insufficient permissions to view ACLs",
+            )
+
+    query = db.query(AccessControlList)
+
+    if entity_type:
+        query = query.filter(AccessControlList.entity_type == entity_type)
+    if operation:
+        query = query.filter(AccessControlList.operation == operation)
+    if is_active is not None:
+        query = query.filter(AccessControlList.is_active == is_active)
+
+    total = query.count()
+    acls = query.offset(skip).limit(limit).all()
+
+    return {
+        "items": acls,
+        "total": total,
+        "page": (skip // limit) + 1 if limit > 0 else 1,
+        "pages": (total + limit - 1) // limit if limit > 0 else 1,
+        "size": len(acls),
+    }
+
+
+@router.post("", response_model=ACLResponse)
+@router.post("/", response_model=ACLResponse)
+def create_acl(
+    *,
+    db: Session = Depends(get_db),
+    acl_in: ACLCreate,
+    current_user: User = Depends(get_current_active_user),
+) -> Any:
+    """Create new ACL"""
+    # Check if user has permission to create ACLs (superusers always have access)
+    if not current_user.is_superuser:
+        perm_service = PermissionService(db)
+        if not perm_service.has_permission(current_user.id, "acl.create"):
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Insufficient permissions to create ACLs",
+            )
+
+    # Check if ACL with this name already exists
+    existing_acl = db.query(AccessControlList).filter(
+        AccessControlList.name == acl_in.name
+    ).first()
+    if existing_acl:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="ACL with this name already exists",
+        )
+
+    acl = AccessControlList(
+        **acl_in.dict(),
+        created_by=current_user.id,
+    )
+    db.add(acl)
+    db.commit()
+    db.refresh(acl)
+    return acl
+
+
+# =============================================================================
+# DYNAMIC PATH ENDPOINTS - Must come after static paths
+# =============================================================================
+
+@router.get("/{acl_id}", response_model=ACLResponse)
+def read_acl(
+    *,
+    db: Session = Depends(get_db),
+    acl_id: int,
+    current_user: User = Depends(get_current_active_user),
+) -> Any:
+    """Get ACL by ID"""
+    # Check if user has permission to view ACLs (superusers always have access)
+    if not current_user.is_superuser:
+        perm_service = PermissionService(db)
+        if not perm_service.has_permission(current_user.id, "acl.read"):
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Insufficient permissions to view ACLs",
+            )
+
+    acl = db.query(AccessControlList).filter(AccessControlList.id == acl_id).first()
+    if not acl:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="ACL not found",
+        )
+    return acl
+
+
+@router.put("/{acl_id}", response_model=ACLResponse)
+def update_acl(
+    *,
+    db: Session = Depends(get_db),
+    acl_id: int,
+    acl_in: ACLUpdate,
+    current_user: User = Depends(get_current_active_user),
+) -> Any:
+    """Update ACL"""
+    # Check if user has permission to update ACLs (superusers always have access)
+    if not current_user.is_superuser:
+        perm_service = PermissionService(db)
+        if not perm_service.has_permission(current_user.id, "acl.update"):
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Insufficient permissions to update ACLs",
+            )
+
+    acl = db.query(AccessControlList).filter(AccessControlList.id == acl_id).first()
+    if not acl:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="ACL not found",
+        )
+
+    # Check if updating to a name that already exists
+    if acl_in.name and acl_in.name != acl.name:
+        existing_acl = db.query(AccessControlList).filter(
+            AccessControlList.name == acl_in.name,
+            AccessControlList.id != acl_id
+        ).first()
+        if existing_acl:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="ACL with this name already exists",
+            )
+
+    update_data = acl_in.dict(exclude_unset=True)
+    for field, value in update_data.items():
+        setattr(acl, field, value)
+
+    db.add(acl)
+    db.commit()
+    db.refresh(acl)
+    return acl
+
+
+@router.delete("/{acl_id}")
+def delete_acl(
+    *,
+    db: Session = Depends(get_db),
+    acl_id: int,
+    current_user: User = Depends(get_current_active_user),
+) -> Any:
+    """Delete ACL"""
+    # Check if user has permission to delete ACLs (superusers always have access)
+    if not current_user.is_superuser:
+        perm_service = PermissionService(db)
+        if not perm_service.has_permission(current_user.id, "acl.delete"):
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Insufficient permissions to delete ACLs",
+            )
+
+    acl = db.query(AccessControlList).filter(AccessControlList.id == acl_id).first()
+    if not acl:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="ACL not found",
+        )
+
+    db.delete(acl)
+    db.commit()
+    return {"message": "ACL deleted successfully"}
