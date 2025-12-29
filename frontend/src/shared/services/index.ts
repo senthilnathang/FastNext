@@ -17,7 +17,6 @@ export type {
   UpdatePermissionRequest,
 } from "./api/permissions";
 export * from "./api/permissions";
-export * from "./api/projects";
 export type {
   CreateRoleRequest,
   Permission,
@@ -36,3 +35,6 @@ export type {
 } from "./api/users";
 // Resource APIs
 export * from "./api/users";
+
+// WebSocket
+export * from "./websocket";

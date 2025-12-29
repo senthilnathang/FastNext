@@ -3,7 +3,7 @@
  */
 
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen } from '../../utils/test-utils';
+import { render, screen, fireEvent } from '../../utils/test-utils';
 import InboxFilters from '@/components/inbox/InboxFilters';
 
 const defaultProps = {
@@ -32,13 +32,12 @@ const defaultProps = {
 };
 
 describe('InboxFilters', () => {
-  it('renders filter sections', () => {
+  it('renders filter dropdowns in horizontal layout', () => {
     render(<InboxFilters {...defaultProps} />);
 
-    // Check for filter section titles
-    expect(screen.getByText('Type')).toBeInTheDocument();
-    expect(screen.getByText('Status')).toBeInTheDocument();
-    expect(screen.getByText('Priority')).toBeInTheDocument();
+    // Check for dropdown options (multiple "All" options exist)
+    expect(screen.getAllByText('All').length).toBeGreaterThan(0);
+    expect(screen.getByText('Notifications')).toBeInTheDocument();
   });
 
   it('shows search input when enabled', () => {
@@ -63,15 +62,15 @@ describe('InboxFilters', () => {
     expect(handleSearchChange).toHaveBeenCalled();
   });
 
-  it('shows unread count in stats', () => {
-    render(<InboxFilters {...defaultProps} />);
+  it('shows unread count in stats with vertical layout', () => {
+    render(<InboxFilters {...defaultProps} layout="vertical" />);
 
     // Should show unread filter option with count
     expect(screen.getByText(/Unread/)).toBeInTheDocument();
   });
 
-  it('shows labels section with available labels', () => {
-    render(<InboxFilters {...defaultProps} />);
+  it('shows labels section in vertical layout', () => {
+    render(<InboxFilters {...defaultProps} layout="vertical" />);
 
     expect(screen.getByText('Important')).toBeInTheDocument();
     expect(screen.getByText('Work')).toBeInTheDocument();
@@ -87,7 +86,8 @@ describe('InboxFilters', () => {
       />
     );
 
-    const clearButton = screen.getByText('Clear filters');
+    // Button text is "Clear all" not "Clear filters"
+    const clearButton = screen.getByText('Clear all');
     await user.click(clearButton);
 
     expect(handleClear).toHaveBeenCalled();

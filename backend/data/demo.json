@@ -9,7 +9,7 @@
       "email": "admin@fastnext.dev",
       "username": "admin",
       "full_name": "System Administrator",
-      "password": "admin123!",
+      "password": "admin123",
       "is_active": true,
       "is_verified": true,
       "is_superuser": true,

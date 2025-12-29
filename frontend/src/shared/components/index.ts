@@ -2,6 +2,9 @@
 // Component Index - Organized by Category
 // ============================================================================
 
+// Attachment Components
+export * from "./attachments";
+
 // Authentication Components
 export {
   AuthGuard,

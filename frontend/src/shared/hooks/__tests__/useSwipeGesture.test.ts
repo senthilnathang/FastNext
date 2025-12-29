@@ -1,4 +1,5 @@
 import { act, renderHook } from "@testing-library/react";
+import { vi, describe, it, expect, beforeEach, afterEach, type MockInstance } from "vitest";
 import { usePointerSwipe, useSwipeGesture } from "../useSwipeGesture";
 
 // Mock touch events
@@ -8,7 +9,7 @@ const createTouchEvent = (
 ) => {
   const event = new Event(type) as any;
   event.touches = touches;
-  event.preventDefault = jest.fn();
+  event.preventDefault = vi.fn();
   return event;
 };
 
@@ -22,17 +23,17 @@ const createPointerEvent = (type: string, clientX: number, clientY: number) => {
 
 describe("useSwipeGesture", () => {
   let mockElement: HTMLElement;
-  let addEventListenerSpy: jest.SpyInstance;
-  let removeEventListenerSpy: jest.SpyInstance;
+  let addEventListenerSpy: MockInstance;
+  let removeEventListenerSpy: MockInstance;
 
   beforeEach(() => {
     mockElement = document.createElement("div");
-    addEventListenerSpy = jest.spyOn(mockElement, "addEventListener");
-    removeEventListenerSpy = jest.spyOn(mockElement, "removeEventListener");
+    addEventListenerSpy = vi.spyOn(mockElement, "addEventListener");
+    removeEventListenerSpy = vi.spyOn(mockElement, "removeEventListener");
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe("Basic Setup", () => {
@@ -88,7 +89,7 @@ describe("useSwipeGesture", () => {
 
   describe("Swipe Detection", () => {
     it("detects right swipe", () => {
-      const onSwipeRight = jest.fn();
+      const onSwipeRight = vi.fn();
       const { result } = renderHook(() =>
         useSwipeGesture({ onSwipeRight, threshold: 50 }),
       );
@@ -114,7 +115,7 @@ describe("useSwipeGesture", () => {
     });
 
     it("detects left swipe", () => {
-      const onSwipeLeft = jest.fn();
+      const onSwipeLeft = vi.fn();
       const { result } = renderHook(() =>
         useSwipeGesture({ onSwipeLeft, threshold: 50 }),
       );
@@ -140,7 +141,7 @@ describe("useSwipeGesture", () => {
     });
 
     it("detects up swipe", () => {
-      const onSwipeUp = jest.fn();
+      const onSwipeUp = vi.fn();
       const { result } = renderHook(() =>
         useSwipeGesture({ onSwipeUp, threshold: 50 }),
       );
@@ -166,7 +167,7 @@ describe("useSwipeGesture", () => {
     });
 
     it("detects down swipe", () => {
-      const onSwipeDown = jest.fn();
+      const onSwipeDown = vi.fn();
       const { result } = renderHook(() =>
         useSwipeGesture({ onSwipeDown, threshold: 50 }),
       );
@@ -194,7 +195,7 @@ describe("useSwipeGesture", () => {
 
   describe("Threshold Handling", () => {
     it("does not trigger swipe when distance is below threshold", () => {
-      const onSwipeRight = jest.fn();
+      const onSwipeRight = vi.fn();
       const { result } = renderHook(() =>
         useSwipeGesture({ onSwipeRight, threshold: 100 }),
       );
@@ -220,7 +221,7 @@ describe("useSwipeGesture", () => {
     });
 
     it("uses custom threshold", () => {
-      const onSwipeRight = jest.fn();
+      const onSwipeRight = vi.fn();
       const { result } = renderHook(() =>
         useSwipeGesture({ onSwipeRight, threshold: 30 }),
       );
@@ -248,7 +249,7 @@ describe("useSwipeGesture", () => {
 
   describe("Time Constraint", () => {
     it("does not trigger swipe when gesture is too slow", () => {
-      const onSwipeRight = jest.fn();
+      const onSwipeRight = vi.fn();
       const { result } = renderHook(() =>
         useSwipeGesture({ onSwipeRight, threshold: 50 }),
       );
@@ -258,7 +259,7 @@ describe("useSwipeGesture", () => {
       // Mock Date.now to simulate slow gesture
       const originalNow = Date.now;
       let timeCounter = 0;
-      Date.now = jest.fn(() => {
+      Date.now = vi.fn(() => {
         timeCounter += 600; // Simulate 600ms delay (too slow)
         return timeCounter;
       });
@@ -340,15 +341,15 @@ describe("useSwipeGesture", () => {
 
 describe("usePointerSwipe", () => {
   let mockElement: HTMLElement;
-  let addEventListenerSpy: jest.SpyInstance;
+  let addEventListenerSpy: MockInstance;
 
   beforeEach(() => {
     mockElement = document.createElement("div");
-    addEventListenerSpy = jest.spyOn(mockElement, "addEventListener");
+    addEventListenerSpy = vi.spyOn(mockElement, "addEventListener");
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe("Basic Setup", () => {
@@ -385,7 +386,7 @@ describe("usePointerSwipe", () => {
 
   describe("Pointer Swipe Detection", () => {
     it("detects right pointer swipe", () => {
-      const onSwipeRight = jest.fn();
+      const onSwipeRight = vi.fn();
       const { result } = renderHook(() =>
         usePointerSwipe({ onSwipeRight, threshold: 50 }),
       );
@@ -407,7 +408,7 @@ describe("usePointerSwipe", () => {
     });
 
     it("does not trigger swipe when pointer is not down", () => {
-      const onSwipeRight = jest.fn();
+      const onSwipeRight = vi.fn();
       const { result } = renderHook(() =>
         usePointerSwipe({ onSwipeRight, threshold: 50 }),
       );
@@ -427,7 +428,7 @@ describe("usePointerSwipe", () => {
     });
 
     it("handles pointerleave as pointerup", () => {
-      const onSwipeRight = jest.fn();
+      const onSwipeRight = vi.fn();
       const { result } = renderHook(() =>
         usePointerSwipe({ onSwipeRight, threshold: 50 }),
       );

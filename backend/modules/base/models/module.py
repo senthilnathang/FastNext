@@ -131,6 +131,11 @@ class InstalledModule(Base, TimestampMixin):
         server_default=func.now(),
         nullable=False
     )
+    updated_at = Column(
+        DateTime(timezone=True),
+        onupdate=func.now(),
+        nullable=True
+    )
     uninstalled_at = Column(
         DateTime(timezone=True),
         nullable=True,
@@ -308,6 +313,7 @@ class ModuleReloadSignal(Base):
     @classmethod
     def acknowledge_signals(cls, db, signal_ids: list) -> int:
         """Mark signals as acknowledged."""
+        from datetime import datetime
         count = db.query(cls).filter(
             cls.id.in_(signal_ids)
         ).update(

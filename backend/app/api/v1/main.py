@@ -5,7 +5,7 @@ Central router for all v1 API endpoints
 
 # Import resource routes (move these to v1 structure later)
 from app.api import saless
-from . import authors, blog_posts, categorys, products
+from . import authors, blog_posts, categorys
 from fastapi import APIRouter
 
 # Import v1 route modules
@@ -29,9 +29,6 @@ from . import (
     pages,
     permissions,
     profile,
-    project_members,
-    projects,
-    projects_rls,
     reactions,
     rls,
     roles,
@@ -39,10 +36,6 @@ from . import (
     security,
     user_roles,
     users,
-    workflow_instances,
-    workflow_states,
-    workflow_templates,
-    workflow_types,
 )
 
 # Create v1 router
@@ -68,12 +61,6 @@ v1_router.include_router(
 )
 v1_router.include_router(acls.router, prefix="/acls", tags=["v1-acls"])
 
-# Project Management
-v1_router.include_router(projects.router, prefix="/projects", tags=["v1-projects"])
-v1_router.include_router(
-    project_members.router, prefix="/project-members", tags=["v1-project-members"]
-)
-
 # Content Management
 v1_router.include_router(pages.router, prefix="/pages", tags=["v1-pages"])
 v1_router.include_router(
@@ -81,22 +68,7 @@ v1_router.include_router(
 )
 v1_router.include_router(assets.router, prefix="/assets", tags=["v1-assets"])
 
-# Workflow Management
-v1_router.include_router(
-    workflow_types.router, prefix="/workflow-types", tags=["v1-workflows"]
-)
-v1_router.include_router(
-    workflow_states.router, prefix="/workflow-states", tags=["v1-workflows"]
-)
-v1_router.include_router(
-    workflow_templates.router, prefix="/workflow-templates", tags=["v1-workflows"]
-)
-v1_router.include_router(
-    workflow_instances.router, prefix="/workflow-instances", tags=["v1-workflows"]
-)
-
-# Business Resources (TODO: Move to v1 structure)
-v1_router.include_router(products.router, prefix="/products", tags=["v1-products"])
+# Business Resources
 v1_router.include_router(
     blog_posts.router, prefix="/blog-posts", tags=["v1-blog-posts"]
 )
@@ -119,15 +91,8 @@ v1_router.include_router(
     data_import_export.router, prefix="/data", tags=["v1-data-import-export"]
 )
 
-
-
 # Row Level Security
 v1_router.include_router(rls.router, prefix="/rls", tags=["v1-rls"])
-
-# RLS-Enhanced Endpoints (Examples)
-v1_router.include_router(
-    projects_rls.router, prefix="/projects-rls", tags=["v1-projects-rls"]
-)
 
 # Performance & Caching
 v1_router.include_router(

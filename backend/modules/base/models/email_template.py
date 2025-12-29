@@ -13,7 +13,7 @@ from datetime import datetime
 
 from sqlalchemy import (
     Boolean, Column, DateTime, Integer, String, Text,
-    ForeignKey, Index, or_
+    ForeignKey, Index
 )
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.sql import func
@@ -406,6 +406,10 @@ class EmailQueue(Base, TimestampMixin):
             cls.status.in_([EmailStatus.SENT.value, EmailStatus.CANCELLED.value]),
             cls.created_at < cutoff
         ).delete(synchronize_session=False)
+
+
+# Import for get_pending query
+from sqlalchemy import or_
 
 
 class EmailLog(Base, TimestampMixin):

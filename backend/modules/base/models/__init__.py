@@ -1,10 +1,34 @@
 """Base module models."""
 
-from .module import InstalledModule, ModuleReloadSignal, serialize_manifest
-from .sequence import Sequence, SequenceDateRange
-from .scheduled_action import ScheduledAction, ScheduledActionLog, IntervalType
-from .server_action import ServerAction, AutomationRule, ActionTrigger, ActionType
+from .module import InstalledModule
+
+# Migration Tracking
+from .module_migration import (
+    ModuleMigration,
+    ModuleModelState,
+    MigrationType,
+    MigrationStatus,
+)
+
+# Configuration Parameters
+from .config_parameter import ConfigParameter, ConfigValueType
+
+# Module Operations (State Machine)
+from .module_operation import ModuleOperation, OperationType, OperationStatus
+
+# Record Rules (Row-Level Security)
 from .record_rule import RecordRule, RuleScope, RuleOperation
+
+# Sequences (Auto-Numbering)
+from .sequence import Sequence, SequenceDateRange
+
+# Scheduled Actions (Cron Jobs)
+from .scheduled_action import ScheduledAction, ScheduledActionLog, IntervalType
+
+# Server Actions and Automation
+from .server_action import ServerAction, AutomationRule, ActionType, ActionTrigger
+
+# Computed Fields
 from .computed_field import (
     ComputedFieldDefinition,
     ComputedFieldInfo,
@@ -14,10 +38,55 @@ from .computed_field import (
     computed,
     related,
     aggregate,
-    setup_computed_field_listeners,
 )
-from .config_parameter import ConfigParameter, ConfigValueType
-from .email_template import EmailTemplate, EmailQueue, EmailLog, EmailStatus
+
+# Model Data (XML ID Registry)
+from .model_data import IrModelData, ref
+
+# Model Hooks
+from .model_hook import (
+    ModelHookDefinition,
+    HookEvent,
+    HookRegistry,
+    HookableMixin,
+    hook_registry,
+    before_create,
+    after_create,
+    before_update,
+    after_update,
+    before_delete,
+    after_delete,
+    onchange,
+    constrains,
+    setup_sqlalchemy_hooks,
+)
+
+# Translation System
+from .translation import (
+    Language,
+    IrTranslation,
+    TranslationType,
+    TranslationState,
+    translatable,
+)
+
+# Workflow Engine
+from .workflow import (
+    WorkflowDefinition,
+    WorkflowTransition,
+    WorkflowState,
+    WorkflowActivity,
+)
+
+# Email Templates
+from .email_template import (
+    EmailTemplate,
+    EmailQueue,
+    EmailLog,
+    EmailStatus,
+)
+
+# Webhooks
 from .webhook import (
     WebhookDefinition,
     WebhookLog,
@@ -27,28 +96,58 @@ from .webhook import (
     WebhookStatus,
 )
 
+# Reports
+from .report import (
+    ReportDefinition,
+    ReportExecution,
+    ReportSchedule,
+    ReportFormat,
+    ReportTemplateType,
+    PaperFormat,
+)
+
+# Module Export/Import
+from .module_export import (
+    ModuleExport,
+    ModuleImport,
+    DataExportTemplate,
+    ExportType,
+    ImportStatus,
+    ConflictResolution,
+)
+
 __all__ = [
-    # Module management
+    # Core
     "InstalledModule",
-    "ModuleReloadSignal",
-    "serialize_manifest",
-    # Sequences
-    "Sequence",
-    "SequenceDateRange",
-    # Scheduled actions
-    "ScheduledAction",
-    "ScheduledActionLog",
-    "IntervalType",
-    # Server actions and automation
-    "ServerAction",
-    "AutomationRule",
-    "ActionTrigger",
-    "ActionType",
-    # Record rules
+    # Migration Tracking
+    "ModuleMigration",
+    "ModuleModelState",
+    "MigrationType",
+    "MigrationStatus",
+    # Configuration Parameters
+    "ConfigParameter",
+    "ConfigValueType",
+    # Module Operations
+    "ModuleOperation",
+    "OperationType",
+    "OperationStatus",
+    # Record Rules
     "RecordRule",
     "RuleScope",
     "RuleOperation",
-    # Computed fields
+    # Sequences
+    "Sequence",
+    "SequenceDateRange",
+    # Scheduled Actions
+    "ScheduledAction",
+    "ScheduledActionLog",
+    "IntervalType",
+    # Server Actions
+    "ServerAction",
+    "AutomationRule",
+    "ActionType",
+    "ActionTrigger",
+    # Computed Fields
     "ComputedFieldDefinition",
     "ComputedFieldInfo",
     "ComputedFieldsMixin",
@@ -57,11 +156,36 @@ __all__ = [
     "computed",
     "related",
     "aggregate",
-    "setup_computed_field_listeners",
-    # Configuration
-    "ConfigParameter",
-    "ConfigValueType",
-    # Email templates
+    # Model Data
+    "IrModelData",
+    "ref",
+    # Model Hooks
+    "ModelHookDefinition",
+    "HookEvent",
+    "HookRegistry",
+    "HookableMixin",
+    "hook_registry",
+    "before_create",
+    "after_create",
+    "before_update",
+    "after_update",
+    "before_delete",
+    "after_delete",
+    "onchange",
+    "constrains",
+    "setup_sqlalchemy_hooks",
+    # Translation System
+    "Language",
+    "IrTranslation",
+    "TranslationType",
+    "TranslationState",
+    "translatable",
+    # Workflow Engine
+    "WorkflowDefinition",
+    "WorkflowTransition",
+    "WorkflowState",
+    "WorkflowActivity",
+    # Email Templates
     "EmailTemplate",
     "EmailQueue",
     "EmailLog",
@@ -73,4 +197,18 @@ __all__ = [
     "WebhookEvent",
     "WebhookAuthType",
     "WebhookStatus",
+    # Reports
+    "ReportDefinition",
+    "ReportExecution",
+    "ReportSchedule",
+    "ReportFormat",
+    "ReportTemplateType",
+    "PaperFormat",
+    # Module Export/Import
+    "ModuleExport",
+    "ModuleImport",
+    "DataExportTemplate",
+    "ExportType",
+    "ImportStatus",
+    "ConflictResolution",
 ]

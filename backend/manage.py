@@ -323,7 +323,8 @@ def _load_data_from_dict(data: dict, clear: bool = False):
     """Load data from dictionary into database."""
     from app.core.security import get_password_hash
     from app.models.role import Role
-    from app.models.permission import Permission, RolePermission
+    from app.models.permission import Permission
+    from app.models.user_role import RolePermission
     from app.models.user import User
     from app.models.workflow import WorkflowState
     from app.models.label import Label

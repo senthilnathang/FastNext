@@ -1,5 +1,6 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import React from "react";
+import { vi } from "vitest";
 import { Input } from "../../ui/input";
 
 describe("Input Component", () => {
@@ -33,7 +34,7 @@ describe("Input Component", () => {
   });
 
   it("handles value changes", () => {
-    const handleChange = jest.fn();
+    const handleChange = vi.fn();
     render(<Input onChange={handleChange} data-testid="input" />);
 
     const input = screen.getByTestId("input");
@@ -84,8 +85,8 @@ describe("Input Component", () => {
   });
 
   it("handles focus and blur events", () => {
-    const handleFocus = jest.fn();
-    const handleBlur = jest.fn();
+    const handleFocus = vi.fn();
+    const handleBlur = vi.fn();
 
     render(
       <Input onFocus={handleFocus} onBlur={handleBlur} data-testid="input" />,

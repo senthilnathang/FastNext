@@ -27,7 +27,7 @@ describe('InboxItem', () => {
     render(
       <InboxItem
         item={mockItem}
-        onItemClick={vi.fn()}
+        onClick={vi.fn()}
         onToggleStar={vi.fn()}
         onTogglePin={vi.fn()}
       />
@@ -40,7 +40,7 @@ describe('InboxItem', () => {
     render(
       <InboxItem
         item={mockItem}
-        onItemClick={vi.fn()}
+        onClick={vi.fn()}
         onToggleStar={vi.fn()}
         onTogglePin={vi.fn()}
       />
@@ -49,20 +49,22 @@ describe('InboxItem', () => {
     expect(screen.getByText('This is a test notification summary')).toBeInTheDocument();
   });
 
-  it('calls onItemClick when clicked', async () => {
+  it('calls onClick when clicked', async () => {
     const handleClick = vi.fn();
-    const { user } = render(
+    render(
       <InboxItem
         item={mockItem}
-        onItemClick={handleClick}
+        onClick={handleClick}
         onToggleStar={vi.fn()}
         onTogglePin={vi.fn()}
       />
     );
 
-    // Find and click the item
-    const title = screen.getByText('Test Notification');
-    await user.click(title.closest('[class*="cursor-pointer"]') || title);
+    // Click the main container
+    const container = screen.getByText('Test Notification').closest('div[class*="cursor-pointer"]');
+    if (container) {
+      fireEvent.click(container);
+    }
 
     expect(handleClick).toHaveBeenCalledWith(mockItem);
   });
@@ -72,13 +74,13 @@ describe('InboxItem', () => {
     render(
       <InboxItem
         item={starredItem}
-        onItemClick={vi.fn()}
+        onClick={vi.fn()}
         onToggleStar={vi.fn()}
         onTogglePin={vi.fn()}
       />
     );
 
-    // Star button should have active styling
+    // Star button should have title "Unstar" when starred
     const starButton = screen.getByTitle('Unstar');
     expect(starButton).toBeInTheDocument();
   });
@@ -87,7 +89,7 @@ describe('InboxItem', () => {
     render(
       <InboxItem
         item={mockItem}
-        onItemClick={vi.fn()}
+        onClick={vi.fn()}
         onToggleStar={vi.fn()}
         onTogglePin={vi.fn()}
       />
@@ -98,17 +100,19 @@ describe('InboxItem', () => {
     expect(title).toHaveClass('font-semibold');
   });
 
-  it('shows priority badge for high priority items', () => {
+  it('shows priority styling for high priority items', () => {
     const highPriorityItem = { ...mockItem, priority: 'high' as const };
     render(
       <InboxItem
         item={highPriorityItem}
-        onItemClick={vi.fn()}
+        onClick={vi.fn()}
         onToggleStar={vi.fn()}
         onTogglePin={vi.fn()}
       />
     );
 
-    expect(screen.getByText('high')).toBeInTheDocument();
+    // High priority items have an orange left border
+    const container = screen.getByText('Test Notification').closest('div[class*="cursor-pointer"]');
+    expect(container).toHaveClass('border-l-orange-500');
   });
 });

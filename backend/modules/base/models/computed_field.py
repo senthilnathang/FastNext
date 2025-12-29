@@ -302,9 +302,8 @@ def related(field_path: str, store: bool = False) -> Callable:
     """
 
     def decorator(func):
-        parts = field_path.split(".")
-
         def wrapper(self):
+            parts = field_path.split(".")
             value = self
             for part in parts:
                 if value is None:

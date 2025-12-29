@@ -2,6 +2,8 @@ from .activity_log import ActivityAction, ActivityLevel, ActivityLog
 from .asset import Asset
 from .audit_trail import AuditTrail
 from .component import Component
+from .label import Label, InboxItemLabel
+from .inbox import InboxItem, InboxItemType, InboxPriority
 from .notification import Notification, NotificationChannel, NotificationType
 from .data_import_export import (
     DataFormat,
@@ -18,8 +20,6 @@ from .data_import_export import (
 )
 from .page import Page
 from .permission import Permission
-from .project import Project
-from .project_member import ProjectMember
 from .role import Role
 from .security_setting import SecuritySetting
 from .system_configuration import (

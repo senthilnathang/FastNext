@@ -11,6 +11,7 @@ import traceback
 from datetime import datetime
 from typing import Any, Callable, Dict, List, Optional, Type
 
+import httpx
 from sqlalchemy.orm import Session
 
 from ..models.server_action import ActionType, AutomationRule, ServerAction
@@ -415,12 +416,6 @@ class AutomationService:
         context: Dict[str, Any],
     ) -> Any:
         """Execute webhook action."""
-        try:
-            import httpx
-        except ImportError:
-            logger.warning("httpx not installed, webhook action skipped")
-            return {"status": "error", "error": "httpx not installed"}
-
         if not action.webhook_url:
             raise ValueError("Webhook URL not configured")
 

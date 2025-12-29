@@ -15,6 +15,7 @@ from datetime import datetime
 from typing import Any, Dict, Optional
 
 from sqlalchemy import Boolean, Column, DateTime, Integer, String
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.sql import func
 
 from app.db.base import Base

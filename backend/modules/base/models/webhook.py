@@ -280,6 +280,9 @@ class WebhookDefinition(Base, TimestampMixin, AuditMixin):
         company_id: Optional[int] = None,
     ) -> List["WebhookDefinition"]:
         """Get all webhooks for an event."""
+        from sqlalchemy import cast
+        from sqlalchemy.dialects.postgresql import JSONB as JSONB_TYPE
+
         query = db.query(cls).filter(
             cls.is_active == True,
             cls.model_name == model_name,

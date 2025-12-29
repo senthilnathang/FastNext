@@ -219,23 +219,7 @@ export const handlers = [
     });
   }),
 
-  http.get(`${API_URL}/inbox/:id`, ({ params }) => {
-    const item = mockInboxItems.find((i) => i.id === Number(params.id));
-    if (!item) {
-      return new HttpResponse(null, { status: 404 });
-    }
-    return HttpResponse.json(item);
-  }),
-
-  http.patch(`${API_URL}/inbox/:id/read`, ({ params }) => {
-    const item = mockInboxItems.find((i) => i.id === Number(params.id));
-    if (!item) {
-      return new HttpResponse(null, { status: 404 });
-    }
-    return HttpResponse.json({ ...item, is_read: true });
-  }),
-
-  // Labels endpoints
+  // Labels endpoints (must be before /inbox/:id to avoid matching "labels" as an id)
   http.get(`${API_URL}/inbox/labels`, () => {
     return HttpResponse.json(mockLabels);
   }),
@@ -247,6 +231,22 @@ export const handlers = [
       ...body,
     };
     return HttpResponse.json(newLabel, { status: 201 });
+  }),
+
+  http.get(`${API_URL}/inbox/:id`, ({ params }) => {
+    const item = mockInboxItems.find((i) => i.id === Number(params.id));
+    if (!item) {
+      return new HttpResponse(null, { status: 404 });
+    }
+    return HttpResponse.json(item);
+  }),
+
+  http.post(`${API_URL}/inbox/:id/read`, ({ params }) => {
+    const item = mockInboxItems.find((i) => i.id === Number(params.id));
+    if (!item) {
+      return new HttpResponse(null, { status: 404 });
+    }
+    return HttpResponse.json({ ...item, is_read: true });
   }),
 
   // Messages endpoints
