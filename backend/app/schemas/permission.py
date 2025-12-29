@@ -1,30 +1,17 @@
+"""Permission schemas"""
+
 from datetime import datetime
-from enum import Enum
-from typing import Optional
+from typing import List, Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
-
-class PermissionCategory(str, Enum):
-    PROJECT = "project"
-    PAGE = "page"
-    COMPONENT = "component"
-    USER = "user"
-    SYSTEM = "system"
-
-
-class PermissionAction(str, Enum):
-    CREATE = "create"
-    READ = "read"
-    UPDATE = "update"
-    DELETE = "delete"
-    MANAGE = "manage"
-    PUBLISH = "publish"
-    DEPLOY = "deploy"
+from app.models.permission import PermissionAction, PermissionCategory
 
 
 class PermissionBase(BaseModel):
-    name: str
+    """Base permission schema"""
+    name: str = Field(..., min_length=1, max_length=100)
+    codename: str = Field(..., min_length=1, max_length=100)
     description: Optional[str] = None
     category: PermissionCategory
     action: PermissionAction
@@ -32,46 +19,30 @@ class PermissionBase(BaseModel):
 
 
 class PermissionCreate(PermissionBase):
-    pass
+    """Schema for creating a permission"""
+    is_active: bool = True
 
 
-class PermissionUpdate(PermissionBase):
-    name: Optional[str] = None
-    category: Optional[PermissionCategory] = None
-    action: Optional[PermissionAction] = None
-
-
-class PermissionInDBBase(PermissionBase):
-    id: Optional[int] = None
-    is_system_permission: bool = False
-    created_at: Optional[datetime] = None
+class PermissionResponse(PermissionBase):
+    """Permission response schema"""
+    id: int
+    is_system_permission: bool
+    is_active: bool
+    created_at: datetime
     updated_at: Optional[datetime] = None
 
-    class Config:
-        from_attributes = True
+    model_config = {"from_attributes": True}
 
 
-class Permission(PermissionInDBBase):
-    pass
+class PermissionList(BaseModel):
+    """Paginated permission list response"""
+    total: int
+    items: List[PermissionResponse]
+    page: int
+    page_size: int
 
 
-# Role Permission Assignment
-class RolePermissionBase(BaseModel):
-    role_id: int
-    permission_id: int
-
-
-class RolePermissionCreate(RolePermissionBase):
-    pass
-
-
-class RolePermissionInDBBase(RolePermissionBase):
-    id: Optional[int] = None
-    created_at: Optional[datetime] = None
-
-    class Config:
-        from_attributes = True
-
-
-class RolePermission(RolePermissionInDBBase):
-    permission: Optional[Permission] = None
+class PermissionGrouped(BaseModel):
+    """Permissions grouped by category"""
+    category: str
+    permissions: List[PermissionResponse]

@@ -1,27 +1,23 @@
-"""
-Database Dependencies
-FastAPI dependencies for database sessions
-"""
+"""Database dependency"""
 
 from typing import Generator
 
-from app.db.session import SessionLocal
 from sqlalchemy.orm import Session
+
+from app.db.base import SessionLocal
 
 
 def get_db() -> Generator[Session, None, None]:
     """
-    Dependency to get database session
+    Database session dependency.
 
-    Yields:
-        Session: Database session
+    Usage:
+        @router.get("/items")
+        def get_items(db: Session = Depends(get_db)):
+            return db.query(Item).all()
     """
     db = SessionLocal()
     try:
         yield db
     finally:
         db.close()
-
-
-# Alias for backward compatibility
-get_db_session = get_db

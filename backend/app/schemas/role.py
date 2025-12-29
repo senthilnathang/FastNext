@@ -1,67 +1,66 @@
-from datetime import datetime
-from typing import Any, Dict, List, Optional
+"""Role schemas"""
 
-from pydantic import BaseModel
+from datetime import datetime
+from typing import List, Optional
+
+from pydantic import BaseModel, Field
 
 
 class RoleBase(BaseModel):
-    name: str
+    """Base role schema"""
+    name: str = Field(..., min_length=1, max_length=100)
+    codename: str = Field(..., min_length=1, max_length=100)
     description: Optional[str] = None
-    is_active: Optional[bool] = True
 
 
 class RoleCreate(RoleBase):
-    pass
+    """Schema for creating a role"""
+    company_id: Optional[int] = None
+    is_active: bool = True
+    permission_ids: List[int] = []
 
 
-class RoleUpdate(RoleBase):
-    name: Optional[str] = None
+class RoleUpdate(BaseModel):
+    """Schema for updating a role"""
+    name: Optional[str] = Field(None, min_length=1, max_length=100)
+    description: Optional[str] = None
+    is_active: Optional[bool] = None
+    permission_ids: Optional[List[int]] = None
 
 
-class RoleInDBBase(RoleBase):
-    id: Optional[int] = None
-    is_system_role: bool = False
-    created_at: Optional[datetime] = None
+class RoleResponse(RoleBase):
+    """Role response schema"""
+    id: int
+    company_id: Optional[int] = None
+    is_system_role: bool
+    is_active: bool
+    created_at: datetime
     updated_at: Optional[datetime] = None
 
-    class Config:
-        from_attributes = True
+    model_config = {"from_attributes": True}
 
 
-class Role(RoleInDBBase):
-    pass
+class PermissionInfo(BaseModel):
+    """Permission info for role"""
+    id: int
+    name: str
+    codename: str
+    category: str
+    action: str
+
+    model_config = {"from_attributes": True}
 
 
-class RoleWithPermissions(Role):
-    permissions: List[Dict[str, Any]] = []
+class RoleWithPermissions(RoleResponse):
+    """Role response with permissions"""
+    permissions: List[PermissionInfo] = []
+
+    model_config = {"from_attributes": True}
 
 
-# User Role Assignment
-class UserRoleBase(BaseModel):
-    user_id: int
-    role_id: int
-    is_active: Optional[bool] = True
-
-
-class UserRoleCreate(UserRoleBase):
-    pass
-
-
-class UserRoleUpdate(BaseModel):
-    is_active: Optional[bool] = None
-
-
-class UserRoleInDBBase(UserRoleBase):
-    id: Optional[int] = None
-    assigned_at: Optional[datetime] = None
-    assigned_by: Optional[int] = None
-
-    class Config:
-        from_attributes = True
-
-
-class UserRole(UserRoleInDBBase):
-    role: Optional[Role] = None
-
-
-# Forward references will be resolved when permission schema is imported
+class RoleList(BaseModel):
+    """Paginated role list response"""
+    total: int
+    items: List[RoleResponse]
+    page: int
+    page_size: int

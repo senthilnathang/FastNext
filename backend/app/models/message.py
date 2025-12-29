@@ -1,10 +1,10 @@
-"""Message model for mail thread functionality
-
-Enables threaded messaging on any model using MailThreadMixin.
-Supports threaded replies, reactions, mentions, and read receipts.
+"""
+Message model for mail thread functionality.
+Enables threaded messaging on any model that uses MailThreadMixin.
 """
 
 import enum
+import json
 from datetime import datetime
 from typing import Any, Dict, List, Optional
 
@@ -14,20 +14,19 @@ from sqlalchemy import (
     DateTime,
     Enum,
     ForeignKey,
-    Index,
     Integer,
     String,
     Text,
+    Index,
 )
-from sqlalchemy.dialects.postgresql import JSONB
-from sqlalchemy.orm import relationship, Session
+from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
 from app.db.base import Base
 
 
 class MessageType(str, enum.Enum):
-    """Type of message"""
+    """Types of messages"""
     COMMENT = "comment"
     NOTE = "note"
     SYSTEM = "system"
@@ -40,7 +39,7 @@ class MessageType(str, enum.Enum):
 
 
 class MessageLevel(str, enum.Enum):
-    """Priority/importance level of message"""
+    """Message importance levels"""
     INFO = "info"
     SUCCESS = "success"
     WARNING = "warning"
@@ -50,64 +49,77 @@ class MessageLevel(str, enum.Enum):
 
 class Message(Base):
     """
-    Message model for threaded discussions on any record.
-
-    Similar to mail.message in Odoo/ERPNext but simplified.
-    Links to parent model via model_name and record_id.
+    Message model for threaded communication.
+    Can be attached to any model using MailThreadMixin.
     """
+
     __tablename__ = "messages"
 
-    id = Column(Integer, primary_key=True, index=True)
+    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
 
-    # Link to parent model (polymorphic)
-    model_name = Column(String(128), nullable=False, index=True)
+    # Link to the parent model
+    model_name = Column(String(100), nullable=False, index=True)
     record_id = Column(Integer, nullable=False, index=True)
 
-    # Author
-    user_id = Column(Integer, ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+    # Message author
+    user_id = Column(
+        Integer,
+        ForeignKey("users.id", ondelete="SET NULL"),
+        nullable=True,
+        index=True,
+    )
 
-    # Threading - parent message for replies
-    parent_id = Column(Integer, ForeignKey("messages.id", ondelete="SET NULL"), nullable=True)
+    # Parent message for threading
+    parent_id = Column(
+        Integer,
+        ForeignKey("messages.id", ondelete="CASCADE"),
+        nullable=True,
+        index=True,
+    )
 
-    # Content
-    subject = Column(String(500), nullable=True)
-    body = Column(Text, nullable=True)
-    body_html = Column(Text, nullable=True)
+    # Message content
+    subject = Column(String(255), nullable=True)
+    body = Column(Text, nullable=False)
+    body_html = Column(Text, nullable=True)  # HTML version if available
 
     # Message metadata
     message_type = Column(
         Enum(MessageType),
-        nullable=False,
         default=MessageType.COMMENT,
+        nullable=False,
+        index=True,
     )
     level = Column(
         Enum(MessageLevel),
-        nullable=False,
         default=MessageLevel.INFO,
+        nullable=False,
     )
 
-    # Attachments stored as JSON array
-    attachments = Column(JSONB, nullable=False, default=list)
+    # Attachments (JSON array of attachment info)
+    attachments = Column(Text, nullable=True)
 
-    # Flags
-    is_internal = Column(Boolean, nullable=False, default=False)
-    is_pinned = Column(Boolean, nullable=False, default=False)
-    is_archived = Column(Boolean, nullable=False, default=False)
-    is_edited = Column(Boolean, nullable=False, default=False)
-    is_deleted = Column(Boolean, nullable=False, default=False)
+    # Read tracking
+    is_internal = Column(Boolean, default=False, nullable=False)  # Internal note vs public
+    is_pinned = Column(Boolean, default=False, nullable=False)
 
-    # Edit tracking
-    edited_at = Column(DateTime(timezone=True), nullable=True)
-    deleted_at = Column(DateTime(timezone=True), nullable=True)
+    # Archive tracking
+    is_archived = Column(Boolean, default=False, nullable=False, index=True)
+    archived_at = Column(DateTime(timezone=True), nullable=True)
+    archived_by = Column(
+        Integer,
+        ForeignKey("users.id", ondelete="SET NULL"),
+        nullable=True,
+    )
 
     # Extra metadata
-    extra_data = Column(JSONB, nullable=True)
+    extra_data = Column(Text, nullable=True)  # JSON
 
     # Timestamps
     created_at = Column(
         DateTime(timezone=True),
         server_default=func.now(),
         nullable=False,
+        index=True,
     )
     updated_at = Column(
         DateTime(timezone=True),
@@ -116,116 +128,142 @@ class Message(Base):
     )
 
     # Relationships
-    user = relationship(
-        "User",
-        foreign_keys=[user_id],
-        backref="messages",
+    user = relationship("User", foreign_keys=[user_id], viewonly=True)
+    parent = relationship("Message", remote_side=[id], backref="replies")
+    reactions = relationship(
+        "MessageReaction",
+        back_populates="message",
+        cascade="all, delete-orphan",
+        lazy="select",
+    )
+    mentions = relationship(
+        "Mention",
+        back_populates="message",
+        cascade="all, delete-orphan",
+        lazy="select",
+    )
+    read_receipts = relationship(
+        "MessageReadReceipt",
+        cascade="all, delete-orphan",
         lazy="select",
     )
 
-    parent = relationship(
-        "Message",
-        remote_side=[id],
-        foreign_keys=[parent_id],
-        backref="replies",
-        lazy="select",
-    )
-
-    # Composite indexes for efficient queries
+    # Composite indexes
     __table_args__ = (
-        Index("idx_messages_model_record", "model_name", "record_id"),
-        Index("idx_messages_model_record_parent", "model_name", "record_id", "parent_id"),
-        Index("idx_messages_user_id", "user_id"),
-        Index("idx_messages_parent_id", "parent_id"),
-        Index("idx_messages_created_at", "created_at"),
+        Index("ix_messages_model_record", "model_name", "record_id"),
+        Index("ix_messages_thread", "model_name", "record_id", "parent_id"),
     )
+
+    def __repr__(self):
+        return f"<Message(id={self.id}, model='{self.model_name}', type='{self.message_type}')>"
 
     @property
     def is_thread_root(self) -> bool:
-        """Check if this message is a thread root (no parent)"""
+        """Check if this message is the root of a thread (has no parent)"""
         return self.parent_id is None
 
     @property
     def reply_count(self) -> int:
-        """Get count of direct replies"""
+        """Get the number of direct replies to this message"""
         return len(self.replies) if self.replies else 0
 
-    def get_all_replies_count(self, db: Session) -> int:
-        """Get count of all nested replies"""
-        count = db.query(Message).filter(
-            Message.parent_id == self.id,
-            Message.is_deleted == False,
-        ).count()
+    def get_all_replies_count(self, db) -> int:
+        """Get total count of all replies (including nested) to this message"""
+        from sqlalchemy import func
+        # Use a recursive CTE for accurate count of all nested replies
+        count = db.query(func.count(Message.id)).filter(
+            Message.parent_id == self.id
+        ).scalar()
+        return count or 0
 
-        # Recursively count nested replies
-        for reply in self.replies:
-            if not reply.is_deleted:
-                count += reply.get_all_replies_count(db)
+    def get_thread_participants(self, db) -> List[int]:
+        """Get all unique user IDs who participated in this thread"""
+        if not self.is_thread_root:
+            # Find the root message first
+            root = self.get_thread_root(db)
+            if root:
+                return root.get_thread_participants(db)
+            return [self.user_id] if self.user_id else []
 
-        return count
+        # Get all user IDs from this thread
+        from sqlalchemy import distinct
+        user_ids = db.query(distinct(Message.user_id)).filter(
+            Message.model_name == self.model_name,
+            Message.record_id == self.record_id,
+            Message.user_id.isnot(None),
+        ).all()
+        return [uid[0] for uid in user_ids]
 
-    def get_thread_participants(self, db: Session) -> List[int]:
-        """Get all unique participant user IDs in this thread"""
-        participants = set()
-
-        # Get root message
-        root = self.get_thread_root(db)
-        if root.user_id:
-            participants.add(root.user_id)
-
-        # Get all replies recursively
-        def collect_participants(msg):
-            if msg.user_id:
-                participants.add(msg.user_id)
-            for reply in msg.replies:
-                if not reply.is_deleted:
-                    collect_participants(reply)
-
-        collect_participants(root)
-        return list(participants)
-
-    def get_thread_root(self, db: Session) -> "Message":
+    def get_thread_root(self, db) -> Optional["Message"]:
         """Get the root message of this thread"""
-        if self.parent_id is None:
+        if self.is_thread_root:
             return self
+        if self.parent_id:
+            parent = db.query(Message).filter(Message.id == self.parent_id).first()
+            if parent:
+                return parent.get_thread_root(db)
+        return None
 
-        parent = db.query(Message).filter(Message.id == self.parent_id).first()
-        if parent:
-            return parent.get_thread_root(db)
-        return self
+    def to_dict(self) -> Dict[str, Any]:
+        """Convert to dictionary for API responses"""
+        return {
+            "id": self.id,
+            "model_name": self.model_name,
+            "record_id": self.record_id,
+            "user_id": self.user_id,
+            "parent_id": self.parent_id,
+            "subject": self.subject,
+            "body": self.body,
+            "message_type": self.message_type.value if self.message_type else None,
+            "level": self.level.value if self.level else None,
+            "is_internal": self.is_internal,
+            "is_pinned": self.is_pinned,
+            "created_at": self.created_at.isoformat() if self.created_at else None,
+            "updated_at": self.updated_at.isoformat() if self.updated_at else None,
+            "attachments": json.loads(self.attachments) if self.attachments else [],
+            "extra_data": json.loads(self.extra_data) if self.extra_data else {},
+        }
 
     @classmethod
     def create(
         cls,
-        db: Session,
+        db,
         model_name: str,
         record_id: int,
-        user_id: Optional[int] = None,
-        subject: Optional[str] = None,
-        body: Optional[str] = None,
-        body_html: Optional[str] = None,
-        message_type: MessageType = MessageType.COMMENT,
-        level: MessageLevel = MessageLevel.INFO,
-        parent_id: Optional[int] = None,
-        attachments: Optional[List[Dict]] = None,
+        user_id: int,
+        body: str,
+        subject: str = None,
+        body_html: str = None,
+        message_type: str = "comment",
+        level: str = "info",
+        parent_id: int = None,
         is_internal: bool = False,
-        extra_data: Optional[Dict] = None,
+        attachments: List[Dict] = None,
+        extra_data: Dict = None,
         auto_flush: bool = True,
-    ) -> "Message":
-        """Create a new message"""
+    ):
+        """Create a new message
+
+        Args:
+            auto_flush: Whether to flush after adding. Set to False when called from event handlers.
+        """
+        # Convert string to enum if needed
+        msg_type = MessageType(message_type) if isinstance(message_type, str) else message_type
+        msg_level = MessageLevel(level) if isinstance(level, str) else level
+
         message = cls(
             model_name=model_name,
             record_id=record_id,
             user_id=user_id,
+            parent_id=parent_id,
             subject=subject,
             body=body,
             body_html=body_html,
-            message_type=message_type,
-            level=level,
-            parent_id=parent_id,
-            attachments=attachments or [],
+            message_type=msg_type,
+            level=msg_level,
             is_internal=is_internal,
-            extra_data=extra_data,
+            attachments=json.dumps(attachments) if attachments else None,
+            extra_data=json.dumps(extra_data, default=str) if extra_data else None,
         )
         db.add(message)
         if auto_flush:
@@ -235,146 +273,70 @@ class Message(Base):
     @classmethod
     def get_thread(
         cls,
-        db: Session,
+        db,
         model_name: str,
         record_id: int,
         include_internal: bool = True,
-        limit: int = 50,
-        offset: int = 0,
-    ) -> List["Message"]:
-        """Get all messages for a record"""
+        limit: int = 100,
+    ):
+        """Get all messages for a model record"""
         query = db.query(cls).filter(
             cls.model_name == model_name,
             cls.record_id == record_id,
-            cls.is_deleted == False,
         )
-
         if not include_internal:
             query = query.filter(cls.is_internal == False)
-
-        return query.order_by(cls.created_at.asc()).offset(offset).limit(limit).all()
+        return query.order_by(cls.created_at.asc()).limit(limit).all()
 
     @classmethod
-    def get_root_messages(
-        cls,
-        db: Session,
-        model_name: str,
-        record_id: int,
-        include_internal: bool = True,
-        limit: int = 50,
-        offset: int = 0,
-    ) -> List["Message"]:
-        """Get only root messages (no parent) for a record"""
-        query = db.query(cls).filter(
-            cls.model_name == model_name,
-            cls.record_id == record_id,
-            cls.parent_id == None,
-            cls.is_deleted == False,
+    def get_replies(cls, db, message_id: int, limit: int = 50):
+        """Get replies to a message"""
+        return (
+            db.query(cls)
+            .filter(cls.parent_id == message_id)
+            .order_by(cls.created_at.asc())
+            .limit(limit)
+            .all()
         )
 
-        if not include_internal:
-            query = query.filter(cls.is_internal == False)
-
-        return query.order_by(cls.created_at.desc()).offset(offset).limit(limit).all()
-
-    def get_replies(self, db: Session, limit: int = 50) -> List["Message"]:
-        """Get direct replies to this message"""
-        return db.query(Message).filter(
-            Message.parent_id == self.id,
-            Message.is_deleted == False,
-        ).order_by(Message.created_at.asc()).limit(limit).all()
-
     @classmethod
-    def get_pinned(
-        cls,
-        db: Session,
-        model_name: str,
-        record_id: int,
-    ) -> List["Message"]:
+    def get_pinned(cls, db, model_name: str, record_id: int):
         """Get pinned messages for a record"""
-        return db.query(cls).filter(
-            cls.model_name == model_name,
-            cls.record_id == record_id,
-            cls.is_pinned == True,
-            cls.is_deleted == False,
-        ).order_by(cls.created_at.desc()).all()
+        return (
+            db.query(cls)
+            .filter(
+                cls.model_name == model_name,
+                cls.record_id == record_id,
+                cls.is_pinned == True,
+            )
+            .order_by(cls.created_at.desc())
+            .all()
+        )
 
-    def add_attachment(self, attachment: Dict[str, Any]) -> None:
+    def add_attachment(self, attachment_info: Dict) -> None:
         """Add an attachment to the message"""
-        if self.attachments is None:
-            self.attachments = []
-        self.attachments.append(attachment)
+        attachments = json.loads(self.attachments) if self.attachments else []
+        attachments.append(attachment_info)
+        self.attachments = json.dumps(attachments)
 
     def pin(self) -> None:
-        """Pin this message"""
+        """Pin the message"""
         self.is_pinned = True
 
     def unpin(self) -> None:
-        """Unpin this message"""
+        """Unpin the message"""
         self.is_pinned = False
 
-    def archive(self) -> None:
-        """Archive this message"""
+    def archive(self, user_id: Optional[int] = None) -> None:
+        """Archive the message"""
+        from datetime import datetime
         self.is_archived = True
+        self.archived_at = datetime.utcnow()
+        if user_id:
+            self.archived_by = user_id
 
     def unarchive(self) -> None:
-        """Unarchive this message"""
+        """Unarchive the message"""
         self.is_archived = False
-
-    def soft_delete(self) -> None:
-        """Soft delete this message"""
-        self.is_deleted = True
-        self.deleted_at = datetime.utcnow()
-
-    def edit(self, body: Optional[str] = None, body_html: Optional[str] = None) -> None:
-        """Edit the message content"""
-        if body is not None:
-            self.body = body
-        if body_html is not None:
-            self.body_html = body_html
-        self.is_edited = True
-        self.edited_at = datetime.utcnow()
-
-    def to_dict(self, include_replies: bool = False, db: Optional[Session] = None) -> Dict[str, Any]:
-        """Convert message to dictionary"""
-        data = {
-            "id": self.id,
-            "model_name": self.model_name,
-            "record_id": self.record_id,
-            "user_id": self.user_id,
-            "parent_id": self.parent_id,
-            "subject": self.subject,
-            "body": self.body,
-            "body_html": self.body_html,
-            "message_type": self.message_type.value if self.message_type else None,
-            "level": self.level.value if self.level else None,
-            "attachments": self.attachments,
-            "is_internal": self.is_internal,
-            "is_pinned": self.is_pinned,
-            "is_archived": self.is_archived,
-            "is_edited": self.is_edited,
-            "is_deleted": self.is_deleted,
-            "edited_at": self.edited_at.isoformat() if self.edited_at else None,
-            "created_at": self.created_at.isoformat() if self.created_at else None,
-            "updated_at": self.updated_at.isoformat() if self.updated_at else None,
-            "reply_count": self.reply_count,
-            "extra_data": self.extra_data,
-        }
-
-        # Include user info if loaded
-        if self.user:
-            data["user"] = {
-                "id": self.user.id,
-                "username": getattr(self.user, "username", None),
-                "full_name": getattr(self.user, "full_name", None),
-                "email": getattr(self.user, "email", None),
-            }
-
-        # Include replies if requested
-        if include_replies and db:
-            replies = self.get_replies(db)
-            data["replies"] = [
-                r.to_dict(include_replies=True, db=db) for r in replies
-            ]
-
-        return data
+        self.archived_at = None
+        self.archived_by = None

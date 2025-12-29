@@ -1,87 +1,88 @@
-"""Mention model for @mention tracking in messages
-
-Tracks @mentions with user resolution and notification integration.
-"""
+"""Mention model for @mentions in messages"""
 
 import re
-from typing import Any, Dict, List, Optional, Tuple
+from typing import List, Optional, Tuple, TYPE_CHECKING
 
-from sqlalchemy import (
-    Column,
-    ForeignKey,
-    Index,
-    Integer,
-    String,
-    UniqueConstraint,
-)
+from sqlalchemy import Column, Integer, String, ForeignKey, UniqueConstraint, Index
 from sqlalchemy.orm import relationship, Session
 
-from app.db.base import Base
+from app.models.base import BaseModel
+
+if TYPE_CHECKING:
+    from app.models.user import User
+    from app.models.message import Message
 
 
-# Pattern for parsing @mentions
-MENTION_PATTERN = re.compile(r"@([a-zA-Z0-9._]+)")
-
-
-class Mention(Base):
+class Mention(BaseModel):
     """
     Tracks @mentions in messages.
 
-    Links a message to a mentioned user with position tracking.
+    When a user mentions another user in a message using @username syntax,
+    a Mention record is created linking the message to the mentioned user.
+    This triggers notifications to mentioned users.
     """
+
     __tablename__ = "mentions"
 
-    id = Column(Integer, primary_key=True, index=True)
-
+    # Foreign keys
     message_id = Column(
         Integer,
         ForeignKey("messages.id", ondelete="CASCADE"),
         nullable=False,
+        index=True,
     )
     user_id = Column(
         Integer,
         ForeignKey("users.id", ondelete="CASCADE"),
         nullable=False,
+        index=True,
+        comment="The user who was mentioned",
     )
 
-    # Track position in message text
+    # Where the mention appears in the message body
     start_position = Column(Integer, nullable=True)
     end_position = Column(Integer, nullable=True)
 
-    # The actual mention text (e.g., "@john.doe")
-    mention_text = Column(String(128), nullable=True)
+    # Original mention text (e.g., "@john.doe")
+    mention_text = Column(String(100), nullable=True)
 
     # Relationships
     message = relationship(
         "Message",
-        backref="mentions",
+        back_populates="mentions",
         lazy="select",
     )
-
     user = relationship(
         "User",
+        back_populates="mentions",
         lazy="select",
     )
 
-    # Constraints and indexes
+    # Constraints
     __table_args__ = (
-        UniqueConstraint("message_id", "user_id", name="uq_mention_message_user"),
-        Index("idx_mention_message", "message_id"),
-        Index("idx_mention_user", "user_id"),
+        UniqueConstraint(
+            "message_id", "user_id",
+            name="uq_mention_message_user"
+        ),
+        Index("ix_mentions_user_created", "user_id", "created_at"),
     )
 
-    @staticmethod
-    def parse_mentions(body: str) -> List[Tuple[str, int, int]]:
-        """
-        Parse @mentions from text.
+    # Pattern for parsing @mentions in message body
+    # Matches @username where username can contain letters, numbers, dots, underscores
+    MENTION_PATTERN = re.compile(r'@([a-zA-Z0-9._]+)')
 
-        Returns list of (username, start_pos, end_pos) tuples.
+    @classmethod
+    def parse_mentions(cls, body: str) -> List[Tuple[str, int, int]]:
+        """
+        Parse @mentions from message body.
+
+        Returns list of tuples: (username, start_position, end_position)
         """
         if not body:
             return []
 
         mentions = []
-        for match in MENTION_PATTERN.finditer(body):
+        for match in cls.MENTION_PATTERN.finditer(body):
             username = match.group(1)
             start = match.start()
             end = match.end()
@@ -99,7 +100,7 @@ class Mention(Base):
         start_position: Optional[int] = None,
         end_position: Optional[int] = None,
     ) -> "Mention":
-        """Create a mention record"""
+        """Create a new mention record"""
         mention = cls(
             message_id=message_id,
             user_id=user_id,
@@ -108,7 +109,6 @@ class Mention(Base):
             end_position=end_position,
         )
         db.add(mention)
-        db.flush()
         return mention
 
     @classmethod
@@ -120,43 +120,46 @@ class Mention(Base):
         resolve_user_func,
     ) -> List["Mention"]:
         """
-        Parse body for mentions and create records.
+        Parse mentions from body and create records.
 
         Args:
             db: Database session
             message_id: ID of the message
             body: Message body text
-            resolve_user_func: Function(username) -> User or None
+            resolve_user_func: Function that takes username and returns user_id or None
 
         Returns:
             List of created Mention objects
         """
         parsed = cls.parse_mentions(body)
-        mentions = []
+        created = []
         seen_users = set()
 
         for username, start, end in parsed:
-            user = resolve_user_func(username)
-            if user and user.id not in seen_users:
+            user_id = resolve_user_func(username)
+            if user_id and user_id not in seen_users:
+                seen_users.add(user_id)
                 mention = cls.create(
                     db=db,
                     message_id=message_id,
-                    user_id=user.id,
+                    user_id=user_id,
                     mention_text=f"@{username}",
                     start_position=start,
                     end_position=end,
                 )
-                mentions.append(mention)
-                seen_users.add(user.id)
+                created.append(mention)
 
-        return mentions
+        return created
 
     @classmethod
     def get_by_message(cls, db: Session, message_id: int) -> List["Mention"]:
-        """Get all mentions in a message"""
-        return db.query(cls).filter(
-            cls.message_id == message_id
-        ).all()
+        """Get all mentions for a message"""
+        return (
+            db.query(cls)
+            .filter(cls.message_id == message_id)
+            .order_by(cls.start_position)
+            .all()
+        )
 
     @classmethod
     def get_by_user(
@@ -166,32 +169,54 @@ class Mention(Base):
         limit: int = 50,
         offset: int = 0,
     ) -> List["Mention"]:
-        """Get mentions of a user (paginated)"""
-        return db.query(cls).filter(
-            cls.user_id == user_id
-        ).order_by(cls.id.desc()).offset(offset).limit(limit).all()
+        """Get all mentions of a user"""
+        return (
+            db.query(cls)
+            .filter(cls.user_id == user_id)
+            .order_by(cls.created_at.desc())
+            .offset(offset)
+            .limit(limit)
+            .all()
+        )
 
     @classmethod
     def count_by_user(cls, db: Session, user_id: int) -> int:
-        """Count total mentions of a user"""
-        return db.query(cls).filter(cls.user_id == user_id).count()
+        """Count mentions of a user"""
+        return (
+            db.query(cls)
+            .filter(cls.user_id == user_id)
+            .count()
+        )
 
-    def to_dict(self) -> Dict[str, Any]:
-        """Convert to dictionary"""
-        data = {
-            "id": self.id,
-            "message_id": self.message_id,
-            "user_id": self.user_id,
-            "mention_text": self.mention_text,
-            "start_position": self.start_position,
-            "end_position": self.end_position,
-        }
+    @classmethod
+    def get_unread_mentions(
+        cls,
+        db: Session,
+        user_id: int,
+        limit: int = 50,
+    ) -> List["Mention"]:
+        """
+        Get unread mentions for a user.
+        A mention is considered unread if the associated inbox item is unread.
+        """
+        from app.models.inbox import InboxItem, InboxItemType
 
-        if self.user:
-            data["user"] = {
-                "id": self.user.id,
-                "username": getattr(self.user, "username", None),
-                "full_name": getattr(self.user, "full_name", None),
-            }
+        return (
+            db.query(cls)
+            .join(
+                InboxItem,
+                (InboxItem.reference_type == "mentions") &
+                (InboxItem.reference_id == cls.id) &
+                (InboxItem.user_id == user_id)
+            )
+            .filter(
+                cls.user_id == user_id,
+                InboxItem.is_read == False,
+            )
+            .order_by(cls.created_at.desc())
+            .limit(limit)
+            .all()
+        )
 
-        return data
+    def __repr__(self) -> str:
+        return f"<Mention(id={self.id}, message_id={self.message_id}, user_id={self.user_id})>"

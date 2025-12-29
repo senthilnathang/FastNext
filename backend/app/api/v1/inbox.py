@@ -1,218 +1,231 @@
-"""Inbox API endpoints
+"""Inbox endpoints for unified inbox functionality (Huly-inspired)"""
 
-REST API for unified inbox operations with filtering and stats.
-"""
+from typing import Optional
 
-from datetime import datetime
-from typing import List, Optional
-
-from fastapi import APIRouter, Depends, HTTPException, Query, status
-from pydantic import BaseModel, Field
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
-from app.db.session import get_db
-from app.models.inbox import InboxItem, InboxItemType, InboxPriority
-from app.services.inbox_service import get_inbox_service
+from app.api.deps import get_db, get_pagination, PaginationParams, get_current_active_user
+from app.models import User, InboxItem, InboxItemType, InboxPriority
+from pydantic import BaseModel
+from app.schemas.inbox import (
+    InboxItemResponse,
+    InboxItemUpdate,
+    InboxListResponse,
+    InboxStats,
+    InboxCountByType,
+    BulkReadRequest,
+    BulkArchiveRequest,
+    BulkActionResponse,
+    ActorInfo,
+)
+from app.services.inbox import InboxService
+from app.models.message import Message
 
 
-router = APIRouter(prefix="/inbox", tags=["inbox"])
+class SendMessageRequest(BaseModel):
+    """Request to send a direct message"""
+    recipient_id: int
+    subject: Optional[str] = None
+    body: str
+    body_html: Optional[str] = None
+    attachments: Optional[list] = None
+    priority: Optional[str] = "normal"
 
 
-# =============================================================================
-# SCHEMAS
-# =============================================================================
-
-class InboxItemUpdate(BaseModel):
-    """Schema for updating an inbox item."""
-    is_read: Optional[bool] = None
-    is_archived: Optional[bool] = None
-    is_starred: Optional[bool] = None
-    priority: Optional[str] = None
+class SendMessageResponse(BaseModel):
+    """Response after sending a message"""
+    message_id: int
+    inbox_item_id: int
+    recipient_id: int
+    message: str
 
 
-class InboxItemResponse(BaseModel):
-    """Schema for inbox item response."""
+class DraftCreate(BaseModel):
+    """Create a draft message"""
+    recipient_ids: Optional[list] = None
+    subject: Optional[str] = None
+    body: Optional[str] = None
+    body_html: Optional[str] = None
+    attachments: Optional[list] = None
+
+
+class DraftResponse(BaseModel):
+    """Draft message response"""
     id: int
     user_id: int
-    item_type: str
-    reference_type: str
-    reference_id: int
-    source_model: Optional[str]
-    source_id: Optional[int]
-    title: str
-    preview: Optional[str]
-    is_read: bool
-    is_archived: bool
-    is_starred: bool
-    priority: str
-    actor_id: Optional[int]
-    created_at: Optional[str]
-    read_at: Optional[str]
-    archived_at: Optional[str]
-    actor: Optional[dict] = None
-    label_ids: Optional[List[int]] = None
-    reference_data: Optional[dict] = None
-
-    class Config:
-        from_attributes = True
+    recipient_ids: Optional[list] = None
+    subject: Optional[str] = None
+    body: Optional[str] = None
+    body_html: Optional[str] = None
+    attachments: Optional[list] = None
+    created_at: str
+    updated_at: Optional[str] = None
 
 
-class InboxListResponse(BaseModel):
-    """Schema for paginated inbox list."""
-    items: List[InboxItemResponse]
+class SentMessageResponse(BaseModel):
+    """Sent message in list"""
+    id: int
+    recipient_id: int
+    recipient_name: Optional[str] = None
+    recipient_email: Optional[str] = None
+    subject: Optional[str] = None
+    body: str
+    body_html: Optional[str] = None
+    created_at: str
+
+
+class SentListResponse(BaseModel):
+    """List of sent messages"""
+    items: list
     total: int
     page: int
     page_size: int
-    unread_count: int
+
+router = APIRouter()
 
 
-class InboxStatsResponse(BaseModel):
-    """Schema for inbox statistics."""
-    total_count: int
-    unread_count: int
-    read_count: int
-    archived_count: int
-    starred_count: int
-    unread_by_type: dict
+def _item_to_response(item: InboxItem, db: Session, include_details: bool = False) -> InboxItemResponse:
+    """Convert InboxItem to response schema with optional details"""
+    response = InboxItemResponse(
+        id=item.id,
+        user_id=item.user_id,
+        item_type=item.item_type,
+        reference_type=item.reference_type,
+        reference_id=item.reference_id,
+        source_model=item.source_model,
+        source_id=item.source_id,
+        title=item.title,
+        preview=item.preview,
+        priority=item.priority,
+        is_read=item.is_read,
+        is_archived=item.is_archived,
+        is_starred=item.is_starred,
+        actor_id=item.actor_id,
+        created_at=item.created_at,
+        updated_at=item.updated_at,
+    )
 
-
-class BulkReadRequest(BaseModel):
-    """Schema for bulk read request."""
-    item_ids: Optional[List[int]] = None
-    item_type: Optional[str] = None
-
-
-class BulkArchiveRequest(BaseModel):
-    """Schema for bulk archive request."""
-    item_ids: Optional[List[int]] = None
-    item_type: Optional[str] = None
-
-
-class BulkActionResponse(BaseModel):
-    """Schema for bulk action response."""
-    message: str
-    updated_count: int
-
-
-# =============================================================================
-# HELPER FUNCTIONS
-# =============================================================================
-
-def get_current_user_id(db: Session) -> Optional[int]:
-    """Get current user ID from request context."""
-    return None
-
-
-def require_auth(db: Session) -> int:
-    """Require authentication and return user ID."""
-    user_id = get_current_user_id(db)
-    if not user_id:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Authentication required",
+    # Add actor info if available
+    if item.actor:
+        response.actor = ActorInfo(
+            id=item.actor.id,
+            full_name=item.actor.full_name,
+            avatar_url=item.actor.avatar_url,
         )
-    return user_id
 
+    # Include referenced data if requested
+    if include_details:
+        service = InboxService(db)
+        details = service.get_referenced_data(item)
+        if "message" in details:
+            response.message = details["message"]
+        if "notification" in details:
+            response.notification = details["notification"]
+        if "activity" in details:
+            response.activity = details["activity"]
 
-# =============================================================================
-# ENDPOINTS
-# =============================================================================
+    return response
+
 
 @router.get("/", response_model=InboxListResponse)
 def list_inbox(
-    item_type: Optional[str] = None,
+    item_type: Optional[InboxItemType] = None,
     is_read: Optional[bool] = None,
-    is_archived: bool = False,
+    is_archived: Optional[bool] = None,
     is_starred: Optional[bool] = None,
-    priority: Optional[str] = None,
+    priority: Optional[InboxPriority] = None,
     source_model: Optional[str] = None,
     source_id: Optional[int] = None,
-    page: int = Query(1, ge=1),
-    page_size: int = Query(50, ge=1, le=100),
+    pagination: PaginationParams = Depends(get_pagination),
+    current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db),
 ):
     """
-    Get unified inbox with filters.
+    List inbox items for current user with filters.
 
-    Supports filtering by type, read status, archived, starred, priority, and source.
+    Filters:
+    - item_type: message, notification, activity, mention
+    - is_read: true/false
+    - is_archived: true/false (default: false - excludes archived)
+    - is_starred: true/false
+    - priority: low, normal, high, urgent
+    - source_model: Filter by source entity type (e.g., 'users', 'leave_requests')
+    - source_id: Filter by source entity ID
     """
-    user_id = require_auth(db)
+    service = InboxService(db)
 
-    # Parse enums
-    type_enum = None
-    if item_type:
-        try:
-            type_enum = InboxItemType(item_type)
-        except ValueError:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Invalid item_type: {item_type}",
-            )
-
-    priority_enum = None
-    if priority:
-        try:
-            priority_enum = InboxPriority(priority)
-        except ValueError:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Invalid priority: {priority}",
-            )
-
-    service = get_inbox_service(db)
-
-    offset = (page - 1) * page_size
-    items = service.get_unified_inbox(
-        user_id=user_id,
-        item_type=type_enum,
+    items, total = service.get_unified_inbox(
+        user_id=current_user.id,
+        item_type=item_type,
         is_read=is_read,
         is_archived=is_archived,
         is_starred=is_starred,
-        priority=priority_enum,
+        priority=priority,
         source_model=source_model,
         source_id=source_id,
-        limit=page_size,
-        offset=offset,
+        skip=pagination.skip,
+        limit=pagination.page_size,
     )
 
-    # Get total count (simplified - in production use a count query)
-    total = len(items) + offset
+    # Get stats
+    stats = service.get_stats(current_user.id)
 
-    # Get unread count
-    unread_count = InboxItem.get_unread_count(db, user_id)
+    # Convert to response
+    response_items = [_item_to_response(item, db) for item in items]
 
     return InboxListResponse(
-        items=[InboxItemResponse(**item) for item in items],
         total=total,
-        page=page,
-        page_size=page_size,
-        unread_count=unread_count,
+        items=response_items,
+        page=pagination.page,
+        page_size=pagination.page_size,
+        unread_count=stats["unread_count"],
+        unread_by_type=InboxCountByType(**stats["unread_by_type"]),
     )
 
 
 @router.get("/search", response_model=InboxListResponse)
 def search_inbox(
-    q: str = Query(..., min_length=1),
-    item_type: Optional[str] = None,
+    q: str,
+    item_type: Optional[InboxItemType] = None,
     is_read: Optional[bool] = None,
-    is_archived: bool = False,
-    date_from: Optional[datetime] = None,
-    date_to: Optional[datetime] = None,
-    label_ids: Optional[str] = None,  # Comma-separated
-    page: int = Query(1, ge=1),
-    page_size: int = Query(50, ge=1, le=100),
+    is_archived: Optional[bool] = None,
+    sender_id: Optional[int] = None,
+    date_from: Optional[str] = None,
+    date_to: Optional[str] = None,
+    label_ids: Optional[str] = None,
+    pagination: PaginationParams = Depends(get_pagination),
+    current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db),
 ):
     """
-    Search inbox with full-text search on title and preview.
-    """
-    user_id = require_auth(db)
+    Search inbox items with full-text search.
 
-    # Parse enums
-    type_enum = None
-    if item_type:
+    Parameters:
+    - q: Search query (searches in title and preview)
+    - item_type: Filter by type (message, notification, activity, mention)
+    - is_read: Filter by read status
+    - is_archived: Filter by archive status (default excludes archived)
+    - sender_id: Filter by sender/actor ID
+    - date_from: Filter items created after this date (ISO format)
+    - date_to: Filter items created before this date (ISO format)
+    - label_ids: Comma-separated label IDs to filter by
+    """
+    from datetime import datetime
+
+    service = InboxService(db)
+
+    # Parse date filters
+    date_from_parsed = None
+    date_to_parsed = None
+    if date_from:
         try:
-            type_enum = InboxItemType(item_type)
+            date_from_parsed = datetime.fromisoformat(date_from.replace("Z", "+00:00"))
+        except ValueError:
+            pass
+    if date_to:
+        try:
+            date_to_parsed = datetime.fromisoformat(date_to.replace("Z", "+00:00"))
         except ValueError:
             pass
 
@@ -220,61 +233,207 @@ def search_inbox(
     label_id_list = None
     if label_ids:
         try:
-            label_id_list = [int(x) for x in label_ids.split(",")]
+            label_id_list = [int(lid.strip()) for lid in label_ids.split(",") if lid.strip()]
         except ValueError:
             pass
 
-    service = get_inbox_service(db)
-
-    offset = (page - 1) * page_size
-    items = service.search_inbox(
-        user_id=user_id,
+    items, total = service.search_inbox(
+        user_id=current_user.id,
         query=q,
-        item_type=type_enum,
+        item_type=item_type,
         is_read=is_read,
         is_archived=is_archived,
-        date_from=date_from,
-        date_to=date_to,
+        sender_id=sender_id,
+        date_from=date_from_parsed,
+        date_to=date_to_parsed,
         label_ids=label_id_list,
-        limit=page_size,
-        offset=offset,
+        skip=pagination.skip,
+        limit=pagination.page_size,
     )
 
-    total = len(items) + offset
-    unread_count = InboxItem.get_unread_count(db, user_id)
+    # Get stats
+    stats = service.get_stats(current_user.id)
+
+    # Convert to response
+    response_items = [_item_to_response(item, db) for item in items]
 
     return InboxListResponse(
-        items=[InboxItemResponse(**item) for item in items],
         total=total,
-        page=page,
-        page_size=page_size,
-        unread_count=unread_count,
+        items=response_items,
+        page=pagination.page,
+        page_size=pagination.page_size,
+        unread_count=stats["unread_count"],
+        unread_by_type=InboxCountByType(**stats["unread_by_type"]),
     )
 
 
-@router.get("/stats", response_model=InboxStatsResponse)
-def get_stats(
+@router.get("/stats", response_model=InboxStats)
+def get_inbox_stats(
+    current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db),
 ):
-    """Get inbox statistics."""
-    user_id = require_auth(db)
+    """Get inbox statistics for current user"""
+    service = InboxService(db)
+    stats = service.get_stats(current_user.id)
 
-    service = get_inbox_service(db)
-    stats = service.get_stats(user_id)
+    return InboxStats(
+        total_count=stats["total_count"],
+        unread_count=stats["unread_count"],
+        read_count=stats["read_count"],
+        archived_count=stats["archived_count"],
+        starred_count=stats["starred_count"],
+        unread_by_type=InboxCountByType(**stats["unread_by_type"]),
+    )
 
-    return InboxStatsResponse(**stats)
+
+# Draft storage (using a simple in-memory store for now)
+# For production, create a proper Draft model
+_drafts_store: dict = {}  # Temporary in-memory store: {user_id: [drafts]}
+
+
+@router.get("/sent", response_model=SentListResponse)
+def get_sent_messages(
+    pagination: PaginationParams = Depends(get_pagination),
+    current_user: User = Depends(get_current_active_user),
+    db: Session = Depends(get_db),
+):
+    """
+    Get messages sent by current user.
+
+    Returns messages where current user is the author and
+    the message was sent to another user's inbox.
+    """
+    # Query messages sent by current user to other users
+    query = db.query(Message).filter(
+        Message.user_id == current_user.id,
+        Message.model_name == "users",  # Direct messages to users
+        Message.record_id != current_user.id,  # Not to self
+    ).order_by(Message.created_at.desc())
+
+    total = query.count()
+    messages = query.offset(pagination.skip).limit(pagination.page_size).all()
+
+    items = []
+    for msg in messages:
+        # Get recipient info
+        recipient = db.query(User).filter(User.id == msg.record_id).first()
+        items.append(SentMessageResponse(
+            id=msg.id,
+            recipient_id=msg.record_id,
+            recipient_name=recipient.full_name if recipient else None,
+            recipient_email=recipient.email if recipient else None,
+            subject=msg.subject,
+            body=msg.body,
+            body_html=msg.body_html,
+            created_at=msg.created_at.isoformat() if msg.created_at else None,
+        ))
+
+    return SentListResponse(
+        items=items,
+        total=total,
+        page=pagination.page,
+        page_size=pagination.page_size,
+    )
+
+
+@router.get("/drafts", response_model=list)
+def get_drafts(
+    current_user: User = Depends(get_current_active_user),
+):
+    """Get all drafts for current user"""
+    user_drafts = _drafts_store.get(current_user.id, [])
+    return user_drafts
+
+
+@router.post("/drafts", response_model=DraftResponse, status_code=status.HTTP_201_CREATED)
+def create_draft(
+    draft: DraftCreate,
+    current_user: User = Depends(get_current_active_user),
+):
+    """Save a new draft"""
+    from datetime import datetime
+
+    if current_user.id not in _drafts_store:
+        _drafts_store[current_user.id] = []
+
+    # Generate a simple ID
+    draft_id = len(_drafts_store[current_user.id]) + 1
+    now = datetime.now().isoformat()
+
+    draft_data = {
+        "id": draft_id,
+        "user_id": current_user.id,
+        "recipient_ids": draft.recipient_ids,
+        "subject": draft.subject,
+        "body": draft.body,
+        "body_html": draft.body_html,
+        "attachments": draft.attachments,
+        "created_at": now,
+        "updated_at": now,
+    }
+
+    _drafts_store[current_user.id].append(draft_data)
+
+    return DraftResponse(**draft_data)
+
+
+@router.put("/drafts/{draft_id}", response_model=DraftResponse)
+def update_draft(
+    draft_id: int,
+    draft: DraftCreate,
+    current_user: User = Depends(get_current_active_user),
+):
+    """Update an existing draft"""
+    from datetime import datetime
+
+    user_drafts = _drafts_store.get(current_user.id, [])
+
+    for i, d in enumerate(user_drafts):
+        if d["id"] == draft_id:
+            user_drafts[i].update({
+                "recipient_ids": draft.recipient_ids,
+                "subject": draft.subject,
+                "body": draft.body,
+                "body_html": draft.body_html,
+                "attachments": draft.attachments,
+                "updated_at": datetime.now().isoformat(),
+            })
+            return DraftResponse(**user_drafts[i])
+
+    raise HTTPException(
+        status_code=status.HTTP_404_NOT_FOUND,
+        detail="Draft not found",
+    )
+
+
+@router.delete("/drafts/{draft_id}")
+def delete_draft(
+    draft_id: int,
+    current_user: User = Depends(get_current_active_user),
+):
+    """Delete a draft"""
+    user_drafts = _drafts_store.get(current_user.id, [])
+
+    for i, d in enumerate(user_drafts):
+        if d["id"] == draft_id:
+            user_drafts.pop(i)
+            return {"message": "Draft deleted"}
+
+    raise HTTPException(
+        status_code=status.HTTP_404_NOT_FOUND,
+        detail="Draft not found",
+    )
 
 
 @router.get("/{item_id}", response_model=InboxItemResponse)
-def get_item(
+def get_inbox_item(
     item_id: int,
+    current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db),
 ):
-    """Get a single inbox item with full details."""
-    user_id = require_auth(db)
-
-    service = get_inbox_service(db)
-    item = service.get_item(item_id, user_id)
+    """Get a specific inbox item with full details"""
+    service = InboxService(db)
+    item = service.get_with_details(item_id, current_user.id)
 
     if not item:
         raise HTTPException(
@@ -282,22 +441,27 @@ def get_item(
             detail="Inbox item not found",
         )
 
-    return InboxItemResponse(**item)
+    return _item_to_response(item, db, include_details=True)
 
 
 @router.patch("/{item_id}", response_model=InboxItemResponse)
-def update_item(
+def update_inbox_item(
     item_id: int,
-    data: InboxItemUpdate,
+    item_in: InboxItemUpdate,
+    current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db),
 ):
-    """Update an inbox item status."""
-    user_id = require_auth(db)
+    """
+    Update inbox item status.
 
-    item = db.query(InboxItem).filter(
-        InboxItem.id == item_id,
-        InboxItem.user_id == user_id,
-    ).first()
+    Can update:
+    - is_read: Mark as read/unread
+    - is_archived: Archive/unarchive
+    - is_starred: Star/unstar
+    - priority: Change priority level
+    """
+    service = InboxService(db)
+    item = service.get_with_details(item_id, current_user.id)
 
     if not item:
         raise HTTPException(
@@ -305,46 +469,43 @@ def update_item(
             detail="Inbox item not found",
         )
 
-    # Update fields
-    if data.is_read is not None:
-        if data.is_read:
+    # Apply updates
+    if item_in.is_read is not None:
+        if item_in.is_read:
             item.mark_as_read()
         else:
             item.mark_as_unread()
 
-    if data.is_archived is not None:
-        if data.is_archived:
+    if item_in.is_archived is not None:
+        if item_in.is_archived:
             item.archive()
         else:
             item.unarchive()
 
-    if data.is_starred is not None:
-        if data.is_starred:
+    if item_in.is_starred is not None:
+        if item_in.is_starred:
             item.star()
         else:
             item.unstar()
 
-    if data.priority:
-        try:
-            item.priority = InboxPriority(data.priority)
-        except ValueError:
-            pass
+    if item_in.priority is not None:
+        item.priority = item_in.priority
 
     db.commit()
+    db.refresh(item)
 
-    return InboxItemResponse(**item.to_dict())
+    return _item_to_response(item, db)
 
 
-@router.delete("/{item_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_item(
+@router.delete("/{item_id}")
+def delete_inbox_item(
     item_id: int,
+    current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db),
 ):
-    """Delete an inbox item."""
-    user_id = require_auth(db)
-
-    service = get_inbox_service(db)
-    success = service.delete_item(item_id, user_id)
+    """Delete an inbox item"""
+    service = InboxService(db)
+    success = service.delete_item(item_id, current_user.id)
 
     if not success:
         raise HTTPException(
@@ -352,29 +513,30 @@ def delete_item(
             detail="Inbox item not found",
         )
 
+    db.commit()
+    return {"message": "Inbox item deleted successfully"}
+
 
 @router.post("/bulk-read", response_model=BulkActionResponse)
-def bulk_mark_read(
-    data: BulkReadRequest,
+def bulk_mark_as_read(
+    request: BulkReadRequest,
+    current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db),
 ):
-    """Mark multiple items as read."""
-    user_id = require_auth(db)
+    """
+    Mark inbox items as read.
 
-    # Parse item type
-    type_enum = None
-    if data.item_type:
-        try:
-            type_enum = InboxItemType(data.item_type)
-        except ValueError:
-            pass
-
-    service = get_inbox_service(db)
+    - If item_ids is provided, marks those specific items
+    - If item_type is provided, marks all unread items of that type
+    - If both are empty, marks all unread items as read
+    """
+    service = InboxService(db)
     count = service.bulk_mark_read(
-        user_id=user_id,
-        item_ids=data.item_ids,
-        item_type=type_enum,
+        user_id=current_user.id,
+        item_ids=request.item_ids if request.item_ids else None,
+        item_type=request.item_type,
     )
+    db.commit()
 
     return BulkActionResponse(
         message="Items marked as read",
@@ -384,26 +546,24 @@ def bulk_mark_read(
 
 @router.post("/bulk-archive", response_model=BulkActionResponse)
 def bulk_archive(
-    data: BulkArchiveRequest,
+    request: BulkArchiveRequest,
+    current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db),
 ):
-    """Archive multiple items."""
-    user_id = require_auth(db)
+    """
+    Archive inbox items.
 
-    # Parse item type
-    type_enum = None
-    if data.item_type:
-        try:
-            type_enum = InboxItemType(data.item_type)
-        except ValueError:
-            pass
-
-    service = get_inbox_service(db)
+    - If item_ids is provided, archives those specific items
+    - If item_type is provided, archives all items of that type
+    - If both are empty, archives all items
+    """
+    service = InboxService(db)
     count = service.bulk_archive(
-        user_id=user_id,
-        item_ids=data.item_ids,
-        item_type=type_enum,
+        user_id=current_user.id,
+        item_ids=request.item_ids if request.item_ids else None,
+        item_type=request.item_type,
     )
+    db.commit()
 
     return BulkActionResponse(
         message="Items archived",
@@ -411,109 +571,253 @@ def bulk_archive(
     )
 
 
-@router.post("/{item_id}/read", status_code=status.HTTP_204_NO_CONTENT)
-def mark_item_read(
+@router.post("/{item_id}/read", response_model=InboxItemResponse)
+def mark_as_read(
     item_id: int,
+    current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db),
 ):
-    """Mark a specific item as read."""
-    user_id = require_auth(db)
+    """Mark a specific inbox item as read"""
+    service = InboxService(db)
+    item = service.mark_read(item_id, current_user.id)
 
-    service = get_inbox_service(db)
-    success = service.mark_read(item_id, user_id)
-
-    if not success:
+    if not item:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Inbox item not found",
         )
 
+    db.commit()
+    return _item_to_response(item, db)
 
-@router.post("/{item_id}/unread", status_code=status.HTTP_204_NO_CONTENT)
-def mark_item_unread(
+
+@router.post("/{item_id}/unread", response_model=InboxItemResponse)
+def mark_as_unread(
     item_id: int,
+    current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db),
 ):
-    """Mark a specific item as unread."""
-    user_id = require_auth(db)
+    """Mark a specific inbox item as unread"""
+    service = InboxService(db)
+    item = service.mark_unread(item_id, current_user.id)
 
-    service = get_inbox_service(db)
-    success = service.mark_unread(item_id, user_id)
-
-    if not success:
+    if not item:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Inbox item not found",
         )
 
+    db.commit()
+    return _item_to_response(item, db)
 
-@router.post("/{item_id}/archive", status_code=status.HTTP_204_NO_CONTENT)
+
+@router.post("/{item_id}/archive", response_model=InboxItemResponse)
 def archive_item(
     item_id: int,
+    current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db),
 ):
-    """Archive an item."""
-    user_id = require_auth(db)
+    """Archive a specific inbox item"""
+    service = InboxService(db)
+    item = service.archive(item_id, current_user.id)
 
-    service = get_inbox_service(db)
-    success = service.archive(item_id, user_id)
-
-    if not success:
+    if not item:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Inbox item not found",
         )
 
+    db.commit()
+    return _item_to_response(item, db)
 
-@router.post("/{item_id}/unarchive", status_code=status.HTTP_204_NO_CONTENT)
+
+@router.post("/{item_id}/unarchive", response_model=InboxItemResponse)
 def unarchive_item(
     item_id: int,
+    current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db),
 ):
-    """Unarchive an item."""
-    user_id = require_auth(db)
+    """Unarchive a specific inbox item"""
+    service = InboxService(db)
+    item = service.unarchive(item_id, current_user.id)
 
-    service = get_inbox_service(db)
-    success = service.unarchive(item_id, user_id)
-
-    if not success:
+    if not item:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Inbox item not found",
         )
 
+    db.commit()
+    return _item_to_response(item, db)
 
-@router.post("/{item_id}/star", status_code=status.HTTP_204_NO_CONTENT)
+
+@router.post("/{item_id}/star", response_model=InboxItemResponse)
 def star_item(
     item_id: int,
+    current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db),
 ):
-    """Star an item."""
-    user_id = require_auth(db)
+    """Star/bookmark a specific inbox item"""
+    service = InboxService(db)
+    item = service.star(item_id, current_user.id)
 
-    service = get_inbox_service(db)
-    success = service.star(item_id, user_id)
-
-    if not success:
+    if not item:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Inbox item not found",
         )
 
+    db.commit()
+    return _item_to_response(item, db)
 
-@router.post("/{item_id}/unstar", status_code=status.HTTP_204_NO_CONTENT)
+
+@router.post("/{item_id}/unstar", response_model=InboxItemResponse)
 def unstar_item(
     item_id: int,
+    current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db),
 ):
-    """Unstar an item."""
-    user_id = require_auth(db)
+    """Remove star from a specific inbox item"""
+    service = InboxService(db)
+    item = service.unstar(item_id, current_user.id)
 
-    service = get_inbox_service(db)
-    success = service.unstar(item_id, user_id)
-
-    if not success:
+    if not item:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Inbox item not found",
         )
+
+    db.commit()
+    return _item_to_response(item, db)
+
+
+@router.post("/send", response_model=SendMessageResponse, status_code=status.HTTP_201_CREATED)
+async def send_direct_message(
+    request: SendMessageRequest,
+    current_user: User = Depends(get_current_active_user),
+    db: Session = Depends(get_db),
+):
+    """
+    Send a direct message to another user.
+
+    This creates:
+    1. A message record in the messages table
+    2. An inbox item for the recipient
+
+    The sender can see sent messages in their activity.
+    The recipient sees the message in their inbox.
+    """
+    import json
+
+    # Verify recipient exists
+    recipient = db.query(User).filter(User.id == request.recipient_id).first()
+    if not recipient:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Recipient user not found",
+        )
+
+    # Can't send message to yourself
+    if recipient.id == current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Cannot send message to yourself",
+        )
+
+    # Create the message
+    message = Message.create(
+        db=db,
+        model_name="users",
+        record_id=request.recipient_id,
+        user_id=current_user.id,
+        body=request.body,
+        body_html=request.body_html,
+        subject=request.subject,
+        message_type="comment",
+        is_internal=False,
+    )
+
+    # Store attachments if provided
+    if request.attachments:
+        message.attachments = json.dumps(request.attachments)
+
+    db.flush()
+
+    # Create inbox item for recipient
+    priority_map = {
+        "low": InboxPriority.LOW,
+        "normal": InboxPriority.NORMAL,
+        "high": InboxPriority.HIGH,
+        "urgent": InboxPriority.URGENT,
+    }
+
+    inbox_item = InboxItem(
+        user_id=recipient.id,
+        item_type=InboxItemType.MESSAGE,
+        reference_type="messages",
+        reference_id=message.id,
+        source_model="users",
+        source_id=current_user.id,
+        title=request.subject or f"Message from {current_user.full_name}",
+        preview=request.body[:200] if len(request.body) > 200 else request.body,
+        priority=priority_map.get(request.priority, InboxPriority.NORMAL),
+        actor_id=current_user.id,
+        is_read=False,
+        is_archived=False,
+        is_starred=False,
+    )
+    db.add(inbox_item)
+    db.flush()  # Get inbox_item.id
+
+    # Also create a notification for the recipient (for header bell)
+    from app.models import Notification, NotificationLevel
+    notification = Notification(
+        user_id=recipient.id,
+        title=f"New message from {current_user.full_name or current_user.email}",
+        description=request.body[:200] if len(request.body) > 200 else request.body,
+        level=NotificationLevel.INFO,
+        link=f"/inbox?item_id={inbox_item.id}",
+        data={"message_id": message.id, "sender_id": current_user.id, "inbox_item_id": inbox_item.id},
+        actor_id=current_user.id,
+        is_read=False,
+    )
+    db.add(notification)
+
+    db.commit()
+
+    # Send push and email notifications asynchronously
+    try:
+        from app.services.push import push_service
+        from app.services.email import email_service
+
+        # Push notification
+        await push_service.notify_new_message(
+            db=db,
+            recipient_id=recipient.id,
+            sender_name=current_user.full_name or current_user.email,
+            subject=request.subject,
+            preview=request.body[:100],
+            message_id=message.id,
+        )
+
+        # Email notification (respects user preferences)
+        await email_service.send_new_message_email(
+            db=db,
+            recipient_id=recipient.id,
+            sender_name=current_user.full_name or current_user.email,
+            sender_email=current_user.email,
+            subject=request.subject,
+            preview=request.body[:200],
+            message_id=message.id,
+        )
+    except Exception as e:
+        # Don't fail the request if notifications fail
+        import logging
+        logging.getLogger(__name__).warning(f"Failed to send notifications: {e}")
+
+    return SendMessageResponse(
+        message_id=message.id,
+        inbox_item_id=inbox_item.id,
+        recipient_id=recipient.id,
+        message="Message sent successfully",
+    )

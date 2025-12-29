@@ -1,218 +1,292 @@
-from typing import Any, List
+"""Role management endpoints"""
 
-from app.auth.deps import get_current_active_user
-from app.auth.permissions import require_admin
-from app.db.session import get_db
-from app.models.permission import Permission
-from app.models.role import Role
-from app.models.user import User
-from app.models.user_role import RolePermission
-from app.schemas.common import ListResponse
-from app.schemas.permission import Permission as PermissionSchema
-from app.schemas.permission import RolePermissionCreate
-from app.schemas.role import Role as RoleSchema
-from app.schemas.role import RoleCreate, RoleUpdate, RoleWithPermissions
-from app.services.permission_service import PermissionService
+from typing import List
+
 from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy import func
 from sqlalchemy.orm import Session
+
+from app.api.deps import get_db, get_current_active_user, get_pagination, PaginationParams
+from app.api.deps.auth import PermissionChecker
+from app.models import User, Role, Permission, RolePermission
+from app.schemas.role import (
+    RoleCreate,
+    RoleUpdate,
+    RoleResponse,
+    RoleWithPermissions,
+    RoleList,
+    PermissionInfo,
+)
+from app.services.base import BaseService
 
 router = APIRouter()
 
 
-@router.get("", response_model=ListResponse[RoleSchema])
-@router.get("/", response_model=ListResponse[RoleSchema])
-def read_roles(
+@router.get("/", response_model=RoleList)
+def list_roles(
+    pagination: PaginationParams = Depends(get_pagination),
+    company_id: int = None,
+    is_active: bool = None,
+    current_user: User = Depends(PermissionChecker("role.read")),
     db: Session = Depends(get_db),
-    skip: int = 0,
-    limit: int = 100,
-    search: str = None,
-    active_only: bool = True,
-    current_user: User = Depends(require_admin),
-) -> Any:
-    """Get all roles with pagination (admin only)"""
+):
+    """List all roles"""
     query = db.query(Role)
 
-    # Apply filters
-    if active_only:
-        query = query.filter(Role.is_active == True)
-
-    if search:
-        search_term = f"%{search}%"
+    if company_id is not None:
         query = query.filter(
-            (Role.name.ilike(search_term)) | (Role.description.ilike(search_term))
+            (Role.company_id == company_id) | (Role.company_id.is_(None))
         )
+    if is_active is not None:
+        query = query.filter(Role.is_active == is_active)
 
-    # Get total count
     total = query.count()
+    roles = query.offset(pagination.skip).limit(pagination.page_size).all()
 
-    # Get paginated results
-    roles = query.offset(skip).limit(limit).all()
-
-    return ListResponse.paginate(items=roles, total=total, skip=skip, limit=limit)
-
-
-@router.post("", response_model=RoleSchema)
-@router.post("/", response_model=RoleSchema)
-def create_role(
-    *,
-    db: Session = Depends(get_db),
-    role_in: RoleCreate,
-    current_user: User = Depends(require_admin),
-) -> Any:
-    """Create new role (admin only)"""
-    # Check if role already exists
-    existing_role = db.query(Role).filter(Role.name == role_in.name).first()
-    if existing_role:
-        raise HTTPException(
-            status_code=400, detail="Role with this name already exists"
-        )
-
-    role = Role(**role_in.dict())
-    db.add(role)
-    db.commit()
-    db.refresh(role)
-    return role
+    return RoleList(
+        total=total,
+        items=[RoleResponse.model_validate(r) for r in roles],
+        page=pagination.page,
+        page_size=pagination.page_size,
+    )
 
 
 @router.get("/{role_id}", response_model=RoleWithPermissions)
-def read_role(
-    *,
-    db: Session = Depends(get_db),
+def get_role(
     role_id: int,
-    current_user: User = Depends(require_admin),
-) -> Any:
-    """Get role with permissions (admin only)"""
+    current_user: User = Depends(PermissionChecker("role.read")),
+    db: Session = Depends(get_db),
+):
+    """Get role by ID with permissions"""
     role = db.query(Role).filter(Role.id == role_id).first()
-    if not role:
-        raise HTTPException(status_code=404, detail="Role not found")
 
-    # Get role permissions
-    role_permissions = (
-        db.query(RolePermission).filter(RolePermission.role_id == role_id).all()
+    if not role:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Role not found",
+        )
+
+    permissions = [
+        PermissionInfo(
+            id=rp.permission.id,
+            name=rp.permission.name,
+            codename=rp.permission.codename,
+            category=rp.permission.category.value,
+            action=rp.permission.action.value,
+        )
+        for rp in role.permissions
+        if rp.permission.is_active
+    ]
+
+    return RoleWithPermissions(
+        **RoleResponse.model_validate(role).model_dump(),
+        permissions=permissions,
     )
 
-    permissions = [rp.permission for rp in role_permissions]
-    role_dict = role.__dict__.copy()
-    role_dict["permissions"] = permissions
 
-    return role_dict
-
-
-@router.put("/{role_id}", response_model=RoleSchema)
-def update_role(
-    *,
+@router.post("/", response_model=RoleResponse, status_code=status.HTTP_201_CREATED)
+def create_role(
+    role_in: RoleCreate,
+    current_user: User = Depends(PermissionChecker("role.create")),
     db: Session = Depends(get_db),
+):
+    """Create a new role"""
+    # Check if codename exists for this company
+    existing = db.query(Role).filter(
+        Role.codename == role_in.codename,
+        Role.company_id == role_in.company_id,
+    ).first()
+
+    if existing:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Role with this codename already exists",
+        )
+
+    # Create role
+    role = Role(
+        name=role_in.name,
+        codename=role_in.codename,
+        description=role_in.description,
+        company_id=role_in.company_id,
+        is_active=role_in.is_active,
+        created_by=current_user.id,
+    )
+    db.add(role)
+    db.flush()
+
+    # Assign permissions
+    if role_in.permission_ids:
+        permissions = db.query(Permission).filter(
+            Permission.id.in_(role_in.permission_ids)
+        ).all()
+        for perm in permissions:
+            rp = RolePermission(role_id=role.id, permission_id=perm.id)
+            db.add(rp)
+
+    db.commit()
+    return RoleResponse.model_validate(role)
+
+
+@router.put("/{role_id}", response_model=RoleResponse)
+def update_role(
     role_id: int,
     role_in: RoleUpdate,
-    current_user: User = Depends(require_admin),
-) -> Any:
-    """Update role (admin only)"""
+    current_user: User = Depends(PermissionChecker("role.update")),
+    db: Session = Depends(get_db),
+):
+    """Update a role"""
     role = db.query(Role).filter(Role.id == role_id).first()
+
     if not role:
-        raise HTTPException(status_code=404, detail="Role not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Role not found",
+        )
 
     if role.is_system_role:
-        raise HTTPException(status_code=400, detail="Cannot modify system roles")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Cannot modify system role",
+        )
 
-    role_data = role_in.dict(exclude_unset=True)
-    for field, value in role_data.items():
+    # Update basic fields
+    update_data = role_in.model_dump(exclude_unset=True, exclude={"permission_ids"})
+    for field, value in update_data.items():
         setattr(role, field, value)
 
-    db.add(role)
+    role.updated_by = current_user.id
+
+    # Update permissions if provided
+    if role_in.permission_ids is not None:
+        # Remove existing permissions
+        db.query(RolePermission).filter(RolePermission.role_id == role_id).delete()
+
+        # Add new permissions
+        permissions = db.query(Permission).filter(
+            Permission.id.in_(role_in.permission_ids)
+        ).all()
+        for perm in permissions:
+            rp = RolePermission(role_id=role.id, permission_id=perm.id)
+            db.add(rp)
+
     db.commit()
-    db.refresh(role)
-    return role
+    return RoleResponse.model_validate(role)
 
 
 @router.delete("/{role_id}")
 def delete_role(
-    *,
-    db: Session = Depends(get_db),
     role_id: int,
-    current_user: User = Depends(require_admin),
-) -> Any:
-    """Delete role (admin only)"""
+    current_user: User = Depends(PermissionChecker("role.delete")),
+    db: Session = Depends(get_db),
+):
+    """Delete a role"""
     role = db.query(Role).filter(Role.id == role_id).first()
+
     if not role:
-        raise HTTPException(status_code=404, detail="Role not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Role not found",
+        )
 
     if role.is_system_role:
-        raise HTTPException(status_code=400, detail="Cannot delete system roles")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Cannot delete system role",
+        )
 
-    role.is_active = False
-    db.add(role)
+    # Check if role is in use
+    if role.user_company_roles:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Cannot delete role that is assigned to users",
+        )
+
+    db.delete(role)
     db.commit()
+
     return {"message": "Role deleted successfully"}
 
 
-@router.post("/{role_id}/permissions")
-def assign_permission_to_role(
-    *,
-    db: Session = Depends(get_db),
+@router.post("/{role_id}/permissions/{permission_id}")
+def add_permission_to_role(
     role_id: int,
-    permission_assignment: RolePermissionCreate,
-    current_user: User = Depends(require_admin),
-) -> Any:
-    """Assign permission to role (admin only)"""
+    permission_id: int,
+    current_user: User = Depends(PermissionChecker("role.manage")),
+    db: Session = Depends(get_db),
+):
+    """Add a permission to a role"""
     role = db.query(Role).filter(Role.id == role_id).first()
     if not role:
-        raise HTTPException(status_code=404, detail="Role not found")
-
-    permission = (
-        db.query(Permission)
-        .filter(Permission.id == permission_assignment.permission_id)
-        .first()
-    )
-    if not permission:
-        raise HTTPException(status_code=404, detail="Permission not found")
-
-    # Check if assignment already exists
-    existing = (
-        db.query(RolePermission)
-        .filter(
-            RolePermission.role_id == role_id,
-            RolePermission.permission_id == permission_assignment.permission_id,
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Role not found",
         )
-        .first()
-    )
+
+    if role.is_system_role:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Cannot modify system role",
+        )
+
+    permission = db.query(Permission).filter(Permission.id == permission_id).first()
+    if not permission:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Permission not found",
+        )
+
+    # Check if already assigned
+    existing = db.query(RolePermission).filter(
+        RolePermission.role_id == role_id,
+        RolePermission.permission_id == permission_id,
+    ).first()
 
     if existing:
         raise HTTPException(
-            status_code=400, detail="Permission already assigned to role"
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Permission already assigned to role",
         )
 
-    role_permission = RolePermission(
-        role_id=role_id, permission_id=permission_assignment.permission_id
-    )
-    db.add(role_permission)
+    rp = RolePermission(role_id=role_id, permission_id=permission_id)
+    db.add(rp)
     db.commit()
 
-    return {"message": "Permission assigned to role successfully"}
+    return {"message": "Permission added to role"}
 
 
 @router.delete("/{role_id}/permissions/{permission_id}")
 def remove_permission_from_role(
-    *,
-    db: Session = Depends(get_db),
     role_id: int,
     permission_id: int,
-    current_user: User = Depends(require_admin),
-) -> Any:
-    """Remove permission from role (admin only)"""
-    role_permission = (
-        db.query(RolePermission)
-        .filter(
-            RolePermission.role_id == role_id,
-            RolePermission.permission_id == permission_id,
+    current_user: User = Depends(PermissionChecker("role.manage")),
+    db: Session = Depends(get_db),
+):
+    """Remove a permission from a role"""
+    role = db.query(Role).filter(Role.id == role_id).first()
+    if not role:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Role not found",
         )
-        .first()
-    )
 
-    if not role_permission:
-        raise HTTPException(status_code=404, detail="Permission assignment not found")
+    if role.is_system_role:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Cannot modify system role",
+        )
 
-    db.delete(role_permission)
+    rp = db.query(RolePermission).filter(
+        RolePermission.role_id == role_id,
+        RolePermission.permission_id == permission_id,
+    ).first()
+
+    if not rp:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Permission not assigned to role",
+        )
+
+    db.delete(rp)
     db.commit()
 
-    return {"message": "Permission removed from role successfully"}
+    return {"message": "Permission removed from role"}

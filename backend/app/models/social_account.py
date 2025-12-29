@@ -1,42 +1,72 @@
-from app.db.base import Base
-from sqlalchemy import Column, DateTime, ForeignKey, Integer, String, Text
+"""Social account model for OAuth providers"""
+
+import enum
+
+from sqlalchemy import Column, DateTime, Enum, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import relationship
-from sqlalchemy.sql import func
+
+from app.models.base import BaseModel
 
 
-class SocialAccount(Base):
+class OAuthProvider(str, enum.Enum):
+    """Supported OAuth providers"""
+    GOOGLE = "google"
+    GITHUB = "github"
+    MICROSOFT = "microsoft"
+
+
+class SocialAccount(BaseModel):
+    """
+    Social account model for OAuth authentication.
+    Links users to their social provider accounts.
+    """
+
     __tablename__ = "social_accounts"
 
-    id = Column(Integer, primary_key=True, index=True)
+    # User association
+    user_id = Column(
+        Integer,
+        ForeignKey("users.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
 
-    # User this social account belongs to
-    user_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
-
-    # OAuth provider details
+    # Provider info
     provider = Column(
-        String(50), nullable=False, index=True
-    )  # 'google', 'github', 'microsoft'
-    provider_id = Column(
-        String(255), nullable=False, index=True
-    )  # Unique ID from provider
-    provider_email = Column(String(255), nullable=True)  # Email from provider
+        Enum(OAuthProvider),
+        nullable=False,
+        index=True,
+    )
+    provider_user_id = Column(String(255), nullable=False, index=True)
+    provider_email = Column(String(255), nullable=True)
+    provider_username = Column(String(255), nullable=True)
+    provider_name = Column(String(255), nullable=True)
+    provider_avatar = Column(String(500), nullable=True)
 
-    # OAuth tokens
-    access_token = Column(Text, nullable=True)  # Encrypted access token
-    refresh_token = Column(Text, nullable=True)  # Encrypted refresh token
+    # Tokens (encrypted in production)
+    access_token = Column(Text, nullable=True)
+    refresh_token = Column(Text, nullable=True)
     token_expires_at = Column(DateTime(timezone=True), nullable=True)
 
-    # Account metadata
-    account_data = Column(Text, nullable=True)  # JSON data from provider (encrypted)
-
-    # Timestamps
-    created_at = Column(
-        DateTime(timezone=True), server_default=func.now(), nullable=False
-    )
-    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+    # Additional data from provider
+    raw_data = Column(Text, nullable=True)  # JSON string of full provider response
 
     # Relationships
-    user = relationship("User", foreign_keys=[user_id])
+    user = relationship("User", back_populates="social_accounts")
+
+    # Unique constraint: one account per provider per user
+    __table_args__ = (
+        # Unique constraint would be added via migration
+        {"sqlite_autoincrement": True},
+    )
 
     def __repr__(self):
-        return f"<SocialAccount(user_id={self.user_id}, provider={self.provider}, provider_id={self.provider_id})>"
+        return f"<SocialAccount(user_id={self.user_id}, provider='{self.provider}')>"
+
+    @property
+    def is_token_expired(self) -> bool:
+        """Check if the access token is expired"""
+        if not self.token_expires_at:
+            return True
+        from datetime import datetime, timezone
+        return datetime.now(timezone.utc) > self.token_expires_at

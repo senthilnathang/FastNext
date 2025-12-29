@@ -1,482 +1,460 @@
-"""
-User management API endpoints.
+"""User management endpoints"""
 
-Provides CRUD operations for user management with proper authentication,
-authorization, and input validation.
-"""
+from typing import Any, Dict, List, Optional
 
-from typing import Any, List
-
-from app.auth.deps import get_current_active_user
-from app.auth.permissions import require_admin
-from app.core import security
-from app.db.session import get_db
-from app.models.user import User
-from app.schemas.common import ListResponse
-from app.schemas.user import AdminUserCreate
-from app.schemas.user import User as UserSchema
-from app.schemas.user import UserCreate, UserResponse, UserUpdate
-from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy import func
+from fastapi import APIRouter, Body, Depends, HTTPException, status
+from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
-# Constants for pagination and validation
-DEFAULT_PAGE_SIZE = 100
-MAX_PAGE_SIZE = 1000
-MIN_SEARCH_LENGTH = 2
-
-# Error messages for consistency
-ERROR_USER_NOT_FOUND = "User not found"
-ERROR_EMAIL_EXISTS = "The user with this email already exists in the system"
-ERROR_USERNAME_EXISTS = "The user with this username already exists in the system"
-ERROR_CANNOT_DELETE_SUPERUSER = "Cannot delete superuser"
-ERROR_CANNOT_MODIFY_SUPERUSER = "Cannot modify superuser status"
-ERROR_INVALID_PARAMETERS = "Invalid parameters provided"
-ERROR_DATABASE_OPERATION = "Database operation failed"
+from app.api.deps import get_db, get_current_active_user, get_pagination, PaginationParams
+from app.api.deps.auth import PermissionChecker
+from app.models import User
+from app.schemas.user import (
+    UserCreate,
+    UserUpdate,
+    UserResponse,
+    UserWithRoles,
+    UserList,
+    CompanyRoleInfo,
+)
+from app.services.user import UserService
+from app.services.rbac import UserMenuPermissionService, MenuItemService
 
 router = APIRouter()
 
 
-@router.get("", response_model=ListResponse[UserResponse])
-@router.get("/", response_model=ListResponse[UserResponse])
-def read_users(
-    db: Session = Depends(get_db),
-    skip: int = 0,
-    limit: int = DEFAULT_PAGE_SIZE,
-    search: str | None = None,
-    is_active: bool | None = None,
-    current_user: User = Depends(require_admin),
-) -> Any:
-    """
-    Retrieve paginated list of users with optional filtering.
-
-    Requires admin privileges. Supports search across username, email, and full name,
-    and filtering by active status.
-
-    Args:
-        skip: Number of records to skip (pagination offset)
-        limit: Maximum number of records to return (max 1000)
-        search: Search term for username, email, or full name (min 2 characters)
-        is_active: Filter by active status (true/false)
-
-    Returns:
-        Paginated list of user responses
-
-    Raises:
-        HTTPException: If parameters are invalid or user lacks permissions
-    """
-    # Validate input parameters
-    if skip < 0:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Skip parameter must be non-negative"
-        )
-
-    if limit < 1 or limit > MAX_PAGE_SIZE:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Limit must be between 1 and {MAX_PAGE_SIZE}"
-        )
-
-    if search and len(search.strip()) < MIN_SEARCH_LENGTH:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Search term must be at least {MIN_SEARCH_LENGTH} characters long"
-        )
-
-    try:
-        query = db.query(User)
-
-        # Apply search filter with proper sanitization
-        if search and (search_term := search.strip()):
-            search_pattern = f"%{search_term}%"
-            query = query.filter(
-                (User.username.ilike(search_pattern))
-                | (User.email.ilike(search_pattern))
-                | (User.full_name.ilike(search_pattern))
-            )
-
-        # Apply active status filter
-        if is_active is not None:
-            query = query.filter(User.is_active == is_active)
-
-        # Get total count for pagination
-        total = query.count()
-
-        # Get paginated results
-        users = query.offset(skip).limit(limit).all()
-
-        return ListResponse.paginate(items=users, total=total, skip=skip, limit=limit)
-
-    except Exception as e:
-        # Log the error but don't expose internal details
-        print(f"Error retrieving users: {type(e).__name__}")
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to retrieve users"
-        )
+class MenuPermission(BaseModel):
+    """Menu permission for a user"""
+    code: str
+    can_view: bool = True
+    can_edit: bool = False
+    can_delete: bool = False
+    can_create: bool = False
 
 
-@router.post("", response_model=UserResponse)
-@router.post("/", response_model=UserResponse)
-def create_user(
-    *,
-    db: Session = Depends(get_db),
-    user_in: AdminUserCreate,
-    current_user: User = Depends(require_admin),
-) -> Any:
-    """
-    Create a new user account (admin only).
-
-    Validates input data, checks for existing users, and creates the account
-    with proper password hashing. Optionally sends invitation email.
-
-    Args:
-        user_in: User creation data including email, username, password, etc.
-        current_user: Admin user performing the operation
-
-    Returns:
-        Created user response
-
-    Raises:
-        HTTPException: If email/username already exists or validation fails
-    """
-    try:
-        # Validate input data
-        if not user_in.email or not user_in.username or not user_in.password:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=ERROR_INVALID_PARAMETERS
-            )
-
-        # Check for existing email
-        existing_user = db.query(User).filter(User.email == user_in.email).first()
-        if existing_user:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=ERROR_EMAIL_EXISTS
-            )
-
-        # Check for existing username
-        existing_user = db.query(User).filter(User.username == user_in.username).first()
-        if existing_user:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=ERROR_USERNAME_EXISTS
-            )
-
-        # Create user data excluding password and invitation flag
-        user_data = user_in.dict(exclude={"password", "send_invitation"})
-        hashed_password = security.get_password_hash(user_in.password)
-
-        # Create new user
-        user = User(**user_data, hashed_password=hashed_password)
-        db.add(user)
-        db.commit()
-        db.refresh(user)
-
-        # TODO: Implement invitation email sending if send_invitation is True
-        if user_in.send_invitation:
-            # Send invitation email logic here
-            pass
-
-        return user
-
-    except HTTPException:
-        raise
-    except Exception as e:
-        # Log the error but don't expose internal details
-        print(f"Error creating user: {type(e).__name__}")
-        db.rollback()
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=ERROR_DATABASE_OPERATION
-        )
+class MenuPermissionsResponse(BaseModel):
+    """Response for user menu permissions"""
+    menu_permissions: List[MenuPermission]
 
 
-@router.get("/me", response_model=UserResponse)
-def read_user_me(
-    db: Session = Depends(get_db),
+class MenuPermissionInput(BaseModel):
+    """Input for setting menu permission"""
+    code: str
+    can_view: bool = True
+    can_edit: bool = False
+    can_delete: bool = False
+    can_create: bool = False
+
+
+class UserMentionSuggestion(BaseModel):
+    """User suggestion for @mention autocomplete"""
+    id: int
+    username: str
+    full_name: Optional[str] = None
+    avatar_url: Optional[str] = None
+
+    class Config:
+        from_attributes = True
+
+
+@router.get("/search/mentions")
+def search_users_for_mentions(
+    q: str = "",
+    limit: int = 10,
     current_user: User = Depends(get_current_active_user),
-) -> Any:
-    """
-    Retrieve the current authenticated user's profile information.
-
-    Returns the full user object for the currently logged-in user.
-
-    Args:
-        current_user: The authenticated user from the request
-
-    Returns:
-        Current user's profile data
-    """
-    return current_user
-
-
-@router.put("/me", response_model=UserResponse)
-def update_user_me(
-    *,
     db: Session = Depends(get_db),
-    user_in: UserUpdate,
-    current_user: User = Depends(get_current_active_user),
-) -> Any:
+) -> List[UserMentionSuggestion]:
     """
-    Update the current authenticated user's profile information.
+    Search users for @mention autocomplete.
 
-    Allows users to modify their own profile data including password changes.
-    Passwords are automatically hashed before storage.
-
-    Args:
-        user_in: Updated user data (only provided fields will be updated)
-        current_user: The authenticated user performing the update
-
-    Returns:
-        Updated user profile data
-
-    Raises:
-        HTTPException: If database operation fails
+    Returns users matching the search query (username, full name, or email).
     """
-    try:
-        update_data = user_in.dict(exclude_unset=True)
+    from app.services.mention import MentionService
 
-        # Handle password update separately
-        if "password" in update_data:
-            new_password = update_data.pop("password")
-            if new_password:
-                update_data["hashed_password"] = security.get_password_hash(new_password)
+    mention_service = MentionService(db)
+    users = mention_service.search_users_for_mention(
+        query=q,
+        company_id=current_user.current_company_id,
+        exclude_user_id=current_user.id,
+        limit=min(limit, 20),  # Cap at 20 results
+    )
 
-        # Apply updates to user object
-        for field, value in update_data.items():
-            setattr(current_user, field, value)
-
-        db.add(current_user)
-        db.commit()
-        db.refresh(current_user)
-        return current_user
-
-    except Exception as e:
-        # Log the error but don't expose internal details
-        print(f"Error updating user profile: {type(e).__name__}")
-        db.rollback()
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=ERROR_DATABASE_OPERATION
+    return [
+        UserMentionSuggestion(
+            id=user.id,
+            username=user.username,
+            full_name=user.full_name,
+            avatar_url=user.avatar_url,
         )
+        for user in users
+    ]
 
 
-@router.get("/{user_id}", response_model=UserResponse)
-def read_user(
-    *,
+@router.get("/messageable")
+def get_messageable_users(
+    search: str = "",
+    pagination: PaginationParams = Depends(get_pagination),
+    current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db),
+):
+    """
+    Get users that the current user can message.
+
+    This endpoint is available to all authenticated users and returns
+    users based on messaging configuration rules.
+
+    - By default, returns users in the same company
+    - Respects messaging config rules for more complex setups
+    - Excludes the current user from results
+    """
+    from app.services.messaging_config import get_messaging_config_service
+    from app.schemas.messaging_config import MessageableUsersResponse
+
+    service = get_messaging_config_service(db)
+
+    # Ensure default rule exists for company
+    if current_user.current_company_id:
+        service.ensure_default_rule(current_user.current_company_id)
+
+    users, total = service.get_messageable_users(
+        user=current_user,
+        search=search if search else None,
+        skip=pagination.skip,
+        limit=pagination.page_size,
+    )
+
+    return MessageableUsersResponse(
+        total=total,
+        items=users,
+        page=pagination.page,
+        page_size=pagination.page_size,
+    )
+
+
+@router.get("/", response_model=UserList)
+def list_users(
+    pagination: PaginationParams = Depends(get_pagination),
+    is_active: bool = None,
+    current_user: User = Depends(PermissionChecker("user.read")),
+    db: Session = Depends(get_db),
+):
+    """List all users (requires user.read permission)"""
+    user_service = UserService(db)
+
+    filters = {}
+    if is_active is not None:
+        filters["is_active"] = is_active
+
+    users = user_service.get_multi(
+        skip=pagination.skip,
+        limit=pagination.page_size,
+        filters=filters,
+    )
+    total = user_service.count(filters=filters)
+
+    return UserList(
+        total=total,
+        items=[UserResponse.model_validate(u) for u in users],
+        page=pagination.page,
+        page_size=pagination.page_size,
+    )
+
+
+@router.get("/{user_id}", response_model=UserWithRoles)
+def get_user(
     user_id: int,
-    current_user: User = Depends(require_admin),
-) -> Any:
-    """
-    Retrieve a specific user by their ID (admin only).
+    current_user: User = Depends(PermissionChecker("user.read")),
+    db: Session = Depends(get_db),
+):
+    """Get user by ID with roles"""
+    user_service = UserService(db)
+    user = user_service.get(user_id)
 
-    Args:
-        user_id: The unique identifier of the user to retrieve
-        current_user: Admin user performing the operation
-
-    Returns:
-        User profile data
-
-    Raises:
-        HTTPException: If user not found (404)
-    """
-    try:
-        user = db.query(User).filter(User.id == user_id).first()
-        if not user:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=ERROR_USER_NOT_FOUND
-            )
-        return user
-
-    except HTTPException:
-        raise
-    except Exception as e:
-        # Log the error but don't expose internal details
-        print(f"Error retrieving user {user_id}: {type(e).__name__}")
+    if not user:
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=ERROR_DATABASE_OPERATION
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found",
         )
+
+    # Build company roles info
+    company_roles = [
+        CompanyRoleInfo(
+            company_id=ucr.company_id,
+            company_name=ucr.company.name,
+            company_code=ucr.company.code,
+            role_id=ucr.role_id,
+            role_name=ucr.role.name,
+            role_codename=ucr.role.codename,
+            is_default=ucr.is_default,
+        )
+        for ucr in user.company_roles
+        if ucr.is_active
+    ]
+
+    permissions = list(user.get_permissions_for_company())
+
+    return UserWithRoles(
+        **UserResponse.model_validate(user).model_dump(),
+        company_roles=company_roles,
+        permissions=permissions,
+    )
+
+
+@router.post("/", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
+def create_user(
+    user_in: UserCreate,
+    current_user: User = Depends(PermissionChecker("user.create")),
+    db: Session = Depends(get_db),
+):
+    """Create a new user"""
+    user_service = UserService(db)
+
+    # Check if email already exists
+    if user_service.get_by_email(user_in.email):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Email already registered",
+        )
+
+    # Check if username already exists
+    if user_service.get_by_username(user_in.username):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Username already taken",
+        )
+
+    user = user_service.create_user(user_in, created_by=current_user.id)
+    db.commit()
+
+    return UserResponse.model_validate(user)
 
 
 @router.put("/{user_id}", response_model=UserResponse)
 def update_user(
-    *,
-    db: Session = Depends(get_db),
     user_id: int,
     user_in: UserUpdate,
-    current_user: User = Depends(require_admin),
-) -> Any:
-    """
-    Update a specific user's information (admin only).
+    current_user: User = Depends(PermissionChecker("user.update")),
+    db: Session = Depends(get_db),
+):
+    """Update a user"""
+    user_service = UserService(db)
+    user = user_service.get(user_id)
 
-    Allows admins to modify any user's profile data including password changes.
-    Cannot modify superuser accounts.
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found",
+        )
 
-    Args:
-        user_id: The unique identifier of the user to update
-        user_in: Updated user data (only provided fields will be updated)
-        current_user: Admin user performing the operation
-
-    Returns:
-        Updated user profile data
-
-    Raises:
-        HTTPException: If user not found or operation fails
-    """
-    try:
-        user = db.query(User).filter(User.id == user_id).first()
-        if not user:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=ERROR_USER_NOT_FOUND
-            )
-
-        # Prevent modification of superuser accounts
-        if user.is_superuser:
+    # Check email uniqueness if changing
+    if user_in.email and user_in.email != user.email:
+        if user_service.get_by_email(user_in.email):
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail=ERROR_CANNOT_MODIFY_SUPERUSER
+                detail="Email already registered",
             )
 
-        update_data = user_in.dict(exclude_unset=True)
+    # Check username uniqueness if changing
+    if user_in.username and user_in.username != user.username:
+        if user_service.get_by_username(user_in.username):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Username already taken",
+            )
 
-        # Handle password update separately
-        if "password" in update_data:
-            new_password = update_data.pop("password")
-            if new_password:
-                update_data["hashed_password"] = security.get_password_hash(new_password)
+    user = user_service.update_user(user, user_in, updated_by=current_user.id)
+    db.commit()
 
-        # Apply updates to user object
-        for field, value in update_data.items():
-            setattr(user, field, value)
-
-        db.add(user)
-        db.commit()
-        db.refresh(user)
-        return user
-
-    except HTTPException:
-        raise
-    except Exception as e:
-        # Log the error but don't expose internal details
-        print(f"Error updating user {user_id}: {type(e).__name__}")
-        db.rollback()
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=ERROR_DATABASE_OPERATION
-        )
+    return UserResponse.model_validate(user)
 
 
 @router.delete("/{user_id}")
 def delete_user(
-    *,
-    db: Session = Depends(get_db),
     user_id: int,
-    current_user: User = Depends(require_admin),
-) -> Any:
-    """
-    Soft delete a user by deactivating their account (admin only).
+    current_user: User = Depends(PermissionChecker("user.delete")),
+    db: Session = Depends(get_db),
+):
+    """Delete a user (soft delete)"""
+    user_service = UserService(db)
 
-    Sets the user's is_active flag to False instead of hard deletion.
-    Cannot delete superuser accounts.
-
-    Args:
-        user_id: The unique identifier of the user to delete
-        current_user: Admin user performing the operation
-
-    Returns:
-        Success message
-
-    Raises:
-        HTTPException: If user not found or cannot be deleted
-    """
-    try:
-        user = db.query(User).filter(User.id == user_id).first()
-        if not user:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=ERROR_USER_NOT_FOUND
-            )
-
-        if user.is_superuser:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=ERROR_CANNOT_DELETE_SUPERUSER
-            )
-
-        user.is_active = False
-        db.add(user)
-        db.commit()
-        return {"message": "User deleted successfully"}
-
-    except HTTPException:
-        raise
-    except Exception as e:
-        # Log the error but don't expose internal details
-        print(f"Error deleting user {user_id}: {type(e).__name__}")
-        db.rollback()
+    if user_id == current_user.id:
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=ERROR_DATABASE_OPERATION
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Cannot delete your own account",
         )
 
-
-@router.patch("/{user_id}/toggle-status", response_model=UserResponse)
-def toggle_user_status(
-    *,
-    db: Session = Depends(get_db),
-    user_id: int,
-    current_user: User = Depends(require_admin),
-) -> Any:
-    """
-    Toggle a user's active status (admin only).
-
-    Switches the user's is_active flag between true and false.
-    Cannot modify superuser accounts.
-
-    Args:
-        user_id: The unique identifier of the user to toggle
-        current_user: Admin user performing the operation
-
-    Returns:
-        Updated user data with new status
-
-    Raises:
-        HTTPException: If user not found or cannot be modified
-    """
-    try:
-        user = db.query(User).filter(User.id == user_id).first()
-        if not user:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=ERROR_USER_NOT_FOUND
-            )
-
-        if user.is_superuser:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=ERROR_CANNOT_MODIFY_SUPERUSER
-            )
-
-        user.is_active = not user.is_active
-        db.add(user)
-        db.commit()
-        db.refresh(user)
-        return user
-
-    except HTTPException:
-        raise
-    except Exception as e:
-        # Log the error but don't expose internal details
-        print(f"Error toggling user status {user_id}: {type(e).__name__}")
-        db.rollback()
+    if not user_service.delete(user_id, user_id=current_user.id):
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=ERROR_DATABASE_OPERATION
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found",
         )
+
+    db.commit()
+    return {"message": "User deleted successfully"}
+
+
+@router.post("/{user_id}/assign-company")
+def assign_user_to_company(
+    user_id: int,
+    company_id: int,
+    role_id: int,
+    is_default: bool = False,
+    current_user: User = Depends(PermissionChecker("user.manage")),
+    db: Session = Depends(get_db),
+):
+    """Assign user to a company with a role"""
+    from app.models import Company, Role
+
+    user_service = UserService(db)
+    user = user_service.get(user_id)
+
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found",
+        )
+
+    company = db.query(Company).filter(Company.id == company_id).first()
+    if not company:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Company not found",
+        )
+
+    role = db.query(Role).filter(Role.id == role_id).first()
+    if not role:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Role not found",
+        )
+
+    user_service.assign_to_company(
+        user, company, role, is_default, assigned_by=current_user.id
+    )
+    db.commit()
+
+    return {"message": "User assigned to company successfully"}
+
+
+@router.delete("/{user_id}/remove-company/{company_id}")
+def remove_user_from_company(
+    user_id: int,
+    company_id: int,
+    current_user: User = Depends(PermissionChecker("user.manage")),
+    db: Session = Depends(get_db),
+):
+    """Remove user from a company"""
+    from app.models import Company
+
+    user_service = UserService(db)
+    user = user_service.get(user_id)
+
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found",
+        )
+
+    company = db.query(Company).filter(Company.id == company_id).first()
+    if not company:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Company not found",
+        )
+
+    if not user_service.remove_from_company(user, company):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="User is not assigned to this company",
+        )
+
+    db.commit()
+    return {"message": "User removed from company successfully"}
+
+
+# =============================================================================
+# USER MENU PERMISSIONS
+# =============================================================================
+
+@router.get("/{user_id}/menu-permissions", response_model=MenuPermissionsResponse)
+def get_user_menu_permissions(
+    user_id: int,
+    company_id: Optional[int] = None,
+    current_user: User = Depends(PermissionChecker("user.read")),
+    db: Session = Depends(get_db),
+):
+    """Get menu permissions for a specific user (database-backed)"""
+    user_service = UserService(db)
+    user = user_service.get(user_id)
+
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found",
+        )
+
+    # Use company_id from user if not provided
+    effective_company_id = company_id or user.current_company_id
+
+    permission_service = UserMenuPermissionService(db)
+    db_permissions = permission_service.get_user_permissions(user_id, effective_company_id)
+
+    permissions = [
+        MenuPermission(
+            code=p.menu_item.code,
+            can_view=p.can_view,
+            can_edit=p.can_edit,
+            can_delete=p.can_delete,
+            can_create=p.can_create,
+        )
+        for p in db_permissions
+    ]
+    return MenuPermissionsResponse(menu_permissions=permissions)
+
+
+@router.put("/{user_id}/menu-permissions")
+def set_user_menu_permissions(
+    user_id: int,
+    permissions: List[MenuPermissionInput] = Body(...),
+    company_id: Optional[int] = None,
+    current_user: User = Depends(PermissionChecker("user.manage")),
+    db: Session = Depends(get_db),
+):
+    """Set menu permissions for a user (database-backed)"""
+    user_service = UserService(db)
+    user = user_service.get(user_id)
+
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found",
+        )
+
+    # Use company_id from user if not provided
+    effective_company_id = company_id or user.current_company_id
+
+    menu_service = MenuItemService(db)
+    permission_service = UserMenuPermissionService(db)
+
+    # First, deactivate all existing permissions for this user/company
+    existing = permission_service.get_user_permissions(user_id, effective_company_id)
+    for perm in existing:
+        perm.is_active = False
+
+    # Set new permissions
+    for perm_input in permissions:
+        menu_item = menu_service.get_by_code(perm_input.code)
+        if menu_item:
+            permission_service.set_user_permission(
+                user_id=user_id,
+                menu_item_id=menu_item.id,
+                company_id=effective_company_id,
+                can_view=perm_input.can_view,
+                can_edit=perm_input.can_edit,
+                can_delete=perm_input.can_delete,
+                can_create=perm_input.can_create,
+                created_by=current_user.id,
+            )
+
+    db.commit()
+    return {"success": True, "message": "Menu permissions updated"}

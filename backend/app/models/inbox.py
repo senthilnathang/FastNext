@@ -1,109 +1,79 @@
-"""Inbox model for unified inbox functionality
+"""Inbox model for unified inbox functionality (Huly-inspired)"""
 
-Provides a unified inbox aggregating messages, notifications, activities, and mentions.
-"""
+from enum import Enum
+from sqlalchemy import Boolean, Column, Enum as SQLEnum, ForeignKey, Integer, String, Index
+from sqlalchemy.orm import relationship
 
-import enum
-from datetime import datetime
-from typing import Any, Dict, List, Optional
-
-from sqlalchemy import (
-    Boolean,
-    Column,
-    DateTime,
-    Enum,
-    ForeignKey,
-    Index,
-    Integer,
-    String,
-    Text,
-)
-from sqlalchemy.orm import relationship, Session
-from sqlalchemy.sql import func
-
-from app.db.base import Base
+from app.models.base import BaseModel
 
 
-class InboxItemType(str, enum.Enum):
-    """Type of inbox item"""
+class InboxItemType(str, Enum):
+    """Types of inbox items"""
     MESSAGE = "message"
     NOTIFICATION = "notification"
     ACTIVITY = "activity"
     MENTION = "mention"
 
 
-class InboxPriority(str, enum.Enum):
-    """Priority level for inbox items"""
+class InboxPriority(str, Enum):
+    """Priority levels for inbox items"""
     LOW = "low"
     NORMAL = "normal"
     HIGH = "high"
     URGENT = "urgent"
 
 
-class InboxItem(Base):
+class InboxItem(BaseModel):
     """
-    Unified inbox item model.
+    Unified inbox item model (Huly-inspired).
 
-    Aggregates messages, notifications, activities, and mentions
-    into a single inbox view for each user.
+    Aggregates messages, notifications, and activities into a single inbox.
+    Each inbox item references the original record via reference_type and reference_id.
+
+    Attributes:
+        user_id: The inbox owner
+        item_type: Type of item (message, notification, activity, mention)
+        reference_type: Table name of the referenced record
+        reference_id: ID of the referenced record
+        source_model: Model name where the item originated (e.g., 'users', 'leave_requests')
+        source_id: ID of the source record
+        title: Brief title/subject for the inbox item
+        preview: Short preview text (first 200 chars)
+        is_read: Whether the item has been read
+        is_archived: Whether the item is archived
+        is_starred: Whether the item is starred/bookmarked
+        priority: Priority level
+        actor_id: User who triggered this inbox item
     """
+
     __tablename__ = "inbox_items"
 
-    id = Column(Integer, primary_key=True, index=True)
+    # Owner of this inbox item
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
 
-    # Owner of the inbox item
-    user_id = Column(
-        Integer,
-        ForeignKey("users.id", ondelete="CASCADE"),
-        nullable=False,
-    )
-
-    # Item classification
-    item_type = Column(
-        Enum(InboxItemType),
-        nullable=False,
-        default=InboxItemType.NOTIFICATION,
-    )
-
-    # Reference to the source record (polymorphic)
-    reference_type = Column(String(64), nullable=False)  # 'messages', 'notifications', etc.
+    # Item type and reference
+    item_type = Column(SQLEnum(InboxItemType), nullable=False, index=True)
+    reference_type = Column(String(100), nullable=False)  # 'messages', 'notifications', 'activity_logs'
     reference_id = Column(Integer, nullable=False)
 
-    # Context navigation
-    source_model = Column(String(64), nullable=True)  # e.g., 'users', 'projects'
+    # Source context (optional - for navigation)
+    source_model = Column(String(100), nullable=True)  # e.g., 'users', 'leave_requests'
     source_id = Column(Integer, nullable=True)
 
-    # Display content
-    title = Column(String(500), nullable=False)
-    preview = Column(Text, nullable=True)
+    # Display fields
+    title = Column(String(255), nullable=True)
+    preview = Column(String(500), nullable=True)
 
     # Status flags
-    is_read = Column(Boolean, nullable=False, default=False, index=True)
-    is_archived = Column(Boolean, nullable=False, default=False, index=True)
-    is_starred = Column(Boolean, nullable=False, default=False)
+    is_read = Column(Boolean, default=False, nullable=False, index=True)
+    is_archived = Column(Boolean, default=False, nullable=False, index=True)
+    is_starred = Column(Boolean, default=False, nullable=False, index=True)
 
     # Priority
-    priority = Column(
-        Enum(InboxPriority),
-        nullable=False,
-        default=InboxPriority.NORMAL,
-    )
+    priority = Column(SQLEnum(InboxPriority), default=InboxPriority.NORMAL, nullable=False)
 
-    # Actor who triggered the item (e.g., message sender)
-    actor_id = Column(
-        Integer,
-        ForeignKey("users.id", ondelete="SET NULL"),
-        nullable=True,
-    )
-
-    # Timestamps
-    created_at = Column(
-        DateTime(timezone=True),
-        server_default=func.now(),
-        nullable=False,
-    )
-    read_at = Column(DateTime(timezone=True), nullable=True)
-    archived_at = Column(DateTime(timezone=True), nullable=True)
+    # Actor (who triggered this inbox item)
+    actor_id = Column(Integer, ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
 
     # Relationships
     user = relationship(
@@ -111,14 +81,11 @@ class InboxItem(Base):
         foreign_keys=[user_id],
         lazy="select",
     )
-
     actor = relationship(
         "User",
         foreign_keys=[actor_id],
         lazy="select",
     )
-
-    # Labels relationship (via junction table)
     labels = relationship(
         "Label",
         secondary="inbox_item_labels",
@@ -126,57 +93,55 @@ class InboxItem(Base):
         lazy="select",
     )
 
-    # Indexes for common queries
+    # Composite indexes for efficient queries
     __table_args__ = (
-        Index("idx_inbox_user_read", "user_id", "is_read"),
-        Index("idx_inbox_user_archived", "user_id", "is_archived"),
-        Index("idx_inbox_user_type", "user_id", "item_type"),
-        Index("idx_inbox_reference", "reference_type", "reference_id"),
-        Index("idx_inbox_created", "created_at"),
+        Index("ix_inbox_user_unread", "user_id", "is_read"),
+        Index("ix_inbox_user_archived", "user_id", "is_archived"),
+        Index("ix_inbox_user_type", "user_id", "item_type"),
+        Index("ix_inbox_reference", "reference_type", "reference_id"),
     )
 
-    def mark_as_read(self) -> None:
-        """Mark item as read"""
+    def __repr__(self):
+        return f"<InboxItem(id={self.id}, user_id={self.user_id}, type={self.item_type}, read={self.is_read})>"
+
+    def mark_as_read(self):
+        """Mark this inbox item as read"""
         self.is_read = True
-        self.read_at = datetime.utcnow()
 
-    def mark_as_unread(self) -> None:
-        """Mark item as unread"""
+    def mark_as_unread(self):
+        """Mark this inbox item as unread"""
         self.is_read = False
-        self.read_at = None
 
-    def archive(self) -> None:
-        """Archive the item"""
+    def archive(self):
+        """Archive this inbox item"""
         self.is_archived = True
-        self.archived_at = datetime.utcnow()
 
-    def unarchive(self) -> None:
-        """Unarchive the item"""
+    def unarchive(self):
+        """Unarchive this inbox item"""
         self.is_archived = False
-        self.archived_at = None
 
-    def star(self) -> None:
-        """Star the item"""
+    def star(self):
+        """Star/bookmark this inbox item"""
         self.is_starred = True
 
-    def unstar(self) -> None:
-        """Unstar the item"""
+    def unstar(self):
+        """Remove star from this inbox item"""
         self.is_starred = False
 
     @classmethod
     def create(
         cls,
-        db: Session,
+        db,
         user_id: int,
         item_type: InboxItemType,
         reference_type: str,
         reference_id: int,
-        title: str,
-        preview: Optional[str] = None,
-        source_model: Optional[str] = None,
-        source_id: Optional[int] = None,
-        actor_id: Optional[int] = None,
-        priority: InboxPriority = InboxPriority.NORMAL,
+        title: str = None,
+        preview: str = None,
+        source_model: str = None,
+        source_id: int = None,
+        priority: InboxPriority = None,
+        actor_id: int = None,
     ) -> "InboxItem":
         """Create a new inbox item"""
         item = cls(
@@ -185,11 +150,11 @@ class InboxItem(Base):
             reference_type=reference_type,
             reference_id=reference_id,
             title=title,
-            preview=preview[:200] if preview else None,
+            preview=preview[:500] if preview else None,
             source_model=source_model,
             source_id=source_id,
+            priority=priority or InboxPriority.NORMAL,
             actor_id=actor_id,
-            priority=priority,
         )
         db.add(item)
         db.flush()
@@ -198,12 +163,12 @@ class InboxItem(Base):
     @classmethod
     def create_from_message(
         cls,
-        db: Session,
+        db,
         user_id: int,
         message,
-        actor_id: Optional[int] = None,
+        actor_id: int = None,
     ) -> "InboxItem":
-        """Create inbox item from a Message"""
+        """Create an inbox item from a Message"""
         return cls.create(
             db=db,
             user_id=user_id,
@@ -211,28 +176,27 @@ class InboxItem(Base):
             reference_type="messages",
             reference_id=message.id,
             title=message.subject or "New message",
-            preview=message.body,
+            preview=message.body[:200] if message.body else None,
             source_model=message.model_name,
             source_id=message.record_id,
             actor_id=actor_id or message.user_id,
-            priority=InboxPriority.NORMAL,
         )
 
     @classmethod
     def create_from_notification(
         cls,
-        db: Session,
+        db,
         notification,
     ) -> "InboxItem":
-        """Create inbox item from a Notification"""
-        # Map notification type to priority
-        priority = InboxPriority.NORMAL
-        if hasattr(notification, "type"):
-            type_str = str(notification.type).lower()
-            if "error" in type_str or "urgent" in type_str:
-                priority = InboxPriority.URGENT
-            elif "warning" in type_str:
-                priority = InboxPriority.HIGH
+        """Create an inbox item from a Notification"""
+        # Map notification level to priority
+        priority_map = {
+            "info": InboxPriority.NORMAL,
+            "success": InboxPriority.NORMAL,
+            "warning": InboxPriority.HIGH,
+            "error": InboxPriority.URGENT,
+        }
+        priority = priority_map.get(notification.level.value if hasattr(notification.level, 'value') else notification.level, InboxPriority.NORMAL)
 
         return cls.create(
             db=db,
@@ -241,143 +205,79 @@ class InboxItem(Base):
             reference_type="notifications",
             reference_id=notification.id,
             title=notification.title,
-            preview=notification.message,
+            preview=notification.description[:200] if notification.description else None,
             priority=priority,
+            actor_id=notification.actor_id,
         )
 
     @classmethod
     def create_from_mention(
         cls,
-        db: Session,
+        db,
         user_id: int,
-        mention,
         message,
-        actor_id: Optional[int] = None,
+        actor_id: int,
     ) -> "InboxItem":
-        """Create inbox item from a Mention"""
+        """Create an inbox item for a mention"""
         return cls.create(
             db=db,
             user_id=user_id,
             item_type=InboxItemType.MENTION,
-            reference_type="mentions",
-            reference_id=mention.id,
-            title="You were mentioned",
-            preview=message.body if message else None,
-            source_model=message.model_name if message else None,
-            source_id=message.record_id if message else None,
-            actor_id=actor_id or (message.user_id if message else None),
+            reference_type="messages",
+            reference_id=message.id,
+            title=f"You were mentioned",
+            preview=message.body[:200] if message.body else None,
+            source_model=message.model_name,
+            source_id=message.record_id,
             priority=InboxPriority.HIGH,
+            actor_id=actor_id,
         )
 
     @classmethod
-    def get_unread_count(cls, db: Session, user_id: int) -> int:
-        """Get count of unread items for user"""
-        return db.query(cls).filter(
+    def get_unread_count(cls, db, user_id: int, item_type: InboxItemType = None) -> int:
+        """Get count of unread inbox items for a user"""
+        query = db.query(cls).filter(
             cls.user_id == user_id,
             cls.is_read == False,
             cls.is_archived == False,
-        ).count()
+        )
+        if item_type:
+            query = query.filter(cls.item_type == item_type)
+        return query.count()
 
     @classmethod
-    def get_counts_by_type(cls, db: Session, user_id: int) -> Dict[str, int]:
+    def get_counts_by_type(cls, db, user_id: int) -> dict:
         """Get unread counts grouped by item type"""
-        from sqlalchemy import func as sa_func
-
+        from sqlalchemy import func
         results = db.query(
             cls.item_type,
-            sa_func.count(cls.id),
+            func.count(cls.id)
         ).filter(
             cls.user_id == user_id,
             cls.is_read == False,
             cls.is_archived == False,
         ).group_by(cls.item_type).all()
 
-        counts = {t.value: 0 for t in InboxItemType}
-        for item_type, count in results:
-            counts[item_type.value] = count
-
-        return counts
+        return {item_type.value: count for item_type, count in results}
 
     @classmethod
-    def mark_all_read(
-        cls,
-        db: Session,
-        user_id: int,
-        item_type: Optional[InboxItemType] = None,
-    ) -> int:
-        """Mark all items as read. Returns count of updated items."""
+    def mark_all_read(cls, db, user_id: int, item_type: InboxItemType = None) -> int:
+        """Mark all inbox items as read for a user"""
         query = db.query(cls).filter(
             cls.user_id == user_id,
             cls.is_read == False,
         )
-
         if item_type:
             query = query.filter(cls.item_type == item_type)
-
-        count = query.update({
-            cls.is_read: True,
-            cls.read_at: datetime.utcnow(),
-        }, synchronize_session=False)
-
-        db.flush()
-        return count
+        return query.update({"is_read": True})
 
     @classmethod
-    def archive_all(
-        cls,
-        db: Session,
-        user_id: int,
-        item_type: Optional[InboxItemType] = None,
-    ) -> int:
-        """Archive all items. Returns count of updated items."""
+    def archive_all(cls, db, user_id: int, item_type: InboxItemType = None) -> int:
+        """Archive all inbox items for a user"""
         query = db.query(cls).filter(
             cls.user_id == user_id,
             cls.is_archived == False,
         )
-
         if item_type:
             query = query.filter(cls.item_type == item_type)
-
-        count = query.update({
-            cls.is_archived: True,
-            cls.archived_at: datetime.utcnow(),
-        }, synchronize_session=False)
-
-        db.flush()
-        return count
-
-    def to_dict(self) -> Dict[str, Any]:
-        """Convert to dictionary"""
-        data = {
-            "id": self.id,
-            "user_id": self.user_id,
-            "item_type": self.item_type.value if self.item_type else None,
-            "reference_type": self.reference_type,
-            "reference_id": self.reference_id,
-            "source_model": self.source_model,
-            "source_id": self.source_id,
-            "title": self.title,
-            "preview": self.preview,
-            "is_read": self.is_read,
-            "is_archived": self.is_archived,
-            "is_starred": self.is_starred,
-            "priority": self.priority.value if self.priority else None,
-            "actor_id": self.actor_id,
-            "created_at": self.created_at.isoformat() if self.created_at else None,
-            "read_at": self.read_at.isoformat() if self.read_at else None,
-            "archived_at": self.archived_at.isoformat() if self.archived_at else None,
-        }
-
-        # Include actor info if loaded
-        if self.actor:
-            data["actor"] = {
-                "id": self.actor.id,
-                "username": getattr(self.actor, "username", None),
-                "full_name": getattr(self.actor, "full_name", None),
-            }
-
-        # Include label IDs if loaded
-        if self.labels:
-            data["label_ids"] = [l.id for l in self.labels]
-
-        return data
+        return query.update({"is_archived": True})

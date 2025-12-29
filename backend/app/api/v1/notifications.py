@@ -1,249 +1,285 @@
-from typing import List, Optional, cast
+"""Notification endpoints"""
 
-from app.api.deps import get_db
-from app.auth.deps import get_current_user
-from app.auth.permissions import require_admin
-from app.models.notification import Notification, NotificationType
-from app.models.user import User
+from typing import Optional
+
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.orm import Session
+from sqlalchemy import desc
+
+from app.api.deps import get_db, get_pagination, PaginationParams, get_current_active_user
+from app.models import User, Notification, NotificationLevel
 from app.schemas.notification import (
     NotificationCreate,
-    NotificationList,
-    NotificationResponse,
     NotificationUpdate,
+    NotificationResponse,
+    NotificationList,
+    BulkReadRequest,
+    BulkReadResponse,
+    BulkDeleteRequest,
+    BulkDeleteResponse,
+    SendNotificationRequest,
+    SendNotificationResponse,
+    NotificationStats,
+    ActorInfo,
 )
-from app.services.notification_service import NotificationService
-from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy.orm import Session
-from pydantic import BaseModel
 
 router = APIRouter()
 
 
 @router.get("/", response_model=NotificationList)
-def get_notifications(
+def list_notifications(
+    filter_type: str = "all",  # all, unread, read
+    pagination: PaginationParams = Depends(get_pagination),
+    current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
-    skip: int = Query(0, ge=0),
-    limit: int = Query(50, ge=1, le=100),
-    include_read: bool = Query(True),
-) -> NotificationList:
-    """Get user's notifications"""
-    notification_service = NotificationService(db)
-    notifications = notification_service.get_user_notifications(
-        user_id=cast(int, current_user.id),
-        skip=skip,
-        limit=limit,
-        include_read=include_read,
+):
+    """
+    List notifications for current user.
+
+    filter_type can be:
+    - all: All notifications
+    - unread: Only unread notifications
+    - read: Only read notifications
+    """
+    query = db.query(Notification).filter(Notification.user_id == current_user.id)
+
+    if filter_type == "unread":
+        query = query.filter(Notification.is_read == False)
+    elif filter_type == "read":
+        query = query.filter(Notification.is_read == True)
+
+    # Get unread count
+    unread_count = db.query(Notification).filter(
+        Notification.user_id == current_user.id,
+        Notification.is_read == False,
+    ).count()
+
+    total = query.count()
+    notifications = (
+        query.order_by(desc(Notification.created_at))
+        .offset(pagination.skip)
+        .limit(pagination.page_size)
+        .all()
     )
+
+    items = []
+    for n in notifications:
+        item = NotificationResponse.model_validate(n)
+        if n.actor:
+            item.actor = ActorInfo(
+                id=n.actor.id,
+                full_name=n.actor.full_name,
+                avatar_url=n.actor.avatar_url,
+            )
+        items.append(item)
 
     return NotificationList(
-        notifications=[
-            NotificationResponse.model_validate(notification)
-            for notification in notifications
-        ],
-        total=len(notifications),
+        total=total,
+        items=items,
+        page=pagination.page,
+        page_size=pagination.page_size,
+        unread_count=unread_count,
     )
 
 
-@router.get("/unread-count")
-def get_unread_count(
+@router.get("/stats", response_model=NotificationStats)
+def get_notification_stats(
+    current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
 ):
-    """Get count of unread notifications"""
-    notification_service = NotificationService(db)
-    count = notification_service.get_unread_count(cast(int, current_user.id))
-    return {"unread_count": count}
+    """Get notification statistics for current user"""
+    all_count = db.query(Notification).filter(
+        Notification.user_id == current_user.id
+    ).count()
+
+    unread_count = db.query(Notification).filter(
+        Notification.user_id == current_user.id,
+        Notification.is_read == False,
+    ).count()
+
+    return NotificationStats(
+        all_count=all_count,
+        unread_count=unread_count,
+        read_count=all_count - unread_count,
+    )
 
 
-@router.put("/{notification_id}/read")
-def mark_as_read(
+@router.get("/{notification_id}", response_model=NotificationResponse)
+def get_notification(
     notification_id: int,
+    current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
 ):
-    """Mark a notification as read"""
-    notification_service = NotificationService(db)
-    success = notification_service.mark_as_read(
-        notification_id, cast(int, current_user.id)
-    )
-    if not success:
-        raise HTTPException(status_code=404, detail="Notification not found")
+    """Get a specific notification"""
+    notification = db.query(Notification).filter(
+        Notification.id == notification_id,
+        Notification.user_id == current_user.id,
+    ).first()
 
-    return {"message": "Notification marked as read"}
+    if not notification:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Notification not found",
+        )
+
+    response = NotificationResponse.model_validate(notification)
+    if notification.actor:
+        response.actor = ActorInfo(
+            id=notification.actor.id,
+            full_name=notification.actor.full_name,
+            avatar_url=notification.actor.avatar_url,
+        )
+
+    return response
 
 
-@router.put("/mark-all-read")
-def mark_all_as_read(
+@router.put("/{notification_id}", response_model=NotificationResponse)
+def update_notification(
+    notification_id: int,
+    notification_in: NotificationUpdate,
+    current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
 ):
-    """Mark all notifications as read"""
-    notification_service = NotificationService(db)
-    count = notification_service.mark_all_as_read(cast(int, current_user.id))
-    return {"message": f"Marked {count} notifications as read"}
+    """Update notification (mark as read/unread)"""
+    notification = db.query(Notification).filter(
+        Notification.id == notification_id,
+        Notification.user_id == current_user.id,
+    ).first()
+
+    if not notification:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Notification not found",
+        )
+
+    if notification_in.is_read is not None:
+        notification.is_read = notification_in.is_read
+
+    db.commit()
+    db.refresh(notification)
+
+    response = NotificationResponse.model_validate(notification)
+    if notification.actor:
+        response.actor = ActorInfo(
+            id=notification.actor.id,
+            full_name=notification.actor.full_name,
+            avatar_url=notification.actor.avatar_url,
+        )
+
+    return response
 
 
 @router.delete("/{notification_id}")
 def delete_notification(
     notification_id: int,
+    current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
 ):
     """Delete a notification"""
-    notification_service = NotificationService(db)
-    success = notification_service.delete_notification(
-        notification_id, cast(int, current_user.id)
-    )
-    if not success:
-        raise HTTPException(status_code=404, detail="Notification not found")
+    notification = db.query(Notification).filter(
+        Notification.id == notification_id,
+        Notification.user_id == current_user.id,
+    ).first()
 
-    return {"message": "Notification deleted"}
-
-
-# Admin endpoints (for creating system notifications)
-@router.post("/", response_model=NotificationResponse)
-def create_notification(
-    notification: NotificationCreate,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(require_admin),
-):
-    """Create a notification (admin only)"""
-
-    notification_service = NotificationService(db)
-    created_notification = notification_service.create_notification(
-        user_id=notification.user_id,
-        title=notification.title,
-        message=notification.message,
-        notification_type=notification.type,
-        channels=notification.channels,
-        action_url=notification.action_url,
-        data=notification.data,
-    )
-
-    return NotificationResponse.model_validate(created_notification)
-
-
-@router.post("/system")
-def create_system_notification(
-    title: str,
-    message: str,
-    user_ids: List[int],
-    notification_type: NotificationType = NotificationType.SYSTEM,
-    channels: Optional[List[str]] = None,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(require_admin),
-):
-    """Create system notifications for multiple users (admin only)"""
-
-    notification_service = NotificationService(db)
-    notifications = notification_service.create_system_notification(
-        user_ids=user_ids,
-        title=title,
-        message=message,
-        notification_type=notification_type,
-        channels=channels or ["in_app"],
-    )
-
-    return {"message": f"Created {len(notifications)} system notifications"}
-
-
-# Push Notification Endpoints
-class PushSubscriptionData(BaseModel):
-    endpoint: str
-    keys: dict
-
-class NotificationPreferences(BaseModel):
-    email_on_login: bool = True
-    email_on_password_change: bool = True
-    email_on_security_change: bool = True
-    email_on_suspicious_activity: bool = True
-
-@router.post("/subscribe")
-async def subscribe_push_notifications(
-    subscription: PushSubscriptionData,
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
-):
-    """Subscribe to push notifications"""
-    try:
-        # Store subscription in user preferences or separate table
-        # For now, we'll just acknowledge the subscription
-        # In production, you'd want to store this in a database table
-
-        return {"message": "Successfully subscribed to push notifications"}
-
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to subscribe: {str(e)}")
-
-@router.post("/unsubscribe")
-async def unsubscribe_push_notifications(
-    subscription: PushSubscriptionData,
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
-):
-    """Unsubscribe from push notifications"""
-    try:
-        # Remove subscription from storage
-        return {"message": "Successfully unsubscribed from push notifications"}
-
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to unsubscribe: {str(e)}")
-
-@router.get("/preferences")
-async def get_notification_preferences(
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
-):
-    """Get user notification preferences"""
-    return {
-        "email_on_login": current_user.email_on_login,
-        "email_on_password_change": current_user.email_on_password_change,
-        "email_on_security_change": current_user.email_on_security_change,
-        "email_on_suspicious_activity": current_user.email_on_suspicious_activity,
-    }
-
-@router.put("/preferences")
-async def update_notification_preferences(
-    preferences: NotificationPreferences,
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
-):
-    """Update user notification preferences"""
-    try:
-        current_user.email_on_login = preferences.email_on_login
-        current_user.email_on_password_change = preferences.email_on_password_change
-        current_user.email_on_security_change = preferences.email_on_security_change
-        current_user.email_on_suspicious_activity = preferences.email_on_suspicious_activity
-
-        db.commit()
-        db.refresh(current_user)
-
-        return {"message": "Notification preferences updated successfully"}
-
-    except Exception as e:
-        db.rollback()
-        raise HTTPException(status_code=500, detail=f"Failed to update preferences: {str(e)}")
-
-@router.post("/test")
-async def send_test_notification(
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
-):
-    """Send a test notification to the current user"""
-    try:
-        notification_service = NotificationService(db)
-
-        notification = notification_service.create_notification(
-            user_id=cast(int, current_user.id),
-            title="Test Notification",
-            message="This is a test notification to verify your notification settings are working correctly.",
-            notification_type=NotificationType.INFO,
-            channels=["in_app", "email"],
-            action_url="/settings"
+    if not notification:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Notification not found",
         )
 
-        return {"message": "Test notification sent successfully", "notification_id": notification.id}
+    db.delete(notification)
+    db.commit()
 
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to send test notification: {str(e)}")
+    return {"message": "Notification deleted successfully"}
+
+
+@router.post("/bulk-read", response_model=BulkReadResponse)
+def bulk_mark_as_read(
+    request: BulkReadRequest,
+    current_user: User = Depends(get_current_active_user),
+    db: Session = Depends(get_db),
+):
+    """
+    Mark notifications as read.
+    If notification_ids is empty, marks all unread notifications as read.
+    """
+    query = db.query(Notification).filter(
+        Notification.user_id == current_user.id,
+        Notification.is_read == False,
+    )
+
+    if request.notification_ids:
+        query = query.filter(Notification.id.in_(request.notification_ids))
+
+    updated_count = query.update({"is_read": True}, synchronize_session=False)
+    db.commit()
+
+    return BulkReadResponse(
+        message="Notifications marked as read",
+        updated_count=updated_count,
+    )
+
+
+@router.post("/bulk-delete", response_model=BulkDeleteResponse)
+def bulk_delete(
+    request: BulkDeleteRequest,
+    current_user: User = Depends(get_current_active_user),
+    db: Session = Depends(get_db),
+):
+    """Delete multiple notifications"""
+    deleted_count = db.query(Notification).filter(
+        Notification.user_id == current_user.id,
+        Notification.id.in_(request.notification_ids),
+    ).delete(synchronize_session=False)
+
+    db.commit()
+
+    return BulkDeleteResponse(
+        message="Notifications deleted",
+        deleted_count=deleted_count,
+    )
+
+
+@router.post("/send", response_model=SendNotificationResponse)
+def send_notification(
+    request: SendNotificationRequest,
+    current_user: User = Depends(get_current_active_user),
+    db: Session = Depends(get_db),
+):
+    """
+    Send notifications to specified users.
+    Requires appropriate permissions.
+    """
+    # Verify all user IDs exist
+    users = db.query(User).filter(
+        User.id.in_(request.user_ids),
+        User.is_active == True,
+    ).all()
+
+    if not users:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="No valid recipients found",
+        )
+
+    # Create notifications
+    notifications = []
+    for user in users:
+        notification = Notification(
+            user_id=user.id,
+            title=request.title,
+            description=request.description,
+            level=request.level,
+            link=request.link,
+            data=request.data,
+            actor_id=current_user.id,
+        )
+        notifications.append(notification)
+
+    db.add_all(notifications)
+    db.commit()
+
+    return SendNotificationResponse(
+        message="Notifications sent successfully",
+        recipient_count=len(notifications),
+    )

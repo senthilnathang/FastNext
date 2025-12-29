@@ -1,134 +1,154 @@
-from typing import Any, List
+"""Permission management endpoints"""
 
-from app.auth.deps import get_current_active_user
-from app.auth.permissions import require_admin
-from app.db.session import get_db
-from app.models.permission import Permission
-from app.models.user import User
-from app.schemas.common import ListResponse
-from app.schemas.permission import Permission as PermissionSchema
-from app.schemas.permission import PermissionCreate, PermissionUpdate
+from typing import List
+
 from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy import func
 from sqlalchemy.orm import Session
+
+from app.api.deps import get_db, get_pagination, PaginationParams
+from app.api.deps.auth import PermissionChecker
+from app.models import User, Permission
+from app.models.permission import PermissionCategory, PermissionAction
+from app.schemas.permission import (
+    PermissionCreate,
+    PermissionResponse,
+    PermissionList,
+    PermissionGrouped,
+)
 
 router = APIRouter()
 
 
-@router.get("", response_model=ListResponse[PermissionSchema])
-@router.get("/", response_model=ListResponse[PermissionSchema])
-def read_permissions(
+@router.get("/", response_model=PermissionList)
+def list_permissions(
+    pagination: PaginationParams = Depends(get_pagination),
+    category: PermissionCategory = None,
+    is_active: bool = None,
+    current_user: User = Depends(PermissionChecker("permission.read")),
     db: Session = Depends(get_db),
-    skip: int = 0,
-    limit: int = 100,
-    category: str = None,
-    search: str = None,
-    current_user: User = Depends(require_admin),
-) -> Any:
-    """Get all permissions with pagination (admin only)"""
+):
+    """List all permissions"""
     query = db.query(Permission)
 
-    # Apply filters
-    if category:
+    if category is not None:
         query = query.filter(Permission.category == category)
+    if is_active is not None:
+        query = query.filter(Permission.is_active == is_active)
 
-    if search:
-        search_term = f"%{search}%"
-        query = query.filter(
-            (Permission.name.ilike(search_term))
-            | (Permission.description.ilike(search_term))
-            | (Permission.action.ilike(search_term))
-        )
-
-    # Get total count
     total = query.count()
+    permissions = query.offset(pagination.skip).limit(pagination.page_size).all()
 
-    # Get paginated results
-    permissions = query.offset(skip).limit(limit).all()
-
-    return ListResponse.paginate(items=permissions, total=total, skip=skip, limit=limit)
-
-
-@router.post("", response_model=PermissionSchema)
-@router.post("/", response_model=PermissionSchema)
-def create_permission(
-    *,
-    db: Session = Depends(get_db),
-    permission_in: PermissionCreate,
-    current_user: User = Depends(require_admin),
-) -> Any:
-    """Create new permission (admin only)"""
-    # Check if permission already exists
-    existing_permission = (
-        db.query(Permission).filter(Permission.name == permission_in.name).first()
+    return PermissionList(
+        total=total,
+        items=[PermissionResponse.model_validate(p) for p in permissions],
+        page=pagination.page,
+        page_size=pagination.page_size,
     )
-    if existing_permission:
+
+
+@router.get("/grouped", response_model=List[PermissionGrouped])
+def list_permissions_grouped(
+    current_user: User = Depends(PermissionChecker("permission.read")),
+    db: Session = Depends(get_db),
+):
+    """List all permissions grouped by category"""
+    permissions = db.query(Permission).filter(Permission.is_active == True).all()
+
+    # Group by category
+    grouped = {}
+    for perm in permissions:
+        category = perm.category.value
+        if category not in grouped:
+            grouped[category] = []
+        grouped[category].append(PermissionResponse.model_validate(perm))
+
+    return [
+        PermissionGrouped(category=cat, permissions=perms)
+        for cat, perms in sorted(grouped.items())
+    ]
+
+
+@router.get("/{permission_id}", response_model=PermissionResponse)
+def get_permission(
+    permission_id: int,
+    current_user: User = Depends(PermissionChecker("permission.read")),
+    db: Session = Depends(get_db),
+):
+    """Get permission by ID"""
+    permission = db.query(Permission).filter(Permission.id == permission_id).first()
+
+    if not permission:
         raise HTTPException(
-            status_code=400, detail="Permission with this name already exists"
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Permission not found",
         )
 
-    permission = Permission(**permission_in.dict())
+    return PermissionResponse.model_validate(permission)
+
+
+@router.post("/", response_model=PermissionResponse, status_code=status.HTTP_201_CREATED)
+def create_permission(
+    permission_in: PermissionCreate,
+    current_user: User = Depends(PermissionChecker("permission.manage")),
+    db: Session = Depends(get_db),
+):
+    """Create a new permission"""
+    # Check if codename exists
+    existing = db.query(Permission).filter(
+        Permission.codename == permission_in.codename
+    ).first()
+
+    if existing:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Permission with this codename already exists",
+        )
+
+    permission = Permission(
+        name=permission_in.name,
+        codename=permission_in.codename,
+        description=permission_in.description,
+        category=permission_in.category,
+        action=permission_in.action,
+        resource=permission_in.resource,
+        is_active=permission_in.is_active,
+        is_system_permission=False,
+    )
     db.add(permission)
     db.commit()
-    db.refresh(permission)
-    return permission
 
-
-@router.get("/{permission_id}", response_model=PermissionSchema)
-def read_permission(
-    *,
-    db: Session = Depends(get_db),
-    permission_id: int,
-    current_user: User = Depends(require_admin),
-) -> Any:
-    """Get permission (admin only)"""
-    permission = db.query(Permission).filter(Permission.id == permission_id).first()
-    if not permission:
-        raise HTTPException(status_code=404, detail="Permission not found")
-    return permission
-
-
-@router.put("/{permission_id}", response_model=PermissionSchema)
-def update_permission(
-    *,
-    db: Session = Depends(get_db),
-    permission_id: int,
-    permission_in: PermissionUpdate,
-    current_user: User = Depends(require_admin),
-) -> Any:
-    """Update permission (admin only)"""
-    permission = db.query(Permission).filter(Permission.id == permission_id).first()
-    if not permission:
-        raise HTTPException(status_code=404, detail="Permission not found")
-
-    if permission.is_system_permission:
-        raise HTTPException(status_code=400, detail="Cannot modify system permissions")
-
-    permission_data = permission_in.dict(exclude_unset=True)
-    for field, value in permission_data.items():
-        setattr(permission, field, value)
-
-    db.add(permission)
-    db.commit()
-    db.refresh(permission)
-    return permission
+    return PermissionResponse.model_validate(permission)
 
 
 @router.delete("/{permission_id}")
 def delete_permission(
-    *,
-    db: Session = Depends(get_db),
     permission_id: int,
-    current_user: User = Depends(require_admin),
-) -> Any:
-    """Delete permission (admin only)"""
+    current_user: User = Depends(PermissionChecker("permission.manage")),
+    db: Session = Depends(get_db),
+):
+    """Delete a permission"""
     permission = db.query(Permission).filter(Permission.id == permission_id).first()
+
     if not permission:
-        raise HTTPException(status_code=404, detail="Permission not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Permission not found",
+        )
 
     if permission.is_system_permission:
-        raise HTTPException(status_code=400, detail="Cannot delete system permissions")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Cannot delete system permission",
+        )
+
+    # Check if permission is assigned to any role
+    if permission.role_permissions:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Cannot delete permission that is assigned to roles",
+        )
 
     db.delete(permission)
     db.commit()
+
     return {"message": "Permission deleted successfully"}

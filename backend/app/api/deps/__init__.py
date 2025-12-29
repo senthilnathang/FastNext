@@ -1,18 +1,20 @@
-"""
-API Dependencies Module
-Common dependencies for FastAPI endpoints
-"""
+"""API dependencies"""
 
-from .auth import get_current_active_user, get_current_user, require_permissions
-from .database import get_db, get_db_session
-from .pagination import PaginationParams, get_pagination_params
+from app.api.deps.database import get_db
+from app.api.deps.auth import (
+    get_current_user,
+    get_current_active_user,
+    get_current_superuser,
+    get_optional_user,
+)
+from app.api.deps.pagination import PaginationParams, get_pagination
 
 __all__ = [
     "get_db",
-    "get_db_session",
     "get_current_user",
     "get_current_active_user",
-    "require_permissions",
-    "get_pagination_params",
+    "get_current_superuser",
+    "get_optional_user",
     "PaginationParams",
+    "get_pagination",
 ]
