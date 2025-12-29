@@ -18,10 +18,13 @@ from . import (
     cache_management,
     collaboration,
     components,
+    conversations,
     csp,
     data_import_export,
     database_performance,
     events,
+    inbox,
+    messages,
     notifications,
     pages,
     permissions,
@@ -29,6 +32,7 @@ from . import (
     project_members,
     projects,
     projects_rls,
+    reactions,
     rls,
     roles,
     scaling_health,
@@ -133,3 +137,11 @@ v1_router.include_router(cache_management.router, prefix="/cache", tags=["v1-cac
 
 # Horizontal Scaling & Health
 v1_router.include_router(scaling_health.router, prefix="/scaling", tags=["v1-scaling"])
+
+# Messaging System
+v1_router.include_router(messages.router, tags=["v1-messages"])
+v1_router.include_router(conversations.router, tags=["v1-conversations"])
+v1_router.include_router(reactions.router, tags=["v1-reactions"])
+
+# Unified Inbox
+v1_router.include_router(inbox.router, tags=["v1-inbox"])

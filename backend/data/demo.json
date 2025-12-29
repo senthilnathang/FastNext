@@ -1,0 +1,172 @@
+{
+  "_meta": {
+    "version": "1.0.0",
+    "description": "FastNext demo data for development and testing",
+    "created_at": "2025-12-29"
+  },
+  "users": [
+    {
+      "email": "admin@fastnext.dev",
+      "username": "admin",
+      "full_name": "System Administrator",
+      "password": "admin123!",
+      "is_active": true,
+      "is_verified": true,
+      "is_superuser": true,
+      "bio": "FastNext system administrator",
+      "location": "San Francisco, CA"
+    },
+    {
+      "email": "john.manager@fastnext.dev",
+      "username": "john_manager",
+      "full_name": "John Manager",
+      "password": "password123",
+      "is_active": true,
+      "is_verified": true,
+      "is_superuser": false,
+      "role": "manager",
+      "bio": "Project manager with 10+ years experience",
+      "location": "New York, NY"
+    },
+    {
+      "email": "sarah.editor@fastnext.dev",
+      "username": "sarah_editor",
+      "full_name": "Sarah Editor",
+      "password": "password123",
+      "is_active": true,
+      "is_verified": true,
+      "is_superuser": false,
+      "role": "editor",
+      "bio": "Content editor and writer",
+      "location": "Los Angeles, CA"
+    },
+    {
+      "email": "mike.developer@fastnext.dev",
+      "username": "mike_dev",
+      "full_name": "Mike Developer",
+      "password": "password123",
+      "is_active": true,
+      "is_verified": true,
+      "is_superuser": false,
+      "role": "member",
+      "bio": "Full-stack developer",
+      "location": "Seattle, WA"
+    },
+    {
+      "email": "emily.designer@fastnext.dev",
+      "username": "emily_design",
+      "full_name": "Emily Designer",
+      "password": "password123",
+      "is_active": true,
+      "is_verified": true,
+      "is_superuser": false,
+      "role": "member",
+      "bio": "UI/UX designer",
+      "location": "Austin, TX"
+    }
+  ],
+  "projects": [
+    {
+      "name": "FastNext Core",
+      "description": "Core FastNext platform development including backend API, authentication, and base modules.",
+      "owner": "admin",
+      "is_public": false,
+      "settings": {
+        "theme": "default",
+        "notifications_enabled": true
+      },
+      "members": ["john_manager", "mike_dev", "emily_design"]
+    },
+    {
+      "name": "Website Redesign",
+      "description": "Complete redesign of the company website with modern UI/UX.",
+      "owner": "john_manager",
+      "is_public": true,
+      "settings": {
+        "theme": "modern",
+        "notifications_enabled": true
+      },
+      "members": ["sarah_editor", "emily_design"]
+    },
+    {
+      "name": "Mobile App",
+      "description": "React Native mobile application for iOS and Android platforms.",
+      "owner": "john_manager",
+      "is_public": false,
+      "settings": {
+        "theme": "dark",
+        "notifications_enabled": true
+      },
+      "members": ["mike_dev"]
+    }
+  ],
+  "workflow_types": [
+    {
+      "name": "Task Workflow",
+      "description": "Standard workflow for task management",
+      "icon": "CheckSquare",
+      "color": "#3B82F6",
+      "is_active": true
+    },
+    {
+      "name": "Approval Workflow",
+      "description": "Multi-level approval process",
+      "icon": "CheckCircle",
+      "color": "#10B981",
+      "is_active": true
+    },
+    {
+      "name": "Content Review",
+      "description": "Content review and publishing workflow",
+      "icon": "FileText",
+      "color": "#8B5CF6",
+      "is_active": true
+    }
+  ],
+  "notifications": [
+    {
+      "user": "john_manager",
+      "title": "New project created",
+      "message": "A new project 'FastNext Core' has been created and you've been added as a member.",
+      "type": "info"
+    },
+    {
+      "user": "sarah_editor",
+      "title": "Content review needed",
+      "message": "New content is ready for review in the Website Redesign project.",
+      "type": "action"
+    },
+    {
+      "user": "mike_dev",
+      "title": "Build completed",
+      "message": "The latest build has completed successfully.",
+      "type": "success"
+    }
+  ],
+  "messages": [
+    {
+      "model_name": "projects",
+      "record_id": 1,
+      "user": "admin",
+      "subject": "Project kickoff",
+      "body": "Welcome to the FastNext Core project! Let's make sure we follow best practices and deliver high-quality code.",
+      "message_type": "comment"
+    },
+    {
+      "model_name": "projects",
+      "record_id": 1,
+      "user": "john_manager",
+      "subject": "Sprint planning",
+      "body": "We'll be starting our first sprint next Monday. Please make sure to review the backlog items.",
+      "message_type": "comment"
+    },
+    {
+      "model_name": "projects",
+      "record_id": 2,
+      "user": "sarah_editor",
+      "subject": "Content draft ready",
+      "body": "I've completed the first draft of the homepage content. Please review when you have time.",
+      "message_type": "comment"
+    }
+  ]
+}

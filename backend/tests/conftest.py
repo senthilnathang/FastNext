@@ -3,6 +3,7 @@ FastNext Backend Test Configuration
 
 This module provides shared pytest fixtures and test configuration for the FastNext backend.
 Includes database setup, authentication helpers, and common test utilities.
+Uses Factory Boy for model creation.
 """
 
 import asyncio
@@ -27,8 +28,20 @@ from main import create_app
 from sqlalchemy import StaticPool, create_engine
 from sqlalchemy.orm import Session, sessionmaker
 
+# Import Factory Boy factories
+from tests.factories.base import FactorySession
+
 # Test Database Setup
 SQLALCHEMY_DATABASE_URL = "sqlite:///./test.db"
+
+# Make JSONB work with SQLite by treating it as JSON
+from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy import JSON
+from sqlalchemy.ext.compiler import compiles
+
+@compiles(JSONB, "sqlite")
+def compile_jsonb_sqlite(element, compiler, **kw):
+    return compiler.visit_JSON(JSON(), **kw)
 
 engine = create_engine(
     SQLALCHEMY_DATABASE_URL,
@@ -55,10 +68,15 @@ def db() -> Generator[Session, None, None]:
     # Create session
     session = TestingSessionLocal()
 
+    # Set up Factory Boy session
+    FactorySession.set_session(session)
+
     try:
         yield session
     finally:
         session.close()
+        # Clear Factory session
+        FactorySession.clear_session()
         # Drop all tables after test
         Base.metadata.drop_all(bind=engine)
 

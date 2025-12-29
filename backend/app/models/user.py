@@ -39,7 +39,7 @@ class User(AuditableActivityModel):
     website = Column(String(500), nullable=True)
 
     # Relationships
-    projects = relationship("Project", back_populates="owner")
+    projects = relationship("Project", back_populates="owner", foreign_keys="Project.user_id")
     user_roles = relationship(
         "UserRole", foreign_keys="UserRole.user_id", back_populates="user"
     )

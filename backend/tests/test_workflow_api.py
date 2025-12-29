@@ -2,7 +2,7 @@ import pytest
 from app.auth.deps import get_current_active_user
 from app.db.base import Base
 from app.db.session import get_db
-from app.main import app
+from main import app
 from app.models.user import User
 from app.models.workflow import WorkflowState, WorkflowTemplate, WorkflowType
 from fastapi.testclient import TestClient

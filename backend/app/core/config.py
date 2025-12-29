@@ -86,6 +86,20 @@ class Settings(BaseSettings):
         "DETAILED_CHANGE_TRACKING", default=True, cast=bool
     )
 
+    # Module System Configuration
+    MODULES_ENABLED: bool = config("MODULES_ENABLED", default=True, cast=bool)
+    AUTO_DISCOVER_MODULES: bool = config("AUTO_DISCOVER_MODULES", default=True, cast=bool)
+    ADDON_PATHS: List[str] = config(
+        "ADDON_PATHS", default="modules", cast=lambda v: [x.strip() for x in v.split(",")]
+    )
+
+    @property
+    def all_addon_paths(self) -> List:
+        """Get all addon paths as Path objects relative to backend directory."""
+        from pathlib import Path
+        base = Path(__file__).parent.parent.parent  # backend/
+        return [base / p for p in self.ADDON_PATHS]
+
     # Performance Settings
     ENABLE_GZIP_COMPRESSION: bool = config(
         "ENABLE_GZIP_COMPRESSION", default=True, cast=bool

@@ -3,6 +3,7 @@ import time
 import traceback
 from contextlib import asynccontextmanager
 from datetime import datetime
+from pathlib import Path
 
 from app.api.main import api_router
 from app.core.config import settings
@@ -87,9 +88,29 @@ async def lifespan(app: FastAPI):
         logger.error(f"⚠️ Redis/Cache initialization failed: {e}")
         logger.warning("Continuing without Redis caching...")
 
+    # Initialize module system
+    if settings.MODULES_ENABLED:
+        try:
+            await _initialize_modules(app)
+            logger.info("✅ Module system initialized")
+        except Exception as e:
+            logger.error(f"⚠️ Module system initialization failed: {e}")
+            if settings.ENVIRONMENT != "development":
+                raise
+
     yield
 
     # Cleanup
+    # Trigger module shutdown hooks
+    if settings.MODULES_ENABLED:
+        try:
+            from app.core.modules import ModuleRegistry
+            registry = ModuleRegistry.get_registry()
+            await registry.trigger_hook_async("shutdown")
+            logger.info("✅ Module shutdown hooks executed")
+        except Exception as e:
+            logger.error(f"⚠️ Module shutdown error: {e}")
+
     try:
         from app.core.redis_config import shutdown_redis
 
@@ -99,6 +120,127 @@ async def lifespan(app: FastAPI):
         logger.error(f"❌ Redis cleanup failed: {e}")
 
     logger.info("🛑 Shutting down FastNext Framework...")
+
+
+async def _ensure_base_module_installed(loader):
+    """Ensure the base module is installed in the database.
+
+    This runs on every startup to ensure the base module record exists,
+    even for databases that were created before the module system was added.
+    """
+    from app.db.session import SessionLocal
+
+    try:
+        from modules.base.models.module import InstalledModule, serialize_manifest
+
+        db = SessionLocal()
+        try:
+            # Check if base module is already installed
+            existing = db.query(InstalledModule).filter(
+                InstalledModule.name == "base"
+            ).first()
+
+            if existing:
+                logger.debug("Base module already installed in database")
+                return
+
+            # Load manifest and create record
+            loader.discover_modules()
+            module_path = loader.get_module_path("base")
+
+            if not module_path:
+                logger.warning("Base module not found in addon paths")
+                return
+
+            manifest = loader.load_manifest(module_path)
+
+            base_module = InstalledModule(
+                name="base",
+                display_name=manifest.get("name", "Base"),
+                version=manifest.get("version", "1.0.0"),
+                summary=manifest.get("summary", "FastNext Base Module"),
+                description=manifest.get("description", ""),
+                author=manifest.get("author", "FastNext Team"),
+                website=manifest.get("website", ""),
+                category=manifest.get("category", "Technical"),
+                license=manifest.get("license", "MIT"),
+                application=manifest.get("application", False),
+                state="installed",
+                depends=[],
+                manifest_cache=serialize_manifest(manifest),
+                module_path=str(module_path),
+                auto_install=True,
+            )
+
+            db.add(base_module)
+            db.commit()
+            logger.info("Base module installed in database")
+
+        finally:
+            db.close()
+
+    except Exception as e:
+        logger.warning(f"Could not ensure base module installation: {e}")
+
+
+async def _initialize_modules(app: FastAPI):
+    """Initialize the module system and load all modules."""
+    from app.core.modules import ModuleRegistry, ModuleLoader
+    from fastapi.staticfiles import StaticFiles
+
+    logger.info("Initializing module system...")
+    logger.info(f"Addon paths: {settings.ADDON_PATHS}")
+
+    # Ensure module directories exist
+    for addon_path in settings.all_addon_paths:
+        addon_path.mkdir(parents=True, exist_ok=True)
+
+    # Create registry and loader
+    registry = ModuleRegistry.get_registry()
+    loader = ModuleLoader(settings.all_addon_paths, registry)
+
+    # Ensure base module is installed in database
+    await _ensure_base_module_installed(loader)
+
+    # Discover and load modules
+    try:
+        discovered = loader.discover_modules()
+        logger.info(f"Discovered {len(discovered)} modules: {discovered}")
+
+        if settings.AUTO_DISCOVER_MODULES:
+            loaded = loader.load_all_modules()
+            logger.info(f"Loaded {len(loaded)} modules")
+
+            # Mount module routers and static files
+            for module_info in loaded:
+                # Mount API routers
+                for router in module_info.routers:
+                    prefix = f"{settings.API_V1_STR}/{module_info.name}"
+                    app.include_router(
+                        router,
+                        prefix=prefix,
+                        tags=[module_info.manifest.name],
+                    )
+                    logger.debug(f"Mounted router for {module_info.name} at {prefix}")
+
+                # Mount static files
+                static_path = module_info.path / "static"
+                if static_path.exists() and static_path.is_dir():
+                    mount_path = f"/modules/{module_info.name}/static"
+                    app.mount(
+                        mount_path,
+                        StaticFiles(directory=static_path),
+                        name=f"{module_info.name}_static",
+                    )
+                    logger.debug(f"Mounted static files for {module_info.name} at {mount_path}")
+
+        # Trigger startup hooks
+        await registry.trigger_hook_async("startup")
+        logger.info("Module system initialized successfully")
+
+    except Exception as e:
+        logger.error(f"Failed to initialize modules: {e}")
+        raise
 
 
 def create_app() -> FastAPI:
@@ -159,6 +301,7 @@ Use the **Authorize** button below to authenticate with your JWT token:
             },
             {"name": "Audit Trails", "description": "📋 Change history and audit logs"},
             {"name": "Assets", "description": "🖼️ File and asset management"},
+            {"name": "Modules", "description": "🧩 Module management and configuration"},
         ],
         swagger_ui_parameters={
             "deepLinking": True,

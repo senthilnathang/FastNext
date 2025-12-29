@@ -25,7 +25,7 @@ class Project(AuditableActivityModel):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
-    owner = relationship("User", back_populates="projects")
+    owner = relationship("User", back_populates="projects", foreign_keys=[user_id])
     pages = relationship("Page", back_populates="project", cascade="all, delete-orphan")
     components = relationship(
         "Component", back_populates="project", cascade="all, delete-orphan"
