@@ -1,71 +1,60 @@
 """
-Factory Boy factories for FastNext models.
+FastVue Test Factories
+
+Provides Factory Boy factories for generating test data.
 
 Usage:
-    from tests.factories import UserFactory, RoleFactory
+    from tests.factories import UserFactory, CompanyFactory
 
-    # Create single instance
     user = UserFactory()
-
-    # Create batch
-    users = UserFactory.create_batch(5)
-
-    # Build without saving
-    user = UserFactory.build()
-
-    # Override attributes
-    user = UserFactory(email="custom@test.com", is_superuser=True)
+    admin = AdminUserFactory()
+    company = CompanyFactory()
 """
 
+from tests.factories.base import (
+    BaseFactory,
+    fake,
+    set_session,
+    get_session,
+)
 from tests.factories.user import (
     UserFactory,
     AdminUserFactory,
-    RegularUserFactory,
     InactiveUserFactory,
+    UnverifiedUserFactory,
+    LockedUserFactory,
+    UserWithCompanyFactory,
 )
-from tests.factories.role import RoleFactory, SystemRoleFactory
-from tests.factories.permission import PermissionFactory, RolePermissionFactory
-from tests.factories.project import ProjectFactory, ProjectMemberFactory
-from tests.factories.message import (
-    MessageFactory,
-    ConversationFactory,
-    ConversationParticipantFactory,
-    MentionFactory,
-    MessageReactionFactory,
+from tests.factories.company import (
+    CompanyFactory,
+    InactiveCompanyFactory,
 )
-from tests.factories.inbox import InboxItemFactory, LabelFactory
-from tests.factories.workflow import (
-    WorkflowStateFactory,
-    WorkflowTypeFactory,
-    WorkflowTemplateFactory,
+from tests.factories.role import (
+    RoleFactory,
+    SystemRoleFactory,
+    AdminRoleFactory,
+    PermissionFactory,
 )
 
 __all__ = [
-    # User factories
+    # Base
+    "BaseFactory",
+    "fake",
+    "set_session",
+    "get_session",
+    # Users
     "UserFactory",
     "AdminUserFactory",
-    "RegularUserFactory",
     "InactiveUserFactory",
-    # Role factories
+    "UnverifiedUserFactory",
+    "LockedUserFactory",
+    "UserWithCompanyFactory",
+    # Companies
+    "CompanyFactory",
+    "InactiveCompanyFactory",
+    # Roles & Permissions
     "RoleFactory",
     "SystemRoleFactory",
-    # Permission factories
+    "AdminRoleFactory",
     "PermissionFactory",
-    "RolePermissionFactory",
-    # Project factories
-    "ProjectFactory",
-    "ProjectMemberFactory",
-    # Message factories
-    "MessageFactory",
-    "ConversationFactory",
-    "ConversationParticipantFactory",
-    "MentionFactory",
-    "MessageReactionFactory",
-    # Inbox factories
-    "InboxItemFactory",
-    "LabelFactory",
-    # Workflow factories
-    "WorkflowStateFactory",
-    "WorkflowTypeFactory",
-    "WorkflowTemplateFactory",
 ]

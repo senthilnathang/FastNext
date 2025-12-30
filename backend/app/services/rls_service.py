@@ -373,7 +373,7 @@ class RLSService:
     def _get_user_permissions(self, user_id: int) -> List[str]:
         """Get user permissions"""
         from app.models.permission import Permission
-        from app.models.user_company_role import RolePermission
+        from app.models.user_role import RolePermission
 
         permissions = (
             self.db.query(Permission.name)

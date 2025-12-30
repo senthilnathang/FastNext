@@ -1,70 +1,83 @@
 """
-User factories for testing.
+User Factory for FastVue Tests
+
+Provides factories for creating User instances with realistic test data.
 """
 
 import factory
-from factory import LazyAttribute, Sequence, SubFactory
+from faker import Faker
 
 from app.core.security import get_password_hash
-from app.models.user import User
-from tests.factories.base import SQLAlchemyModelFactory
+from app.models import User
+from tests.factories.base import BaseFactory
+
+fake = Faker()
 
 
-class UserFactory(SQLAlchemyModelFactory):
-    """Factory for creating User instances."""
+class UserFactory(BaseFactory):
+    """Factory for creating regular User instances."""
 
     class Meta:
         model = User
+        sqlalchemy_get_or_create = ("email",)
 
-    email = Sequence(lambda n: f"user{n}@test.com")
-    username = Sequence(lambda n: f"user{n}")
-    full_name = factory.Faker("name")
-    hashed_password = LazyAttribute(lambda _: get_password_hash("testpassword123"))
+    email = factory.LazyAttribute(lambda _: fake.unique.email())
+    username = factory.LazyAttribute(lambda _: fake.unique.user_name())
+    full_name = factory.LazyAttribute(lambda _: fake.name())
+    hashed_password = factory.LazyAttribute(
+        lambda _: get_password_hash("TestPass123!")
+    )
     is_active = True
     is_verified = True
     is_superuser = False
-    failed_login_attempts = 0
-    avatar_url = factory.Faker("image_url")
-    bio = factory.Faker("text", max_nb_chars=200)
-    location = factory.Faker("city")
-    website = factory.Faker("url")
+    phone = factory.LazyAttribute(lambda _: fake.phone_number()[:20])
+    bio = factory.LazyAttribute(lambda _: fake.text(max_nb_chars=200))
 
-    class Params:
-        """Traits for common user configurations."""
-
-        with_profile = factory.Trait(
-            avatar_url=factory.Faker("image_url"),
-            bio=factory.Faker("text", max_nb_chars=200),
-            location=factory.Faker("city"),
-            website=factory.Faker("url"),
-        )
-        locked = factory.Trait(
-            failed_login_attempts=5,
-            locked_until=factory.Faker(
-                "future_datetime", end_date="+1h", tzinfo=None
-            ),
-        )
+    @classmethod
+    def _create(cls, model_class, *args, **kwargs):
+        """Reset faker's unique tracker to avoid collisions across tests."""
+        return super()._create(model_class, *args, **kwargs)
 
 
 class AdminUserFactory(UserFactory):
-    """Factory for creating admin users."""
+    """Factory for creating superuser/admin User instances."""
 
-    email = Sequence(lambda n: f"admin{n}@test.com")
-    username = Sequence(lambda n: f"admin{n}")
-    full_name = factory.Faker("name")
     is_superuser = True
-    is_verified = True
-
-
-class RegularUserFactory(UserFactory):
-    """Factory for creating regular users."""
-
-    is_superuser = False
-    is_verified = True
+    email = factory.LazyAttribute(lambda _: f"admin_{fake.unique.email()}")
+    username = factory.LazyAttribute(lambda _: f"admin_{fake.unique.user_name()}")
 
 
 class InactiveUserFactory(UserFactory):
-    """Factory for creating inactive users."""
+    """Factory for creating inactive User instances."""
 
     is_active = False
+
+
+class UnverifiedUserFactory(UserFactory):
+    """Factory for creating unverified User instances."""
+
     is_verified = False
+
+
+class LockedUserFactory(UserFactory):
+    """Factory for creating locked User instances."""
+
+    failed_login_attempts = 5
+
+    @factory.lazy_attribute
+    def locked_until(self):
+        from datetime import datetime, timedelta, timezone
+        return datetime.now(timezone.utc) + timedelta(hours=1)
+
+
+class UserWithCompanyFactory(UserFactory):
+    """Factory for creating User with company assignment."""
+
+    @factory.post_generation
+    def company(self, create, extracted, **kwargs):
+        if not create:
+            return
+
+        if extracted:
+            # A company was passed in
+            self.current_company_id = extracted.id

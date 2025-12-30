@@ -1,376 +1,414 @@
 """
-FastNext Backend Test Configuration
+Pytest configuration and fixtures for FastVue backend tests.
 
-This module provides shared pytest fixtures and test configuration for the FastNext backend.
-Includes database setup, authentication helpers, and common test utilities.
-Uses Factory Boy for model creation.
+Provides fixtures for:
+- Database sessions (SQLite in-memory)
+- Async HTTP client (httpx.AsyncClient)
+- Authenticated/admin clients
+- Test users, companies, roles
+- Mock services (Redis, cache)
 """
 
-import asyncio
-import os
-import tempfile
-from typing import Any, Dict, Generator
-from unittest.mock import patch
-
 import pytest
-from app.core.config import settings
-from app.core.security import create_access_token, get_password_hash
+from typing import AsyncGenerator, Generator
+from unittest.mock import MagicMock
+
+import httpx
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker, Session
+from sqlalchemy.pool import StaticPool
+
 from app.db.base import Base
-from app.db.session import get_db
-from app.models.permission import Permission
-from app.models.role import Role
-from app.models.user import User
-from app.models.workflow import WorkflowState, WorkflowType
-from fastapi import FastAPI
-from fastapi.testclient import TestClient
-from httpx import AsyncClient
-from main import create_app
-from sqlalchemy import StaticPool, create_engine
-from sqlalchemy.orm import Session, sessionmaker
+from app.core.config import settings
+from app.core.security import get_password_hash, create_access_token
+from app.models import User, Company, Role, Permission
 
-# Import Factory Boy factories
-from tests.factories.base import FactorySession
 
-# Test Database Setup
-SQLALCHEMY_DATABASE_URL = "sqlite:///./test.db"
+# =============================================================================
+# JSONB COMPATIBILITY FOR SQLITE
+# =============================================================================
 
-# Make JSONB work with SQLite by treating it as JSON
-from sqlalchemy.dialects.postgresql import JSONB
+# SQLite doesn't support JSONB, so we need to compile it as JSON
+from sqlalchemy.dialects import postgresql
 from sqlalchemy import JSON
+
+# Register a type adapter to compile JSONB as JSON for SQLite
 from sqlalchemy.ext.compiler import compiles
 
-@compiles(JSONB, "sqlite")
+@compiles(postgresql.JSONB, "sqlite")
 def compile_jsonb_sqlite(element, compiler, **kw):
     return compiler.visit_JSON(JSON(), **kw)
 
-engine = create_engine(
-    SQLALCHEMY_DATABASE_URL,
-    connect_args={"check_same_thread": False},
-    poolclass=StaticPool,
-)
-TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
+# =============================================================================
+# DATABASE FIXTURES
+# =============================================================================
 
+# Session-scoped engine to avoid recreating tables for each test
 @pytest.fixture(scope="session")
-def event_loop():
-    """Create an instance of the default event loop for the test session."""
-    loop = asyncio.get_event_loop_policy().new_event_loop()
-    yield loop
-    loop.close()
+def engine():
+    """Create a test database engine using SQLite in-memory (session-scoped)"""
+    engine = create_engine(
+        "sqlite:///:memory:",
+        connect_args={"check_same_thread": False},
+        poolclass=StaticPool,
+    )
+    # Create all tables once at session start
+    Base.metadata.create_all(bind=engine)
+    yield engine
+    engine.dispose()
 
 
 @pytest.fixture(scope="function")
-def db() -> Generator[Session, None, None]:
-    """Create a fresh database for each test."""
-    # Create all tables
-    Base.metadata.create_all(bind=engine)
-
-    # Create session
+def db_session(engine) -> Generator[Session, None, None]:
+    """Create a fresh database session for each test with transaction rollback"""
+    connection = engine.connect()
+    transaction = connection.begin()
+    TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=connection)
     session = TestingSessionLocal()
 
-    # Set up Factory Boy session
-    FactorySession.set_session(session)
+    # Start a nested transaction for automatic rollback
+    nested = connection.begin_nested()
 
     try:
         yield session
     finally:
         session.close()
-        # Clear Factory session
-        FactorySession.clear_session()
-        # Drop all tables after test
-        Base.metadata.drop_all(bind=engine)
+        # Rollback any changes made during the test
+        if nested.is_active:
+            nested.rollback()
+        if transaction.is_active:
+            transaction.rollback()
+        connection.close()
 
 
 @pytest.fixture(scope="function")
-def app(db: Session) -> FastAPI:
-    """Create FastAPI app with test database."""
-
-    def get_test_db():
-        try:
-            yield db
-        finally:
-            pass
-
-    # Create app
-    test_app = create_app()
-
-    # Override database dependency
-    test_app.dependency_overrides[get_db] = get_test_db
-
-    return test_app
+def db(db_session) -> Session:
+    """Alias for db_session"""
+    return db_session
 
 
-@pytest.fixture(scope="function")
-def client(app: FastAPI) -> TestClient:
-    """Create test client."""
-    return TestClient(app)
-
-
-@pytest.fixture(scope="function")
-async def async_client(app: FastAPI) -> AsyncClient:
-    """Create async test client."""
-    async with AsyncClient(app=app, base_url="http://test") as ac:
-        yield ac
-
+# =============================================================================
+# USER FIXTURES
+# =============================================================================
 
 @pytest.fixture
-def admin_user(db: Session) -> User:
-    """Create admin user for testing."""
+def test_user(db_session: Session) -> User:
+    """Create a test user"""
     user = User(
-        email="admin@test.com",
-        username="admin",
-        full_name="Test Admin",
-        hashed_password=get_password_hash("testpassword"),
-        is_active=True,
-        is_superuser=True,
-        is_verified=True,
-    )
-    db.add(user)
-    db.commit()
-    db.refresh(user)
-    return user
-
-
-@pytest.fixture
-def regular_user(db: Session) -> User:
-    """Create regular user for testing."""
-    user = User(
-        email="user@test.com",
-        username="user",
+        email="test@example.com",
+        username="testuser",
         full_name="Test User",
-        hashed_password=get_password_hash("testpassword"),
+        hashed_password="$2b$12$test_hashed_password",
         is_active=True,
-        is_superuser=False,
         is_verified=True,
-    )
-    db.add(user)
-    db.commit()
-    db.refresh(user)
-    return user
-
-
-@pytest.fixture
-def inactive_user(db: Session) -> User:
-    """Create inactive user for testing."""
-    user = User(
-        email="inactive@test.com",
-        username="inactive",
-        full_name="Inactive User",
-        hashed_password=get_password_hash("testpassword"),
-        is_active=False,
         is_superuser=False,
-        is_verified=False,
     )
-    db.add(user)
-    db.commit()
-    db.refresh(user)
+    db_session.add(user)
+    db_session.commit()
+    db_session.refresh(user)
     return user
 
 
 @pytest.fixture
-def admin_token(admin_user: User) -> str:
-    """Create JWT token for admin user."""
-    return create_access_token(data={"sub": str(admin_user.id)})
-
-
-@pytest.fixture
-def user_token(regular_user: User) -> str:
-    """Create JWT token for regular user."""
-    return create_access_token(data={"sub": str(regular_user.id)})
-
-
-@pytest.fixture
-def admin_headers(admin_token: str) -> Dict[str, str]:
-    """Create headers with admin authorization."""
-    return {"Authorization": f"Bearer {admin_token}"}
-
-
-@pytest.fixture
-def user_headers(user_token: str) -> Dict[str, str]:
-    """Create headers with user authorization."""
-    return {"Authorization": f"Bearer {user_token}"}
-
-
-@pytest.fixture
-def sample_role(db: Session) -> Role:
-    """Create sample role for testing."""
-    role = Role(
-        name="test_role", description="Test Role", is_active=True, is_system_role=False
+def admin_user(db_session: Session) -> User:
+    """Create an admin user"""
+    user = User(
+        email="admin@example.com",
+        username="admin",
+        full_name="Admin User",
+        hashed_password="$2b$12$admin_hashed_password",
+        is_active=True,
+        is_verified=True,
+        is_superuser=True,
     )
-    db.add(role)
-    db.commit()
-    db.refresh(role)
+    db_session.add(user)
+    db_session.commit()
+    db_session.refresh(user)
+    return user
+
+
+# =============================================================================
+# COMPANY FIXTURES
+# =============================================================================
+
+@pytest.fixture
+def test_company(db_session: Session) -> Company:
+    """Create a test company"""
+    company = Company(
+        name="Test Company",
+        code="TEST",
+        is_active=True,
+    )
+    db_session.add(company)
+    db_session.commit()
+    db_session.refresh(company)
+    return company
+
+
+# =============================================================================
+# ROLE FIXTURES
+# =============================================================================
+
+@pytest.fixture
+def admin_role(db_session: Session) -> Role:
+    """Create an admin role"""
+    role = Role(
+        name="Admin",
+        codename="admin",
+        description="Administrator role",
+        is_system_role=True,
+        is_active=True,
+    )
+    db_session.add(role)
+    db_session.commit()
+    db_session.refresh(role)
     return role
 
 
 @pytest.fixture
-def sample_permission(db: Session) -> Permission:
-    """Create sample permission for testing."""
-    permission = Permission(
-        name="test_permission",
-        description="Test Permission",
-        action="read",
-        resource="test",
-        category="test",
-        is_system_permission=False,
-    )
-    db.add(permission)
-    db.commit()
-    db.refresh(permission)
-    return permission
-
-
-@pytest.fixture
-def sample_workflow_type(db: Session, admin_user: User) -> WorkflowType:
-    """Create sample workflow type for testing."""
-    workflow_type = WorkflowType(
-        name="Test Workflow",
-        description="Test workflow type",
-        icon="TestIcon",
-        color="#FF0000",
+def viewer_role(db_session: Session) -> Role:
+    """Create a viewer role"""
+    role = Role(
+        name="Viewer",
+        codename="viewer",
+        description="Read-only role",
+        is_system_role=True,
         is_active=True,
-        created_by=admin_user.id,
     )
-    db.add(workflow_type)
-    db.commit()
-    db.refresh(workflow_type)
-    return workflow_type
+    db_session.add(role)
+    db_session.commit()
+    db_session.refresh(role)
+    return role
+
+
+# =============================================================================
+# MOCK FIXTURES
+# =============================================================================
+
+@pytest.fixture
+def mock_redis():
+    """Create a mock Redis client"""
+    mock = MagicMock()
+    mock.get.return_value = None
+    mock.set.return_value = True
+    mock.delete.return_value = True
+    return mock
 
 
 @pytest.fixture
-def sample_workflow_state(db: Session) -> WorkflowState:
-    """Create sample workflow state for testing."""
-    state = WorkflowState(
-        name="test_state",
-        label="Test State",
-        description="Test workflow state",
-        color="#00FF00",
-        bg_color="#CCFFCC",
-        icon="TestIcon",
-        is_initial=True,
-        is_final=False,
+def mock_cache(mock_redis):
+    """Create a mock cache service"""
+    from app.core.cache import CacheService
+    cache = CacheService()
+    cache.redis = mock_redis
+    return cache
+
+
+# =============================================================================
+# REQUEST CONTEXT FIXTURES
+# =============================================================================
+
+@pytest.fixture
+def mock_request_context(test_user: User, test_company: Company):
+    """Create a mock request context"""
+    from app.core.context import RequestContext, set_request_context, clear_request_context
+
+    context = RequestContext(
+        user_id=test_user.id,
+        company_id=test_company.id,
+        ip_address="127.0.0.1",
+        user_agent="pytest",
+        request_id="test-request-id",
     )
-    db.add(state)
-    db.commit()
-    db.refresh(state)
-    return state
+    set_request_context(context)
+    yield context
+    clear_request_context()
+
+
+# =============================================================================
+# ASYNC CLIENT FIXTURES
+# =============================================================================
+
+@pytest.fixture
+def test_password() -> str:
+    """Standard test password that meets validation requirements"""
+    return "TestPass123!"
 
 
 @pytest.fixture
-def temp_file():
-    """Create temporary file for testing."""
-    with tempfile.NamedTemporaryFile(delete=False) as tmp:
-        yield tmp.name
-    os.unlink(tmp.name)
+def test_user_with_password(db_session: Session, test_password: str) -> User:
+    """Create a test user with a real hashed password for auth testing"""
+    user = User(
+        email="authtest@example.com",
+        username="authtest",
+        full_name="Auth Test User",
+        hashed_password=get_password_hash(test_password),
+        is_active=True,
+        is_verified=True,
+        is_superuser=False,
+    )
+    db_session.add(user)
+    db_session.commit()
+    db_session.refresh(user)
+    return user
 
 
 @pytest.fixture
-def mock_settings():
-    """Mock settings for testing."""
-    test_settings = {
-        "SECRET_KEY": "test-secret-key",
-        "ACCESS_TOKEN_EXPIRE_MINUTES": 30,
-        "SQLALCHEMY_DATABASE_URL": "sqlite:///./test.db",
-    }
-
-    with patch.object(settings, "__dict__", test_settings):
-        yield test_settings
-
-
-class TestDataFactory:
-    """Factory for creating test data."""
-
-    @staticmethod
-    def create_user_data(**kwargs) -> Dict[str, Any]:
-        """Create user data for testing."""
-        default_data = {
-            "email": "test@example.com",
-            "username": "testuser",
-            "full_name": "Test User",
-            "password": "testpassword123",
-            "is_active": True,
-        }
-        default_data.update(kwargs)
-        return default_data
-
-    @staticmethod
-    def create_role_data(**kwargs) -> Dict[str, Any]:
-        """Create role data for testing."""
-        default_data = {
-            "name": "test_role",
-            "description": "Test Role Description",
-            "is_active": True,
-        }
-        default_data.update(kwargs)
-        return default_data
-
-    @staticmethod
-    def create_permission_data(**kwargs) -> Dict[str, Any]:
-        """Create permission data for testing."""
-        default_data = {
-            "name": "test_permission",
-            "description": "Test Permission Description",
-            "action": "read",
-            "resource": "test_resource",
-            "category": "test",
-        }
-        default_data.update(kwargs)
-        return default_data
-
-    @staticmethod
-    def create_workflow_type_data(**kwargs) -> Dict[str, Any]:
-        """Create workflow type data for testing."""
-        default_data = {
-            "name": "Test Workflow Type",
-            "description": "Test workflow type description",
-            "icon": "TestIcon",
-            "color": "#3B82F6",
-        }
-        default_data.update(kwargs)
-        return default_data
+def admin_user_with_password(db_session: Session, test_password: str) -> User:
+    """Create an admin user with a real hashed password"""
+    user = User(
+        email="authadmin@example.com",
+        username="authadmin",
+        full_name="Auth Admin User",
+        hashed_password=get_password_hash(test_password),
+        is_active=True,
+        is_verified=True,
+        is_superuser=True,
+    )
+    db_session.add(user)
+    db_session.commit()
+    db_session.refresh(user)
+    return user
 
 
 @pytest.fixture
-def test_data_factory():
-    """Provide test data factory."""
-    return TestDataFactory
-
-
-# Test utilities
-class TestUtils:
-    """Utility functions for testing."""
-
-    @staticmethod
-    def assert_response_success(response, expected_status=200):
-        """Assert response is successful."""
-        assert response.status_code == expected_status
-        assert response.headers["content-type"] == "application/json"
-
-    @staticmethod
-    def assert_response_error(response, expected_status=400):
-        """Assert response is an error."""
-        assert response.status_code == expected_status
-        data = response.json()
-        assert "success" in data
-        assert data["success"] is False
-        assert "error" in data
-
-    @staticmethod
-    def assert_pagination_response(response, expected_total=None):
-        """Assert response has pagination structure."""
-        TestUtils.assert_response_success(response)
-        data = response.json()
-        assert "items" in data
-        assert "total" in data
-        assert "page" in data
-        assert "pages" in data
-        assert "size" in data
-
-        if expected_total is not None:
-            assert data["total"] == expected_total
+def access_token(test_user_with_password: User) -> str:
+    """Create a valid access token for the test user"""
+    return create_access_token(user_id=test_user_with_password.id)
 
 
 @pytest.fixture
-def test_utils():
-    """Provide test utilities."""
-    return TestUtils
+def admin_access_token(admin_user_with_password: User) -> str:
+    """Create a valid access token for the admin user"""
+    return create_access_token(user_id=admin_user_with_password.id)
+
+
+@pytest.fixture
+async def async_client(db_session: Session) -> AsyncGenerator[httpx.AsyncClient, None]:
+    """
+    Create an async HTTP client for testing endpoints.
+
+    Overrides the get_db dependency to use the test database session.
+    Clears rate limit cache before each test.
+    """
+    from main import app
+    from app.api.deps.database import get_db
+
+    # Clear rate limiting windows before each test
+    try:
+        from app.middleware.rate_limiting import _rate_limiter
+        _rate_limiter._windows.clear()
+    except (ImportError, AttributeError):
+        pass
+
+    def override_get_db():
+        try:
+            yield db_session
+        finally:
+            pass  # Session cleanup handled by db_session fixture
+
+    app.dependency_overrides[get_db] = override_get_db
+
+    async with httpx.AsyncClient(
+        transport=httpx.ASGITransport(app=app),
+        base_url="http://testserver",
+    ) as client:
+        yield client
+
+    app.dependency_overrides.clear()
+
+
+@pytest.fixture
+async def authenticated_client(
+    async_client: httpx.AsyncClient,
+    access_token: str,
+) -> httpx.AsyncClient:
+    """
+    Create an authenticated async client with valid JWT token.
+    """
+    async_client.headers["Authorization"] = f"Bearer {access_token}"
+    return async_client
+
+
+@pytest.fixture
+async def admin_client(
+    async_client: httpx.AsyncClient,
+    admin_access_token: str,
+) -> httpx.AsyncClient:
+    """
+    Create an authenticated async client with admin/superuser token.
+    """
+    async_client.headers["Authorization"] = f"Bearer {admin_access_token}"
+    return async_client
+
+
+# =============================================================================
+# LOCKED USER FIXTURES
+# =============================================================================
+
+@pytest.fixture
+def locked_user(db_session: Session, test_password: str) -> User:
+    """Create a locked user for testing lockout behavior"""
+    from datetime import datetime, timedelta, timezone
+
+    # Note: For SQLite testing, we need to mock the is_locked method or
+    # skip these tests. For now, use a naive datetime and rely on the
+    # model's locked check being handled appropriately.
+    future_time = datetime.now(timezone.utc) + timedelta(hours=1)
+    user = User(
+        email="locked@example.com",
+        username="lockeduser",
+        full_name="Locked User",
+        hashed_password=get_password_hash(test_password),
+        is_active=True,
+        is_verified=True,
+        is_superuser=False,
+        failed_login_attempts=5,
+        locked_until=future_time,
+    )
+    db_session.add(user)
+    db_session.commit()
+    db_session.refresh(user)
+    # Restore timezone info that SQLite strips
+    user.locked_until = future_time
+    return user
+
+
+@pytest.fixture
+def inactive_user(db_session: Session, test_password: str) -> User:
+    """Create an inactive user for testing"""
+    user = User(
+        email="inactive@example.com",
+        username="inactiveuser",
+        full_name="Inactive User",
+        hashed_password=get_password_hash(test_password),
+        is_active=False,
+        is_verified=True,
+        is_superuser=False,
+    )
+    db_session.add(user)
+    db_session.commit()
+    db_session.refresh(user)
+    return user
+
+
+# =============================================================================
+# FACTORY SESSION FIXTURE
+# =============================================================================
+
+@pytest.fixture(autouse=True)
+def _set_factory_session(db_session: Session):
+    """
+    Automatically set the SQLAlchemy session for all factories.
+
+    This fixture runs for every test and sets the session on all
+    Factory Boy factories that use SQLAlchemyModelFactory.
+    """
+    try:
+        from tests.factories import set_session
+        set_session(db_session)
+        yield
+    except ImportError:
+        # Factories not yet created
+        yield

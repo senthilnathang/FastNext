@@ -1,172 +1,714 @@
 {
   "_meta": {
     "version": "1.0.0",
-    "description": "FastNext demo data for development and testing",
-    "created_at": "2025-12-29"
+    "description": "FastVue Framework Demo Data",
+    "created_at": "2025-01-01T00:00:00Z",
+    "author": "FastVue Team"
   },
+  "companies": [
+    {
+      "id": 1,
+      "name": "Default Company",
+      "code": "DEFAULT",
+      "description": "Default company for initial setup",
+      "is_headquarters": true,
+      "is_active": true,
+      "address": "123 Main Street",
+      "city": "New York",
+      "state": "NY",
+      "country": "USA",
+      "zip_code": "10001",
+      "phone": "+1-555-0100",
+      "email": "info@default-company.com",
+      "website": "https://default-company.com",
+      "timezone": "America/New_York",
+      "currency": "USD",
+      "date_format": "YYYY-MM-DD",
+      "time_format": "HH:mm:ss"
+    },
+    {
+      "id": 2,
+      "name": "Acme Corporation",
+      "code": "ACME",
+      "description": "Leading technology solutions provider",
+      "is_headquarters": true,
+      "is_active": true,
+      "address": "456 Innovation Drive",
+      "city": "San Francisco",
+      "state": "CA",
+      "country": "USA",
+      "zip_code": "94102",
+      "phone": "+1-555-0200",
+      "email": "contact@acme-corp.com",
+      "website": "https://acme-corp.com",
+      "timezone": "America/Los_Angeles",
+      "currency": "USD",
+      "date_format": "MM/DD/YYYY",
+      "time_format": "hh:mm A"
+    },
+    {
+      "id": 3,
+      "name": "Acme Corp - East Branch",
+      "code": "ACME-EAST",
+      "description": "East coast branch office",
+      "parent_company_code": "ACME",
+      "is_headquarters": false,
+      "is_active": true,
+      "address": "789 Commerce Blvd",
+      "city": "Boston",
+      "state": "MA",
+      "country": "USA",
+      "zip_code": "02101",
+      "phone": "+1-555-0201",
+      "email": "east@acme-corp.com",
+      "timezone": "America/New_York",
+      "currency": "USD"
+    },
+    {
+      "id": 4,
+      "name": "Global Tech Solutions",
+      "code": "GTS",
+      "description": "International software consulting firm",
+      "is_headquarters": true,
+      "is_active": true,
+      "address": "100 Tech Park",
+      "city": "London",
+      "state": "Greater London",
+      "country": "UK",
+      "zip_code": "EC1A 1BB",
+      "phone": "+44-20-7946-0958",
+      "email": "info@globaltech.co.uk",
+      "website": "https://globaltech.co.uk",
+      "timezone": "Europe/London",
+      "currency": "GBP",
+      "date_format": "DD/MM/YYYY",
+      "time_format": "HH:mm"
+    }
+  ],
   "users": [
     {
-      "email": "admin@fastnext.dev",
+      "id": 1,
+      "email": "admin@fastvue.com",
       "username": "admin",
       "full_name": "System Administrator",
       "password": "admin123",
       "is_active": true,
       "is_verified": true,
       "is_superuser": true,
-      "bio": "FastNext system administrator",
-      "location": "San Francisco, CA"
+      "current_company_code": "DEFAULT",
+      "timezone": "UTC",
+      "language": "en"
     },
     {
-      "email": "john.manager@fastnext.dev",
-      "username": "john_manager",
-      "full_name": "John Manager",
+      "id": 2,
+      "email": "john.doe@acme-corp.com",
+      "username": "johndoe",
+      "full_name": "John Doe",
       "password": "password123",
       "is_active": true,
       "is_verified": true,
       "is_superuser": false,
-      "role": "manager",
-      "bio": "Project manager with 10+ years experience",
-      "location": "New York, NY"
+      "current_company_code": "ACME",
+      "phone": "+1-555-0102",
+      "bio": "Senior Software Engineer with 10 years of experience",
+      "location": "San Francisco, CA",
+      "timezone": "America/Los_Angeles",
+      "language": "en"
     },
     {
-      "email": "sarah.editor@fastnext.dev",
-      "username": "sarah_editor",
-      "full_name": "Sarah Editor",
+      "id": 3,
+      "email": "jane.smith@acme-corp.com",
+      "username": "janesmith",
+      "full_name": "Jane Smith",
       "password": "password123",
       "is_active": true,
       "is_verified": true,
       "is_superuser": false,
-      "role": "editor",
-      "bio": "Content editor and writer",
-      "location": "Los Angeles, CA"
+      "current_company_code": "ACME",
+      "phone": "+1-555-0103",
+      "bio": "HR Manager specializing in talent acquisition",
+      "location": "San Francisco, CA",
+      "timezone": "America/Los_Angeles",
+      "language": "en"
     },
     {
-      "email": "mike.developer@fastnext.dev",
-      "username": "mike_dev",
-      "full_name": "Mike Developer",
+      "id": 4,
+      "email": "bob.wilson@acme-corp.com",
+      "username": "bobwilson",
+      "full_name": "Bob Wilson",
       "password": "password123",
       "is_active": true,
       "is_verified": true,
       "is_superuser": false,
-      "role": "member",
-      "bio": "Full-stack developer",
-      "location": "Seattle, WA"
+      "current_company_code": "ACME-EAST",
+      "phone": "+1-555-0104",
+      "bio": "Regional Manager for East Coast operations",
+      "location": "Boston, MA",
+      "timezone": "America/New_York",
+      "language": "en"
     },
     {
-      "email": "emily.designer@fastnext.dev",
-      "username": "emily_design",
-      "full_name": "Emily Designer",
+      "id": 5,
+      "email": "alice.johnson@globaltech.co.uk",
+      "username": "alicejohnson",
+      "full_name": "Alice Johnson",
       "password": "password123",
       "is_active": true,
       "is_verified": true,
       "is_superuser": false,
-      "role": "member",
-      "bio": "UI/UX designer",
-      "location": "Austin, TX"
+      "current_company_code": "GTS",
+      "phone": "+44-20-7946-0959",
+      "bio": "Project Manager with expertise in agile methodologies",
+      "location": "London, UK",
+      "timezone": "Europe/London",
+      "language": "en"
+    },
+    {
+      "id": 6,
+      "email": "demo@fastvue.com",
+      "username": "demo",
+      "full_name": "Demo User",
+      "password": "demo123",
+      "is_active": true,
+      "is_verified": true,
+      "is_superuser": false,
+      "current_company_code": "DEFAULT",
+      "bio": "Demo account for testing purposes",
+      "timezone": "UTC",
+      "language": "en"
     }
   ],
-  "projects": [
+  "roles": [
     {
-      "name": "FastNext Core",
-      "description": "Core FastNext platform development including backend API, authentication, and base modules.",
-      "owner": "admin",
-      "is_public": false,
-      "settings": {
-        "theme": "default",
-        "notifications_enabled": true
-      },
-      "members": ["john_manager", "mike_dev", "emily_design"]
+      "id": 1,
+      "name": "Administrator",
+      "description": "Full system access with all permissions",
+      "is_system_role": true,
+      "is_active": true
     },
     {
-      "name": "Website Redesign",
-      "description": "Complete redesign of the company website with modern UI/UX.",
-      "owner": "john_manager",
-      "is_public": true,
-      "settings": {
-        "theme": "modern",
-        "notifications_enabled": true
-      },
-      "members": ["sarah_editor", "emily_design"]
+      "id": 2,
+      "name": "Manager",
+      "description": "Department/team management access",
+      "is_system_role": true,
+      "is_active": true
     },
     {
-      "name": "Mobile App",
-      "description": "React Native mobile application for iOS and Android platforms.",
-      "owner": "john_manager",
-      "is_public": false,
-      "settings": {
-        "theme": "dark",
-        "notifications_enabled": true
-      },
-      "members": ["mike_dev"]
+      "id": 3,
+      "name": "Employee",
+      "description": "Standard employee access",
+      "is_system_role": true,
+      "is_active": true
+    },
+    {
+      "id": 4,
+      "name": "Viewer",
+      "description": "Read-only access to system data",
+      "is_system_role": true,
+      "is_active": true
+    },
+    {
+      "id": 5,
+      "name": "HR Manager",
+      "description": "Human resources management access",
+      "is_system_role": false,
+      "is_active": true
+    },
+    {
+      "id": 6,
+      "name": "Finance Manager",
+      "description": "Financial data and reporting access",
+      "is_system_role": false,
+      "is_active": true
+    },
+    {
+      "id": 7,
+      "name": "Project Manager",
+      "description": "Project and task management access",
+      "is_system_role": false,
+      "is_active": true
     }
   ],
-  "workflow_types": [
+  "permissions": [
     {
-      "name": "Task Workflow",
-      "description": "Standard workflow for task management",
-      "icon": "CheckSquare",
-      "color": "#3B82F6",
+      "id": 1,
+      "name": "user.create",
+      "description": "Create new users",
+      "category": "user",
+      "action": "create",
+      "resource": "user"
+    },
+    {
+      "id": 2,
+      "name": "user.read",
+      "description": "View user information",
+      "category": "user",
+      "action": "read",
+      "resource": "user"
+    },
+    {
+      "id": 3,
+      "name": "user.update",
+      "description": "Update user information",
+      "category": "user",
+      "action": "update",
+      "resource": "user"
+    },
+    {
+      "id": 4,
+      "name": "user.delete",
+      "description": "Delete users",
+      "category": "user",
+      "action": "delete",
+      "resource": "user"
+    },
+    {
+      "id": 5,
+      "name": "user.manage",
+      "description": "Full user management access",
+      "category": "user",
+      "action": "manage",
+      "resource": "user"
+    },
+    {
+      "id": 6,
+      "name": "company.create",
+      "description": "Create new companies",
+      "category": "company",
+      "action": "create",
+      "resource": "company"
+    },
+    {
+      "id": 7,
+      "name": "company.read",
+      "description": "View company information",
+      "category": "company",
+      "action": "read",
+      "resource": "company"
+    },
+    {
+      "id": 8,
+      "name": "company.update",
+      "description": "Update company information",
+      "category": "company",
+      "action": "update",
+      "resource": "company"
+    },
+    {
+      "id": 9,
+      "name": "company.delete",
+      "description": "Delete companies",
+      "category": "company",
+      "action": "delete",
+      "resource": "company"
+    },
+    {
+      "id": 10,
+      "name": "company.manage",
+      "description": "Full company management access",
+      "category": "company",
+      "action": "manage",
+      "resource": "company"
+    },
+    {
+      "id": 11,
+      "name": "role.create",
+      "description": "Create new roles",
+      "category": "system",
+      "action": "create",
+      "resource": "role"
+    },
+    {
+      "id": 12,
+      "name": "role.read",
+      "description": "View role information",
+      "category": "system",
+      "action": "read",
+      "resource": "role"
+    },
+    {
+      "id": 13,
+      "name": "role.update",
+      "description": "Update role information",
+      "category": "system",
+      "action": "update",
+      "resource": "role"
+    },
+    {
+      "id": 14,
+      "name": "role.delete",
+      "description": "Delete roles",
+      "category": "system",
+      "action": "delete",
+      "resource": "role"
+    },
+    {
+      "id": 15,
+      "name": "role.manage",
+      "description": "Full role management access",
+      "category": "system",
+      "action": "manage",
+      "resource": "role"
+    },
+    {
+      "id": 16,
+      "name": "permission.read",
+      "description": "View permissions",
+      "category": "system",
+      "action": "read",
+      "resource": "permission"
+    },
+    {
+      "id": 17,
+      "name": "permission.manage",
+      "description": "Manage permissions",
+      "category": "system",
+      "action": "manage",
+      "resource": "permission"
+    },
+    {
+      "id": 18,
+      "name": "group.create",
+      "description": "Create new groups",
+      "category": "user",
+      "action": "create",
+      "resource": "group"
+    },
+    {
+      "id": 19,
+      "name": "group.read",
+      "description": "View group information",
+      "category": "user",
+      "action": "read",
+      "resource": "group"
+    },
+    {
+      "id": 20,
+      "name": "group.update",
+      "description": "Update group information",
+      "category": "user",
+      "action": "update",
+      "resource": "group"
+    },
+    {
+      "id": 21,
+      "name": "group.delete",
+      "description": "Delete groups",
+      "category": "user",
+      "action": "delete",
+      "resource": "group"
+    },
+    {
+      "id": 22,
+      "name": "group.manage",
+      "description": "Full group management access",
+      "category": "user",
+      "action": "manage",
+      "resource": "group"
+    },
+    {
+      "id": 23,
+      "name": "system.settings",
+      "description": "Access system settings",
+      "category": "system",
+      "action": "manage",
+      "resource": "settings"
+    },
+    {
+      "id": 24,
+      "name": "system.audit",
+      "description": "View audit logs",
+      "category": "system",
+      "action": "read",
+      "resource": "audit"
+    }
+  ],
+  "groups": [
+    {
+      "id": 1,
+      "name": "Engineering",
+      "description": "Software development and engineering team",
+      "company_code": "ACME",
       "is_active": true
     },
     {
-      "name": "Approval Workflow",
-      "description": "Multi-level approval process",
-      "icon": "CheckCircle",
-      "color": "#10B981",
+      "id": 2,
+      "name": "Human Resources",
+      "description": "HR and people operations team",
+      "company_code": "ACME",
       "is_active": true
     },
     {
-      "name": "Content Review",
-      "description": "Content review and publishing workflow",
-      "icon": "FileText",
-      "color": "#8B5CF6",
+      "id": 3,
+      "name": "Finance",
+      "description": "Accounting and finance team",
+      "company_code": "ACME",
+      "is_active": true
+    },
+    {
+      "id": 4,
+      "name": "Sales",
+      "description": "Sales and business development team",
+      "company_code": "ACME",
+      "is_active": true
+    },
+    {
+      "id": 5,
+      "name": "Operations",
+      "description": "Operations and logistics team",
+      "company_code": "ACME-EAST",
+      "is_active": true
+    },
+    {
+      "id": 6,
+      "name": "Consulting",
+      "description": "IT consulting team",
+      "company_code": "GTS",
       "is_active": true
     }
+  ],
+  "user_company_roles": [
+    {
+      "user_email": "admin@fastvue.com",
+      "company_code": "DEFAULT",
+      "role_name": "Administrator",
+      "is_default": true
+    },
+    {
+      "user_email": "john.doe@acme-corp.com",
+      "company_code": "ACME",
+      "role_name": "Manager",
+      "is_default": true
+    },
+    {
+      "user_email": "jane.smith@acme-corp.com",
+      "company_code": "ACME",
+      "role_name": "HR Administrator",
+      "is_default": true
+    },
+    {
+      "user_email": "bob.wilson@acme-corp.com",
+      "company_code": "ACME-EAST",
+      "role_name": "Manager",
+      "is_default": true
+    },
+    {
+      "user_email": "alice.johnson@globaltech.co.uk",
+      "company_code": "GTS",
+      "role_name": "Project Manager",
+      "is_default": true
+    },
+    {
+      "user_email": "demo@fastvue.com",
+      "company_code": "DEFAULT",
+      "role_name": "Viewer",
+      "is_default": true
+    }
+  ],
+  "role_permissions": [
+    {"role_id": 1, "permission_id": 1},
+    {"role_id": 1, "permission_id": 2},
+    {"role_id": 1, "permission_id": 3},
+    {"role_id": 1, "permission_id": 4},
+    {"role_id": 1, "permission_id": 5},
+    {"role_id": 1, "permission_id": 6},
+    {"role_id": 1, "permission_id": 7},
+    {"role_id": 1, "permission_id": 8},
+    {"role_id": 1, "permission_id": 9},
+    {"role_id": 1, "permission_id": 10},
+    {"role_id": 1, "permission_id": 11},
+    {"role_id": 1, "permission_id": 12},
+    {"role_id": 1, "permission_id": 13},
+    {"role_id": 1, "permission_id": 14},
+    {"role_id": 1, "permission_id": 15},
+    {"role_id": 1, "permission_id": 16},
+    {"role_id": 1, "permission_id": 17},
+    {"role_id": 1, "permission_id": 18},
+    {"role_id": 1, "permission_id": 19},
+    {"role_id": 1, "permission_id": 20},
+    {"role_id": 1, "permission_id": 21},
+    {"role_id": 1, "permission_id": 22},
+    {"role_id": 1, "permission_id": 23},
+    {"role_id": 1, "permission_id": 24},
+    {"role_id": 2, "permission_id": 2},
+    {"role_id": 2, "permission_id": 3},
+    {"role_id": 2, "permission_id": 7},
+    {"role_id": 2, "permission_id": 12},
+    {"role_id": 2, "permission_id": 16},
+    {"role_id": 2, "permission_id": 19},
+    {"role_id": 2, "permission_id": 20},
+    {"role_id": 3, "permission_id": 2},
+    {"role_id": 3, "permission_id": 7},
+    {"role_id": 3, "permission_id": 19},
+    {"role_id": 4, "permission_id": 2},
+    {"role_id": 4, "permission_id": 7},
+    {"role_id": 4, "permission_id": 12},
+    {"role_id": 4, "permission_id": 16},
+    {"role_id": 4, "permission_id": 19},
+    {"role_id": 5, "permission_id": 1},
+    {"role_id": 5, "permission_id": 2},
+    {"role_id": 5, "permission_id": 3},
+    {"role_id": 5, "permission_id": 4},
+    {"role_id": 5, "permission_id": 5},
+    {"role_id": 5, "permission_id": 7},
+    {"role_id": 5, "permission_id": 18},
+    {"role_id": 5, "permission_id": 19},
+    {"role_id": 5, "permission_id": 20},
+    {"role_id": 5, "permission_id": 21},
+    {"role_id": 5, "permission_id": 22}
+  ],
+  "user_groups": [
+    {"user_id": 2, "group_id": 1},
+    {"user_id": 3, "group_id": 2},
+    {"user_id": 4, "group_id": 5},
+    {"user_id": 5, "group_id": 6}
   ],
   "notifications": [
     {
-      "user": "john_manager",
-      "title": "New project created",
-      "message": "A new project 'FastNext Core' has been created and you've been added as a member.",
-      "type": "info"
+      "id": 1,
+      "user_id": 2,
+      "title": "Welcome to FastVue!",
+      "description": "Your account has been created successfully. Start exploring the platform.",
+      "level": "success",
+      "is_read": false,
+      "link": "/dashboard"
     },
     {
-      "user": "sarah_editor",
-      "title": "Content review needed",
-      "message": "New content is ready for review in the Website Redesign project.",
-      "type": "action"
+      "id": 2,
+      "user_id": 2,
+      "title": "Profile Update Reminder",
+      "description": "Please complete your profile by adding your phone number and bio.",
+      "level": "info",
+      "is_read": false,
+      "link": "/profile"
     },
     {
-      "user": "mike_dev",
-      "title": "Build completed",
-      "message": "The latest build has completed successfully.",
-      "type": "success"
+      "id": 3,
+      "user_id": 3,
+      "title": "New Employee Onboarding",
+      "description": "A new employee has been added to the system. Please review their profile.",
+      "level": "info",
+      "is_read": false,
+      "link": "/settings/users"
+    },
+    {
+      "id": 4,
+      "user_id": 4,
+      "title": "Monthly Report Available",
+      "description": "The monthly operations report for your branch is now available.",
+      "level": "info",
+      "is_read": true,
+      "link": "/reports"
+    },
+    {
+      "id": 5,
+      "user_id": 5,
+      "title": "Project Deadline Approaching",
+      "description": "The project 'Website Redesign' is due in 3 days.",
+      "level": "warning",
+      "is_read": false,
+      "link": "/projects"
+    }
+  ],
+  "activity_logs": [
+    {
+      "action": "login",
+      "category": "authentication",
+      "level": "info",
+      "entity_type": "user",
+      "entity_id": 1,
+      "entity_name": "System Administrator",
+      "user_id": 1,
+      "company_id": 1,
+      "description": "User logged in successfully",
+      "ip_address": "127.0.0.1",
+      "success": true
+    },
+    {
+      "action": "create",
+      "category": "user_management",
+      "level": "info",
+      "entity_type": "user",
+      "entity_id": 2,
+      "entity_name": "John Doe",
+      "user_id": 1,
+      "company_id": 2,
+      "description": "Created new user account",
+      "ip_address": "127.0.0.1",
+      "success": true
+    },
+    {
+      "action": "update",
+      "category": "data_management",
+      "level": "info",
+      "entity_type": "company",
+      "entity_id": 2,
+      "entity_name": "Acme Corporation",
+      "user_id": 1,
+      "company_id": 2,
+      "description": "Updated company information",
+      "ip_address": "127.0.0.1",
+      "success": true
+    },
+    {
+      "action": "create",
+      "category": "user_management",
+      "level": "info",
+      "entity_type": "group",
+      "entity_id": 1,
+      "entity_name": "Engineering",
+      "user_id": 1,
+      "company_id": 2,
+      "description": "Created new group",
+      "ip_address": "127.0.0.1",
+      "success": true
+    },
+    {
+      "action": "assign",
+      "category": "authorization",
+      "level": "info",
+      "entity_type": "role",
+      "entity_id": 2,
+      "entity_name": "Manager",
+      "user_id": 1,
+      "company_id": 2,
+      "description": "Assigned role to user John Doe",
+      "ip_address": "127.0.0.1",
+      "success": true
     }
   ],
   "messages": [
     {
-      "model_name": "projects",
-      "record_id": 1,
-      "user": "admin",
-      "subject": "Project kickoff",
-      "body": "Welcome to the FastNext Core project! Let's make sure we follow best practices and deliver high-quality code.",
-      "message_type": "comment"
-    },
-    {
-      "model_name": "projects",
-      "record_id": 1,
-      "user": "john_manager",
-      "subject": "Sprint planning",
-      "body": "We'll be starting our first sprint next Monday. Please make sure to review the backlog items.",
-      "message_type": "comment"
-    },
-    {
-      "model_name": "projects",
+      "model_name": "users",
       "record_id": 2,
-      "user": "sarah_editor",
-      "subject": "Content draft ready",
-      "body": "I've completed the first draft of the homepage content. Please review when you have time.",
-      "message_type": "comment"
+      "user_id": 1,
+      "subject": "Welcome to the team!",
+      "body": "Welcome aboard, John! We're excited to have you on the team. Please don't hesitate to reach out if you have any questions.",
+      "message_type": "comment",
+      "level": "info",
+      "is_internal": false,
+      "is_pinned": true
+    },
+    {
+      "model_name": "users",
+      "record_id": 2,
+      "user_id": 3,
+      "body": "Hi John, please complete your onboarding documents by end of week.",
+      "message_type": "note",
+      "level": "info",
+      "is_internal": true,
+      "is_pinned": false
+    },
+    {
+      "model_name": "companies",
+      "record_id": 2,
+      "user_id": 1,
+      "subject": "Q4 Planning",
+      "body": "Let's schedule a meeting to discuss Q4 objectives and KPIs for Acme Corporation.",
+      "message_type": "comment",
+      "level": "info",
+      "is_internal": false,
+      "is_pinned": false
     }
   ]
 }

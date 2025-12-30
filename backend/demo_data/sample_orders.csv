@@ -1,6 +1,0 @@
-order_id,customer_email,product_sku,quantity,order_date,total
-ORD001,john.doe@example.com,LP001,1,2023-10-01,1299.99
-ORD002,jane.smith@example.com,WM002,2,2023-10-02,59.98
-ORD003,bob.johnson@example.com,OC003,1,2023-10-03,149.99
-ORD004,alice.brown@example.com,DL004,3,2023-10-04,119.97
-ORD005,charlie.wilson@example.com,NB005,10,2023-10-05,49.90

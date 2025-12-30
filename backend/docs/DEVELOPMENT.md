@@ -1,650 +1,1227 @@
-# FastNext Backend Development Guide
+# Backend Development Guide
 
-## Development Environment Setup
-
-### Prerequisites
-- **Python 3.11+** (recommended)
-- **PostgreSQL 14+**
-- **Redis 6+** (for caching and sessions)
-- **Node.js 18+** (for frontend integration)
-- **Git** for version control
-
-### Quick Setup
-
-1. **Clone Repository**
-   ```bash
-   git clone <repository-url>
-   cd FastNext/backend
-   ```
-
-2. **Create Virtual Environment**
-   ```bash
-   python -m venv venv
-   source venv/bin/activate  # On Windows: venv\Scripts\activate
-   ```
-
-3. **Install Dependencies**
-   ```bash
-   pip install -r requirements/dev.txt
-   ```
-
-4. **Environment Configuration**
-   ```bash
-   cp .env.example .env
-   # Edit .env with your local settings
-   ```
-
-5. **Database Setup**
-   ```bash
-   # Create database
-   createdb fastnext_dev
-
-   # Run migrations
-   alembic upgrade head
-
-   # Create admin user
-   python scripts/create_admin.py
-   ```
-
-6. **Start Development Server**
-   ```bash
-   python main.py
-   ```
-
-### Environment Configuration
-
-#### `.env` File Example
-```bash
-# Database
-DATABASE_URL=postgresql://username:password@localhost/fastnext_dev
-DATABASE_TEST_URL=postgresql://username:password@localhost/fastnext_test
-
-# Security
-SECRET_KEY=your-super-secret-key-here
-ACCESS_TOKEN_EXPIRE_MINUTES=30
-
-# Redis
-REDIS_URL=redis://localhost:6379/0
-
-# Email (Development)
-SMTP_SERVER=localhost
-SMTP_PORT=1025
-SMTP_USERNAME=
-SMTP_PASSWORD=
-EMAILS_FROM=noreply@fastnext.dev
-
-# Features
-ENABLE_BACKGROUND_TASKS=true
-ENABLE_CACHING=true
-DEBUG=true
-
-# External Services
-SENTRY_DSN=
-OPENAI_API_KEY=
-```
-
-## Project Structure
-
-### Core Application Structure
-```
-app/
-├── __init__.py
-├── main.py                    # FastAPI app factory
-├── api/                       # API layer
-│   ├── __init__.py
-│   ├── main.py               # API router aggregation
-│   ├── deps/                 # Dependencies
-│   │   ├── auth.py          # Authentication deps
-│   │   ├── database.py      # Database deps
-│   │   └── permissions.py   # Authorization deps
-│   └── v1/                  # API version 1
-│       ├── auth/           # Auth endpoints
-│       ├── users/          # User endpoints
-│       ├── admin/          # Admin endpoints
-│       └── workflows/      # Workflow endpoints
-├── core/                    # Core configurations
-│   ├── config.py           # Settings management
-│   ├── security.py         # Security utilities
-│   ├── database.py         # DB configuration
-│   ├── cache.py           # Cache configuration
-│   └── events.py          # Event system
-├── domain/                 # Business logic
-│   ├── entities/          # Domain entities
-│   ├── services/          # Domain services
-│   ├── repositories/      # Repository interfaces
-│   └── value_objects/     # Value objects
-├── infrastructure/        # Technical implementations
-│   ├── database/         # DB implementations
-│   ├── external/         # External services
-│   └── monitoring/       # Monitoring tools
-├── application/           # Use cases
-│   ├── use_cases/        # Use case implementations
-│   ├── commands/         # Command handlers
-│   ├── queries/          # Query handlers
-│   └── events/           # Event handlers
-├── schemas/              # Pydantic schemas
-├── models/               # SQLAlchemy models
-└── middleware/           # Custom middleware
-```
+Guide for developing the FastVue backend.
 
 ## Development Workflow
 
-### 1. **Feature Development Process**
+### Starting Development
 
-#### Starting a New Feature
 ```bash
-# Create feature branch
-git checkout -b feature/user-notifications
+# Navigate to backend
+cd backend
 
-# Create scaffolding (if needed)
-python scaffold-cli.py generate --config configs/notification.json
+# Activate virtual environment
+source venv/bin/activate
 
-# Run tests
-python test_runner.py
+# Start services (if using Docker)
+docker compose up -d db redis
 
 # Start development server
-python main.py
+python manage.py runserver
+
+# Or using uvicorn directly
+uvicorn main:app --reload --host 0.0.0.0 --port 8000
 ```
 
-#### Development Cycle
-1. **Write Tests First** (TDD approach)
-2. **Implement Domain Logic** (business rules)
-3. **Add Application Layer** (use cases)
-4. **Create API Endpoints** (HTTP interface)
-5. **Update Documentation**
-6. **Run Full Test Suite**
+## Management Commands (manage.py)
 
-### 2. **Code Quality Standards**
+FastVue includes a Django-like CLI for common tasks:
 
-#### Pre-commit Hooks
+### User Management
+
 ```bash
-# Install pre-commit hooks
-pre-commit install
+# Create a superuser (interactive)
+python manage.py createsuperuser
 
-# Run hooks manually
-pre-commit run --all-files
+# Create superuser with options
+python manage.py createsuperuser -u admin -e admin@example.com --no-input -p secretpass
+
+# List users
+python manage.py showusers
+python manage.py showusers --superusers  # Only superusers
+
+# Change user password
+python manage.py changepassword username
+
+# Promote user to superuser
+python manage.py promoteuser username
+
+# Demote superuser to regular user
+python manage.py demoteuser username
 ```
 
-#### Code Formatting
+### Database Management
+
 ```bash
-# Format code with black
-black app/ tests/
+# Create database from config
+python manage.py createdb
 
-# Sort imports with isort
-isort app/ tests/
+# Create with custom options
+python manage.py createdb --name mydb --owner postgres --encoding UTF8
 
-# Lint with flake8
-flake8 app/ tests/
+# Drop database (with confirmation)
+python manage.py dropdb
 
-# Type checking with mypy
-mypy app/
+# Drop without confirmation
+python manage.py dropdb --force
+
+# Reset database (drop, create, migrate, init)
+python manage.py resetdb
+python manage.py resetdb --force --sample-data
+
+# Initialize database with default data
+python manage.py initdb
+
+# Initialize with sample data
+python manage.py initdb --sample-data
+
+# Run migrations
+python manage.py migrate
+
+# Create new migration
+python manage.py makemigrations -m "add products table"
+
+# Show migration status
+python manage.py showmigrations
+
+# Open database shell (PostgreSQL)
+python manage.py dbshell
 ```
 
-#### Security Scanning
+### Development Server
+
 ```bash
-# Security linting with bandit
-bandit -r app/
+# Start server (default: 0.0.0.0:8000 with reload)
+python manage.py runserver
 
-# Dependency vulnerability scanning
-safety check
+# Custom port
+python manage.py runserver --port 8080
+
+# Production mode (no reload, multiple workers)
+python manage.py runserver --no-reload --workers 4
 ```
 
-### 3. **Database Development**
+### Interactive Shell
 
-#### Creating Migrations
 ```bash
-# Auto-generate migration
-alembic revision --autogenerate -m "Add user preferences table"
+# Start Python shell with app context
+python manage.py shell
 
-# Create empty migration
-alembic revision -m "Add custom constraints"
-
-# Apply migrations
-alembic upgrade head
-
-# Rollback migration
-alembic downgrade -1
+# Available in shell:
+#   - db: Database session
+#   - User, Company, Role, Permission: Models
+#   - settings: App configuration
 ```
 
-#### Database Operations
+### System Check
+
 ```bash
-# Reset database
-alembic downgrade base
-alembic upgrade head
+# Check system configuration
+python manage.py check
 
-# Create test data
-python scripts/seed_data.py
-
-# Backup database
-python scripts/backup_db.py
+# Verifies:
+#   - Database connection
+#   - Redis connection
+#   - Security settings
 ```
 
-### 4. **Testing Strategy**
+### Demo Data Management
 
-#### Test Categories
 ```bash
-# Unit tests (fast, isolated)
-pytest tests/unit/ -v
+# Load default demo data from data/demo.json
+python manage.py load-data
 
-# Integration tests (with database)
-pytest tests/integration/ -v
+# Load from a custom file
+python manage.py load-data --file data/custom.json
 
-# API tests (full HTTP stack)
-pytest tests/api/ -v
+# Clear existing data before loading
+python manage.py load-data --clear
 
-# End-to-end tests
-pytest tests/e2e/ -v
+# Export current data to JSON
+python manage.py export-data --file backup.json
 
-# Performance tests
-pytest tests/performance/ -v
+# Export including activity logs and messages
+python manage.py export-data --file backup.json --all
 ```
 
-#### Test Coverage
-```bash
-# Run tests with coverage
-pytest --cov=app --cov-report=html --cov-report=term
+#### Demo Data JSON Format
 
-# Coverage threshold (minimum 80%)
-pytest --cov=app --cov-fail-under=80
-```
-
-#### Test Database Management
-```bash
-# Create test database
-createdb fastnext_test
-
-# Run tests with test database
-DATABASE_TEST_URL=postgresql://user:pass@localhost/fastnext_test pytest
-```
-
-## Code Generation & Scaffolding
-
-### 1. **Using the Scaffolding System**
-
-#### Generate Complete CRUD
-```bash
-# Generate from configuration file
-python scaffold-cli.py generate --config configs/product.json
-
-# Interactive generation
-python scaffold-cli.py interactive
-
-# Generate specific components
-python scaffold-cli.py generate --name BlogPost --type backend
-```
-
-#### Configuration Examples
 ```json
 {
-  "name": "Product",
-  "pluralName": "Products",
-  "description": "Product management system",
-  "fields": [
+  "companies": [
+    {"name": "ACME Corp", "code": "ACME", "is_active": true}
+  ],
+  "users": [
     {
-      "name": "name",
-      "type": "string",
-      "required": true,
-      "validation": {"min_length": 2, "max_length": 100}
-    },
-    {
-      "name": "price",
-      "type": "number",
-      "validation": {"min_value": 0}
-    },
-    {
-      "name": "category",
-      "type": "select",
-      "options": ["Electronics", "Clothing", "Books"]
+      "email": "admin@example.com",
+      "username": "admin",
+      "password": "secret123",
+      "is_superuser": true,
+      "current_company_code": "ACME"
     }
+  ],
+  "roles": [
+    {"name": "Admin", "is_system_role": true, "permissions": ["user.read", "user.create"]}
+  ],
+  "groups": [
+    {"name": "Engineering", "company_code": "ACME", "users": ["admin@example.com"]}
+  ],
+  "user_company_roles": [
+    {"user_email": "admin@example.com", "company_code": "ACME", "role_name": "Admin", "is_default": true}
   ]
 }
 ```
 
-### 2. **Generated Code Structure**
-When you generate a new model, the following files are created:
+### Code Structure
 
-#### Backend Files
-- `app/models/{model}.py` - SQLAlchemy model
-- `app/schemas/{model}.py` - Pydantic schemas
-- `app/api/v1/{model}s.py` - API endpoints
-- `app/services/{model}_service.py` - Business logic
-- `tests/test_{model}.py` - Test suite
-- `migrations/add_{model}s.py` - Database migration
+```
+app/
+├── api/                    # API Layer
+│   ├── deps/               # Dependencies (DI)
+│   │   ├── __init__.py
+│   │   ├── auth.py         # get_current_user, require_permissions
+│   │   ├── database.py     # get_db session
+│   │   └── pagination.py   # Pagination helpers
+│   ├── v1/                 # API Version 1
+│   │   ├── __init__.py
+│   │   ├── auth.py         # /auth/* endpoints
+│   │   ├── users.py        # /users/* endpoints
+│   │   ├── companies.py    # /companies/* endpoints
+│   │   ├── roles.py        # /roles/* endpoints
+│   │   └── permissions.py  # /permissions/* endpoints
+│   └── main.py             # Router aggregation
+│
+├── core/                   # Core Modules
+│   ├── __init__.py
+│   ├── config.py           # Pydantic Settings
+│   ├── security.py         # JWT, password hashing, 2FA
+│   ├── cache.py            # Redis caching
+│   └── oauth.py            # OAuth providers
+│
+├── db/                     # Database
+│   ├── __init__.py
+│   ├── base.py             # SQLAlchemy engine, Base
+│   ├── session.py          # Session factory
+│   └── init_db.py          # Initial data seeding
+│
+├── models/                 # SQLAlchemy Models
+│   ├── __init__.py
+│   ├── base.py             # BaseModel, Mixins
+│   ├── user.py             # User model
+│   ├── company.py          # Company model
+│   ├── role.py             # Role model
+│   ├── permission.py       # Permission model
+│   ├── group.py            # Group model
+│   └── audit.py            # AuditLog model
+│
+├── schemas/                # Pydantic Schemas
+│   ├── __init__.py
+│   ├── user.py             # User DTOs
+│   ├── company.py          # Company DTOs
+│   ├── token.py            # Token DTOs
+│   └── ...
+│
+└── services/               # Business Logic
+    ├── __init__.py
+    ├── base.py             # BaseCRUDService
+    ├── user.py             # UserService
+    └── permission.py       # PermissionService
+```
 
-#### Generated API Endpoints
-- `GET /api/v1/{models}/` - List with pagination/filtering
-- `POST /api/v1/{models}/` - Create new item
-- `GET /api/v1/{models}/{id}` - Get specific item
-- `PUT /api/v1/{models}/{id}` - Update item
-- `DELETE /api/v1/{models}/{id}` - Delete item
-- `POST /api/v1/{models}/{id}/toggle-status` - Toggle active status
+## Creating New Features
 
-## Advanced Features
+### 1. Create Model
 
-### 1. **Background Tasks**
-
-#### Celery Setup
 ```python
-# app/core/celery.py
-from celery import Celery
+# app/models/product.py
+from sqlalchemy import Column, String, Integer, ForeignKey, Numeric
+from sqlalchemy.orm import relationship
 
-celery_app = Celery(
-    "fastnext",
-    broker=settings.REDIS_URL,
-    backend=settings.REDIS_URL
+from app.models.base import BaseModel, TimestampMixin, AuditMixin
+
+class Product(BaseModel, TimestampMixin, AuditMixin):
+    __tablename__ = "products"
+
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String(255), nullable=False)
+    sku = Column(String(50), unique=True, index=True)
+    price = Column(Numeric(10, 2), nullable=False)
+    company_id = Column(Integer, ForeignKey("companies.id"), nullable=False)
+
+    # Relationships
+    company = relationship("Company", back_populates="products")
+```
+
+### 2. Create Schema
+
+```python
+# app/schemas/product.py
+from pydantic import BaseModel, Field
+from decimal import Decimal
+from datetime import datetime
+from typing import Optional
+
+class ProductBase(BaseModel):
+    name: str = Field(..., min_length=1, max_length=255)
+    sku: str = Field(..., min_length=1, max_length=50)
+    price: Decimal = Field(..., ge=0)
+
+class ProductCreate(ProductBase):
+    company_id: int
+
+class ProductUpdate(BaseModel):
+    name: Optional[str] = Field(None, min_length=1, max_length=255)
+    sku: Optional[str] = Field(None, min_length=1, max_length=50)
+    price: Optional[Decimal] = Field(None, ge=0)
+
+class ProductResponse(ProductBase):
+    id: int
+    company_id: int
+    created_at: datetime
+    updated_at: Optional[datetime]
+
+    class Config:
+        from_attributes = True
+
+class ProductListResponse(BaseModel):
+    total: int
+    items: list[ProductResponse]
+    page: int
+    page_size: int
+```
+
+### 3. Create Service
+
+```python
+# app/services/product.py
+from sqlalchemy.orm import Session
+from sqlalchemy import select, func
+
+from app.models.product import Product
+from app.schemas.product import ProductCreate, ProductUpdate
+from app.services.base import BaseCRUDService
+
+class ProductService(BaseCRUDService[Product, ProductCreate, ProductUpdate]):
+    def __init__(self, db: Session):
+        super().__init__(Product, db)
+
+    def get_by_sku(self, sku: str) -> Product | None:
+        stmt = select(Product).where(Product.sku == sku)
+        return self.db.execute(stmt).scalar_one_or_none()
+
+    def get_by_company(
+        self, company_id: int, page: int = 1, page_size: int = 20
+    ) -> tuple[list[Product], int]:
+        stmt = select(Product).where(Product.company_id == company_id)
+
+        # Count total
+        count_stmt = select(func.count()).select_from(stmt.subquery())
+        total = self.db.execute(count_stmt).scalar()
+
+        # Paginate
+        stmt = stmt.offset((page - 1) * page_size).limit(page_size)
+        items = self.db.execute(stmt).scalars().all()
+
+        return items, total
+```
+
+### 4. Create API Endpoint
+
+```python
+# app/api/v1/products.py
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.orm import Session
+
+from app.api.deps.database import get_db
+from app.api.deps.auth import get_current_user, require_permissions
+from app.models.user import User
+from app.schemas.product import (
+    ProductCreate, ProductUpdate, ProductResponse, ProductListResponse
+)
+from app.services.product import ProductService
+
+router = APIRouter(prefix="/products", tags=["Products"])
+
+@router.get("/", response_model=ProductListResponse)
+def list_products(
+    page: int = 1,
+    page_size: int = 20,
+    company_id: int | None = None,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_permissions(["product:read"])),
+):
+    """List products with pagination."""
+    service = ProductService(db)
+
+    if company_id:
+        items, total = service.get_by_company(company_id, page, page_size)
+    else:
+        items, total = service.get_multi(page=page, page_size=page_size)
+
+    return ProductListResponse(
+        total=total,
+        items=items,
+        page=page,
+        page_size=page_size,
+    )
+
+@router.post("/", response_model=ProductResponse, status_code=status.HTTP_201_CREATED)
+def create_product(
+    data: ProductCreate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_permissions(["product:create"])),
+):
+    """Create a new product."""
+    service = ProductService(db)
+
+    # Check SKU uniqueness
+    if service.get_by_sku(data.sku):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Product with this SKU already exists",
+        )
+
+    return service.create(data, created_by=current_user.id)
+
+@router.get("/{product_id}", response_model=ProductResponse)
+def get_product(
+    product_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_permissions(["product:read"])),
+):
+    """Get product by ID."""
+    service = ProductService(db)
+    product = service.get(product_id)
+
+    if not product:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Product not found",
+        )
+
+    return product
+
+@router.put("/{product_id}", response_model=ProductResponse)
+def update_product(
+    product_id: int,
+    data: ProductUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_permissions(["product:update"])),
+):
+    """Update product."""
+    service = ProductService(db)
+    product = service.get(product_id)
+
+    if not product:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Product not found",
+        )
+
+    return service.update(product, data, updated_by=current_user.id)
+
+@router.delete("/{product_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_product(
+    product_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_permissions(["product:delete"])),
+):
+    """Delete product."""
+    service = ProductService(db)
+    product = service.get(product_id)
+
+    if not product:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Product not found",
+        )
+
+    service.delete(product_id)
+```
+
+### 5. Register Router
+
+```python
+# app/api/v1/__init__.py
+from fastapi import APIRouter
+from app.api.v1 import auth, users, companies, products  # Add products
+
+api_router = APIRouter()
+api_router.include_router(auth.router)
+api_router.include_router(users.router)
+api_router.include_router(companies.router)
+api_router.include_router(products.router)  # Add this line
+```
+
+### 6. Create Migration
+
+```bash
+# Generate migration
+alembic revision --autogenerate -m "add_products_table"
+
+# Review migration file in alembic/versions/
+
+# Apply migration
+alembic upgrade head
+```
+
+## Authentication & Authorization
+
+### Protecting Endpoints
+
+```python
+from app.api.deps.auth import (
+    get_current_user,           # Any authenticated user
+    get_current_active_user,    # Active users only
+    require_permissions,        # Require specific permissions
+    require_roles,              # Require specific roles
 )
 
-@celery_app.task
-def send_welcome_email(user_id: int):
-    # Email sending logic
-    pass
+# Public endpoint (no auth)
+@router.get("/public")
+def public_endpoint():
+    return {"message": "public"}
+
+# Any authenticated user
+@router.get("/protected")
+def protected_endpoint(current_user: User = Depends(get_current_user)):
+    return {"user": current_user.email}
+
+# Require specific permission
+@router.get("/admin")
+def admin_endpoint(
+    current_user: User = Depends(require_permissions(["admin:access"]))
+):
+    return {"admin": True}
+
+# Require multiple permissions (AND)
+@router.post("/sensitive")
+def sensitive_endpoint(
+    current_user: User = Depends(require_permissions(["data:write", "audit:create"]))
+):
+    return {"success": True}
+
+# Require role
+@router.get("/managers")
+def managers_only(
+    current_user: User = Depends(require_roles(["admin", "manager"]))
+):
+    return {"managers": True}
 ```
 
-#### Task Usage
+## Database Operations
+
+### Transactions
+
 ```python
-# In your endpoint
-@router.post("/users/")
-async def create_user(user: UserCreate):
-    new_user = await user_service.create_user(user)
-    # Queue background task
-    send_welcome_email.delay(new_user.id)
-    return new_user
+from sqlalchemy.orm import Session
+
+def complex_operation(db: Session):
+    try:
+        # Multiple operations in one transaction
+        user = create_user(db, user_data)
+        assign_role(db, user.id, role_id)
+        send_welcome_email(user.email)
+
+        db.commit()
+    except Exception as e:
+        db.rollback()
+        raise
 ```
 
-### 2. **Caching Strategy**
+### Async Operations (Optional)
 
-#### Redis Caching
+```python
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
+
+async def get_user_async(db: AsyncSession, user_id: int):
+    stmt = select(User).where(User.id == user_id)
+    result = await db.execute(stmt)
+    return result.scalar_one_or_none()
+```
+
+## Caching
+
 ```python
 from app.core.cache import cache
 
-@cache.cached(timeout=300)  # 5 minutes
-async def get_user_profile(user_id: int):
-    # Expensive database operation
-    return await db.get_user_profile(user_id)
+# Cache function result
+@cache.cached(ttl=300)  # 5 minutes
+def get_user_permissions(user_id: int) -> list[str]:
+    # Expensive database query
+    return ["perm1", "perm2"]
+
+# Manual cache operations
+cache.set("key", "value", ttl=60)
+value = cache.get("key")
+cache.delete("key")
 ```
 
-#### Cache Invalidation
+## Testing
+
+### Test Infrastructure
+
+The backend uses pytest with SQLite in-memory databases for fast, isolated tests:
+
+```
+tests/
+├── conftest.py              # Shared fixtures (db, users, companies)
+├── unit/                    # Unit tests (no external deps)
+│   └── services/
+│       ├── test_rbac_service.py        # RBAC service tests
+│       └── test_permission_service.py  # Permission service tests
+└── integration/             # Integration tests (with database)
+    └── api/
+        └── test_auth.py
+```
+
+### Test Fixtures (conftest.py)
+
 ```python
-# Invalidate cache on updates
-await cache.delete(f"user_profile_{user_id}")
-await cache.delete_pattern("user_list_*")
+import pytest
+from sqlalchemy import create_engine
+from sqlalchemy.orm import Session
+from app.db.base import Base
+from app.models import User, Company
+
+@pytest.fixture(scope="function")
+def engine():
+    """Fresh SQLite in-memory database per test"""
+    engine = create_engine("sqlite:///:memory:")
+    Base.metadata.create_all(bind=engine)
+    yield engine
+    Base.metadata.drop_all(bind=engine)
+
+@pytest.fixture(scope="function")
+def db_session(engine) -> Session:
+    """Fresh database session per test with rollback"""
+    connection = engine.connect()
+    transaction = connection.begin()
+    session = Session(bind=connection)
+    yield session
+    session.close()
+    transaction.rollback()
+
+@pytest.fixture
+def test_user(db_session) -> User:
+    """Create a test user"""
+    user = User(email="test@example.com", username="testuser", ...)
+    db_session.add(user)
+    db_session.commit()
+    return user
+
+@pytest.fixture
+def test_company(db_session) -> Company:
+    """Create a test company"""
+    company = Company(name="Test Company", code="TEST", ...)
+    db_session.add(company)
+    db_session.commit()
+    return company
 ```
 
-### 3. **Event-Driven Architecture**
+### Running Tests
 
-#### Domain Events
-```python
-# app/domain/events.py
-from dataclasses import dataclass
-from datetime import datetime
-
-@dataclass
-class UserCreated:
-    user_id: int
-    email: str
-    created_at: datetime
-```
-
-#### Event Handlers
-```python
-# app/application/events/user_events.py
-from app.domain.events import UserCreated
-
-async def handle_user_created(event: UserCreated):
-    # Send welcome email
-    await email_service.send_welcome_email(event.email)
-
-    # Track analytics
-    await analytics_service.track_user_signup(event.user_id)
-```
-
-### 4. **Performance Monitoring**
-
-#### APM Integration
-```python
-# app/core/monitoring.py
-import opentelemetry
-from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
-
-def setup_monitoring(app: FastAPI):
-    FastAPIInstrumentor.instrument_app(app)
-```
-
-#### Custom Metrics
-```python
-from app.core.metrics import metrics
-
-@router.get("/users/")
-async def list_users():
-    with metrics.timer("user_list_duration"):
-        users = await user_service.list_users()
-        metrics.increment("user_list_requests")
-        return users
-```
-
-## Debugging & Troubleshooting
-
-### 1. **Development Debugging**
-
-#### FastAPI Debug Mode
-```python
-# main.py
-app = FastAPI(debug=True)  # Enable debug mode
-```
-
-#### Database Query Logging
-```python
-# app/core/database.py
-engine = create_async_engine(
-    DATABASE_URL,
-    echo=True  # Log all SQL queries
-)
-```
-
-#### Exception Handling
-```python
-import traceback
-import logging
-
-logger = logging.getLogger(__name__)
-
-try:
-    # Your code here
-    pass
-except Exception as e:
-    logger.error(f"Error occurred: {e}")
-    logger.error(traceback.format_exc())
-    raise
-```
-
-### 2. **Common Issues & Solutions**
-
-#### Database Connection Issues
 ```bash
-# Check PostgreSQL status
-sudo systemctl status postgresql
+# Activate virtual environment first
+source venv/bin/activate
 
-# Check connection
-psql -h localhost -U username -d fastnext_dev
+# Run all tests
+pytest
 
-# Reset connections
-sudo systemctl restart postgresql
+# Run with verbose output
+pytest -v
+
+# Run specific test file
+pytest tests/unit/services/test_rbac_service.py
+
+# Run specific test class
+pytest tests/unit/services/test_permission_service.py::TestPermissionServiceRolePermissions
+
+# Run specific test
+pytest tests/unit/services/test_permission_service.py::TestPermissionServiceRolePermissions::test_has_permission_returns_true
+
+# Run with coverage
+pytest --cov=app --cov-report=html
+
+# Run only unit tests
+pytest tests/unit/ -v
+
+# Run only integration tests
+pytest tests/integration/ -v
+
+# Run tests matching a pattern
+pytest -k "permission" -v
 ```
 
-#### Migration Issues
-```bash
-# Check current migration status
-alembic current
+### Writing Tests
 
-# Check migration history
-alembic history
-
-# Stamp database at specific revision
-alembic stamp head
-```
-
-#### Performance Issues
-```bash
-# Enable SQL logging
-export SQLALCHEMY_ECHO=true
-
-# Profile code execution
-python -m cProfile -o profile.stats main.py
-
-# Analyze with snakeviz
-pip install snakeviz
-snakeviz profile.stats
-```
-
-### 3. **Monitoring & Logging**
-
-#### Structured Logging
 ```python
-import structlog
+# tests/unit/services/test_example.py
+import pytest
+from sqlalchemy.orm import Session
+from app.services.permission import PermissionService
+from app.models import User, Company
 
-logger = structlog.get_logger(__name__)
+class TestPermissionService:
+    """Tests for PermissionService"""
 
-logger.info(
-    "User created",
-    user_id=user.id,
-    email=user.email,
-    correlation_id=request_id
-)
+    def test_get_user_permissions(self, db_session: Session, test_user, test_company):
+        """Test getting permissions from user's role"""
+        # Setup: Create role, permission, and assign to user
+        role = Role(name="Test Role", codename="test", ...)
+        db_session.add(role)
+        db_session.flush()
+
+        # Test
+        service = PermissionService(db_session)
+        permissions = service.get_user_permissions(
+            test_user.id, test_company.id, use_cache=False
+        )
+
+        # Assert
+        assert "expected.permission" in permissions
+
+    def test_has_permission_returns_true(self, db_session, test_user, test_company):
+        """Test has_permission returns True when user has permission"""
+        # ... setup ...
+        service = PermissionService(db_session)
+        assert service.has_permission(test_user.id, "user.read", test_company.id) is True
+
+    def test_superuser_always_has_permission(self, db_session, admin_user):
+        """Test that superuser flag bypasses permission check"""
+        service = PermissionService(db_session)
+        assert service.has_permission(
+            admin_user.id, "any.permission", None, is_superuser=True
+        ) is True
 ```
 
-#### Health Checks
+### Test Best Practices
+
+1. **Disable caching in tests** - Use `use_cache=False` for permission tests
+2. **Use function-scoped fixtures** - Ensures test isolation
+3. **Test edge cases** - Inactive permissions, missing roles, etc.
+4. **Keep tests fast** - Use SQLite in-memory, mock external services
+5. **Name tests clearly** - `test_<method>_<scenario>_<expected>`
+
+### Writing Tests
+
 ```python
-@router.get("/health")
-async def health_check():
-    return {
-        "status": "healthy",
-        "version": "1.0.0",
-        "database": await check_database_health(),
-        "redis": await check_redis_health(),
-        "timestamp": datetime.utcnow().isoformat()
-    }
+# tests/test_products.py
+import pytest
+from fastapi.testclient import TestClient
+from sqlalchemy.orm import Session
+
+from main import app
+from app.models.product import Product
+
+client = TestClient(app)
+
+@pytest.fixture
+def auth_headers(test_user_token):
+    return {"Authorization": f"Bearer {test_user_token}"}
+
+def test_create_product(db: Session, auth_headers):
+    response = client.post(
+        "/api/v1/products/",
+        json={
+            "name": "Test Product",
+            "sku": "TEST-001",
+            "price": "99.99",
+            "company_id": 1,
+        },
+        headers=auth_headers,
+    )
+
+    assert response.status_code == 201
+    data = response.json()
+    assert data["name"] == "Test Product"
+    assert data["sku"] == "TEST-001"
+
+def test_create_product_duplicate_sku(db: Session, auth_headers):
+    # Create first product
+    client.post(
+        "/api/v1/products/",
+        json={"name": "Product 1", "sku": "DUPE-001", "price": "10.00", "company_id": 1},
+        headers=auth_headers,
+    )
+
+    # Try to create duplicate
+    response = client.post(
+        "/api/v1/products/",
+        json={"name": "Product 2", "sku": "DUPE-001", "price": "20.00", "company_id": 1},
+        headers=auth_headers,
+    )
+
+    assert response.status_code == 400
+    assert "SKU already exists" in response.json()["detail"]
 ```
 
-## IDE Configuration
+## Code Quality
 
-### 1. **VS Code Setup**
+### Linting
 
-#### Extensions
-- Python
-- Pylance
-- Python Docstring Generator
-- GitLens
-- Thunder Client (API testing)
+```bash
+# Run ruff linter
+ruff check app/
 
-#### Settings (.vscode/settings.json)
+# Auto-fix issues
+ruff check --fix app/
+
+# Format code
+ruff format app/
+```
+
+### Type Checking
+
+```bash
+# Run mypy
+mypy app/
+
+# Strict mode
+mypy --strict app/
+```
+
+### Pre-commit Hooks
+
+```yaml
+# .pre-commit-config.yaml
+repos:
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.1.6
+    hooks:
+      - id: ruff
+        args: [--fix]
+      - id: ruff-format
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.7.1
+    hooks:
+      - id: mypy
+```
+
+## Debugging
+
+### Using debugger
+
+```python
+# Add breakpoint in code
+import pdb; pdb.set_trace()
+
+# Or use breakpoint() (Python 3.7+)
+breakpoint()
+```
+
+### VS Code Debug Config
+
 ```json
-{
-  "python.defaultInterpreterPath": "./venv/bin/python",
-  "python.linting.enabled": true,
-  "python.linting.pylintEnabled": true,
-  "python.formatting.provider": "black",
-  "python.sortImports.args": ["--profile", "black"],
-  "editor.formatOnSave": true,
-  "editor.codeActionsOnSave": {
-    "source.organizeImports": true
-  }
-}
-```
-
-#### Launch Configuration (.vscode/launch.json)
-```json
+// .vscode/launch.json
 {
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "FastAPI Debug",
+      "name": "FastAPI",
       "type": "python",
       "request": "launch",
-      "program": "main.py",
-      "console": "integratedTerminal",
-      "env": {
-        "DEBUG": "true"
-      }
+      "module": "uvicorn",
+      "args": ["main:app", "--reload"],
+      "jinja": true,
+      "justMyCode": false
     }
   ]
 }
 ```
 
-### 2. **PyCharm Setup**
+### Logging
 
-#### Configuration
-1. **Interpreter**: Set to `./venv/bin/python`
-2. **Code Style**: Configure Black and isort
-3. **Database**: Connect to PostgreSQL
-4. **Run Configuration**: Point to `main.py`
+```python
+import logging
 
-## Deployment Preparation
+logger = logging.getLogger(__name__)
 
-### 1. **Production Checklist**
+def some_function():
+    logger.debug("Debug message")
+    logger.info("Info message")
+    logger.warning("Warning message")
+    logger.error("Error message")
+```
 
-#### Security
-- [ ] Change default SECRET_KEY
-- [ ] Update CORS settings
-- [ ] Configure HTTPS
-- [ ] Set up proper authentication
-- [ ] Review permission settings
+## Logging Configuration
 
-#### Performance
-- [ ] Enable production caching
-- [ ] Configure connection pooling
-- [ ] Set up monitoring
-- [ ] Optimize database queries
-- [ ] Configure rate limiting
+FastVue configures logging in `main.py` with sensible defaults for development and production.
 
-#### Reliability
-- [ ] Set up health checks
-- [ ] Configure logging
-- [ ] Set up error tracking (Sentry)
-- [ ] Test backup/restore procedures
-- [ ] Configure auto-scaling
+### Log Levels
 
-### 2. **Environment Preparation**
+| Level | Environment Variable | Default |
+|-------|---------------------|---------|
+| Root Logger | `LOG_LEVEL` | `INFO` |
+| watchfiles | (hardcoded) | `WARNING` |
+| uvicorn.access | (hardcoded) | `WARNING` |
+| websockets | (hardcoded) | `WARNING` |
 
-#### Production Dependencies
+### Silenced Loggers
+
+The following loggers are silenced by default to reduce noise:
+
+```python
+# In main.py
+logging.getLogger("watchfiles").setLevel(logging.WARNING)      # Hot-reload file watcher
+logging.getLogger("watchfiles.main").setLevel(logging.WARNING)
+logging.getLogger("uvicorn.access").setLevel(logging.WARNING)  # HTTP access logs
+logging.getLogger("websockets").setLevel(logging.WARNING)      # WebSocket library
+```
+
+These are particularly noisy in development:
+- **watchfiles**: Logs every file change when using `--reload`
+- **uvicorn.access**: Logs every HTTP request
+- **websockets**: Logs WebSocket connection events
+
+### Log Files
+
+Logs are written to:
+- `logs/fastvue.log` - Main application logs
+- `logs/security.log` - Security-related events (auth failures, rate limits)
+
+### Customizing Log Levels
+
+To enable debug logging for specific modules:
+
+```python
+# In main.py or your code
+logging.getLogger("app.services.inbox").setLevel(logging.DEBUG)
+logging.getLogger("app.api.v1.auth").setLevel(logging.DEBUG)
+```
+
+Or via environment:
+
 ```bash
-pip install -r requirements/prod.txt
+# Set global log level
+export LOG_LEVEL=DEBUG
+python manage.py runserver
 ```
 
-#### Environment Variables
-```bash
-# Required for production
-export SECRET_KEY="production-secret-key"
-export DATABASE_URL="postgresql://..."
-export REDIS_URL="redis://..."
-export DEBUG=false
-export ENVIRONMENT=production
+### Request Logging
+
+The `RequestLoggingMiddleware` logs HTTP requests with:
+- Request method and path
+- Response status code
+- Response time
+- Client IP address
+
+**Excluded Paths** (not logged):
+- `/health` - Health check
+- `/` - Root
+- `/api/v1/docs` - Swagger UI
+- `/api/v1/redoc` - ReDoc
+- `/api/v1/openapi.json` - OpenAPI spec
+- `/api/v1/ws` - WebSocket endpoints
+- `/ws` - WebSocket endpoints
+
+### Adding Custom Excluded Paths
+
+To exclude additional paths from request logging:
+
+```python
+# In main.py
+app.add_middleware(
+    RequestLoggingMiddleware,
+    log_request_body=settings.DEBUG,
+    log_response_body=False,
+    excluded_paths=[
+        "/health", "/", "/api/v1/docs", "/api/v1/redoc", "/api/v1/openapi.json",
+        "/api/v1/ws", "/ws",
+        "/api/v1/my-custom-endpoint",  # Add your paths here
+    ],
+)
 ```
 
-## Contributing Guidelines
+### WebSocket Logging
 
-### 1. **Code Standards**
-- Follow PEP 8 style guide
-- Use type hints throughout
-- Write comprehensive docstrings
-- Maintain test coverage above 80%
-- Follow clean architecture principles
+WebSocket connections are logged at INFO level:
+- Connection established (with user ID)
+- Connection disconnected
+- Stale connection cleanup
 
-### 2. **Pull Request Process**
-1. Create feature branch from `main`
-2. Write tests for new functionality
-3. Ensure all tests pass
-4. Update documentation
-5. Submit pull request
-6. Address review feedback
-7. Merge after approval
+To silence WebSocket logging:
 
-### 3. **Commit Message Format**
-```
-feat: add user notification system
-fix: resolve database connection issue
-docs: update API documentation
-test: add integration tests for auth
-refactor: improve error handling
+```python
+logging.getLogger("app.core.websocket").setLevel(logging.WARNING)
 ```
 
-This development guide provides comprehensive information for setting up and working with the FastNext backend. For specific implementation details, refer to the code examples and architecture documentation.
+### Security Logging
+
+Security events are logged to a separate file with these categories:
+- Authentication failures (401)
+- Authorization failures (403)
+- Rate limiting (429)
+- Suspicious request patterns
+
+```python
+from app.middleware.request_logging import log_security_event
+
+log_security_event(
+    event_type="suspicious_request",
+    user_id=current_user.id,
+    request=request,
+    severity="HIGH",
+    details={"reason": "SQL injection attempt"}
+)
+```
+
+### Performance Logging
+
+Slow requests are automatically logged with WARNING level:
+- Requests > 2 seconds: WARNING
+- Requests > 5 seconds: WARNING with "SLOW" tag
+
+### Best Practices
+
+1. **Use module-level loggers**: `logger = logging.getLogger(__name__)`
+2. **Don't log sensitive data**: Passwords, tokens, PII
+3. **Use appropriate levels**: DEBUG for dev, INFO for prod
+4. **Include context**: User ID, request ID in log messages
+5. **Monitor security logs**: Review `logs/security.log` regularly
+
+## Model Mixins
+
+FastVue provides several mixins for common model patterns:
+
+### Available Mixins
+
+```python
+from app.models.base import (
+    TimestampMixin,      # created_at, updated_at
+    SoftDeleteMixin,     # is_deleted, deleted_at, soft_delete()
+    AuditMixin,          # created_by, updated_by
+    MetadataMixin,       # metadata JSONB field
+    ActiveMixin,         # is_active field
+    CompanyScopedMixin,  # company_id foreign key
+    VersionMixin,        # version for optimistic locking
+    ActivityMixin,       # log_activity() method
+    MailThreadMixin,     # add_message(), get_messages()
+    URLMixin,            # url, url_label fields
+)
+```
+
+### Combined Models
+
+```python
+from app.models.base import (
+    BaseModel,           # id, created_at, updated_at
+    AuditableModel,      # BaseModel + created_by, updated_by
+    SoftDeleteModel,     # AuditableModel + soft delete
+    ActiveModel,         # SoftDeleteModel + is_active
+    CompanyScopedModel,  # ActiveModel + company_id
+    ActivityModel,       # CompanyScopedModel + activity logging
+    MailThreadModel,     # ActivityModel + message threading
+    EnterpriseModel,     # All features combined
+)
+```
+
+### Using Mixins
+
+```python
+from app.models.base import BaseModel, ActivityMixin, MailThreadMixin
+
+class Project(BaseModel, ActivityMixin, MailThreadMixin):
+    __tablename__ = "projects"
+
+    name = Column(String(255), nullable=False)
+    status = Column(String(50), default="active")
+
+# Now you can use activity logging and messages
+project = Project(name="New Project")
+db.add(project)
+db.commit()
+
+# Log activity
+project.log_activity(
+    db=db,
+    action="create",
+    user_id=current_user.id,
+    description="Project created"
+)
+
+# Add message
+project.add_message(
+    db=db,
+    body="Project kickoff meeting scheduled",
+    user_id=current_user.id,
+    message_type="comment"
+)
+
+# Get messages
+messages = project.get_messages(db)
+```
+
+## Activity Logging
+
+### Using Activity Logs
+
+```python
+from app.models.activity_log import ActivityLog, ActivityCategory, ActivityLevel
+
+# Create activity log
+ActivityLog.create(
+    db=db,
+    action="login",
+    category=ActivityCategory.AUTHENTICATION,
+    level=ActivityLevel.INFO,
+    entity_type="user",
+    entity_id=user.id,
+    entity_name=user.full_name,
+    user_id=user.id,
+    description="User logged in successfully",
+    ip_address=request.client.host,
+    user_agent=request.headers.get("user-agent"),
+    success=True,
+)
+
+# Query activity logs
+logs = ActivityLog.get_by_entity(db, entity_type="user", entity_id=1, limit=50)
+user_logs = ActivityLog.get_by_user(db, user_id=1, limit=100)
+```
+
+### Activity Categories
+
+- `AUTHENTICATION` - Login, logout, password changes
+- `AUTHORIZATION` - Permission changes, role assignments
+- `USER_MANAGEMENT` - User CRUD operations
+- `DATA_MANAGEMENT` - Data operations
+- `SYSTEM_MANAGEMENT` - System configuration
+- `SECURITY` - Security events
+- `WORKFLOW` - Business process events
+- `API` - API calls
+- `FILE_MANAGEMENT` - File operations
+- `CONFIGURATION` - Settings changes
+- `NOTIFICATION` - Notification events
+- `INTEGRATION` - External service events
+
+## Message Threading
+
+### Using Messages
+
+```python
+from app.models.message import Message, MessageType, MessageLevel
+
+# Create a message
+message = Message.create(
+    db=db,
+    model_name="projects",
+    record_id=project.id,
+    body="Great progress on this project!",
+    user_id=current_user.id,
+    message_type="comment",
+    is_internal=False,
+)
+
+# Get thread messages
+messages = Message.get_thread(
+    db=db,
+    model_name="projects",
+    record_id=project.id,
+    include_internal=True,
+    limit=50,
+)
+
+# Reply to a message
+reply = Message.create(
+    db=db,
+    model_name="projects",
+    record_id=project.id,
+    body="Thanks for the update!",
+    user_id=current_user.id,
+    parent_id=message.id,
+    message_type="comment",
+)
+
+# Get pinned messages
+pinned = Message.get_pinned(db, model_name="projects", record_id=project.id)
+```
+
+### Message Types
+
+- `COMMENT` - General comments
+- `NOTE` - Internal notes
+- `SYSTEM` - System-generated messages
+- `NOTIFICATION` - Notification messages
+- `EMAIL` - Email correspondence
+- `LOG` - Log entries
+- `APPROVAL` - Approval requests/responses
+- `REJECTION` - Rejection notices
+- `ASSIGNMENT` - Task assignments
+
+## Security Middleware
+
+FastVue includes several security middleware components:
+
+### Security Headers
+
+```python
+# Enabled by default in main.py
+from app.middleware.security import SecurityMiddleware
+
+app.add_middleware(SecurityMiddleware)
+
+# Sets these headers:
+# - Content-Security-Policy
+# - X-Content-Type-Options: nosniff
+# - X-Frame-Options: DENY
+# - X-XSS-Protection: 1; mode=block
+# - Strict-Transport-Security (HSTS)
+```
+
+### Rate Limiting
+
+```python
+from app.middleware.rate_limiting import RateLimitMiddleware
+
+app.add_middleware(
+    RateLimitMiddleware,
+    requests_per_minute=60,
+    burst_limit=10,
+)
+
+# Per-endpoint limits configured in settings
+```
+
+### Request Logging
+
+```python
+from app.middleware.request_logging import RequestLoggingMiddleware
+
+app.add_middleware(RequestLoggingMiddleware)
+
+# Logs requests with sensitive data masking
+# Masks: password, token, secret, authorization, cookie
+```
+
+### Threat Detection
+
+```python
+from app.middleware.security import ThreatDetectionMiddleware
+
+app.add_middleware(ThreatDetectionMiddleware)
+
+# Detects:
+# - SQL injection attempts
+# - XSS attempts
+# - Path traversal
+# - Unusual request patterns
+# Calculates risk score and flags suspicious requests
+```
+
+## Best Practices
+
+1. **Always use type hints**
+2. **Write docstrings for public functions**
+3. **Use Pydantic for validation**
+4. **Keep endpoints thin, logic in services**
+5. **Use dependency injection**
+6. **Write tests for new features**
+7. **Follow REST conventions**
+8. **Handle errors gracefully**
+9. **Log important operations**
+10. **Document API with OpenAPI**
+11. **Use model mixins for common patterns**
+12. **Log activities for audit trails**
+13. **Use message threading for collaboration**

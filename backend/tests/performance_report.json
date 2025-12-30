@@ -1,0 +1,172 @@
+{
+  "test_run": {
+    "timestamp": "2025-12-27T08:03:17.152263",
+    "test_count": 8
+  },
+  "summary": {
+    "total_operations": 1850,
+    "total_successful": 1800,
+    "total_failed": 50,
+    "overall_success_rate": 97.3
+  },
+  "tests": [
+    {
+      "test_name": "Local Module Discovery",
+      "total_operations": 100,
+      "successful": 100,
+      "failed": 0,
+      "total_duration_ms": 0.32,
+      "latency": {
+        "min_ms": 0.0,
+        "max_ms": 0.26,
+        "avg_ms": 0.0,
+        "median_ms": 0.0,
+        "p95_ms": 0.0,
+        "p99_ms": 0.26
+      },
+      "throughput": {
+        "ops_per_second": 311848.81
+      },
+      "error_count": 0
+    },
+    {
+      "test_name": "Remote Module Discovery (All Sources)",
+      "total_operations": 50,
+      "successful": 50,
+      "failed": 0,
+      "total_duration_ms": 19038.63,
+      "latency": {
+        "min_ms": 380.45,
+        "max_ms": 381.44,
+        "avg_ms": 380.77,
+        "median_ms": 380.78,
+        "p95_ms": 381.09,
+        "p99_ms": 381.44
+      },
+      "throughput": {
+        "ops_per_second": 2.63
+      },
+      "error_count": 0
+    },
+    {
+      "test_name": "Concurrent Discovery (10 workers)",
+      "total_operations": 100,
+      "successful": 100,
+      "failed": 0,
+      "total_duration_ms": 3022.05,
+      "latency": {
+        "min_ms": 30.08,
+        "max_ms": 30.86,
+        "avg_ms": 30.22,
+        "median_ms": 30.15,
+        "p95_ms": 30.56,
+        "p99_ms": 30.86
+      },
+      "throughput": {
+        "ops_per_second": 33.09
+      },
+      "error_count": 0
+    },
+    {
+      "test_name": "Module Sync (S3)",
+      "total_operations": 20,
+      "successful": 20,
+      "failed": 0,
+      "total_duration_ms": 6010.54,
+      "latency": {
+        "min_ms": 300.25,
+        "max_ms": 303.06,
+        "avg_ms": 300.53,
+        "median_ms": 300.37,
+        "p95_ms": 303.06,
+        "p99_ms": 303.06
+      },
+      "throughput": {
+        "ops_per_second": 3.33
+      },
+      "error_count": 0
+    },
+    {
+      "test_name": "Distributed Loader",
+      "total_operations": 50,
+      "successful": 0,
+      "failed": 50,
+      "total_duration_ms": 3804.2,
+      "latency": {
+        "min_ms": 0,
+        "max_ms": 0,
+        "avg_ms": 0,
+        "median_ms": 0,
+        "p95_ms": 0,
+        "p99_ms": 0
+      },
+      "throughput": {
+        "ops_per_second": 0.0
+      },
+      "error_count": 50
+    },
+    {
+      "test_name": "Cache Hit Performance",
+      "total_operations": 1000,
+      "successful": 1000,
+      "failed": 0,
+      "total_duration_ms": 0.25,
+      "latency": {
+        "min_ms": 0.0,
+        "max_ms": 0.0,
+        "avg_ms": 0.0,
+        "median_ms": 0.0,
+        "p95_ms": 0.0,
+        "p99_ms": 0.0
+      },
+      "throughput": {
+        "ops_per_second": 4066080.51
+      },
+      "error_count": 0
+    },
+    {
+      "test_name": "Source Failover",
+      "total_operations": 30,
+      "successful": 30,
+      "failed": 0,
+      "total_duration_ms": 1505.33,
+      "latency": {
+        "min_ms": 50.1,
+        "max_ms": 50.42,
+        "avg_ms": 50.18,
+        "median_ms": 50.15,
+        "p95_ms": 50.41,
+        "p99_ms": 50.42
+      },
+      "throughput": {
+        "ops_per_second": 19.93
+      },
+      "error_count": 0
+    },
+    {
+      "test_name": "Stress Load (50 workers, 500 ops)",
+      "total_operations": 500,
+      "successful": 500,
+      "failed": 0,
+      "total_duration_ms": 15415.35,
+      "latency": {
+        "min_ms": 1.03,
+        "max_ms": 144.28,
+        "avg_ms": 30.83,
+        "median_ms": 7.44,
+        "p95_ms": 126.29,
+        "p99_ms": 144.13
+      },
+      "throughput": {
+        "ops_per_second": 32.44
+      },
+      "error_count": 0
+    }
+  ],
+  "recommendations": [
+    "Remote Module Discovery (All Sources): Low throughput (2.6 ops/s) - consider parallelization",
+    "Module Sync (S3): Low throughput (3.3 ops/s) - consider parallelization",
+    "Distributed Loader: High failure rate (100.0%) - review error handling",
+    "Distributed Loader: Low throughput (0.0 ops/s) - consider parallelization"
+  ]
+}
