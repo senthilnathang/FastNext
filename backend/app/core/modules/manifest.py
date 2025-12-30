@@ -5,7 +5,7 @@ Defines the structure and validation for module __manifest__.py files.
 Inspired by Odoo's manifest format.
 """
 
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union
 from pydantic import BaseModel, Field, field_validator
 
 
@@ -20,9 +20,9 @@ class AssetConfig(BaseModel):
     """Frontend asset configuration for a module."""
 
     routes: Optional[str] = Field(None, description="Path to routes config file")
-    stores: List[str] = Field(default_factory=list, description="Paths to state stores")
-    components: List[str] = Field(default_factory=list, description="Paths to React components")
-    views: List[str] = Field(default_factory=list, description="Paths to React views/pages")
+    stores: List[str] = Field(default_factory=list, description="Paths to Pinia stores")
+    components: List[str] = Field(default_factory=list, description="Paths to Vue components")
+    views: List[str] = Field(default_factory=list, description="Paths to Vue views/pages")
     styles: List[str] = Field(default_factory=list, description="Paths to CSS/SCSS files")
     locales: List[str] = Field(default_factory=list, description="Paths to i18n files")
     assets: List[str] = Field(default_factory=list, description="Static assets (images, fonts)")
@@ -43,8 +43,8 @@ class ManifestSchema(BaseModel):
     """
     Module manifest schema.
 
-    Defines all metadata and configuration for a FastNext module.
-    Based on Odoo's __manifest__.py format with adaptations for FastAPI/Next.js.
+    Defines all metadata and configuration for a FastVue module.
+    Based on Odoo's __manifest__.py format with adaptations for FastAPI/Vue.
     """
 
     # Basic Info

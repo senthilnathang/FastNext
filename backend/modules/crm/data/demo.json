@@ -1,0 +1,461 @@
+{
+  "pipelines": [
+    {
+      "name": "Sales Pipeline",
+      "description": "Main sales pipeline for leads and opportunities",
+      "is_default": true,
+      "is_active": true
+    },
+    {
+      "name": "Enterprise Deals",
+      "description": "Pipeline for large enterprise deals",
+      "is_default": false,
+      "is_active": true
+    }
+  ],
+  "stages": [
+    {
+      "pipeline": "Sales Pipeline",
+      "name": "New",
+      "sequence": 10,
+      "probability": 10,
+      "color": "#3498db",
+      "description": "New leads to be qualified"
+    },
+    {
+      "pipeline": "Sales Pipeline",
+      "name": "Qualified",
+      "sequence": 20,
+      "probability": 25,
+      "color": "#9b59b6",
+      "description": "Qualified leads ready for outreach"
+    },
+    {
+      "pipeline": "Sales Pipeline",
+      "name": "Proposal",
+      "sequence": 30,
+      "probability": 50,
+      "color": "#f39c12",
+      "description": "Proposal sent to prospect"
+    },
+    {
+      "pipeline": "Sales Pipeline",
+      "name": "Negotiation",
+      "sequence": 40,
+      "probability": 75,
+      "color": "#e67e22",
+      "description": "In negotiation phase"
+    },
+    {
+      "pipeline": "Sales Pipeline",
+      "name": "Won",
+      "sequence": 90,
+      "probability": 100,
+      "color": "#27ae60",
+      "is_won": true,
+      "description": "Deal closed successfully"
+    },
+    {
+      "pipeline": "Sales Pipeline",
+      "name": "Lost",
+      "sequence": 100,
+      "probability": 0,
+      "color": "#e74c3c",
+      "is_lost": true,
+      "description": "Deal lost"
+    }
+  ],
+  "tags": [
+    {"name": "High Value", "color": "#e74c3c"},
+    {"name": "Enterprise", "color": "#9b59b6"},
+    {"name": "SMB", "color": "#3498db"},
+    {"name": "Referral", "color": "#27ae60"},
+    {"name": "Inbound", "color": "#f39c12"},
+    {"name": "Outbound", "color": "#1abc9c"},
+    {"name": "Strategic", "color": "#e91e63"},
+    {"name": "Follow Up", "color": "#607d8b"}
+  ],
+  "accounts": [
+    {
+      "name": "Acme Corporation",
+      "website": "https://acme.example.com",
+      "phone": "+1-555-0100",
+      "account_type": "customer",
+      "industry": "technology",
+      "rating": "hot",
+      "employees": 500,
+      "annual_revenue": 50000000,
+      "billing_city": "San Francisco",
+      "billing_state": "CA",
+      "billing_country": "USA"
+    },
+    {
+      "name": "Global Industries Ltd",
+      "website": "https://globalind.example.com",
+      "phone": "+1-555-0200",
+      "account_type": "prospect",
+      "industry": "manufacturing",
+      "rating": "warm",
+      "employees": 2000,
+      "annual_revenue": 150000000,
+      "billing_city": "Chicago",
+      "billing_state": "IL",
+      "billing_country": "USA"
+    },
+    {
+      "name": "Tech Innovators Inc",
+      "website": "https://techinnovators.example.com",
+      "phone": "+1-555-0300",
+      "account_type": "customer",
+      "industry": "technology",
+      "rating": "hot",
+      "employees": 150,
+      "annual_revenue": 20000000,
+      "billing_city": "Austin",
+      "billing_state": "TX",
+      "billing_country": "USA"
+    },
+    {
+      "name": "MedHealth Systems",
+      "website": "https://medhealth.example.com",
+      "phone": "+1-555-0400",
+      "account_type": "prospect",
+      "industry": "healthcare",
+      "rating": "warm",
+      "employees": 800,
+      "annual_revenue": 75000000,
+      "billing_city": "Boston",
+      "billing_state": "MA",
+      "billing_country": "USA"
+    },
+    {
+      "name": "EduLearn Academy",
+      "website": "https://edulearn.example.com",
+      "phone": "+1-555-0500",
+      "account_type": "prospect",
+      "industry": "education",
+      "rating": "cold",
+      "employees": 100,
+      "annual_revenue": 5000000,
+      "billing_city": "Seattle",
+      "billing_state": "WA",
+      "billing_country": "USA"
+    }
+  ],
+  "contacts": [
+    {
+      "account": "Acme Corporation",
+      "first_name": "John",
+      "last_name": "Smith",
+      "email": "john.smith@acme.example.com",
+      "phone": "+1-555-0101",
+      "job_title": "CEO",
+      "is_primary": true
+    },
+    {
+      "account": "Acme Corporation",
+      "first_name": "Sarah",
+      "last_name": "Johnson",
+      "email": "sarah.johnson@acme.example.com",
+      "phone": "+1-555-0102",
+      "job_title": "CTO"
+    },
+    {
+      "account": "Global Industries Ltd",
+      "first_name": "Michael",
+      "last_name": "Chen",
+      "email": "m.chen@globalind.example.com",
+      "phone": "+1-555-0201",
+      "job_title": "VP of Operations",
+      "is_primary": true
+    },
+    {
+      "account": "Tech Innovators Inc",
+      "first_name": "Emily",
+      "last_name": "Davis",
+      "email": "emily.d@techinnovators.example.com",
+      "phone": "+1-555-0301",
+      "job_title": "Director of IT",
+      "is_primary": true
+    },
+    {
+      "account": "MedHealth Systems",
+      "first_name": "Robert",
+      "last_name": "Wilson",
+      "email": "r.wilson@medhealth.example.com",
+      "phone": "+1-555-0401",
+      "job_title": "CIO",
+      "is_primary": true
+    }
+  ],
+  "leads": [
+    {
+      "name": "Cloud Migration Opportunity",
+      "contact_name": "Alex Thompson",
+      "email": "alex.t@cloudco.example.com",
+      "phone": "+1-555-1001",
+      "company_name": "CloudCo Solutions",
+      "job_title": "IT Director",
+      "stage": "Qualified",
+      "priority": "high",
+      "rating": "hot",
+      "source": "website",
+      "expected_revenue": 75000,
+      "probability": 30
+    },
+    {
+      "name": "Enterprise Software License",
+      "contact_name": "Jessica Brown",
+      "email": "jbrown@bigcorp.example.com",
+      "phone": "+1-555-1002",
+      "company_name": "BigCorp International",
+      "job_title": "Procurement Manager",
+      "stage": "New",
+      "priority": "medium",
+      "rating": "warm",
+      "source": "referral",
+      "expected_revenue": 120000,
+      "probability": 15
+    },
+    {
+      "name": "SaaS Implementation",
+      "contact_name": "David Lee",
+      "email": "dlee@startuphq.example.com",
+      "phone": "+1-555-1003",
+      "company_name": "StartupHQ",
+      "job_title": "Founder",
+      "stage": "Proposal",
+      "priority": "high",
+      "rating": "hot",
+      "source": "cold_call",
+      "expected_revenue": 35000,
+      "probability": 50
+    },
+    {
+      "name": "Training Services",
+      "contact_name": "Maria Garcia",
+      "email": "mgarcia@edutech.example.com",
+      "phone": "+1-555-1004",
+      "company_name": "EduTech Solutions",
+      "job_title": "HR Director",
+      "stage": "New",
+      "priority": "low",
+      "rating": "cold",
+      "source": "trade_show",
+      "expected_revenue": 15000,
+      "probability": 10
+    },
+    {
+      "name": "Security Audit Contract",
+      "contact_name": "James Wilson",
+      "email": "jwilson@securebank.example.com",
+      "phone": "+1-555-1005",
+      "company_name": "SecureBank Financial",
+      "job_title": "CISO",
+      "stage": "Negotiation",
+      "priority": "urgent",
+      "rating": "hot",
+      "source": "partner",
+      "expected_revenue": 250000,
+      "probability": 75
+    }
+  ],
+  "opportunities": [
+    {
+      "name": "Acme Corp Annual Renewal",
+      "account": "Acme Corporation",
+      "contact": "John Smith",
+      "stage": "Negotiation",
+      "amount": 150000,
+      "probability": 80,
+      "opportunity_type": "renewal",
+      "priority": "high"
+    },
+    {
+      "name": "Global Industries Platform Deal",
+      "account": "Global Industries Ltd",
+      "contact": "Michael Chen",
+      "stage": "Proposal",
+      "amount": 500000,
+      "probability": 40,
+      "opportunity_type": "new_business",
+      "priority": "urgent"
+    },
+    {
+      "name": "Tech Innovators Expansion",
+      "account": "Tech Innovators Inc",
+      "contact": "Emily Davis",
+      "stage": "Qualified",
+      "amount": 80000,
+      "probability": 25,
+      "opportunity_type": "upsell",
+      "priority": "medium"
+    },
+    {
+      "name": "MedHealth Digital Transformation",
+      "account": "MedHealth Systems",
+      "contact": "Robert Wilson",
+      "stage": "New",
+      "amount": 300000,
+      "probability": 10,
+      "opportunity_type": "new_business",
+      "priority": "high"
+    }
+  ],
+  "activities": [
+    {
+      "subject": "Initial discovery call with John Smith",
+      "activity_type": "call",
+      "description": "Discussed current pain points and potential solutions. Very interested in our enterprise offering.",
+      "due_date": "2024-01-15T10:00:00",
+      "status": "completed",
+      "completed_at": "2024-01-15T10:45:00",
+      "priority": "high",
+      "account": "Acme Corporation",
+      "contact": "John Smith",
+      "opportunity": "Acme Corp Annual Renewal"
+    },
+    {
+      "subject": "Send proposal to Acme Corporation",
+      "activity_type": "task",
+      "description": "Prepare and send the renewal proposal with updated pricing.",
+      "due_date": "2024-01-20T14:00:00",
+      "status": "completed",
+      "completed_at": "2024-01-19T16:30:00",
+      "priority": "urgent",
+      "account": "Acme Corporation",
+      "contact": "John Smith",
+      "opportunity": "Acme Corp Annual Renewal"
+    },
+    {
+      "subject": "Follow-up meeting with Michael Chen",
+      "activity_type": "meeting",
+      "description": "Review platform requirements and discuss implementation timeline.",
+      "due_date": "2024-01-25T15:00:00",
+      "status": "scheduled",
+      "priority": "high",
+      "account": "Global Industries Ltd",
+      "contact": "Michael Chen",
+      "opportunity": "Global Industries Platform Deal"
+    },
+    {
+      "subject": "Demo presentation for Global Industries",
+      "activity_type": "meeting",
+      "description": "Present product demo to the technical team and stakeholders.",
+      "due_date": "2024-02-01T10:00:00",
+      "status": "scheduled",
+      "priority": "urgent",
+      "account": "Global Industries Ltd",
+      "contact": "Michael Chen",
+      "opportunity": "Global Industries Platform Deal"
+    },
+    {
+      "subject": "Call Alex Thompson - CloudCo Solutions",
+      "activity_type": "call",
+      "description": "Initial qualification call to understand migration requirements.",
+      "due_date": "2024-01-18T11:00:00",
+      "status": "completed",
+      "completed_at": "2024-01-18T11:30:00",
+      "priority": "high",
+      "lead": "Cloud Migration Opportunity"
+    },
+    {
+      "subject": "Prepare technical assessment for CloudCo",
+      "activity_type": "task",
+      "description": "Document current infrastructure and migration plan.",
+      "due_date": "2024-01-22T17:00:00",
+      "status": "in_progress",
+      "priority": "high",
+      "lead": "Cloud Migration Opportunity"
+    },
+    {
+      "subject": "Email introduction to Jessica Brown",
+      "activity_type": "email",
+      "description": "Send introductory email with product brochure and pricing overview.",
+      "due_date": "2024-01-16T09:00:00",
+      "status": "completed",
+      "completed_at": "2024-01-16T09:15:00",
+      "priority": "medium",
+      "lead": "Enterprise Software License"
+    },
+    {
+      "subject": "Pricing negotiation call with James Wilson",
+      "activity_type": "call",
+      "description": "Discuss final pricing and contract terms for security audit.",
+      "due_date": "2024-01-24T14:00:00",
+      "status": "scheduled",
+      "priority": "urgent",
+      "lead": "Security Audit Contract"
+    },
+    {
+      "subject": "Review contract terms with legal",
+      "activity_type": "task",
+      "description": "Send contract to legal for review before final negotiation.",
+      "due_date": "2024-01-23T12:00:00",
+      "status": "completed",
+      "completed_at": "2024-01-23T11:00:00",
+      "priority": "high",
+      "lead": "Security Audit Contract"
+    },
+    {
+      "subject": "Tech Innovators upsell presentation",
+      "activity_type": "meeting",
+      "description": "Present new features and expansion options to Emily Davis.",
+      "due_date": "2024-01-30T13:00:00",
+      "status": "scheduled",
+      "priority": "medium",
+      "account": "Tech Innovators Inc",
+      "contact": "Emily Davis",
+      "opportunity": "Tech Innovators Expansion"
+    },
+    {
+      "subject": "Follow up on SaaS proposal",
+      "activity_type": "call",
+      "description": "Call David Lee to discuss proposal and address any questions.",
+      "due_date": "2024-01-26T10:00:00",
+      "status": "scheduled",
+      "priority": "high",
+      "lead": "SaaS Implementation"
+    },
+    {
+      "subject": "MedHealth discovery meeting",
+      "activity_type": "meeting",
+      "description": "Initial meeting to understand digital transformation requirements.",
+      "due_date": "2024-02-05T09:00:00",
+      "status": "scheduled",
+      "priority": "high",
+      "account": "MedHealth Systems",
+      "contact": "Robert Wilson",
+      "opportunity": "MedHealth Digital Transformation"
+    },
+    {
+      "subject": "Research MedHealth competitors",
+      "activity_type": "task",
+      "description": "Gather competitive intelligence for the healthcare sector pitch.",
+      "due_date": "2024-02-03T17:00:00",
+      "status": "in_progress",
+      "priority": "medium",
+      "account": "MedHealth Systems"
+    },
+    {
+      "subject": "Trade show follow-up with Maria Garcia",
+      "activity_type": "email",
+      "description": "Send follow-up email after trade show meeting with training materials.",
+      "due_date": "2024-01-17T10:00:00",
+      "status": "completed",
+      "completed_at": "2024-01-17T10:05:00",
+      "priority": "low",
+      "lead": "Training Services"
+    },
+    {
+      "subject": "Quarterly review with Sarah Johnson",
+      "activity_type": "meeting",
+      "description": "Quarterly business review meeting with Acme CTO.",
+      "due_date": "2024-02-10T11:00:00",
+      "status": "scheduled",
+      "priority": "medium",
+      "account": "Acme Corporation",
+      "contact": "Sarah Johnson"
+    }
+  ]
+}

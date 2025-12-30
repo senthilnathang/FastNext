@@ -1,7 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import type {
-  BulkActionResult,
+  BulkDeleteResponse,
+  BulkReadResponse,
   Notification,
   NotificationListParams,
   NotificationStats,
@@ -21,7 +22,7 @@ const getAuthHeaders = (): Record<string, string> => {
   };
 };
 
-// API functions for notifications
+// API functions for notifications (matches backend endpoints)
 const notificationsApi = {
   // Get paginated list of notifications
   getNotifications: async (
@@ -29,11 +30,15 @@ const notificationsApi = {
   ): Promise<PaginatedNotifications> => {
     const searchParams = new URLSearchParams();
 
-    Object.entries(params).forEach(([key, value]) => {
-      if (value !== undefined && value !== null && value !== "") {
-        searchParams.append(key, value.toString());
-      }
-    });
+    if (params.filter_type) {
+      searchParams.append("filter_type", params.filter_type);
+    }
+    if (params.page) {
+      searchParams.append("page", params.page.toString());
+    }
+    if (params.page_size) {
+      searchParams.append("page_size", params.page_size.toString());
+    }
 
     const response = await fetch(
       `${API_BASE}/notifications?${searchParams.toString()}`,
@@ -80,26 +85,13 @@ const notificationsApi = {
     return response.json();
   },
 
-  // Get unread count
-  getUnreadCount: async (): Promise<{ count: number }> => {
-    const response = await fetch(`${API_BASE}/notifications/unread-count`, {
-      credentials: "include",
-      headers: getAuthHeaders(),
-    });
-
-    if (!response.ok) {
-      throw new Error(`Failed to fetch unread count: ${response.statusText}`);
-    }
-
-    return response.json();
-  },
-
-  // Mark notification as read
+  // Mark notification as read (using PUT with is_read)
   markAsRead: async (id: number): Promise<Notification> => {
-    const response = await fetch(`${API_BASE}/notifications/${id}/read`, {
-      method: "POST",
+    const response = await fetch(`${API_BASE}/notifications/${id}`, {
+      method: "PUT",
       credentials: "include",
       headers: getAuthHeaders(),
+      body: JSON.stringify({ is_read: true }),
     });
 
     if (!response.ok) {
@@ -113,32 +105,16 @@ const notificationsApi = {
 
   // Mark notification as unread
   markAsUnread: async (id: number): Promise<Notification> => {
-    const response = await fetch(`${API_BASE}/notifications/${id}/unread`, {
-      method: "POST",
+    const response = await fetch(`${API_BASE}/notifications/${id}`, {
+      method: "PUT",
       credentials: "include",
       headers: getAuthHeaders(),
+      body: JSON.stringify({ is_read: false }),
     });
 
     if (!response.ok) {
       throw new Error(
         `Failed to mark notification as unread: ${response.statusText}`
-      );
-    }
-
-    return response.json();
-  },
-
-  // Archive notification
-  archive: async (id: number): Promise<Notification> => {
-    const response = await fetch(`${API_BASE}/notifications/${id}/archive`, {
-      method: "POST",
-      credentials: "include",
-      headers: getAuthHeaders(),
-    });
-
-    if (!response.ok) {
-      throw new Error(
-        `Failed to archive notification: ${response.statusText}`
       );
     }
 
@@ -158,13 +134,13 @@ const notificationsApi = {
     }
   },
 
-  // Bulk mark as read
-  bulkMarkAsRead: async (ids: number[]): Promise<BulkActionResult> => {
-    const response = await fetch(`${API_BASE}/notifications/bulk/read`, {
+  // Bulk mark as read (empty array = mark all)
+  bulkMarkAsRead: async (ids?: number[]): Promise<BulkReadResponse> => {
+    const response = await fetch(`${API_BASE}/notifications/bulk-read`, {
       method: "POST",
       credentials: "include",
       headers: getAuthHeaders(),
-      body: JSON.stringify({ ids }),
+      body: JSON.stringify({ notification_ids: ids || [] }),
     });
 
     if (!response.ok) {
@@ -176,49 +152,13 @@ const notificationsApi = {
     return response.json();
   },
 
-  // Bulk mark as unread
-  bulkMarkAsUnread: async (ids: number[]): Promise<BulkActionResult> => {
-    const response = await fetch(`${API_BASE}/notifications/bulk/unread`, {
-      method: "POST",
-      credentials: "include",
-      headers: getAuthHeaders(),
-      body: JSON.stringify({ ids }),
-    });
-
-    if (!response.ok) {
-      throw new Error(
-        `Failed to mark notifications as unread: ${response.statusText}`
-      );
-    }
-
-    return response.json();
-  },
-
-  // Bulk archive
-  bulkArchive: async (ids: number[]): Promise<BulkActionResult> => {
-    const response = await fetch(`${API_BASE}/notifications/bulk/archive`, {
-      method: "POST",
-      credentials: "include",
-      headers: getAuthHeaders(),
-      body: JSON.stringify({ ids }),
-    });
-
-    if (!response.ok) {
-      throw new Error(
-        `Failed to archive notifications: ${response.statusText}`
-      );
-    }
-
-    return response.json();
-  },
-
   // Bulk delete
-  bulkDelete: async (ids: number[]): Promise<BulkActionResult> => {
-    const response = await fetch(`${API_BASE}/notifications/bulk/delete`, {
+  bulkDelete: async (ids: number[]): Promise<BulkDeleteResponse> => {
+    const response = await fetch(`${API_BASE}/notifications/bulk-delete`, {
       method: "POST",
       credentials: "include",
       headers: getAuthHeaders(),
-      body: JSON.stringify({ ids }),
+      body: JSON.stringify({ notification_ids: ids }),
     });
 
     if (!response.ok) {
@@ -229,46 +169,11 @@ const notificationsApi = {
 
     return response.json();
   },
-
-  // Mark all as read
-  markAllAsRead: async (): Promise<BulkActionResult> => {
-    const response = await fetch(`${API_BASE}/notifications/mark-all-read`, {
-      method: "POST",
-      credentials: "include",
-      headers: getAuthHeaders(),
-    });
-
-    if (!response.ok) {
-      throw new Error(
-        `Failed to mark all notifications as read: ${response.statusText}`
-      );
-    }
-
-    return response.json();
-  },
-
-  // Clear all notifications
-  clearAll: async (): Promise<BulkActionResult> => {
-    const response = await fetch(`${API_BASE}/notifications/clear-all`, {
-      method: "POST",
-      credentials: "include",
-      headers: getAuthHeaders(),
-    });
-
-    if (!response.ok) {
-      throw new Error(
-        `Failed to clear all notifications: ${response.statusText}`
-      );
-    }
-
-    return response.json();
-  },
 };
 
 // Query keys
 const NOTIFICATIONS_QUERY_KEY = ["notifications"];
 const NOTIFICATION_STATS_KEY = ["notification-stats"];
-const UNREAD_COUNT_KEY = ["notification-unread-count"];
 
 /**
  * Hook to fetch paginated notifications
@@ -306,15 +211,14 @@ export function useNotificationStats() {
 }
 
 /**
- * Hook to fetch unread notification count
+ * Hook to get unread notification count
  */
 export function useUnreadNotificationCount() {
-  return useQuery({
-    queryKey: UNREAD_COUNT_KEY,
-    queryFn: notificationsApi.getUnreadCount,
-    staleTime: 30000,
-    refetchInterval: 30000, // More frequent updates for unread count
-  });
+  const { data } = useNotificationStats();
+  return {
+    data: data ? { count: data.unread_count } : undefined,
+    isLoading: !data,
+  };
 }
 
 /**
@@ -328,7 +232,6 @@ export function useMarkAsRead() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: NOTIFICATIONS_QUERY_KEY });
       queryClient.invalidateQueries({ queryKey: NOTIFICATION_STATS_KEY });
-      queryClient.invalidateQueries({ queryKey: UNREAD_COUNT_KEY });
     },
     onError: (error) => {
       console.error("Failed to mark as read:", error);
@@ -348,31 +251,10 @@ export function useMarkAsUnread() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: NOTIFICATIONS_QUERY_KEY });
       queryClient.invalidateQueries({ queryKey: NOTIFICATION_STATS_KEY });
-      queryClient.invalidateQueries({ queryKey: UNREAD_COUNT_KEY });
     },
     onError: (error) => {
       console.error("Failed to mark as unread:", error);
       toast.error("Failed to mark notification as unread");
-    },
-  });
-}
-
-/**
- * Hook to archive notification
- */
-export function useArchiveNotification() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: notificationsApi.archive,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: NOTIFICATIONS_QUERY_KEY });
-      queryClient.invalidateQueries({ queryKey: NOTIFICATION_STATS_KEY });
-      toast.success("Notification archived");
-    },
-    onError: (error) => {
-      console.error("Failed to archive:", error);
-      toast.error("Failed to archive notification");
     },
   });
 }
@@ -388,7 +270,6 @@ export function useDeleteNotification() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: NOTIFICATIONS_QUERY_KEY });
       queryClient.invalidateQueries({ queryKey: NOTIFICATION_STATS_KEY });
-      queryClient.invalidateQueries({ queryKey: UNREAD_COUNT_KEY });
       toast.success("Notification deleted");
     },
     onError: (error) => {
@@ -399,42 +280,21 @@ export function useDeleteNotification() {
 }
 
 /**
- * Hook to bulk mark notifications as read
+ * Hook to mark all notifications as read
  */
-export function useBulkMarkAsRead() {
+export function useMarkAllAsRead() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: notificationsApi.bulkMarkAsRead,
+    mutationFn: () => notificationsApi.bulkMarkAsRead(),
     onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: NOTIFICATIONS_QUERY_KEY });
       queryClient.invalidateQueries({ queryKey: NOTIFICATION_STATS_KEY });
-      queryClient.invalidateQueries({ queryKey: UNREAD_COUNT_KEY });
-      toast.success(`${result.success} notification(s) marked as read`);
+      toast.success(`${result.updated_count} notification(s) marked as read`);
     },
     onError: (error) => {
-      console.error("Failed to bulk mark as read:", error);
-      toast.error("Failed to mark notifications as read");
-    },
-  });
-}
-
-/**
- * Hook to bulk archive notifications
- */
-export function useBulkArchive() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: notificationsApi.bulkArchive,
-    onSuccess: (result) => {
-      queryClient.invalidateQueries({ queryKey: NOTIFICATIONS_QUERY_KEY });
-      queryClient.invalidateQueries({ queryKey: NOTIFICATION_STATS_KEY });
-      toast.success(`${result.success} notification(s) archived`);
-    },
-    onError: (error) => {
-      console.error("Failed to bulk archive:", error);
-      toast.error("Failed to archive notifications");
+      console.error("Failed to mark all as read:", error);
+      toast.error("Failed to mark all notifications as read");
     },
   });
 }
@@ -450,54 +310,11 @@ export function useBulkDelete() {
     onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: NOTIFICATIONS_QUERY_KEY });
       queryClient.invalidateQueries({ queryKey: NOTIFICATION_STATS_KEY });
-      queryClient.invalidateQueries({ queryKey: UNREAD_COUNT_KEY });
-      toast.success(`${result.success} notification(s) deleted`);
+      toast.success(`${result.deleted_count} notification(s) deleted`);
     },
     onError: (error) => {
       console.error("Failed to bulk delete:", error);
       toast.error("Failed to delete notifications");
-    },
-  });
-}
-
-/**
- * Hook to mark all notifications as read
- */
-export function useMarkAllAsRead() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: notificationsApi.markAllAsRead,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: NOTIFICATIONS_QUERY_KEY });
-      queryClient.invalidateQueries({ queryKey: NOTIFICATION_STATS_KEY });
-      queryClient.invalidateQueries({ queryKey: UNREAD_COUNT_KEY });
-      toast.success("All notifications marked as read");
-    },
-    onError: (error) => {
-      console.error("Failed to mark all as read:", error);
-      toast.error("Failed to mark all notifications as read");
-    },
-  });
-}
-
-/**
- * Hook to clear all notifications
- */
-export function useClearAllNotifications() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: notificationsApi.clearAll,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: NOTIFICATIONS_QUERY_KEY });
-      queryClient.invalidateQueries({ queryKey: NOTIFICATION_STATS_KEY });
-      queryClient.invalidateQueries({ queryKey: UNREAD_COUNT_KEY });
-      toast.success("All notifications cleared");
-    },
-    onError: (error) => {
-      console.error("Failed to clear all:", error);
-      toast.error("Failed to clear all notifications");
     },
   });
 }

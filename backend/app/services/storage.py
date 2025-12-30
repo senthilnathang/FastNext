@@ -10,7 +10,7 @@ import uuid
 from abc import ABC, abstractmethod
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import BinaryIO, Dict, Optional, Tuple, List
+from typing import BinaryIO, Dict, Optional, Tuple
 
 from app.core.config import settings
 
@@ -237,22 +237,20 @@ class StorageService:
     def backend(self) -> StorageBackend:
         """Get storage backend based on configuration"""
         if self._backend is None:
-            storage_backend = getattr(settings, 'STORAGE_BACKEND', 'local')
-            if storage_backend == "s3":
-                s3_bucket = getattr(settings, 'S3_BUCKET', None)
-                if not s3_bucket:
+            if settings.STORAGE_BACKEND == "s3":
+                if not settings.S3_BUCKET:
                     raise ValueError("S3_BUCKET must be set when using S3 backend")
                 self._backend = S3StorageBackend(
-                    bucket=s3_bucket,
-                    region=getattr(settings, 'S3_REGION', 'us-east-1'),
-                    access_key=getattr(settings, 'S3_ACCESS_KEY', '') or "",
-                    secret_key=getattr(settings, 'S3_SECRET_KEY', '') or "",
-                    endpoint_url=getattr(settings, 'S3_ENDPOINT_URL', None),
+                    bucket=settings.S3_BUCKET,
+                    region=settings.S3_REGION,
+                    access_key=settings.S3_ACCESS_KEY or "",
+                    secret_key=settings.S3_SECRET_KEY or "",
+                    endpoint_url=settings.S3_ENDPOINT_URL,
                 )
             else:
                 self._backend = LocalStorageBackend(
-                    base_path=getattr(settings, 'STORAGE_LOCAL_PATH', './uploads'),
-                    url_prefix=getattr(settings, 'STORAGE_URL_PREFIX', '/uploads'),
+                    base_path=settings.STORAGE_LOCAL_PATH,
+                    url_prefix=settings.STORAGE_URL_PREFIX,
                 )
         return self._backend
 
@@ -260,7 +258,7 @@ class StorageService:
         self,
         file: BinaryIO,
         filename: str,
-        allowed_types: Optional[List[str]] = None,
+        allowed_types: Optional[list] = None,
         max_size: Optional[int] = None,
     ) -> Tuple[bool, Optional[str]]:
         """
@@ -272,15 +270,13 @@ class StorageService:
         size = file.tell()
         file.seek(0)  # Reset position
 
-        attachment_max_size = getattr(settings, 'ATTACHMENT_MAX_SIZE', 10 * 1024 * 1024)
-        max_size = max_size or attachment_max_size
+        max_size = max_size or settings.ATTACHMENT_MAX_SIZE
         if size > max_size:
             return False, f"File size ({size} bytes) exceeds maximum allowed ({max_size} bytes)"
 
         # Check content type
         content_type, _ = mimetypes.guess_type(filename)
-        allowed_attachment_types = getattr(settings, 'allowed_attachment_types', None)
-        allowed_types = allowed_types or allowed_attachment_types
+        allowed_types = allowed_types or settings.allowed_attachment_types
 
         if content_type and allowed_types and content_type not in allowed_types:
             return False, f"File type '{content_type}' is not allowed"
@@ -294,7 +290,7 @@ class StorageService:
         path: str = "attachments",
         content_type: Optional[str] = None,
         validate: bool = True,
-        allowed_types: Optional[List[str]] = None,
+        allowed_types: Optional[list] = None,
         max_size: Optional[int] = None,
     ) -> Dict:
         """

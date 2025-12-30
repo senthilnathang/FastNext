@@ -6,14 +6,18 @@ Handles dynamic import of module components (models, routers, services).
 """
 
 import ast
+import hashlib
 import importlib
 import importlib.util
 import logging
+import os
 import re
 import shutil
+import sys
+import tempfile
 import threading
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Type
+from typing import Any, Dict, List, Optional, Set, Type
 from zipfile import ZipFile, is_zipfile
 
 from fastapi import APIRouter

@@ -1,5 +1,4 @@
 import { act, renderHook } from "@testing-library/react";
-import { vi, describe, it, expect, beforeEach, afterEach, type MockInstance } from "vitest";
 import { usePointerSwipe, useSwipeGesture } from "../useSwipeGesture";
 
 // Mock touch events
@@ -23,17 +22,17 @@ const createPointerEvent = (type: string, clientX: number, clientY: number) => {
 
 describe("useSwipeGesture", () => {
   let mockElement: HTMLElement;
-  let addEventListenerSpy: MockInstance;
-  let removeEventListenerSpy: MockInstance;
+  let addEventListenerSpy: jest.SpyInstance;
+  let removeEventListenerSpy: jest.SpyInstance;
 
   beforeEach(() => {
     mockElement = document.createElement("div");
-    addEventListenerSpy = vi.spyOn(mockElement, "addEventListener");
-    removeEventListenerSpy = vi.spyOn(mockElement, "removeEventListener");
+    addEventListenerSpy = jest.spyOn(mockElement, "addEventListener");
+    removeEventListenerSpy = jest.spyOn(mockElement, "removeEventListener");
   });
 
   afterEach(() => {
-    vi.clearAllMocks();
+    jest.clearAllMocks();
   });
 
   describe("Basic Setup", () => {
@@ -341,15 +340,15 @@ describe("useSwipeGesture", () => {
 
 describe("usePointerSwipe", () => {
   let mockElement: HTMLElement;
-  let addEventListenerSpy: MockInstance;
+  let addEventListenerSpy: jest.SpyInstance;
 
   beforeEach(() => {
     mockElement = document.createElement("div");
-    addEventListenerSpy = vi.spyOn(mockElement, "addEventListener");
+    addEventListenerSpy = jest.spyOn(mockElement, "addEventListener");
   });
 
   afterEach(() => {
-    vi.clearAllMocks();
+    jest.clearAllMocks();
   });
 
   describe("Basic Setup", () => {

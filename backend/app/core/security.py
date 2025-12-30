@@ -1,273 +1,208 @@
-"""
-Security utilities for authentication, authorization, and password management.
+"""Security utilities - JWT, password hashing, 2FA"""
 
-This module provides secure password hashing, JWT token handling, and authentication
-utilities with fallback mechanisms for enhanced security.
-"""
+import base64
+import io
+import secrets
+from datetime import datetime, timedelta, timezone
+from typing import Optional, Tuple
 
-from datetime import datetime, timedelta
-from typing import Any, Dict, Optional, Union
-
-from app.core.config import settings
-from app.utils.security_utils import hash_password_secure, verify_password_secure
+import pyotp
+import qrcode
 from jose import JWTError, jwt
 from passlib.context import CryptContext
 
-# Password hashing context with bcrypt
+from app.core.config import settings
+
+# Password hashing
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
-def create_access_token(
-    data: Optional[Dict[str, Any]] = None,
-    subject: Optional[Union[str, Any]] = None,
-    expires_delta: Optional[timedelta] = None,
-) -> str:
-    """
-    Create JWT access token with enhanced data support
-
-    Args:
-        data: Dictionary of data to encode in token (preferred)
-        subject: Subject for backward compatibility
-        expires_delta: Custom expiration time
-    """
-    if expires_delta:
-        expire = datetime.utcnow() + expires_delta
-    else:
-        expire = datetime.utcnow() + timedelta(
-            minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES
-        )
-
-    # Support both new data format and legacy subject format
-    if data:
-        to_encode = data.copy()
-        to_encode.update({"exp": expire})
-    else:
-        to_encode = {"exp": expire, "sub": str(subject)}
-
-    encoded_jwt = jwt.encode(
-        to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM
-    )
-    return encoded_jwt
+def get_password_hash(password: str) -> str:
+    """Hash a password using bcrypt"""
+    return pwd_context.hash(password)
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
-    """
-    Verify a plain password against a hashed password.
-
-    Uses enhanced security utilities first, with fallback to passlib bcrypt.
-    This provides better security while maintaining backward compatibility.
-
-    Args:
-        plain_password: The plain text password to verify
-        hashed_password: The hashed password to compare against
-
-    Returns:
-        True if the password matches, False otherwise
-    """
-    if not plain_password or not hashed_password:
-        return False
-
-    # Try enhanced verification first for better security
-    try:
-        return verify_password_secure(plain_password, hashed_password)
-    except Exception as e:
-        # Log the fallback but don't expose sensitive information
-        print(f"Enhanced password verification failed, using fallback: {type(e).__name__}")
-        try:
-            return pwd_context.verify(plain_password, hashed_password)
-        except Exception:
-            return False
+    """Verify a password against a hash"""
+    return pwd_context.verify(plain_password, hashed_password)
 
 
-def get_password_hash(password: str) -> str:
-    """
-    Hash a password using secure hashing algorithms.
+# JWT Token handling
+def create_access_token(
+    user_id: int,
+    company_id: Optional[int] = None,
+    expires_delta: Optional[timedelta] = None,
+) -> str:
+    """Create a JWT access token"""
+    if expires_delta:
+        expire = datetime.now(timezone.utc) + expires_delta
+    else:
+        expire = datetime.now(timezone.utc) + timedelta(
+            minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES
+        )
 
-    Uses enhanced security utilities first, with fallback to bcrypt.
-    The enhanced utilities provide additional security features like
-    peppering and memory-hard functions.
+    to_encode = {
+        "sub": str(user_id),
+        "exp": expire,
+        "iat": datetime.now(timezone.utc),
+        "type": "access",
+    }
 
-    Args:
-        password: The plain text password to hash
+    if company_id:
+        to_encode["company_id"] = company_id
 
-    Returns:
-        The hashed password string
-
-    Raises:
-        ValueError: If password is empty or None
-    """
-    if not password or not isinstance(password, str):
-        raise ValueError("Password must be a non-empty string")
-
-    # Try enhanced hashing first for better security
-    try:
-        return hash_password_secure(password)
-    except Exception as e:
-        # Log the fallback but don't expose sensitive information
-        print(f"Enhanced password hashing failed, using fallback: {type(e).__name__}")
-        try:
-            return pwd_context.hash(password)
-        except Exception as fallback_error:
-            raise ValueError(f"Password hashing failed: {type(fallback_error).__name__}") from fallback_error
+    return jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
 
 
-def verify_token(token: str) -> Optional[Dict[str, Any]]:
-    """
-    Verify and decode a JWT token.
+def create_refresh_token(
+    user_id: int,
+    expires_delta: Optional[timedelta] = None,
+) -> str:
+    """Create a JWT refresh token"""
+    if expires_delta:
+        expire = datetime.now(timezone.utc) + expires_delta
+    else:
+        expire = datetime.now(timezone.utc) + timedelta(
+            days=settings.REFRESH_TOKEN_EXPIRE_DAYS
+        )
 
-    Args:
-        token: The JWT token string to verify
+    to_encode = {
+        "sub": str(user_id),
+        "exp": expire,
+        "iat": datetime.now(timezone.utc),
+        "type": "refresh",
+    }
 
-    Returns:
-        The decoded token payload as a dictionary, or None if invalid
+    return jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
 
-    Note:
-        This function does not check token expiration - use verify_token_with_expiry for that
-    """
-    if not token or not isinstance(token, str):
-        return None
 
+def decode_token(token: str) -> Optional[dict]:
+    """Decode and validate a JWT token"""
     try:
         payload = jwt.decode(
             token,
             settings.SECRET_KEY,
-            algorithms=[settings.ALGORITHM]
+            algorithms=[settings.ALGORITHM],
         )
         return payload
     except JWTError:
-        # Token is invalid (bad signature, malformed, etc.)
-        return None
-    except Exception:
-        # Other unexpected errors
         return None
 
 
-def decode_access_token(token: str) -> Optional[Dict[str, Any]]:
-    """
-    Decode an access token and return its payload.
-
-    This is an alias for verify_token for backward compatibility.
-    For new code, prefer verify_token directly.
-
-    Args:
-        token: The JWT access token to decode
-
-    Returns:
-        The decoded token payload, or None if invalid
-    """
-    return verify_token(token)
-
-
-def verify_token_with_expiry(token: str) -> Optional[Dict[str, Any]]:
-    """
-    Verify a JWT token and check if it has expired.
-
-    Args:
-        token: The JWT token string to verify
-
-    Returns:
-        The decoded token payload if valid and not expired, None otherwise
-    """
-    payload = verify_token(token)
+def verify_token(token: str, token_type: str = "access") -> Optional[int]:
+    """Verify a JWT token and return user_id"""
+    payload = decode_token(token)
     if not payload:
         return None
 
-    # Check if token has expired
-    exp = payload.get('exp')
-    if not exp:
+    if payload.get("type") != token_type:
         return None
 
-    # Convert to datetime for comparison
-    try:
-        exp_datetime = datetime.fromtimestamp(exp)
-        if exp_datetime < datetime.utcnow():
-            return None
-    except (ValueError, TypeError):
+    user_id = payload.get("sub")
+    if not user_id:
         return None
 
-    return payload
+    return int(user_id)
 
 
-def validate_password_strength(password: str) -> Dict[str, Any]:
+# Two-Factor Authentication
+def generate_totp_secret() -> str:
+    """Generate a new TOTP secret"""
+    return pyotp.random_base32()
+
+
+def generate_totp_uri(secret: str, email: str) -> str:
+    """Generate TOTP provisioning URI for authenticator apps"""
+    totp = pyotp.TOTP(secret)
+    return totp.provisioning_uri(name=email, issuer_name=settings.TWO_FACTOR_ISSUER)
+
+
+def generate_qr_code(uri: str) -> str:
+    """Generate QR code image as base64 string"""
+    qr = qrcode.QRCode(version=1, box_size=10, border=5)
+    qr.add_data(uri)
+    qr.make(fit=True)
+
+    img = qr.make_image(fill_color="black", back_color="white")
+    buffer = io.BytesIO()
+    img.save(buffer, format="PNG")
+    buffer.seek(0)
+
+    return base64.b64encode(buffer.getvalue()).decode()
+
+
+def verify_totp(secret: str, code: str) -> bool:
+    """Verify a TOTP code"""
+    totp = pyotp.TOTP(secret)
+    return totp.verify(code)
+
+
+def generate_backup_codes(count: int = 10) -> list:
+    """Generate backup codes for 2FA recovery"""
+    codes = []
+    for _ in range(count):
+        # Generate 8-character alphanumeric codes
+        code = secrets.token_hex(4).upper()
+        codes.append(code)
+    return codes
+
+
+def setup_2fa(email: str) -> Tuple[str, str, list]:
     """
-    Validate password strength and return detailed feedback.
-
-    Args:
-        password: The password to validate
-
-    Returns:
-        Dictionary with validation results and feedback
+    Set up 2FA for a user.
+    Returns: (secret, qr_code_base64, backup_codes)
     """
-    if not password:
-        return {
-            'valid': False,
-            'score': 0,
-            'feedback': ['Password cannot be empty']
-        }
+    secret = generate_totp_secret()
+    uri = generate_totp_uri(secret, email)
+    qr_code = generate_qr_code(uri)
+    backup_codes = generate_backup_codes()
 
-    issues = []
-    score = 0
+    return secret, qr_code, backup_codes
 
-    # Length check
-    if len(password) < 8:
-        issues.append('Password must be at least 8 characters long')
-    elif len(password) >= 12:
-        score += 2
-    elif len(password) >= 8:
-        score += 1
 
-    # Character variety checks
-    has_lower = any(c.islower() for c in password)
-    has_upper = any(c.isupper() for c in password)
-    has_digit = any(c.isdigit() for c in password)
-    has_special = any(not c.isalnum() for c in password)
-
-    if not has_lower:
-        issues.append('Password must contain at least one lowercase letter')
-    else:
-        score += 1
-
-    if not has_upper:
-        issues.append('Password must contain at least one uppercase letter')
-    else:
-        score += 1
-
-    if not has_digit:
-        issues.append('Password must contain at least one number')
-    else:
-        score += 1
-
-    if not has_special:
-        issues.append('Password should contain at least one special character')
-    else:
-        score += 1
-
-    # Common password check (basic)
-    common_passwords = ['password', '123456', 'qwerty', 'admin', 'letmein']
-    if password.lower() in common_passwords:
-        issues.append('Password is too common')
-        score = max(0, score - 2)
-
-    return {
-        'valid': len(issues) == 0,
-        'score': min(5, score),  # Max score of 5
-        'strength': 'weak' if score < 2 else 'medium' if score < 4 else 'strong',
-        'feedback': issues
+# Password reset tokens
+def create_password_reset_token(email: str) -> str:
+    """Create a password reset token"""
+    expire = datetime.now(timezone.utc) + timedelta(hours=1)
+    to_encode = {
+        "sub": email,
+        "exp": expire,
+        "type": "password_reset",
     }
+    return jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
 
 
-def sanitize_token_input(token: str) -> str:
-    """
-    Sanitize token input to prevent injection attacks.
+def verify_password_reset_token(token: str) -> Optional[str]:
+    """Verify password reset token and return email"""
+    payload = decode_token(token)
+    if not payload:
+        return None
 
-    Args:
-        token: Raw token string
+    if payload.get("type") != "password_reset":
+        return None
 
-    Returns:
-        Sanitized token string
-    """
-    if not token or not isinstance(token, str):
-        return ''
+    return payload.get("sub")
 
-    # Remove any whitespace and control characters
-    return ''.join(c for c in token.strip() if c.isprintable())
+
+# Email verification tokens
+def create_email_verification_token(email: str) -> str:
+    """Create an email verification token"""
+    expire = datetime.now(timezone.utc) + timedelta(days=7)
+    to_encode = {
+        "sub": email,
+        "exp": expire,
+        "type": "email_verification",
+    }
+    return jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
+
+
+def verify_email_verification_token(token: str) -> Optional[str]:
+    """Verify email verification token and return email"""
+    payload = decode_token(token)
+    if not payload:
+        return None
+
+    if payload.get("type") != "email_verification":
+        return None
+
+    return payload.get("sub")

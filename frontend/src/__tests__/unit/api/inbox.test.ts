@@ -2,7 +2,6 @@
  * Tests for Inbox API client
  */
 
-import { describe, it, expect, beforeEach } from 'vitest';
 import { inboxApi } from '@/lib/api';
 import { server } from '../../mocks/server';
 import { http, HttpResponse } from 'msw';

@@ -1,5 +1,5 @@
 """
-Email notification service for FastNext.
+Email notification service for FastVue.
 
 Sends notification emails using SMTP or email service providers.
 Supports both immediate and digest (daily/weekly) emails.
@@ -15,6 +15,8 @@ from typing import Dict, List, Optional, Any
 from sqlalchemy.orm import Session
 
 from app.core.config import settings
+from app.models.notification_preference import NotificationPreference, DigestFrequency
+from app.models.inbox import InboxItem
 
 logger = logging.getLogger(__name__)
 
@@ -35,43 +37,31 @@ class EmailService:
     @property
     def is_configured(self) -> bool:
         """Check if email service is properly configured"""
-        email_enabled = getattr(settings, 'EMAIL_NOTIFICATIONS_ENABLED', False)
-        smtp_host = getattr(settings, 'SMTP_HOST', None)
-        smtp_user = getattr(settings, 'SMTP_USER', None)
-        smtp_password = getattr(settings, 'SMTP_PASSWORD', None)
         return bool(
-            email_enabled
-            and smtp_host
-            and smtp_user
-            and smtp_password
+            settings.EMAIL_NOTIFICATIONS_ENABLED
+            and settings.SMTP_HOST
+            and settings.SMTP_USER
+            and settings.SMTP_PASSWORD
         )
 
     @property
     def from_email(self) -> str:
         """Get the from email address"""
-        emails_from = getattr(settings, 'EMAILS_FROM_EMAIL', None)
-        smtp_from = getattr(settings, 'SMTP_FROM_EMAIL', 'noreply@fastnext.com')
-        return emails_from or smtp_from
+        return settings.EMAILS_FROM_EMAIL or settings.SMTP_FROM_EMAIL
 
     def _get_smtp_connection(self) -> smtplib.SMTP:
         """Get SMTP connection (lazy initialization)"""
         if not self.is_configured:
             raise RuntimeError("Email service is not configured")
 
-        smtp_host = getattr(settings, 'SMTP_HOST', 'smtp.gmail.com')
-        smtp_port = getattr(settings, 'SMTP_PORT', 587)
-        smtp_tls = getattr(settings, 'SMTP_TLS', True)
-        smtp_user = getattr(settings, 'SMTP_USER', '')
-        smtp_password = getattr(settings, 'SMTP_PASSWORD', '')
-
         try:
-            if smtp_tls:
-                smtp = smtplib.SMTP(smtp_host, smtp_port)
+            if settings.SMTP_TLS:
+                smtp = smtplib.SMTP(settings.SMTP_HOST, settings.SMTP_PORT)
                 smtp.starttls()
             else:
-                smtp = smtplib.SMTP_SSL(smtp_host, smtp_port)
+                smtp = smtplib.SMTP_SSL(settings.SMTP_HOST, settings.SMTP_PORT)
 
-            smtp.login(smtp_user, smtp_password)
+            smtp.login(settings.SMTP_USER, settings.SMTP_PASSWORD)
             return smtp
         except Exception as e:
             logger.error(f"Failed to connect to SMTP server: {e}")
@@ -165,6 +155,12 @@ class EmailService:
         if not self.is_configured:
             return False
 
+        # Check user preferences
+        prefs = NotificationPreference.get_for_user(db, user_id)
+        if prefs and not prefs.should_send_email(notification_type):
+            logger.debug(f"Email disabled for user {user_id} type {notification_type}")
+            return False
+
         # Get user email
         from app.models.user import User
         user = db.query(User).filter(User.id == user_id).first()
@@ -209,8 +205,7 @@ class EmailService:
         if subject:
             email_subject = f"{email_subject}: {subject}"
 
-        frontend_url = getattr(settings, 'FRONTEND_URL', 'http://localhost:3000')
-        action_url = f"{frontend_url}/inbox?message={message_id}"
+        action_url = f"{settings.FRONTEND_URL}/inbox?message={message_id}"
 
         return await self.send_notification_email(
             db=db,
@@ -232,8 +227,7 @@ class EmailService:
         message_id: int,
     ) -> bool:
         """Send email notification for @mention"""
-        frontend_url = getattr(settings, 'FRONTEND_URL', 'http://localhost:3000')
-        action_url = f"{frontend_url}/inbox?message={message_id}"
+        action_url = f"{settings.FRONTEND_URL}/inbox?message={message_id}"
 
         return await self.send_notification_email(
             db=db,
@@ -255,8 +249,7 @@ class EmailService:
         message_id: int,
     ) -> bool:
         """Send email notification for reply"""
-        frontend_url = getattr(settings, 'FRONTEND_URL', 'http://localhost:3000')
-        action_url = f"{frontend_url}/inbox?message={message_id}"
+        action_url = f"{settings.FRONTEND_URL}/inbox?message={message_id}"
 
         return await self.send_notification_email(
             db=db,
@@ -286,8 +279,38 @@ class EmailService:
         Returns:
             True if sent successfully
         """
-        email_digest_enabled = getattr(settings, 'EMAIL_DIGEST_ENABLED', False)
-        if not self.is_configured or not email_digest_enabled:
+        if not self.is_configured or not settings.EMAIL_DIGEST_ENABLED:
+            return False
+
+        # Check user preferences
+        prefs = NotificationPreference.get_for_user(db, user_id)
+        if not prefs or not prefs.email_enabled:
+            return False
+
+        expected_frequency = (
+            DigestFrequency.DAILY if period == "daily" else DigestFrequency.WEEKLY
+        )
+        if prefs.email_digest != expected_frequency:
+            return False
+
+        # Get unread inbox items from the period
+        from_date = datetime.utcnow() - timedelta(days=1 if period == "daily" else 7)
+
+        items = (
+            db.query(InboxItem)
+            .filter(
+                InboxItem.user_id == user_id,
+                InboxItem.is_read == False,
+                InboxItem.is_archived == False,
+                InboxItem.created_at >= from_date,
+            )
+            .order_by(InboxItem.created_at.desc())
+            .limit(50)
+            .all()
+        )
+
+        if not items:
+            logger.debug(f"No unread items for user {user_id} digest")
             return False
 
         # Get user email
@@ -296,42 +319,17 @@ class EmailService:
         if not user or not user.email:
             return False
 
-        # Try to get inbox items (may not exist in all deployments)
-        try:
-            from app.models.inbox import InboxItem
-            from_date = datetime.utcnow() - timedelta(days=1 if period == "daily" else 7)
+        # Generate digest email
+        subject = f"Your {period} digest - {len(items)} unread items"
+        html_body = self._render_digest_email(items, period)
+        text_body = self._render_digest_text(items, period)
 
-            items = (
-                db.query(InboxItem)
-                .filter(
-                    InboxItem.user_id == user_id,
-                    InboxItem.is_read == False,
-                    InboxItem.is_archived == False,
-                    InboxItem.created_at >= from_date,
-                )
-                .order_by(InboxItem.created_at.desc())
-                .limit(50)
-                .all()
-            )
-
-            if not items:
-                logger.debug(f"No unread items for user {user_id} digest")
-                return False
-
-            # Generate digest email
-            subject = f"Your {period} digest - {len(items)} unread items"
-            html_body = self._render_digest_email(items, period)
-            text_body = self._render_digest_text(items, period)
-
-            return await self.send_email(
-                to_email=user.email,
-                subject=subject,
-                html_body=html_body,
-                text_body=text_body,
-            )
-        except ImportError:
-            logger.warning("InboxItem model not available for digest emails")
-            return False
+        return await self.send_email(
+            to_email=user.email,
+            subject=subject,
+            html_body=html_body,
+            text_body=text_body,
+        )
 
     def _render_notification_email(
         self,
@@ -349,7 +347,7 @@ class EmailService:
                     <a href="{action_url}"
                        style="background-color: #6366f1; color: white; padding: 12px 24px;
                               text-decoration: none; border-radius: 6px; display: inline-block;">
-                        View in FastNext
+                        View in FastVue
                     </a>
                 </td>
             </tr>
@@ -386,7 +384,7 @@ class EmailService:
                     <tr>
                         <td style="padding: 20px 30px; border-top: 1px solid #e5e7eb; background-color: #f9fafb;">
                             <p style="color: #9ca3af; font-size: 12px; margin: 0;">
-                                This email was sent by FastNext. You can manage your notification preferences in your account settings.
+                                This email was sent by FastVue. You can manage your notification preferences in your account settings.
                             </p>
                         </td>
                     </tr>
@@ -416,49 +414,42 @@ class EmailService:
         lines.append("")
 
         if action_url:
-            lines.append(f"View in FastNext: {action_url}")
+            lines.append(f"View in FastVue: {action_url}")
             lines.append("")
 
         lines.append("-" * 40)
-        lines.append("This email was sent by FastNext.")
+        lines.append("This email was sent by FastVue.")
         lines.append("Manage notification preferences in your account settings.")
 
         return "\n".join(lines)
 
-    def _render_digest_email(self, items: List[Any], period: str) -> str:
+    def _render_digest_email(self, items: List[InboxItem], period: str) -> str:
         """Render digest email HTML"""
         items_html = ""
         for item in items[:20]:  # Limit to 20 items in digest
-            item_type = getattr(item, 'item_type', None)
-            type_value = item_type.value if hasattr(item_type, 'value') else str(item_type)
             type_color = {
                 "message": "#3b82f6",
                 "notification": "#10b981",
                 "activity": "#8b5cf6",
                 "mention": "#f59e0b",
-            }.get(type_value, "#6b7280")
-
-            title = getattr(item, 'title', 'No title') or 'No title'
-            preview = getattr(item, 'preview', '') or ''
+            }.get(item.item_type.value, "#6b7280")
 
             items_html += f'''
             <tr>
                 <td style="padding: 15px; border-bottom: 1px solid #e5e7eb;">
                     <span style="background-color: {type_color}; color: white; padding: 2px 8px;
                                  border-radius: 4px; font-size: 11px; text-transform: uppercase;">
-                        {type_value}
+                        {item.item_type.value}
                     </span>
                     <p style="margin: 8px 0 4px 0; font-weight: 500; color: #111827;">
-                        {title}
+                        {item.title or 'No title'}
                     </p>
                     <p style="margin: 0; color: #6b7280; font-size: 14px;">
-                        {preview[:100]}...
+                        {(item.preview or '')[:100]}...
                     </p>
                 </td>
             </tr>
             '''
-
-        frontend_url = getattr(settings, 'FRONTEND_URL', 'http://localhost:3000')
 
         return f'''
 <!DOCTYPE html>
@@ -491,17 +482,17 @@ class EmailService:
                     </tr>
                     <tr>
                         <td style="padding: 20px;" align="center">
-                            <a href="{frontend_url}/inbox"
+                            <a href="{settings.FRONTEND_URL}/inbox"
                                style="background-color: #6366f1; color: white; padding: 12px 24px;
                                       text-decoration: none; border-radius: 6px; display: inline-block;">
-                                View All in FastNext
+                                View All in FastVue
                             </a>
                         </td>
                     </tr>
                     <tr>
                         <td style="padding: 20px 30px; border-top: 1px solid #e5e7eb; background-color: #f9fafb;">
                             <p style="color: #9ca3af; font-size: 12px; margin: 0;">
-                                This {period} digest was sent by FastNext.
+                                This {period} digest was sent by FastVue.
                                 Manage your digest settings in account preferences.
                             </p>
                         </td>
@@ -514,10 +505,8 @@ class EmailService:
 </html>
 '''
 
-    def _render_digest_text(self, items: List[Any], period: str) -> str:
+    def _render_digest_text(self, items: List[InboxItem], period: str) -> str:
         """Render digest email plain text"""
-        frontend_url = getattr(settings, 'FRONTEND_URL', 'http://localhost:3000')
-
         lines = [
             f"Your {period.capitalize()} Digest",
             "=" * 30,
@@ -526,20 +515,15 @@ class EmailService:
         ]
 
         for item in items[:20]:
-            item_type = getattr(item, 'item_type', None)
-            type_value = item_type.value if hasattr(item_type, 'value') else str(item_type)
-            title = getattr(item, 'title', 'No title') or 'No title'
-            preview = getattr(item, 'preview', '') or ''
-
-            lines.append(f"[{type_value.upper()}] {title}")
-            if preview:
-                lines.append(f"  {preview[:100]}...")
+            lines.append(f"[{item.item_type.value.upper()}] {item.title or 'No title'}")
+            if item.preview:
+                lines.append(f"  {item.preview[:100]}...")
             lines.append("")
 
         lines.append("-" * 40)
-        lines.append(f"View all: {frontend_url}/inbox")
+        lines.append(f"View all: {settings.FRONTEND_URL}/inbox")
         lines.append("")
-        lines.append(f"This {period} digest was sent by FastNext.")
+        lines.append(f"This {period} digest was sent by FastVue.")
 
         return "\n".join(lines)
 

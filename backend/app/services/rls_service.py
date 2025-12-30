@@ -12,7 +12,6 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 
 from app.core.config import settings
 from app.core.logging import get_logger
-from app.models.project_member import ProjectMember
 from app.models.role import Role
 from app.models.row_level_security import (
     Organization,
@@ -374,7 +373,7 @@ class RLSService:
     def _get_user_permissions(self, user_id: int) -> List[str]:
         """Get user permissions"""
         from app.models.permission import Permission
-        from app.models.user_role import RolePermission
+        from app.models.user_company_role import RolePermission
 
         permissions = (
             self.db.query(Permission.name)
@@ -395,28 +394,13 @@ class RLSService:
     def _get_accessible_project_ids(
         self, user_id: int, organization_id: Optional[int] = None
     ) -> List[int]:
-        """Get project IDs accessible to user"""
-        from app.models.project import Project
+        """Get project IDs accessible to user.
 
-        query = self.db.query(Project.id).filter(
-            or_(
-                Project.user_id == user_id,  # Owned projects
-                Project.id.in_(  # Member projects
-                    select(ProjectMember.project_id).where(
-                        ProjectMember.user_id == user_id,
-                        ProjectMember.is_active.is_(True),
-                    )
-                ),
-                Project.is_public.is_(True),  # Public projects
-            )
-        )
-
-        if organization_id:
-            # Add organization-based filtering if needed
-            pass
-
-        projects = query.all()
-        return [proj.id for proj in projects]
+        Note: Project and ProjectMember models are not yet implemented.
+        This method returns an empty list until those models are added.
+        """
+        # TODO: Implement when Project and ProjectMember models are added
+        return []
 
     def _create_temp_context(self, user: User) -> RLSContext:
         """Create temporary context for access checks"""

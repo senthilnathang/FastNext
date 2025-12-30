@@ -12,6 +12,8 @@ from typing import Dict, List, Optional, Any
 from sqlalchemy.orm import Session
 
 from app.core.config import settings
+from app.models.push_subscription import PushSubscription
+from app.models.notification_preference import NotificationPreference
 
 logger = logging.getLogger(__name__)
 
@@ -27,28 +29,24 @@ class PushService:
     """
 
     def __init__(self):
-        vapid_claims_email = getattr(settings, 'VAPID_CLAIMS_EMAIL', 'mailto:admin@fastnext.com')
         self.vapid_claims = {
-            "sub": vapid_claims_email,
+            "sub": settings.VAPID_CLAIMS_EMAIL,
         }
         self._pywebpush = None
 
     @property
     def is_configured(self) -> bool:
         """Check if push notifications are properly configured"""
-        push_enabled = getattr(settings, 'PUSH_ENABLED', False)
-        vapid_public = getattr(settings, 'VAPID_PUBLIC_KEY', None)
-        vapid_private = getattr(settings, 'VAPID_PRIVATE_KEY', None)
         return bool(
-            push_enabled
-            and vapid_public
-            and vapid_private
+            settings.PUSH_ENABLED
+            and settings.VAPID_PUBLIC_KEY
+            and settings.VAPID_PRIVATE_KEY
         )
 
     @property
     def public_key(self) -> Optional[str]:
         """Get the VAPID public key for client subscription"""
-        return getattr(settings, 'VAPID_PUBLIC_KEY', None)
+        return settings.VAPID_PUBLIC_KEY
 
     def _get_pywebpush(self):
         """Lazy load pywebpush module"""
@@ -63,25 +61,27 @@ class PushService:
 
     async def send_notification(
         self,
-        subscription_info: Dict,
+        subscription: PushSubscription,
         title: str,
         body: str,
         icon: Optional[str] = None,
         url: Optional[str] = None,
         tag: Optional[str] = None,
         data: Optional[Dict] = None,
+        db: Optional[Session] = None,
     ) -> bool:
         """
         Send a push notification to a specific subscription.
 
         Args:
-            subscription_info: Push subscription info dict with endpoint, keys
+            subscription: The push subscription to send to
             title: Notification title
             body: Notification body text
             icon: URL to icon image
             url: URL to open when notification is clicked
             tag: Tag for notification (for grouping/replacing)
             data: Additional data to send with notification
+            db: Database session (for updating subscription on error)
 
         Returns:
             True if sent successfully, False otherwise
@@ -113,21 +113,37 @@ class PushService:
         if tag:
             payload["notification"]["tag"] = tag
 
-        vapid_private_key = getattr(settings, 'VAPID_PRIVATE_KEY', '')
+        subscription_info = subscription.to_push_info()
 
         try:
             pywebpush.webpush(
                 subscription_info=subscription_info,
                 data=json.dumps(payload),
-                vapid_private_key=vapid_private_key,
+                vapid_private_key=settings.VAPID_PRIVATE_KEY,
                 vapid_claims=self.vapid_claims,
             )
 
-            logger.info("Push notification sent successfully")
+            # Update last used timestamp
+            if db:
+                subscription.mark_used()
+                db.flush()
+
+            logger.info(f"Push notification sent to subscription {subscription.id}")
             return True
 
         except pywebpush.WebPushException as e:
             logger.error(f"Push notification failed: {e}")
+
+            # Handle subscription errors
+            if db:
+                if e.response and e.response.status_code in (404, 410):
+                    # Subscription is no longer valid
+                    subscription.is_active = False
+                    logger.info(f"Deactivated invalid subscription {subscription.id}")
+                else:
+                    subscription.record_error(str(e))
+                db.flush()
+
             return False
 
         except Exception as e:
@@ -168,43 +184,29 @@ class PushService:
         if not self.is_configured:
             return 0
 
-        # Try to get user's push subscriptions
-        try:
-            from app.models.push_subscription import PushSubscription
-            subscriptions = (
-                db.query(PushSubscription)
-                .filter(
-                    PushSubscription.user_id == user_id,
-                    PushSubscription.is_active == True,
-                )
-                .all()
-            )
-        except ImportError:
-            logger.warning("PushSubscription model not available")
+        # Check user preferences
+        prefs = NotificationPreference.get_for_user(db, user_id)
+        if prefs and not prefs.should_send_push(notification_type):
+            logger.debug(f"Push disabled for user {user_id} type {notification_type}")
             return 0
 
+        # Get active subscriptions
+        subscriptions = PushSubscription.get_active_subscriptions(db, user_id)
         if not subscriptions:
             logger.debug(f"No active push subscriptions for user {user_id}")
             return 0
 
         success_count = 0
         for sub in subscriptions:
-            subscription_info = sub.to_push_info() if hasattr(sub, 'to_push_info') else {
-                "endpoint": sub.endpoint,
-                "keys": {
-                    "p256dh": sub.p256dh,
-                    "auth": sub.auth,
-                }
-            }
-
             if await self.send_notification(
-                subscription_info=subscription_info,
+                subscription=sub,
                 title=title,
                 body=body,
                 icon=icon,
                 url=url,
                 tag=tag,
                 data=data,
+                db=db,
             ):
                 success_count += 1
 

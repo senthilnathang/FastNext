@@ -1,148 +1,120 @@
 /**
  * Notification Types and Interfaces
+ * Matches backend API schema
  */
 
-// Notification types
-export type NotificationType =
-  | "system"
-  | "message"
-  | "alert"
-  | "reminder"
-  | "update"
-  | "mention"
-  | "task"
-  | "security";
+// Notification levels (matches backend NotificationLevel enum)
+export type NotificationLevel = "info" | "success" | "warning" | "error";
 
-export type NotificationPriority = "low" | "normal" | "high" | "urgent";
+// Actor info returned with notifications
+export interface ActorInfo {
+  id: number;
+  full_name: string;
+  avatar_url?: string | null;
+}
 
-export type NotificationStatus = "unread" | "read" | "archived";
-
-// Base notification interface
+// Base notification interface (matches backend NotificationResponse)
 export interface Notification {
   id: number;
   user_id: number;
-  type: NotificationType;
-  priority: NotificationPriority;
-  status: NotificationStatus;
   title: string;
-  message: string;
-  message_html?: string | null;
-  icon?: string | null;
-  icon_color?: string | null;
-  action_url?: string | null;
-  action_label?: string | null;
-  source_type?: string | null;
-  source_id?: number | null;
-  metadata?: Record<string, unknown>;
+  description?: string | null;
+  level: NotificationLevel;
   is_read: boolean;
-  read_at?: string | null;
-  expires_at?: string | null;
+  data: Record<string, unknown>;
+  link?: string | null;
+  actor_id?: number | null;
+  actor?: ActorInfo | null;
   created_at: string;
   updated_at?: string | null;
-}
-
-// Notification preferences
-export interface NotificationChannel {
-  enabled: boolean;
-  types: NotificationType[];
-}
-
-export interface NotificationPreferences {
-  id: number;
-  user_id: number;
-  email_enabled: boolean;
-  email_digest: "instant" | "daily" | "weekly" | "never";
-  email_types: NotificationType[];
-  push_enabled: boolean;
-  push_types: NotificationType[];
-  in_app_enabled: boolean;
-  in_app_types: NotificationType[];
-  quiet_hours_enabled: boolean;
-  quiet_hours_start?: string | null;
-  quiet_hours_end?: string | null;
-  muted_until?: string | null;
-  created_at: string;
-  updated_at?: string | null;
-}
-
-export interface UpdateNotificationPreferences {
-  email_enabled?: boolean;
-  email_digest?: "instant" | "daily" | "weekly" | "never";
-  email_types?: NotificationType[];
-  push_enabled?: boolean;
-  push_types?: NotificationType[];
-  in_app_enabled?: boolean;
-  in_app_types?: NotificationType[];
-  quiet_hours_enabled?: boolean;
-  quiet_hours_start?: string | null;
-  quiet_hours_end?: string | null;
-  muted_until?: string | null;
 }
 
 // API request/response types
 export interface NotificationListParams {
-  type?: NotificationType;
-  status?: NotificationStatus;
-  priority?: NotificationPriority;
-  is_read?: boolean;
-  start_date?: string;
-  end_date?: string;
-  search?: string;
+  filter_type?: "all" | "unread" | "read";
   page?: number;
-  limit?: number;
+  page_size?: number;
 }
 
 export interface PaginatedNotifications {
   items: Notification[];
   total: number;
   page: number;
-  limit: number;
-  pages: number;
+  page_size: number;
+  unread_count: number;
 }
 
 export interface NotificationStats {
-  total: number;
-  unread: number;
-  by_type: Partial<Record<NotificationType, number>>;
-  by_priority: Partial<Record<NotificationPriority, number>>;
+  all_count: number;
+  unread_count: number;
+  read_count: number;
 }
 
-export interface BulkActionResult {
-  success: number;
-  failed: number;
-  errors?: Array<{ id: number; error: string }>;
+export interface BulkReadRequest {
+  notification_ids?: number[];
+}
+
+export interface BulkReadResponse {
+  message: string;
+  updated_count: number;
+}
+
+export interface BulkDeleteRequest {
+  notification_ids: number[];
+}
+
+export interface BulkDeleteResponse {
+  message: string;
+  deleted_count: number;
+}
+
+export interface SendNotificationRequest {
+  user_ids: number[];
+  title: string;
+  description?: string;
+  level?: NotificationLevel;
+  link?: string;
+  data?: Record<string, unknown>;
+}
+
+export interface SendNotificationResponse {
+  message: string;
+  recipient_count: number;
 }
 
 // Filter state for components
 export interface NotificationFiltersState {
-  type: NotificationType | "all";
-  status: NotificationStatus | "all";
-  priority: NotificationPriority | "all";
-  dateRange: "all" | "today" | "week" | "month";
+  filter_type: "all" | "unread" | "read";
   search: string;
 }
 
-// Notification type metadata for UI
-export const NOTIFICATION_TYPE_CONFIG: Record<
-  NotificationType,
-  { label: string; icon: string; color: string }
+// Notification level metadata for UI
+export const NOTIFICATION_LEVEL_CONFIG: Record<
+  NotificationLevel,
+  { label: string; icon: string; color: string; bgColor: string }
 > = {
-  system: { label: "System", icon: "Settings", color: "text-gray-500" },
-  message: { label: "Message", icon: "MessageCircle", color: "text-blue-500" },
-  alert: { label: "Alert", icon: "AlertTriangle", color: "text-red-500" },
-  reminder: { label: "Reminder", icon: "Clock", color: "text-yellow-500" },
-  update: { label: "Update", icon: "RefreshCw", color: "text-green-500" },
-  mention: { label: "Mention", icon: "AtSign", color: "text-purple-500" },
-  task: { label: "Task", icon: "CheckSquare", color: "text-amber-500" },
-  security: { label: "Security", icon: "Shield", color: "text-orange-500" },
-};
-
-export const NOTIFICATION_PRIORITY_CONFIG: Record<
-  NotificationPriority,
-  { label: string; color: string; bgColor: string }
-> = {
-  low: { label: "Low", color: "text-gray-400", bgColor: "bg-gray-100" },
-  normal: { label: "Normal", color: "text-gray-600", bgColor: "bg-gray-100" },
-  high: { label: "High", color: "text-orange-600", bgColor: "bg-orange-100" },
-  urgent: { label: "Urgent", color: "text-red-600", bgColor: "bg-red-100" },
+  info: {
+    label: "Info",
+    icon: "Info",
+    color: "text-blue-600 dark:text-blue-400",
+    bgColor: "bg-blue-100 dark:bg-blue-900/30",
+  },
+  success: {
+    label: "Success",
+    icon: "CheckCircle",
+    color: "text-green-600 dark:text-green-400",
+    bgColor: "bg-green-100 dark:bg-green-900/30",
+  },
+  warning: {
+    label: "Warning",
+    icon: "AlertTriangle",
+    color: "text-yellow-600 dark:text-yellow-400",
+    bgColor: "bg-yellow-100 dark:bg-yellow-900/30",
+  },
+  error: {
+    label: "Error",
+    icon: "XCircle",
+    color: "text-red-600 dark:text-red-400",
+    bgColor: "bg-red-100 dark:bg-red-900/30",
+  },
 };

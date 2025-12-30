@@ -6,7 +6,7 @@ import factory
 from factory import Sequence
 
 from app.models.permission import Permission
-from app.models.user_role import RolePermission
+from app.models.user_company_role import RolePermission
 from tests.factories.base import SQLAlchemyModelFactory
 
 

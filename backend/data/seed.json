@@ -6,31 +6,43 @@
   },
   "roles": [
     {
-      "name": "admin",
+      "name": "Super Admin",
+      "codename": "super_admin",
+      "description": "Full system access with all permissions",
+      "is_system_role": true,
+      "is_active": true
+    },
+    {
+      "name": "Admin",
+      "codename": "admin",
       "description": "Full system administrator with all permissions",
       "is_system_role": true,
       "is_active": true
     },
     {
-      "name": "manager",
+      "name": "Manager",
+      "codename": "manager",
       "description": "Project manager with team and project management access",
       "is_system_role": true,
       "is_active": true
     },
     {
-      "name": "editor",
+      "name": "Editor",
+      "codename": "editor",
       "description": "Content editor with create and update permissions",
       "is_system_role": true,
       "is_active": true
     },
     {
-      "name": "viewer",
+      "name": "Viewer",
+      "codename": "viewer",
       "description": "Read-only access to resources",
       "is_system_role": true,
       "is_active": true
     },
     {
-      "name": "member",
+      "name": "Member",
+      "codename": "member",
       "description": "Basic member with limited permissions",
       "is_system_role": true,
       "is_active": true
@@ -38,280 +50,245 @@
   ],
   "permissions": [
     {
-      "name": "users.read",
-      "description": "View user profiles",
-      "action": "read",
-      "resource": "users",
-      "category": "users",
-      "is_system_permission": true
-    },
-    {
-      "name": "users.create",
-      "description": "Create new users",
+      "name": "user.create",
+      "codename": "user.create",
+      "description": "Create Users",
       "action": "create",
-      "resource": "users",
-      "category": "users",
+      "resource": "user",
+      "category": "user",
       "is_system_permission": true
     },
     {
-      "name": "users.update",
-      "description": "Update user profiles",
+      "name": "user.read",
+      "codename": "user.read",
+      "description": "View Users",
+      "action": "read",
+      "resource": "user",
+      "category": "user",
+      "is_system_permission": true
+    },
+    {
+      "name": "user.update",
+      "codename": "user.update",
+      "description": "Update Users",
       "action": "update",
-      "resource": "users",
-      "category": "users",
+      "resource": "user",
+      "category": "user",
       "is_system_permission": true
     },
     {
-      "name": "users.delete",
-      "description": "Delete users",
+      "name": "user.delete",
+      "codename": "user.delete",
+      "description": "Delete Users",
       "action": "delete",
-      "resource": "users",
-      "category": "users",
+      "resource": "user",
+      "category": "user",
       "is_system_permission": true
     },
     {
-      "name": "users.manage",
-      "description": "Full user management",
+      "name": "user.manage",
+      "codename": "user.manage",
+      "description": "Manage Users",
       "action": "manage",
-      "resource": "users",
-      "category": "users",
+      "resource": "user",
+      "category": "user",
       "is_system_permission": true
     },
     {
-      "name": "roles.read",
-      "description": "View roles",
-      "action": "read",
-      "resource": "roles",
-      "category": "roles",
-      "is_system_permission": true
-    },
-    {
-      "name": "roles.create",
-      "description": "Create roles",
+      "name": "company.create",
+      "codename": "company.create",
+      "description": "Create Companies",
       "action": "create",
-      "resource": "roles",
-      "category": "roles",
+      "resource": "company",
+      "category": "company",
       "is_system_permission": true
     },
     {
-      "name": "roles.update",
-      "description": "Update roles",
+      "name": "company.read",
+      "codename": "company.read",
+      "description": "View Companies",
+      "action": "read",
+      "resource": "company",
+      "category": "company",
+      "is_system_permission": true
+    },
+    {
+      "name": "company.update",
+      "codename": "company.update",
+      "description": "Update Companies",
       "action": "update",
-      "resource": "roles",
-      "category": "roles",
+      "resource": "company",
+      "category": "company",
       "is_system_permission": true
     },
     {
-      "name": "roles.delete",
-      "description": "Delete roles",
+      "name": "company.delete",
+      "codename": "company.delete",
+      "description": "Delete Companies",
       "action": "delete",
-      "resource": "roles",
-      "category": "roles",
+      "resource": "company",
+      "category": "company",
       "is_system_permission": true
     },
     {
-      "name": "roles.manage",
-      "description": "Full role management",
+      "name": "company.manage",
+      "codename": "company.manage",
+      "description": "Manage Companies",
       "action": "manage",
-      "resource": "roles",
-      "category": "roles",
+      "resource": "company",
+      "category": "company",
       "is_system_permission": true
     },
     {
-      "name": "projects.read",
-      "description": "View projects",
-      "action": "read",
-      "resource": "projects",
-      "category": "projects",
-      "is_system_permission": true
-    },
-    {
-      "name": "projects.create",
-      "description": "Create projects",
+      "name": "group.create",
+      "codename": "group.create",
+      "description": "Create Groups",
       "action": "create",
-      "resource": "projects",
-      "category": "projects",
+      "resource": "group",
+      "category": "group",
       "is_system_permission": true
     },
     {
-      "name": "projects.update",
-      "description": "Update projects",
+      "name": "group.read",
+      "codename": "group.read",
+      "description": "View Groups",
+      "action": "read",
+      "resource": "group",
+      "category": "group",
+      "is_system_permission": true
+    },
+    {
+      "name": "group.update",
+      "codename": "group.update",
+      "description": "Update Groups",
       "action": "update",
-      "resource": "projects",
-      "category": "projects",
+      "resource": "group",
+      "category": "group",
       "is_system_permission": true
     },
     {
-      "name": "projects.delete",
-      "description": "Delete projects",
+      "name": "group.delete",
+      "codename": "group.delete",
+      "description": "Delete Groups",
       "action": "delete",
-      "resource": "projects",
-      "category": "projects",
+      "resource": "group",
+      "category": "group",
       "is_system_permission": true
     },
     {
-      "name": "projects.manage",
-      "description": "Full project management",
+      "name": "group.manage",
+      "codename": "group.manage",
+      "description": "Manage Groups",
       "action": "manage",
-      "resource": "projects",
-      "category": "projects",
+      "resource": "group",
+      "category": "group",
       "is_system_permission": true
     },
     {
-      "name": "workflows.read",
-      "description": "View workflows",
-      "action": "read",
-      "resource": "workflows",
-      "category": "workflows",
-      "is_system_permission": true
-    },
-    {
-      "name": "workflows.create",
-      "description": "Create workflows",
+      "name": "role.create",
+      "codename": "role.create",
+      "description": "Create Roles",
       "action": "create",
-      "resource": "workflows",
-      "category": "workflows",
+      "resource": "role",
+      "category": "role",
       "is_system_permission": true
     },
     {
-      "name": "workflows.update",
-      "description": "Update workflows",
+      "name": "role.read",
+      "codename": "role.read",
+      "description": "View Roles",
+      "action": "read",
+      "resource": "role",
+      "category": "role",
+      "is_system_permission": true
+    },
+    {
+      "name": "role.update",
+      "codename": "role.update",
+      "description": "Update Roles",
       "action": "update",
-      "resource": "workflows",
-      "category": "workflows",
+      "resource": "role",
+      "category": "role",
       "is_system_permission": true
     },
     {
-      "name": "workflows.delete",
-      "description": "Delete workflows",
+      "name": "role.delete",
+      "codename": "role.delete",
+      "description": "Delete Roles",
       "action": "delete",
-      "resource": "workflows",
-      "category": "workflows",
+      "resource": "role",
+      "category": "role",
       "is_system_permission": true
     },
     {
-      "name": "workflows.manage",
-      "description": "Full workflow management",
+      "name": "role.manage",
+      "codename": "role.manage",
+      "description": "Manage Roles",
       "action": "manage",
-      "resource": "workflows",
-      "category": "workflows",
+      "resource": "role",
+      "category": "role",
       "is_system_permission": true
     },
     {
-      "name": "messages.read",
-      "description": "View messages",
+      "name": "permission.read",
+      "codename": "permission.read",
+      "description": "View Permissions",
       "action": "read",
-      "resource": "messages",
-      "category": "messaging",
+      "resource": "permission",
+      "category": "permission",
       "is_system_permission": true
     },
     {
-      "name": "messages.create",
-      "description": "Create messages",
-      "action": "create",
-      "resource": "messages",
-      "category": "messaging",
-      "is_system_permission": true
-    },
-    {
-      "name": "messages.delete",
-      "description": "Delete messages",
-      "action": "delete",
-      "resource": "messages",
-      "category": "messaging",
-      "is_system_permission": true
-    },
-    {
-      "name": "inbox.read",
-      "description": "View inbox",
-      "action": "read",
-      "resource": "inbox",
-      "category": "inbox",
-      "is_system_permission": true
-    },
-    {
-      "name": "inbox.manage",
-      "description": "Manage inbox items",
+      "name": "permission.manage",
+      "codename": "permission.manage",
+      "description": "Manage Permissions",
       "action": "manage",
-      "resource": "inbox",
-      "category": "inbox",
+      "resource": "permission",
+      "category": "permission",
       "is_system_permission": true
     },
     {
-      "name": "settings.read",
-      "description": "View system settings",
-      "action": "read",
-      "resource": "settings",
-      "category": "system",
-      "is_system_permission": true
-    },
-    {
-      "name": "settings.manage",
-      "description": "Manage system settings",
+      "name": "system.settings",
+      "codename": "system.settings",
+      "description": "System Settings",
       "action": "manage",
       "resource": "settings",
       "category": "system",
       "is_system_permission": true
     },
     {
-      "name": "modules.read",
-      "description": "View installed modules",
+      "name": "system.audit",
+      "codename": "system.audit",
+      "description": "View Audit Logs",
       "action": "read",
-      "resource": "modules",
-      "category": "system",
-      "is_system_permission": true
-    },
-    {
-      "name": "modules.manage",
-      "description": "Install and manage modules",
-      "action": "manage",
-      "resource": "modules",
-      "category": "system",
+      "resource": "audit",
+      "category": "audit",
       "is_system_permission": true
     }
   ],
   "role_permissions": {
+    "super_admin": ["*"],
     "admin": ["*"],
     "manager": [
-      "users.read",
-      "users.update",
-      "roles.read",
-      "projects.read",
-      "projects.create",
-      "projects.update",
-      "projects.delete",
-      "projects.manage",
-      "workflows.read",
-      "workflows.create",
-      "workflows.update",
-      "messages.read",
-      "messages.create",
-      "inbox.read",
-      "inbox.manage"
+      "user.read",
+      "user.update",
+      "group.read",
+      "group.update",
+      "role.read",
+      "permission.read"
     ],
     "editor": [
-      "users.read",
-      "projects.read",
-      "projects.create",
-      "projects.update",
-      "workflows.read",
-      "messages.read",
-      "messages.create",
-      "inbox.read"
+      "user.read",
+      "group.read",
+      "role.read"
     ],
     "viewer": [
-      "users.read",
-      "projects.read",
-      "workflows.read",
-      "messages.read",
-      "inbox.read"
+      "user.read",
+      "group.read",
+      "role.read"
     ],
     "member": [
-      "users.read",
-      "projects.read",
-      "messages.read",
-      "messages.create",
-      "inbox.read"
+      "user.read"
     ]
   },
   "workflow_states": [
@@ -394,33 +371,6 @@
       "icon": "X",
       "is_initial": false,
       "is_final": true
-    }
-  ],
-  "labels": [
-    {
-      "name": "Important",
-      "color": "#EF4444",
-      "description": "High priority items requiring attention"
-    },
-    {
-      "name": "Work",
-      "color": "#3B82F6",
-      "description": "Work-related items"
-    },
-    {
-      "name": "Personal",
-      "color": "#10B981",
-      "description": "Personal items"
-    },
-    {
-      "name": "Follow-up",
-      "color": "#F59E0B",
-      "description": "Items requiring follow-up"
-    },
-    {
-      "name": "Archive",
-      "color": "#6B7280",
-      "description": "Items to archive later"
     }
   ],
   "system_config": {

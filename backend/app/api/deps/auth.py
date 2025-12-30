@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session
 from app.api.deps.database import get_db
 from app.core.security import decode_token
 from app.models import User
-from app.services.permission import PermissionService
+from app.services.permission_service import PermissionService
 
 # Bearer token security scheme
 security_scheme = HTTPBearer(

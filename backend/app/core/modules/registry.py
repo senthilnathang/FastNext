@@ -1,7 +1,7 @@
 """
 Module Registry
 
-Central registry for all loaded modules in the FastNext system.
+Central registry for all loaded modules in the FastVue system.
 Handles module registration, dependency resolution, and lifecycle hooks.
 """
 

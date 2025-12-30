@@ -9,7 +9,7 @@ from app.db.session import get_db
 from app.models.permission import Permission
 from app.models.role import Role
 from app.models.user import User
-from app.models.user_role import RolePermission
+from app.models.user_company_role import RolePermission
 
 
 def create_product_permissions():

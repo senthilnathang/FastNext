@@ -1,161 +1,70 @@
-import json
-from typing import Optional
+"""
+Activity logging utilities for security and audit purposes.
+"""
 
-from app.models.activity_log import (
-    ActivityAction,
-    ActivityLevel,
-    ActivityLog,
-    EventCategory,
-)
+from typing import Any, Dict, Optional
+
 from sqlalchemy.orm import Session
+
+from app.models.activity_log import ActivityCategory, ActivityLevel, ActivityLog
 
 
 def log_activity(
     db: Session,
-    user_id: Optional[int],
-    action: ActivityAction,
+    action: str,
     entity_type: str,
-    entity_id: Optional[int],
-    entity_name: Optional[str],
-    description: str,
-    level: ActivityLevel = ActivityLevel.INFO,
-    category: EventCategory = EventCategory.USER_MANAGEMENT,
+    entity_id: Optional[int] = None,
+    entity_name: Optional[str] = None,
+    user_id: Optional[int] = None,
+    company_id: Optional[int] = None,
+    description: Optional[str] = None,
+    old_values: Optional[Dict[str, Any]] = None,
+    new_values: Optional[Dict[str, Any]] = None,
     ip_address: Optional[str] = None,
     user_agent: Optional[str] = None,
-    request_method: Optional[str] = None,
-    request_path: Optional[str] = None,
-    status_code: Optional[int] = None,
-    extra_data: Optional[dict] = None,
+    extra_data: Optional[Dict[str, Any]] = None,
+    level: ActivityLevel = ActivityLevel.INFO,
+    category: ActivityCategory = ActivityCategory.DATA_MANAGEMENT,
 ) -> ActivityLog:
-    """Log an activity to the activity log table"""
+    """
+    Log an activity entry.
 
-    activity_log = ActivityLog(
-        user_id=user_id,
-        category=category,
+    Args:
+        db: Database session
+        action: Action performed (e.g., "create", "update", "delete")
+        entity_type: Type of entity affected
+        entity_id: ID of the entity
+        entity_name: Name of the entity
+        user_id: ID of the user performing the action
+        company_id: ID of the company context
+        description: Description of the activity
+        old_values: Previous values (for updates)
+        new_values: New values (for updates)
+        ip_address: Client IP address
+        user_agent: Client user agent
+        extra_data: Additional metadata
+        level: Activity level (INFO, WARNING, etc.)
+        category: Activity category
+
+    Returns:
+        The created ActivityLog entry
+    """
+    return ActivityLog.log(
+        db=db,
         action=action,
         entity_type=entity_type,
-        entity_id=str(entity_id) if entity_id else None,
+        entity_id=entity_id,
         entity_name=entity_name,
-        description=description,
+        user_id=user_id,
+        company_id=company_id,
+        category=category,
         level=level,
-        ip_address=ip_address,
-        user_agent=user_agent,
-        request_method=request_method,
-        request_path=request_path,
-        status_code=status_code,
-        event_metadata=extra_data,
-    )
-
-    try:
-        db.add(activity_log)
-        db.commit()
-        db.refresh(activity_log)
-        return activity_log
-    except Exception as e:
-        db.rollback()
-        raise e
-
-
-def log_user_login(
-    db: Session,
-    user_id: int,
-    username: str,
-    ip_address: Optional[str] = None,
-    user_agent: Optional[str] = None,
-    success: bool = True,
-) -> ActivityLog:
-    """Log user login activity"""
-
-    action = ActivityAction.LOGIN
-    level = ActivityLevel.INFO if success else ActivityLevel.WARNING
-    description = (
-        f"User {username} logged in successfully"
-        if success
-        else f"Failed login attempt for user {username}"
-    )
-
-    return log_activity(
-        db=db,
-        user_id=user_id if success else None,
-        action=action,
-        entity_type="auth",
-        entity_id=user_id,
-        entity_name=username,
         description=description,
-        level=level,
+        old_values=old_values,
+        new_values=new_values,
         ip_address=ip_address,
         user_agent=user_agent,
-        extra_data={"success": success},
-    )
-
-
-def log_user_logout(
-    db: Session,
-    user_id: int,
-    username: str,
-    ip_address: Optional[str] = None,
-    user_agent: Optional[str] = None,
-) -> ActivityLog:
-    """Log user logout activity"""
-
-    return log_activity(
-        db=db,
-        user_id=user_id,
-        action=ActivityAction.LOGOUT,
-        entity_type="auth",
-        entity_id=user_id,
-        entity_name=username,
-        description=f"User {username} logged out",
-        level=ActivityLevel.INFO,
-        ip_address=ip_address,
-        user_agent=user_agent,
-    )
-
-
-def log_permission_change(
-    db: Session,
-    user_id: int,
-    target_user_id: int,
-    target_username: str,
-    permission_details: str,
-    ip_address: Optional[str] = None,
-) -> ActivityLog:
-    """Log permission change activity"""
-
-    return log_activity(
-        db=db,
-        user_id=user_id,
-        action=ActivityAction.PERMISSION_CHANGE,
-        entity_type="permission",
-        entity_id=target_user_id,
-        entity_name=target_username,
-        description=f"Permission changed: {permission_details}",
-        level=ActivityLevel.WARNING,
-        ip_address=ip_address,
-        extra_data={"permission_details": permission_details},
-    )
-
-
-def log_data_export(
-    db: Session,
-    user_id: int,
-    export_type: str,
-    entity_count: int,
-    ip_address: Optional[str] = None,
-) -> ActivityLog:
-    """Log data export activity"""
-
-    return log_activity(
-        db=db,
-        user_id=user_id,
-        action=ActivityAction.EXPORT,
-        entity_type="data",
-        entity_id=user_id,
-        entity_name=f"{export_type}_export",
-        description=f"Exported {entity_count} {export_type} records",
-        level=ActivityLevel.INFO,
-        ip_address=ip_address,
-        extra_data={"export_type": export_type, "entity_count": entity_count},
+        extra_data=extra_data,
     )
 
 
@@ -164,21 +73,39 @@ def log_security_event(
     user_id: Optional[int],
     event_type: str,
     description: str,
-    level: ActivityLevel = ActivityLevel.WARNING,
+    level: ActivityLevel = ActivityLevel.INFO,
+    extra_data: Optional[Dict[str, Any]] = None,
     ip_address: Optional[str] = None,
-    extra_data: Optional[dict] = None,
+    user_agent: Optional[str] = None,
+    company_id: Optional[int] = None,
 ) -> ActivityLog:
-    """Log security-related events"""
+    """
+    Log a security-related event.
 
-    return log_activity(
+    Args:
+        db: Database session
+        user_id: ID of the user involved (if any)
+        event_type: Type of security event
+        description: Description of the event
+        level: Severity level
+        extra_data: Additional event details
+        ip_address: Client IP address
+        user_agent: Client user agent
+        company_id: Company context (if any)
+
+    Returns:
+        The created ActivityLog entry
+    """
+    return ActivityLog.log(
         db=db,
-        user_id=user_id,
-        action=ActivityAction.UPDATE,  # Generic action for security events
+        action=event_type,
         entity_type="security",
-        entity_id=user_id,
-        entity_name=event_type,
-        description=description,
+        user_id=user_id,
+        company_id=company_id,
+        category=ActivityCategory.SECURITY,
         level=level,
+        description=description,
         ip_address=ip_address,
+        user_agent=user_agent,
         extra_data=extra_data,
     )

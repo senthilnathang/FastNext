@@ -1,1 +1,1 @@
-# Utils package for FastNext
+# Utils package

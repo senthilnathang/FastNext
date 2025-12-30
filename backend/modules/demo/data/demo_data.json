@@ -1,0 +1,37 @@
+{
+  "model": "demo.DemoItem",
+  "records": [
+    {
+      "code": "DEMO_001",
+      "name": "Sample Item 1",
+      "description": "This is the first demo item to showcase the module system.",
+      "is_active": true,
+      "priority": 10,
+      "tags": ["sample", "demo", "featured"]
+    },
+    {
+      "code": "DEMO_002",
+      "name": "Sample Item 2",
+      "description": "Another demo item with different attributes.",
+      "is_active": true,
+      "priority": 5,
+      "tags": ["sample", "demo"]
+    },
+    {
+      "code": "DEMO_003",
+      "name": "Inactive Example",
+      "description": "This item is marked as inactive for testing purposes.",
+      "is_active": false,
+      "priority": 0,
+      "tags": ["inactive", "test"]
+    },
+    {
+      "code": "DEMO_HIGH",
+      "name": "High Priority Item",
+      "description": "A high priority demo item to test sorting.",
+      "is_active": true,
+      "priority": 100,
+      "tags": ["priority", "important"]
+    }
+  ]
+}

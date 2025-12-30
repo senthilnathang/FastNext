@@ -9,7 +9,7 @@ import qrcode
 from app.auth.deps import get_current_active_user
 from app.core import security
 from app.db.session import get_db
-from app.models.activity_log import ActivityAction, ActivityLevel
+from app.models.activity_log import ActivityLevel
 from app.models.security_setting import SecuritySetting
 from app.models.user import User
 from app.schemas.security_setting import (

@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Optional
 
 from pydantic import BaseModel, Field, validator
@@ -88,8 +89,8 @@ class SecuritySettingUpdate(SecuritySettingBase):
 class SecuritySettingResponse(SecuritySettingBase):
     id: int
     user_id: int
-    created_at: Optional[str]
-    updated_at: Optional[str]
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
 
     class Config:
         from_attributes = True

@@ -1,8 +1,8 @@
 """
-FastNext Module System
+FastVue Module System
 
 A modular addon/plugin architecture inspired by Odoo and Django.
-Allows dynamic loading of FastAPI + Next.js modules with dependency management.
+Allows dynamic loading of FastAPI + Vue.js modules with dependency management.
 """
 
 from .registry import ModuleRegistry, ModuleInfo, ModuleState
@@ -15,9 +15,6 @@ from .exceptions import (
     MissingDependenciesError,
     CircularDependencyError,
     ModuleInstallationError,
-    ModuleLoadError,
-    ExternalDependencyError,
-    ModuleValidationError,
     # Schema exceptions
     SchemaError,
     TableExistsError,
@@ -61,9 +58,6 @@ __all__ = [
     "MissingDependenciesError",
     "CircularDependencyError",
     "ModuleInstallationError",
-    "ModuleLoadError",
-    "ExternalDependencyError",
-    "ModuleValidationError",
     # Schema exceptions
     "SchemaError",
     "TableExistsError",

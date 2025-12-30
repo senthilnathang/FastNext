@@ -1,7 +1,7 @@
 """
 Module System Exceptions
 
-Custom exceptions for the FastNext module system.
+Custom exceptions for the FastVue module system.
 """
 
 from typing import List, Optional

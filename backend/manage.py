@@ -79,8 +79,9 @@ def initdb(
     seed: bool = typer.Option(True, "--seed/--no-seed", help="Load seed data after init"),
 ):
     """Initialize database with tables and seed data."""
-    from app.db.base import Base
-    from app.db.session import engine
+    # Import all models to register them with Base
+    import app.models  # noqa: F401
+    from app.db.base import Base, engine
 
     with Progress(
         SpinnerColumn(),
@@ -191,8 +192,7 @@ def resetdb(
     force: bool = typer.Option(False, "--force", "-f", help="Skip confirmation"),
 ):
     """Reset database by dropping and recreating all tables."""
-    from app.db.base import Base
-    from app.db.session import engine
+    from app.db.base import Base, engine
 
     if not force:
         if not typer.confirm(
@@ -324,9 +324,8 @@ def _load_data_from_dict(data: dict, clear: bool = False):
     from app.core.security import get_password_hash
     from app.models.role import Role
     from app.models.permission import Permission
-    from app.models.user_role import RolePermission
+    from app.models.user_company_role import RolePermission
     from app.models.user import User
-    from app.models.workflow import WorkflowState
     from app.models.label import Label
 
     db = get_db_session()
@@ -381,18 +380,6 @@ def _load_data_from_dict(data: dict, clear: bool = False):
                                     db.add(rp)
             db.commit()
             rprint(f"  [green]✓[/] Loaded role-permission associations")
-
-        # Load workflow states
-        if "workflow_states" in data:
-            for state_data in data["workflow_states"]:
-                existing = db.query(WorkflowState).filter(
-                    WorkflowState.name == state_data["name"]
-                ).first()
-                if not existing:
-                    state = WorkflowState(**state_data)
-                    db.add(state)
-            db.commit()
-            rprint(f"  [green]✓[/] Loaded {len(data['workflow_states'])} workflow states")
 
         # Load labels
         if "labels" in data:

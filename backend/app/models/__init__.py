@@ -61,7 +61,6 @@ from app.models.row_level_security import (
     RLSPolicy,
     RLSEntityType,
     RLSAuditLog,
-    RLSPolicyType,
     RLSAction,
 )
 from app.models.security_setting import SecuritySetting
@@ -163,7 +162,6 @@ __all__ = [
     "RLSPolicy",
     "RLSEntityType",
     "RLSAuditLog",
-    "RLSPolicyType",
     "RLSAction",
     "SecuritySetting",
 ]

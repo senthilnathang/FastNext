@@ -8,7 +8,6 @@ import {
   Database,
   Download,
   FileText,
-  GitBranch,
   Home,
   Key,
   Lock,
@@ -19,7 +18,6 @@ import {
   Upload,
   Users,
   UsersRound,
-  Workflow,
 } from "lucide-react";
 
 export interface MenuItem {
@@ -38,28 +36,10 @@ export const menuItems: MenuItem[] = [
     icon: Home,
   },
   {
-    title: "Projects",
-    href: "/projects",
-    icon: Building2,
-    module: "projects",
-  },
-  {
     title: "Products",
     href: "/products",
     icon: Package,
     module: "inventory",
-  },
-  {
-    title: "Workflow Types",
-    href: "/workflows",
-    icon: Cog,
-    module: "workflows",
-  },
-  {
-    title: "Workflows",
-    href: "/workflows/templates",
-    icon: GitBranch,
-    module: "workflows",
   },
   {
     title: "Notifications",
