@@ -13,7 +13,7 @@ export type { MessageType, MessageLevel, MessageListParams, CreateMessageData, U
 export { conversationsApi, type Conversation, type ConversationParticipant, type ConversationMessage } from "./conversations";
 export type { ConversationType, ConversationListParams, CreateConversationData, UpdateConversationData, SendMessageData, PaginatedConversations, PaginatedConversationMessages } from "./conversations";
 
-export { inboxApi, type InboxItem, type Label as InboxLabel, type InboxStats, type BulkActionResult as InboxBulkActionResult } from "./inbox";
+export { inboxApi, type InboxItem, type InboxLabel, type InboxStats, type BulkActionResult as InboxBulkActionResult } from "./inbox";
 export type { InboxItemType, InboxPriority, InboxStatus, InboxListParams, CreateInboxItemData, UpdateInboxItemData, PaginatedInboxItems } from "./inbox";
 
 export { modulesApi, type InstalledModule, type ModuleManifest, type ModuleCategory, type ModuleDependencyTree, type ScheduledAction, type ServerAction, type Sequence } from "./modules";

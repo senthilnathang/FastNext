@@ -347,11 +347,11 @@ export function GroupForm({
                                   >
                                     <Checkbox
                                       id={`permission-${permission.id}`}
-                                      checked={field.value.includes(
+                                      checked={permission.id !== undefined && field.value.includes(
                                         permission.id
                                       )}
                                       onCheckedChange={(checked) =>
-                                        handlePermissionChange(
+                                        permission.id !== undefined && handlePermissionChange(
                                           permission.id,
                                           checked as boolean
                                         )

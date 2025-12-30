@@ -797,6 +797,7 @@ export function useOfflineQueue(): UseOfflineQueueReturn {
   const clearQueue = React.useCallback(async () => {
     if (!("serviceWorker" in navigator) || !navigator.serviceWorker.controller) return;
 
+    const controller = navigator.serviceWorker.controller;
     return new Promise<void>((resolve) => {
       const channel = new MessageChannel();
       channel.port1.onmessage = () => {
@@ -804,7 +805,7 @@ export function useOfflineQueue(): UseOfflineQueueReturn {
         setQueueItems([]);
         resolve();
       };
-      navigator.serviceWorker.controller.postMessage(
+      controller.postMessage(
         { type: "CLEAR_QUEUE" },
         [channel.port2],
       );

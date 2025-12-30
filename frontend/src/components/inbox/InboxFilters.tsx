@@ -15,7 +15,7 @@ import {
   X,
   SlidersHorizontal,
 } from 'lucide-react';
-import type { InboxItemType, InboxStatus, InboxPriority, Label } from '@/lib/api/inbox';
+import type { InboxItemType, InboxStatus, InboxPriority, InboxLabel } from '@/lib/api/inbox';
 
 interface InboxFiltersProps {
   selectedType?: InboxItemType | 'all';
@@ -23,7 +23,7 @@ interface InboxFiltersProps {
   selectedPriority?: InboxPriority | 'all';
   selectedLabel?: number;
   searchQuery?: string;
-  labels?: Label[];
+  labels?: InboxLabel[];
   stats?: {
     total?: number;
     unread?: number;

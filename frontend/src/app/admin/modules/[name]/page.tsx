@@ -35,17 +35,17 @@ type TabType = 'overview' | 'config' | 'actions' | 'dependencies';
 const getStateColor = (state: string) => {
   switch (state) {
     case 'installed':
-      return 'bg-green-100 text-green-700';
+      return 'bg-green-500/10 text-green-600 dark:text-green-400';
     case 'to_install':
-      return 'bg-blue-100 text-blue-700';
+      return 'bg-primary/10 text-primary';
     case 'to_upgrade':
-      return 'bg-yellow-100 text-yellow-700';
+      return 'bg-yellow-500/10 text-yellow-600 dark:text-yellow-400';
     case 'to_remove':
-      return 'bg-red-100 text-red-700';
+      return 'bg-destructive/10 text-destructive';
     case 'uninstalled':
-      return 'bg-gray-100 text-gray-700';
+      return 'bg-muted text-muted-foreground';
     default:
-      return 'bg-gray-100 text-gray-700';
+      return 'bg-muted text-muted-foreground';
   }
 };
 
@@ -218,19 +218,19 @@ export default function ModuleDetailPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-background">
         <div className="max-w-5xl mx-auto px-4 py-8">
           <div className="animate-pulse space-y-6">
             <div className="flex items-center gap-4">
-              <div className="w-8 h-8 bg-gray-200 rounded" />
-              <div className="h-8 bg-gray-200 rounded w-48" />
+              <div className="w-8 h-8 bg-muted rounded" />
+              <div className="h-8 bg-muted rounded w-48" />
             </div>
-            <div className="bg-white rounded-lg border p-6 space-y-4">
+            <div className="bg-card rounded-lg border p-6 space-y-4">
               <div className="flex items-center gap-4">
-                <div className="w-16 h-16 bg-gray-200 rounded-lg" />
+                <div className="w-16 h-16 bg-muted rounded-lg" />
                 <div className="space-y-2">
-                  <div className="h-6 bg-gray-200 rounded w-48" />
-                  <div className="h-4 bg-gray-100 rounded w-32" />
+                  <div className="h-6 bg-muted rounded w-48" />
+                  <div className="h-4 bg-muted/50 rounded w-32" />
                 </div>
               </div>
             </div>
@@ -242,14 +242,14 @@ export default function ModuleDetailPage() {
 
   if (!module) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
-          <Package className="w-16 h-16 mx-auto mb-4 text-gray-300" />
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">Module not found</h2>
-          <p className="text-gray-500 mb-4">The module "{moduleName}" does not exist</p>
+          <Package className="w-16 h-16 mx-auto mb-4 text-muted-foreground/50" />
+          <h2 className="text-xl font-semibold text-foreground mb-2">Module not found</h2>
+          <p className="text-muted-foreground mb-4">The module "{moduleName}" does not exist</p>
           <button
             onClick={() => router.push('/admin/modules')}
-            className="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg"
+            className="px-4 py-2 text-sm font-medium text-primary-foreground bg-primary hover:bg-primary/90 rounded-lg"
           >
             Back to Modules
           </button>
@@ -266,37 +266,37 @@ export default function ModuleDetailPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className="bg-white border-b">
+      <div className="bg-card border-b">
         <div className="max-w-5xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <button
                 onClick={() => router.push('/admin/modules')}
-                className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg"
+                className="p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg"
               >
                 <ArrowLeft className="w-5 h-5" />
               </button>
 
-              <div className="w-12 h-12 rounded-lg bg-blue-100 flex items-center justify-center">
+              <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
                 {module.icon ? (
                   <span className="text-2xl">{module.icon}</span>
                 ) : module.application ? (
-                  <Layers className="w-6 h-6 text-blue-600" />
+                  <Layers className="w-6 h-6 text-primary" />
                 ) : (
-                  <Puzzle className="w-6 h-6 text-blue-600" />
+                  <Puzzle className="w-6 h-6 text-primary" />
                 )}
               </div>
 
               <div>
                 <div className="flex items-center gap-2">
-                  <h1 className="text-xl font-bold text-gray-900">{module.display_name}</h1>
+                  <h1 className="text-xl font-bold text-foreground">{module.display_name}</h1>
                   <span className={`px-2 py-0.5 text-xs rounded-full ${getStateColor(module.state)}`}>
                     {module.state.replace('_', ' ')}
                   </span>
                 </div>
-                <p className="text-sm text-gray-500">{module.name} v{module.version}</p>
+                <p className="text-sm text-muted-foreground">{module.name} v{module.version}</p>
               </div>
             </div>
 
@@ -304,7 +304,7 @@ export default function ModuleDetailPage() {
               {module.state === 'uninstalled' && (
                 <button
                   onClick={handleInstall}
-                  className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg"
+                  className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-primary-foreground bg-primary hover:bg-primary/90 rounded-lg"
                 >
                   <Download className="w-4 h-4" />
                   Install
@@ -313,7 +313,7 @@ export default function ModuleDetailPage() {
               {module.state === 'installed' && module.latest_version && module.latest_version !== module.version && (
                 <button
                   onClick={handleUpgrade}
-                  className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-amber-600 hover:bg-amber-700 rounded-lg"
+                  className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-amber-600 hover:bg-amber-700 dark:bg-amber-700 dark:hover:bg-amber-600 rounded-lg"
                 >
                   <Upload className="w-4 h-4" />
                   Upgrade to {module.latest_version}
@@ -322,7 +322,7 @@ export default function ModuleDetailPage() {
               {module.state === 'installed' && !module.is_core && (
                 <button
                   onClick={handleUninstall}
-                  className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50 rounded-lg border border-red-200"
+                  className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-destructive hover:bg-destructive/10 rounded-lg border border-destructive/20"
                 >
                   <Trash2 className="w-4 h-4" />
                   Uninstall
@@ -339,8 +339,8 @@ export default function ModuleDetailPage() {
                 onClick={() => setActiveTab(tab.key)}
                 className={`flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 -mb-px ${
                   activeTab === tab.key
-                    ? 'text-blue-600 border-blue-600'
-                    : 'text-gray-500 border-transparent hover:text-gray-700'
+                    ? 'text-primary border-primary'
+                    : 'text-muted-foreground border-transparent hover:text-foreground'
                 }`}
               >
                 {tab.icon}
@@ -358,59 +358,59 @@ export default function ModuleDetailPage() {
           <div className="space-y-6">
             {/* Description */}
             {module.description && (
-              <div className="bg-white rounded-lg border p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-3">Description</h3>
-                <p className="text-gray-600">{module.description}</p>
+              <div className="bg-card rounded-lg border p-6">
+                <h3 className="text-lg font-semibold text-foreground mb-3">Description</h3>
+                <p className="text-muted-foreground">{module.description}</p>
               </div>
             )}
 
             {/* Info grid */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div className="bg-white rounded-lg border p-4">
-                <div className="text-sm text-gray-500 mb-1">Version</div>
-                <div className="font-medium text-gray-900">{module.version}</div>
+              <div className="bg-card rounded-lg border p-4">
+                <div className="text-sm text-muted-foreground mb-1">Version</div>
+                <div className="font-medium text-foreground">{module.version}</div>
               </div>
-              <div className="bg-white rounded-lg border p-4">
-                <div className="text-sm text-gray-500 mb-1">Category</div>
-                <div className="font-medium text-gray-900">{module.category || 'Uncategorized'}</div>
+              <div className="bg-card rounded-lg border p-4">
+                <div className="text-sm text-muted-foreground mb-1">Category</div>
+                <div className="font-medium text-foreground">{module.category || 'Uncategorized'}</div>
               </div>
-              <div className="bg-white rounded-lg border p-4">
-                <div className="text-sm text-gray-500 mb-1">Type</div>
-                <div className="font-medium text-gray-900">
+              <div className="bg-card rounded-lg border p-4">
+                <div className="text-sm text-muted-foreground mb-1">Type</div>
+                <div className="font-medium text-foreground">
                   {module.application ? 'Application' : 'Module'}
                 </div>
               </div>
-              <div className="bg-white rounded-lg border p-4">
-                <div className="text-sm text-gray-500 mb-1">Auto Install</div>
-                <div className="font-medium text-gray-900">
+              <div className="bg-card rounded-lg border p-4">
+                <div className="text-sm text-muted-foreground mb-1">Auto Install</div>
+                <div className="font-medium text-foreground">
                   {module.auto_install ? 'Yes' : 'No'}
                 </div>
               </div>
             </div>
 
             {/* Author & Website */}
-            <div className="bg-white rounded-lg border p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Author & Links</h3>
+            <div className="bg-card rounded-lg border p-6">
+              <h3 className="text-lg font-semibold text-foreground mb-4">Author & Links</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {module.author && (
                   <div className="flex items-center gap-3">
-                    <User className="w-5 h-5 text-gray-400" />
+                    <User className="w-5 h-5 text-muted-foreground" />
                     <div>
-                      <div className="text-sm text-gray-500">Author</div>
-                      <div className="text-gray-900">{module.author}</div>
+                      <div className="text-sm text-muted-foreground">Author</div>
+                      <div className="text-foreground">{module.author}</div>
                     </div>
                   </div>
                 )}
                 {module.website && (
                   <div className="flex items-center gap-3">
-                    <Globe className="w-5 h-5 text-gray-400" />
+                    <Globe className="w-5 h-5 text-muted-foreground" />
                     <div>
-                      <div className="text-sm text-gray-500">Website</div>
+                      <div className="text-sm text-muted-foreground">Website</div>
                       <a
                         href={module.website}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-blue-600 hover:text-blue-800 flex items-center gap-1"
+                        className="text-primary hover:text-primary/80 flex items-center gap-1"
                       >
                         {module.website}
                         <ExternalLink className="w-3 h-3" />
@@ -420,10 +420,10 @@ export default function ModuleDetailPage() {
                 )}
                 {module.license && (
                   <div className="flex items-center gap-3">
-                    <FileText className="w-5 h-5 text-gray-400" />
+                    <FileText className="w-5 h-5 text-muted-foreground" />
                     <div>
-                      <div className="text-sm text-gray-500">License</div>
-                      <div className="text-gray-900">{module.license}</div>
+                      <div className="text-sm text-muted-foreground">License</div>
+                      <div className="text-foreground">{module.license}</div>
                     </div>
                   </div>
                 )}
@@ -432,15 +432,15 @@ export default function ModuleDetailPage() {
 
             {/* Installation dates */}
             {module.state === 'installed' && (
-              <div className="bg-white rounded-lg border p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Installation Info</h3>
+              <div className="bg-card rounded-lg border p-6">
+                <h3 className="text-lg font-semibold text-foreground mb-4">Installation Info</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {module.installed_at && (
                     <div className="flex items-center gap-3">
-                      <Clock className="w-5 h-5 text-gray-400" />
+                      <Clock className="w-5 h-5 text-muted-foreground" />
                       <div>
-                        <div className="text-sm text-gray-500">Installed</div>
-                        <div className="text-gray-900">
+                        <div className="text-sm text-muted-foreground">Installed</div>
+                        <div className="text-foreground">
                           {format(new Date(module.installed_at), 'PPpp')}
                         </div>
                       </div>
@@ -448,10 +448,10 @@ export default function ModuleDetailPage() {
                   )}
                   {module.updated_at && (
                     <div className="flex items-center gap-3">
-                      <RefreshCw className="w-5 h-5 text-gray-400" />
+                      <RefreshCw className="w-5 h-5 text-muted-foreground" />
                       <div>
-                        <div className="text-sm text-gray-500">Last Updated</div>
-                        <div className="text-gray-900">
+                        <div className="text-sm text-muted-foreground">Last Updated</div>
+                        <div className="text-foreground">
                           {format(new Date(module.updated_at), 'PPpp')}
                         </div>
                       </div>
@@ -465,21 +465,21 @@ export default function ModuleDetailPage() {
 
         {/* Configuration Tab */}
         {activeTab === 'config' && (
-          <div className="bg-white rounded-lg border">
+          <div className="bg-card rounded-lg border">
             <div className="p-6 border-b">
               <div className="flex items-center justify-between">
-                <h3 className="text-lg font-semibold text-gray-900">Module Configuration</h3>
+                <h3 className="text-lg font-semibold text-foreground">Module Configuration</h3>
                 <div className="flex items-center gap-2">
                   <button
                     onClick={handleResetConfig}
-                    className="px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-100 rounded-lg"
+                    className="px-3 py-1.5 text-sm text-muted-foreground hover:bg-muted rounded-lg"
                   >
                     Reset to defaults
                   </button>
                   <button
                     onClick={handleSaveConfig}
                     disabled={saving}
-                    className="px-4 py-1.5 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg disabled:opacity-50"
+                    className="px-4 py-1.5 text-sm font-medium text-primary-foreground bg-primary hover:bg-primary/90 rounded-lg disabled:opacity-50"
                   >
                     {saving ? 'Saving...' : 'Save Changes'}
                   </button>
@@ -489,20 +489,20 @@ export default function ModuleDetailPage() {
 
             <div className="p-6">
               {Object.keys(config).length === 0 ? (
-                <div className="text-center py-8 text-gray-500">
-                  <Settings className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+                <div className="text-center py-8 text-muted-foreground">
+                  <Settings className="w-12 h-12 mx-auto mb-3 text-muted-foreground/50" />
                   <p>No configuration options available</p>
                 </div>
               ) : (
                 <div className="space-y-4">
                   {Object.entries(config).map(([key, value]) => (
                     <div key={key} className="flex items-center gap-4">
-                      <label className="w-1/3 text-sm font-medium text-gray-700">{key}</label>
+                      <label className="w-1/3 text-sm font-medium text-foreground">{key}</label>
                       <input
                         type="text"
                         value={String(value)}
                         onChange={(e) => setConfig({ ...config, [key]: e.target.value })}
-                        className="flex-1 px-3 py-2 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="flex-1 px-3 py-2 text-sm border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                       />
                     </div>
                   ))}
@@ -516,13 +516,13 @@ export default function ModuleDetailPage() {
         {activeTab === 'actions' && (
           <div className="space-y-6">
             {/* Scheduled Actions */}
-            <div className="bg-white rounded-lg border">
+            <div className="bg-card rounded-lg border">
               <div className="p-6 border-b">
-                <h3 className="text-lg font-semibold text-gray-900">Scheduled Actions</h3>
+                <h3 className="text-lg font-semibold text-foreground">Scheduled Actions</h3>
               </div>
               {scheduledActions.length === 0 ? (
-                <div className="p-6 text-center text-gray-500">
-                  <Clock className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+                <div className="p-6 text-center text-muted-foreground">
+                  <Clock className="w-12 h-12 mx-auto mb-3 text-muted-foreground/50" />
                   <p>No scheduled actions</p>
                 </div>
               ) : (
@@ -530,30 +530,30 @@ export default function ModuleDetailPage() {
                   {scheduledActions.map((action) => (
                     <div key={action.code} className="p-4 flex items-center justify-between">
                       <div className="flex items-center gap-4">
-                        <div className={`p-2 rounded-lg ${action.is_active ? 'bg-green-100' : 'bg-gray-100'}`}>
+                        <div className={`p-2 rounded-lg ${action.is_active ? 'bg-green-500/10' : 'bg-muted'}`}>
                           {action.is_active ? (
-                            <Play className="w-4 h-4 text-green-600" />
+                            <Play className="w-4 h-4 text-green-600 dark:text-green-400" />
                           ) : (
-                            <Pause className="w-4 h-4 text-gray-500" />
+                            <Pause className="w-4 h-4 text-muted-foreground" />
                           )}
                         </div>
                         <div>
-                          <p className="font-medium text-gray-900">{action.name}</p>
-                          <p className="text-sm text-gray-500">
+                          <p className="font-medium text-foreground">{action.name}</p>
+                          <p className="text-sm text-muted-foreground">
                             {action.cron_expression || `Every ${action.interval_number} ${action.interval_type}`}
                           </p>
                         </div>
                       </div>
                       <div className="flex items-center gap-4">
                         {action.next_run && (
-                          <span className="text-sm text-gray-500">
+                          <span className="text-sm text-muted-foreground">
                             Next: {format(new Date(action.next_run), 'PPp')}
                           </span>
                         )}
                         <button
                           onClick={() => handleRunAction(action.code)}
                           disabled={runningAction === action.code}
-                          className="px-3 py-1.5 text-sm font-medium text-blue-600 hover:bg-blue-50 rounded-lg disabled:opacity-50"
+                          className="px-3 py-1.5 text-sm font-medium text-primary hover:bg-primary/10 rounded-lg disabled:opacity-50"
                         >
                           {runningAction === action.code ? 'Running...' : 'Run now'}
                         </button>
@@ -565,13 +565,13 @@ export default function ModuleDetailPage() {
             </div>
 
             {/* Server Actions */}
-            <div className="bg-white rounded-lg border">
+            <div className="bg-card rounded-lg border">
               <div className="p-6 border-b">
-                <h3 className="text-lg font-semibold text-gray-900">Server Actions</h3>
+                <h3 className="text-lg font-semibold text-foreground">Server Actions</h3>
               </div>
               {serverActions.length === 0 ? (
-                <div className="p-6 text-center text-gray-500">
-                  <Code className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+                <div className="p-6 text-center text-muted-foreground">
+                  <Code className="w-12 h-12 mx-auto mb-3 text-muted-foreground/50" />
                   <p>No server actions</p>
                 </div>
               ) : (
@@ -579,16 +579,16 @@ export default function ModuleDetailPage() {
                   {serverActions.map((action) => (
                     <div key={action.code} className="p-4 flex items-center justify-between">
                       <div className="flex items-center gap-4">
-                        <div className={`p-2 rounded-lg ${action.is_active ? 'bg-blue-100' : 'bg-gray-100'}`}>
-                          <Code className={`w-4 h-4 ${action.is_active ? 'text-blue-600' : 'text-gray-500'}`} />
+                        <div className={`p-2 rounded-lg ${action.is_active ? 'bg-primary/10' : 'bg-muted'}`}>
+                          <Code className={`w-4 h-4 ${action.is_active ? 'text-primary' : 'text-muted-foreground'}`} />
                         </div>
                         <div>
-                          <p className="font-medium text-gray-900">{action.name}</p>
-                          <p className="text-sm text-gray-500">{action.action_type}</p>
+                          <p className="font-medium text-foreground">{action.name}</p>
+                          <p className="text-sm text-muted-foreground">{action.action_type}</p>
                         </div>
                       </div>
                       <span className={`px-2 py-1 text-xs rounded-full ${
-                        action.is_active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'
+                        action.is_active ? 'bg-green-500/10 text-green-600 dark:text-green-400' : 'bg-muted text-muted-foreground'
                       }`}>
                         {action.is_active ? 'Active' : 'Inactive'}
                       </span>
@@ -599,13 +599,13 @@ export default function ModuleDetailPage() {
             </div>
 
             {/* Sequences */}
-            <div className="bg-white rounded-lg border">
+            <div className="bg-card rounded-lg border">
               <div className="p-6 border-b">
-                <h3 className="text-lg font-semibold text-gray-900">Sequences</h3>
+                <h3 className="text-lg font-semibold text-foreground">Sequences</h3>
               </div>
               {sequences.length === 0 ? (
-                <div className="p-6 text-center text-gray-500">
-                  <Database className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+                <div className="p-6 text-center text-muted-foreground">
+                  <Database className="w-12 h-12 mx-auto mb-3 text-muted-foreground/50" />
                   <p>No sequences</p>
                 </div>
               ) : (
@@ -613,12 +613,12 @@ export default function ModuleDetailPage() {
                   {sequences.map((seq) => (
                     <div key={seq.code} className="p-4 flex items-center justify-between">
                       <div>
-                        <p className="font-medium text-gray-900">{seq.name}</p>
-                        <p className="text-sm text-gray-500">
+                        <p className="font-medium text-foreground">{seq.name}</p>
+                        <p className="text-sm text-muted-foreground">
                           Pattern: {seq.prefix || ''}{'{N}'.padStart(seq.padding, '0')}{seq.suffix || ''}
                         </p>
                       </div>
-                      <span className="text-sm text-gray-600">
+                      <span className="text-sm text-muted-foreground">
                         Next: {seq.next_number}
                       </span>
                     </div>
@@ -633,13 +633,13 @@ export default function ModuleDetailPage() {
         {activeTab === 'dependencies' && (
           <div className="space-y-6">
             {/* Dependencies */}
-            <div className="bg-white rounded-lg border">
+            <div className="bg-card rounded-lg border">
               <div className="p-6 border-b">
-                <h3 className="text-lg font-semibold text-gray-900">Dependencies</h3>
+                <h3 className="text-lg font-semibold text-foreground">Dependencies</h3>
               </div>
               {!module.depends || module.depends.length === 0 ? (
-                <div className="p-6 text-center text-gray-500">
-                  <CheckCircle className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+                <div className="p-6 text-center text-muted-foreground">
+                  <CheckCircle className="w-12 h-12 mx-auto mb-3 text-muted-foreground/50" />
                   <p>No dependencies</p>
                 </div>
               ) : (
@@ -647,14 +647,14 @@ export default function ModuleDetailPage() {
                   {module.depends.map((dep) => (
                     <div
                       key={dep}
-                      className="p-4 flex items-center justify-between hover:bg-gray-50 cursor-pointer"
+                      className="p-4 flex items-center justify-between hover:bg-muted/50 cursor-pointer"
                       onClick={() => router.push(`/admin/modules/${dep}`)}
                     >
                       <div className="flex items-center gap-3">
-                        <Puzzle className="w-5 h-5 text-gray-400" />
-                        <span className="font-medium text-gray-900">{dep}</span>
+                        <Puzzle className="w-5 h-5 text-muted-foreground" />
+                        <span className="font-medium text-foreground">{dep}</span>
                       </div>
-                      <ChevronRight className="w-4 h-4 text-gray-400" />
+                      <ChevronRight className="w-4 h-4 text-muted-foreground" />
                     </div>
                   ))}
                 </div>
@@ -662,14 +662,14 @@ export default function ModuleDetailPage() {
             </div>
 
             {/* Dependents */}
-            <div className="bg-white rounded-lg border">
+            <div className="bg-card rounded-lg border">
               <div className="p-6 border-b">
-                <h3 className="text-lg font-semibold text-gray-900">Dependent Modules</h3>
-                <p className="text-sm text-gray-500 mt-1">Modules that depend on this module</p>
+                <h3 className="text-lg font-semibold text-foreground">Dependent Modules</h3>
+                <p className="text-sm text-muted-foreground mt-1">Modules that depend on this module</p>
               </div>
               {dependents.length === 0 ? (
-                <div className="p-6 text-center text-gray-500">
-                  <CheckCircle className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+                <div className="p-6 text-center text-muted-foreground">
+                  <CheckCircle className="w-12 h-12 mx-auto mb-3 text-muted-foreground/50" />
                   <p>No modules depend on this module</p>
                 </div>
               ) : (
@@ -677,23 +677,23 @@ export default function ModuleDetailPage() {
                   {dependents.map((dep) => (
                     <div
                       key={dep.name}
-                      className="p-4 flex items-center justify-between hover:bg-gray-50 cursor-pointer"
+                      className="p-4 flex items-center justify-between hover:bg-muted/50 cursor-pointer"
                       onClick={() => router.push(`/admin/modules/${dep.name}`)}
                     >
                       <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center">
+                        <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
                           {dep.icon ? (
                             <span className="text-lg">{dep.icon}</span>
                           ) : (
-                            <Puzzle className="w-4 h-4 text-blue-600" />
+                            <Puzzle className="w-4 h-4 text-primary" />
                           )}
                         </div>
                         <div>
-                          <p className="font-medium text-gray-900">{dep.display_name}</p>
-                          <p className="text-sm text-gray-500">{dep.name}</p>
+                          <p className="font-medium text-foreground">{dep.display_name}</p>
+                          <p className="text-sm text-muted-foreground">{dep.name}</p>
                         </div>
                       </div>
-                      <ChevronRight className="w-4 h-4 text-gray-400" />
+                      <ChevronRight className="w-4 h-4 text-muted-foreground" />
                     </div>
                   ))}
                 </div>

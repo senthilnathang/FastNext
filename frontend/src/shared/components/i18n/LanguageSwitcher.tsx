@@ -155,7 +155,7 @@ export function LanguageSwitcherCompact({
     <LanguageSwitcher
       className={className}
       variant="ghost"
-      size="icon-sm"
+      size="sm"
       showLabel={false}
       onLanguageChange={onLanguageChange}
     />

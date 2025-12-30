@@ -4,7 +4,7 @@ export {
   CollapsibleThread,
   ThreadReply,
   type CollapsibleThreadProps,
-  type ThreadMessage,
+  type CollapsibleThreadMessage,
   type ThreadReplyProps,
 } from "./CollapsibleThread";
 

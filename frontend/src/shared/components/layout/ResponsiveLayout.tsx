@@ -4,7 +4,7 @@ import { RefreshCw, WifiOff } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import {
-  useOfflineQueue,
+  useServiceWorkerOfflineQueue,
   useServiceWorker,
 } from "@/shared/hooks/useServiceWorker";
 import { cn } from "@/shared/utils";
@@ -39,7 +39,7 @@ export function ResponsiveLayout({
     queuedRequests: offlineRequests,
     forceSync,
     isProcessing,
-  } = useOfflineQueue();
+  } = useServiceWorkerOfflineQueue();
 
   // Detect mobile viewport
   useEffect(() => {

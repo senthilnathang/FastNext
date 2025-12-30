@@ -37,18 +37,20 @@ export interface InboxItem {
   archived_at: string | null;
   created_at: string;
   updated_at: string | null;
-  labels?: Label[];
+  labels?: InboxLabel[];
   related_record?: Record<string, unknown>;
 }
 
-export interface Label {
+export interface InboxLabel {
   id: number;
   name: string;
   color: string;
-  icon: string | null;
-  description: string | null;
-  is_system: boolean;
-  sort_order: number;
+  icon?: string | null;
+  description?: string | null;
+  is_system?: boolean;
+  is_active?: boolean;
+  sort_order?: number;
+  created_at?: string;
 }
 
 export interface InboxListParams {
@@ -258,25 +260,25 @@ export const inboxApi = {
     /**
      * List all labels
      */
-    list: (): Promise<Label[]> =>
+    list: (): Promise<InboxLabel[]> =>
       apiClient.get("/api/v1/inbox/labels"),
 
     /**
      * Get a label by ID
      */
-    get: (id: number): Promise<Label> =>
+    get: (id: number): Promise<InboxLabel> =>
       apiClient.get(`/api/v1/inbox/labels/${id}`),
 
     /**
      * Create a new label
      */
-    create: (data: { name: string; color: string; icon?: string; description?: string }): Promise<Label> =>
+    create: (data: { name: string; color: string; icon?: string; description?: string }): Promise<InboxLabel> =>
       apiClient.post("/api/v1/inbox/labels", data),
 
     /**
      * Update a label
      */
-    update: (id: number, data: { name?: string; color?: string; icon?: string; description?: string }): Promise<Label> =>
+    update: (id: number, data: { name?: string; color?: string; icon?: string; description?: string }): Promise<InboxLabel> =>
       apiClient.patch(`/api/v1/inbox/labels/${id}`, data),
 
     /**

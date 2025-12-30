@@ -8,10 +8,10 @@ import {
   Check,
   GripVertical,
 } from 'lucide-react';
-import type { Label } from '@/lib/api/inbox';
+import type { InboxLabel } from '@/lib/api/inbox';
 
 interface LabelManagerProps {
-  labels: Label[];
+  labels: InboxLabel[];
   onCreateLabel?: (data: { name: string; color: string; icon?: string; description?: string }) => void;
   onUpdateLabel?: (id: number, data: { name?: string; color?: string; icon?: string; description?: string }) => void;
   onDeleteLabel?: (id: number) => void;
@@ -74,7 +74,7 @@ const LabelManager: React.FC<LabelManagerProps> = ({
     setEditingId(null);
   };
 
-  const startEdit = (label: Label) => {
+  const startEdit = (label: InboxLabel) => {
     setFormData({
       name: label.name,
       color: label.color,

@@ -36,7 +36,7 @@ const threadVariants = cva(
   }
 );
 
-export interface ThreadMessage {
+export interface CollapsibleThreadMessage {
   id: string;
   content: React.ReactNode;
   author?: {

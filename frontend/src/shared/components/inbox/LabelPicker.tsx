@@ -90,7 +90,7 @@ export function LabelPicker({
   const [searchQuery, setSearchQuery] = React.useState("");
   const [isCreating, setIsCreating] = React.useState(false);
   const [newLabelName, setNewLabelName] = React.useState("");
-  const [newLabelColor, setNewLabelColor] = React.useState(LABEL_COLORS[10].value);
+  const [newLabelColor, setNewLabelColor] = React.useState<string>(LABEL_COLORS[10].value);
 
   // Filter labels based on search query
   const filteredLabels = React.useMemo(() => {

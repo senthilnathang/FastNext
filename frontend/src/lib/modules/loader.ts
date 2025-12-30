@@ -370,7 +370,7 @@ class ModuleLoader {
     try {
       const routeUrl = this.buildAssetUrl(config.name, config.routes);
       const routeModule = await this.importModule(routeUrl);
-      const routes: ModuleRoute[] = routeModule.default || routeModule.routes || [];
+      const routes: ModuleRoute[] = (routeModule.default || routeModule.routes || []) as ModuleRoute[];
 
       // Add module metadata to routes
       const enhancedRoutes = routes.map(route => ({
@@ -536,7 +536,6 @@ class ModuleLoader {
   private async importModule(url: string): Promise<Record<string, unknown>> {
     try {
       // Try dynamic import first
-      // @ts-expect-error - dynamic import with variable URL
       return await import(/* @vite-ignore */ url);
     } catch {
       // Fallback: fetch the module

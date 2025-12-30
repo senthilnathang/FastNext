@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { cn } from "@/lib/utils";
+import { cn } from "@/shared/utils";
 import { useOnlineStatus } from "@/shared/hooks/useOnlineStatus";
 import { useOfflineQueue, type SyncProgress } from "@/shared/hooks/useOfflineSync";
 

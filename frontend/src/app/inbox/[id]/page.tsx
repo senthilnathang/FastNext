@@ -24,7 +24,7 @@ import {
   ChevronLeft,
   ChevronRight,
 } from 'lucide-react';
-import { inboxApi, type InboxItem, type Label, type InboxItemType } from '@/lib/api';
+import { inboxApi, type InboxItem, type InboxLabel, type InboxItemType } from '@/lib/api';
 
 const getItemIcon = (type: InboxItemType) => {
   switch (type) {
@@ -86,7 +86,7 @@ export default function InboxDetailPage() {
 
   const [item, setItem] = useState<InboxItem | null>(null);
   const [loading, setLoading] = useState(true);
-  const [labels, setLabels] = useState<Label[]>([]);
+  const [labels, setLabels] = useState<InboxLabel[]>([]);
   const [showLabelDropdown, setShowLabelDropdown] = useState(false);
 
   // Fetch item

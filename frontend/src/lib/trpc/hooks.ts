@@ -51,35 +51,6 @@ export const useDeleteUser = () => {
   });
 };
 
-export const useProjects = (params?: {
-  page?: number;
-  limit?: number;
-  search?: string;
-}) => {
-  return api.projects.getAll.useQuery({
-    page: 1,
-    limit: 10,
-    ...params,
-  });
-};
-
-export const useProject = (id: string | number) => {
-  const numericId = typeof id === "string" ? parseInt(id, 10) : id;
-  return api.projects.getById.useQuery(numericId, {
-    enabled: !!id && !isNaN(numericId),
-  });
-};
-
-export const useCreateProject = () => {
-  const utils = api.useUtils();
-
-  return api.projects.create.useMutation({
-    onSuccess: () => {
-      utils.projects.getAll.invalidate();
-    },
-  });
-};
-
 export const useRoles = () => {
   return api.roles.getAll.useQuery();
 };

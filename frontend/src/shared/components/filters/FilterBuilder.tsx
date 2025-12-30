@@ -263,7 +263,7 @@ export const FilterBuilder: React.FC<FilterBuilderProps> = ({
             {features.presetManagement && (
               <FilterPresets
                 presets={presets}
-                activePresetId={activePresetId}
+                activePresetId={activePresetId ?? undefined}
                 onSelect={handleLoadPreset}
                 onSave={handleSavePreset}
                 onDelete={handleDeletePreset}

@@ -278,8 +278,8 @@ export function useServiceWorker(): ServiceWorkerState & ServiceWorkerActions {
   };
 }
 
-// Hook for managing offline queue
-export function useOfflineQueue() {
+// Hook for managing offline queue via Service Worker
+export function useServiceWorkerOfflineQueue() {
   const [queuedRequests, setQueuedRequests] = useState<number>(0);
   const [lastSync, setLastSync] = useState<Date | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -335,8 +335,8 @@ export function useOfflineQueue() {
   };
 }
 
-// Hook for push notifications
-export function usePushNotifications() {
+// Hook for push notifications via Service Worker
+export function useServiceWorkerPushNotifications() {
   const [isSupported, setIsSupported] = useState(false);
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [subscription, setSubscription] = useState<PushSubscription | null>(

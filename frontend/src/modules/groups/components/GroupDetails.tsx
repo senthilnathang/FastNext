@@ -394,7 +394,7 @@ export function GroupDetails({ groupId, onBack, onDeleted }: GroupDetailsProps) 
         cancelText="Cancel"
         variant="destructive"
         onConfirm={handleDelete}
-        loading={deleteGroupMutation.isPending}
+        isLoading={deleteGroupMutation.isPending}
       />
     </div>
   );

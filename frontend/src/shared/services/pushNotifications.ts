@@ -83,7 +83,6 @@ const defaultOptions: Required<PushNotificationOptions> = {
   defaultNotificationOptions: {
     icon: '/icon-192x192.png',
     badge: '/badge-72x72.png',
-    vibrate: [100, 50, 100],
   },
   debug: process.env.NODE_ENV === 'development',
 };
@@ -279,7 +278,7 @@ class PushNotificationService {
 
       const subscription = await registration.pushManager.subscribe({
         userVisibleOnly: true,
-        applicationServerKey,
+        applicationServerKey: applicationServerKey as BufferSource,
       });
 
       this.updateState({
@@ -449,21 +448,17 @@ class PushNotificationService {
     try {
       const registration = this.serviceWorkerRegistration || await navigator.serviceWorker.ready;
 
-      const options: NotificationOptions = {
+      // Service Worker notification options extend standard NotificationOptions
+      // with additional properties like image, actions, timestamp
+      await registration.showNotification(payload.title, {
         body: payload.body,
         icon: payload.icon || this.options.defaultNotificationOptions.icon,
         badge: payload.badge || this.options.defaultNotificationOptions.badge,
-        image: payload.image,
         tag: payload.tag,
         data: payload.data,
-        actions: payload.actions,
         requireInteraction: payload.requireInteraction,
         silent: payload.silent,
-        vibrate: payload.vibrate || this.options.defaultNotificationOptions.vibrate,
-        timestamp: payload.timestamp,
-      };
-
-      await registration.showNotification(payload.title, options);
+      });
       this.log('Notification shown', payload);
       return true;
     } catch (error) {

@@ -1,4 +1,6 @@
 import type { MenuItem } from "./menuConfig";
+import type { ModuleMenuItem } from "@/lib/api/modules";
+import * as LucideIcons from "lucide-react";
 
 export interface MenuFilterOptions {
   canAccessModule: (module: string) => boolean;
@@ -68,4 +70,108 @@ export const getPageTitle = (pathname: string, search?: string): string => {
   }
 
   return titleMap[pathname] || "FastNext Platform";
+};
+
+/**
+ * Convert an icon name string to a Lucide icon component
+ */
+export const getIconComponent = (iconName?: string): React.ComponentType<{ className?: string }> => {
+  if (!iconName) {
+    return LucideIcons.Box;
+  }
+
+  // Convert icon name formats (e.g., "package", "Package", "PackageIcon") to PascalCase
+  const normalizedName = iconName
+    .replace(/Icon$/, '')
+    .replace(/-./g, (x) => x[1].toUpperCase())
+    .replace(/^./, (x) => x.toUpperCase());
+
+  const icons = LucideIcons as unknown as Record<string, React.ComponentType<{ className?: string }>>;
+  const icon = icons[normalizedName];
+  return icon || LucideIcons.Box;
+};
+
+/**
+ * Merge module menu items with base menu items
+ * Module menus can specify a parent to be added as children
+ */
+export const mergeModuleMenus = (
+  baseItems: MenuItem[],
+  moduleMenus: ModuleMenuItem[]
+): MenuItem[] => {
+  // Deep clone base items to avoid mutation
+  const result = JSON.parse(JSON.stringify(baseItems)) as MenuItem[];
+
+  // Restore icon functions (JSON.parse loses them)
+  const restoreIcons = (items: MenuItem[], originals: MenuItem[]) => {
+    items.forEach((item, index) => {
+      item.icon = originals[index].icon;
+      if (item.children && originals[index].children) {
+        restoreIcons(item.children, originals[index].children!);
+      }
+    });
+  };
+  restoreIcons(result, baseItems);
+
+  // Group module menus by parent
+  const topLevelMenus: ModuleMenuItem[] = [];
+  const childMenus: Record<string, ModuleMenuItem[]> = {};
+
+  moduleMenus.forEach((menu) => {
+    if (menu.parent) {
+      if (!childMenus[menu.parent]) {
+        childMenus[menu.parent] = [];
+      }
+      childMenus[menu.parent].push(menu);
+    } else {
+      topLevelMenus.push(menu);
+    }
+  });
+
+  // Helper to find and add children to a menu item
+  const addChildrenToParent = (items: MenuItem[], parentTitle: string, children: ModuleMenuItem[]) => {
+    for (const item of items) {
+      if (item.title === parentTitle) {
+        if (!item.children) {
+          item.children = [];
+        }
+        children
+          .sort((a, b) => (a.order ?? 100) - (b.order ?? 100))
+          .forEach((child) => {
+            item.children!.push({
+              title: child.title,
+              href: child.href,
+              icon: getIconComponent(child.icon),
+              requiredPermission: child.permission,
+              module: child.module,
+            });
+          });
+        return true;
+      }
+      if (item.children && addChildrenToParent(item.children, parentTitle, children)) {
+        return true;
+      }
+    }
+    return false;
+  };
+
+  // Add child menus to their parents
+  Object.entries(childMenus).forEach(([parent, children]) => {
+    addChildrenToParent(result, parent, children);
+  });
+
+  // Add top-level menus
+  topLevelMenus
+    .sort((a, b) => (a.order ?? 100) - (b.order ?? 100))
+    .forEach((menu) => {
+      result.push({
+        title: menu.title,
+        href: menu.href,
+        icon: getIconComponent(menu.icon),
+        requiredPermission: menu.permission,
+        module: menu.module,
+      });
+    });
+
+  return result;
 };

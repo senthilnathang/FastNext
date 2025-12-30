@@ -484,4 +484,35 @@ export function useModuleMenus(): ModuleMenuItem[] {
   return menus;
 }
 
+/**
+ * Hook to get module menus directly from backend API
+ * This is a simpler alternative to useModuleMenus that doesn't require
+ * the full module system to be initialized.
+ */
+export function useBackendModuleMenus() {
+  const [menus, setMenus] = useState<import('@/lib/api/modules').ModuleMenuItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
+
+  const fetchMenus = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const result = await modulesApi.getMenuItems();
+      setMenus(result);
+    } catch (err) {
+      setError(err instanceof Error ? err : new Error(String(err)));
+      setMenus([]);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchMenus();
+  }, [fetchMenus]);
+
+  return { menus, loading, error, refresh: fetchMenus };
+}
+
 export default useModules;

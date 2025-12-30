@@ -11,7 +11,7 @@ import {
   ChevronLeft,
   ChevronRight,
 } from 'lucide-react';
-import { inboxApi, type InboxItem, type InboxStats, type Label, type InboxItemType, type InboxStatus, type InboxPriority } from '@/lib/api';
+import { inboxApi, type InboxItem, type InboxStats, type InboxLabel, type InboxItemType, type InboxStatus, type InboxPriority } from '@/lib/api';
 import {
   InboxList,
   InboxFilters,
@@ -33,7 +33,7 @@ export default function InboxPage() {
     starred: 0,
     pinned: 0,
   });
-  const [labels, setLabels] = useState<Label[]>([]);
+  const [labels, setLabels] = useState<InboxLabel[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 

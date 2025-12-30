@@ -92,6 +92,16 @@ export interface ModuleCategory {
   module_count: number;
 }
 
+export interface ModuleMenuItem {
+  title: string;
+  href: string;
+  icon?: string;
+  parent?: string;
+  order?: number;
+  permission?: string;
+  module: string;
+}
+
 export interface ModuleDependencyTree {
   module: string;
   version: string;
@@ -148,6 +158,12 @@ export const modulesApi = {
    */
   getUpdates: (): Promise<InstalledModule[]> =>
     apiClient.get("/api/v1/modules/updates"),
+
+  /**
+   * Get menu items from installed modules
+   */
+  getMenuItems: (): Promise<ModuleMenuItem[]> =>
+    apiClient.get("/api/v1/modules/installed/menus"),
 
   /**
    * Apply all pending module operations

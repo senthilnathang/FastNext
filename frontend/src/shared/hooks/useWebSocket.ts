@@ -248,9 +248,9 @@ export function useWebSocketEvent<T = unknown>(
 }
 
 /**
- * Hook for typing indicators
+ * Hook for typing indicators via WebSocket
  */
-export function useTypingIndicator(recipientId: number) {
+export function useWebSocketTypingIndicator(recipientId: number) {
   const [isTyping, setIsTyping] = useState(false);
   const [typingTimeout, setTypingTimeout] = useState<ReturnType<
     typeof setTimeout

@@ -462,7 +462,7 @@ export function GroupList({
         cancelText="Cancel"
         variant="destructive"
         onConfirm={handleConfirmDelete}
-        loading={deleteGroupMutation.isPending}
+        isLoading={deleteGroupMutation.isPending}
       />
     </div>
   );

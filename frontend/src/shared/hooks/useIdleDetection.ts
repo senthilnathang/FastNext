@@ -9,7 +9,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-// Activity events to monitor
+// Activity events to monitor on window
 const ACTIVITY_EVENTS: (keyof WindowEventMap)[] = [
   'mousedown',
   'mousemove',
@@ -19,7 +19,6 @@ const ACTIVITY_EVENTS: (keyof WindowEventMap)[] = [
   'touchmove',
   'wheel',
   'resize',
-  'visibilitychange',
 ];
 
 // Hook options
@@ -201,14 +200,13 @@ export function useIdleDetection(
     setLastActiveAt(new Date());
     startIdleTimer();
 
-    // Add event listeners
+    // Add event listeners for window events
     events.forEach((event) => {
-      if (event === 'visibilitychange') {
-        document.addEventListener(event, handleVisibilityChange);
-      } else {
-        window.addEventListener(event, handleActivity, { passive: true });
-      }
+      window.addEventListener(event, handleActivity, { passive: true });
     });
+
+    // Add visibilitychange listener on document
+    document.addEventListener('visibilitychange', handleVisibilityChange);
   }, [events, startIdleTimer, handleActivity, handleVisibilityChange]);
 
   // Stop monitoring
@@ -218,14 +216,13 @@ export function useIdleDetection(
     setIsMonitoring(false);
     clearTimers();
 
-    // Remove event listeners
+    // Remove event listeners from window
     events.forEach((event) => {
-      if (event === 'visibilitychange') {
-        document.removeEventListener(event, handleVisibilityChange);
-      } else {
-        window.removeEventListener(event, handleActivity);
-      }
+      window.removeEventListener(event, handleActivity);
     });
+
+    // Remove visibilitychange listener from document
+    document.removeEventListener('visibilitychange', handleVisibilityChange);
   }, [events, clearTimers, handleActivity, handleVisibilityChange]);
 
   // Reset idle state

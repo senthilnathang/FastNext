@@ -114,7 +114,7 @@ const ParticipantSelector: React.FC<ParticipantSelectorProps> = ({
           onChange={(e) => setQuery(e.target.value)}
           onFocus={() => setIsOpen(true)}
           placeholder={placeholder}
-          disabled={disabled || (maxSelections && selected.length >= maxSelections)}
+          disabled={disabled || (maxSelections !== undefined && selected.length >= maxSelections)}
           className="w-full pl-10 pr-4 py-2 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-50 disabled:text-gray-500"
         />
       </div>
@@ -134,7 +134,7 @@ const ParticipantSelector: React.FC<ParticipantSelectorProps> = ({
             <div className="py-1">
               {availableUsers.map((user) => {
                 const isSelected = selected.includes(user.id);
-                const isDisabled = !isSelected && maxSelections && selected.length >= maxSelections;
+                const isDisabled = !isSelected && maxSelections !== undefined && selected.length >= maxSelections;
 
                 return (
                   <button

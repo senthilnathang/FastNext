@@ -181,7 +181,7 @@ export const MentionInput: React.FC<MentionInputProps> = ({
   }, [value, mentionPosition, mentionTrigger, onChange, onMention]);
 
   // Keyboard navigation
-  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
+  const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLTextAreaElement | HTMLInputElement>) => {
     if (!showSuggestions || filteredUsers.length === 0) return;
 
     switch (e.key) {
@@ -289,6 +289,7 @@ export const MentionInput: React.FC<MentionInputProps> = ({
         ref={inputRef as React.RefObject<HTMLTextAreaElement & HTMLInputElement>}
         value={value}
         onChange={handleChange}
+        // @ts-expect-error - InputComponent can be textarea or input, both handlers are compatible
         onKeyDown={handleKeyDown}
         className={cn(
           "flex w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm",

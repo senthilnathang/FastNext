@@ -494,7 +494,7 @@ export function GroupMemberList({
         cancelText="Cancel"
         variant="destructive"
         onConfirm={handleConfirmRemove}
-        loading={removeGroupMembersMutation.isPending}
+        isLoading={removeGroupMembersMutation.isPending}
       />
     </Card>
   );

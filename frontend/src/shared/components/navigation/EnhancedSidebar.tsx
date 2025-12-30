@@ -12,9 +12,10 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useUserRole } from "@/modules/admin/hooks/useUserRole";
 import { useAuth } from "@/modules/auth";
+import { useBackendModuleMenus } from "@/shared/hooks/useModules";
 import { cn } from "@/shared/utils";
 import { CompanySwitcher, type Company } from "../company/CompanySwitcher";
 import { Button } from "../ui/button";
@@ -25,7 +26,7 @@ import {
   TooltipTrigger,
 } from "../ui/tooltip";
 import { type MenuItem, menuItems } from "./menuConfig";
-import { filterMenuItems } from "./menuUtils";
+import { filterMenuItems, mergeModuleMenus } from "./menuUtils";
 
 // Mock companies for demonstration - in a real app, this would come from an API
 const mockCompanies: Company[] = [
@@ -255,10 +256,21 @@ export default function EnhancedSidebar({
     setIsHovered(false);
   }, [hoverTimer]);
 
-  const filteredMenuItems = filterMenuItems(menuItems, {
-    canAccessModule,
-    hasPermission,
-  });
+  // Fetch dynamic module menus from backend
+  const { menus: moduleMenus } = useBackendModuleMenus();
+
+  // Merge base menu items with module menus
+  const mergedMenuItems = useMemo(() => {
+    return mergeModuleMenus(menuItems, moduleMenus);
+  }, [moduleMenus]);
+
+  // Filter menu items based on permissions
+  const filteredMenuItems = useMemo(() => {
+    return filterMenuItems(mergedMenuItems, {
+      canAccessModule,
+      hasPermission,
+    });
+  }, [mergedMenuItems, canAccessModule, hasPermission]);
 
   const sidebarWidth = isCollapsed ? (isHovered ? "w-64" : "w-16") : "w-64";
 

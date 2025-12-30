@@ -41,6 +41,8 @@ export const API_CONFIG = {
     NOTIFICATIONS: "/api/v1/notifications",
     COMPANIES: "/api/v1/companies",
     GROUPS: "/api/v1/groups",
+    COMPONENTS: "/api/v1/components",
+    PAGES: "/api/v1/pages",
     ADMIN: {
       CONFIG: {
         LIST: "/api/admin/config",

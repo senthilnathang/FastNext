@@ -19,18 +19,19 @@
  * ```
  */
 
-import CharacterCount from '@tiptap/extension-character-count';
-import Image from '@tiptap/extension-image';
-import Link from '@tiptap/extension-link';
-import Mention from '@tiptap/extension-mention';
-import Placeholder from '@tiptap/extension-placeholder';
-import Table from '@tiptap/extension-table';
-import TableCell from '@tiptap/extension-table-cell';
-import TableHeader from '@tiptap/extension-table-header';
-import TableRow from '@tiptap/extension-table-row';
-import Underline from '@tiptap/extension-underline';
+import type { AnyExtension } from '@tiptap/core';
+import { CharacterCount } from '@tiptap/extension-character-count';
+import { Image } from '@tiptap/extension-image';
+import { Link } from '@tiptap/extension-link';
+import { Mention } from '@tiptap/extension-mention';
+import { Placeholder } from '@tiptap/extension-placeholder';
+import { Table } from '@tiptap/extension-table';
+import { TableCell } from '@tiptap/extension-table-cell';
+import { TableHeader } from '@tiptap/extension-table-header';
+import { TableRow } from '@tiptap/extension-table-row';
+import { Underline } from '@tiptap/extension-underline';
 import { useEditor, type Editor } from '@tiptap/react';
-import StarterKit from '@tiptap/starter-kit';
+import { StarterKit } from '@tiptap/starter-kit';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
 // Types
@@ -64,7 +65,7 @@ export interface EditorConfig {
   /** Auto focus on mount */
   autoFocus?: boolean;
   /** Custom extensions */
-  extensions?: unknown[];
+  extensions?: AnyExtension[];
 }
 
 export interface EditorState {
@@ -164,7 +165,7 @@ const createMentionSuggestion = (
     return {
       onStart: (props: {
         items: MentionItem[];
-        clientRect: (() => DOMRect) | null;
+        clientRect?: (() => DOMRect | null) | null;
         command: (item: { id: string; label: string }) => void;
       }) => {
         component = document.createElement('div');
@@ -175,8 +176,10 @@ const createMentionSuggestion = (
 
         if (props.clientRect) {
           const rect = props.clientRect();
-          popup.style.left = `${rect.left}px`;
-          popup.style.top = `${rect.bottom + 4}px`;
+          if (rect) {
+            popup.style.left = `${rect.left}px`;
+            popup.style.top = `${rect.bottom + 4}px`;
+          }
         }
 
         popup.innerHTML = props.items.map((item) => `
@@ -203,15 +206,17 @@ const createMentionSuggestion = (
       },
       onUpdate: (props: {
         items: MentionItem[];
-        clientRect: (() => DOMRect) | null;
+        clientRect?: (() => DOMRect | null) | null;
         command: (item: { id: string; label: string }) => void;
       }) => {
         if (!popup) return;
 
         if (props.clientRect) {
           const rect = props.clientRect();
-          popup.style.left = `${rect.left}px`;
-          popup.style.top = `${rect.bottom + 4}px`;
+          if (rect) {
+            popup.style.left = `${rect.left}px`;
+            popup.style.top = `${rect.bottom + 4}px`;
+          }
         }
 
         popup.innerHTML = props.items.map((item) => `

@@ -70,11 +70,11 @@ class APIClient {
     return JSON.parse(text) as T;
   }
 
-  async get<T>(path: string, params?: Record<string, string | number | boolean | undefined>): Promise<T> {
+  async get<T, P extends object = Record<string, unknown>>(path: string, params?: P): Promise<T> {
     const url = new URL(`${this.baseUrl}${path}`);
     if (params) {
       Object.entries(params).forEach(([key, value]) => {
-        if (value !== undefined) {
+        if (value !== undefined && value !== null) {
           url.searchParams.append(key, String(value));
         }
       });

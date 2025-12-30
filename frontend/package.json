@@ -70,6 +70,7 @@
     "@tiptap/pm": "^3.14.0",
     "@tiptap/react": "^3.14.0",
     "@tiptap/starter-kit": "^3.14.0",
+    "@tiptap/suggestion": "^3.14.0",
     "@trpc/client": "^11.5.1",
     "@trpc/next": "^11.5.1",
     "@trpc/react-query": "^11.5.1",
