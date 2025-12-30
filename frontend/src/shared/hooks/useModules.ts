@@ -488,19 +488,25 @@ export function useModuleMenus(): ModuleMenuItem[] {
  * Hook to get module menus directly from backend API
  * This is a simpler alternative to useModuleMenus that doesn't require
  * the full module system to be initialized.
+ *
+ * Automatically polls for reload signals to refresh when modules change.
  */
 export function useBackendModuleMenus() {
   const [menus, setMenus] = useState<import('@/lib/api/modules').ModuleMenuItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
+  const [lastSignalId, setLastSignalId] = useState<number>(0);
 
   const fetchMenus = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
+      console.log('[useBackendModuleMenus] Fetching menus...');
       const result = await modulesApi.getMenuItems();
+      console.log('[useBackendModuleMenus] Fetched menus:', result);
       setMenus(result);
     } catch (err) {
+      console.error('[useBackendModuleMenus] Error fetching menus:', err);
       setError(err instanceof Error ? err : new Error(String(err)));
       setMenus([]);
     } finally {
@@ -508,11 +514,82 @@ export function useBackendModuleMenus() {
     }
   }, []);
 
+  // Check for reload signals
+  const checkReloadSignals = useCallback(async () => {
+    try {
+      const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+      const response = await fetch(`${baseUrl}/api/v1/modules/reload-signals`);
+      if (response.ok) {
+        const signals = await response.json();
+        if (signals && signals.length > 0) {
+          // Check if there are new signals
+          const maxSignalId = Math.max(...signals.map((s: { id: number }) => s.id));
+          if (maxSignalId > lastSignalId) {
+            setLastSignalId(maxSignalId);
+            // Refresh menus when we detect new signals
+            await fetchMenus();
+
+            // Acknowledge the signals
+            const signalIds = signals.map((s: { id: number }) => s.id);
+            await fetch(`${baseUrl}/api/v1/modules/reload-signals/acknowledge`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ signal_ids: signalIds }),
+            });
+          }
+        }
+      }
+    } catch (err) {
+      // Silently ignore polling errors
+      console.debug('Failed to check reload signals:', err);
+    }
+  }, [lastSignalId, fetchMenus]);
+
+  // Initial fetch
   useEffect(() => {
     fetchMenus();
   }, [fetchMenus]);
 
+  // Poll for reload signals every 5 seconds
+  useEffect(() => {
+    const interval = setInterval(checkReloadSignals, 5000);
+    return () => clearInterval(interval);
+  }, [checkReloadSignals]);
+
   return { menus, loading, error, refresh: fetchMenus };
+}
+
+/**
+ * Hook to get a component from a module's component registry
+ */
+export function useModuleComponent<T = React.ComponentType>(
+  moduleName: string,
+  componentName: string
+): T | undefined {
+  const { isModuleLoaded } = useModules();
+  const [Component, setComponent] = useState<T | undefined>(undefined);
+
+  useEffect(() => {
+    if (isModuleLoaded(moduleName)) {
+      // Dynamic import to get component registry
+      import('@/lib/modules/componentRegistry').then(({ getModuleComponent }) => {
+        const comp = getModuleComponent(moduleName, componentName);
+        setComponent(comp as T | undefined);
+      });
+    } else {
+      setComponent(undefined);
+    }
+  }, [moduleName, componentName, isModuleLoaded]);
+
+  return Component;
+}
+
+/**
+ * Hook to check if a module is installed (loaded in frontend)
+ */
+export function useIsModuleInstalled(moduleName: string): boolean {
+  const { isModuleLoaded } = useModules();
+  return isModuleLoaded(moduleName);
 }
 
 export default useModules;

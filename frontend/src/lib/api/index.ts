@@ -109,3 +109,9 @@ export type { CompanyContext } from "./multitenancy";
 
 // Config
 export { API_CONFIG } from "./config";
+
+// Note: Demo, CRM, and Marketplace module APIs are available via direct imports:
+// - import { demoApi } from "@/lib/api/demo";
+// - import { crmApi } from "@/lib/api/crm";
+// - import { marketplaceApi } from "@/lib/api/marketplace";
+// These are loaded dynamically when modules are installed.

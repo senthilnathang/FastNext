@@ -29,6 +29,9 @@ export interface MenuItem {
   module?: string;
 }
 
+// Note: Demo, CRM, and Marketplace menus are loaded dynamically from installed modules
+// via the useBackendModuleMenus hook in EnhancedSidebar
+
 export const menuItems: MenuItem[] = [
   {
     title: "Dashboard",

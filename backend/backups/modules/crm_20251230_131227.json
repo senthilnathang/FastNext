@@ -1,0 +1,46 @@
+{
+  "module_name": "crm",
+  "timestamp": "20251230_131227",
+  "tables": {
+    "crm_accounts": {
+      "row_count": 0,
+      "data": []
+    },
+    "crm_activities": {
+      "row_count": 0,
+      "data": []
+    },
+    "crm_contacts": {
+      "row_count": 0,
+      "data": []
+    },
+    "crm_leads": {
+      "row_count": 0,
+      "data": []
+    },
+    "crm_pipelines": {
+      "row_count": 0,
+      "data": []
+    },
+    "crm_stages": {
+      "row_count": 0,
+      "data": []
+    },
+    "crm_tags": {
+      "row_count": 0,
+      "data": []
+    },
+    "crm_account_tag": {
+      "row_count": 0,
+      "data": []
+    },
+    "crm_contact_tag": {
+      "row_count": 0,
+      "data": []
+    },
+    "crm_lead_tag": {
+      "row_count": 0,
+      "data": []
+    }
+  }
+}

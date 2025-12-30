@@ -1502,7 +1502,13 @@ export default routes;
         return urls
 
     def get_all_menus(self) -> List[Dict[str, Any]]:
-        """Get all menu items from installed modules."""
+        """Get all menu items from installed modules.
+
+        Translates backend menu fields to frontend format:
+        - name -> title
+        - path -> href
+        - sequence -> order
+        """
         menus = []
 
         for module in self.get_installed_modules():
@@ -1510,13 +1516,24 @@ export default routes;
             module_menus = manifest.get("menus", [])
 
             for menu in module_menus:
-                # Add module name for namespacing
-                menu_copy = dict(menu)
-                menu_copy["module"] = module.name
-                menus.append(menu_copy)
+                # Translate to frontend format
+                menu_item = {
+                    "title": menu.get("name", ""),
+                    "href": menu.get("path", ""),
+                    "icon": menu.get("icon"),
+                    "order": menu.get("sequence", 10),
+                    "module": module.name,
+                }
+                if menu.get("parent"):
+                    menu_item["parent"] = menu.get("parent")
+                if menu.get("permission") or menu.get("groups"):
+                    # Use first group as permission for simplicity
+                    groups = menu.get("groups", [])
+                    menu_item["permission"] = menu.get("permission") or (groups[0] if groups else None)
+                menus.append(menu_item)
 
-        # Sort by sequence
-        menus.sort(key=lambda m: m.get("sequence", 10))
+        # Sort by order
+        menus.sort(key=lambda m: m.get("order", 10))
 
         return menus
 

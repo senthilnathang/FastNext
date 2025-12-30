@@ -3,7 +3,7 @@
 import { ChevronDown, ChevronRight, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useUserRole } from "@/modules/admin/hooks/useUserRole";
 import { useAuth } from "@/modules/auth";
 import { cn } from "@/shared/utils";
@@ -14,8 +14,9 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "../ui/tooltip";
+import { useBackendModuleMenus } from "@/shared/hooks/useModules";
 import { type MenuItem, menuItems } from "./menuConfig";
-import { filterMenuItems } from "./menuUtils";
+import { filterMenuItems, mergeModuleMenus } from "./menuUtils";
 import { UserMenu } from "./UserMenu";
 
 // Mock companies for demonstration - in a real app, this would come from an API
@@ -251,10 +252,17 @@ export default function Sidebar({
     setIsHovered(false);
   }, [hoverTimer]);
 
-  const filteredMenuItems = filterMenuItems(menuItems, {
-    canAccessModule,
-    hasPermission,
-  });
+  // Fetch dynamic module menus from backend
+  const { menus: moduleMenus } = useBackendModuleMenus();
+
+  // Merge base menu items with module menus, then filter by permissions
+  const filteredMenuItems = useMemo(() => {
+    const mergedMenus = mergeModuleMenus(menuItems, moduleMenus);
+    return filterMenuItems(mergedMenus, {
+      canAccessModule,
+      hasPermission,
+    });
+  }, [moduleMenus, canAccessModule, hasPermission]);
 
   const sidebarWidth = isCollapsed ? (isHovered ? "w-56" : "w-14") : "w-56";
 

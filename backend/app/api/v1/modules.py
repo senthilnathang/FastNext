@@ -119,25 +119,43 @@ def get_installed_module_model():
 # Module Discovery & Listing
 # -------------------------------------------------------------------------
 
-@router.get("/", response_model=List[ModuleResponse])
+@router.get("/", response_model=ModuleListResponse)
 def list_modules(
     db: Session = Depends(get_db),
     installed_only: bool = Query(False, description="Only show installed modules"),
     category: Optional[str] = Query(None, description="Filter by category"),
     application_only: bool = Query(False, description="Only show application modules"),
-) -> List[ModuleResponse]:
+    state: Optional[str] = Query(None, description="Filter by state"),
+    search: Optional[str] = Query(None, description="Search by name"),
+    skip: int = Query(0, description="Skip first N items"),
+    limit: int = Query(100, description="Limit results"),
+) -> ModuleListResponse:
     """
     List all available and installed modules.
     """
     service = get_module_service(db)
 
     if service:
-        modules = service.get_all_modules(
-            installed_only=installed_only,
-            category=category,
-            application_only=application_only,
-        )
-        return [ModuleResponse(**m.to_dict()) for m in modules]
+        try:
+            modules = service.get_all_modules(
+                installed_only=installed_only,
+                category=category,
+                application_only=application_only,
+            )
+            result = [ModuleResponse(**m.to_dict()) for m in modules]
+
+            # Apply additional filters
+            if state:
+                result = [m for m in result if m.state == state]
+            if search:
+                search_lower = search.lower()
+                result = [m for m in result if search_lower in m.name.lower() or search_lower in m.display_name.lower()]
+
+            total = len(result)
+            result = result[skip:skip + limit]
+            return ModuleListResponse(items=result, total=total)
+        except Exception:
+            pass
 
     # Fallback: just discover modules from filesystem
     registry = ModuleRegistry.get_registry()
@@ -157,7 +175,7 @@ def list_modules(
                 if application_only and not manifest.get("application", False):
                     continue
 
-                result.append(ModuleResponse(
+                mod = ModuleResponse(
                     name=name,
                     display_name=manifest.get("name", name),
                     version=manifest.get("version", "1.0.0"),
@@ -171,14 +189,24 @@ def list_modules(
                     state="uninstalled",
                     depends=manifest.get("depends", []),
                     module_path=str(module_path),
-                ))
+                )
+
+                # Apply search filter
+                if search:
+                    search_lower = search.lower()
+                    if search_lower not in name.lower() and search_lower not in mod.display_name.lower():
+                        continue
+
+                result.append(mod)
         except Exception:
             pass
 
     if installed_only:
-        return []
+        return ModuleListResponse(items=[], total=0)
 
-    return result
+    total = len(result)
+    result = result[skip:skip + limit]
+    return ModuleListResponse(items=result, total=total)
 
 
 @router.get("/installed", response_model=List[ModuleResponse])
@@ -191,6 +219,68 @@ def list_installed_modules(db: Session = Depends(get_db)) -> List[ModuleResponse
         return [ModuleResponse(**m.to_dict()) for m in modules]
 
     return []
+
+
+@router.post("/refresh")
+def refresh_modules(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_superuser),
+) -> Dict[str, Any]:
+    """
+    Refresh the module list by re-discovering modules from addon paths.
+    """
+    service = get_module_service(db)
+
+    if service:
+        try:
+            result = service.refresh_modules()
+            return {
+                "discovered": result.get("discovered", 0),
+                "updated": result.get("updated", 0),
+            }
+        except Exception as e:
+            return {
+                "discovered": 0,
+                "updated": 0,
+                "error": str(e),
+            }
+
+    # Fallback: just discover
+    registry = ModuleRegistry.get_registry()
+    loader = ModuleLoader(settings.all_addon_paths, registry)
+    discovered = loader.discover_modules()
+    return {
+        "discovered": len(discovered),
+        "updated": 0,
+    }
+
+
+@router.post("/apply")
+def apply_pending_operations(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_superuser),
+) -> List[Dict[str, Any]]:
+    """
+    Apply all pending module operations (installs, upgrades, removals).
+    """
+    service = get_module_service(db)
+
+    if not service:
+        return []
+
+    try:
+        results = service.apply_pending_operations()
+        return [
+            {
+                "success": r.get("success", False),
+                "module_name": r.get("module_name", ""),
+                "action": r.get("action", ""),
+                "message": r.get("message", ""),
+            }
+            for r in results
+        ]
+    except Exception as e:
+        return [{"success": False, "message": str(e)}]
 
 
 @router.get("/discovered", response_model=List[str])
@@ -286,6 +376,67 @@ def acknowledge_reload_signals(
         return {"acknowledged": count}
     except ImportError:
         return {"acknowledged": 0}
+
+
+class ModuleCategoryResponse(BaseModel):
+    """Module category response."""
+    name: str
+    display_name: str
+    module_count: int
+
+
+@router.get("/categories", response_model=List[ModuleCategoryResponse])
+def list_categories(
+    db: Session = Depends(get_db),
+) -> List[ModuleCategoryResponse]:
+    """
+    List all module categories with counts.
+    """
+    service = get_module_service(db)
+
+    if service:
+        try:
+            modules = service.get_all_modules()
+            category_counts: Dict[str, int] = {}
+            for module in modules:
+                cat = module.category or "Uncategorized"
+                category_counts[cat] = category_counts.get(cat, 0) + 1
+
+            return [
+                ModuleCategoryResponse(
+                    name=cat,
+                    display_name=cat.replace("_", " ").title(),
+                    module_count=count
+                )
+                for cat, count in sorted(category_counts.items())
+            ]
+        except Exception:
+            pass
+
+    # Fallback: discover from filesystem
+    registry = ModuleRegistry.get_registry()
+    loader = ModuleLoader(settings.all_addon_paths, registry)
+    discovered = loader.discover_modules()
+
+    category_counts: Dict[str, int] = {}
+    for name in discovered:
+        try:
+            module_path = loader.get_module_path(name)
+            if module_path:
+                manifest = loader.load_manifest(module_path)
+                cat = manifest.get("category", "Uncategorized")
+                category_counts[cat] = category_counts.get(cat, 0) + 1
+        except Exception:
+            pass
+
+    return [
+        ModuleCategoryResponse(
+            name=cat,
+            display_name=cat.replace("_", " ").title(),
+            module_count=count
+        )
+        for cat, count in sorted(category_counts.items())
+    ]
 
 
 @router.get("/reload-status")

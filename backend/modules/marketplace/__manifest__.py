@@ -61,4 +61,9 @@ and monetizing FastVue modules.
     "installable": True,
     "auto_install": False,
     "application": True,
+
+    # Menu Registration
+    "menus": [
+        {"name": "Marketplace", "path": "/marketplace", "icon": "Store", "sequence": 90},
+    ],
 }

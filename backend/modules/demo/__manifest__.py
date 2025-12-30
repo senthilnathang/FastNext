@@ -39,9 +39,8 @@ Use this as a template for creating your own modules.
         {
             "name": "Demo",
             "path": "/demo",
-            "icon": "mdi:flask",
+            "icon": "FlaskConical",
             "sequence": 100,
-            "groups": [],
         }
     ],
 }

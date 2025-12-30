@@ -68,56 +68,14 @@ A comprehensive Customer Relationship Management system with Salesforce-like fea
 
     # Menu Registration
     "menus": [
-        {
-            "name": "CRM",
-            "path": "/crm",
-            "icon": "mdi:account-group",
-            "sequence": 20,
-            "children": [
-                {
-                    "name": "Dashboard",
-                    "path": "/crm/dashboard",
-                    "icon": "mdi:view-dashboard",
-                    "sequence": 1,
-                },
-                {
-                    "name": "Leads",
-                    "path": "/crm/leads",
-                    "icon": "mdi:account-plus",
-                    "sequence": 10,
-                },
-                {
-                    "name": "Opportunities",
-                    "path": "/crm/opportunities",
-                    "icon": "mdi:cash-multiple",
-                    "sequence": 20,
-                },
-                {
-                    "name": "Contacts",
-                    "path": "/crm/contacts",
-                    "icon": "mdi:card-account-phone",
-                    "sequence": 30,
-                },
-                {
-                    "name": "Accounts",
-                    "path": "/crm/accounts",
-                    "icon": "mdi:domain",
-                    "sequence": 40,
-                },
-                {
-                    "name": "Activities",
-                    "path": "/crm/activities",
-                    "icon": "mdi:calendar-check",
-                    "sequence": 50,
-                },
-                {
-                    "name": "Pipeline Settings",
-                    "path": "/crm/settings/pipelines",
-                    "icon": "mdi:cog",
-                    "sequence": 100,
-                },
-            ],
-        },
+        {"name": "CRM", "path": "/crm", "icon": "Users", "sequence": 20},
+        {"name": "Dashboard", "path": "/crm", "icon": "LayoutDashboard", "sequence": 1, "parent": "CRM"},
+        {"name": "Leads", "path": "/crm/leads", "icon": "UserPlus", "sequence": 10, "parent": "CRM"},
+        {"name": "Opportunities", "path": "/crm/opportunities", "icon": "TrendingUp", "sequence": 20, "parent": "CRM"},
+        {"name": "Contacts", "path": "/crm/contacts", "icon": "Contact", "sequence": 30, "parent": "CRM"},
+        {"name": "Accounts", "path": "/crm/accounts", "icon": "Building", "sequence": 40, "parent": "CRM"},
+        {"name": "Activities", "path": "/crm/activities", "icon": "Activity", "sequence": 50, "parent": "CRM"},
+        {"name": "Settings", "path": "/crm/settings", "icon": "Settings", "sequence": 100, "parent": "CRM"},
     ],
 
     # Lifecycle Hooks

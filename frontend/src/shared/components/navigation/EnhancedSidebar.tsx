@@ -257,19 +257,25 @@ export default function EnhancedSidebar({
   }, [hoverTimer]);
 
   // Fetch dynamic module menus from backend
-  const { menus: moduleMenus } = useBackendModuleMenus();
+  const { menus: moduleMenus, loading: menusLoading, error: menusError } = useBackendModuleMenus();
+
+  console.log('[EnhancedSidebar] moduleMenus:', moduleMenus, 'loading:', menusLoading, 'error:', menusError);
 
   // Merge base menu items with module menus
   const mergedMenuItems = useMemo(() => {
-    return mergeModuleMenus(menuItems, moduleMenus);
+    const merged = mergeModuleMenus(menuItems, moduleMenus);
+    console.log('[EnhancedSidebar] mergedMenuItems:', merged);
+    return merged;
   }, [moduleMenus]);
 
   // Filter menu items based on permissions
   const filteredMenuItems = useMemo(() => {
-    return filterMenuItems(mergedMenuItems, {
+    const filtered = filterMenuItems(mergedMenuItems, {
       canAccessModule,
       hasPermission,
     });
+    console.log('[EnhancedSidebar] filteredMenuItems:', filtered);
+    return filtered;
   }, [mergedMenuItems, canAccessModule, hasPermission]);
 
   const sidebarWidth = isCollapsed ? (isHovered ? "w-64" : "w-16") : "w-64";

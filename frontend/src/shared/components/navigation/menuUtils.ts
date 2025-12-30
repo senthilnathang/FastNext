@@ -62,6 +62,7 @@ export const getPageTitle = (pathname: string, search?: string): string => {
     "/operations/tasks": "Tasks",
     "/operations/reports": "Reporting",
     "/operations/files": "File Manager",
+    // Module page titles are loaded dynamically from installed modules
   };
 
   // Handle dynamic routes
@@ -155,22 +156,38 @@ export const mergeModuleMenus = (
     return false;
   };
 
-  // Add child menus to their parents
+  // First, add child menus to existing base items
   Object.entries(childMenus).forEach(([parent, children]) => {
     addChildrenToParent(result, parent, children);
   });
 
-  // Add top-level menus
+  // Add top-level menus (with their children if any)
   topLevelMenus
     .sort((a, b) => (a.order ?? 100) - (b.order ?? 100))
     .forEach((menu) => {
-      result.push({
+      const menuItem: MenuItem = {
         title: menu.title,
         href: menu.href,
         icon: getIconComponent(menu.icon),
         requiredPermission: menu.permission,
         module: menu.module,
-      });
+      };
+
+      // Check if this menu has children waiting
+      const menuChildren = childMenus[menu.title];
+      if (menuChildren && menuChildren.length > 0) {
+        menuItem.children = menuChildren
+          .sort((a, b) => (a.order ?? 100) - (b.order ?? 100))
+          .map((child) => ({
+            title: child.title,
+            href: child.href,
+            icon: getIconComponent(child.icon),
+            requiredPermission: child.permission,
+            module: child.module,
+          }));
+      }
+
+      result.push(menuItem);
     });
 
   return result;

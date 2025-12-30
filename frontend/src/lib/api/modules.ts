@@ -133,19 +133,19 @@ export const modulesApi = {
    * Install a module
    */
   install: (name: string, params?: ModuleActionParams): Promise<ModuleInstallResult> =>
-    apiClient.post(`/api/v1/modules/${name}/install`, params),
+    apiClient.post(`/api/v1/modules/install/${name}`, params),
 
   /**
    * Upgrade a module
    */
   upgrade: (name: string, params?: ModuleActionParams): Promise<ModuleInstallResult> =>
-    apiClient.post(`/api/v1/modules/${name}/upgrade`, params),
+    apiClient.post(`/api/v1/modules/upgrade/${name}`, params),
 
   /**
    * Uninstall a module
    */
   uninstall: (name: string, params?: ModuleActionParams): Promise<ModuleInstallResult> =>
-    apiClient.post(`/api/v1/modules/${name}/uninstall`, params),
+    apiClient.post(`/api/v1/modules/uninstall/${name}`, params),
 
   /**
    * Refresh module list (discover new modules)
