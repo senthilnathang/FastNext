@@ -129,7 +129,4 @@ describe('WorkflowBuilder Approvals', () => {
 
     expect(isValid).toBe(false);
   });
-});</content>
-</xai:function_call/>
-<xai:function_call name="write">
-<parameter name="filePath">frontend/src/__tests__/e2e/workflow/workflow-approvals.test.ts
+});

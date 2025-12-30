@@ -2,7 +2,7 @@
  * Tests for InboxItem component
  */
 
-import { describe, it, expect, vi } from 'vitest';
+import { jest } from '@jest/globals';
 import { render, screen, fireEvent } from '../../utils/test-utils';
 import InboxItem from '@/components/inbox/InboxItem';
 
@@ -23,40 +23,40 @@ const mockItem = {
 };
 
 describe('InboxItem', () => {
-  it('renders inbox item with title', () => {
+  test('renders inbox item with title', () => {
     render(
       <InboxItem
         item={mockItem}
-        onClick={vi.fn()}
-        onToggleStar={vi.fn()}
-        onTogglePin={vi.fn()}
+        onClick={jest.fn()}
+        onToggleStar={jest.fn()}
+        onTogglePin={jest.fn()}
       />
     );
 
     expect(screen.getByText('Test Notification')).toBeInTheDocument();
   });
 
-  it('renders summary when provided', () => {
+  test('renders summary when provided', () => {
     render(
       <InboxItem
         item={mockItem}
-        onClick={vi.fn()}
-        onToggleStar={vi.fn()}
-        onTogglePin={vi.fn()}
+        onClick={jest.fn()}
+        onToggleStar={jest.fn()}
+        onTogglePin={jest.fn()}
       />
     );
 
     expect(screen.getByText('This is a test notification summary')).toBeInTheDocument();
   });
 
-  it('calls onClick when clicked', async () => {
-    const handleClick = vi.fn();
+  test('calls onClick when clicked', async () => {
+    const handleClick = jest.fn();
     render(
       <InboxItem
         item={mockItem}
         onClick={handleClick}
-        onToggleStar={vi.fn()}
-        onTogglePin={vi.fn()}
+        onToggleStar={jest.fn()}
+        onTogglePin={jest.fn()}
       />
     );
 
@@ -69,14 +69,14 @@ describe('InboxItem', () => {
     expect(handleClick).toHaveBeenCalledWith(mockItem);
   });
 
-  it('shows starred indicator when starred', () => {
+  test('shows starred indicator when starred', () => {
     const starredItem = { ...mockItem, is_starred: true };
     render(
       <InboxItem
         item={starredItem}
-        onClick={vi.fn()}
-        onToggleStar={vi.fn()}
-        onTogglePin={vi.fn()}
+        onClick={jest.fn()}
+        onToggleStar={jest.fn()}
+        onTogglePin={jest.fn()}
       />
     );
 
@@ -85,13 +85,13 @@ describe('InboxItem', () => {
     expect(starButton).toBeInTheDocument();
   });
 
-  it('shows unread styling when unread', () => {
+  test('shows unread styling when unread', () => {
     render(
       <InboxItem
         item={mockItem}
-        onClick={vi.fn()}
-        onToggleStar={vi.fn()}
-        onTogglePin={vi.fn()}
+        onClick={jest.fn()}
+        onToggleStar={jest.fn()}
+        onTogglePin={jest.fn()}
       />
     );
 
@@ -100,14 +100,14 @@ describe('InboxItem', () => {
     expect(title).toHaveClass('font-semibold');
   });
 
-  it('shows priority styling for high priority items', () => {
+  test('shows priority styling for high priority items', () => {
     const highPriorityItem = { ...mockItem, priority: 'high' as const };
     render(
       <InboxItem
         item={highPriorityItem}
-        onClick={vi.fn()}
-        onToggleStar={vi.fn()}
-        onTogglePin={vi.fn()}
+        onClick={jest.fn()}
+        onToggleStar={jest.fn()}
+        onTogglePin={jest.fn()}
       />
     );
 

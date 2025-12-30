@@ -2,7 +2,7 @@
  * Tests for useDebounce hook
  */
 
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { jest } from '@jest/globals';
 import { renderHook, act } from '@testing-library/react';
 
 // Simple useDebounce implementation for testing
@@ -26,20 +26,20 @@ import React from 'react';
 
 describe('useDebounce', () => {
   beforeEach(() => {
-    vi.useFakeTimers();
+    jest.useFakeTimers();
   });
 
   afterEach(() => {
-    vi.useRealTimers();
+    jest.useRealTimers();
   });
 
-  it('returns initial value immediately', () => {
+  test('returns initial value immediately', () => {
     const { result } = renderHook(() => useDebounce('initial', 500));
 
     expect(result.current).toBe('initial');
   });
 
-  it('debounces value changes', () => {
+  test('debounces value changes', () => {
     const { result, rerender } = renderHook(
       ({ value, delay }) => useDebounce(value, delay),
       { initialProps: { value: 'initial', delay: 500 } }
@@ -53,14 +53,14 @@ describe('useDebounce', () => {
 
     // Advance time by 500ms
     act(() => {
-      vi.advanceTimersByTime(500);
+      jest.advanceTimersByTime(500);
     });
 
     // Value should now be updated
     expect(result.current).toBe('changed');
   });
 
-  it('cancels previous timeout on rapid changes', () => {
+  test('cancels previous timeout on rapid changes', () => {
     const { result, rerender } = renderHook(
       ({ value, delay }) => useDebounce(value, delay),
       { initialProps: { value: 'initial', delay: 500 } }
@@ -69,12 +69,12 @@ describe('useDebounce', () => {
     // Rapid changes
     rerender({ value: 'change1', delay: 500 });
     act(() => {
-      vi.advanceTimersByTime(200);
+      jest.advanceTimersByTime(200);
     });
 
     rerender({ value: 'change2', delay: 500 });
     act(() => {
-      vi.advanceTimersByTime(200);
+      jest.advanceTimersByTime(200);
     });
 
     rerender({ value: 'change3', delay: 500 });
@@ -84,7 +84,7 @@ describe('useDebounce', () => {
 
     // Advance full delay
     act(() => {
-      vi.advanceTimersByTime(500);
+      jest.advanceTimersByTime(500);
     });
 
     // Should be final value

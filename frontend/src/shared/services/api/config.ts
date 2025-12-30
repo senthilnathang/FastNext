@@ -54,6 +54,7 @@ export const API_CONFIG = {
     CATEGORIES: "/api/v1/categories",
     AUTHORS: "/api/v1/authors",
     SALES: "/api/v1/sales",
+    GROUPS: "/api/v1/groups",
     ADMIN: {
       CONFIG: {
         LIST: "/api/admin/config",

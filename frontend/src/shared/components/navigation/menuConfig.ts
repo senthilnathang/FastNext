@@ -1,6 +1,7 @@
 import {
   Activity,
   AlertTriangle,
+  Bell,
   Book,
   Building2,
   Cog,
@@ -17,6 +18,7 @@ import {
   Shield,
   Upload,
   Users,
+  UsersRound,
   Workflow,
 } from "lucide-react";
 
@@ -60,9 +62,31 @@ export const menuItems: MenuItem[] = [
     module: "workflows",
   },
   {
+    title: "Notifications",
+    href: "/notifications",
+    icon: Bell,
+    module: "notifications",
+  },
+  {
     title: "Settings",
-    href: "/settings",
     icon: Settings,
+    children: [
+      {
+        title: "Profile",
+        href: "/settings",
+        icon: Users,
+      },
+      {
+        title: "Notification Preferences",
+        href: "/settings?tab=notifications",
+        icon: Bell,
+      },
+      {
+        title: "Security",
+        href: "/settings?tab=security",
+        icon: Shield,
+      },
+    ],
   },
   {
     title: "Error Pages",
@@ -135,6 +159,18 @@ export const menuItems: MenuItem[] = [
         href: "/admin/system-monitoring",
         icon: Monitor,
         requiredPermission: "admin.monitoring",
+      },
+      {
+        title: "Companies",
+        href: "/admin/companies",
+        icon: Building2,
+        requiredPermission: "admin.companies",
+      },
+      {
+        title: "Groups",
+        href: "/admin/groups",
+        icon: UsersRound,
+        requiredPermission: "admin.groups",
       },
       {
         title: "Users",

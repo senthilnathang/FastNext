@@ -195,7 +195,4 @@ test.describe("ACL Management", () => {
       await expect(page.locator('text="test_order_456"')).toBeVisible();
     }
   });
-});</content>
-</xai:function_call/>
-<xai:function_call name="write">
-<parameter name="filePath">frontend/src/__tests__/unit/acl/ACLService.test.ts
+});

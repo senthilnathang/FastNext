@@ -2,11 +2,12 @@
 
 import { ChevronDown, ChevronRight, X } from "lucide-react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { useUserRole } from "@/modules/admin/hooks/useUserRole";
 import { useAuth } from "@/modules/auth";
 import { cn } from "@/shared/utils";
+import { CompanySwitcher, type Company } from "../company/CompanySwitcher";
 import {
   Tooltip,
   TooltipContent,
@@ -16,6 +17,29 @@ import {
 import { type MenuItem, menuItems } from "./menuConfig";
 import { filterMenuItems } from "./menuUtils";
 import { UserMenu } from "./UserMenu";
+
+// Mock companies for demonstration - in a real app, this would come from an API
+const mockCompanies: Company[] = [
+  {
+    id: "1",
+    name: "Acme Corporation",
+    slug: "acme-corp",
+    description: "Technology Company",
+    isDefault: true,
+  },
+  {
+    id: "2",
+    name: "Globex Inc",
+    slug: "globex-inc",
+    description: "Finance Company",
+  },
+  {
+    id: "3",
+    name: "Initech",
+    slug: "initech",
+    description: "Consulting Services",
+  },
+];
 
 interface SidebarItemProps {
   item: MenuItem;
@@ -158,11 +182,21 @@ export default function Sidebar({
 }: SidebarProps) {
   const { canAccessModule, hasPermission } = useUserRole();
   const { user } = useAuth();
+  const router = useRouter();
   const [expandedItems, setExpandedItems] = useState<string[]>([
     "Administration",
   ]);
   const [isHovered, setIsHovered] = useState(false);
   const [hoverTimer, setHoverTimer] = useState<NodeJS.Timeout | null>(null);
+
+  const handleCompanyChange = useCallback((company: Company) => {
+    // Handle company change - could trigger data refresh, update context, etc.
+    console.log("Company changed to:", company.name);
+  }, []);
+
+  const handleAddCompany = useCallback(() => {
+    router.push("/admin/companies/new");
+  }, [router]);
 
   useEffect(() => {
     const saved = localStorage.getItem("sidebar-expanded-items");
@@ -272,6 +306,20 @@ export default function Sidebar({
             </button>
           )}
         </div>
+
+        {/* Company Switcher */}
+        {(!isCollapsed || isHovered) && mockCompanies.length > 0 && (
+          <div className="px-3 py-2 border-b border-border">
+            <CompanySwitcher
+              companies={mockCompanies}
+              onCompanyChange={handleCompanyChange}
+              onAddCompany={handleAddCompany}
+              showAddButton={hasPermission("admin.companies")}
+              size="sm"
+              className="w-full"
+            />
+          </div>
+        )}
 
         {/* Navigation */}
         <nav

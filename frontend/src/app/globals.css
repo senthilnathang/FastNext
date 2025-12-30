@@ -444,3 +444,581 @@ body {
     margin-top: 1rem;
   }
 }
+
+/* ==============================================
+   FASTVUE MIGRATED STYLES
+   ============================================== */
+
+/* Firefox scrollbar support */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: oklch(from var(--muted-foreground) l c h / 0.3) transparent;
+}
+
+.dark * {
+  scrollbar-color: oklch(from var(--muted-foreground) l c h / 0.3) transparent;
+}
+
+/* ==============================================
+   DRAG AND DROP STYLES
+   ============================================== */
+
+/* Prevent text selection during drag */
+[draggable="true"] {
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  touch-action: none;
+}
+
+/* Drag handle styles */
+.drag-handle {
+  cursor: grab;
+  touch-action: none;
+}
+
+.drag-handle:active {
+  cursor: grabbing;
+}
+
+/* Drop zone visual feedback */
+.drop-zone {
+  transition: all 0.2s ease;
+}
+
+.drop-zone--active,
+.drop-zone.is-dragging {
+  border-color: var(--primary) !important;
+  background-color: oklch(from var(--primary) l c h / 0.04) !important;
+}
+
+/* Sortable ghost element styles */
+.sortable-ghost {
+  opacity: 0.4;
+  background: oklch(from var(--primary) l c h / 0.2);
+}
+
+.sortable-chosen {
+  background: var(--muted);
+}
+
+.sortable-drag {
+  background: var(--background);
+  box-shadow: 0 4px 12px oklch(0 0 0 / 0.15);
+}
+
+/* Touch device improvements for drag */
+@media (pointer: coarse) {
+  [draggable="true"] {
+    touch-action: manipulation;
+  }
+
+  .drag-handle {
+    min-width: 44px;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+/* ==============================================
+   CHART CONTAINER RESPONSIVE
+   ============================================== */
+
+.echarts-container,
+[class*="chart-container"] {
+  width: 100% !important;
+  min-height: 250px;
+}
+
+@media (max-width: 576px) {
+  .echarts-container,
+  [class*="chart-container"] {
+    min-height: 200px;
+  }
+}
+
+/* ==============================================
+   MOBILE RESPONSIVE IMPROVEMENTS
+   ============================================== */
+
+/* Prevent horizontal overflow on mobile */
+@media (max-width: 576px) {
+  .mobile-stack {
+    flex-direction: column;
+  }
+
+  .mobile-full-width {
+    width: 100% !important;
+  }
+
+  /* Responsive spacing on mobile */
+  .mobile-p-3 {
+    padding: 0.75rem !important;
+  }
+
+  /* Stats responsive */
+  .stat-card {
+    text-align: center;
+  }
+}
+
+/* Tablet adjustments */
+@media (max-width: 768px) {
+  .tablet-stack {
+    flex-direction: column;
+  }
+}
+
+/* ==============================================
+   FORM MOBILE IMPROVEMENTS
+   ============================================== */
+
+@media (max-width: 576px) {
+  .form-mobile .form-item {
+    margin-bottom: 1rem;
+  }
+
+  .form-mobile .form-label {
+    padding-bottom: 0.25rem;
+  }
+
+  /* Full width inputs on mobile */
+  .form-mobile select,
+  .form-mobile input {
+    width: 100% !important;
+  }
+}
+
+/* ==============================================
+   MODAL SCROLL FIX
+   ============================================== */
+
+.modal-scroll-fix {
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+/* ==============================================
+   TABLE RESPONSIVE
+   ============================================== */
+
+.table-responsive-wrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* ==============================================
+   ANIMATION UTILITIES
+   ============================================== */
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideInUp {
+  from {
+    transform: translateY(10px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideInDown {
+  from {
+    transform: translateY(-10px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.2s ease-out;
+}
+
+.animate-slide-in-up {
+  animation: slideInUp 0.3s ease-out;
+}
+
+.animate-slide-in-down {
+  animation: slideInDown 0.3s ease-out;
+}
+
+.animate-pulse-slow {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.animate-spin-slow {
+  animation: spin 3s linear infinite;
+}
+
+/* ==============================================
+   NOTIFICATION BADGE STYLES
+   ============================================== */
+
+.notification-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 18px;
+  text-align: center;
+  color: white;
+  background-color: var(--destructive);
+  border-radius: 9px;
+}
+
+.notification-badge-dot {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 8px;
+  height: 8px;
+  background-color: var(--destructive);
+  border-radius: 50%;
+}
+
+/* ==============================================
+   MENTION & EMOJI STYLES
+   ============================================== */
+
+.mention {
+  display: inline-flex;
+  align-items: center;
+  padding: 0 4px;
+  margin: 0 1px;
+  font-weight: 500;
+  color: var(--primary);
+  background-color: oklch(from var(--primary) l c h / 0.1);
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.mention:hover {
+  background-color: oklch(from var(--primary) l c h / 0.2);
+}
+
+.emoji-picker-trigger {
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+.emoji-picker-trigger:hover {
+  background-color: var(--muted);
+}
+
+/* ==============================================
+   MESSAGE THREAD STYLES
+   ============================================== */
+
+.message-thread {
+  position: relative;
+  padding-left: 1rem;
+}
+
+.message-thread::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background-color: var(--border);
+}
+
+.message-reply {
+  margin-left: 2rem;
+  padding: 0.5rem;
+  border-left: 2px solid var(--border);
+  background-color: var(--muted);
+  border-radius: 0 var(--radius) var(--radius) 0;
+}
+
+/* ==============================================
+   REACTION BAR STYLES
+   ============================================== */
+
+.reaction-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 4px;
+}
+
+.reaction-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  font-size: 12px;
+  background-color: var(--muted);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.reaction-item:hover {
+  background-color: oklch(from var(--primary) l c h / 0.1);
+  border-color: var(--primary);
+}
+
+.reaction-item.active {
+  background-color: oklch(from var(--primary) l c h / 0.15);
+  border-color: var(--primary);
+}
+
+.reaction-count {
+  font-weight: 500;
+  color: var(--muted-foreground);
+}
+
+/* ==============================================
+   LABEL STYLES
+   ============================================== */
+
+.label-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  font-size: 11px;
+  font-weight: 500;
+  border-radius: 12px;
+  white-space: nowrap;
+}
+
+.label-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 6px;
+}
+
+/* ==============================================
+   COLLAPSIBLE THREAD STYLES
+   ============================================== */
+
+.collapsible-thread {
+  border-left: 2px solid var(--border);
+  margin-left: 1rem;
+  padding-left: 1rem;
+}
+
+.collapsible-thread-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 0;
+  cursor: pointer;
+  color: var(--muted-foreground);
+  font-size: 13px;
+}
+
+.collapsible-thread-header:hover {
+  color: var(--foreground);
+}
+
+.collapsible-thread-content {
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+}
+
+/* ==============================================
+   TYPING INDICATOR STYLES
+   ============================================== */
+
+.typing-indicator {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 12px;
+  color: var(--muted-foreground);
+  font-size: 13px;
+}
+
+.typing-dots {
+  display: flex;
+  gap: 3px;
+}
+
+.typing-dot {
+  width: 6px;
+  height: 6px;
+  background-color: var(--muted-foreground);
+  border-radius: 50%;
+  animation: typingBounce 1.4s ease-in-out infinite;
+}
+
+.typing-dot:nth-child(1) {
+  animation-delay: 0s;
+}
+
+.typing-dot:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.typing-dot:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes typingBounce {
+  0%, 60%, 100% {
+    transform: translateY(0);
+  }
+  30% {
+    transform: translateY(-4px);
+  }
+}
+
+/* ==============================================
+   READ STATUS STYLES
+   ============================================== */
+
+.read-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  color: var(--muted-foreground);
+}
+
+.read-status.read {
+  color: var(--primary);
+}
+
+/* ==============================================
+   FILE PREVIEW STYLES
+   ============================================== */
+
+.file-preview-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: oklch(0 0 0 / 0.8);
+}
+
+.file-preview-content {
+  position: relative;
+  max-width: 90vw;
+  max-height: 90vh;
+  overflow: auto;
+  background-color: var(--background);
+  border-radius: var(--radius);
+}
+
+.file-preview-image {
+  max-width: 100%;
+  max-height: 85vh;
+  object-fit: contain;
+}
+
+/* ==============================================
+   COMPANY SWITCHER STYLES
+   ============================================== */
+
+.company-switcher {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background-color: var(--muted);
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.company-switcher:hover {
+  background-color: oklch(from var(--muted) calc(l - 0.05) c h);
+}
+
+.company-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  background-color: var(--primary);
+  color: var(--primary-foreground);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+/* ==============================================
+   BOOKMARK BUTTON STYLES
+   ============================================== */
+
+.bookmark-btn {
+  padding: 4px;
+  color: var(--muted-foreground);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.bookmark-btn:hover {
+  color: var(--warning);
+}
+
+.bookmark-btn.active {
+  color: var(--warning);
+}
+
+/* ==============================================
+   TEMPLATE PICKER STYLES
+   ============================================== */
+
+.template-card {
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.template-card:hover {
+  border-color: var(--primary);
+  background-color: oklch(from var(--primary) l c h / 0.04);
+}
+
+.template-card.selected {
+  border-color: var(--primary);
+  background-color: oklch(from var(--primary) l c h / 0.08);
+}

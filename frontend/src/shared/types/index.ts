@@ -164,3 +164,6 @@ export interface UpdateComponentInstanceRequest {
   parent_id?: number;
   order_index?: number;
 }
+
+// WebSocket types
+export * from "./websocket";

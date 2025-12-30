@@ -2,7 +2,7 @@
  * Tests for InboxFilters component
  */
 
-import { describe, it, expect, vi } from 'vitest';
+import { jest } from '@jest/globals';
 import { render, screen, fireEvent } from '../../utils/test-utils';
 import InboxFilters from '@/components/inbox/InboxFilters';
 
@@ -23,16 +23,16 @@ const defaultProps = {
     starred: 2,
     actionable: 1,
   },
-  onTypeChange: vi.fn(),
-  onStatusChange: vi.fn(),
-  onPriorityChange: vi.fn(),
-  onLabelChange: vi.fn(),
-  onSearchChange: vi.fn(),
-  onClearFilters: vi.fn(),
+  onTypeChange: jest.fn(),
+  onStatusChange: jest.fn(),
+  onPriorityChange: jest.fn(),
+  onLabelChange: jest.fn(),
+  onSearchChange: jest.fn(),
+  onClearFilters: jest.fn(),
 };
 
 describe('InboxFilters', () => {
-  it('renders filter dropdowns in horizontal layout', () => {
+  test('renders filter dropdowns in horizontal layout', () => {
     render(<InboxFilters {...defaultProps} />);
 
     // Check for dropdown options (multiple "All" options exist)
@@ -40,14 +40,14 @@ describe('InboxFilters', () => {
     expect(screen.getByText('Notifications')).toBeInTheDocument();
   });
 
-  it('shows search input when enabled', () => {
+  test('shows search input when enabled', () => {
     render(<InboxFilters {...defaultProps} showSearch={true} />);
 
     expect(screen.getByPlaceholderText('Search inbox...')).toBeInTheDocument();
   });
 
-  it('calls onSearchChange when typing in search', async () => {
-    const handleSearchChange = vi.fn();
+  test('calls onSearchChange when typing in search', async () => {
+    const handleSearchChange = jest.fn();
     const { user } = render(
       <InboxFilters
         {...defaultProps}
@@ -62,22 +62,22 @@ describe('InboxFilters', () => {
     expect(handleSearchChange).toHaveBeenCalled();
   });
 
-  it('shows unread count in stats with vertical layout', () => {
+  test('shows unread count in stats with vertical layout', () => {
     render(<InboxFilters {...defaultProps} layout="vertical" />);
 
     // Should show unread filter option with count
     expect(screen.getByText(/Unread/)).toBeInTheDocument();
   });
 
-  it('shows labels section in vertical layout', () => {
+  test('shows labels section in vertical layout', () => {
     render(<InboxFilters {...defaultProps} layout="vertical" />);
 
     expect(screen.getByText('Important')).toBeInTheDocument();
     expect(screen.getByText('Work')).toBeInTheDocument();
   });
 
-  it('calls onClearFilters when clear button clicked', async () => {
-    const handleClear = vi.fn();
+  test('calls onClearFilters when clear button clicked', async () => {
+    const handleClear = jest.fn();
     const { user } = render(
       <InboxFilters
         {...defaultProps}

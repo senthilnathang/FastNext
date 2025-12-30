@@ -5,6 +5,12 @@
 // Attachment Components
 export * from "./attachments";
 
+// Communication Components
+export * from "./communication";
+
+// Inbox Components
+export * from "./inbox";
+
 // Authentication Components
 export {
   AuthGuard,
@@ -23,6 +29,16 @@ export {
   SystemStatusWidget,
 } from "./data-visualization/DashboardWidgets";
 export { EnhancedListView } from "./data-visualization/EnhancedListView";
+
+// New Dashboard Widgets
+export { ActiveGroupsWidget } from "./data-visualization/ActiveGroupsWidget";
+export { CompanyQuickSwitchWidget } from "./data-visualization/CompanyQuickSwitchWidget";
+export {
+  EnhancedQuickActionsWidget,
+  type QuickAction,
+} from "./data-visualization/EnhancedQuickActionsWidget";
+export { RecentNotificationsWidget } from "./data-visualization/RecentNotificationsWidget";
+export { UnreadMessagesWidget } from "./data-visualization/UnreadMessagesWidget";
 // Data Visualization Components
 export {
   EnhancedDataTable,
@@ -264,3 +280,22 @@ export { default as WindowControls } from "./ui/window-controls";
 export { GenericFormView } from "./views/GenericFormView";
 export { GenericKanbanView } from "./views/GenericKanbanView";
 export { GenericListView } from "./views/GenericListView";
+
+// i18n Components
+export {
+  LanguageSwitcher,
+  LanguageSwitcherCompact,
+  LanguageSwitcherWithLabel,
+  LanguageSelector,
+  type LanguageSwitcherProps,
+} from "./i18n";
+
+// Filters Components
+export * from "./filters";
+
+// Company Components
+export { CompanySwitcher } from "./company/CompanySwitcher";
+
+// Notifications Components
+export { NotificationBell } from "./notifications/NotificationBell";
+export { NotificationCenter } from "./notifications/NotificationCenter";

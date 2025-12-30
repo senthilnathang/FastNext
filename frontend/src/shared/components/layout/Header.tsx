@@ -1,9 +1,11 @@
 "use client";
 
-import { Bell, LogOut, Search, Settings, User } from "lucide-react";
+import { LogOut, Search, Settings, User } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useAuth } from "@/modules/auth";
 import Breadcrumb from "../navigation/Breadcrumb";
 import SidebarToggle from "../navigation/SidebarToggle";
+import { NotificationBell } from "../notifications/NotificationBell";
 import { Button } from "../ui/button";
 import {
   DropdownMenu,
@@ -26,6 +28,7 @@ export default function Header({
   onToggleSidebar,
 }: HeaderProps = {}) {
   const { user, logout } = useAuth();
+  const router = useRouter();
 
   const handleLogout = async () => {
     try {
@@ -74,15 +77,11 @@ export default function Header({
             <QuickActionButton />
           </div>
 
-          <Button
-            variant="ghost"
-            size="sm"
-            title="Notifications"
-            className="p-1.5 relative"
-          >
-            <Bell className="w-4 h-4" />
-            <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-red-500 rounded-full"></span>
-          </Button>
+          <NotificationBell
+            onViewAll={() => router.push("/notifications")}
+            onSettingsClick={() => router.push("/settings?tab=notifications")}
+            notificationCenterUrl="/notifications"
+          />
 
           <EnhancedThemeToggle />
 

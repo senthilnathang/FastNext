@@ -197,3 +197,11 @@ export type ExportJobType = z.infer<typeof ExportJobCreateSchema>;
 export type FileValidationRequestType = z.infer<
   typeof FileValidationRequestSchema
 >;
+
+// Re-export feature schemas
+export * from "./company.schema";
+export * from "./notification.schema";
+export * from "./group.schema";
+export * from "./label.schema";
+export * from "./message.schema";
+export * from "./filter.schema";

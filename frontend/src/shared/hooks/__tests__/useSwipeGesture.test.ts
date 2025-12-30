@@ -9,7 +9,7 @@ const createTouchEvent = (
 ) => {
   const event = new Event(type) as any;
   event.touches = touches;
-  event.preventDefault = vi.fn();
+  event.preventDefault = jest.fn();
   return event;
 };
 
@@ -37,14 +37,14 @@ describe("useSwipeGesture", () => {
   });
 
   describe("Basic Setup", () => {
-    it("returns addSwipeListeners function", () => {
+    test("returns addSwipeListeners function", () => {
       const { result } = renderHook(() => useSwipeGesture());
 
       expect(result.current.addSwipeListeners).toBeDefined();
       expect(typeof result.current.addSwipeListeners).toBe("function");
     });
 
-    it("adds touch event listeners to element", () => {
+    test("adds touch event listeners to element", () => {
       const { result } = renderHook(() => useSwipeGesture());
 
       result.current.addSwipeListeners(mockElement);
@@ -66,7 +66,7 @@ describe("useSwipeGesture", () => {
       );
     });
 
-    it("removes event listeners when cleanup function is called", () => {
+    test("removes event listeners when cleanup function is called", () => {
       const { result } = renderHook(() => useSwipeGesture());
 
       const cleanup = result.current.addSwipeListeners(mockElement);
@@ -88,8 +88,8 @@ describe("useSwipeGesture", () => {
   });
 
   describe("Swipe Detection", () => {
-    it("detects right swipe", () => {
-      const onSwipeRight = vi.fn();
+    test("detects right swipe", () => {
+      const onSwipeRight = jest.fn();
       const { result } = renderHook(() =>
         useSwipeGesture({ onSwipeRight, threshold: 50 }),
       );
@@ -114,8 +114,8 @@ describe("useSwipeGesture", () => {
       expect(onSwipeRight).toHaveBeenCalled();
     });
 
-    it("detects left swipe", () => {
-      const onSwipeLeft = vi.fn();
+    test("detects left swipe", () => {
+      const onSwipeLeft = jest.fn();
       const { result } = renderHook(() =>
         useSwipeGesture({ onSwipeLeft, threshold: 50 }),
       );
@@ -140,8 +140,8 @@ describe("useSwipeGesture", () => {
       expect(onSwipeLeft).toHaveBeenCalled();
     });
 
-    it("detects up swipe", () => {
-      const onSwipeUp = vi.fn();
+    test("detects up swipe", () => {
+      const onSwipeUp = jest.fn();
       const { result } = renderHook(() =>
         useSwipeGesture({ onSwipeUp, threshold: 50 }),
       );
@@ -166,8 +166,8 @@ describe("useSwipeGesture", () => {
       expect(onSwipeUp).toHaveBeenCalled();
     });
 
-    it("detects down swipe", () => {
-      const onSwipeDown = vi.fn();
+    test("detects down swipe", () => {
+      const onSwipeDown = jest.fn();
       const { result } = renderHook(() =>
         useSwipeGesture({ onSwipeDown, threshold: 50 }),
       );
@@ -194,8 +194,8 @@ describe("useSwipeGesture", () => {
   });
 
   describe("Threshold Handling", () => {
-    it("does not trigger swipe when distance is below threshold", () => {
-      const onSwipeRight = vi.fn();
+    test("does not trigger swipe when distance is below threshold", () => {
+      const onSwipeRight = jest.fn();
       const { result } = renderHook(() =>
         useSwipeGesture({ onSwipeRight, threshold: 100 }),
       );
@@ -220,8 +220,8 @@ describe("useSwipeGesture", () => {
       expect(onSwipeRight).not.toHaveBeenCalled();
     });
 
-    it("uses custom threshold", () => {
-      const onSwipeRight = vi.fn();
+    test("uses custom threshold", () => {
+      const onSwipeRight = jest.fn();
       const { result } = renderHook(() =>
         useSwipeGesture({ onSwipeRight, threshold: 30 }),
       );
@@ -248,8 +248,8 @@ describe("useSwipeGesture", () => {
   });
 
   describe("Time Constraint", () => {
-    it("does not trigger swipe when gesture is too slow", () => {
-      const onSwipeRight = vi.fn();
+    test("does not trigger swipe when gesture is too slow", () => {
+      const onSwipeRight = jest.fn();
       const { result } = renderHook(() =>
         useSwipeGesture({ onSwipeRight, threshold: 50 }),
       );
@@ -259,7 +259,7 @@ describe("useSwipeGesture", () => {
       // Mock Date.now to simulate slow gesture
       const originalNow = Date.now;
       let timeCounter = 0;
-      Date.now = vi.fn(() => {
+      Date.now = jest.fn(() => {
         timeCounter += 600; // Simulate 600ms delay (too slow)
         return timeCounter;
       });
@@ -287,7 +287,7 @@ describe("useSwipeGesture", () => {
   });
 
   describe("preventDefault Option", () => {
-    it("calls preventDefault when option is enabled", () => {
+    test("calls preventDefault when option is enabled", () => {
       const { result } = renderHook(() =>
         useSwipeGesture({ preventDefault: true }),
       );
@@ -305,7 +305,7 @@ describe("useSwipeGesture", () => {
       expect(startEvent.preventDefault).toHaveBeenCalled();
     });
 
-    it("does not call preventDefault when option is disabled", () => {
+    test("does not call preventDefault when option is disabled", () => {
       const { result } = renderHook(() =>
         useSwipeGesture({ preventDefault: false }),
       );
@@ -325,7 +325,7 @@ describe("useSwipeGesture", () => {
   });
 
   describe("Passive Option", () => {
-    it("uses passive option when adding event listeners", () => {
+    test("uses passive option when adding event listeners", () => {
       const { result } = renderHook(() => useSwipeGesture({ passive: false }));
 
       result.current.addSwipeListeners(mockElement);
@@ -353,14 +353,14 @@ describe("usePointerSwipe", () => {
   });
 
   describe("Basic Setup", () => {
-    it("returns addPointerListeners function", () => {
+    test("returns addPointerListeners function", () => {
       const { result } = renderHook(() => usePointerSwipe());
 
       expect(result.current.addPointerListeners).toBeDefined();
       expect(typeof result.current.addPointerListeners).toBe("function");
     });
 
-    it("adds pointer event listeners to element", () => {
+    test("adds pointer event listeners to element", () => {
       const { result } = renderHook(() => usePointerSwipe());
 
       result.current.addPointerListeners(mockElement);
@@ -385,8 +385,8 @@ describe("usePointerSwipe", () => {
   });
 
   describe("Pointer Swipe Detection", () => {
-    it("detects right pointer swipe", () => {
-      const onSwipeRight = vi.fn();
+    test("detects right pointer swipe", () => {
+      const onSwipeRight = jest.fn();
       const { result } = renderHook(() =>
         usePointerSwipe({ onSwipeRight, threshold: 50 }),
       );
@@ -407,8 +407,8 @@ describe("usePointerSwipe", () => {
       expect(onSwipeRight).toHaveBeenCalled();
     });
 
-    it("does not trigger swipe when pointer is not down", () => {
-      const onSwipeRight = vi.fn();
+    test("does not trigger swipe when pointer is not down", () => {
+      const onSwipeRight = jest.fn();
       const { result } = renderHook(() =>
         usePointerSwipe({ onSwipeRight, threshold: 50 }),
       );
@@ -427,8 +427,8 @@ describe("usePointerSwipe", () => {
       expect(onSwipeRight).not.toHaveBeenCalled();
     });
 
-    it("handles pointerleave as pointerup", () => {
-      const onSwipeRight = vi.fn();
+    test("handles pointerleave as pointerup", () => {
+      const onSwipeRight = jest.fn();
       const { result } = renderHook(() =>
         usePointerSwipe({ onSwipeRight, threshold: 50 }),
       );
