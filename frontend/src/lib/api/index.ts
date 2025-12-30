@@ -20,17 +20,16 @@ export { modulesApi, type InstalledModule, type ModuleManifest, type ModuleCateg
 export type { ModuleState, ModuleListParams, ModuleInstallResult, ModuleActionParams, PaginatedModules } from "./modules";
 
 // Notifications
-export { notificationsApi, type Notification, type NotificationPreferences } from "./notifications";
+export { notificationsApi, type Notification, type ActorInfo } from "./notifications";
 export type {
-  NotificationType,
-  NotificationPriority,
-  NotificationStatus,
+  NotificationLevel,
   NotificationListParams,
-  CreateNotificationData,
   PaginatedNotifications,
   NotificationStats,
-  UnreadCountResponse,
-  BulkActionResult as NotificationBulkActionResult,
+  BulkReadResponse,
+  BulkDeleteResponse,
+  SendNotificationRequest,
+  SendNotificationResponse,
 } from "./notifications";
 
 // Labels

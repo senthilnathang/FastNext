@@ -88,6 +88,20 @@ export interface NotificationFiltersState {
   search: string;
 }
 
+// Notification preferences
+export interface NotificationPreferences {
+  email_enabled: boolean;
+  push_enabled: boolean;
+  in_app_enabled: boolean;
+  digest_frequency: "none" | "daily" | "weekly";
+  muted_until?: string | null;
+  quiet_hours_enabled: boolean;
+  quiet_hours_start?: string | null;
+  quiet_hours_end?: string | null;
+}
+
+export interface UpdateNotificationPreferences extends Partial<NotificationPreferences> {}
+
 // Notification level metadata for UI
 export const NOTIFICATION_LEVEL_CONFIG: Record<
   NotificationLevel,

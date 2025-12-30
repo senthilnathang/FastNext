@@ -12,7 +12,6 @@ import {
   Key,
   Lock,
   Monitor,
-  Package,
   Settings,
   Shield,
   Upload,
@@ -34,12 +33,6 @@ export const menuItems: MenuItem[] = [
     title: "Dashboard",
     href: "/dashboard",
     icon: Home,
-  },
-  {
-    title: "Products",
-    href: "/products",
-    icon: Package,
-    module: "inventory",
   },
   {
     title: "Notifications",

@@ -33,6 +33,7 @@ export interface NotificationListParams {
   filter_type?: "all" | "unread" | "read";
   page?: number;
   page_size?: number;
+  [key: string]: string | number | boolean | undefined;
 }
 
 export interface PaginatedNotifications {

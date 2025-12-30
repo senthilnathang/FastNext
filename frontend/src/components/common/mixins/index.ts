@@ -13,15 +13,3 @@ export type { TimestampInfo as TimestampInfoType } from './TimestampDisplay';
 
 export { default as AuditInfo } from './AuditInfo';
 export type { AuditInfo as AuditInfoType } from './AuditInfo';
-
-// Re-export with named exports for convenience
-export { ActivityLog, AuditTrail, MessageNotifications, TimestampDisplay, AuditInfo };
-
-// Re-export types with clear naming
-export type {
-  ActivityLogEntryType,
-  AuditTrailEntryType,
-  MessageNotificationType,
-  TimestampInfoType,
-  AuditInfoType
-};

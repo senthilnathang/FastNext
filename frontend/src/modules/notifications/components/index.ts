@@ -1,5 +1,4 @@
-// Notification components exports
-export { default as NotificationFilters } from "./NotificationFilters";
-export { default as NotificationItem } from "./NotificationItem";
-export { default as NotificationList } from "./NotificationList";
-export { default as NotificationPreferences } from "./NotificationPreferences";
+// Notification components
+// Components are defined inline in the page/components that use them
+// This allows for simpler, more focused components without shared state complexities
+export {};

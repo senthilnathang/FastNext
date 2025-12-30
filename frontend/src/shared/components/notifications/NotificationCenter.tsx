@@ -1,14 +1,18 @@
 "use client";
 
 import {
+  AlertTriangle,
   Bell,
   Check,
   CheckCheck,
+  CheckCircle,
   ExternalLink,
+  Info,
   Settings,
   Trash2,
-  X,
+  XCircle,
 } from "lucide-react";
+import Link from "next/link";
 import type React from "react";
 import { useCallback, useEffect, useState } from "react";
 import { useAuth } from "@/modules/auth";
@@ -26,19 +30,19 @@ import {
   SheetTrigger,
 } from "../ui/sheet";
 
+type NotificationLevel = "info" | "success" | "warning" | "error";
+
 interface Notification {
   id: number;
   title: string;
-  message: string;
-  type: "info" | "success" | "warning" | "error" | "system";
-  channels: string[];
+  description?: string | null;
+  level: NotificationLevel;
   is_read: boolean;
-  is_sent: boolean;
-  sent_at: string | null;
-  action_url: string | null;
-  data: any;
+  link?: string | null;
+  data: Record<string, unknown>;
+  actor_id?: number | null;
   created_at: string;
-  updated_at: string;
+  updated_at?: string | null;
 }
 
 interface NotificationCenterProps {
@@ -48,119 +52,143 @@ interface NotificationCenterProps {
   onOpenChange?: (open: boolean) => void;
 }
 
+// Format time ago
+function formatTimeAgo(date: string): string {
+  const now = new Date();
+  const past = new Date(date);
+  const diffInSeconds = Math.floor((now.getTime() - past.getTime()) / 1000);
+
+  if (diffInSeconds < 60) return "Just now";
+  if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`;
+  if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`;
+  if (diffInSeconds < 604800) return `${Math.floor(diffInSeconds / 86400)}d ago`;
+  return past.toLocaleDateString();
+}
+
+// Level configuration
+const LEVEL_CONFIG: Record<
+  NotificationLevel,
+  {
+    icon: React.ComponentType<{ className?: string }>;
+    color: string;
+    bgColor: string;
+  }
+> = {
+  info: {
+    icon: Info,
+    color: "text-blue-600 dark:text-blue-400",
+    bgColor: "bg-blue-100 dark:bg-blue-900/30",
+  },
+  success: {
+    icon: CheckCircle,
+    color: "text-green-600 dark:text-green-400",
+    bgColor: "bg-green-100 dark:bg-green-900/30",
+  },
+  warning: {
+    icon: AlertTriangle,
+    color: "text-amber-600 dark:text-amber-400",
+    bgColor: "bg-amber-100 dark:bg-amber-900/30",
+  },
+  error: {
+    icon: XCircle,
+    color: "text-red-600 dark:text-red-400",
+    bgColor: "bg-red-100 dark:bg-red-900/30",
+  },
+};
+
 function NotificationItem({
   notification,
   onMarkAsRead,
   onDelete,
+  onClose,
 }: {
   notification: Notification;
   onMarkAsRead: (id: number) => void;
   onDelete: (id: number) => void;
+  onClose: () => void;
 }) {
-  const getTypeColor = (type: string) => {
-    switch (type) {
-      case "success":
-        return "text-green-600 dark:text-green-400";
-      case "warning":
-        return "text-yellow-600 dark:text-yellow-400";
-      case "error":
-        return "text-red-600 dark:text-red-400";
-      case "system":
-        return "text-blue-600 dark:text-blue-400";
-      default:
-        return "text-gray-600 dark:text-gray-400";
-    }
-  };
-
-  const getTypeIcon = (type: string) => {
-    switch (type) {
-      case "success":
-        return "✓";
-      case "warning":
-        return "⚠";
-      case "error":
-        return "✕";
-      case "system":
-        return "ℹ";
-      default:
-        return "•";
-    }
-  };
-
-  const handleActionClick = () => {
-    if (notification.action_url) {
-      window.open(notification.action_url, "_blank");
-    }
-  };
+  const config = LEVEL_CONFIG[notification.level] || LEVEL_CONFIG.info;
+  const IconComponent = config.icon;
 
   return (
     <div
       className={cn(
-        "p-4 border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors",
-        !notification.is_read && "bg-blue-50 dark:bg-blue-900/20",
+        "p-4 hover:bg-accent/50 transition-colors border-b last:border-b-0",
+        !notification.is_read && "bg-primary/5"
       )}
     >
-      <div className="flex items-start justify-between">
+      <div className="flex gap-3">
+        {/* Icon */}
+        <div
+          className={cn(
+            "flex items-center justify-center w-9 h-9 rounded-full shrink-0",
+            config.bgColor
+          )}
+        >
+          <IconComponent className={cn("h-4 w-4", config.color)} />
+        </div>
+
+        {/* Content */}
         <div className="flex-1 min-w-0">
-          <div className="flex items-center space-x-2 mb-1">
-            <span
-              className={cn(
-                "text-sm font-medium",
-                getTypeColor(notification.type),
+          <div className="flex items-start justify-between gap-2">
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 mb-0.5">
+                <h4
+                  className={cn(
+                    "text-sm truncate",
+                    !notification.is_read ? "font-semibold" : "font-medium"
+                  )}
+                >
+                  {notification.title}
+                </h4>
+                {!notification.is_read && (
+                  <span className="w-2 h-2 bg-primary rounded-full shrink-0" />
+                )}
+              </div>
+              {notification.description && (
+                <p className="text-xs text-muted-foreground line-clamp-2 mb-1">
+                  {notification.description}
+                </p>
               )}
-            >
-              {getTypeIcon(notification.type)}
-            </span>
-            <h4
-              className={cn(
-                "text-sm font-medium truncate",
-                !notification.is_read && "font-semibold",
-              )}
-            >
-              {notification.title}
-            </h4>
-            {!notification.is_read && (
-              <div className="w-2 h-2 bg-blue-500 rounded-full flex-shrink-0" />
-            )}
-          </div>
-          <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
-            {notification.message}
-          </p>
-          <div className="flex items-center justify-between">
-            <span className="text-xs text-gray-500 dark:text-gray-500">
-              {new Date(notification.created_at).toLocaleDateString()} at{" "}
-              {new Date(notification.created_at).toLocaleTimeString()}
-            </span>
-            <div className="flex items-center space-x-1">
-              {notification.action_url && (
+              <span className="text-xs text-muted-foreground">
+                {formatTimeAgo(notification.created_at)}
+              </span>
+            </div>
+
+            {/* Actions */}
+            <div className="flex items-center gap-0.5 shrink-0">
+              {notification.link && (
                 <Button
                   variant="ghost"
-                  size="sm"
-                  onClick={handleActionClick}
-                  className="h-6 px-2 text-xs"
+                  size="icon"
+                  asChild
+                  className="h-7 w-7"
+                  onClick={onClose}
                 >
-                  <ExternalLink className="h-3 w-3 mr-1" />
-                  Action
+                  <Link href={notification.link}>
+                    <ExternalLink className="h-3.5 w-3.5" />
+                  </Link>
                 </Button>
               )}
               {!notification.is_read && (
                 <Button
                   variant="ghost"
-                  size="sm"
+                  size="icon"
                   onClick={() => onMarkAsRead(notification.id)}
-                  className="h-6 px-2 text-xs"
+                  className="h-7 w-7"
+                  title="Mark as read"
                 >
-                  <Check className="h-3 w-3 mr-1" />
-                  Mark Read
+                  <Check className="h-3.5 w-3.5" />
                 </Button>
               )}
               <Button
                 variant="ghost"
-                size="sm"
+                size="icon"
                 onClick={() => onDelete(notification.id)}
-                className="h-6 px-2 text-xs text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20"
+                className="h-7 w-7 text-muted-foreground hover:text-destructive"
+                title="Delete"
               >
-                <Trash2 className="h-3 w-3" />
+                <Trash2 className="h-3.5 w-3.5" />
               </Button>
             </div>
           </div>
@@ -192,9 +220,13 @@ export function NotificationCenter({
     setLoading(true);
     try {
       const response = await apiClient.get("/api/v1/notifications/");
-      setNotifications(response.data.notifications);
+      setNotifications(response.data.items || []);
+      if (response.data.unread_count !== undefined) {
+        setUnreadCount(response.data.unread_count);
+      }
     } catch (error) {
       console.error("Failed to fetch notifications:", error);
+      setNotifications([]);
     } finally {
       setLoading(false);
     }
@@ -205,10 +237,8 @@ export function NotificationCenter({
     if (!user) return;
 
     try {
-      const response = await apiClient.get(
-        "/api/v1/notifications/unread-count",
-      );
-      setUnreadCount(response.data.unread_count);
+      const response = await apiClient.get("/api/v1/notifications/stats");
+      setUnreadCount(response.data.unread_count || 0);
     } catch (error) {
       console.error("Failed to fetch unread count:", error);
     }
@@ -217,11 +247,13 @@ export function NotificationCenter({
   // Mark as read
   const markAsRead = async (notificationId: number) => {
     try {
-      await apiClient.put(`/api/v1/notifications/${notificationId}/read`);
+      await apiClient.put(`/api/v1/notifications/${notificationId}`, {
+        is_read: true,
+      });
       setNotifications((prev) =>
         prev.map((n) =>
-          n.id === notificationId ? { ...n, is_read: true } : n,
-        ),
+          n.id === notificationId ? { ...n, is_read: true } : n
+        )
       );
       setUnreadCount((prev) => Math.max(0, prev - 1));
     } catch (error) {
@@ -232,7 +264,12 @@ export function NotificationCenter({
   // Mark all as read
   const markAllAsRead = async () => {
     try {
-      await apiClient.put("/api/v1/notifications/mark-all-read");
+      const unreadIds = notifications.filter((n) => !n.is_read).map((n) => n.id);
+      if (unreadIds.length === 0) return;
+
+      await apiClient.post("/api/v1/notifications/bulk-read", {
+        notification_ids: unreadIds,
+      });
       setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true })));
       setUnreadCount(0);
     } catch (error) {
@@ -244,11 +281,8 @@ export function NotificationCenter({
   const deleteNotification = async (notificationId: number) => {
     try {
       await apiClient.delete(`/api/v1/notifications/${notificationId}`);
+      const deletedNotification = notifications.find((n) => n.id === notificationId);
       setNotifications((prev) => prev.filter((n) => n.id !== notificationId));
-      // Update unread count if deleted notification was unread
-      const deletedNotification = notifications.find(
-        (n) => n.id === notificationId,
-      );
       if (deletedNotification && !deletedNotification.is_read) {
         setUnreadCount((prev) => Math.max(0, prev - 1));
       }
@@ -276,20 +310,27 @@ export function NotificationCenter({
     return () => clearInterval(interval);
   }, [user, fetchUnreadCount]);
 
+  // Refetch notifications when sheet opens
+  useEffect(() => {
+    if (isOpen && user) {
+      fetchNotifications();
+    }
+  }, [isOpen, user, fetchNotifications]);
+
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
       <SheetTrigger asChild>
         {trigger || (
           <Button
             variant="ghost"
-            size="sm"
+            size="icon"
             className={cn("relative", className)}
           >
-            <Bell className="h-4 w-4" />
+            <Bell className="h-5 w-5" />
             {unreadCount > 0 && (
               <Badge
                 variant="destructive"
-                className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs"
+                className="absolute -top-1 -right-1 h-5 min-w-5 flex items-center justify-center px-1 text-xs"
               >
                 {unreadCount > 99 ? "99+" : unreadCount}
               </Badge>
@@ -297,93 +338,87 @@ export function NotificationCenter({
           </Button>
         )}
       </SheetTrigger>
-      <SheetContent side="right" className="w-full sm:w-96 p-0">
-        <SheetHeader className="p-6 pb-4">
+      <SheetContent side="right" className="w-full sm:w-[400px] p-0 flex flex-col">
+        <SheetHeader className="px-4 py-3 border-b">
           <div className="flex items-center justify-between">
-            <SheetTitle className="flex items-center space-x-2">
+            <SheetTitle className="flex items-center gap-2 text-base">
               <Bell className="h-5 w-5" />
-              <span>Notifications</span>
+              Notifications
               {unreadCount > 0 && (
                 <Badge variant="secondary" className="text-xs">
                   {unreadCount} new
                 </Badge>
               )}
             </SheetTitle>
-            <div className="flex items-center space-x-2">
-              {unreadCount > 0 && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={markAllAsRead}
-                  className="text-xs"
-                >
-                  <CheckCheck className="h-3 w-3 mr-1" />
-                  Mark all read
-                </Button>
-              )}
+            {unreadCount > 0 && (
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => setIsOpen(false)}
+                onClick={markAllAsRead}
+                className="h-8 text-xs"
               >
-                <X className="h-4 w-4" />
+                <CheckCheck className="h-3.5 w-3.5 mr-1" />
+                Mark all read
               </Button>
-            </div>
+            )}
           </div>
         </SheetHeader>
 
-        <Separator />
-
         <ScrollArea className="flex-1">
           {loading ? (
-            <div className="p-6 text-center">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-              <p className="text-sm text-gray-500">Loading notifications...</p>
+            <div className="flex flex-col items-center justify-center py-12">
+              <div className="animate-spin rounded-full h-8 w-8 border-2 border-primary border-t-transparent mb-3" />
+              <p className="text-sm text-muted-foreground">Loading...</p>
             </div>
           ) : notifications.length === 0 ? (
-            <div className="p-6 text-center">
-              <Bell className="h-12 w-12 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-                No notifications
-              </h3>
-              <p className="text-sm text-gray-500 dark:text-gray-400">
-                You&apos;re all caught up! We&apos;ll notify you when
-                there&apos;s something new.
+            <div className="flex flex-col items-center justify-center py-12 px-4">
+              <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mb-4">
+                <Bell className="h-8 w-8 text-muted-foreground" />
+              </div>
+              <h3 className="text-base font-medium mb-1">All caught up!</h3>
+              <p className="text-sm text-muted-foreground text-center">
+                No new notifications. We'll let you know when something arrives.
               </p>
             </div>
           ) : (
-            <div className="divide-y divide-gray-100 dark:divide-gray-800">
+            <div>
               {notifications.map((notification) => (
                 <NotificationItem
                   key={notification.id}
                   notification={notification}
                   onMarkAsRead={markAsRead}
                   onDelete={deleteNotification}
+                  onClose={() => setIsOpen(false)}
                 />
               ))}
             </div>
           )}
         </ScrollArea>
 
-        {notifications.length > 0 && (
-          <>
-            <Separator />
-            <div className="p-4">
-              <Button
-                variant="outline"
-                className="w-full"
-                onClick={() => {
-                  // Navigate to settings notifications tab
-                  window.location.href = "/settings?tab=notifications";
-                  setIsOpen(false);
-                }}
-              >
-                <Settings className="h-4 w-4 mr-2" />
-                Notification Settings
-              </Button>
-            </div>
-          </>
-        )}
+        <Separator />
+        <div className="p-3 flex gap-2">
+          <Button
+            variant="outline"
+            className="flex-1"
+            size="sm"
+            asChild
+            onClick={() => setIsOpen(false)}
+          >
+            <Link href="/notifications">
+              View all notifications
+            </Link>
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            asChild
+            onClick={() => setIsOpen(false)}
+          >
+            <Link href="/settings?tab=notifications">
+              <Settings className="h-4 w-4" />
+            </Link>
+          </Button>
+        </div>
       </SheetContent>
     </Sheet>
   );
