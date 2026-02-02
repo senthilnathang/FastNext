@@ -62,7 +62,25 @@ async def lifespan(app: FastAPI):
     if settings.MODULES_ENABLED:
         await _initialize_modules(app)
 
+    # Initialize and start scheduler
+    try:
+        from app.core.scheduler import get_scheduler
+        scheduler = get_scheduler()
+        scheduler.initialize(settings.SQLALCHEMY_DATABASE_URI)
+        scheduler.start()
+        await _register_scheduled_actions(scheduler)
+    except Exception as e:
+        logger.error(f"Failed to start scheduler: {e}")
+
     yield
+
+    # Shutdown scheduler
+    try:
+        from app.core.scheduler import get_scheduler
+        scheduler = get_scheduler()
+        scheduler.shutdown(wait=False)
+    except Exception as e:
+        logger.error(f"Error shutting down scheduler: {e}")
 
     # Shutdown
     logger.info("Shutting down...")
@@ -141,6 +159,34 @@ async def _ensure_base_module_installed(loader):
         logger.warning(f"Could not ensure base module installation: {e}")
 
 
+async def _register_scheduled_actions(scheduler):
+    """Load active scheduled actions from DB and register with APScheduler."""
+    from app.db.base import SessionLocal
+
+    try:
+        from modules.base.models.scheduled_action import ScheduledAction
+
+        db = SessionLocal()
+        try:
+            actions = db.query(ScheduledAction).filter(
+                ScheduledAction.is_active == True,
+            ).all()
+
+            for action in actions:
+                try:
+                    scheduler.register_scheduled_action(action)
+                except Exception as e:
+                    logger.error(f"Failed to register action '{action.code}': {e}")
+
+            if actions:
+                logger.info(f"Registered {len(actions)} scheduled actions")
+        finally:
+            db.close()
+
+    except Exception as e:
+        logger.warning(f"Could not load scheduled actions: {e}")
+
+
 async def _initialize_modules(app: FastAPI):
     """Initialize the module system and load all modules."""
     from app.core.modules import ModuleRegistry, ModuleLoader
@@ -168,6 +214,20 @@ async def _initialize_modules(app: FastAPI):
             loaded = loader.load_all_modules()
             logger.info(f"Loaded {len(loaded)} modules")
 
+            # Apply model inheritance extensions
+            # (modules register extensions via @extend_model decorator during import)
+            from app.core.modules.inheritance import get_model_extender
+            extender = get_model_extender()
+            extended_models = extender.apply_extensions()
+            if any(
+                name in extender._extensions
+                for name in extended_models
+            ):
+                logger.info(
+                    f"Applied model extensions to: "
+                    f"{[n for n in extended_models if n in extender._extensions]}"
+                )
+
             # Mount module routers and static files
             for module_info in loaded:
                 # Mount API routers
@@ -191,6 +251,14 @@ async def _initialize_modules(app: FastAPI):
                     )
                     logger.debug(f"Mounted static files for {module_info.name} at {mount_path}")
 
+        # Apply router overrides registered by modules
+        # (modules register overrides via @override_route, @wrap_route decorators)
+        from app.core.modules.overrides import get_router_overrider
+        overrider = get_router_overrider()
+        n_overrides = overrider.apply_overrides(app)
+        if n_overrides:
+            logger.info(f"Applied {n_overrides} route overrides")
+
         # Trigger startup hooks
         await registry.trigger_hook_async("startup")
         logger.info("Module system initialized successfully")
@@ -212,11 +280,18 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# Add middlewares (order matters - last added is first executed)
-# 1. GZip compression (last to execute, compresses final response)
+# Add middlewares (order matters - last added is first executed, i.e. wraps all previous)
+# 1. GZip compression (innermost - compresses final response)
 app.add_middleware(GZipMiddleware, minimum_size=1000)
 
-# 2. CORS (must be early in the chain)
+# 2. Error handling (catches exceptions from app + GZip)
+app.add_middleware(
+    ErrorHandlingMiddleware,
+    include_debug_info=settings.DEBUG,
+    log_errors=True,
+)
+
+# 3. CORS (wraps error handling so ALL responses including errors get CORS headers)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.cors_origins,
@@ -225,13 +300,6 @@ app.add_middleware(
     allow_headers=settings.CORS_ALLOW_HEADERS.split(","),
     expose_headers=settings.CORS_EXPOSE_HEADERS.split(","),
     max_age=settings.CORS_MAX_AGE,
-)
-
-# 3. Error handling (catches all exceptions)
-app.add_middleware(
-    ErrorHandlingMiddleware,
-    include_debug_info=settings.DEBUG,
-    log_errors=True,
 )
 
 # 4. Rate limiting
@@ -248,7 +316,7 @@ app.add_middleware(
     ],
 )
 
-# 6. Security (first to execute, adds security headers)
+# 6. Security (adds security headers to all responses)
 app.add_middleware(
     SecurityMiddleware,
     enable_threat_detection=True,
@@ -256,7 +324,7 @@ app.add_middleware(
     enable_hsts=settings.ENVIRONMENT == "production",
 )
 
-# 7. Context (sets user context for activity tracking)
+# 7. Context (outermost - sets user context for activity tracking)
 app.add_middleware(ContextMiddleware)
 
 # Include API router

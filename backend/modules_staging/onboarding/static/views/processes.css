@@ -1,0 +1,425 @@
+/* Onboarding Processes - Companion CSS */
+
+/* ===== Header ===== */
+.ob-proc-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+/* ===== Toolbar ===== */
+.ob-proc-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+/* ===== Detail Modal Spin ===== */
+.ob-proc-detail-spin {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+  width: 100%;
+}
+
+/* ===== Overview Tab ===== */
+.ob-proc-overview {
+  padding: 8px 0;
+}
+
+.ob-proc-progress-circle {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.ob-proc-progress-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: rgba(0, 0, 0, 0.65);
+}
+
+.ob-proc-info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px 24px;
+}
+
+.ob-proc-info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.ob-proc-info-label {
+  font-size: 12px;
+  color: rgba(0, 0, 0, 0.45);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.ob-proc-info-value {
+  font-size: 14px;
+  color: rgba(0, 0, 0, 0.85);
+  font-weight: 500;
+}
+
+/* ===== Candidate Cell (List View) ===== */
+.ob-proc-candidate-cell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.ob-proc-candidate-info {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.ob-proc-candidate-name {
+  font-weight: 500;
+  font-size: 14px;
+  color: rgba(0, 0, 0, 0.85);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ob-proc-candidate-email {
+  font-size: 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ===== Statistics Row ===== */
+.ob-proc-stats {
+  /* wrapper for stats cards */
+}
+
+.ob-proc-stat-card {
+  text-align: center;
+  border-radius: 8px;
+}
+
+/* ===== Kanban Board ===== */
+.ob-kanban-board {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+  min-height: 400px;
+}
+
+.ob-kanban-column {
+  flex: 1 1 0;
+  min-width: 240px;
+  max-width: 320px;
+  display: flex;
+  flex-direction: column;
+  background: #fafafa;
+  border-radius: 8px;
+  border: 1px solid #f0f0f0;
+  overflow: hidden;
+}
+
+.ob-kanban-column-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px;
+  background: #fff;
+  border-top: 3px solid #d9d9d9;
+  border-bottom: 1px solid #f0f0f0;
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.ob-kanban-column-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(0, 0, 0, 0.85);
+}
+
+.ob-kanban-column-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 600px;
+}
+
+.ob-kanban-card {
+  background: #fff;
+  border: 1px solid #f0f0f0;
+  border-radius: 8px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  transition: box-shadow 0.2s, border-color 0.2s;
+  cursor: default;
+}
+
+.ob-kanban-card:hover {
+  border-color: #d9d9d9;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.ob-kanban-card-top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ob-kanban-card-info {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+  flex: 1;
+}
+
+.ob-kanban-card-name {
+  font-weight: 600;
+  font-size: 13px;
+  color: rgba(0, 0, 0, 0.85);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ob-kanban-card-template {
+  font-size: 11px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ob-kanban-card-progress {
+  padding: 0 2px;
+}
+
+.ob-kanban-card-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.ob-kanban-card-date {
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.ob-kanban-card-actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  border-top: 1px solid #f5f5f5;
+  padding-top: 6px;
+  margin-top: 2px;
+}
+
+.ob-kanban-empty {
+  padding: 24px 0;
+}
+
+/* ===== Stages Tab ===== */
+.ob-proc-stages {
+  padding: 4px 0;
+}
+
+.ob-proc-stage-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ob-proc-stage-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #1890ff;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.ob-proc-stage-name {
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.ob-proc-stage-body {
+  padding: 4px 0;
+}
+
+.ob-proc-stage-desc {
+  font-size: 13px;
+  color: rgba(0, 0, 0, 0.55);
+  padding: 4px 0;
+}
+
+/* ===== Task List (shared by Stages & Tasks tabs) ===== */
+.ob-proc-task-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ob-proc-task-item {
+  display: flex;
+  align-items: center;
+  padding: 6px 8px;
+  border-radius: 6px;
+  transition: background-color 0.15s;
+}
+
+.ob-proc-task-item:hover {
+  background-color: rgba(0, 0, 0, 0.02);
+}
+
+.ob-proc-task-done {
+  text-decoration: line-through;
+  color: rgba(0, 0, 0, 0.35);
+}
+
+/* ===== Tasks Tab (all tasks view) ===== */
+.ob-proc-tasks-all {
+  padding: 4px 0;
+}
+
+.ob-proc-tasks-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ob-proc-task-row {
+  display: flex;
+  align-items: center;
+  padding: 8px 10px;
+  border-bottom: 1px solid #f0f0f0;
+  transition: background-color 0.15s;
+}
+
+.ob-proc-task-row:last-child {
+  border-bottom: none;
+}
+
+.ob-proc-task-row:hover {
+  background-color: rgba(0, 0, 0, 0.02);
+}
+
+/* ===== Dark Mode Support ===== */
+.dark .ob-proc-progress-label {
+  color: rgba(255, 255, 255, 0.65);
+}
+
+.dark .ob-proc-info-label {
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.dark .ob-proc-info-value {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.dark .ob-proc-candidate-name {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.dark .ob-proc-stage-desc {
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.dark .ob-proc-task-item:hover,
+.dark .ob-proc-task-row:hover {
+  background-color: rgba(255, 255, 255, 0.04);
+}
+
+.dark .ob-proc-task-done {
+  color: rgba(255, 255, 255, 0.3);
+}
+
+.dark .ob-proc-task-row {
+  border-bottom-color: #303030;
+}
+
+.dark .ob-kanban-column {
+  background: #1f1f1f;
+  border-color: #303030;
+}
+
+.dark .ob-kanban-column-header {
+  background: #262626;
+  border-bottom-color: #303030;
+}
+
+.dark .ob-kanban-column-title {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.dark .ob-kanban-card {
+  background: #262626;
+  border-color: #303030;
+}
+
+.dark .ob-kanban-card:hover {
+  border-color: #434343;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.dark .ob-kanban-card-name {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.dark .ob-kanban-card-actions {
+  border-top-color: #303030;
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 576px) {
+  .ob-proc-info-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .ob-proc-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .ob-kanban-board {
+    flex-direction: column;
+  }
+
+  .ob-kanban-column {
+    max-width: none;
+    min-width: 0;
+  }
+
+  .ob-kanban-column-body {
+    max-height: 300px;
+  }
+}
+
+@media (max-width: 768px) {
+  .ob-kanban-column {
+    min-width: 200px;
+  }
+}

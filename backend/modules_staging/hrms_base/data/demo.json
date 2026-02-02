@@ -1,0 +1,1237 @@
+{
+    "hrms_base.Department": [
+        {
+            "id": 1,
+            "name": "Executive Management",
+            "code": "EXEC",
+            "description": "Executive and senior leadership team",
+            "parent_id": null,
+            "manager_id": null,
+            "cost_center": "CC001",
+            "is_active": true,
+            "company_id": 1
+        },
+        {
+            "id": 2,
+            "name": "Human Resources",
+            "code": "HR",
+            "description": "Human resources and talent management",
+            "parent_id": 1,
+            "manager_id": null,
+            "cost_center": "CC002",
+            "is_active": true,
+            "company_id": 1
+        },
+        {
+            "id": 3,
+            "name": "Engineering",
+            "code": "ENG",
+            "description": "Software development and engineering team",
+            "parent_id": 1,
+            "manager_id": null,
+            "cost_center": "CC003",
+            "is_active": true,
+            "company_id": 1
+        },
+        {
+            "id": 4,
+            "name": "Backend Development",
+            "code": "BE",
+            "description": "Backend and API development team",
+            "parent_id": 3,
+            "manager_id": null,
+            "cost_center": "CC003-01",
+            "is_active": true,
+            "company_id": 1
+        },
+        {
+            "id": 5,
+            "name": "Frontend Development",
+            "code": "FE",
+            "description": "Frontend and UI development team",
+            "parent_id": 3,
+            "manager_id": null,
+            "cost_center": "CC003-02",
+            "is_active": true,
+            "company_id": 1
+        },
+        {
+            "id": 6,
+            "name": "Finance",
+            "code": "FIN",
+            "description": "Finance and accounting department",
+            "parent_id": 1,
+            "manager_id": null,
+            "cost_center": "CC004",
+            "is_active": true,
+            "company_id": 1
+        },
+        {
+            "id": 7,
+            "name": "Sales",
+            "code": "SALES",
+            "description": "Sales and business development",
+            "parent_id": 1,
+            "manager_id": null,
+            "cost_center": "CC005",
+            "is_active": true,
+            "company_id": 1
+        },
+        {
+            "id": 8,
+            "name": "Marketing",
+            "code": "MKT",
+            "description": "Marketing and brand management",
+            "parent_id": 1,
+            "manager_id": null,
+            "cost_center": "CC006",
+            "is_active": true,
+            "company_id": 1
+        },
+        {
+            "id": 9,
+            "name": "Quality Assurance",
+            "code": "QA",
+            "description": "Quality assurance and testing",
+            "parent_id": 3,
+            "manager_id": null,
+            "cost_center": "CC003-03",
+            "is_active": true,
+            "company_id": 1
+        },
+        {
+            "id": 10,
+            "name": "IT Operations",
+            "code": "OPS",
+            "description": "IT infrastructure and operations",
+            "parent_id": 3,
+            "manager_id": null,
+            "cost_center": "CC003-04",
+            "is_active": true,
+            "company_id": 1
+        }
+    ],
+    "hrms_base.JobPosition": [
+        {
+            "id": 1,
+            "title": "Chief Executive Officer",
+            "code": "CEO",
+            "description": "Overall leadership and strategic direction of the company",
+            "department_id": 1,
+            "min_salary": 200000.00,
+            "max_salary": 500000.00,
+            "currency": "USD",
+            "is_active": true,
+            "company_id": 1
+        },
+        {
+            "id": 2,
+            "title": "Chief Technology Officer",
+            "code": "CTO",
+            "description": "Technology strategy and engineering leadership",
+            "department_id": 3,
+            "min_salary": 180000.00,
+            "max_salary": 400000.00,
+            "currency": "USD",
+            "is_active": true,
+            "company_id": 1
+        },
+        {
+            "id": 3,
+            "title": "HR Director",
+            "code": "HRD",
+            "description": "Human resources strategy and team leadership",
+            "department_id": 2,
+            "min_salary": 120000.00,
+            "max_salary": 200000.00,
+            "currency": "USD",
+            "is_active": true,
+            "company_id": 1
+        },
+        {
+            "id": 4,
+            "title": "HR Manager",
+            "code": "HRM",
+            "description": "HR operations and employee relations management",
+            "department_id": 2,
+            "min_salary": 80000.00,
+            "max_salary": 120000.00,
+            "currency": "USD",
+            "is_active": true,
+            "company_id": 1
+        },
+        {
+            "id": 5,
+            "title": "Senior Software Engineer",
+            "code": "SSE",
+            "description": "Senior level software development and architecture",
+            "department_id": 3,
+            "min_salary": 100000.00,
+            "max_salary": 160000.00,
+            "currency": "USD",
+            "is_active": true,
+            "company_id": 1
+        },
+        {
+            "id": 6,
+            "title": "Software Engineer",
+            "code": "SWE",
+            "description": "Software development and implementation",
+            "department_id": 3,
+            "min_salary": 70000.00,
+            "max_salary": 120000.00,
+            "currency": "USD",
+            "is_active": true,
+            "company_id": 1
+        },
+        {
+            "id": 7,
+            "title": "Junior Software Engineer",
+            "code": "JSE",
+            "description": "Entry-level software development",
+            "department_id": 3,
+            "min_salary": 50000.00,
+            "max_salary": 75000.00,
+            "currency": "USD",
+            "is_active": true,
+            "company_id": 1
+        },
+        {
+            "id": 8,
+            "title": "QA Engineer",
+            "code": "QAE",
+            "description": "Quality assurance and software testing",
+            "department_id": 9,
+            "min_salary": 60000.00,
+            "max_salary": 100000.00,
+            "currency": "USD",
+            "is_active": true,
+            "company_id": 1
+        },
+        {
+            "id": 9,
+            "title": "DevOps Engineer",
+            "code": "DOE",
+            "description": "DevOps and infrastructure automation",
+            "department_id": 10,
+            "min_salary": 90000.00,
+            "max_salary": 150000.00,
+            "currency": "USD",
+            "is_active": true,
+            "company_id": 1
+        },
+        {
+            "id": 10,
+            "title": "Finance Manager",
+            "code": "FM",
+            "description": "Financial operations and reporting",
+            "department_id": 6,
+            "min_salary": 90000.00,
+            "max_salary": 140000.00,
+            "currency": "USD",
+            "is_active": true,
+            "company_id": 1
+        },
+        {
+            "id": 11,
+            "title": "Sales Manager",
+            "code": "SM",
+            "description": "Sales team leadership and client relations",
+            "department_id": 7,
+            "min_salary": 85000.00,
+            "max_salary": 150000.00,
+            "currency": "USD",
+            "is_active": true,
+            "company_id": 1
+        },
+        {
+            "id": 12,
+            "title": "Marketing Manager",
+            "code": "MM",
+            "description": "Marketing strategy and campaign management",
+            "department_id": 8,
+            "min_salary": 80000.00,
+            "max_salary": 130000.00,
+            "currency": "USD",
+            "is_active": true,
+            "company_id": 1
+        }
+    ],
+    "hrms_base.JobRole": [
+        {
+            "id": 1,
+            "name": "Administrator",
+            "code": "ADMIN",
+            "description": "System administrator with full access",
+            "permissions": {
+                "hrms.*": ["create", "read", "update", "delete"],
+                "system.*": ["create", "read", "update", "delete"]
+            },
+            "is_active": true,
+            "company_id": 1
+        },
+        {
+            "id": 2,
+            "name": "HR Administrator",
+            "code": "HR_ADMIN",
+            "description": "HR module administrator",
+            "permissions": {
+                "hrms.employee.*": ["create", "read", "update", "delete"],
+                "hrms.leave.*": ["create", "read", "update", "delete"],
+                "hrms.attendance.*": ["create", "read", "update", "delete"],
+                "hrms.payroll.*": ["create", "read", "update", "delete"]
+            },
+            "is_active": true,
+            "company_id": 1
+        },
+        {
+            "id": 3,
+            "name": "Manager",
+            "code": "MANAGER",
+            "description": "Department manager with team access",
+            "permissions": {
+                "hrms.employee.*": ["read"],
+                "hrms.leave.*": ["read", "update"],
+                "hrms.attendance.*": ["read"],
+                "hrms.approval.*": ["create", "read", "update"]
+            },
+            "is_active": true,
+            "company_id": 1
+        },
+        {
+            "id": 4,
+            "name": "Employee",
+            "code": "EMPLOYEE",
+            "description": "Standard employee with self-service access",
+            "permissions": {
+                "hrms.employee.self": ["read", "update"],
+                "hrms.leave.self": ["create", "read"],
+                "hrms.attendance.self": ["create", "read"]
+            },
+            "is_active": true,
+            "company_id": 1
+        },
+        {
+            "id": 5,
+            "name": "Recruiter",
+            "code": "RECRUITER",
+            "description": "Recruitment team member",
+            "permissions": {
+                "hrms.recruitment.*": ["create", "read", "update", "delete"],
+                "hrms.onboarding.*": ["create", "read"]
+            },
+            "is_active": true,
+            "company_id": 1
+        },
+        {
+            "id": 6,
+            "name": "Payroll Officer",
+            "code": "PAYROLL",
+            "description": "Payroll processing and management",
+            "permissions": {
+                "hrms.payroll.*": ["create", "read", "update"],
+                "hrms.employee.*": ["read"]
+            },
+            "is_active": true,
+            "company_id": 1
+        }
+    ],
+    "hrms_base.EmployeeType": [
+        {
+            "id": 1,
+            "name": "Full-time",
+            "code": "FT",
+            "description": "Full-time permanent employee",
+            "is_active": true,
+            "company_id": 1
+        },
+        {
+            "id": 2,
+            "name": "Part-time",
+            "code": "PT",
+            "description": "Part-time employee with reduced hours",
+            "is_active": true,
+            "company_id": 1
+        },
+        {
+            "id": 3,
+            "name": "Contract",
+            "code": "CT",
+            "description": "Fixed-term contract employee",
+            "is_active": true,
+            "company_id": 1
+        },
+        {
+            "id": 4,
+            "name": "Intern",
+            "code": "INT",
+            "description": "Internship position",
+            "is_active": true,
+            "company_id": 1
+        },
+        {
+            "id": 5,
+            "name": "Consultant",
+            "code": "CON",
+            "description": "External consultant or advisor",
+            "is_active": true,
+            "company_id": 1
+        },
+        {
+            "id": 6,
+            "name": "Temporary",
+            "code": "TEMP",
+            "description": "Temporary or seasonal employee",
+            "is_active": true,
+            "company_id": 1
+        }
+    ],
+    "hrms_base.EmployeeShift": [
+        {
+            "id": 1,
+            "name": "Day Shift",
+            "start_time": "09:00:00",
+            "end_time": "18:00:00",
+            "break_start": "12:00:00",
+            "break_end": "13:00:00",
+            "working_hours": 8.0,
+            "is_night_shift": false,
+            "color": "#4CAF50",
+            "is_active": true,
+            "company_id": 1
+        },
+        {
+            "id": 2,
+            "name": "Morning Shift",
+            "start_time": "06:00:00",
+            "end_time": "14:00:00",
+            "break_start": "10:00:00",
+            "break_end": "10:30:00",
+            "working_hours": 7.5,
+            "is_night_shift": false,
+            "color": "#2196F3",
+            "is_active": true,
+            "company_id": 1
+        },
+        {
+            "id": 3,
+            "name": "Evening Shift",
+            "start_time": "14:00:00",
+            "end_time": "22:00:00",
+            "break_start": "18:00:00",
+            "break_end": "18:30:00",
+            "working_hours": 7.5,
+            "is_night_shift": false,
+            "color": "#FF9800",
+            "is_active": true,
+            "company_id": 1
+        },
+        {
+            "id": 4,
+            "name": "Night Shift",
+            "start_time": "22:00:00",
+            "end_time": "06:00:00",
+            "break_start": "02:00:00",
+            "break_end": "02:30:00",
+            "working_hours": 7.5,
+            "is_night_shift": true,
+            "color": "#9C27B0",
+            "is_active": true,
+            "company_id": 1
+        },
+        {
+            "id": 5,
+            "name": "Flexible Hours",
+            "start_time": "08:00:00",
+            "end_time": "20:00:00",
+            "break_start": null,
+            "break_end": null,
+            "working_hours": 8.0,
+            "is_night_shift": false,
+            "color": "#00BCD4",
+            "is_active": true,
+            "company_id": 1
+        }
+    ],
+    "hrms_base.GraceTime": [
+        {
+            "id": 1,
+            "shift_id": 1,
+            "allowed_late_minutes": 15,
+            "allowed_early_leave_minutes": 10,
+            "overtime_threshold_minutes": 30,
+            "is_active": true,
+            "company_id": 1
+        },
+        {
+            "id": 2,
+            "shift_id": 2,
+            "allowed_late_minutes": 10,
+            "allowed_early_leave_minutes": 10,
+            "overtime_threshold_minutes": 30,
+            "is_active": true,
+            "company_id": 1
+        },
+        {
+            "id": 3,
+            "shift_id": 3,
+            "allowed_late_minutes": 10,
+            "allowed_early_leave_minutes": 10,
+            "overtime_threshold_minutes": 30,
+            "is_active": true,
+            "company_id": 1
+        },
+        {
+            "id": 4,
+            "shift_id": 4,
+            "allowed_late_minutes": 15,
+            "allowed_early_leave_minutes": 15,
+            "overtime_threshold_minutes": 30,
+            "is_active": true,
+            "company_id": 1
+        }
+    ],
+    "hrms_base.WorkType": [
+        {
+            "id": 1,
+            "name": "Office",
+            "code": "OFFICE",
+            "description": "Working from office location",
+            "color": "#4CAF50",
+            "is_active": true,
+            "company_id": 1
+        },
+        {
+            "id": 2,
+            "name": "Work From Home",
+            "code": "WFH",
+            "description": "Remote work from home",
+            "color": "#2196F3",
+            "is_active": true,
+            "company_id": 1
+        },
+        {
+            "id": 3,
+            "name": "Hybrid",
+            "code": "HYB",
+            "description": "Combination of office and remote work",
+            "color": "#FF9800",
+            "is_active": true,
+            "company_id": 1
+        },
+        {
+            "id": 4,
+            "name": "Field Work",
+            "code": "FIELD",
+            "description": "Working at client site or field location",
+            "color": "#9C27B0",
+            "is_active": true,
+            "company_id": 1
+        },
+        {
+            "id": 5,
+            "name": "Travel",
+            "code": "TRAVEL",
+            "description": "Business travel",
+            "color": "#E91E63",
+            "is_active": true,
+            "company_id": 1
+        }
+    ],
+    "hrms_base.RotatingShift": [
+        {
+            "id": 1,
+            "name": "Weekly Rotation",
+            "description": "Weekly shift rotation pattern",
+            "rotation_type": "weekly",
+            "start_date": "2024-01-01",
+            "is_active": true,
+            "company_id": 1
+        },
+        {
+            "id": 2,
+            "name": "Bi-Weekly Rotation",
+            "description": "Bi-weekly shift rotation pattern",
+            "rotation_type": "biweekly",
+            "start_date": "2024-01-01",
+            "is_active": true,
+            "company_id": 1
+        }
+    ],
+    "hrms_base.ShiftSchedule": [
+        {
+            "id": 1,
+            "rotating_shift_id": 1,
+            "shift_id": 1,
+            "sequence": 1,
+            "day_of_week": 0,
+            "company_id": 1
+        },
+        {
+            "id": 2,
+            "rotating_shift_id": 1,
+            "shift_id": 1,
+            "sequence": 1,
+            "day_of_week": 1,
+            "company_id": 1
+        },
+        {
+            "id": 3,
+            "rotating_shift_id": 1,
+            "shift_id": 1,
+            "sequence": 1,
+            "day_of_week": 2,
+            "company_id": 1
+        },
+        {
+            "id": 4,
+            "rotating_shift_id": 1,
+            "shift_id": 1,
+            "sequence": 1,
+            "day_of_week": 3,
+            "company_id": 1
+        },
+        {
+            "id": 5,
+            "rotating_shift_id": 1,
+            "shift_id": 1,
+            "sequence": 1,
+            "day_of_week": 4,
+            "company_id": 1
+        }
+    ],
+    "hrms_base.ApprovalWorkflow": [
+        {
+            "id": 1,
+            "name": "Leave Request Approval",
+            "model_name": "leave_request",
+            "description": "Standard approval workflow for leave requests",
+            "is_active": true,
+            "company_id": 1
+        },
+        {
+            "id": 2,
+            "name": "Expense Approval",
+            "model_name": "expense_claim",
+            "description": "Multi-level approval for expense claims",
+            "is_active": true,
+            "company_id": 1
+        },
+        {
+            "id": 3,
+            "name": "Work Type Change Approval",
+            "model_name": "work_type_request",
+            "description": "Approval for work type change requests",
+            "is_active": true,
+            "company_id": 1
+        },
+        {
+            "id": 4,
+            "name": "Shift Change Approval",
+            "model_name": "shift_request",
+            "description": "Approval for shift change requests",
+            "is_active": true,
+            "company_id": 1
+        },
+        {
+            "id": 5,
+            "name": "Asset Request Approval",
+            "model_name": "asset_request",
+            "description": "Approval for asset allocation requests",
+            "is_active": true,
+            "company_id": 1
+        }
+    ],
+    "hrms_base.ApprovalLevel": [
+        {
+            "id": 1,
+            "workflow_id": 1,
+            "level": 1,
+            "name": "Manager Approval",
+            "approver_type": "reporting_manager",
+            "approver_id": null,
+            "auto_approve_after_days": null,
+            "can_skip": false,
+            "company_id": 1
+        },
+        {
+            "id": 2,
+            "workflow_id": 1,
+            "level": 2,
+            "name": "HR Approval",
+            "approver_type": "role",
+            "approver_id": 2,
+            "auto_approve_after_days": 3,
+            "can_skip": true,
+            "company_id": 1
+        },
+        {
+            "id": 3,
+            "workflow_id": 2,
+            "level": 1,
+            "name": "Manager Approval",
+            "approver_type": "reporting_manager",
+            "approver_id": null,
+            "auto_approve_after_days": null,
+            "can_skip": false,
+            "company_id": 1
+        },
+        {
+            "id": 4,
+            "workflow_id": 2,
+            "level": 2,
+            "name": "Finance Approval",
+            "approver_type": "department",
+            "approver_id": 6,
+            "auto_approve_after_days": 5,
+            "can_skip": false,
+            "company_id": 1
+        },
+        {
+            "id": 5,
+            "workflow_id": 3,
+            "level": 1,
+            "name": "Manager Approval",
+            "approver_type": "reporting_manager",
+            "approver_id": null,
+            "auto_approve_after_days": 2,
+            "can_skip": false,
+            "company_id": 1
+        },
+        {
+            "id": 6,
+            "workflow_id": 4,
+            "level": 1,
+            "name": "Manager Approval",
+            "approver_type": "reporting_manager",
+            "approver_id": null,
+            "auto_approve_after_days": 2,
+            "can_skip": false,
+            "company_id": 1
+        }
+    ],
+    "hrms_base.ApprovalRule": [
+        {
+            "id": 1,
+            "workflow_id": 1,
+            "condition_field": "days_requested",
+            "condition_operator": ">",
+            "condition_value": "5",
+            "skip_to_level": null,
+            "require_all_levels": true,
+            "company_id": 1
+        },
+        {
+            "id": 2,
+            "workflow_id": 2,
+            "condition_field": "amount",
+            "condition_operator": ">",
+            "condition_value": "1000",
+            "skip_to_level": null,
+            "require_all_levels": true,
+            "company_id": 1
+        },
+        {
+            "id": 3,
+            "workflow_id": 2,
+            "condition_field": "amount",
+            "condition_operator": "<=",
+            "condition_value": "1000",
+            "skip_to_level": 1,
+            "require_all_levels": false,
+            "company_id": 1
+        }
+    ],
+    "hrms_base.StageDefinition": [
+        {
+            "id": 1,
+            "model_name": "candidate",
+            "name": "New",
+            "code": "new",
+            "sequence": 1,
+            "color": "#9E9E9E",
+            "is_initial": true,
+            "is_final": false,
+            "fold": false,
+            "company_id": 1
+        },
+        {
+            "id": 2,
+            "model_name": "candidate",
+            "name": "Screening",
+            "code": "screening",
+            "sequence": 2,
+            "color": "#2196F3",
+            "is_initial": false,
+            "is_final": false,
+            "fold": false,
+            "company_id": 1
+        },
+        {
+            "id": 3,
+            "model_name": "candidate",
+            "name": "Interview",
+            "code": "interview",
+            "sequence": 3,
+            "color": "#FF9800",
+            "is_initial": false,
+            "is_final": false,
+            "fold": false,
+            "company_id": 1
+        },
+        {
+            "id": 4,
+            "model_name": "candidate",
+            "name": "Offer",
+            "code": "offer",
+            "sequence": 4,
+            "color": "#8BC34A",
+            "is_initial": false,
+            "is_final": false,
+            "fold": false,
+            "company_id": 1
+        },
+        {
+            "id": 5,
+            "model_name": "candidate",
+            "name": "Hired",
+            "code": "hired",
+            "sequence": 5,
+            "color": "#4CAF50",
+            "is_initial": false,
+            "is_final": true,
+            "fold": true,
+            "company_id": 1
+        },
+        {
+            "id": 6,
+            "model_name": "candidate",
+            "name": "Rejected",
+            "code": "rejected",
+            "sequence": 6,
+            "color": "#F44336",
+            "is_initial": false,
+            "is_final": true,
+            "fold": true,
+            "company_id": 1
+        },
+        {
+            "id": 7,
+            "model_name": "onboarding",
+            "name": "Pending",
+            "code": "pending",
+            "sequence": 1,
+            "color": "#9E9E9E",
+            "is_initial": true,
+            "is_final": false,
+            "fold": false,
+            "company_id": 1
+        },
+        {
+            "id": 8,
+            "model_name": "onboarding",
+            "name": "In Progress",
+            "code": "in_progress",
+            "sequence": 2,
+            "color": "#2196F3",
+            "is_initial": false,
+            "is_final": false,
+            "fold": false,
+            "company_id": 1
+        },
+        {
+            "id": 9,
+            "model_name": "onboarding",
+            "name": "Completed",
+            "code": "completed",
+            "sequence": 3,
+            "color": "#4CAF50",
+            "is_initial": false,
+            "is_final": true,
+            "fold": true,
+            "company_id": 1
+        }
+    ],
+    "hrms_base.StatusDefinition": [
+        {
+            "id": 1,
+            "model_name": "leave_request",
+            "name": "Draft",
+            "code": "draft",
+            "color": "#9E9E9E",
+            "is_initial": true,
+            "is_final": false,
+            "company_id": 1
+        },
+        {
+            "id": 2,
+            "model_name": "leave_request",
+            "name": "Pending Approval",
+            "code": "pending",
+            "color": "#FF9800",
+            "is_initial": false,
+            "is_final": false,
+            "company_id": 1
+        },
+        {
+            "id": 3,
+            "model_name": "leave_request",
+            "name": "Approved",
+            "code": "approved",
+            "color": "#4CAF50",
+            "is_initial": false,
+            "is_final": true,
+            "company_id": 1
+        },
+        {
+            "id": 4,
+            "model_name": "leave_request",
+            "name": "Rejected",
+            "code": "rejected",
+            "color": "#F44336",
+            "is_initial": false,
+            "is_final": true,
+            "company_id": 1
+        },
+        {
+            "id": 5,
+            "model_name": "leave_request",
+            "name": "Cancelled",
+            "code": "cancelled",
+            "color": "#9E9E9E",
+            "is_initial": false,
+            "is_final": true,
+            "company_id": 1
+        },
+        {
+            "id": 6,
+            "model_name": "expense_claim",
+            "name": "Draft",
+            "code": "draft",
+            "color": "#9E9E9E",
+            "is_initial": true,
+            "is_final": false,
+            "company_id": 1
+        },
+        {
+            "id": 7,
+            "model_name": "expense_claim",
+            "name": "Submitted",
+            "code": "submitted",
+            "color": "#2196F3",
+            "is_initial": false,
+            "is_final": false,
+            "company_id": 1
+        },
+        {
+            "id": 8,
+            "model_name": "expense_claim",
+            "name": "Approved",
+            "code": "approved",
+            "color": "#4CAF50",
+            "is_initial": false,
+            "is_final": false,
+            "company_id": 1
+        },
+        {
+            "id": 9,
+            "model_name": "expense_claim",
+            "name": "Paid",
+            "code": "paid",
+            "color": "#8BC34A",
+            "is_initial": false,
+            "is_final": true,
+            "company_id": 1
+        },
+        {
+            "id": 10,
+            "model_name": "expense_claim",
+            "name": "Rejected",
+            "code": "rejected",
+            "color": "#F44336",
+            "is_initial": false,
+            "is_final": true,
+            "company_id": 1
+        }
+    ],
+    "hrms_base.StatusTransition": [
+        {
+            "id": 1,
+            "from_status_id": 1,
+            "to_status_id": 2,
+            "name": "Submit for Approval",
+            "required_permission": "leave.submit",
+            "company_id": 1
+        },
+        {
+            "id": 2,
+            "from_status_id": 2,
+            "to_status_id": 3,
+            "name": "Approve",
+            "required_permission": "leave.approve",
+            "company_id": 1
+        },
+        {
+            "id": 3,
+            "from_status_id": 2,
+            "to_status_id": 4,
+            "name": "Reject",
+            "required_permission": "leave.approve",
+            "company_id": 1
+        },
+        {
+            "id": 4,
+            "from_status_id": 3,
+            "to_status_id": 5,
+            "name": "Cancel",
+            "required_permission": "leave.cancel",
+            "company_id": 1
+        },
+        {
+            "id": 5,
+            "from_status_id": 6,
+            "to_status_id": 7,
+            "name": "Submit",
+            "required_permission": "expense.submit",
+            "company_id": 1
+        },
+        {
+            "id": 6,
+            "from_status_id": 7,
+            "to_status_id": 8,
+            "name": "Approve",
+            "required_permission": "expense.approve",
+            "company_id": 1
+        },
+        {
+            "id": 7,
+            "from_status_id": 8,
+            "to_status_id": 9,
+            "name": "Mark as Paid",
+            "required_permission": "expense.pay",
+            "company_id": 1
+        },
+        {
+            "id": 8,
+            "from_status_id": 7,
+            "to_status_id": 10,
+            "name": "Reject",
+            "required_permission": "expense.approve",
+            "company_id": 1
+        }
+    ],
+    "hrms_base.HRMSSettings": [
+        {
+            "id": 1,
+            "key": "working_days_per_week",
+            "value": "5",
+            "value_type": "integer",
+            "module": "hrms_base",
+            "category": "general",
+            "description": "Number of working days per week",
+            "is_system": true,
+            "company_id": 1
+        },
+        {
+            "id": 2,
+            "key": "default_shift",
+            "value": "1",
+            "value_type": "integer",
+            "module": "hrms_base",
+            "category": "shifts",
+            "description": "Default shift ID for new employees",
+            "is_system": false,
+            "company_id": 1
+        },
+        {
+            "id": 3,
+            "key": "default_work_type",
+            "value": "1",
+            "value_type": "integer",
+            "module": "hrms_base",
+            "category": "work_types",
+            "description": "Default work type ID for new employees",
+            "is_system": false,
+            "company_id": 1
+        },
+        {
+            "id": 4,
+            "key": "require_manager_approval",
+            "value": "true",
+            "value_type": "boolean",
+            "module": "hrms_base",
+            "category": "approvals",
+            "description": "Require manager approval for requests",
+            "is_system": false,
+            "company_id": 1
+        },
+        {
+            "id": 5,
+            "key": "currency",
+            "value": "USD",
+            "value_type": "string",
+            "module": "hrms_base",
+            "category": "general",
+            "description": "Default currency for salary and payroll",
+            "is_system": true,
+            "company_id": 1
+        },
+        {
+            "id": 6,
+            "key": "fiscal_year_start",
+            "value": "01-01",
+            "value_type": "string",
+            "module": "hrms_base",
+            "category": "general",
+            "description": "Fiscal year start date (MM-DD)",
+            "is_system": true,
+            "company_id": 1
+        },
+        {
+            "id": 7,
+            "key": "enable_overtime_tracking",
+            "value": "true",
+            "value_type": "boolean",
+            "module": "hrms_base",
+            "category": "attendance",
+            "description": "Enable overtime tracking in attendance",
+            "is_system": false,
+            "company_id": 1
+        },
+        {
+            "id": 8,
+            "key": "max_approval_days",
+            "value": "7",
+            "value_type": "integer",
+            "module": "hrms_base",
+            "category": "approvals",
+            "description": "Maximum days before auto-escalation",
+            "is_system": false,
+            "company_id": 1
+        }
+    ],
+    "hrms_base.Announcement": [
+        {
+            "id": 1,
+            "title": "Welcome to the HRMS System",
+            "content": "We are excited to announce the launch of our new HR Management System. This platform will help streamline all HR processes including leave management, attendance tracking, payroll, and more. Please explore the features and reach out to HR for any questions.",
+            "priority": "high",
+            "is_published": true,
+            "is_pinned": true,
+            "publish_date": "2024-01-01T00:00:00",
+            "expire_date": null,
+            "target_audience": "all",
+            "department_ids": [],
+            "role_ids": [],
+            "author_id": 1,
+            "company_id": 1
+        },
+        {
+            "id": 2,
+            "title": "Annual Leave Policy Update",
+            "content": "Please be informed that the annual leave policy has been updated. Key changes include: increased carry-forward limit to 5 days, new medical leave provisions, and updated parental leave benefits. Please review the full policy document in the HR portal.",
+            "priority": "medium",
+            "is_published": true,
+            "is_pinned": false,
+            "publish_date": "2024-01-15T09:00:00",
+            "expire_date": "2024-12-31T23:59:59",
+            "target_audience": "all",
+            "department_ids": [],
+            "role_ids": [],
+            "author_id": 1,
+            "company_id": 1
+        },
+        {
+            "id": 3,
+            "title": "Engineering Team Meeting",
+            "content": "Reminder: Weekly engineering standup meeting every Monday at 10:00 AM. All engineering team members are required to attend. Agenda includes sprint updates, blockers, and technical discussions.",
+            "priority": "low",
+            "is_published": true,
+            "is_pinned": false,
+            "publish_date": "2024-01-10T00:00:00",
+            "expire_date": null,
+            "target_audience": "department",
+            "department_ids": [3, 4, 5, 9, 10],
+            "role_ids": [],
+            "author_id": 2,
+            "company_id": 1
+        },
+        {
+            "id": 4,
+            "title": "New Employee Onboarding Checklist",
+            "content": "HR team reminder: Ensure all new employee onboarding tasks are completed within the first week. This includes IT setup, access card provision, policy acknowledgment, and team introductions.",
+            "priority": "medium",
+            "is_published": true,
+            "is_pinned": false,
+            "publish_date": "2024-01-05T00:00:00",
+            "expire_date": null,
+            "target_audience": "role",
+            "department_ids": [],
+            "role_ids": [2],
+            "author_id": 1,
+            "company_id": 1
+        }
+    ],
+    "hrms_base.MailTemplate": [
+        {
+            "id": 1,
+            "name": "Leave Request Submitted",
+            "code": "leave_request_submitted",
+            "subject": "Leave Request Submitted: {{employee_name}}",
+            "body_html": "<p>Dear {{approver_name}},</p><p>A leave request has been submitted by <strong>{{employee_name}}</strong> for your approval.</p><p><strong>Leave Type:</strong> {{leave_type}}<br><strong>From:</strong> {{start_date}}<br><strong>To:</strong> {{end_date}}<br><strong>Days:</strong> {{days_count}}<br><strong>Reason:</strong> {{reason}}</p><p>Please <a href='{{approval_link}}'>click here</a> to review and take action.</p><p>Best regards,<br>HR System</p>",
+            "body_text": "Dear {{approver_name}},\n\nA leave request has been submitted by {{employee_name}} for your approval.\n\nLeave Type: {{leave_type}}\nFrom: {{start_date}}\nTo: {{end_date}}\nDays: {{days_count}}\nReason: {{reason}}\n\nPlease login to the HR system to review and take action.\n\nBest regards,\nHR System",
+            "model_name": "leave_request",
+            "trigger_event": "on_submit",
+            "is_active": true,
+            "company_id": 1
+        },
+        {
+            "id": 2,
+            "name": "Leave Request Approved",
+            "code": "leave_request_approved",
+            "subject": "Leave Request Approved",
+            "body_html": "<p>Dear {{employee_name}},</p><p>Your leave request has been <strong style='color:green'>APPROVED</strong>.</p><p><strong>Leave Type:</strong> {{leave_type}}<br><strong>From:</strong> {{start_date}}<br><strong>To:</strong> {{end_date}}<br><strong>Days:</strong> {{days_count}}</p><p>Approved by: {{approver_name}}</p><p>Best regards,<br>HR System</p>",
+            "body_text": "Dear {{employee_name}},\n\nYour leave request has been APPROVED.\n\nLeave Type: {{leave_type}}\nFrom: {{start_date}}\nTo: {{end_date}}\nDays: {{days_count}}\n\nApproved by: {{approver_name}}\n\nBest regards,\nHR System",
+            "model_name": "leave_request",
+            "trigger_event": "on_approve",
+            "is_active": true,
+            "company_id": 1
+        },
+        {
+            "id": 3,
+            "name": "Leave Request Rejected",
+            "code": "leave_request_rejected",
+            "subject": "Leave Request Rejected",
+            "body_html": "<p>Dear {{employee_name}},</p><p>Your leave request has been <strong style='color:red'>REJECTED</strong>.</p><p><strong>Leave Type:</strong> {{leave_type}}<br><strong>From:</strong> {{start_date}}<br><strong>To:</strong> {{end_date}}<br><strong>Days:</strong> {{days_count}}</p><p>Rejected by: {{approver_name}}<br><strong>Reason:</strong> {{rejection_reason}}</p><p>Best regards,<br>HR System</p>",
+            "body_text": "Dear {{employee_name}},\n\nYour leave request has been REJECTED.\n\nLeave Type: {{leave_type}}\nFrom: {{start_date}}\nTo: {{end_date}}\nDays: {{days_count}}\n\nRejected by: {{approver_name}}\nReason: {{rejection_reason}}\n\nBest regards,\nHR System",
+            "model_name": "leave_request",
+            "trigger_event": "on_reject",
+            "is_active": true,
+            "company_id": 1
+        },
+        {
+            "id": 4,
+            "name": "New Employee Welcome",
+            "code": "new_employee_welcome",
+            "subject": "Welcome to {{company_name}}!",
+            "body_html": "<p>Dear {{employee_name}},</p><p>Welcome to <strong>{{company_name}}</strong>! We are excited to have you join our team.</p><p><strong>Your Details:</strong><br>Employee ID: {{employee_id}}<br>Department: {{department}}<br>Position: {{position}}<br>Start Date: {{start_date}}<br>Reporting Manager: {{manager_name}}</p><p>Your login credentials have been sent in a separate email. Please complete your onboarding tasks in the HR portal.</p><p>If you have any questions, please reach out to HR.</p><p>Best regards,<br>HR Team</p>",
+            "body_text": "Dear {{employee_name}},\n\nWelcome to {{company_name}}! We are excited to have you join our team.\n\nYour Details:\nEmployee ID: {{employee_id}}\nDepartment: {{department}}\nPosition: {{position}}\nStart Date: {{start_date}}\nReporting Manager: {{manager_name}}\n\nYour login credentials have been sent in a separate email. Please complete your onboarding tasks in the HR portal.\n\nIf you have any questions, please reach out to HR.\n\nBest regards,\nHR Team",
+            "model_name": "employee",
+            "trigger_event": "on_create",
+            "is_active": true,
+            "company_id": 1
+        },
+        {
+            "id": 5,
+            "name": "Expense Claim Submitted",
+            "code": "expense_claim_submitted",
+            "subject": "Expense Claim Submitted: {{employee_name}} - {{amount}} {{currency}}",
+            "body_html": "<p>Dear {{approver_name}},</p><p>An expense claim has been submitted by <strong>{{employee_name}}</strong> for your approval.</p><p><strong>Amount:</strong> {{amount}} {{currency}}<br><strong>Category:</strong> {{category}}<br><strong>Description:</strong> {{description}}<br><strong>Date:</strong> {{expense_date}}</p><p>Please <a href='{{approval_link}}'>click here</a> to review and take action.</p><p>Best regards,<br>HR System</p>",
+            "body_text": "Dear {{approver_name}},\n\nAn expense claim has been submitted by {{employee_name}} for your approval.\n\nAmount: {{amount}} {{currency}}\nCategory: {{category}}\nDescription: {{description}}\nDate: {{expense_date}}\n\nPlease login to the HR system to review and take action.\n\nBest regards,\nHR System",
+            "model_name": "expense_claim",
+            "trigger_event": "on_submit",
+            "is_active": true,
+            "company_id": 1
+        }
+    ]
+}

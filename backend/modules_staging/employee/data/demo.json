@@ -1,0 +1,280 @@
+{
+    "employee.Employee": [
+        {
+            "id": 1,
+            "employee_number": "EMP001",
+            "first_name": "John",
+            "last_name": "Smith",
+            "work_email": "john.smith@example.com",
+            "mobile_phone": "+1-555-0101",
+            "gender": "male",
+            "date_of_birth": "1985-03-15",
+            "nationality": "American",
+            "department_id": 1,
+            "job_position_id": 1,
+            "employee_type_id": 1,
+            "hire_date": "2020-01-15",
+            "salary": 250000.00,
+            "currency": "USD",
+            "is_manager": true,
+            "is_active": true,
+            "company_id": 1
+        },
+        {
+            "id": 2,
+            "employee_number": "EMP002",
+            "first_name": "Sarah",
+            "last_name": "Johnson",
+            "work_email": "sarah.johnson@example.com",
+            "mobile_phone": "+1-555-0102",
+            "gender": "female",
+            "date_of_birth": "1988-07-22",
+            "nationality": "American",
+            "department_id": 3,
+            "job_position_id": 2,
+            "employee_type_id": 1,
+            "reporting_manager_id": 1,
+            "hire_date": "2019-06-01",
+            "salary": 200000.00,
+            "currency": "USD",
+            "is_manager": true,
+            "is_active": true,
+            "company_id": 1
+        },
+        {
+            "id": 3,
+            "employee_number": "EMP003",
+            "first_name": "Michael",
+            "last_name": "Chen",
+            "work_email": "michael.chen@example.com",
+            "mobile_phone": "+1-555-0103",
+            "gender": "male",
+            "date_of_birth": "1990-11-08",
+            "nationality": "American",
+            "department_id": 3,
+            "job_position_id": 5,
+            "employee_type_id": 1,
+            "reporting_manager_id": 2,
+            "hire_date": "2021-03-15",
+            "salary": 120000.00,
+            "currency": "USD",
+            "is_manager": false,
+            "is_active": true,
+            "company_id": 1
+        },
+        {
+            "id": 4,
+            "employee_number": "EMP004",
+            "first_name": "Emily",
+            "last_name": "Davis",
+            "work_email": "emily.davis@example.com",
+            "mobile_phone": "+1-555-0104",
+            "gender": "female",
+            "date_of_birth": "1992-04-30",
+            "nationality": "American",
+            "department_id": 2,
+            "job_position_id": 3,
+            "employee_type_id": 1,
+            "reporting_manager_id": 1,
+            "hire_date": "2020-08-01",
+            "salary": 150000.00,
+            "currency": "USD",
+            "is_manager": true,
+            "is_active": true,
+            "company_id": 1
+        },
+        {
+            "id": 5,
+            "employee_number": "EMP005",
+            "first_name": "David",
+            "last_name": "Wilson",
+            "work_email": "david.wilson@example.com",
+            "mobile_phone": "+1-555-0105",
+            "gender": "male",
+            "date_of_birth": "1993-09-12",
+            "nationality": "American",
+            "department_id": 3,
+            "job_position_id": 6,
+            "employee_type_id": 1,
+            "reporting_manager_id": 2,
+            "hire_date": "2022-01-10",
+            "salary": 90000.00,
+            "currency": "USD",
+            "is_manager": false,
+            "is_active": true,
+            "company_id": 1
+        }
+    ],
+    "employee.EmployeeContact": [
+        {
+            "id": 1,
+            "employee_id": 1,
+            "contact_type": "home",
+            "is_primary": true,
+            "address_line1": "123 Main Street",
+            "city": "New York",
+            "state": "NY",
+            "postal_code": "10001",
+            "country": "USA",
+            "phone": "+1-555-0111",
+            "company_id": 1
+        },
+        {
+            "id": 2,
+            "employee_id": 2,
+            "contact_type": "home",
+            "is_primary": true,
+            "address_line1": "456 Oak Avenue",
+            "city": "San Francisco",
+            "state": "CA",
+            "postal_code": "94102",
+            "country": "USA",
+            "phone": "+1-555-0112",
+            "company_id": 1
+        }
+    ],
+    "employee.EmployeeEmergencyContact": [
+        {
+            "id": 1,
+            "employee_id": 1,
+            "name": "Jane Smith",
+            "relationship": "Spouse",
+            "phone": "+1-555-0121",
+            "is_primary": true,
+            "company_id": 1
+        },
+        {
+            "id": 2,
+            "employee_id": 2,
+            "name": "Robert Johnson",
+            "relationship": "Father",
+            "phone": "+1-555-0122",
+            "is_primary": true,
+            "company_id": 1
+        }
+    ],
+    "employee.EmployeeBankAccount": [
+        {
+            "id": 1,
+            "employee_id": 1,
+            "bank_name": "Chase Bank",
+            "account_number": "****1234",
+            "account_holder_name": "John Smith",
+            "account_type": "checking",
+            "routing_number": "****5678",
+            "is_primary": true,
+            "is_verified": true,
+            "company_id": 1
+        },
+        {
+            "id": 2,
+            "employee_id": 2,
+            "bank_name": "Bank of America",
+            "account_number": "****5678",
+            "account_holder_name": "Sarah Johnson",
+            "account_type": "checking",
+            "routing_number": "****9012",
+            "is_primary": true,
+            "is_verified": true,
+            "company_id": 1
+        }
+    ],
+    "employee.EmployeeSkill": [
+        {
+            "id": 1,
+            "employee_id": 3,
+            "skill_name": "Python",
+            "category": "technical",
+            "proficiency_level": "expert",
+            "years_of_experience": 5,
+            "company_id": 1
+        },
+        {
+            "id": 2,
+            "employee_id": 3,
+            "skill_name": "FastAPI",
+            "category": "technical",
+            "proficiency_level": "advanced",
+            "years_of_experience": 3,
+            "company_id": 1
+        },
+        {
+            "id": 3,
+            "employee_id": 5,
+            "skill_name": "JavaScript",
+            "category": "technical",
+            "proficiency_level": "advanced",
+            "years_of_experience": 4,
+            "company_id": 1
+        },
+        {
+            "id": 4,
+            "employee_id": 5,
+            "skill_name": "Vue.js",
+            "category": "technical",
+            "proficiency_level": "intermediate",
+            "years_of_experience": 2,
+            "company_id": 1
+        }
+    ],
+    "employee.EmployeeEducation": [
+        {
+            "id": 1,
+            "employee_id": 1,
+            "institution": "Stanford University",
+            "degree": "MBA",
+            "field_of_study": "Business Administration",
+            "start_date": "2008-09-01",
+            "end_date": "2010-06-15",
+            "company_id": 1
+        },
+        {
+            "id": 2,
+            "employee_id": 3,
+            "institution": "MIT",
+            "degree": "Bachelor of Science",
+            "field_of_study": "Computer Science",
+            "start_date": "2008-09-01",
+            "end_date": "2012-05-30",
+            "company_id": 1
+        }
+    ],
+    "employee.EmployeeExperience": [
+        {
+            "id": 1,
+            "employee_id": 3,
+            "company_name": "Tech Corp",
+            "job_title": "Software Developer",
+            "location": "San Jose, CA",
+            "employment_type": "full-time",
+            "start_date": "2012-07-01",
+            "end_date": "2021-03-01",
+            "description": "Developed backend services using Python and Django",
+            "company_id": 1
+        }
+    ],
+    "employee.EmployeeDocument": [
+        {
+            "id": 1,
+            "employee_id": 1,
+            "document_type": "passport",
+            "name": "US Passport",
+            "document_number": "****5678",
+            "issue_date": "2020-01-15",
+            "expiry_date": "2030-01-14",
+            "status": "verified",
+            "company_id": 1
+        },
+        {
+            "id": 2,
+            "employee_id": 2,
+            "document_type": "drivers_license",
+            "name": "California Driver's License",
+            "document_number": "****1234",
+            "issue_date": "2022-06-01",
+            "expiry_date": "2027-06-01",
+            "status": "verified",
+            "company_id": 1
+        }
+    ]
+}

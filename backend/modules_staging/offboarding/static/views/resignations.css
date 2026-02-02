@@ -1,0 +1,11 @@
+/* Offboarding Resignations - companion CSS */
+
+.offb-resign-details .offb-info-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 0;
+}
+
+.offb-resign-details .offb-info-row + .offb-info-row {
+  border-top: 1px solid #f5f5f5;
+}

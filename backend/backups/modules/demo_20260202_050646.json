@@ -1,0 +1,10 @@
+{
+  "module_name": "demo",
+  "timestamp": "20260202_050646",
+  "tables": {
+    "demo_items": {
+      "row_count": 0,
+      "data": []
+    }
+  }
+}

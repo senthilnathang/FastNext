@@ -1,0 +1,3 @@
+"""
+HRMS Base Module Tests
+"""

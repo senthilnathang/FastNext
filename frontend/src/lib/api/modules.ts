@@ -246,7 +246,7 @@ export const modulesApi = {
      * Run a scheduled action manually
      */
     runScheduled: (actionCode: string): Promise<{ success: boolean; result?: unknown; error?: string }> =>
-      apiClient.post(`/api/v1/scheduled-actions/${actionCode}/run`),
+      apiClient.post(`/api/v1/base/scheduled-actions/${actionCode}/run`),
   },
 
   // Sequences
@@ -255,19 +255,19 @@ export const modulesApi = {
      * Get sequences for a module
      */
     list: (moduleName?: string): Promise<Sequence[]> =>
-      apiClient.get("/api/v1/sequences", moduleName ? { module_name: moduleName } : undefined),
+      apiClient.get("/api/v1/base/sequences", moduleName ? { module_name: moduleName } : undefined),
 
     /**
      * Get next sequence number
      */
     getNext: (code: string): Promise<{ next_number: string }> =>
-      apiClient.get(`/api/v1/sequences/${code}/next`),
+      apiClient.get(`/api/v1/base/sequences/${code}/next`),
 
     /**
      * Preview next sequence number without consuming
      */
     preview: (code: string): Promise<{ preview: string }> =>
-      apiClient.get(`/api/v1/sequences/${code}/preview`),
+      apiClient.get(`/api/v1/base/sequences/${code}/preview`),
   },
 };
 

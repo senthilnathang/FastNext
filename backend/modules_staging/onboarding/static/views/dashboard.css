@@ -1,0 +1,188 @@
+/*
+ * Onboarding Dashboard - Companion CSS
+ *
+ * Styles specific to the onboarding dashboard view.
+ * Auto-loaded by ModuleView.vue alongside dashboard.vue.
+ * Uses ob- prefix to avoid collisions with other modules.
+ */
+
+/* ============================================================================
+   STAT CARDS
+   ============================================================================ */
+
+.ob-stat-card {
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.ob-stat-card .ant-card-body {
+  padding: 16px;
+}
+
+.ob-stat-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.ob-stat-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.ob-stat-bg-blue {
+  background-color: rgba(24, 144, 255, 0.1);
+}
+
+.ob-stat-bg-green {
+  background-color: rgba(82, 196, 26, 0.1);
+}
+
+.ob-stat-bg-purple {
+  background-color: rgba(114, 46, 209, 0.1);
+}
+
+.ob-stat-bg-orange {
+  background-color: rgba(250, 173, 20, 0.1);
+}
+
+.ob-stat-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.ob-stat-number {
+  font-size: 26px;
+  font-weight: 700;
+  line-height: 1.2;
+  margin-top: 2px;
+}
+
+.ob-stat-suffix {
+  font-size: 13px;
+  font-weight: 400;
+  color: #8c8c8c;
+  margin-left: 4px;
+}
+
+/* ============================================================================
+   PROCESSES TABLE
+   ============================================================================ */
+
+.ob-processes-table .ant-table-cell {
+  padding: 10px 12px;
+}
+
+.ob-progress-cell {
+  min-width: 120px;
+}
+
+/* ============================================================================
+   PROGRESS GAUGES
+   ============================================================================ */
+
+.ob-progress-gauge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 0;
+}
+
+/* ============================================================================
+   PENDING ITEMS
+   ============================================================================ */
+
+.ob-pending-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.ob-pending-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  border-radius: 8px;
+  transition: background-color 0.2s ease;
+}
+
+.ob-pending-item:hover {
+  background-color: #fafafa;
+}
+
+.ob-pending-item + .ob-pending-item {
+  border-top: 1px solid #f5f5f5;
+}
+
+/* ============================================================================
+   QUICK ACTIONS
+   ============================================================================ */
+
+.ob-quick-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ob-action-btn {
+  text-align: left;
+  height: 40px;
+}
+
+.ob-action-btn .anticon {
+  margin-right: 4px;
+}
+
+/* ============================================================================
+   ALERT CARD
+   ============================================================================ */
+
+.ob-alert-card {
+  border-color: #ffccc7;
+  background: #fff2f0;
+  border-radius: 8px;
+}
+
+.ob-alert-card .ant-card-body {
+  padding: 16px;
+}
+
+/* ============================================================================
+   RESPONSIVE ADJUSTMENTS
+   ============================================================================ */
+
+@media (max-width: 768px) {
+  .ob-stat-item {
+    flex-direction: column;
+    text-align: center;
+    gap: 8px;
+  }
+
+  .ob-stat-number {
+    font-size: 22px;
+  }
+
+  .ob-stat-icon {
+    width: 40px;
+    height: 40px;
+  }
+
+  .ob-progress-gauge {
+    padding: 4px 0;
+  }
+}
+
+@media (max-width: 576px) {
+  .ob-stat-suffix {
+    display: block;
+    margin-left: 0;
+    margin-top: 2px;
+  }
+}

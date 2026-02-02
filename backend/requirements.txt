@@ -33,5 +33,8 @@ email-validator==2.2.0
 typer[all]==0.15.1
 rich==13.9.4
 
+# Scheduling
+apscheduler>=3.10.4
+
 # Utilities
 python-dateutil==2.9.0.post0

@@ -13,7 +13,7 @@ import logging
 from datetime import datetime
 from typing import Any, Dict, List, Optional, Set, Type
 
-from sqlalchemy import func as sql_func
+from sqlalchemy import func as sql_func, text
 from sqlalchemy.orm import Session
 
 from ..models.computed_field import (
@@ -316,19 +316,41 @@ class ComputedFieldService:
             logger.error(f"Error evaluating expression '{expression}': {e}")
             return None
 
+    # SQL keywords that are forbidden in computed field expressions
+    _FORBIDDEN_SQL_KEYWORDS = frozenset({
+        "DROP", "DELETE", "UPDATE", "ALTER", "TRUNCATE",
+        "INSERT", "GRANT", "REVOKE", "CREATE", "EXEC",
+    })
+
     def _compute_sql_expression(
         self,
         record: Any,
         expression: str,
     ) -> Any:
-        """Execute an SQL expression and return the result."""
+        """Execute an SQL expression and return the result.
+
+        Uses parameterized queries to prevent SQL injection.
+        The expression should use :record_id as a bind parameter
+        for the current record's ID.
+        """
         if not expression:
             return None
 
+        # Reject expressions containing dangerous SQL keywords
+        upper_expr = expression.upper()
+        for kw in self._FORBIDDEN_SQL_KEYWORDS:
+            if kw in upper_expr:
+                logger.error(
+                    f"Forbidden keyword '{kw}' in SQL expression, "
+                    f"rejecting: {expression[:100]}"
+                )
+                return None
+
         try:
-            # Substitute record values
-            formatted = expression.format(record=record, id=record.id)
-            result = self.db.execute(formatted).scalar()
+            stmt = text(expression)
+            result = self.db.execute(
+                stmt, {"record_id": record.id}
+            ).scalar()
             return result
         except Exception as e:
             logger.error(f"Error executing SQL expression: {e}")

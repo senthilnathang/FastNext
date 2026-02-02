@@ -110,6 +110,111 @@ export type { CompanyContext } from "./multitenancy";
 // Config
 export { API_CONFIG } from "./config";
 
+// Users
+export { usersApi } from "./users";
+export type { User, UserListParams, CreateUserData, UpdateUserData, PaginatedUsers } from "./users";
+
+// Roles
+export { rolesApi } from "./roles";
+export type { Role, RoleListParams, CreateRoleData, UpdateRoleData, PaginatedRoles } from "./roles";
+
+// Permissions
+export { permissionsApi } from "./permissions";
+export type { Permission, PermissionGrouped, PermissionListParams, PaginatedPermissions } from "./permissions";
+
+// Auth
+export { authApi } from "./auth";
+export type { LoginRequest, LoginResponse, RefreshTokenResponse, UserInfo as AuthUserInfo, TwoFactorSetup } from "./auth";
+
+// Attachments
+export { attachmentsApi } from "./attachments";
+export type { Attachment as FileAttachment, AttachmentListParams, AttachmentUploadResponse } from "./attachments";
+
+// Activity / Audit
+export { activityApi } from "./activity";
+export type { ActivityLog, ActivityLogUser, ActivityListParams, PaginatedActivityLogs } from "./activity";
+
+// Bookmarks
+export { bookmarksApi } from "./bookmarks";
+export type { Bookmark, BookmarkListParams, PaginatedBookmarks } from "./bookmarks";
+
+// Reactions
+export { reactionsApi } from "./reactions";
+export type { Reaction, ReactionSummaryItem } from "./reactions";
+
+// RBAC
+export { rbacApi } from "./rbac";
+export type { MenuItem as RBACMenuItem, ContentType, AccessRule, AccessRuleScope } from "./rbac";
+
+// Templates
+export { templatesApi } from "./templates";
+export type { TextTemplate, TemplateListParams } from "./templates";
+
+// Push Notifications
+export { pushApi } from "./push";
+
+// ACLs
+export { aclsApi } from "./acls";
+
+// Workflows
+export { workflowsApi } from "./workflows";
+export type { Workflow, WorkflowState, WorkflowTransition } from "./workflows";
+
+// Automation
+export { automationApi } from "./automation";
+export type { ServerAction as AutomationServerAction, AutomationRule } from "./automation";
+
+// Scheduled Actions
+export { scheduledActionsApi } from "./scheduled-actions";
+export type { ScheduledAction as ScheduledActionDetail, ScheduledActionLog } from "./scheduled-actions";
+
+// Reports
+export { reportsApi } from "./reports";
+
+// Config Parameters
+export { configParamsApi } from "./config-params";
+
+// Translations
+export { translationsApi } from "./translations";
+
+// Sequences
+export { sequencesApi } from "./sequences";
+
+// Webhooks
+export { webhooksApi } from "./webhooks";
+
+// Security
+export { securityApi } from "./security";
+export type { SecuritySettings, SecurityOverview, TwoFactorSetupResponse, SecurityViolation } from "./security";
+
+// Messaging Config
+export { messagingConfigApi } from "./messaging-config";
+export type { MessagingConfig, CreateMessagingConfigData, UpdateMessagingConfigData } from "./messaging-config";
+
+// CSP
+export { cspApi } from "./csp";
+export type { CSPReport, CSPStatus } from "./csp";
+
+// Record Rules
+export { recordRulesApi } from "./record-rules";
+export type { RecordRule, CreateRecordRuleData, UpdateRecordRuleData, CheckAccessData, CheckAccessResponse } from "./record-rules";
+
+// Remote Modules
+export { remoteModulesApi } from "./remote-modules";
+export type { RemoteSource, RemoteModule, SyncStatus as RemoteModuleSyncStatus } from "./remote-modules";
+
+// Module Technical
+export { moduleTechnicalApi } from "./module-technical";
+export type { ModuleTechnicalInfo, ModelInfo, ModelField, ModuleRoute as ModuleTechnicalRoute, ModuleService, ModuleStatistics, ModuleAssets } from "./module-technical";
+
+// Schema
+export { schemaApi } from "./schema";
+export type { SchemaStatus, Migration, TableInfo, ColumnInfo, SchemaComparison, SchemaDifference, BackupResult, SchemaCheckResult } from "./schema";
+
+// Exports / Imports
+export { exportsApi } from "./exports";
+export type { ExportHistory, ImportInfo, ExportTemplate } from "./exports";
+
 // Note: Demo, CRM, and Marketplace module APIs are available via direct imports:
 // - import { demoApi } from "@/lib/api/demo";
 // - import { crmApi } from "@/lib/api/crm";

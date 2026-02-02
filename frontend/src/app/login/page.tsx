@@ -372,10 +372,7 @@ export default function LoginPage() {
               </h4>
               <div className="text-xs text-blue-700 space-y-1">
                 <p>
-                  <strong>Admin:</strong> admin / AdminPass123
-                </p>
-                <p>
-                  <strong>Demo:</strong> demo / DemoPass123
+                  <strong>Admin:</strong> admin / admin123
                 </p>
               </div>
             </div>
@@ -455,10 +452,7 @@ export default function LoginPage() {
           </h4>
           <div className="text-xs text-blue-700 space-y-1">
             <p>
-              <strong>Admin:</strong> admin / AdminPass123
-            </p>
-            <p>
-              <strong>Demo:</strong> demo / DemoPass123
+              <strong>Admin:</strong> admin / admin123
             </p>
           </div>
         </div>

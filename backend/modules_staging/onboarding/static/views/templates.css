@@ -1,0 +1,75 @@
+/* ============================
+   Onboarding Templates View
+   Companion CSS (global scope)
+   ============================ */
+
+/* Template name link in table */
+.mv-tpl-name-link {
+  color: #1890ff;
+  cursor: pointer;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+
+.mv-tpl-name-link:hover {
+  color: #40a9ff;
+}
+
+/* Template description snippet under the name */
+.mv-tpl-desc {
+  font-size: 12px;
+  color: #8c8c8c;
+  max-width: 260px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Text alignment helper */
+.mv-text-right {
+  text-align: right;
+}
+
+/* Drawer footer layout */
+.mv-tpl-drawer-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+/* View mode: template title */
+.mv-tpl-view-title {
+  font-size: 20px;
+  font-weight: 600;
+  margin: 0 0 4px 0;
+}
+
+/* View mode: stat cards */
+.mv-tpl-stat-label {
+  font-size: 12px;
+  color: #8c8c8c;
+  margin-bottom: 4px;
+}
+
+.mv-tpl-stat-value {
+  font-size: 16px;
+  font-weight: 500;
+  color: #262626;
+}
+
+/* Stages section minimum height */
+.mv-tpl-stages {
+  min-height: 360px;
+}
+
+/* Task heading inside stage collapse */
+.mv-tpl-task-heading {
+  font-size: 13px;
+  font-weight: 500;
+  color: #595959;
+}
+
+/* Small left margin utility */
+.mv-ml-2 {
+  margin-left: 8px;
+}

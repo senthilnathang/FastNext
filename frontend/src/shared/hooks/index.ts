@@ -65,6 +65,25 @@ export {
   useTimeTranslations,
 } from "./useTranslation";
 
+// Domain hooks
+export * from "./useAttachments";
+export * from "./useBookmarks";
+export * from "./useReactions";
+export * from "./useAuditLogs";
+export * from "./useWorkflows";
+export * from "./useAutomation";
+export * from "./useScheduledActions";
+export * from "./useTemplates";
+export * from "./useRBAC";
+
+// Security & Infrastructure hooks
+export * from "./useSecurity";
+export * from "./useMessagingConfig";
+export * from "./useRecordRules";
+export * from "./useModuleTechnical";
+export * from "./useSchema";
+export * from "./useExports";
+
 // Note: Other hooks have been moved to their respective modules:
 // - useAuth -> @/modules/auth
 // - useUsers -> @/modules/users

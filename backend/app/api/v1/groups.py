@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 
 from app.api.deps import get_db, get_pagination, PaginationParams
 from app.api.deps.auth import PermissionChecker
-from app.models import User, Group, Permission, UserGroup, GroupPermission
+from app.models import User, Group, Permission, UserGroup, GroupPermission, GroupMenuPermission, MenuItem
 from app.schemas.group import (
     GroupCreate,
     GroupUpdate,
@@ -20,10 +20,6 @@ from app.schemas.group import (
 )
 
 router = APIRouter()
-
-# In-memory storage for group menu permissions (in production, use database)
-_group_menu_permissions: Dict[int, List[str]] = {}
-
 
 class GroupMenuPermissionsResponse(BaseModel):
     """Response for group menu permissions"""
@@ -369,7 +365,17 @@ def get_group_menu_permissions(
             detail="Group not found",
         )
 
-    codes = _group_menu_permissions.get(group_id, [])
+    # Query persisted menu permissions, join to get menu codes
+    perms = (
+        db.query(MenuItem.code)
+        .join(GroupMenuPermission, GroupMenuPermission.menu_item_id == MenuItem.id)
+        .filter(
+            GroupMenuPermission.group_id == group_id,
+            GroupMenuPermission.is_active == True,
+        )
+        .all()
+    )
+    codes = [p.code for p in perms]
     return GroupMenuPermissionsResponse(menu_codes=codes)
 
 
@@ -380,7 +386,7 @@ def set_group_menu_permissions(
     current_user: User = Depends(PermissionChecker("group.manage")),
     db: Session = Depends(get_db),
 ):
-    """Set menu permissions for a group"""
+    """Set menu permissions for a group (replaces existing permissions)"""
     group = db.query(Group).filter(Group.id == group_id).first()
 
     if not group:
@@ -389,5 +395,30 @@ def set_group_menu_permissions(
             detail="Group not found",
         )
 
-    _group_menu_permissions[group_id] = menu_codes
+    # Look up menu items by code
+    menu_items = db.query(MenuItem).filter(MenuItem.code.in_(menu_codes)).all()
+    found_codes = {mi.code for mi in menu_items}
+    missing = set(menu_codes) - found_codes
+    if missing:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Unknown menu codes: {sorted(missing)}",
+        )
+
+    # Remove existing permissions for this group
+    db.query(GroupMenuPermission).filter(
+        GroupMenuPermission.group_id == group_id,
+    ).delete()
+
+    # Insert new permissions
+    for mi in menu_items:
+        perm = GroupMenuPermission(
+            group_id=group_id,
+            menu_item_id=mi.id,
+            is_active=True,
+            created_by=current_user.id,
+        )
+        db.add(perm)
+
+    db.commit()
     return {"success": True}

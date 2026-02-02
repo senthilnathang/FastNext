@@ -1,0 +1,76 @@
+.view-toggle-group {
+  display: inline-flex;
+  gap: 0;
+}
+
+.view-toggle-group :deep(.ant-btn) {
+  border-radius: 0;
+}
+
+.view-toggle-group :deep(.ant-btn:first-child) {
+  border-radius: 6px 0 0 6px;
+}
+
+.view-toggle-group :deep(.ant-btn:last-child) {
+  border-radius: 0 6px 6px 0;
+  margin-left: -1px;
+}
+
+.candidate-card {
+  padding: 0;
+}
+
+.candidate-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.candidate-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.candidate-name {
+  font-weight: 600;
+  font-size: 14px;
+  color: #333;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.candidate-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.meta-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.candidate-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 8px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.candidate-details .space-y-3 > * + * {
+  margin-top: 12px;
+}
+
+/* Dark mode */
+.dark .candidate-name {
+  color: #fff;
+}
+
+.dark .candidate-footer {
+  border-top-color: #333;
+}
