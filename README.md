@@ -85,6 +85,7 @@ pip install -r requirements.txt
 # Environment configuration
 cp .env.example .env
 # Configure database, Redis, and security settings
+# NOTE: In production, you MUST set JWT_SECRET_KEY or SECRET_KEY to a secure value.
 
 # Initialize database
 alembic upgrade head
