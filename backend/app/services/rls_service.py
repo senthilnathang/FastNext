@@ -510,6 +510,8 @@ class RLSService:
         condition_column = policy.condition_column or "user_id"
 
         try:
+            # We assume table_name and condition_column are safe (from config)
+            # but we must bind entity_id
             result = self.db.execute(
                 text(
                     f"SELECT {condition_column} FROM {table_name} WHERE id = :entity_id"
@@ -596,17 +598,25 @@ class RLSService:
             return True, None
 
         try:
-            # Replace placeholders in condition
+            # Use safe parameter binding instead of string replacement
             condition = policy.custom_condition
-            condition = condition.replace(":user_id", str(context.user_id))
-            condition = condition.replace(
-                ":organization_id", str(context.organization_id or 0)
-            )
+            params = {
+                "user_id": context.user_id,
+                "organization_id": context.organization_id or 0,
+            }
             if entity_id:
-                condition = condition.replace(":entity_id", str(entity_id))
+                params["entity_id"] = entity_id
 
-            # Execute condition
-            result = self.db.execute(text(f"SELECT ({condition}) as allowed")).first()
+            # For backward compatibility, if the condition doesn't use :user_id param style
+            # but expects string replacement, we might break it.
+            # However, security takes precedence.
+            # We assume custom_condition is like "user_id = :user_id"
+
+            # Execute condition safely
+            result = self.db.execute(
+                text(f"SELECT ({condition}) as allowed"),
+                params
+            ).first()
 
             if result and result.allowed:
                 return True, None
@@ -640,10 +650,13 @@ class RLSService:
 
             elif policy.policy_type == RLSPolicy.OWNER_ONLY:
                 condition_column = policy.condition_column or "user_id"
-                return query.filter(text(f"{condition_column} = {context.user_id}"))
+                # Use bound parameter
+                return query.filter(text(f"{condition_column} = :current_user_id")).params(current_user_id=context.user_id)
 
             elif policy.policy_type == RLSPolicy.PROJECT_MEMBER:
                 if context.project_ids:
+                    # For IN clause with integers, standard binding is tricky in all dialects
+                    # but we can trust list of ints from our own code not to be SQLi
                     project_ids_str = ",".join(map(str, context.project_ids))
                     return query.filter(text(f"id IN ({project_ids_str})"))
                 else:

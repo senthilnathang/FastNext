@@ -38,3 +38,4 @@ apscheduler>=3.10.4
 
 # Utilities
 python-dateutil==2.9.0.post0
+bleach>=6.1.0

@@ -6,6 +6,7 @@ import json
 from typing import List, Optional
 from datetime import datetime
 
+import bleach
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
@@ -140,6 +141,36 @@ class EditMessageRequest(BaseModel):
     body_html: Optional[str] = None
 
 
+# ============== Security Utils ==============
+
+def sanitize_html(html_content: Optional[str]) -> Optional[str]:
+    """Sanitize HTML content to prevent XSS"""
+    if not html_content:
+        return None
+
+    allowed_tags = [
+        'p', 'b', 'i', 'u', 'em', 'strong', 'a',
+        'ul', 'ol', 'li', 'br', 'blockquote',
+        'code', 'pre', 'span', 'div', 'h1', 'h2', 'h3',
+        'h4', 'h5', 'h6', 'hr'
+    ]
+
+    allowed_attributes = {
+        'a': ['href', 'title', 'target'],
+        'span': ['class', 'style'],
+        'div': ['class', 'style'],
+        'code': ['class'],
+        'pre': ['class'],
+    }
+
+    return bleach.clean(
+        html_content,
+        tags=allowed_tags,
+        attributes=allowed_attributes,
+        strip=True
+    )
+
+
 # ============== Endpoints ==============
 
 @router.get("/", response_model=ConversationListResponse)
@@ -216,7 +247,7 @@ async def create_conversation(
         recipient_ids=request.recipient_ids,
         body=request.body,
         subject=request.subject,
-        body_html=request.body_html,
+        body_html=sanitize_html(request.body_html),
         attachments=[a.model_dump() for a in request.attachments] if request.attachments else None,
     )
 
@@ -276,7 +307,7 @@ async def send_message(
         conversation_id=conversation_id,
         user_id=current_user.id,
         body=request.body,
-        body_html=request.body_html,
+        body_html=sanitize_html(request.body_html),
         parent_id=request.parent_id,
         attachments=[a.model_dump() for a in request.attachments] if request.attachments else None,
     )
@@ -460,7 +491,7 @@ async def edit_message(
         message_id=message_id,
         user_id=current_user.id,
         new_body=request.body,
-        new_body_html=request.body_html,
+        new_body_html=sanitize_html(request.body_html),
     )
 
     if not updated_message:
