@@ -187,6 +187,10 @@ class Settings(BaseSettings):
 
     def model_post_init(self, __context) -> None:
         """Build database and redis URLs from components, validate security settings"""
+        # Enforce DEBUG=False in production
+        if self.ENVIRONMENT == "production":
+            object.__setattr__(self, 'DEBUG', False)
+
         # SECRET_KEY validation
         if self.ENVIRONMENT == "production":
             if not self.SECRET_KEY or self.SECRET_KEY == _DEFAULT_SECRET_KEY:
