@@ -1,4 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server";
+import { jwtVerify } from "jose";
 import { SecureCookieManager } from "./src/lib/auth/secure-cookies";
 import { rateLimit } from "./src/lib/security/rate-limit";
 import { validateRequest } from "./src/lib/security/request-validator";
@@ -469,34 +470,27 @@ async function checkAuthentication(request: NextRequest): Promise<{
   }
 
   try {
-    // Validate JWT token structure
-    const parts = token.split(".");
-    if (parts.length !== 3) {
-      return { isAuthenticated: false };
+    let secretKey = process.env.JWT_SECRET_KEY || process.env.SECRET_KEY;
+    if (!secretKey) {
+      if (process.env.NODE_ENV === "production") {
+        console.error("JWT_SECRET_KEY or SECRET_KEY is not set in production!");
+        return { isAuthenticated: false };
+      }
+      secretKey = "your-super-secret-key-change-this-in-production";
     }
 
-    // Decode payload
-    const payload = JSON.parse(atob(parts[1]));
+    const secret = new TextEncoder().encode(secretKey);
 
-    // Check expiration
-    const isExpired = payload.exp * 1000 < Date.now();
-    if (isExpired) {
-      return { isAuthenticated: false };
-    }
-
-    // Check token issued time (not too old)
-    const issuedAt = payload.iat * 1000;
-    const maxAge = 24 * 60 * 60 * 1000; // 24 hours
-    if (Date.now() - issuedAt > maxAge) {
-      return { isAuthenticated: false };
-    }
+    const { payload } = await jwtVerify(token, secret);
 
     return {
       isAuthenticated: true,
-      userId: payload.sub || payload.user_id,
-      roles: payload.roles || [],
-      isAdmin: payload.is_superuser || payload.roles?.includes("admin"),
-      permissions: payload.permissions || [],
+      userId: (payload.sub || payload.user_id) as string,
+      roles: (payload.roles as string[]) || [],
+      isAdmin:
+        (payload.is_superuser as boolean) ||
+        (payload.roles as string[])?.includes("admin"),
+      permissions: (payload.permissions as string[]) || [],
     };
   } catch {
     return { isAuthenticated: false };
